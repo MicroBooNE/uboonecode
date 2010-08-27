@@ -1,0 +1,26 @@
+<constant name="kDetEnclosureWidth"	  value="793" />
+<constant name="kDetEnclosureHeight"	  value="854" />
+<constant name="kDetEnclosureLength"	  value="2073" />
+<constant name="kDirtThickness"           value="300" />
+<constant name="kWorldW"                  value="100.0*kDetEnclosureWidth"/>
+<constant name="kWorldH"                  value="100.0*kDetEnclosureHeight"/>
+<constant name="kWorldL"                  value="100.0*kDetEnclosureLength"/>
+
+<constant name="kTPCWidth"		  value="256" />
+<constant name="kTPCLength"		  value="1200" />
+<constant name="kTPCDepth"		  value="260" />
+<constant name="kTPCWallThickness"	  value="0.5*kInch" />
+<constant name="kTPCStripThickness"	  value="0.1" />
+<constant name="kTPCStripWidth"		  value="1.0" />
+
+<constant name="kTPCWirePlaneThickness"   value="0.15*kInch" />
+<constant name="kTPCWireThickness"	  value="0.015" />
+<constant name="kTPCWirePlaneWidth"       value="kTPCWidth" />
+<constant name="kTPCWirePlaneOuterWidth"  value="5" />
+<constant name="kTPCWirePlaneLength"	  value="kTPCLength" />
+<constant name="kTPCWirePlaneOuterLength" value="5" />
+<constant name="kTPCWirePitch"            value="0.3"/>
+<constant name="kCos30"                   value="0.8660254038"/>
+<constant name="kCos60"                   value="0.5"/>
+<constant name="kTPCWireXPitch"           value="kTPCWirePitch/kCos60"/>
+

@@ -1,0 +1,26 @@
+<define>
+   <rotation name="rPlus30AboutX"  unit="deg" x="30"  y="0"   z="0"/>
+   <rotation name="rPlus60AboutX"  unit="deg" x="60"  y="0"   z="0"/>
+   <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
+   <rotation name="rPlus150AboutX"	unit="deg" x="150" y="0"   z="0"/>
+   <rotation name="rPlus180AboutX"	unit="deg" x="180" y="0"   z="0"/>
+   <rotation name="rMinus30AboutX" unit="deg" x="-30" y="0"   z="0"/>
+   <rotation name="rMinus90AboutX" unit="deg" x="-90" y="0"   z="0"/>
+   <rotation name="rPlus30AboutY"  unit="deg" x="0"   y="30"  z="0"/>
+   <rotation name="rPlus60AboutY"  unit="deg" x="0"   y="60"  z="0"/>
+   <rotation name="rPlus90AboutY"  unit="deg" x="0"   y="90"  z="0"/>
+   <rotation name="rPlus180AboutY" unit="deg" x="0"   y="180" z="0"/>
+   <rotation name="rMinus90AboutY" unit="deg" x="0"   y="-90" z="0"/>
+   <rotation name="rPlus90AboutZ"  unit="deg" x="0"   y="0"   z="90"/>
+   <rotation name="rMinus90AboutZ"  unit="deg" x="0"   y="0"   z="-90"/>
+   <rotation name="rPlus180AboutZ"	unit="deg" x="0"   y="0"   z="180"/>
+   <rotation name="rMinus180AboutZ"	unit="deg" x="0"   y="0"   z="-180"/>
+   <rotation name="rPlus90AboutXPlus90AboutZ"  unit="deg" x="90" y="0"   z="90"/>
+   <rotation name="rPlus90AboutXPlus180AboutZ" unit="deg" x="90" y="0"   z="180"/>
+   <rotation name="rPlus90AboutYMinus90AboutZ" unit="deg" x="0"  y="90"  z="0"/>
+   <rotation name="rPlus90AboutXMinus90AboutY" unit="deg" x="90" y="-90" z="0"/>
+   <rotation name="rPlus90AboutXMinus90AboutZ" unit="deg" x="90" y="0"   z="-90"/>
+   <rotation name="rPlus90AboutXPlus90AboutY"  unit="deg"  x="90" y="90" z="0"/>
+   <rotation name="r60"  unit="deg" x="-90" y="60"  z="0"/>
+   <rotation name="r120" unit="deg" x="-90" y="120" z="0"/>
+</define>

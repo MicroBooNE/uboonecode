@@ -1,0 +1,17 @@
+<solids>
+ <box name="DetEnclosure" lunit="cm"
+   x="kDetEnclosureWidth" y="kDetEnclosureHeight" z="kDetEnclosureLength"
+ />
+</solids>
+
+<structure>
+ <volume name="volDetEnclosure">
+  <materialref ref="Air"/>
+  <solidref ref="DetEnclosure"/>
+  <physvol>
+   <volumeref ref="volCryostat"/>
+   <position name="posCryostat" unit="cm" x="0" y="0" z="0"/>
+   <rotationref ref="rMinus180AboutZ"/>
+  </physvol>
+ </volume>
+</structure>

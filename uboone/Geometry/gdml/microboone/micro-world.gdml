@@ -1,0 +1,93 @@
+<solids>
+   <box name="World" lunit="cm" x="kWorldW" y="kWorldH" z="kWorldL"/>
+   <box name="MoundTop" x="kDetEnclosureWidth" y="kDirtThickness" z="kDetEnclosureLength" lunit="cm" />
+   <xtru name="MoundEW" lunit="cm" >
+     <twoDimVertex x="0"                y="-0.5*kDetEnclosureHeight" />
+     <twoDimVertex x="4*kDirtThickness" y="-0.5*kDetEnclosureHeight" />
+     <twoDimVertex x="kDirtThickness"   y="0.5*kDetEnclosureHeight+kDirtThickness" />
+     <twoDimVertex x="0" y="0.5*kDetEnclosureHeight+kDirtThickness" />
+     <section zOrder="0" zPosition="-0.5*kDetEnclosureLength" xOffset="0" yOffset="0" scalingFactor="1" />
+     <section zOrder="1" zPosition="0.5*kDetEnclosureLength"  xOffset="0" yOffset="0" scalingFactor="1" />  
+   </xtru>
+   <xtru name="MoundNS" lunit="cm" >
+     <twoDimVertex x="0"                y="-0.5*kDetEnclosureHeight" />
+     <twoDimVertex x="4*kDirtThickness" y="-0.5*kDetEnclosureHeight" />
+     <twoDimVertex x="kDirtThickness"   y="0.5*kDetEnclosureHeight+kDirtThickness" />
+     <twoDimVertex x="0" y="0.5*kDetEnclosureHeight+kDirtThickness" />
+     <section zOrder="0" zPosition="-0.5*kDetEnclosureWidth" xOffset="0" yOffset="0" scalingFactor="1" />
+     <section zOrder="1" zPosition="0.5*kDetEnclosureWidth"  xOffset="0" yOffset="0" scalingFactor="1" />
+   </xtru>
+   <cone name="MoundCorner" lunit="cm" aunit="deg"
+     rmin1="0" rmin2="0" rmax1="4*kDirtThickness" rmax2="kDirtThickness"
+     z="kDetEnclosureHeight+kDirtThickness"
+     startphi="90" deltaphi="90"
+   />
+</solids>
+
+<structure>
+ <volume name="volMoundTop" >
+  <materialref ref="Dirt" />
+  <solidref ref="MoundTop" />
+ </volume>
+ <volume name="volMoundEast" >
+  <materialref ref="Dirt" />
+  <solidref ref="MoundEW" />
+ </volume>
+ <volume name="volMoundWest" >
+  <materialref ref="Dirt" />
+  <solidref ref="MoundEW" />
+ </volume>
+ <volume name="volMoundNorth" >
+  <materialref ref="Dirt" />
+  <solidref ref="MoundNS" />
+ </volume>
+ <volume name="volMoundCorner" >
+  <materialref ref="Dirt" />
+  <solidref ref="MoundCorner" />
+ </volume>
+ <volume name="volWorld" >
+  <materialref ref="Air"/> <solidref ref="World"/>
+   <physvol>
+    <volumeref ref="volMoundTop"/>
+    <position name="posMoundTop" unit="cm" x="0.5*kTPCDepth" y="0.5*(kDetEnclosureHeight+kDirtThickness)" z="0.5*kTPCLength"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volMoundCorner"/>
+    <position name="posMoundCornerSW" unit="cm" x="-0.5*(kDetEnclosureWidth-kTPCDepth)" y="0.5*kDirtThickness" z="-0.5*(kDetEnclosureLength-kTPCLength)"/>
+    <rotationref ref="rPlus90AboutX"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volMoundCorner"/>
+    <position name="posMoundCornerNW" unit="cm" x="0.5*(kDetEnclosureWidth+kTPCDepth)" y="0.5*kDirtThickness" z="0.5*(kDetEnclosureLength+kTPCLength)"/>
+    <rotationref ref="rPlus90AboutXPlus180AboutZ"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volMoundCorner"/>
+    <position name="posMoundCornerNE" unit="cm" x="-0.5*(kDetEnclosureWidth-kTPCDepth)" y="0.5*kDirtThickness" z="0.5*(kDetEnclosureLength+kTPCLength)"/>
+    <rotationref ref="rPlus90AboutXMinus90AboutZ"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volMoundCorner"/>
+    <position name="posMoundCornerSE" unit="cm" x="0.5*(kDetEnclosureWidth+kTPCDepth)" y="0.5*kDirtThickness" z="-0.5*(kDetEnclosureLength-kTPCLength)"/>
+    <rotationref ref="rPlus90AboutXPlus90AboutZ"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volMoundEast"/>
+    <position name="posMoundEast" unit="cm" x="0.5*(kTPCDepth+kDetEnclosureWidth)" y="0" z="0.5*kTPCLength"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volMoundWest"/>
+    <position name="posMoundWest" unit="cm" x="-0.5*(kDetEnclosureWidth-kTPCDepth)" y="0" z="0.5*kTPCLength"/>
+    <rotationref ref="rPlus180AboutY"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volMoundNorth"/>
+    <position name="posMoundNorth" unit="cm" x="0.5*kTPCDepth" y="0" z="0.5*(kTPCLength+kDetEnclosureLength)"/>
+    <rotationref ref="rPlus90AboutY"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volDetEnclosure"/>
+    <position name="posDetEnclosure" unit="cm" x="0.5*kTPCDepth" y="0" z="0.5*kTPCLength"/>
+   </physvol>
+ </volume> 
+</structure>

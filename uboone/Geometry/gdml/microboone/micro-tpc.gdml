@@ -1,0 +1,73 @@
+<solids>
+ <box name="TPCBackWall"
+  lunit="cm"
+  z="kTPCLength"
+  x="kTPCWallThickness"
+  y="kTPCWidth"/>
+ <box name="TPCVertWall"
+  lunit="cm"
+  x="kTPCDepth+kTPCWallThickness"
+  y="kTPCWidth"
+  z="kTPCWallThickness"/>
+ <box name="TPCHorizWall"
+  lunit="cm"
+  x="kTPCDepth+kTPCWallThickness"
+  y="kTPCWallThickness"
+  z="kTPCLength+2*kTPCWallThickness"/>
+ <box name="TPC"
+  lunit="cm"
+  x="kTPCDepth+kTPCWallThickness+2*kTPCWirePlaneThickness"
+  y="kTPCWidth+2*kTPCWallThickness"
+  z="kTPCLength+2*kTPCWallThickness"/>
+</solids>
+<structure>
+ <volume name="volTPCBackWall">
+  <materialref ref="G10"/>
+  <solidref ref="TPCBackWall"/>
+ </volume>
+ <volume name="volTPCHorizWall">
+  <materialref ref="G10"/>
+  <solidref ref="TPCHorizWall"/>
+ </volume>
+ <volume name="volTPCVertWall">
+  <materialref ref="G10"/>
+  <solidref ref="TPCVertWall"/>
+ </volume>
+ <volume name="volTPC">
+  <materialref ref="LAr"/>
+  <solidref ref="TPC"/>
+  <physvol>
+   <volumeref ref="volTPCBackWall"/>
+   <position name="posTPCBackWall" unit="cm" x="-0.5*kTPCDepth" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCVertWall"/>
+   <position name="posTPCVertWallN" unit="cm" x="0" y="0" z="0.5*(kTPCLength+kTPCWallThickness)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCVertWall"/>
+   <position name="posTPCVertWallS" unit="cm"  x="0" y="0" z="-0.5*(kTPCLength+kTPCWallThickness)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCHorizWall"/>
+   <position name="posTPCBottomWall" unit="cm" x="0" y="-0.5*(kTPCWidth+kTPCWallThickness)" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCHorizWall"/>
+   <position name="posTPCTopWall" unit="cm" x="0" y="0.5*(kTPCWidth+kTPCWallThickness)" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlane"/>
+   <position name="posTPCPlane1" unit="cm" x="0.5*kTPCDepth" y="0" z="0"/>
+   <rotationref ref="rPlus180AboutZ"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlane"/>
+   <position name="posTPCPlane2" unit="cm" x="0.5*kTPCDepth+1.0*kTPCWirePlaneThickness" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPCPlaneVert"/>
+   <position name="posTPCPlaneVert" unit="cm" x="0.5*kTPCDepth+2.0*kTPCWirePlaneThickness" y="0" z="0"/>
+  </physvol>
+ </volume> 
+</structure>
