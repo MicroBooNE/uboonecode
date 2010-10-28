@@ -1,0 +1,34 @@
+<solids>
+ <tube name="Cryostat" 
+  rmax="(240)"
+  z="1400+5"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="SteelTube"
+  rmin="(200)"
+  rmax="(240)"
+  z="1400"
+  deltaphi="2*(3.1415926535897)"
+  aunit="rad"
+  lunit="cm"/>
+</solids>
+
+<structure>
+ <volume name="volSteelTube">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="SteelTube"/>
+ </volume>
+ <volume name="volCryostat">
+  <materialref ref="LAr"/>
+  <solidref ref="Cryostat"/>
+  <physvol>
+   <volumeref ref="volSteelTube"/>
+   <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPC"/>
+   <position name="posTPC" x="0.0" y="0" z="0"/>
+  </physvol>
+ </volume>
+</structure>

@@ -1,0 +1,247 @@
+<?xml version='1.0'?>
+<gdml>
+<define>
+ <constant name="kCathodeFrameWidth"  	value="9" /> 
+ <constant name="kCathodeFrameDepth"  	value="5" /> 
+ <constant name="kCathodePlateDepth"  	value="0.1" /> 
+ <constant name="kCathodeWidth"  	value="kCathodeFrameDepth+kCathodePlateDepth" /> 
+ <constant name="kCathodeHeight"  	value="240" /> 
+ <constant name="kCathodeLength"  	value="1042" /> 
+ <constant name="kCathodeFrameVInHeight"  	value="0.5*(kCathodeFrameWidth-3*kCathodeFrameWidth)" /> 
+</define>
+<solids>
+ <box name="Cathode"
+  lunit="cm"
+  x="kCathodeWidth+0.1"
+  y="kCathodeHeight"
+  z="kCathodeLength"/>
+ <box name="CathodeFrame"
+  lunit="cm"
+  x="kCathodeWidth-kCathodePlateDepth"
+  y="kCathodeHeight"
+  z="kCathodeLength"/>
+ <box name="CathodePlate"
+  lunit="cm"
+  x="kCathodePlateDepth"
+  y="kCathodeHeight"
+  z="kCathodeLength"/>
+ <box name="CathodeFrameV"
+  lunit="cm"
+  x="kCathodeFrameDepth"
+  y="kCathodeHeight"
+  z="kCathodeFrameWidth"/>
+ <box name="CathodeFrameH"
+  lunit="cm"
+  x="kCathodeFrameDepth"
+  y="kCathodeFrameWidth"
+  z="kCathodeLength-2*kCathodeFrameWidth"/>
+ <box name="CathodeFrameVIn"
+  lunit="cm"
+  x="kCathodeFrameDepth"
+  y="kCathodeFrameVInHeight"
+  z="kCathodeFrameWidth"/>
+ <box name="CathodeFrameXBar"
+  lunit="cm"
+  x="(2/5)*(0.5*kCathodeLength-1.5*kCathodeFrameWidth)"
+  y="0.5*(kCathodeHeight-kCathodeFrameWidth)"
+  z="0.5*kCathodeFrameDepth"/>
+ <xtru name="CathodeFrameXBar1" lunit="cm" > 
+  <twoDimVertex x="0.5*kCathodeFrameWidth" y="0.5*kCathodeFrameWidth+1.7" /> 
+  <twoDimVertex x="0.5*kCathodeFrameWidth" y="0.5*kCathodeFrameWidth" /> 
+  <twoDimVertex x="0.5*kCathodeFrameWidth+1.7" y="0.5*kCathodeFrameWidth" /> 
+  <twoDimVertex x="(1/5)*(0.5*kCathodeLength-1.5*kCathodeFrameWidth)" y="0.5*(kCathodeHeight-kCathodeFrameWidth)-1.7" /> 
+  <twoDimVertex x="(1/5)*(0.5*kCathodeLength-1.5*kCathodeFrameWidth)" y="0.5*(kCathodeHeight-kCathodeFrameWidth)" /> 
+  <twoDimVertex x="(1/5)*(0.5*kCathodeLength-1.5*kCathodeFrameWidth)-1.7" y="0.5*(kCathodeHeight-kCathodeFrameWidth)" /> 
+  <section zOrder="0" zPosition="0" xOffset="0" yOffset="0" scalingFactor="1" /> 
+  <section zOrder="1" zPosition="0.5*kCathodeFrameDepth" xOffset="0" yOffset="0" scalingFactor="1" /> 
+ </xtru>
+ <xtru name="CathodeFrameXBar2" lunit="cm" > 
+  <twoDimVertex x="-0.5*kCathodeFrameWidth" y="0.5*kCathodeFrameWidth+1.7" /> 
+  <twoDimVertex x="-0.5*kCathodeFrameWidth" y="0.5*kCathodeFrameWidth" /> 
+  <twoDimVertex x="-0.5*kCathodeFrameWidth-1.7" y="0.5*kCathodeFrameWidth" /> 
+  <twoDimVertex x="-(1/5)*(0.5*kCathodeLength-1.5*kCathodeFrameWidth)" y="0.5*(kCathodeHeight-kCathodeFrameWidth)-1.7" /> 
+  <twoDimVertex x="-(1/5)*(0.5*kCathodeLength-1.5*kCathodeFrameWidth)" y="0.5*(kCathodeHeight-kCathodeFrameWidth)" /> 
+  <twoDimVertex x="-(1/5)*(0.5*kCathodeLength-1.5*kCathodeFrameWidth)+1.7" y="0.5*(kCathodeHeight-kCathodeFrameWidth)" /> 
+  <section zOrder="0" zPosition="0" xOffset="0" yOffset="0" scalingFactor="1" /> 
+  <section zOrder="1" zPosition="0.5*kCathodeFrameDepth" xOffset="0" yOffset="0" scalingFactor="1" /> 
+ </xtru>
+</solids>
+<structure>
+ <volume name="volCathodePlate">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodePlate"/>
+ </volume>
+ <volume name="volCathodeFrameH">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameH"/>
+ </volume>
+ <volume name="volCathodeFrameV">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameV"/>
+ </volume>
+ <volume name="volCathodeFrameVIn">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameVIn"/>
+ </volume>
+ <volume name="volCathodeFrameXBar1">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameXBar1"/>
+ </volume>
+ <volume name="volCathodeFrameXBar2">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameXBar2"/>
+ </volume>
+ <volume name="volCathodeFrameXBar">
+  <materialref ref="LAr"/>
+  <solidref ref="CathodeFrameXBar"/>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar1"/>
+   <position name="posCathodeFrameXBar" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="rCathodeFrameXBar" unit="cm" x="0" y="-90" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar2"/>
+   <position name="posCathodeFrameXBar" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="rCathodeFrameXBar" unit="cm" x="0" y="-90" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar1"/>
+   <position name="posCathodeFrameXBar" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="rCathodeFrameXBar" unit="cm" x="180" y="-90" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar2"/>
+   <position name="posCathodeFrameXBar" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="rCathodeFrameXBar" unit="cm" x="180" y="-90" z="0"/>
+  </physvol>
+ </volume>
+ <volume name="volCathodeFrame">
+  <materialref ref="LAr"/>
+  <solidref ref="CathodeFrame"/>
+  <physvol>
+   <volumeref ref="volCathodeFrameH"/>
+   <position name="posCathodeFrameTop" unit="cm" x="0" y="0.5*(kCathodeHeight-kCathodeFrameWidth)" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameH"/>
+   <position name="posCathodeFrameBot" unit="cm" x="0" y="-0.5*(kCathodeHeight-kCathodeFrameWidth)" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameH"/>
+   <position name="posCathodeFrameCenter" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameV"/>
+   <position name="posCathodeFrameFront" unit="cm" x="0" y="0" z="0.5*(kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameV"/>
+   <position name="posCathodeFrameBack" unit="cm" x="0" y="0" z="-0.5*(kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop1" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(-4/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot1" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(-4/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop2" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(-3/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot2" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(-3/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop3" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(-2/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot3" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(-2/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop4" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(-1/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot4" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(-1/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop5" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(0/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot5" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(0/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop6" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(1/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot6" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(1/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop7" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(2/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot7" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(2/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop8" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(3/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot8" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(3/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInTop9" unit="cm" x="0" y="0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(4/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameVIn"/>
+   <position name="posCathodeFrameVInBot9" unit="cm" x="0" y="-0.5*(kCathodeFrameWidth+kCathodeFrameVInHeight)" z="(4/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar"/>
+   <position name="posCathodeFrameXBar1" unit="cm" x="0" y="0" z="-(4/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar"/>
+   <position name="posCathodeFrameXBar2" unit="cm" x="0" y="0" z="-(2/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar"/>
+   <position name="posCathodeFrameXBar3" unit="cm" x="0" y="0" z="(0/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar"/>
+   <position name="posCathodeFrameXBar4" unit="cm" x="0" y="0" z="(2/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodeFrameXBar"/>
+   <position name="posCathodeFrameXBar5" unit="cm" x="0" y="0" z="(4/5)*(0.5*kCathodeLength-kCathodeFrameWidth)"/>
+  </physvol>
+ </volume> 
+ <volume name="volCathode">
+  <materialref ref="LAr"/>
+  <solidref ref="Cathode"/>
+  <physvol>
+   <volumeref ref="volCathodeFrame"/>
+   <position name="posCathodeFrame" unit="cm" x="0.5*kCathodePlateDepth" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathodePlate"/>
+   <position name="posCathodeFrame" unit="cm" x="-0.5*kCathodeFrameDepth-0.1" y="0" z="0"/>
+  </physvol>
+ </volume>
+</structure>
+</gdml>

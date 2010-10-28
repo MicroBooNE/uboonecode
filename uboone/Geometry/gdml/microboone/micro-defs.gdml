@@ -1,3 +1,7 @@
+<?xml version='1.0'?>
+<define>
+<constant name="kInch"	value="2.54" />
+<constant name="kPi"	value="3.14159265358979" />
 <constant name="kDetEnclosureWidth"	  value="793" />
 <constant name="kDetEnclosureHeight"	  value="854" />
 <constant name="kDetEnclosureLength"	  value="2073" />
@@ -6,21 +10,29 @@
 <constant name="kWorldH"                  value="100.0*kDetEnclosureHeight"/>
 <constant name="kWorldL"                  value="100.0*kDetEnclosureLength"/>
 
-<constant name="kTPCWidth"		  value="256" />
-<constant name="kTPCLength"		  value="1200" />
-<constant name="kTPCDepth"		  value="260" />
-<constant name="kTPCWallThickness"	  value="0.5*kInch" />
-<constant name="kTPCStripThickness"	  value="0.1" />
-<constant name="kTPCStripWidth"		  value="1.0" />
+<constant name="kTPCWidth"		  value="226" />
+<constant name="kTPCLength"		  value="1100" />
+<constant name="kTPCDepth"		  value="230" />
+<constant name="kTPCWidthA"		  value="256" />
+<constant name="kTPCLengthA"		  value="1200" />
+<constant name="kTPCDepthA"		  value="260" />
+<constant name="kTPCWallThickness"        value="0.5*kInch" />
 
 <constant name="kTPCWirePlaneThickness"   value="0.15*kInch" />
 <constant name="kTPCWireThickness"	  value="0.015" />
 <constant name="kTPCWirePlaneWidth"       value="kTPCWidth" />
-<constant name="kTPCWirePlaneOuterWidth"  value="5" />
 <constant name="kTPCWirePlaneLength"	  value="kTPCLength" />
-<constant name="kTPCWirePlaneOuterLength" value="5" />
 <constant name="kTPCWirePitch"            value="0.3"/>
-<constant name="kCos30"                   value="0.8660254038"/>
-<constant name="kCos60"                   value="0.5"/>
-<constant name="kTPCWireXPitch"           value="kTPCWirePitch/kCos60"/>
-
+<constant name="kSinUVAngle"              value="0.866025403784439"/>
+<constant name="kCosUVAngle"              value="0.5"/>
+<constant name="kCos30"      	          value="0.15425145"/>
+<constant name="kCos60"        		  value="-0.95241298"/>
+<constant name="kTanUVAngle"              value="1.73205080756888"/>
+<constant name="kTPCWireXPitch"           value="kTPCWirePitch/kCosUVAngle"/>
+<constant name="kCryoTPCMountLength" 	  value="40">
+<constant name="kCryoTPCMountWidth" 	  value="20">
+<constant name="kCryoTPCMountHeight" 	  value="20">
+<constant name="kRailLength"               value="1200">
+<constant name="kRailWidth"                value="4">
+<constant name="kRailHeight"               value="8">
+</define>
