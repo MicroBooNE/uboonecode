@@ -1,5 +1,3 @@
-<?xml version='1.0'?>
-<gdml>
 <solids>
    <box name="World" lunit="cm" x="kWorldW" y="kWorldH" z="kWorldL"/>
    <box name="MoundTop" x="kDetEnclosureWidth" y="kDirtThickness" z="kDetEnclosureLength" lunit="cm" />
@@ -92,4 +90,4 @@
     <position name="posDetEnclosure" unit="cm" x="0.5*kTPCDepth" y="0" z="0.5*kTPCLength"/>
    </physvol>
  </volume> 
-</structure></gdml>
+</structure>
