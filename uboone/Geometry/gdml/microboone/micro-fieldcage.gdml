@@ -551,51 +551,195 @@
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFieldCageLoopPlus2" unit="cm" x="18" y="0" z="0"/>
+   <position name="posFieldCageLoopPlus2" unit="cm" x="6" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFCLoopMinus2" unit="cm" x="-18" y="0" z="0"/>
+   <position name="posFCLoopMinus2" unit="cm" x="-6" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFieldCageLoopPlus3" unit="cm" x="34" y="0" z="0"/>
+   <position name="posFieldCageLoopPlus3" unit="cm" x="10" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFCLoopMinus3" unit="cm" x="-34" y="0" z="0"/>
+   <position name="posFCLoopMinus3" unit="cm" x="-10" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFieldCageLoopPlus4" unit="cm" x="50" y="0" z="0"/>
+   <position name="posFieldCageLoopPlus4" unit="cm" x="14" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFCLoopMinus4" unit="cm" x="-50" y="0" z="0"/>
+   <position name="posFCLoopMinus4" unit="cm" x="-14" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFieldCageLoopPlus5" unit="cm" x="66" y="0" z="0"/>
+   <position name="posFieldCageLoopPlus5" unit="cm" x="18" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFCLoopMinus5" unit="cm" x="-66" y="0" z="0"/>
+   <position name="posFCLoopMinus5" unit="cm" x="-18" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFieldCageLoopPlus6" unit="cm" x="82" y="0" z="0"/>
+   <position name="posFieldCageLoopPlus6" unit="cm" x="22" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFCLoopMinus6" unit="cm" x="-82" y="0" z="0"/>
+   <position name="posFCLoopMinus6" unit="cm" x="-22" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFieldCageLoopPlus7" unit="cm" x="98" y="0" z="0"/>
+   <position name="posFieldCageLoopPlus7" unit="cm" x="26" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volFieldCageLoop"/>
-   <position name="posFCLoopMinus7" unit="cm" x="-98" y="0" z="0"/>
+   <position name="posFCLoopMinus7" unit="cm" x="-26" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus8" unit="cm" x="30" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus8" unit="cm" x="-30" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus9" unit="cm" x="34" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus9" unit="cm" x="-34" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus10" unit="cm" x="38" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus10" unit="cm" x="-38" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus11" unit="cm" x="42" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus11" unit="cm" x="-42" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus12" unit="cm" x="46" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus12" unit="cm" x="-46" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus13" unit="cm" x="50" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus13" unit="cm" x="-50" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus14" unit="cm" x="54" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus14" unit="cm" x="-54" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus15" unit="cm" x="58" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus15" unit="cm" x="-58" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus16" unit="cm" x="62" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus16" unit="cm" x="-62" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus17" unit="cm" x="66" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus17" unit="cm" x="-66" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus18" unit="cm" x="70" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus18" unit="cm" x="-70" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus19" unit="cm" x="74" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus19" unit="cm" x="-74" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus20" unit="cm" x="78" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus20" unit="cm" x="-78" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus21" unit="cm" x="82" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus21" unit="cm" x="-82" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus22" unit="cm" x="86" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus22" unit="cm" x="-86" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus23" unit="cm" x="90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus23" unit="cm" x="-90" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus24" unit="cm" x="94" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus24" unit="cm" x="-94" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFieldCageLoopPlus25" unit="cm" x="98" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volFieldCageLoop"/>
+   <position name="posFCLoopMinus25" unit="cm" x="-98" y="0" z="0"/>
   </physvol>
  </volume>
 </structure>

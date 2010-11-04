@@ -14,12 +14,80 @@
   deltaphi="2*kPi"
   aunit="rad"
   lunit="cm"/>
+ <xtru name="CryoRail-1" lunit="cm" >	
+  <twoDimVertex x="-49.25" y="-183.982197780111" />
+  <twoDimVertex x="-50.25" y="-183.711592176433" />
+  <twoDimVertex x="-51.25" y="-183.435135947288" />
+  <twoDimVertex x="-52.25" y="-183.15280259936" />
+  <twoDimVertex x="-53.25" y="-182.864564910756" />
+  <twoDimVertex x="-54.25" y="-182.570394916591" />
+  <twoDimVertex x="-55.25" y="-182.270263894032" />
+  <twoDimVertex x="-55.25" y="-179.270263894032" />
+  <twoDimVertex x="-49.25" y="-179.270263894032" />
+  <section zOrder="0" zPosition="-(1400/2)" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="((1400/2)-150)" xOffset="0" yOffset="0" scalingFactor="1" />
+</xtru>
+ <xtru name="CryoRail1" lunit="cm" >	
+  <twoDimVertex x="49.25" y="-183.982197780111" />
+  <twoDimVertex x="50.25" y="-183.711592176433" />
+  <twoDimVertex x="51.25" y="-183.435135947288" />
+  <twoDimVertex x="52.25" y="-183.15280259936" />
+  <twoDimVertex x="53.25" y="-182.864564910756" />
+  <twoDimVertex x="54.25" y="-182.570394916591" />
+  <twoDimVertex x="55.25" y="-182.270263894032" />
+  <twoDimVertex x="55.25" y="-179.270263894032" />
+  <twoDimVertex x="49.25" y="-179.270263894032" />
+  <section zOrder="0" zPosition="-(1400/2)" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="((1400/2)-150)" xOffset="0" yOffset="0" scalingFactor="1" />
+</xtru>
+ <xtru name="CryoMount-1" lunit="cm" >   
+  <twoDimVertex x="-124.5" y="-144.134526051186" />
+  <twoDimVertex x="-125.5" y="-143.264655794791" />
+  <twoDimVertex x="-126.5" y="-142.38244835653" />
+  <twoDimVertex x="-127.5" y="-141.487672961287" />
+  <twoDimVertex x="-128.5" y="-140.580089628653" />
+  <twoDimVertex x="-129.5" y="-139.659448659946" />
+  <twoDimVertex x="-130.5" y="-138.725490087439" />
+  <twoDimVertex x="-130.5" y="-133.725490087439" />
+  <twoDimVertex x="-124.5" y="-133.725490087439" />
+  <section zOrder="0" zPosition="-(10/2)" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="(10/2)" xOffset="0" yOffset="0" scalingFactor="1" />
+</xtru>
+ <xtru name="CryoMount1" lunit="cm" >   
+  <twoDimVertex x="124.5" y="-144.134526051186" />
+  <twoDimVertex x="125.5" y="-143.264655794791" />
+  <twoDimVertex x="126.5" y="-142.38244835653" />
+  <twoDimVertex x="127.5" y="-141.487672961287" />
+  <twoDimVertex x="128.5" y="-140.580089628653" />
+  <twoDimVertex x="129.5" y="-139.659448659946" />
+  <twoDimVertex x="130.5" y="-138.725490087439" />
+  <twoDimVertex x="130.5" y="-133.725490087439" />
+  <twoDimVertex x="124.5" y="-133.725490087439" />
+  <section zOrder="0" zPosition="-(10/2)" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="(10/2)" xOffset="0" yOffset="0" scalingFactor="1" />
+</xtru>
 </solids>
 
 <structure>
  <volume name="volSteelTube">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="SteelTube"/>
+ </volume>
+ <volume name="volCryoRail-1">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CryoRail-1"/>
+ </volume>
+ <volume name="volCryoRail1">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CryoRail1"/>
+ </volume>
+ <volume name="volCryoMount-1">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CryoMount-1"/>
+ </volume>
+ <volume name="volCryoMount1">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CryoMount1"/>
  </volume>
  <volume name="volCryostat">
   <materialref ref="LAr"/>
@@ -30,7 +98,39 @@
   </physvol>
   <physvol>
    <volumeref ref="volTPC"/>
-   <position name="posTPC" x="0.0" y="0" z="0"/>
+   <position name="posTPC" unit="cm" x="0.0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupport"/>
+   <position name="posWheelSupport1" unit="cm" x="0.0" y="-((256/2)+17)" z="(1200/3)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupport"/>
+   <position name="posWheelSupport1" unit="cm" x="0.0" y="-((256/2)+17)" z="-(1200/3)"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCryoRail-1"/>
+   <position name="posCryoRails" unit="cm" x="0.0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCryoRail1"/>
+   <position name="posCryoRails" unit="cm" x="0.0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCryoMount-1"/>
+   <position name="posCryoMount-1F" unit="cm" x="0.0" y="0" z="300"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCryoMount-1"/>
+   <position name="posCryoMount-1B" unit="cm"  x="0.0" y="0" z="-300"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCryoMount1"/>
+   <position name="posCryoMount1F" unit="cm" x="0.0" y="0" z="300"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCryoMount1"/>
+   <position name="posCryoMount1B" unit="cm" x="0.0" y="0" z="-300"/>
   </physvol>
   <physvol>
    <volumeref ref="volPMT"/>
