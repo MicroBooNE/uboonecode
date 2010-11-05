@@ -4443,6 +4443,53 @@
   dtheta="2*kPi"
   lunit="cm"
   aunit="rad"/>
+ <box name="WheelSupportPiece5" 
+  x="96.5"
+  y="15"
+  z="18"
+  lunit="cm"/>
+ <xtru name="WheelSupportPiece6" lunit="cm" >	
+  <twoDimVertex x="8" y="0" />
+  <twoDimVertex x="9" y="0" />
+  <twoDimVertex x="9" y="8.8" />
+  <twoDimVertex x="-9" y="8.8" />
+  <twoDimVertex x="-9" y="0" />
+  <twoDimVertex x="-8" y="0" />
+  <twoDimVertex x="-8" y="7.8" />
+  <twoDimVertex x="8" y="7.8" />
+  <section zOrder="0" zPosition="-15/2" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="15/2" xOffset="0" yOffset="0" scalingFactor="1" />
+ </xtru>
+ <xtru name="WheelSupportPiece7" lunit="cm" >	
+  <twoDimVertex x="3.9" y="0" />
+  <twoDimVertex x="4.9" y="0" />
+  <twoDimVertex x="4.9" y="33.32" />
+  <twoDimVertex x="-4.9" y="33.32" />
+  <twoDimVertex x="-4.9" y="0" />
+  <twoDimVertex x="-3.9" y="0" />
+  <twoDimVertex x="-3.9" y="32.32" />
+  <twoDimVertex x="3.9" y="32.32" />
+  <section zOrder="0" zPosition="-15/2" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="15/2" xOffset="0" yOffset="0" scalingFactor="1" />
+ </xtru>
+ <tube name="AxlePart1"
+  rmax="1.5"
+  z="7.8"
+  dtheta="2*kPi"
+  lunit="cm"
+  aunit="rad"/>
+ <tube name="AxlePart2"
+  rmax="1.5"
+  z="2"
+  dtheta="2*kPi"
+  lunit="cm"
+  aunit="rad"/>
+ <tube name="AxlePart3"
+  rmax="1.5"
+  z="3"
+  dtheta="2*kPi"
+  lunit="cm"
+  aunit="rad"/>
 
  <tube name="PMTVolume"
   rmax="(6*2.54)"
@@ -37136,6 +37183,18 @@
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="WheelSupportPiece4"/>
  </volume>
+ <volume name="volWheelSupportPiece5">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="WheelSupportPiece5"/>
+ </volume>
+ <volume name="volWheelSupportPiece6">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="WheelSupportPiece6"/>
+ </volume>
+ <volume name="volWheelSupportPiece7">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="WheelSupportPiece7"/>
+ </volume>
  <volume name="volWheelPart1">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="WheelPart1"/>
@@ -37143,6 +37202,18 @@
  <volume name="volWheelPart2">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="WheelPart2"/>
+ </volume>
+ <volume name="volAxlePart1">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="AxlePart1"/>
+ </volume>
+ <volume name="volAxlePart2">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="AxlePart2"/>
+ </volume>
+ <volume name="volAxlePart3">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="AxlePart3"/>
  </volume>
  <volume name="volWheelSupport">
   <materialref ref="LAr"/>
@@ -37177,52 +37248,146 @@
   </physvol>
   <physvol>
    <volumeref ref="volWheelSupportPiece4"/>
-   <position name="posWheelSupportPiece4" unit="cm" x="52.15" y="0" z="0"/>
+   <position name="posWheelSupportPiece4" unit="cm" x="(96.5+7.8)/2" y="0" z="0"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelSupportPiece4"/>
-   <position name="posWheelSupportPiece4" unit="cm" x="-52.15" y="0" z="0"/>
+   <position name="posWheelSupportPiece4" unit="cm" x="-(96.5+7.8)/2" y="0" z="0"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupportPiece5"/>
+   <position name="posWheelSupportPiece5" unit="cm" x="0" y="-7.5" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupportPiece6"/>
+   <position name="posWheelSupportPiece6" unit="cm" x="96.5/2" y="-7.5" z="0"/>
+   <rotationref ref="rPlus90AboutXPlus90AboutZ" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupportPiece6"/>
+   <position name="posWheelSupportPiece6" unit="cm" x="-96.5/2" y="-7.5" z="0"/>
+   <rotationref ref="rPlus90AboutXMinus90AboutZ" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupportPiece7"/>
+   <position name="posWheelSupportPiece7" unit="cm" x="-(94.5+9.8)/2" y="-7.5" z="-9"/>
+   <rotationref ref="rPlus90AboutX" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupportPiece7"/>
+   <position name="posWheelSupportPiece7" unit="cm" x="(94.5+9.8)/2" y="-7.5" z="-9"/>
+   <rotationref ref="rPlus90AboutX" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupportPiece7"/>
+   <position name="posWheelSupportPiece7" unit="cm" x="(94.5+9.8)/2" y="-7.5" z="9"/>
+   <rotationref ref="rMinus90AboutX" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volWheelSupportPiece7"/>
+   <position name="posWheelSupportPiece7" unit="cm" x="-(94.5+9.8)/2" y="-7.5" z="9"/>
+   <rotationref ref="rMinus90AboutX" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart1"/>
+   <position name="posAxlePart1" unit="cm" x="-(94.5+9.8)/2" y="-7.5" z="-25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart2"/>
+   <position name="posAxlePart2" unit="cm" x="-((94.5-2)/2)" y="-7.5" z="-25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart3"/>
+   <position name="posAxlePart3" unit="cm" x="-((94.5+3)/2+9.8)" y="-7.5" z="-25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelPart1"/>
-   <position name="posWheelPart1" unit="cm" x="-(52.15+0.5)" y="-13" z="-30"/>
+   <position name="posWheelPart1" unit="cm" x="-((94.5+9.8)/2+0.5)" y="-7.5" z="-25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelPart2"/>
-   <position name="posWheelPart2" unit="cm" x="-(52.15-2.5)" y="-13" z="-30"/>
+   <position name="posWheelPart2" unit="cm" x="-((94.5+9.8)/2-2.5)" y="-7.5" z="-25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart1"/>
+   <position name="posAxlePart1" unit="cm" x="-(94.5+9.8)/2" y="-7.5" z="25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart2"/>
+   <position name="posAxlePart2" unit="cm" x="-(94.5-2)/2" y="-7.5" z="25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart3"/>
+   <position name="posAxlePart3" unit="cm" x="-((94.5+3)/2+9.8)" y="-7.5" z="25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelPart1"/>
-   <position name="posWheelPart1" unit="cm" x="-(52.15+0.5)" y="-13" z="30"/>
+   <position name="posWheelPart1" unit="cm" x="-((94.5+9.8)/2+0.5)" y="-7.5" z="25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelPart2"/>
-   <position name="posWheelPart2" unit="cm" x="-(52.15-2.5)" y="-13" z="30"/>
+   <position name="posWheelPart2" unit="cm" x="-((94.5+9.8)/2-2.5)" y="-7.5" z="25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart1"/>
+   <position name="posAxlePart1" unit="cm" x="(94.5+9.8)/2" y="-7.5" z="-25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart2"/>
+   <position name="posAxlePart2" unit="cm" x="(94.5-2)/2" y="-7.5" z="-25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart3"/>
+   <position name="posAxlePart3" unit="cm" x="(94.5+3)/2+9.8" y="-7.5" z="-25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelPart1"/>
-   <position name="posWheelPart1" unit="cm" x="(52.15+0.5)" y="-13" z="-30"/>
+   <position name="posWheelPart1" unit="cm" x="((94.5+9.8)/2+0.5)" y="-7.5" z="-25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelPart2"/>
-   <position name="posWheelPart2" unit="cm" x="(52.15-2.5)" y="-13" z="-30"/>
+   <position name="posWheelPart2" unit="cm" x="((94.5+9.8)/2-2.5)" y="-7.5" z="-25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart1"/>
+   <position name="posAxlePart1" unit="cm" x="(94.5+9.8)/2" y="-7.5" z="25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart2"/>
+   <position name="posAxlePart2" unit="cm" x="(94.5-2)/2" y="-7.5" z="25"/>
+   <rotationref ref="rPlus90AboutY" />
+  </physvol>
+  <physvol>
+   <volumeref ref="volAxlePart3"/>
+   <position name="posAxlePart3" unit="cm" x="(94.5+3)/2+9.8" y="-7.5" z="25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelPart1"/>
-   <position name="posWheelPart1" unit="cm" x="(52.15+0.5)" y="-13" z="30"/>
+   <position name="posWheelPart1" unit="cm" x="((94.5+9.8)/2+0.5)" y="-7.5" z="25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
   <physvol>
    <volumeref ref="volWheelPart2"/>
-   <position name="posWheelPart2" unit="cm" x="(52.15-2.5)" y="-13" z="30"/>
+   <position name="posWheelPart2" unit="cm" x="((94.5+9.8)/2-2.5)" y="-7.5" z="25"/>
    <rotationref ref="rPlus90AboutY" />
   </physvol>
  </volume>
