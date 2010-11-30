@@ -206,11 +206,11 @@
   <solidref ref="Electronics"/>
   <physvol>
    <volumeref ref="volElectroBar"/>
-   <position name="posElectroBar1" unit="cm" x="6.5" y="-2" z="0"/>
+   <position name="posElectroBar1" unit="cm" x="6.5" y="-3.2" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volElectroBar"/>
-   <position name="posElectroBar2" unit="cm" x="-6.5" y="-2" z="0"/>
+   <position name="posElectroBar2" unit="cm" x="-6.5" y="-3.2" z="0"/>
    <rotation name="rPlus180AboutZ" unit="cm" x="0" y="0" z="180"/>
   </physvol>
   <physvol> 
