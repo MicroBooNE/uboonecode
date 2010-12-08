@@ -14912,11 +14912,6 @@
      <rotationref ref="rPlusUVAngleAboutX"/>
     </physvol>
     <physvol>
-     <volumeref ref="volTPCWireCommon"/>
-     <position name="posTPCWire1704" unit="cm" y="0" z="(-0.5*kTPCWirePlaneLength)+kTPCWireXPitch*(0.5*637 + 1067+1)" x="0"/>
-     <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol>
-    <physvol>
      <volumeref ref="volTPCWire636"/>
      <position name="posTPCWire1705" unit="cm" y="0.5*kTPCWirePlaneWidth-0.5*(636+1)*kTPCWireXPitch/kTanUVAngle" z="0.5*kTPCWirePlaneLength-0.5*kTPCWireXPitch*(636+1)" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/>

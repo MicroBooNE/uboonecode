@@ -1,11 +1,6 @@
 <?xml version='1.0'?>
 <gdml>
 <solids>
- <box name="GroundPlane"
-  lunit="cm"
-  x="kGroundPlateWidth+0.5"
-  y="kGroundPlateHeight+kGroundBeamHeight"
-  z="kGroundPlateLength"/>
  <box name="GroundPlate"
   lunit="cm"
   x="kGroundPlateWidth"
@@ -31,25 +26,5 @@
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="GroundBeam"/>
  </volume>
- <volume name="volGroundPlane">
-  <materialref ref="LAr"/>
-  <solidref ref="GroundPlane"/>
-  <physvol>I
-   <volumeref ref="volGroundPlate"/>
-   <position name="posGroundPlate" unit="cm" x="0.25" y="-0.5*(kGroundBeamHeight)" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volGroundBeam"/>
-   <position name="posGroundBeam1" unit="cm" x="-(0.5*(kGroundPlateWidth-kGroundBeamWidth)+0.25)" y="0.5*kGroundPlateHeight" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volGroundBeam"/>
-   <position name="posGroundBeam2" unit="cm" x="-12" y="0.5*kGroundPlateHeight" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volGroundBeam"/>
-   <position name="posGroundBeam3" unit="cm" x="0.5*(kGroundPlateWidth-kGroundBeamWidth)-9" y="0.5*kGroundPlateHeight" z="0"/>
-  </physvol>
- </volume> 
 </structure>
 </gdml>

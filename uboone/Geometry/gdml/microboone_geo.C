@@ -33,6 +33,7 @@ microboone_geo(TString volName="")
     obj->Print();
   }
 
+  gGeoManager->GetTopNode();
   gGeoManager->CheckOverlaps(0.01);
   gGeoManager->PrintOverlaps();
   gGeoManager->SetMaxVisNodes(70000);

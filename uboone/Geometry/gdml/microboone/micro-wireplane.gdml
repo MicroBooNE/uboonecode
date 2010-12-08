@@ -4,19 +4,14 @@
 <define>
 </define>
 <solids>
- <box name="WirePlane"
+ <box name="WireFrameV1"
   lunit="cm"
   x="kWireFrameDepth"
-  y="kWirePlaneHeight"
-  z="kWirePlaneLength"/>
- <box name="WireFrame"
+  y="kWirePlaneHeight-2*kWireFrameWidth"
+  z="kWireFrameWidth"/>
+ <box name="WireFrameV2"
   lunit="cm"
-  x="kWireFrameDepth"
-  y="kWirePlaneHeight"
-  z="kWirePlaneLength"/>
- <box name="WireFrameV"
-  lunit="cm"
-  x="kWireFrameDepth"
+  x="-0.5*kWireFrameDepth-2"
   y="kWirePlaneHeight-2*kWireFrameWidth"
   z="kWireFrameWidth"/>
  <box name="WireFrameH"
@@ -30,66 +25,13 @@
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="WireFrameH"/>
  </volume>
- <volume name="volWireFrameV">
+ <volume name="volWireFrameV1">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="WireFrameV"/>
+  <solidref ref="WireFrameV1"/>
  </volume>
- <volume name="volWireFrame">
-  <materialref ref="LAr"/>
-  <solidref ref="WireFrame"/>
-  <physvol>
-   <volumeref ref="volWireFrameH"/>
-   <position name="posWireFrameTop" unit="cm" x="0" y="0.5*(kWirePlaneHeight-kWireFrameWidth)" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volWireFrameH"/>
-   <position name="posWireFrameBot" unit="cm" x="0" y="-0.5*(kWirePlaneHeight-kWireFrameWidth)" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volWireFrameV"/>
-   <position name="posWireFrameFront" unit="cm" x="0" y="0" z="0.5*(kWirePlaneLength-kWireFrameWidth)"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volWireFrameV"/>
-   <position name="posWireFrameBack" unit="cm" x="0" y="0" z="-0.5*(kWirePlaneLength-kWireFrameWidth)"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volWireFrameV"/>
-   <position name="posWireFrameVIn1" unit="cm" x="0" y="0" z="(-3/5)*(0.5*kWirePlaneLength-kWireFrameWidth)"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volWireFrameV"/>
-   <position name="posWireFrameVIn2" unit="cm" x="0" y="0" z="(-1/5)*(0.5*kWirePlaneLength-kWireFrameWidth)"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volWireFrameV"/>
-   <position name="posWireFrameVIn3" unit="cm" x="0" y="0" z="(1/5)*(0.5*kWirePlaneLength-kWireFrameWidth)"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volWireFrameV"/>
-   <position name="posWireFrameVIn4" unit="cm" x="0" y="0" z="(3/5)*(0.5*kWirePlaneLength-kWireFrameWidth)"/>
-  </physvol>
- </volume>
- <volume name="volWirePlane">
-  <materialref ref="LAr"/>
-  <solidref ref="WirePlane"/>
-  <physvol>
-   <volumeref ref="volWireFrame"/>
-   <position name="posWireFrame" unit="cm" x="0" y="0" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volTPCPlaneVert"/>
-   <position name="posTPCPlaneVert" unit="cm" x="-2*0.3" y="0" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volTPCPlane"/>
-   <position name="posTPCPlane" unit="cm" x="-" y="0" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volTPCPlane"/>
-   <position name="posTPCPlane2" unit="cm" x="0" y="0" z="0"/>
-   <rotationref ref="rPlus180AboutY"/>
-  </physvol>
+ <volume name="volWireFrameV2">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="WireFrameV2"/>
  </volume>
 </structure>
 </gdml>
