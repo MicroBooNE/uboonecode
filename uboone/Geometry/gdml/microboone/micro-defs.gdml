@@ -37,7 +37,7 @@
 <constant name="kCathodeWidth"  	value="5.1" /> 
 <constant name="kCathodeHeight"  	value="240" /> 
 <constant name="kCathodeLength"  	value="1042" /> 
-<constant name="kCathodeFrameVInHeight"  	value="0.5*(kCathodeFrameWidth-3*kCathodeFrameWidth)" /> 
+<constant name="kCathodeFrameVInHeight"  	value="0.5*(kCathodeHeight-3*kCathodeFrameWidth)" /> 
 
 <constant name="kGroundPlateWidth"      value="224" /> 
 <constant name="kGroundPlateHeight"     value="0.1" /> 

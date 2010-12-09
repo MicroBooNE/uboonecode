@@ -13,8 +13,8 @@
   z="kGroundBeamLength"/>
  <box name="GroundBeamIn"
   lunit="cm"
-  x="kGroundBeamWidth-kGroundBeamThickness"
-  y="kGroundBeamHeight-kGroundBeamThickness"
+  x="kGroundBeamWidth - kGroundBeamThickness"
+  y="kGroundBeamHeight - kGroundBeamThickness"
   z="kGroundBeamLength"/>
 </solids>
 <structure>

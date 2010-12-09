@@ -9,7 +9,7 @@
   z="kCathodeLength"/>
  <box name="CathodeFrame"
   lunit="cm"
-  x="kCathodeWidth-kCathodePlateDepth"
+  x="kCathodeWidth - kCathodePlateDepth"
   y="kCathodeHeight"
   z="kCathodeLength"/>
  <box name="CathodePlate"

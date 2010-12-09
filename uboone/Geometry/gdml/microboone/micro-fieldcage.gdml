@@ -35,23 +35,24 @@
 </define>
 <solids>
  <tube name="FieldCageTubeZ"
-  rmin="kFieldCageTubeRadius-kFieldCageTubeThickness"
+  rmin="kFieldCageTubeRadius - kFieldCageTubeThickness"
   rmax="kFieldCageTubeRadius"  
   z="kFieldCageLoopLength-2*(kFieldCageCornerRadius+kFieldCageTubeRadius)" 
   deltaphi="2*kPi" 
   aunit="rad" 
   lunit="cm"/> 
  <tube name="FieldCageTubeY" 
-  rmin="kFieldCageTubeRadius-kFieldCageTubeThickness"
+  rmin="kFieldCageTubeRadius - kFieldCageTubeThickness"
   rmax="kFieldCageTubeRadius"  
   z="kFieldCageLoopHeight-2*(kFieldCageCornerRadius+kFieldCageTubeRadius)"  
   deltaphi="2*kPi" 
   aunit="rad" 
   lunit="cm"/> 
  <torus name="FieldCageCorner"
-  rmin="kFieldCageTubeRadius-kFieldCageTubeThickness"
+  rmin="kFieldCageTubeRadius - kFieldCageTubeThickness"
   rmax="kFieldCageTubeRadius"  
   rtor="kFieldCageCornerRadius"
+  startphi="0"
   deltaphi="0.5*kPi"
   aunit="rad"
   lunit="cm"/>

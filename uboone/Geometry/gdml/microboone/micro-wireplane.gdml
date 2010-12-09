@@ -11,7 +11,7 @@
   z="kWireFrameWidth"/>
  <box name="WireFrameV2"
   lunit="cm"
-  x="-0.5*kWireFrameDepth-2"
+  x="0.5*kWireFrameDepth-2"
   y="kWirePlaneHeight-2*kWireFrameWidth"
   z="kWireFrameWidth"/>
  <box name="WireFrameH"
