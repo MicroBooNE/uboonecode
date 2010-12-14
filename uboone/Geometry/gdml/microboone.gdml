@@ -132,6 +132,7 @@
   <element name="sodium" formula="Na" Z="11"> <atom value="22.99"/>    </element>
   <element name="titanium" formula="Ti" Z="22"> <atom value="47.867"/>   </element>
   <element name="argon" formula="Ar" Z="18"> <atom value="39.9480"/>  </element>
+  <element name="neon" formula="Ne" Z="10"> <atom value="20.1797"/>  </element>
 
   <material name="Vacuum" formula="Vacuum">
    <D value="1.e-25" unit="g/cm3"/>
@@ -218,7 +219,7 @@
   <material name="STEEL_STAINLESS_Fe7Cr2Ni" formula="STEEL_STAINLESS_Fe7Cr2Ni">
    <D value="7.9300" unit="g/cm3"/>
    <fraction n="0.0010" ref="carbon"/>
-   <fraction n="0.1800" ref="chromium"/>
+   <fraction n="0.1792" ref="chromium"/>
    <fraction n="0.7298" ref="iron"/>
    <fraction n="0.0900" ref="nickel"/>
   </material>
@@ -231,8 +232,10 @@
   <material formula=" " name="Air">
    <D value="0.001205" unit="g/cc"/>
    <fraction n="0.78084" ref="nitrogen"/>
-   <fraction n="0.209476" ref="oxygen"/>
+   <fraction n="0.209476+0.000209333" ref="oxygen"/>
    <fraction n="0.00934" ref="argon"/>
+   <fraction n="0.000104667" ref="carbon"/>
+   <fraction n="0.00003" ref="neon"/>
   </material>
 
   <material formula=" " name="G10">
