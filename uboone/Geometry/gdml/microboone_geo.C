@@ -12,20 +12,17 @@ microboone_geo(TString volName="")
   TGeoManager::Import("microboone.gdml");
 
   drawopt optuboone[] = {
-    {"volWorld",        0},
-    {"volDetEnclosure", kWhite},
-    {"volCryostat",     kOrange},
-    {"volTPC",          kOrange-5},
-    {"volTPCBackWall",  kRed},
-    {"volTPCVertWall",  kCyan-5},
-    {"volTPCHorizWall", kOrange},
+    {"volGround",       kOrange-7},
+    {"volOverburden",       kOrange-7},
+    {"volConcreteEnclosure", kGray},
+    {"volConcreteEnclosureBottom", kGray},
     {0, 0}
   };
 
-  // for (int i=0;; ++i) {
-  //   if (optuboone[i].volume==0) break;
-  //     gGeoManager->FindVolumeFast(optuboone[i].volume)->SetLineColor(optuboone[i].color);
-  // }
+  for (int i=0;; ++i) {
+     if (optuboone[i].volume==0) break;
+       gGeoManager->FindVolumeFast(optuboone[i].volume)->SetLineColor(optuboone[i].color);
+  }
   TList* mat = gGeoManager->GetListOfMaterials();
   TIter next(mat);
   TObject *obj;
@@ -39,7 +36,8 @@ microboone_geo(TString volName="")
   gGeoManager->SetMaxVisNodes(70000);
 
   //gGeoManager->GetTopVolume()->Draw();
-  if ( ! volName.IsNull() ) gGeoManager->FindVolumeFast(volName)->Draw("ogl");
+  //if ( ! volName.IsNull() ) gGeoManager->FindVolumeFast(volName)->Draw("ogl");
+  gGeoManager->FindVolumeFast("volWorld")->Draw("ogl");
 
   TFile *tf = new TFile("microboone.root", "RECREATE");
  
