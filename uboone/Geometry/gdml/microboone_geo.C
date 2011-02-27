@@ -31,7 +31,8 @@ microboone_geo(TString volName="")
   }
 
   gGeoManager->GetTopNode();
-  gGeoManager->CheckOverlaps(0.0000001);
+  //gGeoManager->CheckOverlaps(0.0000001);
+  gGeoManager->CheckOverlaps(10e-24);
   gGeoManager->PrintOverlaps();
   gGeoManager->SetMaxVisNodes(70000);
 
@@ -43,20 +44,21 @@ microboone_geo(TString volName="")
 
   TGeoVolume *TPC = gGeoManager->FindVolumeFast("volTPC");
   float m_tpc = TPC->Weight();
-  TGeoVolume *Cathode = gGeoManager->FindVolumeFast("volCathodePlate");
-  float m_cathode = Cathode->Weight();
-  TGeoVolume *Ground = gGeoManager->FindVolumeFast("volGroundPlate");
-  float m_ground = Ground->Weight();
-  TGeoVolume *UVPlane = gGeoManager->FindVolumeFast("volTPCPlane");
-  float m_uvplane = UVPlane->Weight();
+  //TGeoVolume *Cathode = gGeoManager->FindVolumeFast("volCathodePlate");
+  //float m_cathode = Cathode->Weight();
+  //TGeoVolume *Ground = gGeoManager->FindVolumeFast("volGroundPlate");
+  //float m_ground = Ground->Weight();
+  //TGeoVolume *UVPlane = gGeoManager->FindVolumeFast("volTPCPlane");
+  //float m_uvplane = UVPlane->Weight();
   TGeoVolume *YPlane = gGeoManager->FindVolumeFast("volTPCPlaneVert");
   float m_yplane = YPlane->Weight();
-  TGeoVolume *FieldCageH = gGeoManager->FindVolumeFast("volFieldCageTubeTop");
-  float m_fchoriz = FieldCageH->Weight();
-  TGeoVolume *FieldCageV = gGeoManager->FindVolumeFast("volFieldCageTubeFront");
-  float m_fcvert = FieldCageV->Weight();
+  //TGeoVolume *FieldCageH = gGeoManager->FindVolumeFast("volFieldCageTubeTop");
+  //float m_fchoriz = FieldCageH->Weight();
+  //TGeoVolume *FieldCageV = gGeoManager->FindVolumeFast("volFieldCageTubeFront");
+  //float m_fcvert = FieldCageV->Weight();
 
-  float m_tpc_argon = m_tpc - ( m_cathode + m_ground + 2*m_uvplane + m_yplane + 50*(m_fchoriz + m_fcvert));
+  //float m_tpc_argon = m_tpc - ( m_cathode + m_ground + 2*m_uvplane + m_yplane + 50*(m_fchoriz + m_fcvert));
+  float m_tpc_argon = m_tpc - m_yplane;
   cout << "LAr weight in TPC = " << m_tpc_argon << " kg\n" <<endl;
 
   TFile *tf = new TFile("microboone.root", "RECREATE");
