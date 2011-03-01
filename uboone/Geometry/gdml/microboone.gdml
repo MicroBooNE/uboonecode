@@ -4320,6 +4320,12 @@
   aunit="deg" 
   lunit="cm"/> 
 
+ <box name="TPCEnclosure"
+  lunit="cm"
+  x="266"
+  y="266"
+  z="1210"/>
+
  <box name="TPC"
   lunit="cm"
   x="260"
@@ -37410,6 +37416,15 @@
   </physvol>
  </volume>
 
+ <volume name="volTPCEnclosure"> 
+  <materialref ref="LAr"/> 
+  <solidref ref="TPCEnclosure"/> 
+  <physvol>
+   <volumeref ref="volTPC"/>
+   <position name="posTPC" unit="cm" x="0.0" y="0" z="0"/>
+  </physvol>
+ </volume> 
+
  <volume name="volSteelTube">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="SteelTube"/>
@@ -37418,12 +37433,8 @@
   <materialref ref="LAr"/>
   <solidref ref="Cryostat"/>
   <physvol>
-   <volumeref ref="volSteelTube"/>
-   <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="volTPC"/>
-   <position name="posTPC" unit="cm" x="0.0" y="0.97" z="0"/>
+   <volumeref ref="volTPCEnclosure"/>
+   <position name="posTPCEnclosure" unit="cm" x="0.0" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volPMT"/>
@@ -37574,6 +37585,10 @@
    <volumeref ref="volPMT"/>
    <position name="posPMT29" unit="cm"  x="-147.8"  y="3.21654"  z="514.408"/>
    <rotationref ref="rPMTRotation1"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volSteelTube"/>
+   <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
   </physvol>
  </volume>
 
