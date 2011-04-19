@@ -39,7 +39,7 @@ microboone_geo(TString volName="")
   //gGeoManager->GetTopVolume()->Draw();
   //if ( ! volName.IsNull() ) gGeoManager->FindVolumeFast(volName)->Draw("ogl");
   //gGeoManager->FindVolumeFast("volWorld")->Draw("ogl");
-  //gGeoManager->FindVolumeFast("volTPC")->Draw("ogl");
+  gGeoManager->FindVolumeFast("volTPC")->Draw("ogl");
   //gGeoManager->FindVolumeFast("volTPCPlane")->Draw("ogl");
 
   TGeoVolume *TPC = gGeoManager->FindVolumeFast("volTPC");
