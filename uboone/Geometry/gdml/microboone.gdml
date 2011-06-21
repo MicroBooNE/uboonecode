@@ -4325,6 +4325,11 @@
   x="260"
   y="256"
   z="1200"/>
+ <box name="TPCActive"
+  lunit="cm"
+  x="251.35"
+  y="205.4"
+  z="1025.4"/>
 
  <tube name="PMTVolume"
   rmax="(6.1*2.54)"
@@ -36431,28 +36436,32 @@
   <solidref ref="FieldCageTubeY"/> 
  </volume> 
 
+ <volume name="volTPCActive">
+  <materialref ref="LAr"/>
+  <solidref ref="TPCActive"/>
+ </volume>
  <volume name="volTPC">
   <materialref ref="LAr"/>
- <solidref ref="TPC"/>
+  <solidref ref="TPC"/>
   <physvol>
    <volumeref ref="volGroundPlate"/>
    <position name="posGroundPlate" unit="cm" x="9+0.25" y="124" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volCathodePlate"/>
-   <position name="posCathodePlate" unit="cm" x="125.45" y="0" z="0"/>
+   <position name="posCathodePlate" unit="cm" x="127.45" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volTPCPlaneVert"/>
-   <position name="posTPCPlaneVert" unit="cm" x="-0.5*256+3*0.3" y="0" z="0"/>
+   <position name="posTPCPlaneVert" unit="cm" x="-0.5*260+3*0.3" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volTPCPlane"/>
-   <position name="posTPCPlane" unit="cm" x="-0.5*256+2*0.3" y="0" z="0"/>
+   <position name="posTPCPlane" unit="cm" x="-0.5*260+2*0.3" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volTPCPlane"/>
-   <position name="posTPCPlane2" unit="cm" x="-0.5*256+0.3" y="0" z="0"/>
+   <position name="posTPCPlane2" unit="cm" x="-0.5*260+0.3" y="0" z="0"/>
    <rotationref ref="rPlus180AboutY"/>
   </physvol>
   <physvol>
@@ -37355,6 +37364,10 @@
    <position name="posFieldCageTubeBackB25" unit="cm" x="-98" y="0" z="-0.5*(1030.48-2*1.27)"/>
    <rotation name="rFieldCageVertBackB25" unit="deg" x="-90" y="0" z="0"/>
   </physvol>
+   <physvol>
+    <volumeref ref="volTPCActive"/>
+    <position name="posTPCActive" unit="cm" x="-1.55" y="0" z="0"/>
+   </physvol>
  </volume> 
 
  <volume name="vol_PMT_TPBCoating">
