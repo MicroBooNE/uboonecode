@@ -37620,27 +37620,27 @@
     <solidref ref="World"/>
     <physvol>
       <volumeref ref="volConcreteEnclosure"/>
-      <position name="posConcreteEnclosure" unit="cm" x="0.5*251.35" y="36*2.54/2" z="0.5*1025.4"/>
+      <position name="posConcreteEnclosure" unit="cm" x="0.5*251.35" y="36*2.54/2" z="0.5*1037.1"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
     <physvol>
       <volumeref ref="volConcreteEnclosureBottom"/>
-      <position name="posConcreteEnclosureBottom" unit="cm" x="0.5*251.35" y="-38*12*2.54/2" z="0.5*1025.4"/>
+      <position name="posConcreteEnclosureBottom" unit="cm" x="0.5*251.35" y="-38*12*2.54/2" z="0.5*1037.1"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
     <physvol>
       <volumeref ref="volGround"/>
-      <position name="posGround" unit="cm" x="0.5*251.35" y="0" z="0.5*1025.4"/>
+      <position name="posGround" unit="cm" x="0.5*251.35" y="0" z="0.5*1037.1"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
     <physvol>
       <volumeref ref="volOverburden"/>
-      <position name="posOverburden" unit="cm" x="0.5*251.35" y="(41-10)*12*2.54/2" z="0.5*1025.4"/>
+      <position name="posOverburden" unit="cm" x="0.5*251.35" y="(41-10)*12*2.54/2" z="0.5*1037.1"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
     <physvol>
       <volumeref ref="volDetEnclosure"/>
-      <position name="posDetEnclosure" unit="cm" x="0.5*251.35" y="0" z="0.5*1025.4"/>
+      <position name="posDetEnclosure" unit="cm" x="0.5*251.35" y="0" z="0.5*1037.1"/>
     </physvol>
   </volume> 
 </structure>
