@@ -75,4 +75,4 @@ physics.producers.generator.SigmaThetaYZ: [ 5.0 ]
 physics.producers.generator.X0: [ 100.0 ]
 physics.producers.generator.Z0: [ 50.0 ]
 physics.producers.generator.P0: [ 1.5 ]
-
+physics.producers.generator.Theta0YZ: [ 0.0 ] # over-ride singles.fcl!!!
