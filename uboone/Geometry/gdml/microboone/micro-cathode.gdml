@@ -2,16 +2,80 @@
 <?xml version='1.0'?>
 <gdml>
 <solids>
+ <box name="Cathode"
+  lunit="cm"
+  x="kCathodeWidth+0.1"
+  y="kCathodeHeight"
+  z="kCathodeLength"/>
+ <box name="CathodeFrame"
+  lunit="cm"
+  x="kCathodeWidth - kCathodePlateDepth"
+  y="kCathodeHeight"
+  z="kCathodeLength"/>
  <box name="CathodePlate"
   lunit="cm"
-  x="0.1"
-  y="240"
-  z="1042"/>
+  x="kCathodePlateDepth"
+  y="kCathodeHeight"
+  z="kCathodeLength"/>
+ <box name="CathodeFrameV"
+  lunit="cm"
+  x="kCathodeFrameDepth"
+  y="kCathodeHeight"
+  z="kCathodeFrameWidth"/>
+ <box name="CathodeFrameH"
+  lunit="cm"
+  x="kCathodeFrameDepth"
+  y="kCathodeFrameWidth"
+  z="kCathodeLength-2*kCathodeFrameWidth"/>
+ <box name="CathodeFrameVIn"
+  lunit="cm"
+  x="kCathodeFrameDepth"
+  y="kCathodeFrameVInHeight"
+  z="kCathodeFrameWidth"/>
+ <box name="CathodeFrameXBar"
+  lunit="cm"
+  x="(1/5)*(kCathodeLength-6*kCathodeFrameWidth)"
+  y="kCathodeHeight-2*kCathodeFrameWidth"
+  z="0.5*kCathodeFrameDepth"/>
+ <xtru name="CathodeFrameXBarPiece" lunit="cm" > 
+  <twoDimVertex x="0.5*kCathodeFrameWidth" y="0.5*kCathodeFrameWidth+1.7" /> 
+  <twoDimVertex x="0.5*kCathodeFrameWidth" y="0.5*kCathodeFrameWidth" /> 
+  <twoDimVertex x="0.5*kCathodeFrameWidth+1.7" y="0.5*kCathodeFrameWidth" /> 
+  <twoDimVertex x="(1/10)*(kCathodeLength-6*kCathodeFrameWidth)-0.9" y="0.5*(kCathodeHeight-2*kCathodeFrameWidth)-1.7" /> 
+  <twoDimVertex x="(1/10)*(kCathodeLength-6*kCathodeFrameWidth)-0.9" y="0.5*(kCathodeHeight-2*kCathodeFrameWidth)" /> 
+  <twoDimVertex x="(1/10)*(kCathodeLength-6*kCathodeFrameWidth)-1.7-0.9" y="0.5*(kCathodeHeight-2*kCathodeFrameWidth)" /> 
+  <section zOrder="0" zPosition="-0.25*kCathodeFrameDepth" xOffset="0" yOffset="0" scalingFactor="1" /> 
+  <section zOrder="1" zPosition="0.25*kCathodeFrameDepth" xOffset="0" yOffset="0" scalingFactor="1" /> 
+ </xtru>
 </solids>
 <structure>
  <volume name="volCathodePlate">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="CathodePlate"/>
+ </volume>
+ <volume name="volCathodeFrameH">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameH"/>
+ </volume>
+ <volume name="volCathodeFrameV">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameV"/>
+ </volume>
+ <volume name="volCathodeFrameVIn">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameVIn"/>
+ </volume>
+ <volume name="volCathodeFrameXBarPiece">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="CathodeFrameXBarPiece"/>
+ </volume>
+ <volume name="volCathodeFrameXBar">
+  <materialref ref="LAr"/>
+  <solidref ref="CathodeFrameXBar"/>
+ </volume>
+ <volume name="volCathodeFrame">
+  <materialref ref="LAr"/>
+  <solidref ref="CathodeFrame"/>
  </volume>
 </structure>
 </gdml>

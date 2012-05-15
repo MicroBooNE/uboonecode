@@ -30,15 +30,15 @@
   </physvol>
   <physvol>
    <volumeref ref="volTPCPlaneVert"/>
-   <position name="posTPCPlaneVert" unit="cm" x="-0.5*251.35-2*0.3" y="0" z="0"/>
+   <position name="posTPCPlaneVert" unit="cm" x="-0.5*260+3*0.3" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volTPCPlane"/>
-   <position name="posTPCPlane" unit="cm" x="-0.5*251.35-0.3" y="0" z="0"/>
+   <position name="posTPCPlane" unit="cm" x="-0.5*260+2*0.3" y="0" z="0"/>
   </physvol>
   <physvol>
    <volumeref ref="volTPCPlane"/>
-   <position name="posTPCPlane2" unit="cm" x="-0.5*251.35" y="0" z="0"/>
+   <position name="posTPCPlane2" unit="cm" x="-0.5*260+0.3" y="0" z="0"/>
    <rotationref ref="rPlus180AboutY"/>
   </physvol>
   <physvol>
