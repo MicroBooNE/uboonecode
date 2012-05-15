@@ -1,104 +1,18 @@
-<define>
- <constant name="kFieldCageTPCClearance"    	value="5*kInch" />
-
- <constant name="kFieldCageTubeRadius"  	value="0.5*kInch" />
- <constant name="kFieldCageTubeThickness" 	value="0.25*kInch" />
- <constant name="kFieldCageBeamDepth"           value="12.5"/>
- <constant name="kFieldCageBeamWidth"           value="2.5"/>
- <constant name="kFieldCageCrossDepth"          value="2.5"/>
- <constant name="kFieldCageCrossWidth"          value="4"/>
- <constant name="kFieldCageCrossLength"         value="238.537208837531"/>
-
- <constant name="kTPCTotalLength"         	value="1000"/>
- <constant name="kTPCTotalWidth"         	value="200"/>
- <constant name="kTPCTotalHeight"         	value="180"/>
-
- <constant name="kFieldCageLoopLength"       	value="kTPCTotalLength+2*(kFieldCageTPCClearance+2*kFieldCageTubeRadius)"/>
- <constant name="kFieldCageLoopWidth"   	value="200"/>
- <constant name="kFieldCageLoopHeight"       	value="kTPCTotalHeight+2*(kFieldCageTPCClearance+2*kFieldCageTubeRadius)"/>
-
- <constant name="kFieldCageCornerRadius"	value="0.5*kFieldCageTPCClearance"/>
- <constant name="kFieldCageCornerY"       	value="(0.5*kFieldCageLoopHeight)-kFieldCageCornerRadius-kFieldCageTubeRadius"/>
- <constant name="kFieldCageCornerZ"       	value="(0.5*kFieldCageLoopLength)-kFieldCageCornerRadius-kFieldCageTubeRadius"/>
-
- <constant name="kFieldCageHeight"       	value="kFieldCageLoopHeight+2*(kFieldCageBeamDepth+kFieldCageCrossDepth)"/>
- <constant name="kFieldCageLength"       	value="kFieldCageLoopLength+2*(kFieldCageBeamDepth+kFieldCageCrossDepth)"/>
- <constant name="kFieldCageWidth"      		value="200"/>
-
- <constant name="kFieldCageBeamYInt"            value="0.5*(kFieldCageLoopHeight-50)"/>
- <constant name="kFieldCageBeamZPos"            value="0.5*(kFieldCageLoopLength)"/>
- <constant name="kFieldCageBeamYPos"            value="0.5*(kFieldCageLoopHeight)"/>
- <constant name="kFieldCageBeamZInt"            value="0.5*(kFieldCageLoopLength-40)"/>
-
- <constant name="kFieldCageCrossYPos"           value="0.5*(kFieldCageLoopHeight+kFieldCageCrossDepth)+kFieldCageBeamDepth"/>
- <constant name="kFieldCageCrossZPos"           value="0.5*(kFieldCageLoopLength+kFieldCageCrossDepth)+kFieldCageBeamDepth"/>
-</define>
 <solids>
  <tube name="FieldCageTubeZ"
-  rmin="kFieldCageTubeRadius - kFieldCageTubeThickness"
-  rmax="kFieldCageTubeRadius"  
-  z="kFieldCageLoopLength-2*(kFieldCageCornerRadius+kFieldCageTubeRadius)" 
-  deltaphi="2*kPi" 
-  aunit="rad" 
+  rmin="1.27-0.635"
+  rmax="1.27"  
+  z="1030.48-2*(6.35+1.27)" 
+  deltaphi="360" 
+  aunit="deg" 
   lunit="cm"/> 
  <tube name="FieldCageTubeY" 
-  rmin="kFieldCageTubeRadius - kFieldCageTubeThickness"
-  rmax="kFieldCageTubeRadius"  
-  z="kFieldCageLoopHeight-2*(kFieldCageCornerRadius+kFieldCageTubeRadius)"  
-  deltaphi="2*kPi" 
-  aunit="rad" 
+  rmin="1.27-0.635"
+  rmax="1.27"  
+  z="210.48-2*(6.35+1.27)"  
+  deltaphi="360" 
+  aunit="deg" 
   lunit="cm"/> 
- <torus name="FieldCageCorner"
-  rmin="kFieldCageTubeRadius - kFieldCageTubeThickness"
-  rmax="kFieldCageTubeRadius"  
-  rtor="kFieldCageCornerRadius"
-  startphi="0"
-  deltaphi="0.5*kPi"
-  aunit="rad"
-  lunit="cm"/>
- <box name="FieldCageBarFlat"
-  x="kFieldCageLoopWidth"
-  y="kFieldCageBeamDepth"
-  z="kFieldCageBeamWidth"
-  lunit="cm"/>
- <box name="FieldCageBarLoopSpacer"
-  x="4-2*kFieldCageTubeRadius"
-  y="2*kFieldCageTubeRadius"
-  z="kFieldCageBeamWidth"
-  lunit="cm"/>
- <box name="FieldCageBarLoopSpacers"
-  x="kFieldCageWidth"
-  y="2*kFieldCageTubeRadius"
-  z="kFieldCageBeamWidth"
-  lunit="cm"/>
- <box name="FieldCageBarFlat2"
-  x="kFieldCageLoopWidth"
-  y="0.5*kFieldCageBeamDepth"
-  z="kFieldCageBeamWidth"
-  lunit="cm"/>
- <box name="FieldCageBarAngle"
-  x="kFieldCageCrossLength"
-  y="kFieldCageCrossWidth"
-  z="kFieldCageCrossDepth"
-  lunit="cm"/>
- <box name="FieldCageCrossBox"
-  x="36"
-  y="30"
-  z="kFieldCageCrossDepth"
-  lunit="cm"/>
- <box name="FieldCageCross"
-  x="kFieldCageLoopWidth"
-  y="kFieldCageLoopHeight"
-  z="kFieldCageCrossDepth"
-  lunit="cm"/>
-
- <xtru name="Triangle" lunit="cm" >
-  <twoDimVertex x="0" y="0" />
-  <twoDimVertex x="-15" y="0" />
-  <twoDimVertex x="-15" y="-15" />
-  <section zOrder="0" zPosition="-1" xOffset="0" yOffset="0" scalingFactor="1" />
-  <section zOrder="1" zPosition="1" xOffset="0" yOffset="0" scalingFactor="1" />
- </xtru>
 </solids> 
 <structure> 
  <volume name="volFieldCageTubeTop"> 
@@ -117,36 +31,4 @@
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
   <solidref ref="FieldCageTubeY"/> 
  </volume> 
- <volume name="volFieldCageCorner"> 
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
-  <solidref ref="FieldCageCorner"/> 
- </volume> 
- <volume name="volFieldCageBarAngle1">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="FieldCageBarAngle"/> 
- </volume>  
- <volume name="volFieldCageBarAngle2">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="FieldCageBarAngle"/>
- </volume>
- <volume name="volFieldCageCrossBox">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="FieldCageCrossBox"/>
- </volume>
- <volume name="volTriangle"> 
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
-  <solidref ref="Triangle"/> 
- </volume> 
- <volume name="volFieldCageBarFlat">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="FieldCageBarFlat"/>  
- </volume>  
- <volume name="volFieldCageBarFlat2">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="FieldCageBarFlat2"/>  
- </volume>  
- <volume name="volFieldCageBarLoopSpacer">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="FieldCageBarLoopSpacer"/>  
- </volume>
 </structure>
