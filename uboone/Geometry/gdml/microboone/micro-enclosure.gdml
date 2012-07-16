@@ -2,7 +2,7 @@
 <gdml>
 <solids>
  <box name="DetEnclosure" lunit="cm"
-   x="793" y="500" z="2073"
+   x="1000" y="1060" z="2073"
  />
 </solids>
 
@@ -14,6 +14,127 @@
    <volumeref ref="volCryostat"/>
    <position name="posCryostat" unit="cm" x="0" y="0" z="0"/>
   </physvol>
+      <physvol>
+        <volumeref ref="volInsulation"/>
+        <position name="posInsulation" unit="cm" x="0" y="0" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volPlatform"/>
+        <position name="posPlatform" unit="cm" x="0" y="292.74" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volColumn"/>
+        <position name="posColumn1" unit="cm" x="266" y="-121.261" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volColumn"/>
+        <position name="posColumn2" unit="cm" x="-266" y="-121.261" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volTankBox1"/>
+        <position name="posTank1_1" unit="cm" x="50" y="419" z="-600"/>
+      </physvol>
+      <physvol>
+       <volumeref ref="volTankBox1"/>
+       <position name="posTank1_2" unit="cm" x="-50" y="419" z="-600"/>
+      </physvol>
+      <physvol>
+       <volumeref ref="volStandSubtraction"/>
+       <position name="posStand1" unit="cm" x="0" y="-236" z="335.28"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volStandSubtraction"/>
+       <position name="posStand2" unit="cm" x="0" y="-236" z="-335.28"/>
+      </physvol>
+      <physvol>
+       <volumeref ref="volStandConcrete"/>
+       <position name="posConcreteStand1" unit="cm" x="0" y="-424" z="335.28"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volStandConcrete"/>
+       <position name="posConcreteStand2" unit="cm" x="0" y="-424" z="-335.28"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack1" unit="cm" x="-75" y="408.91" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack2" unit="cm" x="-75" y="408.91" z="93.85"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack3" unit="cm" x="-75" y="408.91" z="187.7"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack4" unit="cm" x="-75" y="408.91" z="275.15"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack5" unit="cm" x="-75" y="408.91" z="-142.15"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack6" unit="cm" x="-75" y="408.91" z="-243.8"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack7" unit="cm" x="-75" y="408.91" z="-326.9"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack8" unit="cm" x="127.9" y="408.91" z="-326.9"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack9" unit="cm" x="127.9" y="408.91" z="-387.7"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack10" unit="cm" x="53.07" y="408.91" z="335.85"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volFloorTankBox1"/>
+         <position name="posfloortankbox1" unit="cm" x="-450" y="100+.001-530" z="335.28"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volFloorTankBox1"/>
+         <position name="posfloortankbox1_2" unit="cm" x="100" y="100+.001-530" z="-445"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volFloorTankBox1"/>
+         <position name="posfloortankbox1_3" unit="cm" x="100" y="100+.001-530" z="-521.5"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volFloorTankBox1"/>
+         <position name="posfloortankbox1_4" unit="cm" x="360" y="100+.001-530" z="-335.28"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volFloorTankBox1"/>
+         <position name="posfloortankbox1_5" unit="cm" x="360+60" y="100+.001-530" z="-335.28-60"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volWalkway"/>
+        <position name="posExtraPlatform" unit="cm" x="0" y="268" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volWalkway"/>
+        <position name="posWalkway" unit="cm" x="-212" y="181.74" z="0"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volFloorTankBox2"/>
+         <position name="posfloortankbox2_1" unit="cm" x="-20" y="100+.001-530" z="-500"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volFloorTankBox2"/>
+         <position name="posfloortankbox2_2" unit="cm" x="-136" y="40+80-530" z="-500"/>
+      </physvol>
+      <physvol>
+         <volumeref ref="volPump"/>
+         <position name="posPump" unit="cm" x="0" y="-424" z="200"/>
+      </physvol>
  </volume>
 </structure>
 </gdml>
