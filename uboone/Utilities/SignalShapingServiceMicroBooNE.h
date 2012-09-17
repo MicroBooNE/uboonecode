@@ -55,11 +55,11 @@ namespace util {
 
     // Do convolution calcution (for simulation).
 
-    void Convolute(int plane, std::vector<double>& func) const;
+    template <class T> void Convolute(int plane, std::vector<T>& func) const;
 
     // Do deconvolution calcution (for reconstruction).
 
-    void Deconvolute(int plane, std::vector<double>& func) const;
+    template <class T> void Deconvolute(int plane, std::vector<T>& func) const;
 
   private:
 
@@ -86,16 +86,16 @@ namespace util {
 
     // Fcl parameters.
 
-    int fNFieldBins;          ///< number of bins for field response
-    double fCol3DCorrection;  ///< correction factor to account for 3D path of 
-                              ///< electrons thru wires
-    double fInd3DCorrection;  ///< correction factor to account for 3D path of 
-                              ///< electrons thru wires
-    double fColFieldRespAmp;  ///< amplitude of response to field 
-    double fIndFieldRespAmp;  ///< amplitude of response to field 
+    int fNFieldBins;                      ///< number of bins for field response	      
+    double fCol3DCorrection;   		  ///< correction factor to account for 3D path of
+                              		  ///< electrons thru wires			      
+    double fInd3DCorrection;   		  ///< correction factor to account for 3D path of
+                              		  ///< electrons thru wires			      
+    double fColFieldRespAmp;  		  ///< amplitude of response to field 	      
+    double fIndFieldRespAmp;  		  ///< amplitude of response to field             
     std::vector<double> fShapeTimeConst;  ///< time constants for exponential shaping
-    TF1* fColFilterFunc;      ///< Parameterized collection filter function.
-    TF1* fIndFilterFunc;      ///< Parameterized induction filter function.
+    TF1* fColFilterFunc;                  ///< Parameterized collection filter function.
+    TF1* fIndFilterFunc;      		  ///< Parameterized induction filter function. 
 
     // Following attributes hold the convolution and deconvolution kernels
 
@@ -117,5 +117,21 @@ namespace util {
     std::vector<TComplex> fIndFilter;
   };
 }
+
+//----------------------------------------------------------------------
+// Do convolution.
+template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(int plane, std::vector<T>& func) const
+{
+  SignalShaping(plane).Convolute(func);
+}
+
+
+//----------------------------------------------------------------------
+// Do deconvolution.
+template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute(int plane, std::vector<T>& func) const
+{
+  SignalShaping(plane).Deconvolute(func);
+}
+
 
 #endif
