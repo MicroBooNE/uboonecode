@@ -3,6 +3,7 @@
 #include "job/singles.fcl"
 #include "job/caldata.fcl"
 #include "job/detsimmodules.fcl"
+#include "job/mccheatermodules.fcl"
 
 process_name: SinglesGen
 
@@ -36,6 +37,7 @@ physics:
    largeant:  @local::microboone_largeant	  
    daq:       @local::microboone_simwire       
    caldata:   @local::microboone_calwire
+   backtrack: @local::standard_backtrackerloader
  }
 
  analyzers:
@@ -45,7 +47,7 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ generator, largeant, daq, caldata ] 
+ simulate: [ generator, largeant, daq, caldata, backtrack ] 
  analyzeIt:  [ largana ]
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
