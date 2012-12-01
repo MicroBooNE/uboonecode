@@ -30,7 +30,6 @@ extern "C" {
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib/search_path.h"
 
 #include "Utilities/LArFFT.h"
 #include "RawData/raw.h"
