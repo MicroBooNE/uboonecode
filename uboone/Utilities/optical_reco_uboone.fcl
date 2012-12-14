@@ -4,8 +4,6 @@
 #include "job/clustermodules.fcl"
 #include "job/trackfindermodules.fcl"
 #include "job/opticaldetectormodules.fcl"
-#include "job/opticaldetectorservices.fcl"
-#include "job/photpropservices.fcl"
 
 process_name: OpRecoFlash
 
