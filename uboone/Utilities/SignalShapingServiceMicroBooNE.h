@@ -51,15 +51,15 @@ namespace util {
 
     // Accessors.
 
-    const util::SignalShaping& SignalShaping(int plane) const;
+    const util::SignalShaping& SignalShaping(unsigned int channel) const;
 
     // Do convolution calcution (for simulation).
 
-    template <class T> void Convolute(int plane, std::vector<T>& func) const;
+    template <class T> void Convolute(unsigned int channel, std::vector<T>& func) const;
 
     // Do deconvolution calcution (for reconstruction).
 
-    template <class T> void Deconvolute(int plane, std::vector<T>& func) const;
+    template <class T> void Deconvolute(unsigned int channel, std::vector<T>& func) const;
 
   private:
 
@@ -120,17 +120,17 @@ namespace util {
 
 //----------------------------------------------------------------------
 // Do convolution.
-template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(int plane, std::vector<T>& func) const
+template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(unsigned int channel, std::vector<T>& func) const
 {
-  SignalShaping(plane).Convolute(func);
+  SignalShaping(channel).Convolute(func);
 }
 
 
 //----------------------------------------------------------------------
 // Do deconvolution.
-template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute(int plane, std::vector<T>& func) const
+template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute(unsigned int channel, std::vector<T>& func) const
 {
-  SignalShaping(plane).Deconvolute(func);
+  SignalShaping(channel).Deconvolute(func);
 }
 
 

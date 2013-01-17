@@ -77,7 +77,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 //----------------------------------------------------------------------
 // Accessor for single-plane signal shaper.
 const util::SignalShaping&
-util::SignalShapingServiceMicroBooNE::SignalShaping(int plane) const
+util::SignalShapingServiceMicroBooNE::SignalShaping(unsigned int channel) const
 {
   if(!fInit)
     init();
@@ -85,7 +85,7 @@ util::SignalShapingServiceMicroBooNE::SignalShaping(int plane) const
   // Figure out plane type.
 
   art::ServiceHandle<geo::Geometry> geom;
-  geo::SigType_t sigtype = geom->TPC(0).Plane(plane).SignalType();
+  geo::SigType_t sigtype = geom->SignalType(channel);
 
   // Return appropriate shaper.
 
@@ -94,8 +94,10 @@ util::SignalShapingServiceMicroBooNE::SignalShaping(int plane) const
   else if(sigtype == geo::kCollection)
     return fColSignalShaping;
   else
-    throw cet::exception("SignalShapingServiceMicroBooNE")
-      << "Bad plane = " << plane << "\n";
+    throw cet::exception("SignalShapingServiceMicroBooNE") << "can't determine"
+							   << " SignalType";
+
+  return fColSignalShaping;
 }
 
 //----------------------------------------------------------------------
