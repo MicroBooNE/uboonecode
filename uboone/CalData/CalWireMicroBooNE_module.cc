@@ -172,12 +172,8 @@ namespace caldata {
 	for(bin = 0; bin < dataSize; ++bin) 
 	  holder[bin]=(rawadc[bin]-digitVec->GetPedestal());
 
-	// Figure out which plane this is.
-	unsigned int cstat, tpc, plane, wire;
-	geom->ChannelToWire(channel, cstat, tpc, plane, wire);
-
 	// Do deconvolution.
-	sss->Deconvolute(plane, holder);
+	sss->Deconvolute(channel, holder);
 
       } // end if not a bad channel 
       
