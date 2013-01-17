@@ -188,10 +188,6 @@ namespace detsim {
   {
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
-    unsigned int tpc        = 0;
-    unsigned int cstat      = 0;
-    unsigned int plane      = 0;
-    unsigned int wire       = 0;
     unsigned int signalSize = fNTicks;
 
     // vectors for working
@@ -252,8 +248,6 @@ namespace detsim {
 
       if( sc ){      
 
-	geo->ChannelToWire(chan, cstat, tpc, plane, wire);      
-
 	// loop over the tdcs and grab the number of electrons for each
 	for(size_t t = 0; t < fChargeWork.size(); ++t) 
 	  fChargeWork[t] = sc->Charge(t);      
@@ -268,11 +262,11 @@ namespace detsim {
 
 	  fChargeWorkPreSpill.resize(fNTicks,0);
 	  fChargeWorkPostSpill.resize(fNTicks,0);
-	  sss->Convolute(plane, fChargeWorkPreSpill);
-	  sss->Convolute(plane, fChargeWorkPostSpill);
+	  sss->Convolute(chan, fChargeWorkPreSpill);
+	  sss->Convolute(chan, fChargeWorkPostSpill);
 	}
 	fChargeWork.resize(fNTicks,0);
-	sss->Convolute(plane,fChargeWork);
+	sss->Convolute(chan,fChargeWork);
 
       }
 
