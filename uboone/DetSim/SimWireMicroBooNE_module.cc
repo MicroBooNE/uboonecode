@@ -32,13 +32,13 @@ extern "C" {
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "Utilities/LArFFT.h"
+#include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Geometry/Geometry.h"
 #include "Simulation/sim.h"
 #include "Simulation/SimChannel.h"
-#include "RawData/RawDigit.h"
 #include "Utilities/DetectorProperties.h"
 
 #include "TMath.h"
