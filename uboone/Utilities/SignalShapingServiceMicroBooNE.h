@@ -34,6 +34,8 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "Utilities/SignalShaping.h"
 #include "TF1.h"
+#include "TH1D.h"
+
 
 namespace util {
   class SignalShapingServiceMicroBooNE {
@@ -86,17 +88,25 @@ namespace util {
 
     // Fcl parameters.
 
-    int fNFieldBins;                      ///< number of bins for field response	      
-    double fCol3DCorrection;   		  ///< correction factor to account for 3D path of
-                              		  ///< electrons thru wires			      
-    double fInd3DCorrection;   		  ///< correction factor to account for 3D path of
-                              		  ///< electrons thru wires			      
-    double fColFieldRespAmp;  		  ///< amplitude of response to field 	      
-    double fIndFieldRespAmp;  		  ///< amplitude of response to field             
-    std::vector<double> fShapeTimeConst;  ///< time constants for exponential shaping
-    TF1* fColFilterFunc;                  ///< Parameterized collection filter function.
-    TF1* fIndFilterFunc;      		  ///< Parameterized induction filter function. 
+    int fNFieldBins;         			///< number of bins for field response
+    double fCol3DCorrection; 			///< correction factor to account for 3D path of 
+						///< electrons thru wires
+    double fInd3DCorrection;  			///< correction factor to account for 3D path of 
+						///< electrons thru wires
+    double fColFieldRespAmp;  			///< amplitude of response to field 
+    double fIndFieldRespAmp;  			///< amplitude of response to field 
+    std::vector<double> fShapeTimeConst;  	///< time constants for exponential shaping
+    TF1* fColFilterFunc;      			///< Parameterized collection filter function.
+    TF1* fIndFilterFunc;      			///< Parameterized induction filter function.
 
+    
+    bool fUseFunctionFieldShape;   		///< Flag that allows to use a parameterized field response instead of the hardcoded version
+    bool fGetFilterFromHisto;   		///< Flag that allows to use a filter function from a histogram instead of the functional dependency
+    TF1* fColFieldFunc;      			///< Parameterized collection field shape function.
+    TF1* fIndFieldFunc;      			///< Parameterized induction field shape function.
+    
+    TH1D *fFilterHist[3];    			///< Histogram used to hold the collection filter, hardcoded for the time being
+    
     // Following attributes hold the convolution and deconvolution kernels
 
     util::SignalShaping fColSignalShaping;
@@ -117,7 +127,6 @@ namespace util {
     std::vector<TComplex> fIndFilter;
   };
 }
-
 //----------------------------------------------------------------------
 // Do convolution.
 template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(unsigned int channel, std::vector<T>& func) const
@@ -132,6 +141,5 @@ template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute
 {
   SignalShaping(channel).Deconvolute(func);
 }
-
 
 #endif
