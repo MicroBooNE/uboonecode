@@ -1,4 +1,5 @@
 ////////////////////////////////////////////////////////////////////////
+// $Id: SimWireMicroBooNE.cxx,v 1.22 2010/04/23 20:30:53 seligman Exp $
 //
 // SimWireMicroBooNE class designed to simulate signal on a wire in the TPC
 //
@@ -8,7 +9,6 @@
 // - save the electron clusters associated with each digit.
 //
 ////////////////////////////////////////////////////////////////////////
-
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -87,9 +87,14 @@ namespace detsim {
     std::vector< std::vector<float> > fNoise;///< noise on each channel for each time
     
     TH1D*                fNoiseDist;          ///< distribution of noise counts
-
+       
+    bool fGetNoiseFromHisto; 
+    std::string fNoiseFileFname; 
+    std::string fNoiseHistoName; 
+    TH1D*             fNoiseHist;        ///< distribution of noise counts
+    
   }; // class SimWireMicroBooNE
-
+  
   DEFINE_ART_MODULE(SimWireMicroBooNE);
 
   //-------------------------------------------------
@@ -133,6 +138,31 @@ namespace detsim {
     fNoiseWidth       = p.get< double              >("NoiseWidth");
     fLowCutoff        = p.get< double              >("LowCutoff");
 
+    fGetNoiseFromHisto= p.get< bool              >("GetNoiseFromHisto");
+    
+  
+    
+    if(fGetNoiseFromHisto)
+      {
+      fNoiseHistoName= p.get< std::string         >("NoiseHistoName"); 
+    
+      cet::search_path sp("FW_SEARCH_PATH");
+      sp.find_file(p.get<std::string>("NoiseFileFname"), fNoiseFileFname);
+    
+      TFile * in=new TFile(fNoiseFileFname.c_str(),"READ");
+      TH1D * temp=(TH1D *)in->Get(fNoiseHistoName.c_str());
+      
+      if(temp!=NULL)
+      {
+	fNoiseHist=new TH1D(fNoiseHistoName.c_str(),fNoiseHistoName.c_str(),temp->GetNbinsX(),0,temp->GetNbinsX());
+	temp->Copy(*fNoiseHist);
+      }
+      else
+	throw cet::exception("SimWireMicroBooNE") << " Could not find noise histogram in Root file ";
+      in->Close();
+    
+      }
+    
     art::ServiceHandle<util::DetectorProperties> detprop;
     fSampleRate       = detprop->SamplingRate();
     fNSamplesReadout  = detprop->ReadOutWindowSize();
@@ -152,7 +182,11 @@ namespace detsim {
     art::ServiceHandle<util::LArFFT> fFFT;
     fNTicks = fFFT->FFTSize();
 
-    if ( fNTicks%2 != 0 ) 
+//     art::ServiceHandle<util::DetectorProperties> detp;
+//     double samprate=detp->SamplingRate();
+//     double sampfreq=1./samprate *1e6; // in kHz   
+    
+   if ( fNTicks%2 != 0 ) 
       LOG_DEBUG("SimWireMicroBooNE") << "Warning: FFTSize not a power of 2. "
 				     << "May cause issues in (de)convolution.\n";
 
@@ -191,9 +225,9 @@ namespace detsim {
     unsigned int signalSize = fNTicks;
 
     // vectors for working
-    std::vector<short>    adcvec(signalSize, 0);	
-    std::vector<short>    adcvecPreSpill(signalSize, 0);	
-    std::vector<short>    adcvecPostSpill(signalSize, 0);	
+    std::vector<short>    adcvec(signalSize, 0);
+    std::vector<short>    adcvecPreSpill(signalSize, 0);        
+    std::vector<short>    adcvecPostSpill(signalSize, 0);       
     std::vector<const sim::SimChannel*> chanHandle;
     evt.getView(fDriftEModuleLabel,chanHandle);
 
@@ -209,19 +243,19 @@ namespace detsim {
       channels[chanHandle[c]->Channel()] = chanHandle[c];
     }
     
-    // make an unique_ptr of sim::SimDigits that allows ownership of the produced
+    // make a unique_ptr of sim::SimDigits that allows ownership of the produced
     // digits to be transferred to the art::Event after the put statement below
     std::unique_ptr< std::vector<raw::RawDigit>   >  digcol(new std::vector<raw::RawDigit>);
     std::unique_ptr< std::vector<raw::RawDigit>   >  digcolPreSpill(new std::vector<raw::RawDigit>);
     std::unique_ptr< std::vector<raw::RawDigit>   >  digcolPostSpill(new std::vector<raw::RawDigit>);
-
-	  
+  
+    
     unsigned int chan = 0; 
     fChargeWork.clear();
     fChargeWork.resize(fNTicks, 0.);
-	  
-    std::vector<double> fChargeWorkPreSpill, fChargeWorkPostSpill;
-
+    
+    std::vector<double> fChargeWorkPreSpill, fChargeWorkPostSpill; 
+    
     art::ServiceHandle<util::LArFFT> fFFT;
 
     // Add all channels  
@@ -235,7 +269,6 @@ namespace detsim {
       fChargeWork.clear();    
       //      fChargeWork.resize(fNTicks, 0.);    
       fChargeWork.resize(fNTimeSamples, 0.);    
-
 
       fChargeWorkPreSpill.clear();
       fChargeWorkPostSpill.clear();
@@ -251,21 +284,23 @@ namespace detsim {
 	// loop over the tdcs and grab the number of electrons for each
 	for(size_t t = 0; t < fChargeWork.size(); ++t) 
 	  fChargeWork[t] = sc->Charge(t);      
+    
+	// Convolve charge with appropriate response function 
+       if(fNSamplesReadout != fNTimeSamples ) {
+         fChargeWorkPreSpill.assign(fChargeWork.begin(), fChargeWork.begin()+fNSamplesReadout);
+         fChargeWorkPostSpill.assign(fChargeWork.begin()+2*fNSamplesReadout, fChargeWork.end());
+
+         fChargeWork.erase( fChargeWork.begin()+2*fNSamplesReadout, fChargeWork.end() );
+         fChargeWork.erase( fChargeWork.begin(), fChargeWork.begin()+fNSamplesReadout );
+
+         fChargeWorkPreSpill.resize(fNTicks,0);
+         fChargeWorkPostSpill.resize(fNTicks,0);
+         sss->Convolute(chan, fChargeWorkPreSpill);
+         sss->Convolute(chan, fChargeWorkPostSpill);
+       }
+       fChargeWork.resize(fNTicks,0);
 
         // Convolve charge with appropriate response function 
-	if(fNSamplesReadout != fNTimeSamples ) {
-	  fChargeWorkPreSpill.assign(fChargeWork.begin(), fChargeWork.begin()+fNSamplesReadout);
-	  fChargeWorkPostSpill.assign(fChargeWork.begin()+2*fNSamplesReadout, fChargeWork.end());
-
-	  fChargeWork.erase( fChargeWork.begin()+2*fNSamplesReadout, fChargeWork.end() );
-	  fChargeWork.erase( fChargeWork.begin(), fChargeWork.begin()+fNSamplesReadout );
-
-	  fChargeWorkPreSpill.resize(fNTicks,0);
-	  fChargeWorkPostSpill.resize(fNTicks,0);
-	  sss->Convolute(chan, fChargeWorkPreSpill);
-	  sss->Convolute(chan, fChargeWorkPostSpill);
-	}
-	fChargeWork.resize(fNTicks,0);
 	sss->Convolute(chan,fChargeWork);
 
       }
@@ -287,7 +322,7 @@ namespace detsim {
       adcvec.resize(fNSamplesReadout);
       adcvecPreSpill.resize(fNSamplesReadout);
       adcvecPostSpill.resize(fNSamplesReadout);
-
+      
       // compress the adc vector using the desired compression scheme,
       // if raw::kNone is selected nothing happens to adcvec
       // This shrinks adcvec, if fCompression is not kNone.
@@ -298,14 +333,16 @@ namespace detsim {
       raw::RawDigit rd(chan, fNSamplesReadout, adcvec, fCompression);
       raw::RawDigit rdPreSpill(chan, fNSamplesReadout, adcvecPreSpill, fCompression);
       raw::RawDigit rdPostSpill(chan, fNSamplesReadout, adcvecPostSpill, fCompression);
+
       // Then, resize adcvec back to full length!
       adcvec.clear();
-      adcvec.resize(signalSize,0.0);
-
+      adcvec.resize(signalSize,0.0); 
+      
       adcvecPreSpill.clear();
       adcvecPreSpill.resize(signalSize,0.0);
       adcvecPostSpill.clear();
       adcvecPostSpill.resize(signalSize,0.0);
+
       // add this digit to the collection
       digcol->push_back(rd);
       digcolPreSpill->push_back(rdPreSpill);
@@ -338,24 +375,34 @@ namespace detsim {
     double lofilter = 0.;
     double phase = 0.;
     double rnd[2] = {0.};
-
+    
     // width of frequencyBin in kHz
     double binWidth = 1.0/(fNTicks*fSampleRate*1.0e-6);
     for(int i=0; i< fNTicks/2+1; ++i){
       // exponential noise spectrum 
-      pval = fNoiseFact*exp(-(double)i*binWidth/fNoiseWidth);
+       flat.fireArray(2,rnd,0,1);
+       if(!fGetNoiseFromHisto)
+       {
+	pval = fNoiseFact*exp(-(double)i*binWidth/fNoiseWidth);
       // low frequency cutoff     
-      lofilter = 1.0/(1.0+exp(-(i-fLowCutoff/binWidth)/0.5));
+	lofilter = 1.0/(1.0+exp(-(i-fLowCutoff/binWidth)/0.5));
       // randomize 10%
-      flat.fireArray(2,rnd,0,1);
-      pval *= lofilter*(0.9+0.2*rnd[0]);
-      // random pahse angle
-      phase = rnd[1]*2.*TMath::Pi();
-
-      TComplex tc(pval*cos(phase),pval*sin(phase));
-      noiseFrequency[i] += tc;
+	
+	pval *= lofilter*(0.9+0.2*rnd[0]);
+       }
+       else
+       {
+	
+	pval = fNoiseHist->GetBinContent(i)*(0.9+0.2*rnd[0])*fNoiseFact; 
+	//std::cout << " pval: " << pval << std::endl;
+       }
+	  
+	phase = rnd[1]*2.*TMath::Pi();
+	TComplex tc(pval*cos(phase),pval*sin(phase));
+	noiseFrequency[i] += tc;
     }
-  
+    
+    
     // std::cout << "filled noise freq" << std::endl;
 
     // inverse FFT MCSignal
@@ -371,4 +418,5 @@ namespace detsim {
 
     return;
   }
+   
 }
