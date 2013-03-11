@@ -2,7 +2,7 @@
 
   <material name="TPB" formula="TPB">
    <D value="1.40" unit="g/cm3"/>
-   <fraction n="1.0000" ref="argon"/>
+   <fraction n="1.0000" ref="carbon"/>
   </material>
 
   <material name="Glass">

@@ -231,7 +231,7 @@
 
   <material name="TPB" formula="TPB">
    <D value="1.40" unit="g/cm3"/>
-   <fraction n="1.0000" ref="argon"/>
+   <fraction n="1.0000" ref="carbon"/>
   </material>
 
   <material name="Glass">
@@ -37515,7 +37515,7 @@
    </physvol>
  </volume> 
 
- <volume name="vol_PMT_TPBCoating">
+ <volume name="volOpDetSensitive">
   <materialref ref="TPB"/>
   <solidref ref="PMT_TPBCoating"/>
  </volume>
@@ -37535,7 +37535,7 @@
   <materialref ref="Glass"/>
   <solidref ref="PMT_Underside"/>
  </volume>
- <volume name="volOpDetSensitive">
+ <volume name="vol_PMT_Lens">
   <materialref ref="LAr"/>
   <solidref ref="PMT_Lens"/>
  </volume>
@@ -37543,7 +37543,7 @@
   <materialref ref="LAr"/>
   <solidref ref="PMTVolume"/>
   <physvol>
-   <volumeref ref="vol_PMT_TPBCoating"/>
+   <volumeref ref="volOpDetSensitive"/>
    <position name="pos_PMT_TPBCoating" unit="cm" x="0" y="0" z="(5.5 * 2.54) - (0.5 * 0.005)"/>
   </physvol>
   <physvol>
@@ -37559,7 +37559,7 @@
    <position name="pos_PMT_SteelBase" unit="cm" x="0" y="0" z="(0.75 * 2.54)-(5.5 * 2.54)"/>
   </physvol>
   <physvol>
-   <volumeref ref="volOpDetSensitive"/>
+   <volumeref ref="vol_PMT_Lens"/>
    <position name="pos_PMT_Lens" unit="cm" x="0" y="0" z="(7.0 * 2.54)-(5.5 * 2.54)"/>
   </physvol>
   <physvol>
