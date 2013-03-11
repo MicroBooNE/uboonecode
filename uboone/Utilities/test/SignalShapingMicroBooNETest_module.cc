@@ -108,26 +108,26 @@ namespace util
     // Convoluted pulse.
 
     std::vector<double> tconvc(tinc);
-    sss->Convolute(2, tconvc);
+    sss->Convolute(6000, tconvc);
     TH1D* hconvc = dirc.make<TH1D>("conv", "Collection Convoluted", nhist+1, -0.5, nhist+0.5);
     vector_to_hist(tconvc, hconvc);
 
     // Deconvoluted pulse.
 
     std::vector<double> tdeconvc(tconvc);
-    sss->Deconvolute(2, tdeconvc);
+    sss->Deconvolute(6000, tdeconvc);
     TH1D* hdeconvc = dirc.make<TH1D>("deconv", "Collection Deconvoluted", nhist+1, -0.5, nhist+0.5);
     vector_to_hist(tdeconvc, hdeconvc);
 
     // Get collection response function and fill histogram.
 
-    const std::vector<double>&  respc = sss->SignalShaping(2).Response();
+    const std::vector<double>&  respc = sss->SignalShaping(6000).Response();
     TH1D* hrfc = dirc.make<TH1D>("resp", "Collection Response", nhist+1, -nhist/2-0.5, nhist/2+0.5);
     vector_to_hist(respc, hrfc);
 
     // Get collection convolution kernel and fill histogram.
 
-    const std::vector<TComplex>&  kernc = sss->SignalShaping(2).ConvKernel();
+    const std::vector<TComplex>&  kernc = sss->SignalShaping(6000).ConvKernel();
     std::vector<double> kernrc(kernc.size());
     for(unsigned int i=0; i<kernrc.size(); ++i)
       kernrc[i] = kernc[i].Rho();
@@ -137,7 +137,7 @@ namespace util
 
     // Get collection filter function and fill histogram.
 
-    const std::vector<TComplex>&  filtc = sss->SignalShaping(2).Filter();
+    const std::vector<TComplex>&  filtc = sss->SignalShaping(6000).Filter();
     std::vector<double> filtrc(filtc.size());
     for(unsigned int i=0; i<filtrc.size(); ++i)
       filtrc[i] = filtc[i].Re();
