@@ -125,6 +125,7 @@ namespace caldata {
 
     // get the FFT service to have access to the FFT size
     art::ServiceHandle<util::LArFFT> fFFT;
+    int transformSize = fFFT->FFTSize();
 
     // Get signal shaping service.
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
@@ -145,7 +146,6 @@ namespace caldata {
         
     unsigned int dataSize = digitVec0->Samples(); //size of raw data vectors
     
-    int transformSize = fFFT->FFTSize();
     unsigned int channel(0); // channel number
     unsigned int bin(0);     // time bin loop variable
     
@@ -156,9 +156,10 @@ namespace caldata {
     std::vector<TComplex> freqHolder(transformSize+1); // temporary frequency data
     
     // loop over all wires    
-    for(unsigned int rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){ // ++ move
+    for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){ // ++ move
       holder.clear();
       
+      // get the reference to the current raw::RawDigit
       art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
       channel = digitVec->Channel();
 
@@ -169,6 +170,7 @@ namespace caldata {
 	// uncompress the data
 	raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
 	
+	// loop over all adc values and subtract the pedestal
 	for(bin = 0; bin < dataSize; ++bin) 
 	  holder[bin]=(rawadc[bin]-digitVec->GetPedestal());
 
@@ -178,6 +180,7 @@ namespace caldata {
       } // end if not a bad channel 
       
       holder.resize(dataSize,1e-5);
+
       //This restores the DC component to signal removed by the deconvolution.
       if(fPostsample) {
         double average=0.0;
