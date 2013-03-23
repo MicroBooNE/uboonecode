@@ -223,7 +223,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
   // the first entry is 0
 
   double driftvelocity=larp->DriftVelocity()/1000.;  
-  int nbinc = TMath::Nint(fCol3DCorrection*(fabs(pitch))/(driftvelocity*detprop->SamplingRate())); ///number of bins //KP
+  int nbinc = TMath::Nint(fCol3DCorrection*(std::abs(pitch))/(driftvelocity*detprop->SamplingRate())); ///number of bins //KP
   
   ////////////////////////////////////////////////////
    if(fUseFunctionFieldShape)
@@ -279,7 +279,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
 
   // now the induction plane
     
-  int nbini = TMath::Nint(fInd3DCorrection*(fabs(pitch))/(driftvelocity*detprop->SamplingRate()));//KP
+  int nbini = TMath::Nint(fInd3DCorrection*(std::abs(pitch))/(driftvelocity*detprop->SamplingRate()));//KP
   for(int i = 0; i < nbini; ++i){
     fIndFieldResponse[i] = fIndFieldRespAmp/(1.*nbini);
     fIndFieldResponse[nbini+i] = -fIndFieldRespAmp/(1.*nbini);
