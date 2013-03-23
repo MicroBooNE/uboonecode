@@ -45,10 +45,6 @@
 </solids>
 <structure>
  <volume name="volOpDetSensitive">
-  <materialref ref="TPB"/>
-  <solidref ref="PMT_TPBCoating"/>
- </volume>
- <volume name="vol_PMT_AcrylicPlate">
   <materialref ref="Acrylic"/>
   <solidref ref="PMT_AcrylicPlate"/>
  </volume>
@@ -73,10 +69,6 @@
   <solidref ref="PMTVolume"/>
   <physvol>
    <volumeref ref="volOpDetSensitive"/>
-   <position name="pos_PMT_TPBCoating" unit="cm" x="0" y="0" z="(5.5 * 2.54) - (0.5 * 0.005)"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="vol_PMT_AcrylicPlate"/>
    <position name="pos_PMT_AcrylicPlate" unit="cm" x="0" y="0" z="(5.5 * 2.54) - 0.01 - (0.5 * 0.2)"/>
   </physvol>
   <physvol>
