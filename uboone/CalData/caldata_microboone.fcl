@@ -1,0 +1,19 @@
+#include "job/caldata.fcl"
+
+BEGIN_PROLOG
+
+microboone_calwire:
+{
+ module_type:        "CalWireMicroBooNE"
+ DigitModuleLabel:   "daq"
+ PostsampleBins:     400
+}
+
+microboone_calwirePrespill:  @local::microboone_calwire
+microboone_calwirePostspill: @local::microboone_calwire
+microboone_calwirePrespill.DigitModuleLabel: "daq:preSpill"
+microboone_calwirePostspill.DigitModuleLabel: "daq:postSpill"
+
+microboone_calwireana: @local::standard_calwireana
+
+END_PROLOG
