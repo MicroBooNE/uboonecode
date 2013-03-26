@@ -1,4 +1,16 @@
 #include "job/services.fcl"
+#include "job/geometry_microboone.fcl"
+#include "job/detectorproperties_microboone.fcl"
+#include "job/larproperties.fcl"
+#include "job/larfft_microboone.fcl"
+#include "job/messageservice.fcl"
+#include "job/simulationservices_microboone.fcl"
+#include "job/signalservices_microboone.fcl"
+#include "job/magfield.fcl"
+#include "job/databaseutil_microboone.fcl"
+#include "job/backtracker.fcl"
+#include "job/photpropservices_microboone.fcl"
+#include "job/opticaldetectorservices_microboone.fcl"
 
 BEGIN_PROLOG
 
