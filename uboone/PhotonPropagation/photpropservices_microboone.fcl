@@ -1,0 +1,7 @@
+#include "job/photpropservices.fcl"
+
+BEGIN_PROLOG
+
+microboone_photonvisibilityservice: @local::standard_photonvisibilityservice
+
+END_PROLOG
