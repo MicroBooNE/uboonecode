@@ -1,0 +1,9 @@
+#include "job/databaseutil.fcl"
+
+BEGIN_PROLOG
+
+microboone_database:               @local::standard_database
+microboone_database.PassFileName:  ".upswd"
+microboone_database.ShouldConnect: true
+
+END_PROLOG
