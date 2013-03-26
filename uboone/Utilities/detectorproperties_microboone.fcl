@@ -1,0 +1,17 @@
+#include "job/detectorproperties.fcl"
+
+BEGIN_PROLOG
+
+microboone_detproperties:                   @local::standard_detproperties
+microboone_detproperties.SamplingRate:      500.         #in ns  
+microboone_detproperties.ElectronsToADC:    6.8906513e-3 # 1fC = 43.008 ADC counts for MicroBooNE  
+microboone_detproperties.NumberTimeSamples: 3200
+microboone_detproperties.TimeOffsetU:       0.
+microboone_detproperties.TimeOffsetV:       0.
+microboone_detproperties.TimeOffsetW:       0.
+microboone_detproperties.ReadOutWindowSize: 3200
+
+microboone_detproperties_3windows:                   @local::microboone_detproperties
+microboone_detproperties_3windows.NumberTimeSamples: 9600         
+
+END_PROLOG
