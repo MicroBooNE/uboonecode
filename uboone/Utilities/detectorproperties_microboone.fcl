@@ -8,7 +8,7 @@ microboone_detproperties.ElectronsToADC:    6.8906513e-3 # 1fC = 43.008 ADC coun
 microboone_detproperties.NumberTimeSamples: 3200
 microboone_detproperties.TimeOffsetU:       0.
 microboone_detproperties.TimeOffsetV:       0.
-microboone_detproperties.TimeOffsetW:       0.
+microboone_detproperties.TimeOffsetZ:       0.
 microboone_detproperties.ReadOutWindowSize: 3200
 
 microboone_detproperties_3windows:                   @local::microboone_detproperties
