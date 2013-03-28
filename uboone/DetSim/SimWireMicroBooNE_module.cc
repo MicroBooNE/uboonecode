@@ -394,7 +394,7 @@ namespace detsim {
        {
 	
 	pval = fNoiseHist->GetBinContent(i)*(0.9+0.2*rnd[0])*fNoiseFact; 
-	//std::cout << " pval: " << pval << std::endl;
+	//mf::LogInfo("SimWireMicroBooNE")  << " pval: " << pval;
        }
 	  
 	phase = rnd[1]*2.*TMath::Pi();
@@ -403,7 +403,7 @@ namespace detsim {
     }
     
     
-    // std::cout << "filled noise freq" << std::endl;
+    // mf::LogInfo("SimWireMicroBooNE") << "filled noise freq";
 
     // inverse FFT MCSignal
     art::ServiceHandle<util::LArFFT> fFFT;
