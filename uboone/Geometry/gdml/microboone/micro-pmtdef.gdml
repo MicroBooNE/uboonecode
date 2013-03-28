@@ -64,7 +64,7 @@
   <materialref ref="Glass"/>
   <solidref ref="PMT_Underside"/>
  </volume>
- <volume name="vol_PMTSensitive">
+ <volume name="volOpDetSensitive">
   <materialref ref="LAr"/>
   <solidref ref="PMT_Lens"/>
  </volume>
@@ -88,7 +88,7 @@
    <position name="pos_PMT_SteelBase" unit="cm" x="0" y="0" z="(0.75 * 2.54)-(5.5 * 2.54)"/>
   </physvol>
   <physvol>
-   <volumeref ref="vol_PMTSensitive"/>
+   <volumeref ref="volOpDetSensitive"/>
    <position name="pos_PMT_Lens" unit="cm" x="0" y="0" z="(7.0 * 2.54)-(5.5 * 2.54)"/>
   </physvol>
   <physvol>

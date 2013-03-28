@@ -1,6 +1,5 @@
 <?xml version='1.0'?>
 <materials>
-  <element name="videRef" formula="VACUUM" Z="1">  <atom value="1"/> </element>
   <element name="bromine" formula="Br" Z="35"> <atom value="79.904"/> </element>
   <element name="hydrogen" formula="H" Z="1">  <atom value="1.0079"/> </element>
   <element name="nitrogen" formula="N" Z="7">  <atom value="14.0067"/> </element>
@@ -18,9 +17,9 @@
   <element name="titanium" formula="Ti" Z="22"> <atom value="47.867"/>   </element>
   <element name="argon" formula="Ar" Z="18"> <atom value="39.9480"/>  </element>
 
-  <material name="Vacuum" formula="Vacuum">
+   <material Z="1" formula=" " name="Vacuum">
    <D value="1.e-25" unit="g/cm3"/>
-   <fraction n="1.0" ref="videRef"/>
+   <atom value="1.0079"/>
   </material>
 
   <material name="ALUMINUM_Al" formula="ALUMINUM_Al">
@@ -40,7 +39,23 @@
    <composite n="6" ref="oxygen"/>
    <composite n="4" ref="bromine"/>
   </material>
-
+  
+  <material name="PU_foam_dense" formula="C25H42N2O6">
+   <D value=".224" unit="g/cm3"/>
+   <composite n="25" ref="carbon"/>
+   <composite n="42" ref="hydrogen"/>
+   <composite n="2" ref="nitrogen"/>
+   <composite n="6" ref="oxygen"/>
+ </material>
+ 
+ <material name="PU_foam_light" formula="C25H42N2O6">
+	 <D value=".0384" unit="g/cm3"/>
+	 <composite n="25" ref="carbon"/>
+	 <composite n="42" ref="hydrogen"/>
+	 <composite n="2" ref="nitrogen"/>
+	 <composite n="6" ref="oxygen"/>
+ </material>
+	     
   <material name="SiO2" formula="SiO2">
    <D value="2.2" unit="g/cm3"/>
    <composite n="1" ref="silicon"/>
@@ -103,7 +118,7 @@
   <material name="STEEL_STAINLESS_Fe7Cr2Ni" formula="STEEL_STAINLESS_Fe7Cr2Ni">
    <D value="7.9300" unit="g/cm3"/>
    <fraction n="0.0010" ref="carbon"/>
-   <fraction n="0.1800" ref="chromium"/>
+   <fraction n="0.1792" ref="chromium"/>
    <fraction n="0.7298" ref="iron"/>
    <fraction n="0.0900" ref="nickel"/>
   </material>
@@ -115,9 +130,9 @@
 
   <material formula=" " name="Air">
    <D value="0.001205" unit="g/cc"/>
-   <fraction n="0.78084" ref="nitrogen"/>
+   <fraction n="0.781154" ref="nitrogen"/>
    <fraction n="0.209476" ref="oxygen"/>
-   <fraction n="0.00934" ref="argon"/>
+   <fraction n="0.00937" ref="argon"/>
   </material>
 
   <material formula=" " name="G10">
@@ -177,6 +192,29 @@
   <material formula="Ti" name="Titanium">
    <D value="4.506" unit="g/cc"/>
    <fraction n="1." ref="titanium"/>
+  </material>
+
+  <material name="TPB" formula="TPB">
+   <D value="1.40" unit="g/cm3"/>
+   <fraction n="1.0000" ref="argon"/>
+  </material>
+
+  <material name="Glass">
+   <D value="2.74351" unit="g/cm3"/>
+   <fraction n="0.600" ref="SiO2"/>
+   <fraction n="0.118" ref="Al2O3"/>
+   <fraction n="0.001" ref="Fe2O3"/>
+   <fraction n="0.224" ref="CaO"/>
+   <fraction n="0.034" ref="MgO"/>
+   <fraction n="0.010" ref="Na2O"/>
+   <fraction n="0.013" ref="TiO2"/>
+  </material>
+
+  <material name="Acrylic">
+   <D value="1.19" unit="g/cm3"/>
+   <fraction n="0.600" ref="carbon"/>
+   <fraction n="0.320" ref="oxygen"/>
+   <fraction n="0.080" ref="hydrogen"/>
   </material>
 
 </materials>
