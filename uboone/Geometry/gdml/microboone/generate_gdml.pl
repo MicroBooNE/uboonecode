@@ -791,12 +791,6 @@ sub gen_pmt {
   aunit="deg"
   lunit="cm"/>
 
- <tube name="PMT_TPBCoating"
-  rmax="(6.0*2.54)"
-  z="0.01"
-  deltaphi="360"
-  aunit="deg"
-  lunit="cm"/>
  <tube name="PMT_AcrylicPlate"
   rmax="(6.0*2.54)"
   z="(0.2)"
@@ -834,11 +828,7 @@ EOF
 	print PMT <<EOF;
 </solids>
 <structure>
- <volume name="vol_PMT_TPBCoating">
-  <materialref ref="TPB"/>
-  <solidref ref="PMT_TPBCoating"/>
- </volume>
- <volume name="vol_PMT_AcrylicPlate">
+ <volume name="volOpDetSensitive">
   <materialref ref="Acrylic"/>
   <solidref ref="PMT_AcrylicPlate"/>
  </volume>
@@ -856,7 +846,7 @@ EOF
  </volume>
 EOF
 	print PMT <<EOF;
- <volume name="volOpDetSensitive">
+ <volume name="vol_PMT_Lens">
   <materialref ref="LAr"/>
   <solidref ref="PMT_Lens"/>
  </volume>
@@ -866,11 +856,7 @@ EOF
   <materialref ref="LAr"/>
   <solidref ref="PMTVolume"/>
   <physvol>
-   <volumeref ref="vol_PMT_TPBCoating"/>
-   <position name="pos_PMT_TPBCoating" unit="cm" x="0" y="0" z="(5.5 * 2.54) - (0.5 * 0.005)"/>
-  </physvol>
-  <physvol>
-   <volumeref ref="vol_PMT_AcrylicPlate"/>
+   <volumeref ref="volOpDetSensitive"/>
    <position name="pos_PMT_AcrylicPlate" unit="cm" x="0" y="0" z="(5.5 * 2.54) - 0.01 - (0.5 * 0.2)"/>
   </physvol>
   <physvol>
@@ -882,7 +868,7 @@ EOF
    <position name="pos_PMT_SteelBase" unit="cm" x="0" y="0" z="(0.75 * 2.54)-(5.5 * 2.54)"/>
   </physvol>
   <physvol>
-   <volumeref ref="volOpDetSensitive"/>
+   <volumeref ref="vol_PMT_Lens"/>
    <position name="pos_PMT_Lens" unit="cm" x="0" y="0" z="(7.0 * 2.54)-(5.5 * 2.54)"/>
   </physvol>
   <physvol>
