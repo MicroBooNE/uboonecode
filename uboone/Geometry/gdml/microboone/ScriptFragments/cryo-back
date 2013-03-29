@@ -1,0 +1,110 @@
+<?xml version='1.0'?>
+<gdml>
+<solids>
+ <tube name="Cryostat" 
+  rmax="240"
+  z="1400+2*2.5"
+  deltaphi="2*kPi"
+  aunit="rad"
+  lunit="cm"/>
+<tube name="SteelTube"
+  rmin="237.46"
+  rmax="240"
+  z="1400"
+  deltaphi="2*kPi"
+  aunit="rad"
+  lunit="cm"/>
+<box name="CryoTPCRail"
+  x="10" 
+  y="10" 
+  z="1200"
+  lunit="cm"/>
+<box name="CryoPlaneMount"
+  x="10"
+  y="10"
+  z="10"
+  lunit="cm"/>
+</solids>
+
+<structure>
+ <volume name="volSteelTube">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="SteelTube"/>
+ </volume>
+ <volume name="volCryoRailLeft">
+  <materialref ref="ALUMINUM_Al"/>
+  <solidref ref="CryoTPCRail"/>
+ </volume>
+ <volume name="volCryoRailRight">
+  <materialref ref="ALUMINUM_Al"/>
+  <solidref ref="CryoTPCRail"/>
+ </volume>
+ <volume name="volPlaneMountCathodeFront">
+  <materialref ref="ALUMINUM_Al"/>
+  <solidref ref="CryoPlaneMount"/>
+ </volume>
+ <volume name="volPlaneMountCathodeBack">
+  <materialref ref="ALUMINUM_Al"/>
+  <solidref ref="CryoPlaneMount"/>
+ </volume>
+ <volume name="volPlaneMountWireFront">
+  <materialref ref="ALUMINUM_Al"/>
+  <solidref ref="CryoPlaneMount"/>
+ </volume>
+ <volume name="volPlaneMountWireBack">
+  <materialref ref="ALUMINUM_Al"/>
+  <solidref ref="CryoPlaneMount"/>
+ </volume>
+ <volume name="volCryostat">
+  <materialref ref="LAr"/>
+  <solidref ref="Cryostat"/>
+  <physvol>
+   <volumeref ref="volSteelTube"/>
+   <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volTPC"/>
+   <position name="posTPC" x="0.0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCryoRailLeft"/>
+   <position name="posCryoRailLeft" unit="cm" x="-30" y="-235.557321" z="100"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCryoRailRight"/>
+   <position name="posCryoRailRight" unit="cm" x="30" y="-235.557321" z="100"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volPlaneMountCathodeFront"/>
+   <position name="posTPC" unit="cm" x="-190" y="-0.5*kTPCWirePlaneWidth" z="-0.25*kTPCWirePlaneLength"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volPlaneMountCathodeBack"/>
+   <position name="posTPC" unit="cm" x="-190" y="-0.5*kTPCWirePlaneWidth" z="0.25*kTPCWirePlaneLength"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volPlaneMountWireFront"/>
+   <position name="posTPC" unit="cm" x="190" y="-0.5*kTPCWirePlaneWidth" z="-0.25*kTPCWirePlaneLength"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volPlaneMountWireBack"/>
+   <position name="posTPC" unit="cm" x="190" y="-0.5*kTPCWirePlaneWidth" z="0.25*kTPCWirePlaneLength"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volPMTSpineFoot1top">
+   <rotationref ref="rMinus45AboutZ"/>
+   <position name="posSpineFoot1Top" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volPMTSpineFoot1bot">
+   <rotationref ref="rPlus45AboutZ"/>
+   <position name="posSpineFoot1Bot" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volPMTSpineBow1">
+   <rotationref ref="rMinus45AboutZ"/>
+   <position name="posTPC" unit="cm" x="0" y="0" z="0"/>
+  <physvol>
+ </volume>
+</structure>
+</gdml>
