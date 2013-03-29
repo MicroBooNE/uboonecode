@@ -60,7 +60,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   // Construct parameterized collection filter function.
  if(!fGetFilterFromHisto)
  {
-  std::cout << "Getting Filter from .fcl file" << std::endl;
+  mf::LogInfo("SignalShapingServiceMicroBooNE") << "Getting Filter from .fcl file" ;
   std::string colFilt = pset.get<std::string>("ColFilter");
   std::vector<double> colFiltParams =
   pset.get<std::vector<double> >("ColFilterParams");
@@ -81,7 +81,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
  {
   
    std::string histoname = pset.get<std::string>("FilterHistoName");
-   std::cout << " using filter from .root file " << std::endl;
+   mf::LogInfo("SignalShapingServiceMicroBooNE") << " using filter from .root file " ;
    int fNPlanes=3;
    
   // constructor decides if initialized value is a path or an environment variable
@@ -266,7 +266,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
   else
   {
   //////////////////////////////////////////////////
-  std::cout << " using the old field shape " << std::endl;
+  mf::LogInfo("SignalShapingServiceMicroBooNE") << " using the old field shape " ;
   double integral = 0.;
   for(int i = 1; i < nbinc; ++i){
     fColFieldResponse[i] = fColFieldResponse[i-1] + 1.0;
