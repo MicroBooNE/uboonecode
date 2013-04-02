@@ -10,7 +10,7 @@ microboone_simwire:
  #NoiseFact:          0.15       #Noise Scale to use with histogram
  NoiseWidth:         62.4         #Exponential Noise width (kHz)
  LowCutoff:          7.5          #Low frequency filter cutoff (kHz)
- CompressionType:    "none"       #could also be none
+ CompressionType:    "none"       #could also be none		
  GetNoiseFromHisto:   false  
  NoiseFileFname:      "uboone_noise_v0.1.root"
  NoiseHistoName:      "NoiseFreq"    
