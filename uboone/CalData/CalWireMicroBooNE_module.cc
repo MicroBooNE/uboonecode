@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 extern "C" {
 #include <sys/types.h>
@@ -146,7 +147,7 @@ namespace caldata {
         
     unsigned int dataSize = digitVec0->Samples(); //size of raw data vectors
     
-    unsigned int channel(0); // channel number
+    uint32_t     channel(0); // channel number
     unsigned int bin(0);     // time bin loop variable
     
     filter::ChannelFilter *chanFilt = new filter::ChannelFilter();  
