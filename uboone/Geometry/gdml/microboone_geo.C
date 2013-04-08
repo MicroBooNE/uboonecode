@@ -9,7 +9,7 @@ microboone_geo(TString volName="")
   gSystem->Load("libGeom");
   gSystem->Load("libGdml");
 
-  TGeoManager::Import("microboone.gdml");
+  TGeoManager::Import("microboone_nowires.gdml");
 
   drawopt optuboone[] = {
     {"volGround",       kOrange-7},
@@ -37,9 +37,9 @@ microboone_geo(TString volName="")
   gGeoManager->SetMaxVisNodes(70000);
 
   //gGeoManager->GetTopVolume()->Draw();
-  //if ( ! volName.IsNull() ) gGeoManager->FindVolumeFast(volName)->Draw("ogl");
+  if ( ! volName.IsNull() ) gGeoManager->FindVolumeFast(volName)->Draw("ogl");
   //gGeoManager->FindVolumeFast("volWorld")->Draw("ogl");
-  gGeoManager->FindVolumeFast("volTPC")->Draw("ogl");
+  // gGeoManager->FindVolumeFast("volTPC")->Draw("ogl");
   //gGeoManager->FindVolumeFast("volTPCPlane")->Draw("ogl");
 
   TGeoVolume *TPC = gGeoManager->FindVolumeFast("volTPC");

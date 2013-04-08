@@ -829,6 +829,10 @@ EOF
 </solids>
 <structure>
  <volume name="volOpDetSensitive">
+  <materialref ref="LAr"/>
+  <solidref ref="PMT_AcrylicPlate"/>
+ </volume>
+ <volume name="vol_PMT_AcrylicPlate">
   <materialref ref="Acrylic"/>
   <solidref ref="PMT_AcrylicPlate"/>
  </volume>
@@ -857,7 +861,11 @@ EOF
   <solidref ref="PMTVolume"/>
   <physvol>
    <volumeref ref="volOpDetSensitive"/>
-   <position name="pos_PMT_AcrylicPlate" unit="cm" x="0" y="0" z="(5.5 * 2.54) - 0.01 - (0.5 * 0.2)"/>
+   <position name="posOpDetSensitive" unit="cm" x="0" y="0" z="(5.5 * 2.54) - 0.1"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="vol_PMT_AcrylicPlate"/>
+   <position name="pos_PMT_AcrylicPlate" unit="cm" x="0" y="0" z="(5.5 * 2.54) - 0.3"/>
   </physvol>
   <physvol>
    <volumeref ref="vol_PMT_Stalk"/>
