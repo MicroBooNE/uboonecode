@@ -17,15 +17,19 @@
 #include "art/Framework/Principal/EventPrincipal.h"
 #include "art/Persistency/Provenance/SubRunID.h"
 
-
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/list.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/version.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/list.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/binary_object.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include "boost/date_time/gregorian/gregorian.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include "boost/date_time/gregorian/greg_serialize.hpp"
+#include "boost/date_time/posix_time/time_serialize.hpp"
+#include "boost/serialization/vector.hpp"
 
 
 #include "RawData/utils/boonetypes.h"
@@ -51,7 +55,9 @@ namespace datatypes {
 using namespace gov::fnal::uboone;
 
 
-
+// ====================================================================================
+// ===== Putting in constants.h methods stolen from swizzle_dependencies/datatypes ====
+// ====================================================================================
 enum {
     IO_GRANULARITY_CRATE,
     IO_GRANULARITY_CARD,
@@ -660,7 +666,7 @@ class eventRecord {
   int getSEBMap_size() { return seb_map.size(); }
   void clearSEBMap() { seb_map.clear(); }
 
-  int getBeamDataVecotr_size() { return beam_data_vector.size(); }
+  int getBeamData_size() { return beam_data_vector.size(); }
   void clearBeamDataVector() { beam_data_vector.clear(); }
 
   uint8_t getIOMode() { return er_IO_mode; }
@@ -697,7 +703,26 @@ class eventRecord {
 }
 }
 }
+std::ostream & operator<<(std::ostream &os, const gov::fnal::uboone::datatypes::beamData &bd);
+std::ostream & operator<<(std::ostream &os, const gov::fnal::uboone::datatypes::beamHeader &bh);
 
+
+
+
+// These MACRO must be outside any namespaces.
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::beamHeader, gov::fnal::uboone::datatypes::constants::VERSION)
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::beamData, gov::fnal::uboone::datatypes::constants::VERSION) 
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::cardData, gov::fnal::uboone::datatypes::constants::VERSION) 
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::cardHeader, gov::fnal::uboone::datatypes::constants::VERSION)
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::channelData, gov::fnal::uboone::datatypes::constants::VERSION) 
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::crateData, gov::fnal::uboone::datatypes::constants::VERSION) 
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::crateHeader, gov::fnal::uboone::datatypes::constants::VERSION) 
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::eventHeader, gov::fnal::uboone::datatypes::constants::VERSION)    
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::eventTrailer, gov::fnal::uboone::datatypes::constants::VERSION) 
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::eventRecord, gov::fnal::uboone::datatypes::constants::VERSION)
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::globalHeader, gov::fnal::uboone::datatypes::constants::VERSION) 
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::gps, gov::fnal::uboone::datatypes::constants::VERSION) 
+BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::triggerData, gov::fnal::uboone::datatypes::constants::VERSION)
 //================================================================================================================================
 //================================================================================================================================
 //================================================================================================================================

@@ -18,11 +18,10 @@
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
 #include "art/Utilities/Exception.h"
 
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/version.hpp>
 
 extern "C" {
 #include <sys/types.h>
+#include <iostream>
 #include <dirent.h>
 }
 
@@ -39,7 +38,9 @@ extern "C" {
 
 using namespace gov::fnal::uboone::datatypes;
 
-
+// ##################################################################################
+// ### Putting in beamData.cpp methods stolen from swizzle_dependencies/datatypes ###
+// ##################################################################################
 std::ostream & operator<<(std::ostream &os, const gov::fnal::uboone::datatypes::beamData &bd)
 {
   os <<"Device name: " << bd.deviceName << std::endl
@@ -58,6 +59,9 @@ beamData::beamData()
   val.resize(0);
 }
 
+// ####################################################################################
+// ### Putting in beamHeader.cpp methods stolen from swizzle_dependencies/datatypes ###
+// ####################################################################################
 std::ostream & operator<<(std::ostream &os, const gov::fnal::uboone::datatypes::beamHeader &bh)
 {
   return os <<"Record type: " << (int)bh.record_type << std::endl
@@ -68,6 +72,9 @@ std::ostream & operator<<(std::ostream &os, const gov::fnal::uboone::datatypes::
 	    <<"Number of bytes om: "<< bh.number_of_bytes_in_record << std::endl;	 
 }
 
+// ##################################################################################
+// ### Putting in cardData.cpp methods stolen from swizzle_dependencies/datatypes ###
+// ##################################################################################
 beamHeader::beamHeader()
 {
   record_type=0;
@@ -77,6 +84,7 @@ beamHeader::beamHeader()
   number_of_devices=0;
   number_of_bytes_in_record=0;
 }
+
 
 char* cardData::getCardDataPtr(){
   
@@ -161,7 +169,9 @@ void cardData::insertChannel(int channel_number, channelData chD){
   channel_map.insert(std::pair<int,channelData>(channel_number,chD));
 }
 
-
+// ####################################################################################
+// ### Putting in cardHeader.cpp methods stolen from swizzle_dependencies/datatypes ###
+// ####################################################################################
 cardHeader::cardHeader(){
   bt_card_header.id_and_module = 0;
   bt_card_header.word_count = 0;
@@ -204,6 +214,9 @@ uint32_t cardHeader::getChecksum(){
   return bt_card_header.checksum;
 }
 
+// ##################################################################################
+// ### Putting in crateData.cpp methods stolen from swizzle_dependencies/datatypes ###
+// ##################################################################################
 char* crateData::getCrateDataPtr(){
   
   if(crateData_IO_mode >= IO_GRANULARITY_CARD){
@@ -304,6 +317,10 @@ void crateData::insertCard(cardHeader cH, cardData cD){
   card_map.insert(std::pair<cardHeader,cardData>(cH,cD));
 }
 
+
+// #####################################################################################
+// ### Putting in crateHeader.cpp methods stolen from swizzle_dependencies/datatypes ###
+// #####################################################################################
 crateHeader::crateHeader(){
 
   bt_crate_header.size = 0;
@@ -315,7 +332,9 @@ crateHeader::crateHeader(){
 }
 
 
-
+// #####################################################################################
+// ### Putting in eventRecord.cpp methods stolen from swizzle_dependencies/datatypes ###
+// #####################################################################################
 eventRecord::eventRecord() {
 
   //use default constructors here
@@ -348,7 +367,9 @@ void eventRecord::insertSEB(crateHeader cH, crateData cD){
 }
 
 
-
+// ######################################################################################
+// ### Putting in globalHeader.cpp methods stolen from swizzle_dependencies/datatypes ###
+// ######################################################################################
 globalHeader::globalHeader() {
 
   //record_type = RESERVED;
@@ -368,6 +389,9 @@ globalHeader::globalHeader() {
 
 }
 
+// ######################################################################################
+// ### Putting in triggerData.cpp methods stolen from swizzle_dependencies/datatypes ###
+// ######################################################################################
 triggerData::triggerData() {
 
   bt_trigger_data.trig_event_num = 0;
@@ -378,6 +402,11 @@ triggerData::triggerData() {
 }
 
 
+// ============================================================================
+// = \todo: Might need to include evttypes.cpp? Need to think about this some =
+// ============================================================================
+
+
 
 // ======================================================================================================
 // ======================================================================================================
@@ -385,12 +414,7 @@ triggerData::triggerData() {
 // ======================================================================================================
 // ======================================================================================================
 // ======================================================================================================
-// ======================================================================================================
-// ======================================================================================================
-// ======================================================================================================
-// ======================================================================================================
-// ======================================================================================================
-// ======================================================================================================
+
 
 
 
@@ -409,6 +433,9 @@ namespace {
 
   
   // ===================================================================== 
+  /// \todo: This is a method stolen from swizzle_dependencies/share/boonetypes.h
+  /// \      Clearly need to use swizzling instead...just need to figure out how
+  
    struct event_header 	// Event Control Words. These should be at begin and end 
    			// of each crate. Header word format: (should be 0xffffffff)
 			// Trailer word format: (should be 0xe0000000) */
@@ -515,9 +542,8 @@ compressed    0  (code,code,             )
        // goes out of scope *for any reason*, including normal function
        // exit or exception throw.
        
-       std::cout<<dir<<std::endl;
        EventFileSentry efs(dir+"/"+filename);
-       std::ifstream &infile = efs.infile;
+       std::ifstream &infile =  efs.infile;
     
        // Throwing an exception if the file fails to open
        if( !infile.is_open() ) {
@@ -525,19 +551,27 @@ compressed    0  (code,code,             )
           << "failed to open input file " << filename << std::endl;
       }
       
+      // JAsaadi: Just checking that the file opened correctly
       if( infile.is_open()){std::cout<<"YES! The file opened"<<std::endl;}
       
       // ##########################################################################
       // Trying something from the swizzle
       eventRecord event_record;  // Declare an eventRecord object. This is yours.
       
-      std::cout<<"Event_Record"<<std::endl;
+      //std::ifstream ifs("/uboone/app/users/jasaadi/uBoone_DataFormat/xmit-bin-NU-04022013-203237-0.dat", std::ios::binary);
+      
+      // declare a boost::archive::binary_iarchive object
+      boost::archive::binary_iarchive ia(infile); 
+      //boost::archive::binary_iarchive ia(ifs); 
+      // read in from the archive into your eventRecord object
+ 
+      ia >> event_record;
       
       //Here's how to get info from the global header in the event record.
       //Other header-type objects will be very, very similar.
       globalHeader *global_header = event_record.getGlobalHeaderPtr();
       
-      // #############################################################################
+      // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
       // Reading in the event header information in a similar way to how ArgoNeuT did
       // ...need to think more about this
       
@@ -548,8 +582,14 @@ compressed    0  (code,code,             )
       
       //read in header section of file
       infile.read((char *) &h1, sizeof h1);
-
-      // Back to swizzleing
+      
+      
+      // above here is still using old ArgoNeut Methods...need to fix eventually
+      // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      
+      // ########################################################
+      // ### Back to swizzling: using global_header-> methods ###
+      // ########################################################
       time_t mytime = global_header->getSeconds();
       
       // I suspect this is antiquated...but might need to confirm?
@@ -563,13 +603,60 @@ compressed    0  (code,code,             )
       daqHeader.SetFixedWord(h1.header);
       daqHeader.SetFileFormat(global_header->getRecordType());
       daqHeader.SetSoftwareVersion(global_header->DAQ_version_number);
-      
       daqHeader.SetRun(global_header->getRunNumber());
       daqHeader.SetEvent(global_header->getEventNumber());
       daqHeader.SetTimeStamp(mytime);
       
-      // What is the "spare word" ?
+      /// \todo: What is the "spare word" ? Leaving it unset for now
       //daqHeader.SetSpareWord(h1.spare);
+      
+      
+      
+      // ### Swizzling to get the number of channels...trying the method used in write_read.cpp
+      // ### provided by Wes --- About the data:
+      // ### The format of the data is in levels: crate, card, channel.
+      // ### Level 1: The event record contains a map of (crateHeader,crateData) pairs.
+      // ### Level 2: Each crateData object may contain a map of (cardHeader,cardData) pairs.
+      // ### Level 3: Each cardData object may contain a map of (int,channelData) pairs. The int
+      // ### is the channel number.
+      
+      int channel_number = 0;
+      
+      //get the seb map, and do a loop over all sebs/crates
+      std::map<crateHeader,crateData,compareCrateHeader> seb_map = event_record.getSEBMap();
+      std::map<crateHeader,crateData>::iterator seb_it;
+      for( seb_it = seb_map.begin(); seb_it != seb_map.end(); seb_it++){
+      
+      	//get the crateHeader/crateData objects
+        crateHeader crate_header = seb_it->first;
+        crateData crate_data = seb_it->second;
+	
+	//now get the card map (for the current crate), and do a loop over all cards
+    	std::map<cardHeader,cardData>::iterator card_it;
+    	std::map<cardHeader,cardData,compareCardHeader> card_map = crate_data.getCardMap();
+    	for(card_it = card_map.begin(); card_it != card_map.end(); card_it++){
+	   
+	   //get the cardHeader/cardData objects
+           cardHeader card_header = card_it->first;
+           cardData card_data = card_it->second;
+	   
+	   //now get the channel map (for the current card), and do a loop over all channels
+      	   std::map<int,channelData> channel_map = card_data.getChannelMap();
+      	   std::map<int,channelData>::iterator channel_it;
+      	   for(channel_it = channel_map.begin(); channel_it != channel_map.end(); channel_it++){
+	   
+           //get the channel number and channelData
+	   int channel_number = channel_it->first;
+	   channelData chD = channel_it->second;
+      
+           //can pull some info from the channelData (channelData objects include some header/trailer words)
+      std::cout << "(" << std::dec << channel_number << "," << std::hex << chD.getChannelHeader() << "," << chD.getChannelTrailer() << ") " << std::endl;;
+           
+      	   }//<--End channel_it for loop
+      	}//<---End card_it for loop
+      }//<---End seb_it for loop
+      
+      std::cout<<"channel_number = "<<channel_number<<std::endl;
       
       //daqHeader.SetNChannels(h1.nchan);
       
