@@ -32,6 +32,7 @@
 #include <vector>
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
+#include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "Utilities/SignalShaping.h"
 #include "TF1.h"
 #include "TH1D.h"
@@ -142,4 +143,5 @@ template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute
   SignalShaping(channel).Deconvolute(func);
 }
 
+DECLARE_ART_SERVICE(util::SignalShapingServiceMicroBooNE, LEGACY)
 #endif
