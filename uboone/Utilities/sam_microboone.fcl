@@ -17,18 +17,18 @@ art_file_catalog_mc.fileType:  "mc"
 art_file_catalog_data:           @local::art_file_catalog
 art_file_catalog_data.fileType:  "data"
 
-# Standard configurations for FileCatalogMetadataMicroBooNE service.
+# Standard configurations for FileCatalogMetadataExtras service.
 # Both fields and values are microboone-specific.
 
 microboone_file_catalog:
 {
-  group:           "uboone"   # This field should move to FileCatalogMetadata. 
-  fileFormat:      "root"     # This field should move to FileCatalogMetadata.
-  fclName:         ""
-  fclVersion:      ""
-  projectName:     ""
-  projectStage:    ""
-  projectVersion:  ""
+  Metadata: [ "group",          "uboone",   # This field should move to FileCatalogMetadata. 
+              "fileFormat",     "root",     # This field should move to FileCatalogMetadata.
+              "fclName",        "",
+              "fclVersion",     "",
+              "projectName",    "",
+              "projectStage",   "",
+              "projectVersion", "" ]
 }
 
 END_PROLOG

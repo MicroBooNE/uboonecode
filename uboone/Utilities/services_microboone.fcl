@@ -11,6 +11,7 @@
 #include "job/backtracker.fcl"
 #include "job/photpropservices_microboone.fcl"
 #include "job/opticaldetectorservices_microboone.fcl"
+#include "job/sam_microboone.fcl"
 
 BEGIN_PROLOG
 
