@@ -17,9 +17,6 @@ services.user.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingse
 services.user.DatabaseUtil:       @local::microboone_database
 services.user.DatabaseUtil.ShouldConnect: false
 
-services.user.LArFFT.FFTOption: ""
-
-
 source:
 {
   module_type: EmptyEvent
