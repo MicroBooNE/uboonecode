@@ -6,7 +6,7 @@
 #include "job/messageservice.fcl"
 #include "job/simulationservices_microboone.fcl"
 #include "job/signalservices_microboone.fcl"
-#include "job/magfield.fcl"
+#include "magfield.fcl"
 #include "job/databaseutil_microboone.fcl"
 #include "job/backtracker.fcl"
 #include "job/photpropservices_microboone.fcl"
