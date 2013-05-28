@@ -8,6 +8,8 @@ art_file_catalog:
   # Note sam application name is taken from "process_name" fcl parameter in main job file.
   applicationFamily:   "art"
   applicationVersion:  "development"
+  group:               "uboone"
+  fileFormat:          "root"
   fileType:            "unknown"
 }
 
@@ -29,6 +31,7 @@ microboone_file_catalog:
               "projectName",    "",
               "projectStage",   "",
               "projectVersion", "" ]
+  GeneratePerFileMetadata: true
 }
 
 END_PROLOG
