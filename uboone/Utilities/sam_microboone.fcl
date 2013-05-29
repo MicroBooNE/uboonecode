@@ -33,6 +33,7 @@ microboone_file_catalog:
               "projectVersion", "" ]
   GeneratePerFileMetadata: true
   RenameTemplate:          ""
+  RenameOverwrite:         true
 }
 
 END_PROLOG
