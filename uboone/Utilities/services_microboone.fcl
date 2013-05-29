@@ -1,4 +1,3 @@
-#include "job/services.fcl"
 #include "job/geometry_microboone.fcl"
 #include "job/detectorproperties_microboone.fcl"
 #include "job/larproperties.fcl"
