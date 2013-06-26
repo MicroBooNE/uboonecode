@@ -7,6 +7,7 @@ microboone_genie.GlobalTimeOffset:   1.6e6                  #microboone reads ou
 
 microboone_genie_hist:               @local::microboone_genie
 microboone_genie_hist.BeamName:      "booster"
+microboone_genie_hist.FluxType:       histogram
 microboone_genie_hist.FluxFiles:     ["flux/bnb/current/histograms/ub470_r200_bnb_fhc/numode_bnb_470m_r200.root"] 
 microboone_genie_hist.BeamCenter:    [1.25, 0., 0.]  
 microboone_genie_hist.BeamDirection: [0., 0., 1.]    
