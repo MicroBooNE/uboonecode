@@ -13,6 +13,11 @@ microboone_genie_hist.BeamCenter:    [1.25, 0., 0.]
 microboone_genie_hist.BeamDirection: [0., 0., 1.]    
 microboone_genie_hist.BeamRadius:    4.              
 
+microboone_genie_simple:                @local::microboone_genie
+microboone_genie_simple.FluxFiles:      ["bnb_gsimple_fluxes_07.17.2012_470/gsimple_microboone-470-onaxis_numintp_*.root"]
+microboone_genie_simple.EventsPerSpill: 0
+
+
 microboone_genie_uniform_flux:               @local::standard_genie_uniform_flux
 microboone_genie_uniform_flux.BeamCenter:    [1.25, 0., 0.]  
 microboone_genie_uniform_flux.BeamDirection: [0., 0., 1.]    
