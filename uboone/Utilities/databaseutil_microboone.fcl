@@ -4,6 +4,8 @@ BEGIN_PROLOG
 
 microboone_database:               @local::standard_database
 microboone_database.PassFileName:  ".upswd"
+microboone_database.DBName:	 "uboone_dev"
+microboone_database.DBUser:	 "uboone_reader"
 microboone_database.ShouldConnect: true
 
 END_PROLOG
