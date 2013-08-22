@@ -13,6 +13,8 @@ namespace trigger{
 
     InitVars();
 
+    ClearTriggerInfo();
+
     Config(pset);
 
   }
@@ -25,7 +27,21 @@ namespace trigger{
 
     _clock_pmt = _clock_tpc = _clock_trigger = 0;
 
+    _pmt_frame_size = _tpc_frame_size = 0;
+
   }
+
+  //***************************************************************
+  void TriggerAlgoMicroBoone::ClearTriggerInfo() {
+  //***************************************************************
+
+    TriggerAlgoBase::ClearTriggerInfo();
+
+    _readout_index_fifo.clear();
+
+    _readout_index_wire.clear();
+
+  }  
 
   //***************************************************************
   void TriggerAlgoMicroBoone::Config(fhicl::ParameterSet const& pset) {
@@ -52,6 +68,9 @@ namespace trigger{
   //***************************************************************
   void TriggerAlgoMicroBoone::FillData(const art::Event& event) {
   //***************************************************************
+
+    // Clear variables as this is a new data filling trial
+    ClearTriggerInfo();
 
     //
     // Read in PMTTrigger array ... handle the case if there's no PMTTrigger 
@@ -135,6 +154,8 @@ namespace trigger{
   //***************************************************************
   void TriggerAlgoMicroBoone::TriggerWire(const art::Event& event) {
   //***************************************************************
+
+    _readout_index_wire.clear();
 
     //
     // Read in RawDigits array ... handle the ase if there's no RawDigit

@@ -101,6 +101,13 @@ namespace trigger
     /// Getter function for triggered wire index array
     const std::set<size_t>* GetIndexes_Wire() const {return &_readout_index_wire;};
 
+    /**
+       Override a function to clear all trigger simulation data.
+       The base class clears simulated time window and input trigger timestamps. 
+       This class overrides to clear also fifo and wire index std::set.
+    */
+    virtual void ClearTriggerInfo();
+
   protected:
 
     //
@@ -110,7 +117,7 @@ namespace trigger
     /// Override implementation of TriggerAlgoBase::FillData()
     virtual void FillData(const art::Event& event);
 
-    /// Variable Initialization
+    /// Variable Initialization ... CAUTION this initializes ALL private attributes (some of which should be set from fhicl file)
     void InitVars();
 
     /// A function to store a set of index for PMT FIFOChannel that is triggered for readout
@@ -153,14 +160,12 @@ namespace trigger
     */
     double _clock_trigger;
 
-    /// Scaling factor to convert optdata::TimeSlice_t into trigdata::TrigTimeSlice_t 
-    double _scale_pmt_timeslice;
-
     /// Frame size of PMT FEM readout
     optdata::TimeSlice_t _pmt_frame_size;
 
     /// Frame size of TPC FEM readout
     optdata::TimeSlice_t _tpc_frame_size;
+
 
   }; /// TriggerAlgoMicroBoone class def
 
