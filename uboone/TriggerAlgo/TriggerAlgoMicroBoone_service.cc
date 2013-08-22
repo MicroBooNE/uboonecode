@@ -1,0 +1,164 @@
+
+#ifndef TRIGGERALGOMICROBOONE_CC
+#define TRIGGERALGOMICROBOONE_CC
+
+#include "TriggerAlgoMicroBoone.h"
+
+namespace trigger{
+
+  TriggerAlgoMicroBoone::TriggerAlgoMicroBoone(fhicl::ParameterSet const& pset,
+					       art::ActivityRegistry& reg) 
+    : TriggerAlgoBase(pset, reg) 
+  {
+
+    InitVars();
+
+    Config(pset);
+
+  }
+
+  //***************************************************************
+  void TriggerAlgoMicroBoone::InitVars() {
+  //***************************************************************
+
+    _name_opt_module = _name_gen_module = _name_daq_module = "";
+
+    _clock_pmt = _clock_tpc = _clock_trigger = 0;
+
+  }
+
+  //***************************************************************
+  void TriggerAlgoMicroBoone::Config(fhicl::ParameterSet const& pset) {
+  //***************************************************************
+
+    _name_opt_module     = pset.get< std::string          >("ModuleName_PMT");
+
+    _name_gen_module     = pset.get< std::string          >("ModuleName_BeamSim");
+
+    _name_daq_module     = pset.get< std::string          >("ModuleName_DAQ");
+
+    _pmt_frame_size      = pset.get< optdata::TimeSlice_t >("FrameSize_PMT");
+
+    _tpc_frame_size      = pset.get< optdata::TimeSlice_t >("FrameSize_TPC");
+
+    _clock_pmt           = pset.get< double               >("ClockFrequency_PMT");
+
+    _clock_tpc           = pset.get< double               >("ClockFrequency_TPC");
+
+    _clock_trigger       = pset.get< double               >("ClockFrequency_Trigger");
+
+  }
+
+  //***************************************************************
+  void TriggerAlgoMicroBoone::FillData(const art::Event& event) {
+  //***************************************************************
+
+    //
+    // Read in PMTTrigger array ... handle the case if there's no PMTTrigger 
+    //
+    std::vector<const optdata::PMTTrigger*> pmtTrigArray;
+    try {
+      event.getView(_name_opt_module, pmtTrigArray);
+    }
+    catch ( art::Exception const& err ) {
+      if ( err.categoryCode() != art::errors::ProductNotFound ) throw;
+    }
+
+    //
+    // Read in BeamGateInfo array ... handle the case if there's no BeamGateInfo 
+    //
+    std::vector<const sim::BeamGateInfo*> beamGateArray;
+    try{
+      event.getView(_name_gen_module, beamGateArray);
+    }
+    catch ( art::Exception const& err ) {
+      if ( err.categoryCode() != art::errors::ProductNotFound ) throw;
+    }
+
+    //
+    // Loop over readout trigger candidate time stamps, and fill _timestamps std::set.
+    //
+
+    // First, PMTTrigger array
+    for(size_t index=0; index < pmtTrigArray.size(); ++index){
+
+      const optdata::PMTTrigger* trig(pmtTrigArray.at(index));
+
+      trigdata::TrigTimeSlice_t timestamp = ConvertTimeSlice_PMT(trig->Frame(), trig->TimeSlice());
+
+      _timestamps.insert(timestamp);
+
+    }
+
+    // Second, BeamGate array
+    for(size_t index=0; index < beamGateArray.size(); ++index){
+
+      const sim::BeamGateInfo* trig(beamGateArray.at(index));
+
+      trigdata::TrigTimeSlice_t timestamp = ConvertTime(trig->Start());
+
+      _timestamps.insert(timestamp);
+
+    }
+
+    // Done.
+  }
+
+
+  //***************************************************************
+  void TriggerAlgoMicroBoone::TriggerFIFO(const art::Event& event) {
+  //***************************************************************
+    
+    _readout_index_fifo.clear();
+    
+    //
+    // Read in FIFOChannel array ... handle the case if there's no FIFOChannel
+    //
+    std::vector<const optdata::FIFOChannel*> pmtFIFOArray;
+    try {
+      event.getView(_name_opt_module, pmtFIFOArray);
+    }
+    catch ( art::Exception const& err ) {
+      if ( err.categoryCode() != art::errors::ProductNotFound ) throw;
+    }
+    
+    for(size_t index=0; index < pmtFIFOArray.size(); ++index){
+      
+      const optdata::FIFOChannel* fifo(pmtFIFOArray.at(index));
+      
+      if(IsTriggered(fifo)) _readout_index_fifo.insert(index);
+
+    }
+
+  }
+
+  //***************************************************************
+  void TriggerAlgoMicroBoone::TriggerWire(const art::Event& event) {
+  //***************************************************************
+
+    //
+    // Read in RawDigits array ... handle the ase if there's no RawDigit
+    //
+    std::vector<const raw::RawDigit*> tpcWireArray;
+    try{
+      event.getView(_name_daq_module, tpcWireArray);
+    }
+    catch ( art::Exception const& err ) {
+      if ( err.categoryCode() != art::errors::ProductNotFound ) throw;
+    }
+
+    for(size_t index=0; index < tpcWireArray.size(); ++index){
+
+      const raw::RawDigit* wire(tpcWireArray.at(index));
+
+      if(IsTriggered(wire)) _readout_index_wire.insert(index);
+
+    }
+
+  }
+  
+} // namespace trigger
+
+DEFINE_ART_SERVICE(trigger::TriggerAlgoMicroBoone);
+
+#endif 
