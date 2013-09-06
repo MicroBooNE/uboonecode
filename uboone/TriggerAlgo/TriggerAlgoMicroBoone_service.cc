@@ -29,6 +29,8 @@ namespace trigger{
 
     _pmt_frame_size = _tpc_frame_size = 0;
 
+    _current_run = _current_subrun = _current_event = -1;
+
   }
 
   //***************************************************************
@@ -40,6 +42,10 @@ namespace trigger{
     _readout_index_fifo.clear();
 
     _readout_index_wire.clear();
+
+    _current_run = _current_subrun = _current_event = -1;
+
+    _fifo_sim_done = _wire_sim_done = _sim_done = false;
 
   }  
 
@@ -68,6 +74,11 @@ namespace trigger{
   //***************************************************************
   void TriggerAlgoMicroBoone::FillData(const art::Event& event) {
   //***************************************************************
+
+    // Check if data is already filled or not. If filled, return
+    if( _current_run == event.run() && _current_event == event.id().event() )
+      
+      return;
 
     // Clear variables as this is a new data filling trial
     ClearTriggerInfo();
@@ -120,6 +131,10 @@ namespace trigger{
 
     }
 
+    // Data is filled. Update run, subrun and event id
+    _current_run = event.run();
+    _current_event = event.id().event();
+
     // Done.
   }
 
@@ -128,6 +143,8 @@ namespace trigger{
   void TriggerAlgoMicroBoone::TriggerFIFO(const art::Event& event) {
   //***************************************************************
     
+    if(_fifo_sim_done) return;
+
     _readout_index_fifo.clear();
     
     //
@@ -154,6 +171,8 @@ namespace trigger{
   //***************************************************************
   void TriggerAlgoMicroBoone::TriggerWire(const art::Event& event) {
   //***************************************************************
+
+    if(_wire_sim_done) return;
 
     _readout_index_wire.clear();
 

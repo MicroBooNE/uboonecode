@@ -47,9 +47,11 @@ namespace trigger
     /// Function to run trigger simulation
     virtual void RunTriggerSim(const art::Event& event){
       FillData(event);
-      SimTrigger();
-      TriggerFIFO(event);
-      TriggerWire(event); 
+      if(!_sim_done){
+	SimTrigger();
+	TriggerFIFO(event);
+	TriggerWire(event); 
+      }
     };
 
     /// A function to convert input time in nano-seconds into the time unit used in Trigger logic.
@@ -166,6 +168,11 @@ namespace trigger
     /// Frame size of TPC FEM readout
     optdata::TimeSlice_t _tpc_frame_size;
 
+    /// run, subrun, and event id to keep track of which event has been processed.
+    uint32_t _current_run, _current_subrun, _current_event;
+
+    /// Run control booleans
+    bool _fifo_sim_done, _wire_sim_done;
 
   }; /// TriggerAlgoMicroBoone class def
 
