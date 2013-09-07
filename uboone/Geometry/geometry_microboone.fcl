@@ -1,5 +1,3 @@
-#include "job/geometry.fcl"
-
 BEGIN_PROLOG
 
 microboone_geo:
