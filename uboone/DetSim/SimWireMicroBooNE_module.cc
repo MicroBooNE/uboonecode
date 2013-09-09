@@ -95,7 +95,7 @@ namespace detsim {
     
   }; // class SimWireMicroBooNE
   
-  DEFINE_ART_MODULE(SimWireMicroBooNE);
+  DEFINE_ART_MODULE(SimWireMicroBooNE)
 
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)

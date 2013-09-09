@@ -199,6 +199,6 @@ namespace trigger{
   
 } // namespace trigger
 
-DEFINE_ART_SERVICE(trigger::TriggerAlgoMicroBoone);
+DEFINE_ART_SERVICE(trigger::TriggerAlgoMicroBoone)
 
 #endif 
