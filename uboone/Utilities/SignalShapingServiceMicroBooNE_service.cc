@@ -421,6 +421,6 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
 
 namespace util {
 
-  DEFINE_ART_SERVICE(SignalShapingServiceMicroBooNE);
+  DEFINE_ART_SERVICE(SignalShapingServiceMicroBooNE)
 
 }

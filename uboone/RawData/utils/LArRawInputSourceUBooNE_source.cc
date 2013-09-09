@@ -12,4 +12,4 @@ namespace lris {
   typedef art::Source<LArRawInputDriverUBooNE> LArRawInputSourceUBooNE;
 }
 
-DEFINE_ART_INPUT_SOURCE(lris::LArRawInputSourceUBooNE);
+DEFINE_ART_INPUT_SOURCE(lris::LArRawInputSourceUBooNE)

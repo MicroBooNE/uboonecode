@@ -75,7 +75,7 @@ namespace util
 
   };
 
-  DEFINE_ART_MODULE(SignalShapingMicroBooNETest);
+  DEFINE_ART_MODULE(SignalShapingMicroBooNETest)
 
   SignalShapingMicroBooNETest::SignalShapingMicroBooNETest(const fhicl::ParameterSet& pset)
   {}
