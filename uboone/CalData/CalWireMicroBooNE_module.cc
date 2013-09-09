@@ -75,7 +75,7 @@ namespace caldata {
     
   }; // class CalWireMicroBooNE
 
-  DEFINE_ART_MODULE(CalWireMicroBooNE);
+  DEFINE_ART_MODULE(CalWireMicroBooNE)
   
   //-------------------------------------------------
   CalWireMicroBooNE::CalWireMicroBooNE(fhicl::ParameterSet const& pset)

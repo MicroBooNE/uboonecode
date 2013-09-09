@@ -320,7 +320,7 @@ namespace uboone{
 
 namespace uboone{
 
-  DEFINE_ART_MODULE(MicrobooneResp);
+  DEFINE_ART_MODULE(MicrobooneResp)
   
 } // end namespace uboone
 
