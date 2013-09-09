@@ -628,7 +628,7 @@ compressed    0  (code,code,             )
       for( seb_it = seb_map.begin(); seb_it != seb_map.end(); seb_it++){
       
       	//get the crateHeader/crateData objects
-        crateHeader crate_header = seb_it->first;
+        //crateHeader crate_header = seb_it->first;   // unused variable
         crateData crate_data = seb_it->second;
 	
 	//now get the card map (for the current crate), and do a loop over all cards
@@ -637,7 +637,7 @@ compressed    0  (code,code,             )
     	for(card_it = card_map.begin(); card_it != card_map.end(); card_it++){
 	   
 	   //get the cardHeader/cardData objects
-           cardHeader card_header = card_it->first;
+           //cardHeader card_header = card_it->first;   // unused variable
            cardData card_data = card_it->second;
 	   
 	   //now get the channel map (for the current card), and do a loop over all channels
