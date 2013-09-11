@@ -176,7 +176,7 @@ namespace trigger
 
   }; /// TriggerAlgoMicroBoone class def
 
-}; /// trigger namesapce
+} /// trigger namesapce
 
 DECLARE_ART_SERVICE(trigger::TriggerAlgoMicroBoone, LEGACY)
 

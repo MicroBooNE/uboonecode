@@ -72,10 +72,10 @@ namespace trigana {
 
   //-----------------------------------------------------------------------
   // Destructor
-  TrigAnaMicroBoone::~TrigAnaMicroBoone(){};
+  TrigAnaMicroBoone::~TrigAnaMicroBoone(){}
    
   //-----------------------------------------------------------------------
-  void TrigAnaMicroBoone::beginJob(){};
+  void TrigAnaMicroBoone::beginJob(){}
    
 
   //-----------------------------------------------------------------------
