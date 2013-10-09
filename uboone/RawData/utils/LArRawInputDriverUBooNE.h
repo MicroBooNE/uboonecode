@@ -5,7 +5,7 @@
 /// \Original Version from:
 /// \version $Id: T962ConvertBinaryToROOT.h,v 1.7 2010/01/14 19:20:33 brebel Exp $
 /// \author  brebel@fnal.gov, soderber@fnal.gov
-/// \MicroBooNE author: jasaadi@fnal.gov (with much help from Eric and Wes)
+/// \MicroBooNE author: jasaadi@fnal.gov, zarko@fnal.gov (with much help from Eric and Wes)
 ////////////////////////////////////////////////////////////////////////
 
 #include "fhiclcpp/ParameterSet.h"
@@ -17,32 +17,27 @@
 #include "art/Framework/Principal/EventPrincipal.h"
 #include "art/Persistency/Provenance/SubRunID.h"
 
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/version.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/binary_object.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include "boost/date_time/gregorian/gregorian.hpp"
-#include "boost/date_time/posix_time/posix_time.hpp"
-#include "boost/date_time/gregorian/greg_serialize.hpp"
-#include "boost/date_time/posix_time/time_serialize.hpp"
-#include "boost/serialization/vector.hpp"
-
-#include "RawData/uboone_datatypes/share/boonetypes.h"
-
 #include <fstream>
-#include <string>
 #include <vector>
 
-namespace raw {
-class RawDigit;
-class OpDetPulse;
-class BeamInfo;
-class DAQHeader;
+namespace gov {
+  namespace fnal {
+    namespace uboone {
+      namespace datatypes {
+	class eventRecord;
+      }
+    }
+  }
 }
+
+namespace raw {
+  class RawDigit;
+  class OpDetPulse;
+  class BeamInfo;
+  class DAQHeader;
+}
+
+class TH1D;
 
 ///Conversion of binary data to root files
 namespace lris {
@@ -87,26 +82,33 @@ namespace lris {
 		  art::SubRunPrincipal* &outSR,
 		  art::EventPrincipal* &outE);
 
+  private:
     //Other functions
     void initChannelMap();
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
 			  std::vector<raw::OpDetPulse>& pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo);
-
-  private:
-    
+    void fillDAQHeaderData(gov::fnal::uboone::datatypes::eventRecord& event_record,
+			   raw::DAQHeader& daqHeader);
+    void fillTPCData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
+		     std::vector<raw::RawDigit>& digitList);
+    void fillPMTData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
+		     std::vector<raw::OpDetPulse>& pmtDigitList);
+    void fillBeamData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
+		      raw::BeamInfo& beamInfo);
+      
     art::PrincipalMaker            fPrincipalMaker;
     art::SubRunID                  fCurrentSubRunID;
-
-    std::ifstream fInputStream;
-    std::vector<std::streampos> fEventLocation;
-
-    uint32_t fNumberOfEvents;
-    uint32_t fEventCounter; //event counter
-    bool fHuffmanDecode;
-
-    std::map<daqid_t, int> fChannelMap;
+    std::ifstream                  fInputStream;
+    std::vector<std::streampos>    fEventLocation;
+    uint32_t                       fNumberOfEvents;
+    uint32_t                       fEventCounter; 
+    bool                           fHuffmanDecode;
+    std::map<daqid_t, int>         fChannelMap;   
+    
+    //histograms
+    std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
     
   };  // LArRawInputDriverUBooNE
 
