@@ -12,7 +12,7 @@
 #include "RawData/RawDigit.h"
 #include "RawData/DAQHeader.h"
 #include "RawData/BeamInfo.h"
-#include "RawData/OpDetPulse.h"
+#include "OpticalDetectorData/FIFOChannel.h"
 #include "Geometry/Geometry.h"
 #include "SummaryData/RunData.h"
 
@@ -54,6 +54,9 @@ extern "C" {
 #include <sys/types.h>
 }
 
+#include <bitset>
+#include <iostream>
+
 namespace ubdaq=gov::fnal::uboone::datatypes;
 
 // +++ Blatant stealing from LongBo
@@ -72,7 +75,7 @@ namespace lris {
   {
     helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
-    helper.reconstitutes<std::vector<raw::OpDetPulse>,art::InEvent>("daq");
+    helper.reconstitutes<std::vector<optdata::FIFOChannel>,art::InEvent>("daq");
     helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
     initChannelMap();
 
@@ -222,7 +225,7 @@ namespace lris {
     // Create empty result, then fill it from current file:
     std::unique_ptr<raw::DAQHeader> daq_header(new raw::DAQHeader);
     std::unique_ptr<std::vector<raw::RawDigit> >  tpc_raw_digits( new std::vector<raw::RawDigit>  );
-    std::unique_ptr<std::vector<raw::OpDetPulse> >  pmt_raw_digits( new std::vector<raw::OpDetPulse>  );
+    std::unique_ptr<std::vector<optdata::FIFOChannel> >  pmt_raw_digits( new std::vector<optdata::FIFOChannel>  );
     std::unique_ptr<raw::BeamInfo> beam_info(new raw::BeamInfo);
 
     bool res=false;
@@ -274,7 +277,7 @@ namespace lris {
 
   // =====================================================================
   bool LArRawInputDriverUBooNE::processNextEvent(std::vector<raw::RawDigit>& tpcDigitList,
-						 std::vector<raw::OpDetPulse>& pmtDigitList,
+						 std::vector<optdata::FIFOChannel>& pmtDigitList,
 						 raw::DAQHeader& daqHeader,
 						 raw::BeamInfo& beamInfo)
   {       
@@ -291,9 +294,9 @@ namespace lris {
       fillPMTData(event_record, pmtDigitList);
       fillBeamData(event_record, beamInfo);
 
-    } catch ( ... ) {
+    } catch ( art::Exception const& e ) {
       throw art::Exception( art::errors::FileReadError )
-	<< "Failed to read the event." << std::endl;
+	<< "Failed to read the event."<<e.what() << std::endl;
     }
   
     return true;
@@ -375,21 +378,22 @@ namespace lris {
 	    //\todo here fill in the detector RawData structures. something like this:
 	    //\tode following code is from pulse_viewer.cpp, not sure what is the most 
 	    //      elegant way to do this
-	    //\todo adclist is a vector<short> can't really go from uint16_t to short
+	    //\todo adclist is a vector<short>, but need only 12bit so probably 
+	    //      ok to cast uint16_t to short
+
 	    std::unique_ptr<uint16_t> blk_chD(new uint16_t);
 	    std::vector<short> adclist;
-
 	    size_t chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));
 	    char* cdptr=chD.getChannelDataPtr();
-	    
+
 	    for (uint i=0;i<chdsize;i++) {
 	      std::copy(cdptr+i*sizeof(uint16_t),
 			cdptr+(i+1)*sizeof(uint16_t),
 			(char*)blk_chD.get());
-	    
-	      adclist.push_back(*blk_chD);
+
+	      adclist.push_back(*blk_chD);	      
 	    }
-	    
+
 	    daqid_t daqId(crate_header.getCrateNumber(),
 			  card_header.getModule(),
 			  channel_number);
@@ -412,9 +416,10 @@ namespace lris {
 
   // =====================================================================
   void LArRawInputDriverUBooNE::fillPMTData(ubdaq::eventRecord& event_record,
-					    std::vector<raw::OpDetPulse>& pmtDigitList)
+					    std::vector<optdata::FIFOChannel>& pmtDigitList)
   {
     //fill PMT data
+
     //crate -> card -> channel -> window
     std::map<ubdaq::crateHeader,ubdaq::crateDataPMT,ubdaq::compareCrateHeader> seb_pmt_map = event_record.getSEBPMTMap();
     std::map<ubdaq::crateHeader,ubdaq::crateDataPMT>::iterator seb_pmt_it;
@@ -445,23 +450,33 @@ namespace lris {
 	  for(window_it = window_map.begin(); window_it != window_map.end(); window_it++){
 	    ubdaq::windowHeaderPMT winHeader=window_it->first;
 	    ubdaq::windowDataPMT winData=window_it->second;
-	    
-	    //\todo fix the uint16_t vs short 
-	    std::unique_ptr<uint16_t> blk_winD(new uint16_t);
-	    std::vector<short> adclist;
-	    
 	    size_t win_data_size=winData.getWindowDataSize()/sizeof(uint16_t);
-	    for (uint i=0;i<win_data_size;i++) {
-		std::copy(winData.getWindowDataPtr()+i*sizeof(uint16_t),
-			  winData.getWindowDataPtr()+(i+1)*sizeof(uint16_t),
-			  (char*)blk_winD.get());
-		
-		adclist.push_back(*blk_winD);
-	    }
 	    
-	    unsigned int pmt_frame=winHeader.getFrame();
-	    unsigned int first_sample=0;
-	    raw::OpDetPulse rd(channel_number,adclist,pmt_frame,first_sample);
+	    //\todo check category, time & frame
+	    optdata::Optical_Category_t category = optdata::kUndefined;
+	    switch (winHeader.getDiscriminant()) {
+	    case 1:
+	      category=optdata::kCosmicPMTTrigger;
+	      break;
+	    case 3:
+	      category=optdata::kBeamPMTTrigger;
+	      break;
+	    default:
+	      category=optdata::kUndefined;
+	     
+	    }
+	    optdata::TimeSlice_t time=winHeader.getSample();
+	    optdata::Frame_t frame=winHeader.getFrame();
+	    optdata::FIFOChannel rd(category, time, frame, channel_number,win_data_size);
+
+	    std::unique_ptr<uint16_t> blk_winD(new uint16_t);	    
+	    for (uint i=0;i<win_data_size;i++) {
+	      std::copy(winData.getWindowDataPtr()+i*sizeof(uint16_t),
+			winData.getWindowDataPtr()+(i+1)*sizeof(uint16_t),
+			(char*)blk_winD.get());
+	      
+	      rd.push_back(*blk_winD & 0xfff);
+	    }
 	    pmtDigitList.push_back(rd);
 	  }
 	}//<--End channel_pmt_it for loop

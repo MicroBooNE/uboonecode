@@ -30,9 +30,12 @@ namespace gov {
   }
 }
 
+namespace optdata {
+  class FIFOChannel;
+}
+
 namespace raw {
-  class RawDigit;
-  class OpDetPulse;
+  class RawDigit; 
   class BeamInfo;
   class DAQHeader;
 }
@@ -86,7 +89,7 @@ namespace lris {
     //Other functions
     void initChannelMap();
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
-			  std::vector<raw::OpDetPulse>& pmtDigitList,
+			  std::vector<optdata::FIFOChannel>& pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo);
     void fillDAQHeaderData(gov::fnal::uboone::datatypes::eventRecord& event_record,
@@ -94,7 +97,7 @@ namespace lris {
     void fillTPCData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
 		     std::vector<raw::RawDigit>& digitList);
     void fillPMTData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
-		     std::vector<raw::OpDetPulse>& pmtDigitList);
+		     std::vector<optdata::FIFOChannel>& pmtDigitList);
     void fillBeamData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
 		      raw::BeamInfo& beamInfo);
       
