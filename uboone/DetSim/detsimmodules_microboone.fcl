@@ -1,4 +1,4 @@
-#include "job/detsimmodules.fcl"
+#include "detsimmodules.fcl"
 
 BEGIN_PROLOG
 

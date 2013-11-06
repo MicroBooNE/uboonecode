@@ -1,4 +1,4 @@
-#include job/lightsource.fcl
+#include lightsource.fcl
 
 BEGIN_PROLOG
 

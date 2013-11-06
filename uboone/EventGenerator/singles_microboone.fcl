@@ -1,4 +1,4 @@
-#include "job/singles.fcl"
+#include "singles.fcl"
 
 BEGIN_PROLOG
 

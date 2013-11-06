@@ -1,4 +1,4 @@
-#include "job/largeantmodules.fcl"
+#include "largeantmodules.fcl"
 
 BEGIN_PROLOG
 

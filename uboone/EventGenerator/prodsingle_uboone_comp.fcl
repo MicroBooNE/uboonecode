@@ -1,9 +1,9 @@
-#include "job/services.fcl"
-#include "job/largeantmodules.fcl"
-#include "job/singles.fcl"
-#include "job/caldata.fcl"
-#include "job/detsimmodules.fcl"
-#include "job/mccheatermodules.fcl"
+#include "services.fcl"
+#include "largeantmodules.fcl"
+#include "singles.fcl"
+#include "caldata.fcl"
+#include "detsimmodules.fcl"
+#include "mccheatermodules.fcl"
 
 process_name: SinglesGen
 

@@ -1,4 +1,4 @@
-#include "job/genie.fcl"
+#include "genie.fcl"
 
 BEGIN_PROLOG
 

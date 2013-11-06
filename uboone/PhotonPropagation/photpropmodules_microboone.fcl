@@ -1,4 +1,4 @@
-#include "job/photpropmodules.fcl"
+#include "photpropmodules.fcl"
 
 BEGIN_PROLOG
 
