@@ -9,6 +9,16 @@
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
+#include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Principal/Event.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "art/Framework/Principal/Handle.h"
+#include "art/Persistency/Common/Ptr.h"
+#include "art/Persistency/Common/PtrVector.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "art/Framework/Services/Optional/TFileService.h"
+#include "art/Framework/Services/Optional/TFileDirectory.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 // ROOT include
 #include <TH1D.h>
@@ -39,24 +49,9 @@ namespace trigana {
 
 } 
 
-// Framework includes
-#include "art/Framework/Core/ModuleMacros.h"
-
 namespace trigana {
   DEFINE_ART_MODULE(TrigAnaMicroBoone)
 }
-
-
-// Framework includes
-#include "art/Framework/Principal/Event.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Principal/Handle.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art/Framework/Services/Optional/TFileService.h"
-#include "art/Framework/Services/Optional/TFileDirectory.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 
 namespace trigana {
@@ -64,6 +59,7 @@ namespace trigana {
   //-----------------------------------------------------------------------
   // Constructor
   TrigAnaMicroBoone::TrigAnaMicroBoone(fhicl::ParameterSet const& pset)
+    : EDAnalzyer(pset)
   {
 
     _name_opt_module   = pset.get< std::string >("ModuleName_PMT");
