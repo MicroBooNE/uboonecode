@@ -1,5 +1,5 @@
-#include "job/services.fcl"
-#include "job/microbooneresp.fcl"
+#include "services.fcl"
+#include "microbooneresp.fcl"
 
 process_name: MicrobooneResp
 

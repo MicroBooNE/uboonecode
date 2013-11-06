@@ -1,5 +1,5 @@
-#include "job/services.fcl"
-#include "job/caldata.fcl"
+#include "services.fcl"
+#include "caldata.fcl"
 
 process_name: FFTTest
 

@@ -1,5 +1,5 @@
-#include "job/services.fcl"
-#include "job/detsimmodules.fcl"
+#include "services.fcl"
+#include "detsimmodules.fcl"
 
 process_name: SimWire
 
