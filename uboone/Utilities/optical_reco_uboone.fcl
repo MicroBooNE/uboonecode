@@ -1,9 +1,9 @@
-#include "job/services.fcl"
-#include "job/caldata.fcl"
-#include "job/hitfindermodules.fcl"
-#include "job/clustermodules.fcl"
-#include "job/trackfindermodules.fcl"
-#include "job/opticaldetectormodules.fcl"
+#include "services.fcl"
+#include "caldata.fcl"
+#include "hitfindermodules.fcl"
+#include "clustermodules.fcl"
+#include "trackfindermodules.fcl"
+#include "opticaldetectormodules.fcl"
 
 process_name: OpRecoFlash
 

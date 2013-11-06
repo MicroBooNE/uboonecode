@@ -1,4 +1,4 @@
-#include "job/larfft.fcl"
+#include "larfft.fcl"
 
 BEGIN_PROLOG
 

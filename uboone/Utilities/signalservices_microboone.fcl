@@ -1,4 +1,4 @@
-#include "job/signalservices.fcl"
+#include "signalservices.fcl"
 
 BEGIN_PROLOG
 

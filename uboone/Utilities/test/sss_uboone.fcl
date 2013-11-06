@@ -1,4 +1,4 @@
-#include "job/services_microboone.fcl"
+#include "services_microboone.fcl"
 
 process_name: SignalShapingMicroBooNETest
 
