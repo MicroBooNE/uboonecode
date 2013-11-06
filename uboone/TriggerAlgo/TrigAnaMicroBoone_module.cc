@@ -59,7 +59,7 @@ namespace trigana {
   //-----------------------------------------------------------------------
   // Constructor
   TrigAnaMicroBoone::TrigAnaMicroBoone(fhicl::ParameterSet const& pset)
-    : EDAnalzyer(pset)
+    : EDAnalyzer(pset)
   {
 
     _name_opt_module   = pset.get< std::string >("ModuleName_PMT");
