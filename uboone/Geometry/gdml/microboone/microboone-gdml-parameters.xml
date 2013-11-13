@@ -381,6 +381,12 @@
    <fraction n="0.080" ref="hydrogen"/>
   </material>
 
+  <material name="Polystyrene">
+   <D value="1.06" unit="g/cm3"/>
+   <fraction n="0.077418" ref="hydrogen"/>
+   <fraction n="0.922582" ref="carbon"/>
+  </material>
+
 </materials>
 
 </parameters>
