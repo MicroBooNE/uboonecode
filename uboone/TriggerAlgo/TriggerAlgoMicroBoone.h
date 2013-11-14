@@ -110,6 +110,15 @@ namespace trigger
     */
     virtual void ClearTriggerInfo();
 
+    /// Getter function for TPC frame size
+    optdata::TimeSlice_t FrameSizeTPC() const { return _tpc_frame_size;};
+
+    /// Getter function for PMT frame size
+    optdata::TimeSlice_t FrameSizePMT() const { return _pmt_frame_size;};
+
+    /// Getter function for Trigger frame size
+    optdata::TimeSlice_t FrameSizeTrigger() const { return _trigger_frame_size;};
+
   protected:
 
     //
@@ -167,6 +176,9 @@ namespace trigger
 
     /// Frame size of TPC FEM readout
     optdata::TimeSlice_t _tpc_frame_size;
+
+    /// Frame size of Trigger readout
+    optdata::TimeSlice_t _trigger_frame_size;
 
     /// run, subrun, and event id to keep track of which event has been processed.
     uint32_t _current_run, _current_subrun, _current_event;

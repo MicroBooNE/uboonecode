@@ -63,6 +63,8 @@ namespace trigger{
 
     _tpc_frame_size      = pset.get< optdata::TimeSlice_t >("FrameSize_TPC");
 
+    _trigger_frame_size  = pset.get< optdata::TimeSlice_t >("FrameSize_Trigger");
+
     _clock_pmt           = pset.get< double               >("ClockFrequency_PMT");
 
     _clock_tpc           = pset.get< double               >("ClockFrequency_TPC");
