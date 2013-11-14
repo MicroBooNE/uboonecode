@@ -56,7 +56,7 @@ namespace trigger
 
     /// A function to convert input time in nano-seconds into the time unit used in Trigger logic.
     trigdata::TrigTimeSlice_t ConvertTime(double time_ns) const {
-      return trigdata::TrigTimeSlice_t( (time_ns*1.e-3)/(_clock_pmt) );
+      return trigdata::TrigTimeSlice_t( (time_ns*1.e-3) * (_clock_trigger) );
     };
 
     /**
