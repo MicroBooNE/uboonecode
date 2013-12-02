@@ -1,8 +1,8 @@
-#include "services.fcl"
-#include "caldata.fcl"
-#include "hitfindermodules.fcl"
-#include "clustermodules.fcl"
-#include "trackfindermodules.fcl"
+#include "services_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "trackfindermodules_microboone.fcl"
 
 process_name: Reco
 
