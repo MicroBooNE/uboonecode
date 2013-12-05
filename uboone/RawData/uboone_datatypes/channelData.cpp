@@ -1,4 +1,5 @@
 #include <vector>
+#include <iostream>
 #include "channelData.h"
 
 using namespace gov::fnal::uboone::datatypes;

@@ -1,3 +1,4 @@
+#include <iostream>
 #include "crateData.h"
 
 using namespace gov::fnal::uboone::datatypes;
