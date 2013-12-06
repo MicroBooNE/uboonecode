@@ -78,7 +78,7 @@ namespace util
   DEFINE_ART_MODULE(SignalShapingMicroBooNETest)
 
   SignalShapingMicroBooNETest::SignalShapingMicroBooNETest(const fhicl::ParameterSet& pset)
-  : EDAnalyzer(/*pset*/)
+  : EDAnalyzer(pset)
   {}
 
   void SignalShapingMicroBooNETest::beginJob()
