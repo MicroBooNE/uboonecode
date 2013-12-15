@@ -4,7 +4,6 @@ microboone_geo:
 {
  SurfaceY:        2.0e2                           #in cm, vertical distance to the surface
  Name:            "microboone"
- RelativePath:    "Geometry/gdml/"
  GDML:            "microboone.gdml"
  ROOT:            "microboone.gdml"
  DisableWiresInG4: true                           # Whether to use wirefree geometry in LArG4
