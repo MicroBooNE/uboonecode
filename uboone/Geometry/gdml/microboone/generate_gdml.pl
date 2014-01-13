@@ -1314,6 +1314,13 @@ sub gen_cryostat()
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
+<sphere name="EndCap"
+  rmin="144*2.54"
+  rmax="144.4281*2.54"
+  deltaphi="360"
+  deltatheta="31.3822"
+  aunit="deg"
+  lunit="cm"/>
 EOF
 
 
@@ -1321,6 +1328,10 @@ EOF
 </solids>
 
 <structure>
+<volume name="volEndCap">
+   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+   <solidref ref="EndCap"/>
+  </volume>
  <volume name="volSteelTube">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="SteelTube"/>
@@ -1331,6 +1342,15 @@ EOF
   <physvol>
    <volumeref ref="volSteelTube"/>
    <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+<physvol>
+   <volumeref ref="volEndCap"/>
+   <position name="posEndCap1" unit="cm" x="0" y="0" z="700- 2.54*sqrt(144.4281^2-75.4281^2)"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volEndCap"/>
+    <position name="posEndCap2" unit="cm" x="0" y="0" z="-(700- 2.54*sqrt(144.4281^2-75.4281^2))"/>
+    <rotationref ref="rPlus180AboutY"/>
   </physvol>
   <physvol>
    <volumeref ref="volTPC"/>
