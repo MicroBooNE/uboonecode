@@ -2,7 +2,7 @@
 #ifndef TRIGGERALGOMICROBOONE_CC
 #define TRIGGERALGOMICROBOONE_CC
 
-#include "TriggerAlgoMicroBoone.h"
+#include "uboone/TriggerAlgo/TriggerAlgoMicroBoone.h"
 
 namespace trigger{
 

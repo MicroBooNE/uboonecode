@@ -31,7 +31,7 @@ extern "C" {
 #include "cetlib/exception.h"
 #include "cetlib/search_path.h"
 
-#include "Utilities/SignalShapingServiceMicroBooNE.h"
+#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Geometry/Geometry.h"
 #include "Filters/ChannelFilter.h"
 #include "RawData/RawDigit.h"

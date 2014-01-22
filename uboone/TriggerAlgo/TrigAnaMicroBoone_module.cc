@@ -4,7 +4,7 @@
 
 // LArSoft includes
 #include "Geometry/Geometry.h"
-#include "TriggerAlgoMicroBoone.h"
+#include "uboone/TriggerAlgo/TriggerAlgoMicroBoone.h"
 #include "OpticalDetectorData/FIFOChannel.h"
 
 // ART includes.

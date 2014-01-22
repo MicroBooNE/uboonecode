@@ -3,7 +3,7 @@
 /// \author H. Greenlee 
 ////////////////////////////////////////////////////////////////////////
 
-#include "Utilities/SignalShapingServiceMicroBooNE.h"
+#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"

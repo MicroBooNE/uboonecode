@@ -8,7 +8,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 //LArSoft 
-#include "RawData/utils/LArRawInputDriverUBooNE.h"
+#include "uboone/RawData/utils/LArRawInputDriverUBooNE.h"
 #include "RawData/RawDigit.h"
 #include "RawData/DAQHeader.h"
 #include "RawData/BeamInfo.h"

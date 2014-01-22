@@ -35,7 +35,7 @@ extern "C" {
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "Utilities/LArProperties.h"
-#include "Utilities/SignalShapingServiceMicroBooNE.h"
+#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Geometry/Geometry.h"
 #include "Simulation/sim.h"
 #include "Simulation/SimChannel.h"
