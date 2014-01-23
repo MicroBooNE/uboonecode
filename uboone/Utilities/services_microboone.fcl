@@ -16,7 +16,7 @@ BEGIN_PROLOG
 
 microboone_services:
 {
- ExptGeoHelperInterface          @local::microboone_geometry_helper
+ ExptGeoHelperInterface:         @local::microboone_geometry_helper
  Geometry:                       @local::microboone_geo 	       
  DetectorProperties:             @local::microboone_detproperties 
  LArProperties:                  @local::microboone_properties    
@@ -33,7 +33,7 @@ microboone_simulation_services:
 {
  LArG4Parameters:                @local::microboone_largeantparameters 
  LArVoxelCalculator:             @local::microboone_larvoxelcalculator 
- ExptGeoHelperInterface          @local::microboone_geometry_helper
+ ExptGeoHelperInterface:         @local::microboone_geometry_helper
  Geometry:                       @local::microboone_geo 	           
  DetectorProperties:             @local::microboone_detproperties      
  LArProperties:                  @local::microboone_properties	   
