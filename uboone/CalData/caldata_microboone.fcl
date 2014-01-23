@@ -1,4 +1,4 @@
-#include "job/caldata.fcl"
+#include "caldata.fcl"
 
 BEGIN_PROLOG
 
