@@ -1428,28 +1428,12 @@ sub gen_vetoWall()
   # Set up the output file.
   $VW = "micro-vetoWall" . $suffix . ".gdml";
   push (@gdmlFiles, $VW); # Add file to list of GDML fragments
-  $VW = ">" . $VW;
+  $VW = ">" . $VW; 
   open(VW) or die("Could not open file $VW for writing");
-  
-  print VW <<EOF;
-  <?xml version='1.0'?>
-  <gdml>
-    <solids>
-      <box lunit="cm" name="AuxDet0"    x="10"    y="20"    z="2" />
-      <box lunit="cm" name="AuxDet1"    x="10"    y="20"    z="1" />
-  
-  </solids>
-  <structure>
-    <volume name="volAuxDet0">
-      <materialref ref="Polystyrene"/>
-      <solidref ref="AuxDet0"/>
-    </volume>
-    <volume name="volAuxDet1">
-      <materialref ref="Polystyrene"/>
-      <solidref ref="AuxDet1"/>
-    </volume>
-  </structure>
-EOF
+  my $subroutineFile = 'gdml_vetoWall_subroutine_file.gdml';
+  open( FILE, "< $subroutineFile" ) or die "Can't open $subroutineFile : $!";
+  print VW <FILE>;
+  close FILE;
 }
 
 # Parameterize the cryostat's surroundings.
@@ -1644,22 +1628,11 @@ EOF
 EOF
   }
   
-  if ( $vetoWall_switch eq "on" ) {
-    print GDML <<EOF;
-    
-    <physvol>
-    <volumeref ref="volAuxDet0"/>
-    <position name="posAuxDet0" unit="cm" x="0" y="0" z="-800"/>
-    <rotation name="rAuxDet0" unit="deg" x="0" y="0" z="0"/>
-    </physvol>
-    <physvol>
-    <volumeref ref="volAuxDet1"/>
-    <position name="posAuxDet1" unit="cm" x="0" y="0" z="-805"/>
-    <rotation name="rAuxDet1" unit="deg" x="0" y="0" z="0"/>
-    </physvol>
-    
-EOF
-  }
+    if ( $vetoWall_switch eq "on" ) {
+      my $volumePlacementFile = 'gdml_vetoWall_volumePlacement_file.gdml';
+      open VPF, "< $volumePlacementFile" or die "Can't open $volumePlacementFile : $!";
+      print GDML <VPF>;
+    }
 
     print GDML <<EOF;
  </volume>
