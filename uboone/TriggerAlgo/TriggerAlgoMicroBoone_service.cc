@@ -2,7 +2,9 @@
 #ifndef TRIGGERALGOMICROBOONE_CC
 #define TRIGGERALGOMICROBOONE_CC
 
-#include "uboone/TriggerAlgo/TriggerAlgoMicroBoone.h"
+// TriggerAlgoMicroBoone.h is temporarily in larsim
+//#include "uboone/TriggerAlgo/TriggerAlgoMicroBoone.h"
+#include "TriggerAlgo/TriggerAlgoMicroBoone.h"
 
 namespace trigger{
 
