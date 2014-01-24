@@ -1,0 +1,37 @@
+
+<?xml version='1.0'?>
+<gdml>
+<define>
+</define>
+<solids>
+ <box name="WireFrameV1"
+  lunit="cm"
+  x="kWireFrameDepth"
+  y="kWirePlaneHeight-2*kWireFrameWidth"
+  z="kWireFrameWidth"/>
+ <box name="WireFrameV2"
+  lunit="cm"
+  x="0.5*kWireFrameDepth-2"
+  y="kWirePlaneHeight-2*kWireFrameWidth"
+  z="kWireFrameWidth"/>
+ <box name="WireFrameH"
+  lunit="cm"
+  x="kWireFrameDepth"
+  y="kWireFrameWidth"
+  z="kWirePlaneLength"/>
+</solids>
+<structure>
+ <volume name="volWireFrameH">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="WireFrameH"/>
+ </volume>
+ <volume name="volWireFrameV1">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="WireFrameV1"/>
+ </volume>
+ <volume name="volWireFrameV2">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="WireFrameV2"/>
+ </volume>
+</structure>
+</gdml>

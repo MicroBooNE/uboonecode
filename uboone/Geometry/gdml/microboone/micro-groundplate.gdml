@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+<gdml>
+<solids>
+ <box name="GroundPlate"
+  lunit="cm"
+  x="224"
+  y="0.1"
+  z="1100"/>
+</solids>
+<structure>
+ <volume name="volGroundPlate">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="GroundPlate"/>
+ </volume>
+</structure>
+</gdml>

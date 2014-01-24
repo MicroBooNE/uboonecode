@@ -1,0 +1,27 @@
+BEGIN_PROLOG
+
+microboone_makeresp:
+{ 
+  module_type:        MicrobooneResp
+  ElectFunction:      'exp(-[0]*(x-[2]))/(1.0+exp(-[1]*(x-[2])))'
+  ElectParams:        [ .066, 0.22, 35.0]
+  NoiseFunction:      "[0]*x*exp(-x/[1])"
+  NoiseParams:        [ .003, 60.0 ]
+  ColDriftShape:      "x^[2]/(1.0+(x/[0])^[1])"
+  IndDriftShape:      "[0]*(1.0+[4]*tanh(x-[2]))*([2]-x)*exp(-0.5*((x-[2])/[3])^2.0)"
+  IndSimScale:        0.15
+  ColSimScale:        .00025
+  Ind3DCorrection:    .91
+  Col3DCorrection:    1.5
+  Asymmetry:          0
+  RawIndFilter:        "[0]*exp(-0.5*(x/[1])^[2])"
+  RawIndFilterParams:  [ 0.0456, 100.0, 2.0 ]
+  RawColFilter:        "(x>0)*[0]*exp(-0.5*((x-[1])/[2])^2)"
+  RawColFilterParams: [ .675, 0.0, 110.0 ]
+  SimIndFilter:        "gaus*exp(-0.5*pow(x/[3],[4]))"
+  SimIndFilterParams:  [ .454, 0.0, 150.0, 200.0, 8.0 ]
+  SimColFilter:        "(x>0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])"
+  SimColFilterParams: [ 79258.0, 0.0, 150.0, 1.5 ]
+}
+
+END_PROLOG

@@ -1,0 +1,22 @@
+#include "caldata.fcl"
+
+BEGIN_PROLOG
+
+microboone_calwire:
+{
+ module_type:        "CalWireMicroBooNE"
+ DigitModuleLabel:   "daq"
+ PostsampleBins:       0
+ BaseSampleBins:      40  # set > 0 for baseline subtraction. Value should be
+                          # modulo the data size (3200 for uB)
+ BaseVarCut:         25.  # Variance cut for selecting baseline points
+}
+
+microboone_calwirePrespill:  @local::microboone_calwire
+microboone_calwirePostspill: @local::microboone_calwire
+microboone_calwirePrespill.DigitModuleLabel: "daq:preSpill"
+microboone_calwirePostspill.DigitModuleLabel: "daq:postSpill"
+
+microboone_calwireana: @local::standard_calwireana
+
+END_PROLOG

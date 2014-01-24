@@ -1,0 +1,37 @@
+<?xml version='1.0'?>
+<gdml>
+<solids>
+ <box name="Bulk"
+  lunit="cm"
+  x="kFieldCageWidth+20"
+  y="kFieldCageHeight+20"
+  z="kFieldCageLength"/>
+</solids>
+<structure>
+ <volume name="volBulk">
+  <materialref ref="LAr"/>
+  <solidref ref="Bulk"/>
+  <physvol>
+   <volumeref ref="volFieldCage"/>
+   <position name="posFieldCage" unit="cm" x="0" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volHiVPlane"/>
+   <position name="posHiVPlane" unit="cm" x="9" y="0.5*kFieldCageHeight+3" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volCathode"/>
+   <position name="posCathode" unit="cm" x="0.5*(kFieldCageWidth)+kCathodeWidth" y="0" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volWirePlane"/>
+   <position name="posWireplane" unit="cm" x="-0.5*(kFieldCageWidth)-kWirePlaneWidth" y="0" z="0"/>
+   <rotation name="rWirePlane" unit="cm" x="0" y="180" z="0"/>
+  </physvol>
+  <physvol>
+   <volumeref ref="volElectronics"/>
+   <position name="posElectronics" unit="cm" x="-0.5*(kFieldCageWidth)-kWirePlaneWidth" y="0.5*kFieldCageHeight" z="0"/>
+  </physvol>
+ </volume>
+</structure>
+</gdml>

@@ -1,0 +1,93 @@
+
+<?xml version='1.0'?>
+<gdml>
+<solids>
+ <box name="ElectroBoard"
+  lunit="cm"
+  z="30"
+  x="15"
+  y=".5"/>
+ <box name="ElectroSetPiece"
+  lunit="cm"
+  z="1"
+  x="15"
+  y="5"/>
+ <box name="ElectroSet"
+  lunit="cm"
+  z="30"
+  x="15"
+  y="5"/>
+ <box name="Nub1"
+  lunit="cm"
+  x="1"
+  y="1.5"
+  z=".5"/>
+ <box name="Nub2"
+  lunit="cm"
+  x="2"
+  y="1.5"
+  z=".5"/>
+ <box name="Nub3"
+  lunit="cm"
+  x="3"
+  y="1.5"
+  z=".5"/>
+ <box name="Nub4"
+  lunit="cm"
+  x="1.5"
+  y="1.5"
+  z=".5"/>
+ <box name="ElectroCard"
+  lunit="cm"
+  x="9"
+  y="3"
+  z=".5"/>
+ <box name="Electronics"
+  lunit="cm"
+  x="18"
+  y="12"
+  z="800"/>
+<xtru name="ElectroBar" lunit="cm" >
+  <twoDimVertex x="1.3" y="1.9" />
+  <twoDimVertex x="1.3" y="2.1" />
+  <twoDimVertex x="-1.3" y="2.1" />
+  <twoDimVertex x="-1.3" y="-2.1" />
+  <twoDimVertex x="1.3" y="-2.1" />
+  <twoDimVertex x="1.3" y="-1.9" />
+  <twoDimVertex x="-1.1" y="-1.9" />
+  <twoDimVertex x="-1.1" y="1.9" />
+  <section zOrder="0" zPosition="-400" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="400" xOffset="0" yOffset="0" scalingFactor="1" />
+</xtru>
+</solids>
+<structure>
+ <volume name="volElectroBar">
+  <materialref ref="G10"/>
+  <solidref ref="ElectroBar"/>
+ </volume>
+ <volume name="volElectroBoard">
+  <materialref ref="SILICON_Si"/>
+  <solidref ref="ElectroBoard"/>
+ </volume>
+ <volume name="volNub1">
+  <materialref ref="G10"/>
+  <solidref ref="Nub1"/>
+ </volume>
+ <volume name="volNub2">
+  <materialref ref="G10"/>
+  <solidref ref="Nub2"/>
+ </volume>
+ <volume name="volNub3">
+  <materialref ref="G10"/>
+  <solidref ref="Nub3"/>
+ </volume>
+ <volume name="volNub4">
+  <materialref ref="G10"/>
+  <solidref ref="Nub4"/>
+ </volume>
+ <volume name="volElectroCard">
+  <materialref ref="SILICON_Si"/>
+  <solidref ref="ElectroCard"/>
+ </volume>
+</structure>
+</gdml>

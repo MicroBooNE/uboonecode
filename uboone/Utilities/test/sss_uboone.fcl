@@ -1,0 +1,55 @@
+#include "services_microboone.fcl"
+
+process_name: SignalShapingMicroBooNETest
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "ss_test_uboone.root" }
+  user: {}
+}
+
+services.user.ExptGeoHelperInterface: @local::microboone_geometry_helper
+services.user.Geometry:           @local::microboone_geo
+services.user.DetectorProperties: @local::microboone_detproperties
+services.user.LArProperties:      @local::microboone_properties
+services.user.LArFFT:             @local::microboone_larfft
+services.user.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+services.user.DatabaseUtil:       @local::microboone_database
+services.user.DatabaseUtil.ShouldConnect: false
+
+source:
+{
+  module_type: EmptyEvent
+  maxEvents:   0       # Number of events to create
+}
+
+outputs:
+{
+}
+
+physics:
+{
+
+ analyzers:
+ {
+  sstest: { module_type: "SignalShapingMicroBooNETest" }
+ }
+
+ #define the path for analyzer modules, order does not matter.
+ #see lines starting physics.analyzers below
+ ana:  [ sstest ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [ ] 
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ana]  
+}
+
+physics.analyzers.sstest:
+{
+  module_type: "SignalShapingMicroBooNETest"
+}
