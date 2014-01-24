@@ -1,6 +1,7 @@
 
 art_make( BASENAME_ONLY
-          MODULE_LIBRARIES
+          EXCLUDE TriggerAlgoMicroBoone_service.cc
+	  MODULE_LIBRARIES
                         TriggerAlgoMicroBoone_service
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
