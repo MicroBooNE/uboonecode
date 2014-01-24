@@ -29,7 +29,7 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
-larsoft         v1_00_00
+larsoft         v1_00_01
 postgresql      v9_1_5b
 gcc		v4_8_1
 
