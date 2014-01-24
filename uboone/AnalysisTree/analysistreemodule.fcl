@@ -1,0 +1,25 @@
+BEGIN_PROLOG
+
+microboone_analysistree:
+{ 
+ module_type:              "AnalysisTree"
+ DigitModuleLabel:         "daq"
+ HitsModuleLabel:          "ffthit"
+ LArGeantModuleLabel:      "largeant"
+ CalDataModuleLabel:       "caldata"
+ GenieGenModuleLabel:      "generator"
+ G4ModuleLabel:            "largeant"
+ ClusterModuleLabel:       "linemerger"
+ KingaModuleLabel:         "kingacluster" 
+ LineMergerModuleLabel:    "linemerger"
+ DbscanModuleLabel:        "dbcluster"
+ FuzzyModuleLabel:         "fuzzy"
+ TrackModuleLabel:         "track3d"
+ EndPoint2DModuleLabel:    "vertex2d"
+ VertexModuleLabel:        "vertex2d"
+ POTModuleLabel:           "generator"
+ CalorimetryModuleLabel:   "calo"
+ ParticleIDModuleLabel:    "pid"
+}
+
+END_PROLOG
