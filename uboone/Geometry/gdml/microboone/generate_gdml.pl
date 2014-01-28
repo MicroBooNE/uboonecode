@@ -166,7 +166,7 @@ sub gen_defs()
     $wires_plength		=	($wire_plane_length - 2*$wire_frame_width) ;
     $wires_pwidth		=	($wire_plane_height - 2*$wire_frame_width) ;
 
-    $field_cage_width			=	200;
+    $field_cage_width			=	256;
     $field_cage_height			=	207.6;  #increased size to avoid overlap of TubeBottom and Top with TPCActive
     $field_cage_cross_length	=	sqrt(($field_cage_width)**2+($field_cage_height-50)**2);
     $field_cage_length			=	1011.6; #increased size to avoid overlap of TubeFront and Back with TPCActive
@@ -669,10 +669,10 @@ EOF
     $ground_plate_Z=0;
 
     print GDML <<EOF;
-  <physvol>
+<!--  <physvol>
    <volumeref ref="volGroundPlate"/>
    <position name="posGroundPlate" unit="cm" x="$ground_plate_X+0.25" y="$ground_plate_Y" z="0"/>
-  </physvol>
+  </physvol>-->
 EOF
 
 
@@ -1316,7 +1316,7 @@ sub gen_cryostat()
   lunit="cm"/>
 <sphere name="EndCap"
   rmin="144*2.54"
-  rmax="144.4281*2.54"
+  rmax="144.5*2.54"
   deltaphi="360"
   deltatheta="31.3822"
   aunit="deg"
@@ -1345,11 +1345,11 @@ EOF
   </physvol>
 <physvol>
    <volumeref ref="volEndCap"/>
-   <position name="posEndCap1" unit="cm" x="0" y="0" z="700- 2.54*sqrt(144.4281^2-75.4281^2)"/>
+   <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
    </physvol>
    <physvol>
     <volumeref ref="volEndCap"/>
-    <position name="posEndCap2" unit="cm" x="0" y="0" z="-(700- 2.54*sqrt(144.4281^2-75.4281^2))"/>
+    <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
     <rotationref ref="rPlus180AboutY"/>
   </physvol>
   <physvol>
@@ -1428,12 +1428,28 @@ sub gen_vetoWall()
   # Set up the output file.
   $VW = "micro-vetoWall" . $suffix . ".gdml";
   push (@gdmlFiles, $VW); # Add file to list of GDML fragments
-  $VW = ">" . $VW; 
+  $VW = ">" . $VW;
   open(VW) or die("Could not open file $VW for writing");
-  my $subroutineFile = 'gdml_vetoWall_subroutine_file.gdml';
-  open( FILE, "< $subroutineFile" ) or die "Can't open $subroutineFile : $!";
-  print VW <FILE>;
-  close FILE;
+  
+  print VW <<EOF;
+  <?xml version='1.0'?>
+  <gdml>
+    <solids>
+      <box lunit="cm" name="AuxDet0"    x="10"    y="20"    z="2" />
+      <box lunit="cm" name="AuxDet1"    x="10"    y="20"    z="1" />
+  
+  </solids>
+  <structure>
+    <volume name="volAuxDet0">
+      <materialref ref="Polystyrene"/>
+      <solidref ref="AuxDet0"/>
+    </volume>
+    <volume name="volAuxDet1">
+      <materialref ref="Polystyrene"/>
+      <solidref ref="AuxDet1"/>
+    </volume>
+  </structure>
+EOF
 }
 
 # Parameterize the cryostat's surroundings.
@@ -1628,11 +1644,22 @@ EOF
 EOF
   }
   
-    if ( $vetoWall_switch eq "on" ) {
-      my $volumePlacementFile = 'gdml_vetoWall_volumePlacement_file.gdml';
-      open VPF, "< $volumePlacementFile" or die "Can't open $volumePlacementFile : $!";
-      print GDML <VPF>;
-    }
+  if ( $vetoWall_switch eq "on" ) {
+    print GDML <<EOF;
+    
+    <physvol>
+    <volumeref ref="volAuxDet0"/>
+    <position name="posAuxDet0" unit="cm" x="0" y="0" z="-800"/>
+    <rotation name="rAuxDet0" unit="deg" x="0" y="0" z="0"/>
+    </physvol>
+    <physvol>
+    <volumeref ref="volAuxDet1"/>
+    <position name="posAuxDet1" unit="cm" x="0" y="0" z="-805"/>
+    <rotation name="rAuxDet1" unit="deg" x="0" y="0" z="0"/>
+    </physvol>
+    
+EOF
+  }
 
     print GDML <<EOF;
  </volume>
@@ -1663,26 +1690,39 @@ sub gen_world()
     y="$WorldHeight" 
     z="$WorldLength"/>
   <tube name="Ground"
-    rmin="620*2.54"
-    rmax="((50*12)+620)*2.54"
+    rmin="310*2.54"
+    rmax="((50*12)+310)*2.54"
     z="41*12*2.54"
     deltaphi="360" 
     lunit="cm"
     aunit="deg"/>
   <tube name="ConcreteEnclosure"
-    rmin="584.1*2.54"
-    rmax="619.999*2.54"
+    rmin="292*2.54"
+    rmax="310*2.54"
     z="38*12*2.54"
     deltaphi="360" 
     lunit="cm"
     aunit="deg"/>
+  <tube name="PolystyreneEnclosure"
+    rmin="310*2.54"
+    rmax="312*2.54"
+    z="(38*12+36)*2.54"
+    deltaphi="360"
+    lunit="cm"
+    aunit="deg"/>
   <tube name="ConcreteEnclosureBottom"
     rmin="0"
-    rmax="619.998*2.54"
-    z="35.9*2.54"
+    rmax="310*2.54"
+    z="36*2.54"
     deltaphi="360" 
     lunit="cm"
     aunit="deg"/>
+  <tube name="PolystyreneEnclosureBottom"
+   rmax="292*2.54"
+   z="2*2.54"
+   deltaphi="360"
+   lunit="cm"
+   aunit="deg"/>
   <tube name="Overburden"
     rmin="0"
     rmax="584*2.54"
@@ -1701,9 +1741,17 @@ sub gen_world()
     <materialref ref="Dirt" />
     <solidref ref="Overburden" />
   </volume>
+  <volume name="volPolystyreneEnclosure" >
+    <materialref ref="Polystyrene" />
+    <solidref ref="PolystyreneEnclosure" />
+  </volume>
   <volume name="volConcreteEnclosure" >
     <materialref ref="Concrete" />
     <solidref ref="ConcreteEnclosure" />
+  </volume>
+  <volume name="volPolystyreneEnclosureBottom">
+     <materialref ref="Polystyrene" />
+     <solidref ref="PolystyreneEnclosureBottom"/>
   </volume>
   <volume name="volConcreteEnclosureBottom" >
     <materialref ref="Concrete" />
@@ -1718,15 +1766,25 @@ sub gen_world()
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
     <physvol>
+      <volumeref ref="volPolystyreneEnclosure"/>
+      <position name="posPolystyreneEnclosure" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol>  
+    <physvol>
       <volumeref ref="volConcreteEnclosureBottom"/>
       <position name="posConcreteEnclosureBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-38*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
+   <physvol>
+      <volumeref ref="volPolystyreneEnclosureBottom"/>
+      <position name="posPolystyreneEnclosureBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-(38*12 - 36)*2.54/2" z="0.5*$TPCWirePlaneLength"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> 
     <physvol>
-      <volumeref ref="volGround"/>
+       <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>
+    </physvol>  
     <!--physvol>
       <volumeref ref="volOverburden"/>
       <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="(41-10)*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
