@@ -4,7 +4,7 @@
 <tube name="Insulation"
   rmin="193+0.1"
   rmax="193+0.1+2.54*16"
-  z="1400"
+  z="424.75*2.54+3*2.54"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>

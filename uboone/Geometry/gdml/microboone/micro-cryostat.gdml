@@ -3,20 +3,20 @@
 <solids>
  <tube name="Cryostat" 
   rmax="193"
-  z="1400+2*2.5"
+  z="424.75*2.54+3*2.54+2*2.5"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 <tube name="SteelTube"
   rmin="190.46"
   rmax="193-0.1"
-  z="1400"
+  z="424.75*2.54+3*2.54"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 <sphere name="EndCap"
   rmin="144*2.54"
-  rmax="144.4281*2.54"
+  rmax="144.5*2.54"
   deltaphi="360"
   deltatheta="31.3822"
   aunit="deg"
@@ -41,11 +41,11 @@
   </physvol>
 <physvol>
    <volumeref ref="volEndCap"/>
-   <position name="posEndCap1" unit="cm" x="0" y="0" z="700- 2.54*sqrt(144.4281^2-75.4281^2)"/>
+   <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
    </physvol>
    <physvol>
     <volumeref ref="volEndCap"/>
-    <position name="posEndCap2" unit="cm" x="0" y="0" z="-(700- 2.54*sqrt(144.4281^2-75.4281^2))"/>
+    <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
     <rotationref ref="rPlus180AboutY"/>
   </physvol>
   <physvol>
