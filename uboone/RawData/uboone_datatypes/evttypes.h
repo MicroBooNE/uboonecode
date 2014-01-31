@@ -53,9 +53,9 @@
 
 /* function declarations */
 #ifdef __CXX__
-extern "C" char * TranslateEventType(uint16_t event_type, const int abbrev);
+extern "C" const char * TranslateEventType(uint16_t event_type, const int abbrev);
 #else
-char * TranslateEventType(uint16_t event_type, const int abbrev);
+const char * TranslateEventType(uint16_t event_type, const int abbrev);
 #endif
 
 #endif /* #ifdef EVENT_TYPES_H */
