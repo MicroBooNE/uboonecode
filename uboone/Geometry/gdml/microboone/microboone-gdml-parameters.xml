@@ -135,6 +135,11 @@
      This is the thickness of the steel bars making up the racks (in cm)
    </parameter>
 
+
+   <parameter name="PMTOffset" value="424.75*2.54/2">
+   This is the axially offset for one coordinate of the PMTs
+   </parameter>
+
    <!-- The following wire shifts are for adjusting the nominal wire
         positions within the "frame" of a TPC plane. They are mainly
         meant to allow for a constant offset due to wrapping the wires

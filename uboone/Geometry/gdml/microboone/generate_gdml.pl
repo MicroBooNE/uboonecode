@@ -1314,13 +1314,7 @@ sub gen_cryostat()
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
-<sphere name="EndCap"
-  rmin="144*2.54"
-  rmax="144.5*2.54"
-  deltaphi="360"
-  deltatheta="31.3822"
-  aunit="deg"
-  lunit="cm"/>
+<sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
 EOF
 
 
