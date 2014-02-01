@@ -576,7 +576,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       std::vector< art::Ptr<recob::Hit> > hits[kNplanes];
       
       for(size_t ah = 0; ah < allHits.size(); ++ah){
-	if (allHits[ah]->WireID().Plane >= 0 &&
+	if (/* allHits[ah]->WireID().Plane >= 0 && */ // always true
 	    allHits[ah]->WireID().Plane <  3){
 	  hits[allHits[ah]->WireID().Plane].push_back(allHits[ah]);
 	}

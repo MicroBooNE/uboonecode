@@ -290,18 +290,20 @@ namespace caldata {
             break;
           }
         } // ii
+        baseOK = false; // assume the worst, hope for better
         unsigned short ii1 = 0;
-        for(unsigned short ii = ii2 - 1; ii > 0; --ii) {
-          if(base[ii] != 0) {
-            ii1 = ii;
-            break;
-          }
-        } // ii
-        if(ii1 >= 0) {
+        if (ii2 >= 1) {
+          for(unsigned short ii = ii2 - 1; ii > 0; --ii) {
+            if(base[ii] != 0) {
+              ii1 = ii;
+              baseOK = true;
+              break;
+            } // if base[ii]
+          } // ii
+        } // if ii2
+        if (baseOK) {
           float slp = (base[ii2] - base[ii1]) / (float)(ii2 - ii1);
           base[nBasePts] = base[ii2] + slp * (nBasePts - ii2);
-        } else {
-          baseOK = false;
         }
       } // baseOK && base[nBasePts] == 0
       // now fill in any intermediate points

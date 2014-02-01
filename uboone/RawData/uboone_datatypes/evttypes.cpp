@@ -7,55 +7,55 @@ uint32_t ev_type_prescale[N_EVENT_TYPES_MAX];
 uint32_t ev_type_count[N_EVENT_TYPES_MAX];
 #endif
 
-char * TranslateEventType(uint16_t event_type, const int abbrev) {
+const char * TranslateEventType(uint16_t event_type, const int abbrev) {
     /* if abbrev is set to non-zero, then the abbreviation is used in some cases. Use macro
        TRANSLATE_ABBREV(=1) or TRANSLATE_NOABBREV(=0) to specify.*/
 
     switch (event_type) {
     case UNUSED_TYPE:
-        return((char*)"");
+        return "";
         break;
     case BEAM_TYPE:
-        return((char*)"Beam");
+        return "Beam";
         break;
     case STROBE_TYPE:
-        return((char*)"Strobe");
+        return "Strobe";
         break;
     case CALIB_TYPE:
-        return(abbrev ? (char*)"" : (char*)"Calibration");
+        return abbrev ? "" : "Calibration";
         break;
     case BNB_TYPE:
-        return(abbrev ? (char*)"BNB" : (char*)"BNB Neutrino");
+        return abbrev ? "BNB" : "BNB Neutrino";
         break;
     case NUMI_TYPE:
-        return(abbrev ? (char*)"NuMI" : (char*)"NuMI Neutrino");
+        return abbrev ? "NuMI" : "NuMI Neutrino";
         break;
     case SN_TYPE:
-        return(abbrev ? (char*)"SuperN" : (char*)"Supernova");
+        return abbrev ? "SuperN" : "Supernova";
         break;
     case GRANITE_TYPE:
-        return(abbrev ? (char*)"Granite" : (char*)"Granite");
+        return abbrev ? "Granite" : "Granite";
         break;
     case BEGIN_TYPE:
-        return(abbrev ? (char*)"Begin" : (char*)"Begin Run event");
+        return abbrev ? "Begin" : "Begin Run event";
         break;
     case RESUME_TYPE:
-        return(abbrev ? (char*)"Resume" : (char*)"Resume Run event");
+        return abbrev ? "Resume" : "Resume Run event";
         break;
     case PAUSE_TYPE:
-        return(abbrev ? (char*)"Pause" : (char*)"Pause Run event");
+        return abbrev ? "Pause" : "Pause Run event";
         break;
     case TPC_ERROR_TYPE:
-        return(abbrev ? (char*)"TPC err" : (char*)"TPC error event");
+        return abbrev ? "TPC err" : "TPC error event";
         break;
     case END_TYPE:
-        return(abbrev ? (char*)"End" : (char*)"End Run event");
+        return abbrev ? "End" : "End Run event";
         break;
     case TEST_TYPE:
-        return(abbrev ? (char*)"Test" : (char*)"Test event");
+        return abbrev ? "Test" : "Test event";
         break;
     default:
-        return(abbrev ? (char*)"" : (char*)"Illegal Event type");
+        return abbrev ? "" : "Illegal Event type";
         break;
     }
 }
