@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 // Constructor.
 util::SignalShapingServiceMicroBooNE::SignalShapingServiceMicroBooNE(const fhicl::ParameterSet& pset,
-								    art::ActivityRegistry& reg) 
+								    art::ActivityRegistry& /* reg */) 
   : fInit(false)
 {
   reconfigure(pset);
