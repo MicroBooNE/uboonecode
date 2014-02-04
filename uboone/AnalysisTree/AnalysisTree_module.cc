@@ -211,6 +211,7 @@ namespace microboone {
     int    TrackId[kMaxPrimaries];
     int    Mother[kMaxPrimaries];
     int    process_primary[kMaxPrimaries];
+    int    MergedId[kMaxPrimaries]; //geant track segments, which belong to the same particle, get the same
     
     // **** more geant info
     int   mc_status[kMaxPrimaries];
@@ -412,10 +413,10 @@ void microboone::AnalysisTree::beginJob(){
   fTree->Branch("NumberDaughters",NumberDaughters,"NumberDaughters[geant_list_size]/I");
   fTree->Branch("Mother",Mother,"Mother[geant_list_size]/I");
   fTree->Branch("TrackId",TrackId,"TrackId[geant_list_size]/I");
-  fTree->Branch("process_primary",process_primary,"process_primary[geant_list_size]/I");
-  
-  fTree->Branch("geant_list_size_in_tpcFV",&geant_list_size_in_tpcFV,"geant_list_size_in_tpcFV/I");
-  
+  fTree->Branch("MergedId", MergedId, "MergedId[geant_list_size]/I");
+  fTree->Branch("process_primary",process_primary,"process_primary[geant_list_size]/I");  
+  fTree->Branch("geant_list_size_in_tpcFV",&geant_list_size_in_tpcFV,"geant_list_size_in_tpcFV/I");  
+
   fTree->Branch("mc_pdg", mc_pdg, "mc_pdg[geant_list_size_in_tpcFV]/I");
   fTree->Branch("mc_status", mc_status, "mc_status[geant_list_size_in_tpcFV]/I");
   fTree->Branch("mc_trackId", mc_trackId, "mc_trackId[geant_list_size_in_tpcFV]/I");
@@ -576,7 +577,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       std::vector< art::Ptr<recob::Hit> > hits[kNplanes];
       
       for(size_t ah = 0; ah < allHits.size(); ++ah){
-	if (allHits[ah]->WireID().Plane >= 0 &&
+	if (/* allHits[ah]->WireID().Plane >= 0 && */ // always true
 	    allHits[ah]->WireID().Plane <  3){
 	  hits[allHits[ah]->WireID().Plane].push_back(allHits[ah]);
 	}
@@ -826,7 +827,34 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     
     geant_list_size_in_tpcFV = geant_part_intpcFV.size();      
      
-    
+
+    int currentMergedId = 1;
+    int currentMotherId = 0;
+    int currentMotherTrackId = 0;
+    for(int i = 0; i < geant_list_size; i++) {
+       MergedId[i] = 0;
+    }
+
+    for(int i = geant_list_size - 1; i >= 0; i--) {
+       if(MergedId[i] == 0) {
+          MergedId[i] = currentMergedId;
+          currentMotherId = Mother[i];
+          currentMotherTrackId = -1;
+          while(currentMotherId > 0) {
+             for(int j = 0; j < geant_list_size; j++) {
+                if(TrackId[j] == currentMotherId) currentMotherTrackId = j;
+             }
+             if(pdg[i] == pdg[currentMotherTrackId]) {
+                MergedId[currentMotherTrackId] = currentMergedId;
+                currentMotherId = Mother[currentMotherTrackId];
+             }
+             else currentMotherId = 0;
+          }
+          currentMergedId++;
+       }
+    }    
+
+
       for( unsigned int i = 0; i < geant_part_intpcFV.size(); ++i ){ 
       TVector3 mcstart;
       TVector3 mcend;

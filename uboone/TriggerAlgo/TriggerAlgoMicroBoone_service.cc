@@ -9,7 +9,7 @@
 namespace trigger{
 
   TriggerAlgoMicroBoone::TriggerAlgoMicroBoone(fhicl::ParameterSet const& pset,
-					       art::ActivityRegistry& reg) 
+					       art::ActivityRegistry& /* reg */) 
     : TriggerAlgoBase(pset, reg) 
   {
 

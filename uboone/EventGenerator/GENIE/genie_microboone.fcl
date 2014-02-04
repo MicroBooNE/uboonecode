@@ -39,4 +39,10 @@ microboone_genie_uniform_flux_cc.BeamRadius:    0.2
 microboone_genie_uniform_flux_cc.FiducialCut:   "mzcyl:(125., 0.),10.,100.,200."
 microboone_genie_uniform_flux_cc.GeomScan:      "flux: 10000 1.1"
 
+microboone_genie_simple_dirt:                @local::microboone_genie
+microboone_genie_simple_dirt.FluxType:       "simple_flux"
+microboone_genie_simple_dirt.FluxFiles: ["bnb_gsimple_fluxes_07.17.2012_470_dirt/gsimple_microboone-470-onaxis-dirt_numintp_*.root"]
+#microboone_genie_simple_dirt.FluxFiles:      ["bnb_gsimple_fluxes_07.17.2012_470/gsimple_microboone-470-onaxis_numintp_*.root"]
+microboone_genie_simple_dirt.EventsPerSpill: 0
+
 END_PROLOG
