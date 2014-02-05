@@ -112,20 +112,6 @@ namespace microboone {
 
     //track information
     int    ntracks_reco;             //number of reconstructed tracks
-    double trkvtxx[kMaxTrack];       //track vertex x
-    double trkvtxy[kMaxTrack];       //track vertex y
-    double trkvtxz[kMaxTrack];       //track vertex z
-    double trkendx[kMaxTrack];       //track end x
-    double trkendy[kMaxTrack];       //track end y
-    double trkendz[kMaxTrack];       //track end z
-    double trkstartdcosx[kMaxTrack]; //track start dcosx
-    double trkstartdcosy[kMaxTrack]; //track start dcosy
-    double trkstartdcosz[kMaxTrack]; //track start dcosz
-    double trkenddcosx[kMaxTrack];   //track end dcosx
-    double trkenddcosy[kMaxTrack];   //track end dcosy
-    double trkenddcosz[kMaxTrack];   //track end dcosz
-    double trkzenith[kMaxTrack];     //track zenith angle
-    double trkazimuth[kMaxTrack];    //track azimuth angle
     double trkke[kMaxTrack][kNplanes];
     double trkrange[kMaxTrack][kNplanes];
     int    trkidtruth[kMaxTrack][kNplanes]; //true geant trackid
@@ -133,24 +119,28 @@ namespace microboone {
     double trkefftruth[kMaxTrack][kNplanes]; //completeness
     double trkpurtruth[kMaxTrack][kNplanes]; //purity of track
     
-    //*****
-    // reconstructed info
-    int    reco_trackId[kMaxTrack];
-    double reco_startx[kMaxTrack];      // starting x position.
-    double reco_starty[kMaxTrack];      // starting y position.
-    double reco_startz[kMaxTrack];      // starting z position.
-    double reco_startd[kMaxTrack];      // starting distance to boundary.
-    double reco_endx[kMaxTrack];        // ending x position.
-    double reco_endy[kMaxTrack];        // ending y position.
-    double reco_endz[kMaxTrack];        // ending z position.
-    double reco_endd[kMaxTrack];        // ending distance to boundary.
-    double reco_theta[kMaxTrack];       // theta.
-    double reco_phi[kMaxTrack];	      // phi.
-    double reco_theta_xz[kMaxTrack];    // theta_xz.
-    double reco_theta_yz[kMaxTrack];    // theta_yz.
-    double reco_mom[kMaxTrack];	      // momentum.
-    double reco_len[kMaxTrack];	      // length.
-    //*****
+    // more track info
+    int    trkId[kMaxTrack];
+    double trkstartx[kMaxTrack];      // starting x position.
+    double trkstarty[kMaxTrack];      // starting y position.
+    double trkstartz[kMaxTrack];      // starting z position.
+    double trkstartd[kMaxTrack];      // starting distance to boundary.
+    double trkendx[kMaxTrack];        // ending x position.
+    double trkendy[kMaxTrack];        // ending y position.
+    double trkendz[kMaxTrack];        // ending z position.
+    double trkendd[kMaxTrack];        // ending distance to boundary.
+    double trktheta[kMaxTrack];       // theta.
+    double trkphi[kMaxTrack];	      // phi.
+    double trkstartdcosx[kMaxTrack]; 
+    double trkstartdcosy[kMaxTrack]; 
+    double trkstartdcosz[kMaxTrack]; 
+    double trkenddcosx[kMaxTrack];
+    double trkenddcosy[kMaxTrack];
+    double trkenddcosz[kMaxTrack];
+    double trkthetaxz[kMaxTrack];    // theta_xz.
+    double trkthetayz[kMaxTrack];    // theta_yz.
+    double trkmom[kMaxTrack];	      // momentum.
+    double trklen[kMaxTrack];	      // length.
        
     //mctruth information
     int    mcevts_truth;    //number of neutrino interactions in the spill
@@ -213,38 +203,38 @@ namespace microboone {
     int    process_primary[kMaxPrimaries];
     int    MergedId[kMaxPrimaries]; //geant track segments, which belong to the same particle, get the same
     
-    // **** more geant info
-    int   mc_status[kMaxPrimaries];
-    int   mc_trackId[kMaxPrimaries];
-    int   mc_pdg[kMaxPrimaries];
+    // more geant information
+    int   geant_tpcFV_status[kMaxPrimaries];
+    int   geant_tpcFV_trackId[kMaxPrimaries];
+    int   geant_tpcFV_pdg[kMaxPrimaries];
     
-    double mc_p_E[kMaxPrimaries];
-    double mc_p_px[kMaxPrimaries];
-    double mc_p_py[kMaxPrimaries];
-    double mc_p_pz[kMaxPrimaries];
-    double mc_p_startx[kMaxPrimaries];
-    double mc_p_starty[kMaxPrimaries];
-    double mc_p_startz[kMaxPrimaries];
-    double mc_p_startt[kMaxPrimaries];
-    double mc_p_endx[kMaxPrimaries];
-    double mc_p_endy[kMaxPrimaries];
-    double mc_p_endz[kMaxPrimaries];
-    double mc_p_endt[kMaxPrimaries];
+    double geant_tpcFV_orig_E[kMaxPrimaries];
+    double geant_tpcFV_orig_px[kMaxPrimaries];
+    double geant_tpcFV_orig_py[kMaxPrimaries];
+    double geant_tpcFV_orig_pz[kMaxPrimaries];
+    double geant_tpcFV_orig_startx[kMaxPrimaries];
+    double geant_tpcFV_orig_starty[kMaxPrimaries];
+    double geant_tpcFV_orig_startz[kMaxPrimaries];
+    double geant_tpcFV_orig_startt[kMaxPrimaries];
+    double geant_tpcFV_orig_endx[kMaxPrimaries];
+    double geant_tpcFV_orig_endy[kMaxPrimaries];
+    double geant_tpcFV_orig_endz[kMaxPrimaries];
+    double geant_tpcFV_orig_endt[kMaxPrimaries];
     
-    double mc_startx[kMaxPrimaries];	  // starting x position.
-    double mc_starty[kMaxPrimaries];	  // starting y position.
-    double mc_startz[kMaxPrimaries];	  // starting z position.
-    double mc_startd[kMaxPrimaries];	  // starting distance to boundary.
-    double mc_endx[kMaxPrimaries];	  // ending x position.
-    double mc_endy[kMaxPrimaries];	  // ending y position.
-    double mc_endz[kMaxPrimaries];	  // ending z position.
-    double mc_endd[kMaxPrimaries];	  // ending distance to boundary.
-    double mc_theta[kMaxPrimaries];	  // theta.
-    double mc_phi[kMaxPrimaries];	  // phi.
-    double mc_theta_xz[kMaxPrimaries];    // theta_xz.
-    double mc_theta_yz[kMaxPrimaries];    // theta_yz.
-    double mc_mom[kMaxPrimaries];         // momentum.
-    double mc_len[kMaxPrimaries];         // length.
+    double geant_tpcFV_startx[kMaxPrimaries];	  // starting x position.
+    double geant_tpcFV_starty[kMaxPrimaries];	  // starting y position.
+    double geant_tpcFV_startz[kMaxPrimaries];	  // starting z position.
+    double geant_tpcFV_startd[kMaxPrimaries];	  // starting distance to boundary.
+    double geant_tpcFV_endx[kMaxPrimaries];	  // ending x position.
+    double geant_tpcFV_endy[kMaxPrimaries];	  // ending y position.
+    double geant_tpcFV_endz[kMaxPrimaries];	  // ending z position.
+    double geant_tpcFV_endd[kMaxPrimaries];	  // ending distance to boundary.
+    double geant_tpcFV_theta[kMaxPrimaries];	  // theta.
+    double geant_tpcFV_phi[kMaxPrimaries];	  // phi.
+    double geant_tpcFV_theta_xz[kMaxPrimaries];    // theta_xz.
+    double geant_tpcFV_theta_yz[kMaxPrimaries];    // theta_yz.
+    double geant_tpcFV_mom[kMaxPrimaries];         // momentum.
+    double geant_tpcFV_len[kMaxPrimaries];         // length.
 
 
     std::string fDigitModuleLabel;
@@ -320,44 +310,33 @@ void microboone::AnalysisTree::beginJob(){
   fTree->Branch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/I");
 
   fTree->Branch("ntracks_reco",&ntracks_reco,"ntracks_reco/I");
-  fTree->Branch("trkvtxx",trkvtxx,"trkvtxx[ntracks_reco]/D");
-  fTree->Branch("trkvtxy",trkvtxy,"trkvtxy[ntracks_reco]/D");
-  fTree->Branch("trkvtxz",trkvtxz,"trkvtxz[ntracks_reco]/D");
-  fTree->Branch("trkendx",trkendx,"trkendx[ntracks_reco]/D");
-  fTree->Branch("trkendy",trkendy,"trkendy[ntracks_reco]/D");
-  fTree->Branch("trkendz",trkendz,"trkendz[ntracks_reco]/D");
-  fTree->Branch("trkstartdcosx",trkstartdcosx,"trkstartdcosx[ntracks_reco]/D");
-  fTree->Branch("trkstartdcosy",trkstartdcosy,"trkstartdcosy[ntracks_reco]/D");
-  fTree->Branch("trkstartdcosz",trkstartdcosz,"trkstartdcosz[ntracks_reco]/D");
-  fTree->Branch("trkenddcosx",trkenddcosx,"trkenddcosx[ntracks_reco]/D");
-  fTree->Branch("trkenddcosy",trkenddcosy,"trkenddcosy[ntracks_reco]/D");
-  fTree->Branch("trkenddcosz",trkenddcosz,"trkenddcosz[ntracks_reco]/D");
-  fTree->Branch("trkzenith",trkzenith,"trkzenith[ntracks_reco]/D");
-  fTree->Branch("trkazimuth",trkazimuth,"trkazimuth[ntracks_reco]/D");
   fTree->Branch("trkke",trkke,"trkke[ntracks_reco][3]/D");
   fTree->Branch("trkrange",trkrange,"trkrange[ntracks_reco][3]/D");
   fTree->Branch("trkidtruth",trkidtruth,"trkidtruth[ntracks_reco][3]/I");
   fTree->Branch("trkpdgtruth",trkpdgtruth,"trkpdgtruth[ntracks_reco][3]/D");
   fTree->Branch("trkefftruth",trkefftruth,"trkefftruth[ntracks_reco][3]/D");
   fTree->Branch("trkpurtruth",trkpurtruth,"trkpurtruth[ntracks_reco][3]/D");
-
-  //*****more track information  
-  fTree->Branch("reco_trackId", reco_trackId, "reco_trackId[ntracks_reco]/I");
-  fTree->Branch("reco_startx", reco_startx, "reco_startx[ntracks_reco]/D");
-  fTree->Branch("reco_starty", reco_starty, "reco_starty[ntracks_reco]/D");
-  fTree->Branch("reco_startz", reco_startz, "reco_startz[ntracks_reco]/D");
-  fTree->Branch("reco_startd", reco_startd, "reco_startd[ntracks_reco]/D");
-  fTree->Branch("reco_endx", reco_endx, "reco_endx[ntracks_reco]/D");
-  fTree->Branch("reco_endy", reco_endy, "reco_endy[ntracks_reco]/D");
-  fTree->Branch("reco_endz", reco_endz, "reco_endz[ntracks_reco]/D");
-  fTree->Branch("reco_endd", reco_endd, "reco_endd[ntracks_reco]/D");
-  fTree->Branch("reco_theta", reco_theta, "reco_theta[ntracks_reco]/D");
-  fTree->Branch("reco_phi", reco_phi, "reco_phi[ntracks_reco]/D");
-  fTree->Branch("reco_theta_xz", reco_theta_xz, "reco_theta_xz[ntracks_reco]/D");
-  fTree->Branch("treco_theta_yz", reco_theta_yz, "reco_theta_yz[ntracks_reco]/D");
-  fTree->Branch("reco_mom", reco_mom, "reco_mom[ntracks_reco]/D");
-  fTree->Branch("reco_len", reco_len, "reco_len[ntracks_reco]/D");  
-  //*****  
+  fTree->Branch("trkId", trkId, "trkId[ntracks_reco]/I");
+  fTree->Branch("trkstartx", trkstartx, "trkstartx[ntracks_reco]/D");
+  fTree->Branch("trkstarty", trkstarty, "trkstarty[ntracks_reco]/D");
+  fTree->Branch("trkstartz", trkstartz, "trkstartz[ntracks_reco]/D");
+  fTree->Branch("trkstartd", trkstartd, "trkstartd[ntracks_reco]/D");
+  fTree->Branch("trkendx", trkendx, "trkendx[ntracks_reco]/D");
+  fTree->Branch("trkendy", trkendy, "trkendy[ntracks_reco]/D");
+  fTree->Branch("trkendz", trkendz, "trkendz[ntracks_reco]/D");
+  fTree->Branch("trkendd", trkendd, "trkendd[ntracks_reco]/D");
+  fTree->Branch("trktheta", trktheta, "trktheta[ntracks_reco]/D");
+  fTree->Branch("trkphi", trkphi, "trkphi[ntracks_reco]/D");
+  fTree->Branch("trkstartdcosx", trkstartdcosx,"trkstartdcosx[ntracks_reco]/D");
+  fTree->Branch("trkstartdcosy", trkstartdcosy,"trkstartdcosy[ntracks_reco]/D");
+  fTree->Branch("trkstartdcosz", trkstartdcosz,"trkstartdcosz[ntracks_reco]/D");
+  fTree->Branch("trkenddcosx", trkenddcosx, "trkenddcosx[ntracks_reco]/D");
+  fTree->Branch("trkenddcosy", trkenddcosy, "trkenddcosy[ntracks_reco]/D");
+  fTree->Branch("trkenddcosz", trkenddcosz, "trkenddcosz[ntracks_reco]/D");
+  fTree->Branch("trkthetaxz", trkthetaxz, "trkthetaxz[ntracks_reco]/D");
+  fTree->Branch("trkthetayz", trkthetayz, "trkthetayz[ntracks_reco]/D");
+  fTree->Branch("trkmom", trkmom, "trkmom[ntracks_reco]/D");
+  fTree->Branch("trklen", trklen, "trklen[ntracks_reco]/D");   
 
   fTree->Branch("mcevts_truth",&mcevts_truth,"mcevts_truth/I");
   fTree->Branch("nuPDG_truth",&nuPDG_truth,"nuPDG_truth/I");
@@ -415,37 +394,37 @@ void microboone::AnalysisTree::beginJob(){
   fTree->Branch("TrackId",TrackId,"TrackId[geant_list_size]/I");
   fTree->Branch("MergedId", MergedId, "MergedId[geant_list_size]/I");
   fTree->Branch("process_primary",process_primary,"process_primary[geant_list_size]/I");  
+  
   fTree->Branch("geant_list_size_in_tpcFV",&geant_list_size_in_tpcFV,"geant_list_size_in_tpcFV/I");  
-
-  fTree->Branch("mc_pdg", mc_pdg, "mc_pdg[geant_list_size_in_tpcFV]/I");
-  fTree->Branch("mc_status", mc_status, "mc_status[geant_list_size_in_tpcFV]/I");
-  fTree->Branch("mc_trackId", mc_trackId, "mc_trackId[geant_list_size_in_tpcFV]/I");
-  fTree->Branch("mc_p_E", mc_p_E, "mc_p_E[geant_list_size_in_tpcFV]/F");
-  fTree->Branch("mc_p_px", mc_p_px, "mc_p_px[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_py", mc_p_py, "mc_p_py[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_pz", mc_p_pz, "mc_p_pz[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_startx", mc_p_startx, "mc_p_startx[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_starty", mc_p_starty, "mc_p_starty[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_startz", mc_p_startz, "mc_p_startz[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_startt", mc_p_startt, "mc_p_startt[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_endx", mc_p_endx, "mc_p_endx[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_endy", mc_p_endy, "mc_p_endy[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_endz", mc_p_endz, "mc_p_endz[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_p_endt", mc_p_endt, "mc_p_endt[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_startx", mc_startx, "mc_startx[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_starty", mc_starty, "mc_starty[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_startz", mc_startz, "mc_startz[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_startd", mc_startd, "mc_startd[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_endx", mc_endx, "mc_endx[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_endy", mc_endy, "mc_endy[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_endz", mc_endz, "mc_endz[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_endd", mc_endd, "mc_endd[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_theta", mc_theta, "mc_theta[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_phi", mc_phi, "mc_phi[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_theta_xz", mc_theta_xz, "mc_theta_xz[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_theta_yz", mc_theta_yz, "mc_theta_yz[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_mom", mc_mom, "mc_mom[geant_list_size_in_tpcFV]/D");
-  fTree->Branch("mc_len", mc_len, "mc_len[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_pdg", geant_tpcFV_pdg, "geant_tpcFV_pdg[geant_list_size_in_tpcFV]/I");
+  fTree->Branch("geant_tpcFV_status", geant_tpcFV_status, "geant_tpcFV_status[geant_list_size_in_tpcFV]/I");
+  fTree->Branch("geant_tpcFV_trackId", geant_tpcFV_trackId, "geant_tpcFV_trackId[geant_list_size_in_tpcFV]/I");
+  fTree->Branch("geant_tpcFV_orig_E", geant_tpcFV_orig_E, "geant_tpcFV_orig_E[geant_list_size_in_tpcFV]/F");
+  fTree->Branch("geant_tpcFV_orig_px", geant_tpcFV_orig_px, "geant_tpcFV_orig_px[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_py", geant_tpcFV_orig_py, "geant_tpcFV_orig_py[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_pz", geant_tpcFV_orig_pz, "geant_tpcFV_orig_pz[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_startx", geant_tpcFV_orig_startx, "geant_tpcFV_orig_startx[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_starty", geant_tpcFV_orig_starty, "geant_tpcFV_orig_starty[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_startz", geant_tpcFV_orig_startz, "geant_tpcFV_orig_startz[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_startt", geant_tpcFV_orig_startt, "geant_tpcFV_orig_startt[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_endx", geant_tpcFV_orig_endx, "geant_tpcFV_orig_endx[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_endy", geant_tpcFV_orig_endy, "geant_tpcFV_orig_endy[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_endz", geant_tpcFV_orig_endz, "geant_tpcFV_orig_endz[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_orig_endt", geant_tpcFV_orig_endt, "geant_tpcFV_orig_endt[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_startx", geant_tpcFV_startx, "geant_tpcFV_startx[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_starty", geant_tpcFV_starty, "geant_tpcFV_starty[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_startz", geant_tpcFV_startz, "geant_tpcFV_startz[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_startd", geant_tpcFV_startd, "geant_tpcFV_startd[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_endx", geant_tpcFV_endx, "geant_tpcFV_endx[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_endy", geant_tpcFV_endy, "geant_tpcFV_endy[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_endz", geant_tpcFV_endz, "geant_tpcFV_endz[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_endd", geant_tpcFV_endd, "geant_tpcFV_endd[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_theta", geant_tpcFV_theta, "geant_tpcFV_theta[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_phi", geant_tpcFV_phi, "geant_tpcFV_phi[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_theta_xz", geant_tpcFV_theta_xz, "geant_tpcFV_theta_xz[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_theta_yz", geant_tpcFV_theta_yz, "geant_tpcFV_theta_yz[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_mom", geant_tpcFV_mom, "geant_tpcFV_mom[geant_list_size_in_tpcFV]/D");
+  fTree->Branch("geant_tpcFV_len", geant_tpcFV_len, "geant_tpcFV_len[geant_list_size_in_tpcFV]/D");
 
 }
 
@@ -496,7 +475,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   //associations
   art::FindMany<recob::Track>     fmtk(hitListHandle, evt, fTrackModuleLabel);
   art::FindManyP<recob::Hit>      fmht(trackListHandle, evt, fTrackModuleLabel);
-  art::FindManyP<anab::Calorimetry> fmcal(trackListHandle, evt, fCalorimetryModuleLabel);
+  art::FindMany<anab::Calorimetry> fmcal(trackListHandle, evt, fCalorimetryModuleLabel);
 
   run = evt.run();
   subrun = evt.subRun();
@@ -539,32 +518,101 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   //track information
 
   ntracks_reco=tracklist.size();
-  double larStart[3];
-  double larEnd[3];
-  std::vector<double> trackStart;
-  std::vector<double> trackEnd;
-
+ 
   for(unsigned int i=0; i<tracklist.size();++i){//loop over tracks
-    trackStart.clear();
-    trackEnd.clear();
-    memset(larStart, 0, 3);
-    memset(larEnd, 0, 3);
-    tracklist[i]->Extent(trackStart,trackEnd); 
-    tracklist[i]->Direction(larStart,larEnd);
-    trkvtxx[i]        = trackStart[0];
-    trkvtxy[i]        = trackStart[1];
-    trkvtxz[i]        = trackStart[2];
-    trkendx[i]        = trackEnd[0];
-    trkendy[i]        = trackEnd[1];
-    trkendz[i]        = trackEnd[2];
-    trkstartdcosx[i]  = larStart[0];
-    trkstartdcosy[i]  = larStart[1];
-    trkstartdcosz[i]  = larStart[2];
-    trkenddcosx[i]    = larEnd[0];
-    trkenddcosy[i]    = larEnd[1];
-    trkenddcosz[i]    = larEnd[2];
+    art::Ptr<recob::Track> ptrack(trackListHandle, i);
+    const recob::Track& track = *ptrack;    
+    //we need to use Bezier methods for Bezier tracks
+    if(fTrackModuleLabel.compare("beziertracker")==0){
+      trkf::BezierTrack btrack(*ptrack);
+      int ntraj = btrack.NSegments();
+      if(ntraj > 0) {
+    	double xyz[3];
+    	btrack.GetTrackPoint(0,xyz); 
+	TVector3 pos(xyz[0],xyz[1],xyz[2]);
+    	btrack.GetTrackDirection(0,xyz);  
+	TVector3 dir_start(xyz[0],xyz[1],xyz[2]);
+	btrack.GetTrackDirection(1,xyz);  
+	TVector3 dir_end(xyz[0],xyz[1],xyz[2]);
+    	btrack.GetTrackPoint(1,xyz); 
+	TVector3 end(xyz[0],xyz[1],xyz[2]);
+    	
+    	double dpos	= bdist(pos);
+    	double dend	= bdist(end);
+    	double tlen	= btrack.GetLength();
+    	double theta_xz = std::atan2(dir_start.X(), dir_start.Z());
+    	double theta_yz = std::atan2(dir_start.Y(), dir_start.Z());
+    	double mom	= 0.;
+    	if (btrack.NumberFitMomentum() > 0)   
+    	  mom = btrack.VertexMomentum();
+    	
+    	// fill bezier track reco branches
+    	trkId[i]         = i;  //bezier has some screwed up track IDs
+    	trkstartx[i]     = pos.X();
+    	trkstarty[i]     = pos.Y();
+    	trkstartz[i]     = pos.Z();
+    	trkstartd[i]     = dpos;
+    	trkendx[i]       = end.X();
+    	trkendy[i]       = end.Y();
+    	trkendz[i]       = end.Z();
+    	trkendd[i]       = dend;
+    	trktheta[i]      = dir_start.Theta();
+    	trkphi[i]        = dir_start.Phi();
+	trkstartdcosx[i] = dir_start.X();
+	trkstartdcosy[i] = dir_start.Y();
+	trkstartdcosz[i] = dir_start.Z();
+	trkenddcosx[i]   = dir_end.X();
+	trkenddcosy[i]   = dir_end.Y();
+	trkenddcosz[i]   = dir_end.Z();	
+    	trkthetaxz[i]    = theta_xz;
+    	trkthetayz[i]    = theta_yz;
+    	trkmom[i]        = mom;
+    	trklen[i]        = tlen;  	
+      }
+   } 
+   else {   //use the normal methods for other kinds of tracks       
+     int ntraj = track.NumberTrajectoryPoints();
+     if (ntraj > 0) {
+       const TVector3& pos 	 = track.Vertex();
+       const TVector3& dir_start = track.VertexDirection();
+       const TVector3& dir_end   = track.EndDirection();
+       const TVector3& end       = track.End();
+
+       double dpos     = bdist(pos);
+       double dend     = bdist(end);
+       double tlen     = length(track);
+       double theta_xz = std::atan2(dir_start.X(), dir_start.Z());
+       double theta_yz = std::atan2(dir_start.Y(), dir_start.Z());
+       double mom      = 0.;
+       if(track.NumberFitMomentum() > 0)
+         mom = track.VertexMomentum();
+
+       // fill non-bezier-track reco branches
+       trkId[i]  	   = track.ID();
+       trkstartx[i]	   = pos.X();
+       trkstarty[i]	   = pos.Y();
+       trkstartz[i]	   = pos.Z();
+       trkstartd[i]	   = dpos;
+       trkendx[i]	   = end.X();
+       trkendy[i]	   = end.Y();
+       trkendz[i]	   = end.Z();
+       trkendd[i]	   = dend;
+       trktheta[i]	   = dir_start.Theta();
+       trkphi[i]	   = dir_start.Phi();
+       trkstartdcosx[i]    = dir_start.X();
+       trkstartdcosy[i]    = dir_start.Y();
+       trkstartdcosz[i]    = dir_start.Z();	
+       trkenddcosx[i]      = dir_end.X();
+       trkenddcosy[i]      = dir_end.Y();
+       trkenddcosz[i]      = dir_end.Z();	       
+       trkthetaxz[i]       = theta_xz;
+       trkthetayz[i]       = theta_yz;
+       trkmom[i]	   = mom;
+       trklen[i]	   = tlen;
+     } 
+   }
     
-    std::vector< art::Ptr<anab::Calorimetry> > calos = fmcal.at(i);
+    std::vector<const anab::Calorimetry*> calos = fmcal.at(i);
     //std::cout<<"calo size "<<calos.size()<<std::endl;
     for (size_t j = 0; j<calos.size(); ++j){
       trkke[i][j] = calos[j]->KineticEnergy();
@@ -598,90 +646,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	}	  
       }
     }
-  //*****sowjanya*****track information//
-
-
-  art::Ptr<recob::Track> ptrack(trackListHandle, i);
-    const recob::Track& track = *ptrack;    
-    //we need to use Bezier methods for Bezier tracks
-
-    /**/
-    if(fTrackModuleLabel.compare("beziertracker")==0){
-      trkf::BezierTrack btrack(*ptrack);
-      int ntraj = btrack.NSegments();
-      if(ntraj > 0) {
-    	double xyz[3];
-    	btrack.GetTrackPoint(0,xyz); 
-	TVector3 pos(xyz[0],xyz[1],xyz[2]);
-    	btrack.GetTrackDirection(0,xyz);  
-	TVector3 dir(xyz[0],xyz[1],xyz[2]);
-    	btrack.GetTrackPoint(1,xyz); 
-	TVector3 end(xyz[0],xyz[1],xyz[2]);
-    	
-    	double dpos	= bdist(pos);
-    	double dend	= bdist(end);
-    	double tlen	= btrack.GetLength();
-    	double theta_xz = std::atan2(dir.X(), dir.Z());
-    	double theta_yz = std::atan2(dir.Y(), dir.Z());
-    	double mom	= 0.;
-    	if (btrack.NumberFitMomentum() > 0)   
-    	  mom = btrack.VertexMomentum();
-    	
-    	// fill bezier track reco branches
-    	reco_trackId[i]  = i;  //bezier has some screwed up track IDs
-    	reco_startx[i]   = pos.X();
-    	reco_starty[i]   = pos.Y();
-    	reco_startz[i]   = pos.Z();
-    	reco_startd[i]   = dpos;
-    	reco_endx[i]     = end.X();
-    	reco_endy[i]     = end.Y();
-    	reco_endz[i]     = end.Z();
-    	reco_startd[i]   = dend;
-    	reco_theta[i]    = dir.Theta();
-    	reco_phi[i]      = dir.Phi();
-    	reco_theta_xz[i] = theta_xz;
-    	reco_theta_yz[i] = theta_yz;
-    	reco_mom[i]      = mom;
-    	reco_len[i]      = tlen;  	
-      }
-   } 
-   else {   //use the normal methods for other kinds of tracks       
-     /**/
-     //{
-     int ntraj = track.NumberTrajectoryPoints();
-     if (ntraj > 0) {
-       const TVector3& pos = track.Vertex();
-       const TVector3& dir = track.VertexDirection();
-       const TVector3& end = track.End();
-
-       double dpos     = bdist(pos);
-       double dend     = bdist(end);
-       double tlen     = length(track);
-       double theta_xz = std::atan2(dir.X(), dir.Z());
-       double theta_yz = std::atan2(dir.Y(), dir.Z());
-       double mom      = 0.;
-       if(track.NumberFitMomentum() > 0)
-         mom = track.VertexMomentum();
-
-       // fill non-bezier-track reco branches
-       reco_trackId[i]  = track.ID();
-       reco_startx[i]	= pos.X();
-       reco_starty[i]	= pos.Y();
-       reco_startz[i]	= pos.Z();
-       reco_startd[i]	= dpos;
-       reco_endx[i]	= end.X();
-       reco_endy[i]	= end.Y();
-       reco_endz[i]	= end.Z();
-       reco_startd[i]	= dend;
-       reco_theta[i]	= dir.Theta();
-       reco_phi[i]	= dir.Phi();
-       reco_theta_xz[i] = theta_xz;
-       reco_theta_yz[i] = theta_yz;
-       reco_mom[i]	= mom;
-       reco_len[i]	= tlen;
-     } 
-   }    
-   //*****sowjanya*****track information//
  }//end loop over track
 
   //mc truth information
@@ -770,8 +734,52 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       
       //GEANT particles information
       std::vector<const simb::MCParticle* > geant_part;
+      int i = 0;
+      geant_list_size_in_tpcFV = 0;
       for(size_t p = 0; p < plist.size(); ++p) 
-        geant_part.push_back(plist.Particle(p)); 		
+      	{
+        geant_part.push_back(plist.Particle(p)); 
+	assert(plist.Particle(p) != 0);
+        TVector3 mcstart, mcend;
+        double plen = length(*plist.Particle(p), mcstart, mcend);
+        if ( (plen==0) || plist.Particle(p)->PdgCode() > 10000) continue;
+	else{
+	  geant_tpcFV_pdg[i] = plist.Particle(p)->PdgCode();
+	  double mctheta_xz = std::atan2(plist.Particle(p)->Px(), plist.Particle(p)->Pz());
+	  double mctheta_yz = std::atan2(plist.Particle(p)->Py(), plist.Particle(p)->Pz());
+
+	  geant_tpcFV_trackId[i] = plist.Particle(p)->TrackId();
+	  geant_tpcFV_status[i]  = plist.Particle(p)->StatusCode();
+	  //
+	  geant_tpcFV_orig_E[i]	     = plist.Particle(p)->E();
+	  geant_tpcFV_orig_px[i]     = plist.Particle(p)->Px();
+	  geant_tpcFV_orig_py[i]     = plist.Particle(p)->Py();
+	  geant_tpcFV_orig_pz[i]     = plist.Particle(p)->Pz();
+	  geant_tpcFV_orig_startx[i] = plist.Particle(p)->Vx();
+	  geant_tpcFV_orig_starty[i] = plist.Particle(p)->Vy();
+	  geant_tpcFV_orig_startz[i] = plist.Particle(p)->Vz();
+	  geant_tpcFV_orig_startt[i] = plist.Particle(p)->T();
+	  geant_tpcFV_orig_endx[i]   = plist.Particle(p)->EndX();
+	  geant_tpcFV_orig_endy[i]   = plist.Particle(p)->EndY();
+	  geant_tpcFV_orig_endz[i]   = plist.Particle(p)->EndZ();
+	  geant_tpcFV_orig_endt[i]   = plist.Particle(p)->EndT();
+	  //
+	  geant_tpcFV_startx[i]   = mcstart.X();
+	  geant_tpcFV_starty[i]   = mcstart.Y();
+	  geant_tpcFV_startz[i]   = mcstart.Z();
+	  geant_tpcFV_endx[i]	  = mcend.X();
+	  geant_tpcFV_endy[i]	  = mcend.Y();
+	  geant_tpcFV_endz[i]	  = mcend.Z();
+	  geant_tpcFV_theta[i]	  = plist.Particle(p)->Momentum().Theta();
+	  geant_tpcFV_phi[i]	  = plist.Particle(p)->Momentum().Phi();
+	  geant_tpcFV_theta_xz[i] = mctheta_xz;
+	  geant_tpcFV_theta_yz[i] = mctheta_yz;
+	  geant_tpcFV_mom[i]	  = plist.Particle(p)->Momentum().Vect().Mag();
+	  geant_tpcFV_len[i]	  = plen;    
+	  i++;  
+        }
+      }
+      geant_list_size_in_tpcFV = i;				
 	
       std::string pri("primary");
       int primary=0;
@@ -813,21 +821,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	EndPointz[i]=geant_part[i]->EndPosition()[2];
 	NumberDaughters[i]=geant_part[i]->NumberDaughters();
       }
-      //*******
     
-      std::vector<const simb::MCParticle* > geant_part_intpcFV;      
-       for(size_t p = 0; p < plist.size(); ++p) { 
-        assert(plist.Particle(p) != 0);
-        TVector3 mcstart, mcend;
-        double plen = length(*plist.Particle(p), mcstart, mcend);
-        if ( (plen==0) || plist.Particle(p)->PdgCode() > 10000) continue;
-		//std::cout<<plist.Particle(p)->PdgCode()<<"\n";
-	geant_part_intpcFV.push_back(plist.Particle(p));
-    }  
-    
-    geant_list_size_in_tpcFV = geant_part_intpcFV.size();      
-     
-
     int currentMergedId = 1;
     int currentMotherId = 0;
     int currentMotherTrackId = 0;
@@ -853,50 +847,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           currentMergedId++;
        }
     }    
-
-
-      for( unsigned int i = 0; i < geant_part_intpcFV.size(); ++i ){ 
-      TVector3 mcstart;
-      TVector3 mcend;
-      double plen = length(*geant_part_intpcFV[i], mcstart, mcend);
-
-      mc_pdg[i] = geant_part_intpcFV[i]->PdgCode();
-
-      double mctheta_xz = std::atan2(geant_part_intpcFV[i]->Px(), geant_part_intpcFV[i]->Pz());
-      double mctheta_yz = std::atan2(geant_part_intpcFV[i]->Py(), geant_part_intpcFV[i]->Pz());
-
-      mc_trackId[i] = geant_part_intpcFV[i]->TrackId();
-      mc_status[i]  = geant_part_intpcFV[i]->StatusCode();
-      //
-      mc_p_E[i]      = geant_part_intpcFV[i]->E();
-      mc_p_px[i]     = geant_part_intpcFV[i]->Px();
-      mc_p_py[i]     = geant_part_intpcFV[i]->Py();
-      mc_p_pz[i]     = geant_part_intpcFV[i]->Pz();
-      mc_p_startx[i] = geant_part_intpcFV[i]->Vx();
-      mc_p_starty[i] = geant_part_intpcFV[i]->Vy();
-      mc_p_startz[i] = geant_part_intpcFV[i]->Vz();
-      mc_p_startt[i] = geant_part_intpcFV[i]->T();
-      mc_p_endx[i]   = geant_part_intpcFV[i]->EndX();
-      mc_p_endy[i]   = geant_part_intpcFV[i]->EndY();
-      mc_p_endz[i]   = geant_part_intpcFV[i]->EndZ();
-      mc_p_endt[i]   = geant_part_intpcFV[i]->EndT();
-      //
-      mc_startx[i]   = mcstart.X();
-      mc_starty[i]   = mcstart.Y();
-      mc_startz[i]   = mcstart.Z();
-      mc_endx[i]     = mcend.X();
-      mc_endy[i]     = mcend.Y();
-      mc_endz[i]     = mcend.Z();
-      mc_theta[i]    = geant_part_intpcFV[i]->Momentum().Theta();
-      mc_phi[i]      = geant_part_intpcFV[i]->Momentum().Phi();
-      mc_theta_xz[i] = mctheta_xz;
-      mc_theta_yz[i] = mctheta_yz;
-      mc_mom[i]      = geant_part_intpcFV[i]->Momentum().Vect().Mag();
-      mc_len[i]      = plen;      
-    }    
-    
-    //***** 
-    }//if (mcevts_truth){//at least one mc record
+   }//if (mcevts_truth){//at least one mc record
   }//if (!isdata){  
   taulife = LArProp->ElectronLifetime();
   fTree->Fill();
@@ -1066,36 +1017,27 @@ void microboone::AnalysisTree::ResetVars(){
 
   ntracks_reco = 0;
   for (int i = 0; i < kMaxTrack; ++i){
-    trkvtxx[i] = -99999;
-    trkvtxy[i] = -99999;
-    trkvtxz[i] = -99999;
-    trkendx[i] = -99999;
-    trkendy[i] = -99999;
-    trkendz[i] = -99999;
-    trkstartdcosx[i] = -99999;
-    trkstartdcosy[i] = -99999;
-    trkstartdcosz[i] = -99999;
+    trkId[i] = -99999;
+    trkstartx[i] = -99999;   
+    trkstarty[i] = -99999;   
+    trkstartz[i] = -99999;   
+    trkstartd[i] = -99999;   
+    trkendx[i] = -99999;     
+    trkendy[i] = -99999;     
+    trkendz[i] = -99999;     
+    trkendd[i] = -99999;     
+    trktheta[i] = -99999;    
+    trkphi[i] = -99999; 
+    trkstartdcosx[i] = -99999;     
+    trkstartdcosy[i] = -99999;     
+    trkstartdcosz[i] = -99999;  
     trkenddcosx[i] = -99999;
     trkenddcosy[i] = -99999;
-    trkenddcosz[i] = -99999;
-    trkzenith[i] = -99999;
-    trkazimuth[i] = -99999;
-    
-    reco_trackId[i] = -99999;
-    reco_startx[i] = -99999;   
-    reco_starty[i] = -99999;   
-    reco_startz[i] = -99999;   
-    reco_startd[i] = -99999;   
-    reco_endx[i] = -99999;     
-    reco_endy[i] = -99999;     
-    reco_endz[i] = -99999;     
-    reco_endd[i] = -99999;     
-    reco_theta[i] = -99999;    
-    reco_phi[i] = -99999;      
-    reco_theta_xz[i] = -99999; 
-    reco_theta_yz[i] = -99999; 
-    reco_mom[i] = -99999;      
-    reco_len[i] = -99999;      
+    trkenddcosz[i] = -99999;   
+    trkthetaxz[i] = -99999; 
+    trkthetayz[i] = -99999; 
+    trkmom[i] = -99999;      
+    trklen[i] = -99999;
     
     for (int j = 0; j < kNplanes; ++j){
       trkke[i][j] = -99999;
@@ -1162,37 +1104,37 @@ void microboone::AnalysisTree::ResetVars(){
     genie_ND[i] = -99999;
     genie_mother[i] = -99999;
     
-    mc_status[i] = -99999;
-    mc_trackId[i] = -99999;
-    mc_pdg[i] = -99999;
+    geant_tpcFV_status[i] = -99999;
+    geant_tpcFV_trackId[i] = -99999;
+    geant_tpcFV_pdg[i] = -99999;
 
-    mc_p_E[i] = -99999;
-    mc_p_px[i] = -99999;
-    mc_p_py[i] = -99999;
-    mc_p_pz[i] = -99999;
-    mc_p_startx[i] = -99999;
-    mc_p_starty[i] = -99999;
-    mc_p_startz[i] = -99999;
-    mc_p_startt[i] = -99999;
-    mc_p_endx[i] = -99999;
-    mc_p_endy[i] = -99999;
-    mc_p_endz[i] = -99999;
-    mc_p_endt[i] = -99999;
+    geant_tpcFV_orig_E[i] = -99999;
+    geant_tpcFV_orig_px[i] = -99999;
+    geant_tpcFV_orig_py[i] = -99999;
+    geant_tpcFV_orig_pz[i] = -99999;
+    geant_tpcFV_orig_startx[i] = -99999;
+    geant_tpcFV_orig_starty[i] = -99999;
+    geant_tpcFV_orig_startz[i] = -99999;
+    geant_tpcFV_orig_startt[i] = -99999;
+    geant_tpcFV_orig_endx[i] = -99999;
+    geant_tpcFV_orig_endy[i] = -99999;
+    geant_tpcFV_orig_endz[i] = -99999;
+    geant_tpcFV_orig_endt[i] = -99999;
 
-    mc_startx[i] = -99999;  
-    mc_starty[i] = -99999;  
-    mc_startz[i] = -99999;  
-    mc_startd[i] = -99999;  
-    mc_endx[i] = -99999;    
-    mc_endy[i] = -99999;    
-    mc_endz[i] = -99999;    
-    mc_endd[i] = -99999;    
-    mc_theta[i] = -99999;   
-    mc_phi[i] = -99999;     
-    mc_theta_xz[i] = -99999;
-    mc_theta_yz[i] = -99999;
-    mc_mom[i] = -99999;     
-    mc_len[i] = -99999;     
+    geant_tpcFV_startx[i] = -99999;  
+    geant_tpcFV_starty[i] = -99999;  
+    geant_tpcFV_startz[i] = -99999;  
+    geant_tpcFV_startd[i] = -99999;  
+    geant_tpcFV_endx[i] = -99999;    
+    geant_tpcFV_endy[i] = -99999;    
+    geant_tpcFV_endz[i] = -99999;    
+    geant_tpcFV_endd[i] = -99999;    
+    geant_tpcFV_theta[i] = -99999;   
+    geant_tpcFV_phi[i] = -99999;     
+    geant_tpcFV_theta_xz[i] = -99999;
+    geant_tpcFV_theta_yz[i] = -99999;
+    geant_tpcFV_mom[i] = -99999;     
+    geant_tpcFV_len[i] = -99999;         
   }    
   
 }
