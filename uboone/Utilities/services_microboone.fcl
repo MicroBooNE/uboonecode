@@ -66,4 +66,14 @@ microboone_services_3windows.DetectorProperties:            @local::microboone_d
 microboone_simulation_services_3windows:                    @local::microboone_simulation_services
 microboone_simulation_services_3windows.DetectorProperties: @local::microboone_detproperties_3windows
 
+
+microboone_message_services:
+{
+  destinations: {
+	errormsg:    @local::standard_error.destinations.errormsg
+	warningmsg:  @local::standard_warning.destinations.warningmsg
+	infomsg:     @local::standard_info.destinations.infomsg
+	debugmsg:    @local::standard_debug.destinations.debugmsg
+  }
+}
 END_PROLOG
