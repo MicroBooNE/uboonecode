@@ -106,9 +106,9 @@ microboone_message_services_prod_debug:
 
   destinations: {
 
-  LogDebugFile:      @local::microboone_message_services_common.destinations.LogDebugFile
-  LogStandardOut:    @local::microboone_message_services_common.destinations.LogStandardOut
-  LogStandardError:  @local::microboone_message_services_common.destinations.LogStandardError
+  LogDebugFile:      @local::microboone_message_services.destinations.LogDebugFile
+  LogStandardOut:    @local::microboone_message_services.destinations.LogStandardOut
+  LogStandardError:  @local::microboone_message_services.destinations.LogStandardError
   }
 }
 microboone_message_services_prod_debug.destinations.LogDebugFile.categories:{
@@ -123,8 +123,8 @@ microboone_message_services_prod:
   debugModules: ["*"]
 
   destinations: {
-    LogStandardOut:    @local::microboone_message_services_common.destinations.LogStandardOut
-    LogStandardError:  @local::microboone_message_services_common.destinations.LogStandardError
+    LogStandardOut:    @local::microboone_message_services.destinations.LogStandardOut
+    LogStandardError:  @local::microboone_message_services.destinations.LogStandardError
   }
 }
 
@@ -134,9 +134,9 @@ microboone_message_services_interactive:
 
   destinations: {
 
-    LogDebugFile:      @local::microboone_message_services_common.destinations.LogDebugFile
-    LogStandardOut:    @local::microboone_message_services_common.destinations.LogStandardOut
-    LogStandardError:  @local::microboone_message_services_common.destinations.LogStandardError
+    LogDebugFile:      @local::microboone_message_services.destinations.LogDebugFile
+    LogStandardOut:    @local::microboone_message_services.destinations.LogStandardOut
+    LogStandardError:  @local::microboone_message_services.destinations.LogStandardError
   }
 }
 microboone_message_services_interactive.destinations.LogStandardOut.threshold:  "INFO"
