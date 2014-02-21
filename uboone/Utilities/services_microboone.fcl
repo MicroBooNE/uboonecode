@@ -87,6 +87,7 @@ microboone_message_services:
       categories:{
         default:{ }
         RecoBaseDefaultCtor: { limit: 0 }
+        AnaBaseDefaultCtor:  { limit: 0 }
         GeometryBadInputPoint: { limit: 5 timespan: 1000}
       }
     }
@@ -114,6 +115,7 @@ microboone_message_services_prod_debug:
 microboone_message_services_prod_debug.destinations.LogDebugFile.categories:{
   default: { }
   RecoBaseDefaultCtor: { limit: 0 }
+  AnaBaseDefaultCtor:  { limit: 0 }
   GeometryBadInputPoint: { limit: 5 timespan: 1000}
 }
 
@@ -147,6 +149,7 @@ microboone_message_services_interactive.destinations.LogStandardError.threshold:
 microboone_message_services_interactive.destinations.LogStandardError.categories:{
   default: { }
   RecoBaseDefaultCtor: { limit: 1 }
+  AnaBaseDefaultCtor:  { limit: 1 }
   GeometryBadInputPoint: { limit: 5 timespan: 1000}
 }
 
