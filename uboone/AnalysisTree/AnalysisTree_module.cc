@@ -118,7 +118,12 @@ namespace microboone {
     double trkpdgtruth[kMaxTrack][kNplanes]; //true pdg code
     double trkefftruth[kMaxTrack][kNplanes]; //completeness
     double trkpurtruth[kMaxTrack][kNplanes]; //purity of track
-    
+    double trkpitchc[kMaxTrack][kNplanes];
+    int    ntrkhits[kMaxTrack][kNplanes];
+    double trkdedx[kMaxTrack][kNplanes][kMaxTrackHits];
+    double trkdqdx[kMaxTrack][kNplanes][kMaxTrackHits];
+    double trkresrg[kMaxTrack][kNplanes][kMaxTrackHits];
+ 
     // more track info
     int    trkId[kMaxTrack];
     double trkstartx[kMaxTrack];      // starting x position.
@@ -316,6 +321,11 @@ void microboone::AnalysisTree::beginJob(){
   fTree->Branch("trkpdgtruth",trkpdgtruth,"trkpdgtruth[ntracks_reco][3]/D");
   fTree->Branch("trkefftruth",trkefftruth,"trkefftruth[ntracks_reco][3]/D");
   fTree->Branch("trkpurtruth",trkpurtruth,"trkpurtruth[ntracks_reco][3]/D");
+  fTree->Branch("trkpitchc",trkpitchc,"trkpitchc[ntracks_reco][3]/D");
+  fTree->Branch("ntrkhits",ntrkhits,"ntrkhits[ntracks_reco][3]/I");
+  fTree->Branch("trkdedx",trkdedx,"trkdedx[ntracks_reco][3][1000]/D");
+  fTree->Branch("trkdqdx",trkdqdx,"trkdqdx[ntracks_reco][3][1000]/D");
+  fTree->Branch("trkresrg",trkresrg,"trkresrg[ntracks_reco][3][1000]/D");
   fTree->Branch("trkId", trkId, "trkId[ntracks_reco]/I");
   fTree->Branch("trkstartx", trkstartx, "trkstartx[ntracks_reco]/D");
   fTree->Branch("trkstarty", trkstarty, "trkstarty[ntracks_reco]/D");
@@ -617,6 +627,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     for (size_t j = 0; j<calos.size(); ++j){
       trkke[i][j] = calos[j]->KineticEnergy();
       trkrange[i][j] = calos[j]->Range();
+      trkpitchc[i][j] = calos[j] -> TrkPitchC();
+      ntrkhits[i][j] = calos[j] -> dEdx().size();
+      for(int k = 0; k < ntrkhits[i][j]; ++k) {
+        trkdedx[i][j][k] = (calos[j] -> dEdx())[k];
+        trkdqdx[i][j][k] = (calos[j] -> dQdx())[k];
+        trkresrg[i][j][k] = (calos[j] -> ResidualRange())[k];
+      }
     }
     //track truth information
     if (!isdata){
@@ -640,7 +657,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	  double tote = 0;
 	  for (size_t iide = 0; iide<vide.size(); ++iide){
 	    tote += vide[iide].energy;
+            //std::cout << "SimIDE: " << iide << "\t energy dep: " << vide[iide].energy << std::endl;
 	  }
+
+          //std::cout << "the total kinetic energy is: " << tote << std::endl;
 	  trkpdgtruth[i][ipl] = particle->PdgCode();
 	  trkefftruth[i][ipl] = maxe/(tote/kNplanes); //I believe tote include both induction and collection energies
 	}	  
@@ -885,6 +905,7 @@ void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > co
     }
   }
   
+  //std::cout << "the total energy of this reco track is: " << tote << std::endl;
   
   if (tote>0){
     purity = maxe/tote;
@@ -1046,6 +1067,13 @@ void microboone::AnalysisTree::ResetVars(){
       trkpdgtruth[i][j] = -99999;
       trkefftruth[i][j] = -99999;
       trkpurtruth[i][j] = -99999;
+      trkpitchc[i][j] = -99999;
+      ntrkhits[i][j] = -99999;
+      for(int k = 0; k < kMaxTrackHits; k++) {
+         trkdedx[i][j][k] = -99999;
+         trkdqdx[i][j][k] = -99999;
+         trkresrg[i][j][k] = -99999;
+      }
     }
   }
 
