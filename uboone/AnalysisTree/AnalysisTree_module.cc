@@ -483,9 +483,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   art::ServiceHandle<util::LArProperties> LArProp;
 
   //associations
-  art::FindMany<recob::Track>     fmtk(hitListHandle, evt, fTrackModuleLabel);
-  art::FindManyP<recob::Hit>      fmht(trackListHandle, evt, fTrackModuleLabel);
-  art::FindMany<anab::Calorimetry> fmcal(trackListHandle, evt, fCalorimetryModuleLabel);
+  art::FindManyP<recob::Track>      fmtk(hitListHandle, evt, fTrackModuleLabel);
+  art::FindManyP<recob::Hit>        fmht(trackListHandle, evt, fTrackModuleLabel);
+  art::FindManyP<anab::Calorimetry> fmcal(trackListHandle, evt, fCalorimetryModuleLabel);
 
   run = evt.run();
   subrun = evt.subRun();
@@ -621,18 +621,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
        trklen[i]	   = tlen;
      } 
    }
-    
-    std::vector<const anab::Calorimetry*> calos = fmcal.at(i);
-    //std::cout<<"calo size "<<calos.size()<<std::endl;
-    for (size_t j = 0; j<calos.size(); ++j){
-      trkke[i][j] = calos[j]->KineticEnergy();
-      trkrange[i][j] = calos[j]->Range();
-      trkpitchc[i][j] = calos[j] -> TrkPitchC();
-      ntrkhits[i][j] = calos[j] -> dEdx().size();
-      for(int k = 0; k < ntrkhits[i][j]; ++k) {
-        trkdedx[i][j][k] = (calos[j] -> dEdx())[k];
-        trkdqdx[i][j][k] = (calos[j] -> dQdx())[k];
-        trkresrg[i][j][k] = (calos[j] -> ResidualRange())[k];
+    if (fmcal.isValid()){
+      std::vector<art::Ptr< anab::Calorimetry > > calos = fmcal.at(i);
+      //std::cout<<"calo size "<<calos.size()<<std::endl;
+      for (size_t j = 0; j<calos.size(); ++j){
+	trkke[i][j] = calos[j]->KineticEnergy();
+	trkrange[i][j] = calos[j]->Range();
+	trkpitchc[i][j] = calos[j] -> TrkPitchC();
+	ntrkhits[i][j] = calos[j] -> dEdx().size();
+	for(int k = 0; k < ntrkhits[i][j]; ++k) {
+	  trkdedx[i][j][k] = (calos[j] -> dEdx())[k];
+	  trkdqdx[i][j][k] = (calos[j] -> dQdx())[k];
+	  trkresrg[i][j][k] = (calos[j] -> ResidualRange())[k];
+	}
       }
     }
     //track truth information
