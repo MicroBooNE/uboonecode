@@ -1,8 +1,7 @@
 
-art_make( NO_PLUGINS
-          BASENAME_ONLY
-          LIBRARY_NAME  uboone_Utilities
+art_make( BASENAME_ONLY
 	  MODULE_LIBRARIES Utilities
+                        SignalShapingServiceMicroBooNE_service
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -20,6 +19,8 @@ art_make( NO_PLUGINS
                         ${ROOT_GDML}
 			${ROOT_BASIC_LIB_LIST}
         )
+
+
 
 
 install_headers()

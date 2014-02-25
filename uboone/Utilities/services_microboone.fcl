@@ -66,4 +66,91 @@ microboone_services_3windows.DetectorProperties:            @local::microboone_d
 microboone_simulation_services_3windows:                    @local::microboone_simulation_services
 microboone_simulation_services_3windows.DetectorProperties: @local::microboone_detproperties_3windows
 
+
+microboone_message_services:
+{
+  debugModules: ["*"]
+
+  destinations: {
+    LogDebugFile: { 
+      type:       "file"
+      filename:   "debug.log"
+      append:     false
+      threshold:  "DEBUG"
+      categories:{
+        default:{ limit: 0 }
+      }
+    }
+    LogStandardOut: {
+      type:       "cout"
+      threshold:  "WARNING"
+      categories:{
+        default:{ }
+        RecoBaseDefaultCtor: { limit: 0 }
+        AnaBaseDefaultCtor:  { limit: 0 }
+        GeometryBadInputPoint: { limit: 5 timespan: 1000}
+      }
+    }
+    LogStandardError: {
+      type:       "cerr"
+      threshold:  "ERROR"
+      categories:{
+        default:{ }
+      }
+    }
+  }
+}
+
+microboone_message_services_prod_debug:
+{
+  debugModules: ["*"]
+
+  destinations: {
+
+  LogDebugFile:      @local::microboone_message_services.destinations.LogDebugFile
+  LogStandardOut:    @local::microboone_message_services.destinations.LogStandardOut
+  LogStandardError:  @local::microboone_message_services.destinations.LogStandardError
+  }
+}
+microboone_message_services_prod_debug.destinations.LogDebugFile.categories:{
+  default: { }
+  RecoBaseDefaultCtor: { limit: 0 }
+  AnaBaseDefaultCtor:  { limit: 0 }
+  GeometryBadInputPoint: { limit: 5 timespan: 1000}
+}
+
+
+microboone_message_services_prod:
+{
+  debugModules: ["*"]
+
+  destinations: {
+    LogStandardOut:    @local::microboone_message_services.destinations.LogStandardOut
+    LogStandardError:  @local::microboone_message_services.destinations.LogStandardError
+  }
+}
+
+microboone_message_services_interactive:
+{
+  debugModules: ["*"]
+
+  destinations: {
+
+    LogDebugFile:      @local::microboone_message_services.destinations.LogDebugFile
+    LogStandardOut:    @local::microboone_message_services.destinations.LogStandardOut
+    LogStandardError:  @local::microboone_message_services.destinations.LogStandardError
+  }
+}
+microboone_message_services_interactive.destinations.LogStandardOut.threshold:  "INFO"
+microboone_message_services_interactive.destinations.LogStandardOut.categories:{
+  default: { limit: 0 }
+}
+microboone_message_services_interactive.destinations.LogStandardError.threshold:  "WARNING"
+microboone_message_services_interactive.destinations.LogStandardError.categories:{
+  default: { }
+  RecoBaseDefaultCtor: { limit: 1 }
+  AnaBaseDefaultCtor:  { limit: 1 }
+  GeometryBadInputPoint: { limit: 5 timespan: 1000}
+}
+
 END_PROLOG
