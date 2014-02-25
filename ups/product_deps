@@ -16,7 +16,8 @@ defaultqual e4
 # libdir  fq_dir       lib
 # bindir  fq_dir       bin
 #
-fcldir product_dir job
+fcldir  product_dir job
+gdmldir product_dir gdml
 
 # table fragment to set FW_SEARCH_PATH needed 
 # to find gdml files:
@@ -36,7 +37,7 @@ gcc		v4_8_1
 
 # list products required ONLY for the build
 # any products here must NOT have qualifiers
-only_for_build  cetbuildtools   v3_07_07
+only_for_build  cetbuildtools   v3_07_10
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
