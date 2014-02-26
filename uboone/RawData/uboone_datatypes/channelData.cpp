@@ -6,13 +6,13 @@ using namespace gov::fnal::uboone::datatypes;
 
 void channelData::decompress(){
 
-  uint i_bit,i_zero; // some counters we will use
+  unsigned int i_bit,i_zero; // some counters we will use
 
   const size_t size16 = sizeof(uint16_t);
   std::unique_ptr<uint16_t> word(new uint16_t);
   std::vector<uint16_t> uncompressed_vector;
 
-  for(uint iword = 0; iword < channel_data_size; iword++){
+  for(unsigned int iword = 0; iword < channel_data_size; iword++){
 
     std::copy(getChannelDataPtr() + iword*size16,
 	      getChannelDataPtr() + (iword+1)*size16,
