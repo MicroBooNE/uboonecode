@@ -386,7 +386,7 @@ namespace lris {
 	    size_t chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));
 	    char* cdptr=chD.getChannelDataPtr();
 
-	    for (uint i=0;i<chdsize;i++) {
+	    for (unsigned int i=0;i<chdsize;i++) {
 	      std::copy(cdptr+i*sizeof(uint16_t),
 			cdptr+(i+1)*sizeof(uint16_t),
 			(char*)blk_chD.get());
@@ -470,7 +470,7 @@ namespace lris {
 	    optdata::FIFOChannel rd(category, time, frame, channel_number,win_data_size);
 
 	    std::unique_ptr<uint16_t> blk_winD(new uint16_t);	    
-	    for (uint i=0;i<win_data_size;i++) {
+	    for (unsigned int i=0;i<win_data_size;i++) {
 	      std::copy(winData.getWindowDataPtr()+i*sizeof(uint16_t),
 			winData.getWindowDataPtr()+(i+1)*sizeof(uint16_t),
 			(char*)blk_winD.get());
