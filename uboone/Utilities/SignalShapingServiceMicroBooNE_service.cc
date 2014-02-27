@@ -309,10 +309,11 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
     }
 
     for(int i = 0; i < nbincPlane; ++i){
-      fColFieldResponse[i] *= fColFieldRespAmp/integral;
+      //fColFieldResponse[i] *= fColFieldRespAmp/integral;
+      fColFieldResponse[i] /= integral;
     }
 
-    const int nbiniOld = 6;
+    //const int nbiniOld = 6;
     const int nbinuPlane = 228;
     // now induction plane 0 ("U")
     // this response function has a very long (first) positive lobe, ~ 100 usec
@@ -368,7 +369,8 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
     };
 
     for(int i = 0; i < nbinuPlane; ++i){
-      fIndUFieldResponse[i] = fIndUFieldRespAmp*uPlaneResponse[i]/(nbiniOld);
+      //fIndUFieldResponse[i] = fIndUFieldRespAmp*uPlaneResponse[i]/(nbiniOld);
+      fIndUFieldResponse[i] = uPlaneResponse[i]/integral;
     }
    
     const int nbinvPlane = 20;
@@ -380,7 +382,8 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
     };
 
     for (int i = 0; i < nbinvPlane; ++i) {
-      fIndVFieldResponse[i] = vPlaneResponse[i]*fIndVFieldRespAmp/(nbiniOld);
+      //fIndVFieldResponse[i] = vPlaneResponse[i]*fIndVFieldRespAmp/(nbiniOld);
+      fIndVFieldResponse[i] = vPlaneResponse[i]/integral;
     }
 
    } else {
