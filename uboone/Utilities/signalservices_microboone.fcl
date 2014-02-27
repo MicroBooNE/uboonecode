@@ -5,7 +5,7 @@ BEGIN_PROLOG
 microboone_signalshapingservice:
 {
   ADCTicksPerPCAtLowestASICGainSetting: 33.5628
-  fASICGainInMVPerFC:                    4.7
+  ASICGainInMVPerFC:                    4.7
   
   FieldBins:        75
   Col3DCorrection:  2.5
