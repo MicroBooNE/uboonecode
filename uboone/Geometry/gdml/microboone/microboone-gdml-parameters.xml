@@ -128,18 +128,18 @@
    <parameter name="RackY" value="212.7">
 	   This is the height of the computer racks that sit on top of the platform (in cm)
    </parameter>
-   <parameter name="RackZ" value="60.7">
+   <parameter name="RackZ" value="60.96">
 	   This is the length of the computer racks that sit on top of the platform (in cm)
    </parameter>
    <parameter name="RackThickness" value="5.8">
      This is the thickness of the steel bars making up the racks (in cm)
    </parameter>
 
-
-   <parameter name="PMTOffset" value="424.75*2.54/2">
-   This is the axially offset for one coordinate of the PMTs
+<!--
+   <parameter name="PMTOffset" value="0">
+   This is the axial offset for one coordinate of the PMTs
    </parameter>
-
+-->
    <!-- The following wire shifts are for adjusting the nominal wire
         positions within the "frame" of a TPC plane. They are mainly
         meant to allow for a constant offset due to wrapping the wires
