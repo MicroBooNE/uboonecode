@@ -48,6 +48,8 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 
   // Fetch fcl parameters.
 
+  fADCTicksPerPCAtLowestASICGainSetting = pset.get<double>("ADCTicksPerPCAtLowestASICGainSetting");
+  fASICGainInMVPerFC = pset.get<double>("fASICGainInMVPerFC");
   fNFieldBins = pset.get<int>("FieldBins");
   fCol3DCorrection = pset.get<double>("Col3DCorrection");
   fInd3DCorrection = pset.get<double>("Ind3DCorrection");
@@ -480,9 +482,16 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse()
     
   LOG_DEBUG("SignalShapingMicroBooNE") << " Done.";
 
- //normalize fElectResponse[i], before the convolution   
+  // normalize fElectResponse[i], before the convolution
+  // Put in overall normalization in a pedantic way:
+  // first put in the pulse area per eleectron at the lowest gain setting,
+  // then normalize by the actual ASIC gain setting used.
+  // This code is executed only during initialization of service,
+  // so don't worry about code inefficiencies here.
    for(int i = 0; i < nticks; ++i){
-     fElectResponse[i]/=integral;
+     fElectResponse[i] /= integral;
+     fElectResponse[i] *= fADCTicksPerPCAtLowestASICGainSetting*1.6e-7;
+     fElectResponse[i] *= fASICGainInMVPerFC/4.7;
    }
   
   

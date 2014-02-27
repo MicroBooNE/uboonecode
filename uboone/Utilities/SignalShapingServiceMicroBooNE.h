@@ -88,6 +88,9 @@ namespace util {
     bool fInit;               ///< Initialization flag.
 
     // Fcl parameters.
+    double fADCTicksPerPCAtLowestASICGainSetting; ///< Pulse area (in ADC*ticks) for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
+
+    double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
 
     int fNFieldBins;         			///< number of bins for field response
     double fCol3DCorrection; 			///< correction factor to account for 3D path of 
