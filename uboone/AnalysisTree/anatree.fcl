@@ -1,6 +1,3 @@
-#IMPORTANT NOTE: YOU NEED TO INCLUDE THE CALO MODULE FOR THE ANALYSISTREE TO RUN, OTHERWISE, YOU WILL END UP WITH AN
-#EMPTY TREE. WORK IN PROGRESS TO FIX THIS! 
-
 #include "services.fcl"
 #include "caldata.fcl"
 #include "hitfindermodules.fcl"

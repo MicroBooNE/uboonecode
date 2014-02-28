@@ -728,7 +728,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       for (size_t ipl = 0; ipl < 3; ++ipl){
   	  double maxe = 0;
   	  HitsPurity(hits[ipl],trkidtruth[it1][i][ipl],trkpurtruth[it1][i][ipl],maxe);
-	  std::cout<<"\n"<<it1<<"\t"<<i<<"\t"<<ipl<<"\t"<<trkidtruth[it1][i][ipl]<<"\t"<<trkpurtruth[it1][i][ipl]<<"\t"<<maxe;
+	  //std::cout<<"\n"<<it1<<"\t"<<i<<"\t"<<ipl<<"\t"<<trkidtruth[it1][i][ipl]<<"\t"<<trkpurtruth[it1][i][ipl]<<"\t"<<maxe;
   	  if (trkidtruth[it1][i][ipl]>0){
   	    const simb::MCParticle *particle = bt->TrackIDToParticle(trkidtruth[it1][i][ipl]);
   	    const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(trkidtruth[it1][i][ipl]);
@@ -738,7 +738,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   	    }
   	    trkpdgtruth[it1][i][ipl] = particle->PdgCode();
   	    trkefftruth[it1][i][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
-	    std::cout<<"\n"<<trkpdgtruth[it1][i][ipl]<<"\t"<<trkefftruth[it1][i][ipl];
+	    //std::cout<<"\n"<<trkpdgtruth[it1][i][ipl]<<"\t"<<trkefftruth[it1][i][ipl];
   	  }	    
   	}
       }//end if (!isdata)
