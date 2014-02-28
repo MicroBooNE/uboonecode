@@ -24,10 +24,10 @@ microboone_services:
  DatabaseUtil:	                 @local::microboone_database      
  SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
  BackTracker:                    @local::microboone_backtracker  
+ OpDigiProperties:               @local::microboone_opdigiproperties
 }
 
 microboone_optical_services:                          @local::microboone_services
-microboone_optical_services.OpDigiProperties:         @local::microboone_opdigiproperties 
 
 microboone_simulation_services:
 {
