@@ -153,10 +153,22 @@ namespace caldata {
         
     unsigned int dataSize = digitVec0->Samples(); //size of raw data vectors
 
+    if( (unsigned int)transformSize < dataSize){
+      mf::LogWarning("CalWireMicroBooNE")<<"FFT size (" << transformSize << ") "
+					 << "is smaller than the data size (" << dataSize << ") "
+					 << "\nResizing the FFT now...";
+      fFFT->ReinitializeFFT(dataSize,fFFT->FFTOptions(),fFFT->FFTFitBins());
+      transformSize = fFFT->FFTSize();
+      mf::LogWarning("CalWireMicroBooNE")<<"FFT size is now (" << transformSize << ") "
+					 << "and should be larger than the data size (" << dataSize << ")";
+    }
+
+    mf::LogInfo("CalWireMicroBooNE") << "Data size is " << dataSize << " and transform size is " << transformSize;
+
     if(fBaseSampleBins > 0 && dataSize % fBaseSampleBins != 0) {
       mf::LogError("CalWireMicroBooNE")<<"Set BaseSampleBins modulo dataSize= "<<dataSize;
     }
-    
+
     uint32_t     channel(0); // channel number
     unsigned int bin(0);     // time bin loop variable
     
@@ -176,6 +188,7 @@ namespace caldata {
 
       // skip bad channels
       if(!chanFilt->BadChannel(channel)) {
+
         // resize and pad with zeros
 	holder.resize(transformSize, 0.);
 	
@@ -184,6 +197,7 @@ namespace caldata {
 	
 	// loop over all adc values and subtract the pedestal
         float pdstl = digitVec->GetPedestal();
+	
 	for(bin = 0; bin < dataSize; ++bin) 
 	  holder[bin]=(rawadc[bin]-pdstl);
 

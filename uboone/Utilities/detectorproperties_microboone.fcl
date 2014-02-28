@@ -16,5 +16,6 @@ microboone_detproperties.InheritNumberTimeSamples: true
 
 microboone_detproperties_3windows:                   @local::microboone_detproperties
 microboone_detproperties_3windows.NumberTimeSamples: 9600         
+microboone_detproperties_3windows.ReadOutWindowSize: 9600
 
 END_PROLOG
