@@ -43,13 +43,16 @@ outputs:
 
 physics:
 {
- producers:{}
+ producers:{### calorimetry producers
+  trackkalmanhitcalo:  @local::microboone_calomc
+  trackkalspscalo:     @local::microboone_calomc
+  beziercalo:          @local::microboone_beziercalorimetry}
  filters:  {} 
  analyzers:{}
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ calo ]
+ reco: [ trackkalmanhitcalo, trackkalspscalo, beziercalo ]
  ana:  [ analysistree ]
  
  #define the output stream, there could be more than one if using filters 
@@ -72,16 +75,19 @@ physics.analyzers.analysistree:  @local::microboone_analysistree
 #physics.producers.filter.BadEvents:    [5]
 #physics.producers.filter.BadRuns:      [10]
 #physics.producers.matchtracks.lartracks:                "spacepts"
-physics.producers.calo.TrackModuleLabel:                "trackkalmanhit"
+#physics.producers.calo.TrackModuleLabel:                 ["trackkalmanhit","trackkalsps","beziertracker"]
+physics.producers.trackkalmanhitcalo.TrackModuleLabel:          "trackkalmanhit"
+physics.producers.trackkalspscalo.TrackModuleLabel:             "trackkalsps"
+physics.producers.beziercalo.BTrackModuleLabel:                 "beziertracker"
+
 #physics.producers.calo.UseArea:                         true
 #physics.producers.calo.CaloAlg.CaloUseModBox:            true
 #physics.producers.pid.TrackModuleLabel:                 "spacepts"
 #physics.producers.pid.CalorimetryModuleLabel:           "calo"
-physics.analyzers.analysistree.TrackModuleLabel:        "trackkalmanhit"
-#physics.analyzers.analysistree.CalorimetryModuleLabel:  "calo"
+physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "trackkalsps", "beziertracker"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "trackkalspscalo", "beziercalo"]
 physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "generator"
 #physics.analyzers.analysistree.ParticleIDModuleLabel:   "pid"
-#physics.analyzers.analysistree.TrackMatchModuleLabel:   "matchtracks"
 
 
