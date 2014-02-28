@@ -122,11 +122,9 @@ namespace microboone {
     double trkpurtruth[kMaxTrackers][kMaxTrack][kNplanes]; //purity of track    
     double trkpitchc[kMaxTrackers][kMaxTrack][kNplanes];
     int    ntrkhits[kMaxTrackers][kMaxTrack][kNplanes];
-    /*
-    double trkdedx[kMaxTrack][kNplanes][kMaxTrackHits];
-    double trkdqdx[kMaxTrack][kNplanes][kMaxTrackHits];
-    double trkresrg[kMaxTrack][kNplanes][kMaxTrackHits];
-    */
+    double trkdedx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
+    double trkdqdx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
+    double trkresrg[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
     
     // more track info
     char   S_temp[50],S1_temp[50], S2_temp[50], Str_temp[50];
@@ -353,12 +351,16 @@ void microboone::AnalysisTree::beginJob(){
     fTree->Branch(S1_temp,trkpitchc[i],S2_temp);
     sprintf(S1_temp,"ntrkhits_%s",fTrackModuleLabel[i].c_str());
     sprintf(S2_temp,"ntrkhits_%s[%s][3]/I",fTrackModuleLabel[i].c_str(),S_temp);
-    fTree->Branch(S1_temp, ntrkhits[i], S2_temp);
-    /*
-    fTree->Branch("trkdedx",trkdedx,"trkdedx[ntracks_reco][3][1000]/D");
-    fTree->Branch("trkdqdx",trkdqdx,"trkdqdx[ntracks_reco][3][1000]/D");
-    fTree->Branch("trkresrg",trkresrg,"trkresrg[ntracks_reco][3][1000]/D");
-    */
+    fTree->Branch(S1_temp, ntrkhits[i], S2_temp);    
+    sprintf(S1_temp,"trkdedx_%s",fTrackModuleLabel[i].c_str());
+    sprintf(S2_temp,"trkdedx_%s[%s][3][1000]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    fTree->Branch(S1_temp,trkdedx[i],S2_temp);    
+    sprintf(S1_temp,"trkdqdx_%s",fTrackModuleLabel[i].c_str());
+    sprintf(S2_temp,"trkdqdx_%s[%s][3][1000]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    fTree->Branch(S1_temp,trkdqdx[i],S2_temp);    
+    sprintf(S1_temp,"trkresrg_%s",fTrackModuleLabel[i].c_str());
+    sprintf(S2_temp,"trkresrg_%s[%s][3][1000]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    fTree->Branch(S1_temp,trkresrg[i],S2_temp);    
     sprintf(S1_temp,"trkstartx_%s",fTrackModuleLabel[i].c_str());
     sprintf(S2_temp,"trkstartx_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
     fTree->Branch(S1_temp, trkstartx[i], S2_temp);
@@ -703,11 +705,11 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   	  trkrange[it1][i][j] = calos[j]->Range();
 	  trkpitchc[it1][i][j]= calos[j] -> TrkPitchC();
 	  ntrkhits[it1][i][j] = calos[j] -> dEdx().size();
-	  /*for(int k = 0; k < ntrkhits[i][j]; ++k) {
-	    trkdedx[i][j][k] = (calos[j] -> dEdx())[k];
-	    trkdqdx[i][j][k] = (calos[j] -> dQdx())[k];
-	    trkresrg[i][j][k] = (calos[j] -> ResidualRange())[k];
-	  }*/
+	  for(int k = 0; k < ntrkhits[it1][i][j]; ++k) {
+	    trkdedx[it1][i][j][k]  = (calos[j] -> dEdx())[k];
+	    trkdqdx[it1][i][j][k]  = (calos[j] -> dQdx())[k];
+	    trkresrg[it1][i][j][k] = (calos[j] -> ResidualRange())[k];
+	  }
         }
       }
     
@@ -1148,11 +1150,11 @@ void microboone::AnalysisTree::ResetVars(){
         trkpurtruth[i][j][k] = -99999;
         trkpitchc[i][j][k]   = -99999;
         ntrkhits[i][j][k]    = -99999;
-        /*for(int l = 0; l < kMaxTrackHits; l++) {
-         trkdedx[j][k][l] = -99999;
-         trkdqdx[j][k][l] = -99999;
-         trkresrg[j][k][l] = -99999;
-        }*/
+        for(int l = 0; l < kMaxTrackHits; l++) {
+         trkdedx[i][j][k][l]  = -99999;
+         trkdqdx[i][j][k][l]  = -99999;
+         trkresrg[i][j][k][l] = -99999;
+        }
       }
     }
   }  
