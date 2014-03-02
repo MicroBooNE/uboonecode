@@ -15,7 +15,7 @@ microboone_genie_hist.BeamRadius:    4.
 
 microboone_genie_simple:                @local::microboone_genie
 microboone_genie_simple.FluxType:       "simple_flux"
-microboone_genie_simple.FluxFiles:      ["bnb_gsimple_fluxes_07.17.2012_470/gsimple_microboone-470-onaxis_numintp_*.root"]
+microboone_genie_simple.FluxFiles:      ["uboonebeam/bnb_gsimple_fluxes_02.28.2014_470/gsimple_microboone-470-onaxis_mc_nu_dummy_ntrd_*.root"]
 microboone_genie_simple.EventsPerSpill: 0
 
 
