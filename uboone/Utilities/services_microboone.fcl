@@ -61,14 +61,17 @@ microboone_optical_simulation_services.LArG4Parameters.EnabledPhysics: [ "Em",
                                                                          "NeutronTrackingCut" ]
 
 
-microboone_services_3windows:                               @local::microboone_services
-microboone_services_3windows.DetectorProperties:            @local::microboone_detproperties_3windows
-microboone_simulation_services_3windows:                    @local::microboone_simulation_services
-microboone_simulation_services_3windows.DetectorProperties: @local::microboone_detproperties_3windows
+microboone_services_1window:                               @local::microboone_services
+microboone_services_1window.DetectorProperties:            @local::microboone_detproperties_1window
+microboone_simulation_services_1window:                    @local::microboone_simulation_services
+microboone_simulation_services_1window.DetectorProperties: @local::microboone_detproperties_1window
 
-microboone_optical_simulation_services_3windows:                    @local::microboone_optical_simulation_services
-microboone_optical_simulation_services_3windows.DetectorProperties: @local::microboone_detproperties_3windows
+microboone_optical_simulation_services_1window:                    @local::microboone_optical_simulation_services
+microboone_optical_simulation_services_1window.DetectorProperties: @local::microboone_detproperties_1window
 
+microboone_services_3windows:                              @local::microboone_services
+microboone_simulation_services_3windows:                   @local::microboone_simulation_services
+microboone_optical_simulation_services_3windows:                   @local::microboone_optical_simulation_services
 
 microboone_message_services:
 {
