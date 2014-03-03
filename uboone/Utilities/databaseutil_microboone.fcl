@@ -6,6 +6,7 @@ microboone_database:               @local::standard_database
 microboone_database.PassFileName:  ".upswd"
 microboone_database.DBName:	 "uboone_dev"
 microboone_database.DBUser:	 "uboone_reader"
-microboone_database.ShouldConnect: true
+microboone_database.ShouldConnect: false       # enable it when DB is available
+microboone_database.ToughErrorTreatment: false # enable it when DB is available too
 
 END_PROLOG
