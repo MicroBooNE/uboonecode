@@ -584,7 +584,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   //hit information
   no_hits=hitlist.size();
-
   for (size_t i = 0; i<hitlist.size(); ++i){//loop over hits
     hit_channel[i] = hitlist[i]->Channel();
     hit_plane[i]   = hitlist[i]->WireID().Plane;
@@ -592,6 +591,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     hit_peakT[i]   = hitlist[i]->PeakTime();
     hit_charge[i]  = hitlist[i]->Charge();
     hit_charge[i]  = hitlist[i]->Charge(true);
+    /*
     for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
       art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[it]);
       if (fmtk.at(i).size()!=0){
@@ -599,13 +599,15 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
       else
       	hit_trkid[it][i] = 0;
-    }  
+    } 
+    */ 
   }
 
   //track information for multiple trackers
   for (unsigned int it1=0; it1<fTrackModuleLabel.size(); ++it1){
     ntracks[it1]=tracklist[it1].size(); 
     for(unsigned int i=0; i<tracklist[it1].size();++i){//loop over tracks
+
       art::Ptr<recob::Track> ptrack(trackListHandle[it1], i);
       const recob::Track& track = *ptrack;
       //we need to use Bezier methods for Bezier tracks
