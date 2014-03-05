@@ -46,6 +46,9 @@ qualifier	larsoft		postgresql	gcc	notes
 e4:debug	e4:debug	-nq-		-nq-
 e4:opt		e4:opt		-nq-		-nq-
 e4:prof		e4:prof		-nq-		-nq-
+e4:noifdh:debug	e4:noifdh:debug	-nq-		-nq-
+e4:noifdh:opt	e4:noifdh:opt	-nq-		-nq-
+e4:noifdh:prof	e4:noifdh:prof	-nq-		-nq-
 
 # Preserve tabs and formatting in emacs and vi / vim:
 
