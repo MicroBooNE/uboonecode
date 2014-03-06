@@ -125,6 +125,7 @@ namespace microboone {
     double trkdedx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
     double trkdqdx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
     double trkresrg[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
+    double trkxyz[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits][3];
     
     // more track info
     char   S_temp[50],S1_temp[50], S2_temp[50], Str_temp[50];
@@ -360,7 +361,10 @@ void microboone::AnalysisTree::beginJob(){
     fTree->Branch(S1_temp,trkdqdx[i],S2_temp);    
     sprintf(S1_temp,"trkresrg_%s",fTrackModuleLabel[i].c_str());
     sprintf(S2_temp,"trkresrg_%s[%s][3][1000]/D",fTrackModuleLabel[i].c_str(),S_temp);
-    fTree->Branch(S1_temp,trkresrg[i],S2_temp);    
+    fTree->Branch(S1_temp,trkresrg[i],S2_temp);
+    sprintf(S1_temp,"trkxyz_%s",fTrackModuleLabel[i].c_str());
+    sprintf(S2_temp,"trkxyz_%s[%s][3][1000][3]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    fTree->Branch(S1_temp,trkxyz[i],S2_temp);
     sprintf(S1_temp,"trkstartx_%s",fTrackModuleLabel[i].c_str());
     sprintf(S2_temp,"trkstartx_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
     fTree->Branch(S1_temp, trkstartx[i], S2_temp);
@@ -711,6 +715,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	    trkdedx[it1][i][j][k]  = (calos[j] -> dEdx())[k];
 	    trkdqdx[it1][i][j][k]  = (calos[j] -> dQdx())[k];
 	    trkresrg[it1][i][j][k] = (calos[j] -> ResidualRange())[k];
+	    trkxyz[it1][i][j][k][0] = (calos[j] -> XYZ())[k].X();
+	    trkxyz[it1][i][j][k][1] = (calos[j] -> XYZ())[k].Y();
+	    trkxyz[it1][i][j][k][2] = (calos[j] -> XYZ())[k].Z();
 	  }
         }
       }
@@ -1152,10 +1159,12 @@ void microboone::AnalysisTree::ResetVars(){
         trkpurtruth[i][j][k] = -99999;
         trkpitchc[i][j][k]   = -99999;
         ntrkhits[i][j][k]    = -99999;
-        for(int l = 0; l < kMaxTrackHits; l++) {
-         trkdedx[i][j][k][l]  = -99999;
-         trkdqdx[i][j][k][l]  = -99999;
-         trkresrg[i][j][k][l] = -99999;
+        for(int l = 0; l < kMaxTrackHits; ++l) {
+         trkdedx[i][j][k][l]  = 0;
+         trkdqdx[i][j][k][l]  = 0;
+         trkresrg[i][j][k][l] = 0;
+	 for (int m = 0; m<3; ++m)
+	   trkxyz[i][j][k][l][m] = 0;
         }
       }
     }
