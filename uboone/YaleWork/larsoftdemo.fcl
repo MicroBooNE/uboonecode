@@ -126,7 +126,7 @@ physics:
     selectMode1: {
      module_type: FilterPrimaryPDG
      GeantModuleLabel: "largeant"
-     PrimaryParticles: [ 2212 ] # find one of these and it's satisfied. 2212==protons
+     PrimaryParticles: [ 2112 ] # find one of these primaries. 2112 == neutrons
     }
 }
 
