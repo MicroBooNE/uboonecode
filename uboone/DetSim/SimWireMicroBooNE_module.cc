@@ -310,11 +310,39 @@ namespace detsim {
       // pick a new "noise channel" for every channel  - this makes sure    
       // the noise has the right coherent characteristics to be on one channel
 
+      //Determine pedistal
+      //Fixed value for pedistal based on plane type
+      //Do we want to allow for variation?
+      //each wire might eventually be calibrated differently...
+      //maybe .fcl parameter that is RMS for baseline variation
+      float ped_mean = 2048;
+      geo::SigType_t sigtype = geo->SignalType(chan);
+      if (sigtype == geo::kInduction)
+	ped_mean = 2048;
+      else if (sigtype == geo::kCollection)
+	ped_mean = 400;
+
       int noisechan = TMath::Nint(flat.fire()*(1.*(geo->Nchannels()-1)+0.1));
+
       for(unsigned int i = 0; i < signalSize; ++i){
-	adcvec[i] = (short)TMath::Nint(fNoise[noisechan][i] + fChargeWork[i]);
-	adcvecPreSpill[i] = (short)TMath::Nint(fNoise[noisechan][i] + fChargeWorkPreSpill[i]);
-        adcvecPostSpill[i] = (short)TMath::Nint(fNoise[noisechan][i] + fChargeWorkPostSpill[i]);
+ 	float adcval           =  fNoise[noisechan][i] + fChargeWork[i] + ped_mean;
+	float adcval_prespill  =  fNoise[noisechan][i] + fChargeWorkPreSpill[i] + ped_mean;
+        float adcval_postspill =  fNoise[noisechan][i] + fChargeWorkPostSpill[i] + ped_mean;
+	
+	//allow for ADC saturation
+	//make saturation value a fcl parameter?
+	float adcsaturation = 4096;
+	if ( adcval > adcsaturation )
+	  adcval = adcsaturation;
+	if ( adcval_prespill > adcsaturation )
+	  adcval_prespill = adcsaturation;
+	if ( adcval_postspill > adcsaturation )
+	  adcval_postspill = adcsaturation;
+
+	adcvec[i]          = (unsigned short)(adcval);
+	adcvecPreSpill[i]  = (unsigned short)(adcval_prespill);
+	adcvecPostSpill[i] = (unsigned short)(adcval_postspill);
+
       }// end loop over signal size
 
       // resize the adcvec to be the correct number of time samples, 
