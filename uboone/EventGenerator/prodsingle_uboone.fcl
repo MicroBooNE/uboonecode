@@ -1,4 +1,4 @@
-#include "services.fcl"
+#include "services_microboone.fcl"
 #include "singles.fcl"
 #include "largeantmodules.fcl"
 #include "detsimmodules.fcl"
@@ -20,7 +20,7 @@ services:
 source:
 {
   module_type: EmptyEvent
-  maxEvents:   5        # Number of events to create
+  maxEvents:   1           # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
 }
@@ -76,4 +76,6 @@ physics.producers.generator.SigmaThetaXZ: [ 5.0 ]
 physics.producers.generator.SigmaThetaYZ: [ 5.0 ]
 physics.producers.generator.X0: [ 100.0 ]
 physics.producers.generator.Z0: [ 50.0 ]
-physics.producers.generator.P0: [ 1.5 ]
+physics.producers.generator.P0: [ 0.05 ]
+
+physics.producers.daq.GenNoiseInTime: true

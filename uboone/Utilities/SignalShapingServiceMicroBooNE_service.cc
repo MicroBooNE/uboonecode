@@ -49,7 +49,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   // Fetch fcl parameters.
 
   fADCTicksPerPCAtLowestASICGainSetting = pset.get<double>("ADCTicksPerPCAtLowestASICGainSetting");
-  fASICGainInMVPerFC = pset.get<double>("fASICGainInMVPerFC");
+  fASICGainInMVPerFC = pset.get<double>("ASICGainInMVPerFC");
   fNFieldBins = pset.get<int>("FieldBins");
   fCol3DCorrection = pset.get<double>("Col3DCorrection");
   fInd3DCorrection = pset.get<double>("Ind3DCorrection");

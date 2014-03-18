@@ -11,7 +11,8 @@ microboone_simwire:
  NoiseWidth:         62.4         #Exponential Noise width (kHz)
  LowCutoff:          7.5          #Low frequency filter cutoff (kHz)
  CompressionType:    "none"       #could also be none		
- GetNoiseFromHisto:   false  
+ GetNoiseFromHisto:   false
+ GenNoiseInTime:      false
  NoiseFileFname:      "uboone_noise_v0.1.root"
  NoiseHistoName:      "NoiseFreq"    
 
