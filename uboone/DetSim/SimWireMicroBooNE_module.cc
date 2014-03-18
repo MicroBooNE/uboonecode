@@ -331,7 +331,7 @@ namespace detsim {
 	
 	//allow for ADC saturation
 	//make saturation value a fcl parameter?
-	float adcsaturation = 4096;
+	float adcsaturation = 4095;
 	if ( adcval > adcsaturation )
 	  adcval = adcsaturation;
 	if ( adcval_prespill > adcsaturation )
