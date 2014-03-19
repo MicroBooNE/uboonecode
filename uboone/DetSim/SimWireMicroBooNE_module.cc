@@ -71,7 +71,8 @@ namespace detsim {
 
   private:
 
-    void         GenNoise(std::vector<float>& array);
+    std::vector<float>         GenNoiseInTime();
+    std::vector<float>         GenNoiseInFreq();
 
     std::string            fDriftEModuleLabel;///< module making the ionization electrons
     raw::Compress_t        fCompression;      ///< compression type to use
@@ -202,16 +203,17 @@ namespace detsim {
     art::ServiceHandle<geo::Geometry> geo;
     
     fNoise.resize(geo->Nchannels()); 
+
     // GenNoise() will further resize each channel's 
     // fNoise vector to fNTicks long.
-
+    /*
     for(unsigned int p = 0; p < geo->Nchannels(); ++p){
       GenNoise(fNoise[p]);
       for(int i = 0; i < fNTicks; ++i){
 	fNoiseDist->Fill(fNoise[p][i]);
       }
     }// end loop over wires
-
+    */
     return;
 
   }
@@ -314,6 +316,13 @@ namespace detsim {
       // pick a new "noise channel" for every channel  - this makes sure    
       // the noise has the right coherent characteristics to be on one channel
 
+      //Generate Noise:
+      std::vector<float> noisetmp;
+      if (fGenNoiseInTime)
+	noisetmp = GenNoiseInTime();
+      else
+	noisetmp = GenNoiseInFreq();
+
       //Determine pedistal
       //Fixed value for pedistal based on plane type
       //Do we want to allow for variation?
@@ -326,10 +335,13 @@ namespace detsim {
       else if (sigtype == geo::kCollection)
 	ped_mean = 400;
 
+      //random number for noise
+      TRandom r(0);
+      
       for(unsigned int i = 0; i < signalSize; ++i){
- 	float adcval           =  fNoise[chan][i] + fChargeWork[i] + ped_mean;
-	float adcval_prespill  =  fNoise[chan][i] + fChargeWorkPreSpill[i] + ped_mean;
-        float adcval_postspill =  fNoise[chan][i] + fChargeWorkPostSpill[i] + ped_mean;
+ 	float adcval           =  noisetmp[i] + fChargeWork[i] + ped_mean; //fNoise[chan][i]
+	float adcval_prespill  =  noisetmp[i] + fChargeWorkPreSpill[i] + ped_mean;
+        float adcval_postspill =  noisetmp[i] + fChargeWorkPostSpill[i] + ped_mean;
 	
 	//allow for ADC saturation
 	//make saturation value a fcl parameter?
@@ -361,8 +373,11 @@ namespace detsim {
       raw::Compress(adcvecPostSpill, fCompression); 
       
       raw::RawDigit rd(chan, fNSamplesReadout, adcvec, fCompression);
+      rd.SetPedestal(ped_mean);
       raw::RawDigit rdPreSpill(chan, fNSamplesReadout, adcvecPreSpill, fCompression);
+      rdPreSpill.SetPedestal(ped_mean);
       raw::RawDigit rdPostSpill(chan, fNSamplesReadout, adcvecPostSpill, fCompression);
+      rdPostSpill.SetPedestal(ped_mean);
 
       // Then, resize adcvec back to full length!
       adcvec.clear();
@@ -390,8 +405,31 @@ namespace detsim {
   }
 
   //-------------------------------------------------
-  void SimWireMicroBooNE::GenNoise(std::vector<float>& noise)
+  std::vector<float> SimWireMicroBooNE::GenNoiseInTime()
   {
+    std::vector<float> noise;
+    //random numbers for time noise
+    TRandom r(0); //seed is 0...ok?
+    noise.clear();
+    noise.resize(fNTicks, 0.);
+    //In this case fNoiseFact is a value in ADC counts
+    //It is going to be the Noise RMS
+    
+    //loop over all bins in "noise" vector
+    //and insert random noise value
+    for (unsigned int i=0; i<noise.size(); i++){
+      noise.at(i) = 0.0;//r.Gaus(0.0,fNoiseFact);
+    }
+    
+    return noise;
+  }
+
+  //-------------------------------------------------
+  std::vector<float> SimWireMicroBooNE::GenNoiseInFreq()
+  {
+
+    std::vector<float> noise;
+
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine();
     CLHEP::RandFlat flat(engine);
@@ -412,70 +450,50 @@ namespace detsim {
     // width of frequencyBin in kHz
     double binWidth = 1.0/(fNTicks*fSampleRate*1.0e-6);
 
-    //****************************************************************
-    //if noise in time domani:
-    if (fGenNoiseInTime)
-      {
-	//In this case fNoiseFact is a value in ADC counts
-	//It is going to be the Noise RMS
-
-	//loop over all bins in "noise" vector
-	//and insert random noise value
-	for (unsigned int i=0; i<noise.size(); i++){
-	  noise.at(i) = r.Gaus(0.0,fNoiseFact);
+    for(int i=0; i< fNTicks/2+1; ++i){
+      // exponential noise spectrum 
+      flat.fireArray(2,rnd,0,1);
+      //if not from histo or in time --> then hardcoded freq. spectrum
+      if( !fGetNoiseFromHisto )
+	{
+	  pval = fNoiseFact*exp(-(double)i*binWidth/fNoiseWidth);
+	  // low frequency cutoff     
+	  lofilter = 1.0/(1.0+exp(-(i-fLowCutoff/binWidth)/0.5));
+	  // randomize 10%
+	  
+	  pval *= lofilter*(0.9+0.2*rnd[0]);
 	}
-      }
-    //*****************************************************************
+      
+      
+      else
+	{
+	  
+	  pval = fNoiseHist->GetBinContent(i)*(0.9+0.2*rnd[0])*fNoiseFact; 
+	  //mf::LogInfo("SimWireMicroBooNE")  << " pval: " << pval;
+	}
+      
+      phase = rnd[1]*2.*TMath::Pi();
+      TComplex tc(pval*cos(phase),pval*sin(phase));
+      noiseFrequency[i] += tc;
+    }
     
-    //*****************************************************************
-    //if noise in frequency space
-    else {
-
-      for(int i=0; i< fNTicks/2+1; ++i){
-	// exponential noise spectrum 
-	flat.fireArray(2,rnd,0,1);
-	//if not from histo or in time --> then hardcoded freq. spectrum
-	if( !fGetNoiseFromHisto )
-	  {
-	    pval = fNoiseFact*exp(-(double)i*binWidth/fNoiseWidth);
-	    // low frequency cutoff     
-	    lofilter = 1.0/(1.0+exp(-(i-fLowCutoff/binWidth)/0.5));
-	    // randomize 10%
-	    
-	    pval *= lofilter*(0.9+0.2*rnd[0]);
-	  }
-	
-	
-	else
-	  {
-	    
-	    pval = fNoiseHist->GetBinContent(i)*(0.9+0.2*rnd[0])*fNoiseFact; 
-	    //mf::LogInfo("SimWireMicroBooNE")  << " pval: " << pval;
-	  }
-	
-	phase = rnd[1]*2.*TMath::Pi();
-	TComplex tc(pval*cos(phase),pval*sin(phase));
-	noiseFrequency[i] += tc;
-      }
-      
-      
-      // mf::LogInfo("SimWireMicroBooNE") << "filled noise freq";
-      
-      // inverse FFT MCSignal
-      art::ServiceHandle<util::LArFFT> fFFT;
-      fFFT->DoInvFFT(noiseFrequency, noise);
-      
-      noiseFrequency.clear();
-      
-      // multiply each noise value by fNTicks as the InvFFT 
-      // divides each bin by fNTicks assuming that a forward FFT
-      // has already been done.
-      for(unsigned int i = 0; i < noise.size(); ++i) noise[i] *= 1.*fNTicks;
-
-    }//if noise in frequency space
-    //**********************************************************************
-
-    return;
+    
+    // mf::LogInfo("SimWireMicroBooNE") << "filled noise freq";
+    
+    // inverse FFT MCSignal
+    art::ServiceHandle<util::LArFFT> fFFT;
+    fFFT->DoInvFFT(noiseFrequency, noise);
+    
+    noiseFrequency.clear();
+    
+    // multiply each noise value by fNTicks as the InvFFT 
+    // divides each bin by fNTicks assuming that a forward FFT
+    // has already been done.
+    for(unsigned int i = 0; i < noise.size(); ++i) noise[i] *= 1.*fNTicks;
+    
+    return noise;
+    
   }
-   
+  
+
 }
