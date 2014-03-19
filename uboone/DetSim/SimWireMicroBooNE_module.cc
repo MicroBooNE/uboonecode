@@ -79,6 +79,7 @@ namespace detsim {
 
     double                 fNoiseFact;        ///< noise scale factor 
     double                 fNoiseWidth;       ///< exponential noise width (kHz) 
+    double                 fNoiseRand;        ///< fraction of random "wiggle" in noise in freq. spectrum
     double                 fLowCutoff;        ///< low frequency filter cutoff (kHz)
     int                    fNTicks;           ///< number of ticks of the clock
     double                 fSampleRate;       ///< sampling rate in ns
@@ -95,6 +96,7 @@ namespace detsim {
        
     bool fGetNoiseFromHisto;
     bool fGenNoiseInTime;
+    bool fGenNoise;
     std::string fNoiseFileFname; 
     std::string fNoiseHistoName; 
     TH1D*             fNoiseHist;        ///< distribution of noise counts
@@ -142,12 +144,15 @@ namespace detsim {
     fDriftEModuleLabel= p.get< std::string         >("DriftEModuleLabel");
     fNoiseFact        = p.get< double              >("NoiseFact");
     fNoiseWidth       = p.get< double              >("NoiseWidth");
+    fNoiseRand        = p.get< double              >("NoiseRand");
     fLowCutoff        = p.get< double              >("LowCutoff");
 
     fGetNoiseFromHisto= p.get< bool              >("GetNoiseFromHisto");
     
     //generate noise in time
     fGenNoiseInTime   = p.get< bool >("GenNoiseInTime");
+    //generate noise at all
+    fGenNoise         = p.get< bool >("GenNoise");
     //Baseline for Induction/Collection plane and ADC RMS                                                                                             
     fCollectionPed    = p.get< float >("CollectionPed");
     fInductionPed     = p.get< float >("InductionPed");
@@ -324,10 +329,16 @@ namespace detsim {
 
       //Generate Noise:
       std::vector<float> noisetmp;
-      if (fGenNoiseInTime)
-	noisetmp = GenNoiseInTime();
-      else
-	noisetmp = GenNoiseInFreq();
+      if (fGenNoise){
+	if (fGenNoiseInTime)
+	  noisetmp = GenNoiseInTime();
+	else
+	  noisetmp = GenNoiseInFreq();
+      }
+      else{
+	noisetmp.clear();
+	noisetmp.resize(fNTicks, 0.);
+      }
 
       //Determine pedistal                                                                                                                            
       //Fixed value for pedistal based on plane type                                                                                                  
@@ -347,9 +358,9 @@ namespace detsim {
       ped_mean += rGaussPed.fire();
       
       for(unsigned int i = 0; i < signalSize; ++i){
- 	float adcval           =  fChargeWork[i] + ped_mean; //fNoise[chan][i]
-	float adcval_prespill  =  fChargeWorkPreSpill[i] + ped_mean;
-        float adcval_postspill =  fChargeWorkPostSpill[i] + ped_mean;
+ 	float adcval           =  noisetmp[i] + fChargeWork[i] + ped_mean;
+	float adcval_prespill  =  noisetmp[i] + fChargeWorkPreSpill[i] + ped_mean;
+        float adcval_postspill =  noisetmp[i] + fChargeWorkPostSpill[i] + ped_mean;
 	
 	//allow for ADC saturation
 	//make saturation value a fcl parameter?
@@ -360,6 +371,13 @@ namespace detsim {
 	  adcval_prespill = adcsaturation;
 	if ( adcval_postspill > adcsaturation )
 	  adcval_postspill = adcsaturation;
+	//don't allow for "negative" saturation
+	if ( adcval < 0 )
+	  adcval = 0;
+	if ( adcval_prespill < 0 )
+	  adcval_prespill = 0;
+	if ( adcval_postspill < 0 )
+	  adcval_postspill = 0;
 
 	adcvec[i]          = (unsigned short)(adcval);
 	adcvecPreSpill[i]  = (unsigned short)(adcval_prespill);
@@ -475,14 +493,14 @@ namespace detsim {
 	  lofilter = 1.0/(1.0+exp(-(i-fLowCutoff/binWidth)/0.5));
 	  // randomize 10%
 	  
-	  pval *= lofilter*(0.9+0.2*rnd[0]);
+	  pval *= lofilter*((1-fNoiseRand)+2*fNoiseRand*rnd[0]);
 	}
       
       
       else
 	{
 	  
-	  pval = fNoiseHist->GetBinContent(i)*(0.9+0.2*rnd[0])*fNoiseFact; 
+	  pval = fNoiseHist->GetBinContent(i)*((1-fNoiseRand)+2*fNoiseRand*rnd[0])*fNoiseFact; 
 	  //mf::LogInfo("SimWireMicroBooNE")  << " pval: " << pval;
 	}
       
