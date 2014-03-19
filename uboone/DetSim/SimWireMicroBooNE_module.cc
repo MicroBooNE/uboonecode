@@ -84,6 +84,9 @@ namespace detsim {
     double                 fSampleRate;       ///< sampling rate in ns
     unsigned int           fNSamplesReadout;  ///< number of ADC readout samples in 1 readout frame
     unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)
+    float                  fCollectionPed;    ///< ADC value of baseline for collection plane                                                         
+    float                  fInductionPed;     ///< ADC value of baseline for induction plane                                                          
+    float                  fBaselineRMS;      ///< ADC value of baseline RMS within each channel                    
 
     std::vector<double>    fChargeWork;
     std::vector< std::vector<float> > fNoise;///< noise on each channel for each time
@@ -145,7 +148,10 @@ namespace detsim {
     
     //generate noise in time
     fGenNoiseInTime   = p.get< bool >("GenNoiseInTime");
-  
+    //Baseline for Induction/Collection plane and ADC RMS                                                                                             
+    fCollectionPed    = p.get< float >("CollectionPed");
+    fInductionPed     = p.get< float >("InductionPed");
+    fBaselineRMS      = p.get< float >("BaselineRMS");
     
     if(fGetNoiseFromHisto)
       {
@@ -323,21 +329,22 @@ namespace detsim {
       else
 	noisetmp = GenNoiseInFreq();
 
-      //Determine pedistal
-      //Fixed value for pedistal based on plane type
-      //Do we want to allow for variation?
-      //each wire might eventually be calibrated differently...
-      //maybe .fcl parameter that is RMS for baseline variation
-      float ped_mean = 2048;
+      //Determine pedistal                                                                                                                            
+      //Fixed value for pedistal based on plane type                                                                                                  
+      //Do we want to allow for variation?                                                                                                            
+      //each wire might eventually be calibrated differently...                                                                                       
+      //maybe .fcl parameter that is RMS for baseline variation                                                                                       
+      float ped_mean = fCollectionPed;
       geo::SigType_t sigtype = geo->SignalType(chan);
       if (sigtype == geo::kInduction)
-	ped_mean = 2048;
+        ped_mean = fInductionPed;
       else if (sigtype == geo::kCollection)
-	ped_mean = 400;
-      ped_mean = 0;
-
-      //random number for noise
-      TRandom r(0);
+        ped_mean = fCollectionPed;
+      //slight variation on ped on order of RMS of baselien variation
+      art::ServiceHandle<art::RandomNumberGenerator> rng;
+      CLHEP::HepRandomEngine &engine = rng->getEngine();
+      CLHEP::RandGaussQ rGaussPed(engine, 0.0, fBaselineRMS);
+      ped_mean += rGaussPed.fire();
       
       for(unsigned int i = 0; i < signalSize; ++i){
  	float adcval           =  fChargeWork[i] + ped_mean; //fNoise[chan][i]
@@ -405,25 +412,31 @@ namespace detsim {
     return;
   }
 
-  //-------------------------------------------------
+  //-------------------------------------------------                                                                                                 
   std::vector<float> SimWireMicroBooNE::GenNoiseInTime()
   {
+
+    //ART random number service                                                                                                                       
+    art::ServiceHandle<art::RandomNumberGenerator> rng;
+    CLHEP::HepRandomEngine &engine = rng->getEngine();
+    CLHEP::RandGaussQ rGauss(engine, 0.0, fNoiseFact);
+
     std::vector<float> noise;
-    //random numbers for time noise
-    TRandom r(0); //seed is 0...ok?
+
     noise.clear();
     noise.resize(fNTicks, 0.);
-    //In this case fNoiseFact is a value in ADC counts
-    //It is going to be the Noise RMS
-    
-    //loop over all bins in "noise" vector
-    //and insert random noise value
+    //In this case fNoiseFact is a value in ADC counts                                                                                                
+    //It is going to be the Noise RMS                                                                                                                 
+
+    //loop over all bins in "noise" vector                                                                                                            
+    //and insert random noise value    
     for (unsigned int i=0; i<noise.size(); i++){
-      noise.at(i) = 0.0;//r.Gaus(0.0,fNoiseFact);
+      noise.at(i) = rGauss.fire();
     }
-    
+
     return noise;
   }
+
 
   //-------------------------------------------------
   std::vector<float> SimWireMicroBooNE::GenNoiseInFreq()
@@ -433,7 +446,7 @@ namespace detsim {
 
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine();
-    CLHEP::RandFlat flat(engine);
+    CLHEP::RandFlat flat(engine,-1,1);
 
     //random numbers for time noise
     TRandom r(0); //seed is 0...ok?
@@ -447,7 +460,7 @@ namespace detsim {
     double lofilter = 0.;
     double phase = 0.;
     double rnd[2] = {0.};
-    
+
     // width of frequencyBin in kHz
     double binWidth = 1.0/(fNTicks*fSampleRate*1.0e-6);
 

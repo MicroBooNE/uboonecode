@@ -13,6 +13,9 @@ microboone_simwire:
  CompressionType:    "none"       #could also be none		
  GetNoiseFromHisto:   false
  GenNoiseInTime:      false
+ CollectionPed:       400         #ADC baseline for coll plane                                                                                        
+ InductionPed:        2048        #ADC baseline for ind plane                                                                                         
+ BaselineRMS:         0.3         #ADC baseline fluctuation within channel        
  NoiseFileFname:      "uboone_noise_v0.1.root"
  NoiseHistoName:      "NoiseFreq"    
 
