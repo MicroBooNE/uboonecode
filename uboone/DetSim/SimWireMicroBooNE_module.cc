@@ -334,14 +334,15 @@ namespace detsim {
 	ped_mean = 2048;
       else if (sigtype == geo::kCollection)
 	ped_mean = 400;
+      ped_mean = 0;
 
       //random number for noise
       TRandom r(0);
       
       for(unsigned int i = 0; i < signalSize; ++i){
- 	float adcval           =  noisetmp[i] + fChargeWork[i] + ped_mean; //fNoise[chan][i]
-	float adcval_prespill  =  noisetmp[i] + fChargeWorkPreSpill[i] + ped_mean;
-        float adcval_postspill =  noisetmp[i] + fChargeWorkPostSpill[i] + ped_mean;
+ 	float adcval           =  fChargeWork[i] + ped_mean; //fNoise[chan][i]
+	float adcval_prespill  =  fChargeWorkPreSpill[i] + ped_mean;
+        float adcval_postspill =  fChargeWorkPostSpill[i] + ped_mean;
 	
 	//allow for ADC saturation
 	//make saturation value a fcl parameter?
