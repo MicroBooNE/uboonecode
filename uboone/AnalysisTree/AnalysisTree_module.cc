@@ -92,27 +92,27 @@ namespace microboone {
 
     TTree* fTree;
     //run information
-    int    run;                  //run number
-    int    subrun;               //subrun number
-    int    event;                //event number
-    double evttime;              //event time in sec
-    double beamtime;             //beam time
-    double pot;                  //protons on target
-    double taulife;              //electron lifetime
-    int    isdata;               //flag, 0=MC 1=data
+    Int_t      run;                  //run number
+    Int_t      subrun;               //subrun number
+    Int_t      event;                //event number
+    Double_t   evttime;              //event time in sec
+    Double_t   beamtime;             //beam time
+    Double_t   pot;                  //protons on target
+    Double_t   taulife;              //electron lifetime
+    Char_t     isdata;               //flag, 0=MC 1=data
 
     //hit information
-    int no_hits;                     //number of hits
-    int hit_plane[kMaxHits];         //plane number
-    int hit_wire[kMaxHits];          //wire number
-    int hit_channel[kMaxHits];       //channel ID
-    double hit_peakT[kMaxHits];      //peak time
-    double hit_charge[kMaxHits];     //charge (area)
-    double hit_ph[kMaxHits];         //amplitude
+    Int_t    no_hits;                  //number of hits
+    Char_t   hit_plane[kMaxHits];      //plane number
+    Short_t  hit_wire[kMaxHits];       //wire number
+    Short_t  hit_channel[kMaxHits];    //channel ID
+    Double_t hit_peakT[kMaxHits];      //peak time
+    Double_t hit_charge[kMaxHits];     //charge (area)
+    Double_t hit_ph[kMaxHits];         //amplitude
     int    hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
 
     //track information
-    int    kNTracker;
+    Char_t kNTracker;
     int    ntracks[kMaxTrackers];             //number of reconstructed tracks
     double trkke[kMaxTrackers][kMaxTrack][kNplanes];
     double trkrange[kMaxTrackers][kMaxTrack][kNplanes];
@@ -306,19 +306,23 @@ void microboone::AnalysisTree::beginJob(){
   fTree->Branch("evttime",&evttime,"evttime/D");
   fTree->Branch("beamtime",&beamtime,"beamtime/D");
   fTree->Branch("pot",&pot,"pot/D");
-  fTree->Branch("isdata",&isdata,"isdata/I");
+  fTree->Branch("isdata",&isdata,"isdata/B");
   fTree->Branch("taulife",&taulife,"taulife/D");
 
   fTree->Branch("no_hits",&no_hits,"no_hits/I");
-  fTree->Branch("hit_plane",hit_plane,"hit_plane[no_hits]/I");
-  fTree->Branch("hit_wire",hit_wire,"hit_wire[no_hits]/I");
-  fTree->Branch("hit_channel",hit_channel,"hit_channel[no_hits]/I");
+  fTree->Branch("hit_plane",hit_plane,"hit_plane[no_hits]/B");
+  fTree->Branch("hit_wire",hit_wire,"hit_wire[no_hits]/S");
+  fTree->Branch("hit_channel",hit_channel,"hit_channel[no_hits]/S");
   fTree->Branch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
   fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/D");
   fTree->Branch("hit_ph",hit_ph,"hit_ph[no_hits]/D");
 
+  std::ostringstream sstr;
+  sstr << kMaxTrackHits;
+  std::string MaxTrackHitsStr(sstr.str());
+  
   kNTracker = fTrackModuleLabel.size();
-  fTree->Branch("kNTracker",&kNTracker,"kNTracker/I");
+  fTree->Branch("kNTracker",&kNTracker,"kNTracker/B");
   for(int i=0; i<kNTracker; i++){
     sprintf(Str_temp,"hit_trkid_%s",fTrackModuleLabel[i].c_str());
     sprintf(S1_temp,"hit_trkid_%s[no_hits]/I",fTrackModuleLabel[i].c_str()); 	
@@ -354,16 +358,16 @@ void microboone::AnalysisTree::beginJob(){
     sprintf(S2_temp,"ntrkhits_%s[%s][3]/I",fTrackModuleLabel[i].c_str(),S_temp);
     fTree->Branch(S1_temp, ntrkhits[i], S2_temp);    
     sprintf(S1_temp,"trkdedx_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkdedx_%s[%s][3][1000]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S2_temp,"trkdedx_%s[%s][3][%s]/D",fTrackModuleLabel[i].c_str(),S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkdedx[i],S2_temp);    
     sprintf(S1_temp,"trkdqdx_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkdqdx_%s[%s][3][1000]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S2_temp,"trkdqdx_%s[%s][3][%s]/D",fTrackModuleLabel[i].c_str(),S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkdqdx[i],S2_temp);    
     sprintf(S1_temp,"trkresrg_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkresrg_%s[%s][3][1000]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S2_temp,"trkresrg_%s[%s][3][%s]/D",fTrackModuleLabel[i].c_str(),S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkresrg[i],S2_temp);
     sprintf(S1_temp,"trkxyz_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkxyz_%s[%s][3][1000][3]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S2_temp,"trkxyz_%s[%s][3][%s][3]/D",fTrackModuleLabel[i].c_str(),S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkxyz[i],S2_temp);
     sprintf(S1_temp,"trkstartx_%s",fTrackModuleLabel[i].c_str());
     sprintf(S2_temp,"trkstartx_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
