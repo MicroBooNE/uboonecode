@@ -47,7 +47,6 @@ extern "C" {
 #include "TH2.h"
 #include "TH1D.h"
 #include "TFile.h"
-#include "TRandom.h"
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussQ.h"
@@ -465,9 +464,6 @@ namespace detsim {
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine();
     CLHEP::RandFlat flat(engine,-1,1);
-
-    //random numbers for time noise
-    TRandom r(0); //seed is 0...ok?
 
     noise.clear();
     noise.resize(fNTicks, 0.);
