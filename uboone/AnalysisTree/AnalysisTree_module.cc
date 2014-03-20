@@ -109,142 +109,140 @@ namespace microboone {
     Double_t hit_peakT[kMaxHits];      //peak time
     Double_t hit_charge[kMaxHits];     //charge (area)
     Double_t hit_ph[kMaxHits];         //amplitude
-    int    hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
+    Int_t    hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track? TODO ask Tingjun
 
     //track information
     Char_t kNTracker;
-    int    ntracks[kMaxTrackers];             //number of reconstructed tracks
-    double trkke[kMaxTrackers][kMaxTrack][kNplanes];
-    double trkrange[kMaxTrackers][kMaxTrack][kNplanes];
-    int    trkidtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true geant trackid
-    int    trkpdgtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true pdg code
-    double trkefftruth[kMaxTrackers][kMaxTrack][kNplanes]; //completeness
-    double trkpurtruth[kMaxTrackers][kMaxTrack][kNplanes]; //purity of track    
-    double trkpitchc[kMaxTrackers][kMaxTrack][kNplanes];
-    int    ntrkhits[kMaxTrackers][kMaxTrack][kNplanes];
-    double trkdedx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
-    double trkdqdx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
-    double trkresrg[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
-    double trkxyz[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits][3];
+    Short_t  ntracks[kMaxTrackers];             //number of reconstructed tracks
+    Double_t trkke[kMaxTrackers][kMaxTrack][kNplanes];
+    Double_t trkrange[kMaxTrackers][kMaxTrack][kNplanes];
+    Short_t  trkidtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true geant trackid TODO ask Tingjun
+    Int_t    trkpdgtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true pdg code
+    Double_t trkefftruth[kMaxTrackers][kMaxTrack][kNplanes]; //completeness
+    Double_t trkpurtruth[kMaxTrackers][kMaxTrack][kNplanes]; //purity of track    
+    Double_t trkpitchc[kMaxTrackers][kMaxTrack][kNplanes];
+    Short_t  ntrkhits[kMaxTrackers][kMaxTrack][kNplanes]; // TODO ask Tingjun
+    Double_t trkdedx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
+    Double_t trkdqdx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
+    Double_t trkresrg[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
+    Double_t trkxyz[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits][3];
     
     // more track info
-    char   S_temp[50],S1_temp[50], S2_temp[50], Str_temp[50];
-    int    trkId[kMaxTrackers][kMaxTrack];
-    double trkstartx[kMaxTrackers][kMaxTrack];      // starting x position.
-    double trkstarty[kMaxTrackers][kMaxTrack];      // starting y position.
-    double trkstartz[kMaxTrackers][kMaxTrack];      // starting z position.
-    double trkstartd[kMaxTrackers][kMaxTrack];      // starting distance to boundary.
-    double trkendx[kMaxTrackers][kMaxTrack];        // ending x position.
-    double trkendy[kMaxTrackers][kMaxTrack];        // ending y position.
-    double trkendz[kMaxTrackers][kMaxTrack];        // ending z position.
-    double trkendd[kMaxTrackers][kMaxTrack];        // ending distance to boundary.
-    double trktheta[kMaxTrackers][kMaxTrack];       // theta.
-    double trkphi[kMaxTrackers][kMaxTrack];	      // phi.
-    double trkstartdcosx[kMaxTrackers][kMaxTrack]; 
-    double trkstartdcosy[kMaxTrackers][kMaxTrack]; 
-    double trkstartdcosz[kMaxTrackers][kMaxTrack]; 
-    double trkenddcosx[kMaxTrackers][kMaxTrack];
-    double trkenddcosy[kMaxTrackers][kMaxTrack];
-    double trkenddcosz[kMaxTrackers][kMaxTrack];
-    double trkthetaxz[kMaxTrackers][kMaxTrack];    // theta_xz.
-    double trkthetayz[kMaxTrackers][kMaxTrack];    // theta_yz.
-    double trkmom[kMaxTrackers][kMaxTrack];	      // momentum.
-    double trklen[kMaxTrackers][kMaxTrack];	      // length.
+    Short_t   trkId[kMaxTrackers][kMaxTrack]; // TODO ask Tingjun
+    Double_t  trkstartx[kMaxTrackers][kMaxTrack];      // starting x position.
+    Double_t  trkstarty[kMaxTrackers][kMaxTrack];      // starting y position.
+    Double_t  trkstartz[kMaxTrackers][kMaxTrack];      // starting z position.
+    Double_t  trkstartd[kMaxTrackers][kMaxTrack];      // starting distance to boundary.
+    Double_t  trkendx[kMaxTrackers][kMaxTrack];        // ending x position.
+    Double_t  trkendy[kMaxTrackers][kMaxTrack];        // ending y position.
+    Double_t  trkendz[kMaxTrackers][kMaxTrack];        // ending z position.
+    Double_t  trkendd[kMaxTrackers][kMaxTrack];        // ending distance to boundary.
+    Double_t  trktheta[kMaxTrackers][kMaxTrack];       // theta.
+    Double_t  trkphi[kMaxTrackers][kMaxTrack];	      // phi.
+    Double_t  trkstartdcosx[kMaxTrackers][kMaxTrack]; 
+    Double_t  trkstartdcosy[kMaxTrackers][kMaxTrack]; 
+    Double_t  trkstartdcosz[kMaxTrackers][kMaxTrack]; 
+    Double_t  trkenddcosx[kMaxTrackers][kMaxTrack];
+    Double_t  trkenddcosy[kMaxTrackers][kMaxTrack];
+    Double_t  trkenddcosz[kMaxTrackers][kMaxTrack];
+    Double_t  trkthetaxz[kMaxTrackers][kMaxTrack];    // theta_xz.
+    Double_t  trkthetayz[kMaxTrackers][kMaxTrack];    // theta_yz.
+    Double_t  trkmom[kMaxTrackers][kMaxTrack];	      // momentum.
+    Double_t  trklen[kMaxTrackers][kMaxTrack];	      // length.
        
     //mctruth information
-    int    mcevts_truth;    //number of neutrino interactions in the spill
-    int    nuPDG_truth;     //neutrino PDG code
-    int    ccnc_truth;      //0=CC 1=NC
-    int    mode_truth;      //0=QE/El, 1=RES, 2=DIS, 3=Coherent production
-    double enu_truth;       //true neutrino energy
-    double Q2_truth;        //Momentum transfer squared
-    double W_truth;         //hadronic invariant mass
-    int    hitnuc_truth;    //hit nucleon
-    double nuvtxx_truth;    //neutrino vertex x
-    double nuvtxy_truth;    //neutrino vertex y
-    double nuvtxz_truth;    //neutrino vertex z
-    double nu_dcosx_truth;  //neutrino dcos x
-    double nu_dcosy_truth;  //neutrino dcos y
-    double nu_dcosz_truth;  //neutrino dcos z
-    double lep_mom_truth;   //lepton momentum
-    double lep_dcosx_truth; //lepton dcos x
-    double lep_dcosy_truth; //lepton dcos y
-    double lep_dcosz_truth; //lepton dcos z
+    Int_t     mcevts_truth;    //number of neutrino Int_teractions in the spill
+    Int_t     nuPDG_truth;     //neutrino PDG code
+    Int_t     ccnc_truth;      //0=CC 1=NC
+    Int_t     mode_truth;      //0=QE/El, 1=RES, 2=DIS, 3=Coherent production
+    Double_t  enu_truth;       //true neutrino energy
+    Double_t  Q2_truth;        //Momentum transfer squared
+    Double_t  W_truth;         //hadronic invariant mass
+    Int_t     hitnuc_truth;    //hit nucleon
+    Double_t  nuvtxx_truth;    //neutrino vertex x
+    Double_t  nuvtxy_truth;    //neutrino vertex y
+    Double_t  nuvtxz_truth;    //neutrino vertex z
+    Double_t  nu_dcosx_truth;  //neutrino dcos x
+    Double_t  nu_dcosy_truth;  //neutrino dcos y
+    Double_t  nu_dcosz_truth;  //neutrino dcos z
+    Double_t  lep_mom_truth;   //lepton momentum
+    Double_t  lep_dcosx_truth; //lepton dcos x
+    Double_t  lep_dcosy_truth; //lepton dcos y
+    Double_t  lep_dcosz_truth; //lepton dcos z
 
     //flux information
-    double tpx_flux;        //Px of parent particle leaving BNB target
-    double tpy_flux;        //Py of parent particle leaving BNB target
-    double tpz_flux;        //Pz of parent particle leaving BNB target
-    int    tptype_flux;     //Type of parent particle leaving BNB target
+    Double_t  tpx_flux;        //Px of parent particle leaving BNB target
+    Double_t  tpy_flux;        //Py of parent particle leaving BNB target
+    Double_t  tpz_flux;        //Pz of parent particle leaving BNB target
+    Int_t     tptype_flux;     //Type of parent particle leaving BNB target
 
     //genie information
-    int    genie_no_primaries;
-    int    genie_primaries_pdg[kMaxPrimaries];
-    double genie_Eng[kMaxPrimaries];
-    double genie_Px[kMaxPrimaries];
-    double genie_Py[kMaxPrimaries];
-    double genie_Pz[kMaxPrimaries];
-    double genie_P[kMaxPrimaries];
-    int    genie_status_code[kMaxPrimaries];
-    double genie_mass[kMaxPrimaries];
-    int    genie_trackID[kMaxPrimaries];
-    int    genie_ND[kMaxPrimaries];
-    int    genie_mother[kMaxPrimaries];
+    Int_t     genie_no_primaries;
+    Int_t     genie_primaries_pdg[kMaxPrimaries];
+    Double_t  genie_Eng[kMaxPrimaries];
+    Double_t  genie_Px[kMaxPrimaries];
+    Double_t  genie_Py[kMaxPrimaries];
+    Double_t  genie_Pz[kMaxPrimaries];
+    Double_t  genie_P[kMaxPrimaries];
+    Int_t     genie_status_code[kMaxPrimaries];
+    Double_t  genie_mass[kMaxPrimaries];
+    Int_t     genie_trackID[kMaxPrimaries];
+    Int_t     genie_ND[kMaxPrimaries];
+    Int_t     genie_mother[kMaxPrimaries];
  
     //geant information
-    int    no_primaries;      //number of primary geant particles
-    int    geant_list_size;  //number of all geant particles
-    int    geant_list_size_in_tpcFV;
-    int    pdg[kMaxPrimaries];
-    double Eng[kMaxPrimaries];
-    double Px[kMaxPrimaries];
-    double Py[kMaxPrimaries];
-    double Pz[kMaxPrimaries];
-    double StartPointx[kMaxPrimaries];
-    double StartPointy[kMaxPrimaries];
-    double StartPointz[kMaxPrimaries];
-    double EndPointx[kMaxPrimaries];
-    double EndPointy[kMaxPrimaries];
-    double EndPointz[kMaxPrimaries];
-    int    NumberDaughters[kMaxPrimaries];
-    int    TrackId[kMaxPrimaries];
-    int    Mother[kMaxPrimaries];
-    int    process_primary[kMaxPrimaries];
-    int    MergedId[kMaxPrimaries]; //geant track segments, which belong to the same particle, get the same
+    Int_t     no_primaries;      //number of primary geant particles
+    Int_t     geant_list_size;  //number of all geant particles
+    Int_t     geant_list_size_in_tpcFV;
+    Int_t     pdg[kMaxPrimaries];
+    Double_t  Eng[kMaxPrimaries];
+    Double_t  Px[kMaxPrimaries];
+    Double_t  Py[kMaxPrimaries];
+    Double_t  Pz[kMaxPrimaries];
+    Double_t  StartPoInt_tx[kMaxPrimaries];
+    Double_t  StartPoInt_ty[kMaxPrimaries];
+    Double_t  StartPoInt_tz[kMaxPrimaries];
+    Double_t  EndPoInt_tx[kMaxPrimaries];
+    Double_t  EndPoInt_ty[kMaxPrimaries];
+    Double_t  EndPoInt_tz[kMaxPrimaries];
+    Int_t     NumberDaughters[kMaxPrimaries];
+    Int_t     TrackId[kMaxPrimaries];
+    Int_t     Mother[kMaxPrimaries];
+    Int_t     process_primary[kMaxPrimaries];
+    Int_t     MergedId[kMaxPrimaries]; //geant track segments, which belong to the same particle, get the same
     
     // more geant information
-    int   geant_tpcFV_status[kMaxPrimaries];
-    int   geant_tpcFV_trackId[kMaxPrimaries];
-    int   geant_tpcFV_pdg[kMaxPrimaries];
+    Int_t   geant_tpcFV_status[kMaxPrimaries];
+    Int_t   geant_tpcFV_trackId[kMaxPrimaries];
+    Int_t   geant_tpcFV_pdg[kMaxPrimaries];
     
-    double geant_tpcFV_orig_E[kMaxPrimaries];
-    double geant_tpcFV_orig_px[kMaxPrimaries];
-    double geant_tpcFV_orig_py[kMaxPrimaries];
-    double geant_tpcFV_orig_pz[kMaxPrimaries];
-    double geant_tpcFV_orig_startx[kMaxPrimaries];
-    double geant_tpcFV_orig_starty[kMaxPrimaries];
-    double geant_tpcFV_orig_startz[kMaxPrimaries];
-    double geant_tpcFV_orig_startt[kMaxPrimaries];
-    double geant_tpcFV_orig_endx[kMaxPrimaries];
-    double geant_tpcFV_orig_endy[kMaxPrimaries];
-    double geant_tpcFV_orig_endz[kMaxPrimaries];
-    double geant_tpcFV_orig_endt[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_E[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_px[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_py[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_pz[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_startx[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_starty[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_startz[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_startt[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_endx[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_endy[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_endz[kMaxPrimaries];
+    Double_t  geant_tpcFV_orig_endt[kMaxPrimaries];
     
-    double geant_tpcFV_startx[kMaxPrimaries];	  // starting x position.
-    double geant_tpcFV_starty[kMaxPrimaries];	  // starting y position.
-    double geant_tpcFV_startz[kMaxPrimaries];	  // starting z position.
-    double geant_tpcFV_startd[kMaxPrimaries];	  // starting distance to boundary.
-    double geant_tpcFV_endx[kMaxPrimaries];	  // ending x position.
-    double geant_tpcFV_endy[kMaxPrimaries];	  // ending y position.
-    double geant_tpcFV_endz[kMaxPrimaries];	  // ending z position.
-    double geant_tpcFV_endd[kMaxPrimaries];	  // ending distance to boundary.
-    double geant_tpcFV_theta[kMaxPrimaries];	  // theta.
-    double geant_tpcFV_phi[kMaxPrimaries];	  // phi.
-    double geant_tpcFV_theta_xz[kMaxPrimaries];    // theta_xz.
-    double geant_tpcFV_theta_yz[kMaxPrimaries];    // theta_yz.
-    double geant_tpcFV_mom[kMaxPrimaries];         // momentum.
-    double geant_tpcFV_len[kMaxPrimaries];         // length.
-
+    Double_t  geant_tpcFV_startx[kMaxPrimaries];	  // starting x position.
+    Double_t  geant_tpcFV_starty[kMaxPrimaries];	  // starting y position.
+    Double_t  geant_tpcFV_startz[kMaxPrimaries];	  // starting z position.
+    Double_t  geant_tpcFV_startd[kMaxPrimaries];	  // starting distance to boundary.
+    Double_t  geant_tpcFV_endx[kMaxPrimaries];	  // ending x position.
+    Double_t  geant_tpcFV_endy[kMaxPrimaries];	  // ending y position.
+    Double_t  geant_tpcFV_endz[kMaxPrimaries];	  // ending z position.
+    Double_t  geant_tpcFV_endd[kMaxPrimaries];	  // ending distance to boundary.
+    Double_t  geant_tpcFV_theta[kMaxPrimaries];	  // theta.
+    Double_t  geant_tpcFV_phi[kMaxPrimaries];	  // phi.
+    Double_t  geant_tpcFV_theta_xz[kMaxPrimaries];    // theta_xz.
+    Double_t  geant_tpcFV_theta_yz[kMaxPrimaries];    // theta_yz.
+    Double_t  geant_tpcFV_mom[kMaxPrimaries];         // momentum.
+    Double_t  geant_tpcFV_len[kMaxPrimaries];         // length.
 
     std::string fDigitModuleLabel;
     std::string fHitsModuleLabel;
@@ -316,7 +314,9 @@ void microboone::AnalysisTree::beginJob(){
   fTree->Branch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
   fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/D");
   fTree->Branch("hit_ph",hit_ph,"hit_ph[no_hits]/D");
-
+  
+  char S_temp[50],S1_temp[50], S2_temp[50], Str_temp[50];
+  
   std::ostringstream sstr;
   sstr << kMaxTrackHits;
   std::string MaxTrackHitsStr(sstr.str());
@@ -324,110 +324,111 @@ void microboone::AnalysisTree::beginJob(){
   kNTracker = fTrackModuleLabel.size();
   fTree->Branch("kNTracker",&kNTracker,"kNTracker/B");
   for(int i=0; i<kNTracker; i++){
-    sprintf(Str_temp,"hit_trkid_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S1_temp,"hit_trkid_%s[no_hits]/I",fTrackModuleLabel[i].c_str()); 	
+    const char* TrackLabel = fTrackModuleLabel[i].c_str();
+    sprintf(Str_temp,"hit_trkid_%s",TrackLabel);
+    sprintf(S1_temp,"hit_trkid_%s[no_hits]/I",TrackLabel);
     fTree->Branch(Str_temp,hit_trkid[i],S1_temp);
-    sprintf(S_temp,"ntracks_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S1_temp,"ntracks_%s/I",fTrackModuleLabel[i].c_str());
+    sprintf(S_temp,"ntracks_%s",TrackLabel);
+    sprintf(S1_temp,"ntracks_%s/S",TrackLabel);
     fTree->Branch(S_temp, &ntracks[i], S1_temp);
-    sprintf(S1_temp,"trkId_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkId_%s[%s]/I",fTrackModuleLabel[i].c_str(),S_temp);
-    fTree->Branch(S1_temp, trkId[i], S2_temp);  
-    sprintf(S1_temp,"trkke_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkke_%s[%s][3]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkId_%s",TrackLabel);
+    sprintf(S2_temp,"trkId_%s[%s]/S",TrackLabel,S_temp);
+    fTree->Branch(S1_temp, trkId[i], S2_temp);
+    sprintf(S1_temp,"trkke_%s",TrackLabel);
+    sprintf(S2_temp,"trkke_%s[%s][3]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkke[i], S2_temp);
-    sprintf(S1_temp,"trkrange_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkrange_%s[%s][3]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkrange_%s",TrackLabel);
+    sprintf(S2_temp,"trkrange_%s[%s][3]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkrange[i], S2_temp);
-    sprintf(S1_temp,"trkidtruth_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkidtruth_%s[%s][3]/I",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkidtruth_%s",TrackLabel);
+    sprintf(S2_temp,"trkidtruth_%s[%s][3]/S",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkidtruth[i], S2_temp);
-    sprintf(S1_temp,"trkpdgtruth_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkpdgtruth_%s[%s][3]/I",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkpdgtruth_%s",TrackLabel);
+    sprintf(S2_temp,"trkpdgtruth_%s[%s][3]/I",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkpdgtruth[i], S2_temp);
-    sprintf(S1_temp,"trkefftruth_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkefftruth_%s[%s][3]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkefftruth_%s",TrackLabel);
+    sprintf(S2_temp,"trkefftruth_%s[%s][3]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkefftruth[i], S2_temp);
-    sprintf(S1_temp,"trkpurtruth_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkpurtruth_%s[%s][3]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkpurtruth_%s",TrackLabel);
+    sprintf(S2_temp,"trkpurtruth_%s[%s][3]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkpurtruth[i], S2_temp);
-    sprintf(S1_temp,"trkpitchc_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkpitchc_%s[%s][3]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkpitchc_%s",TrackLabel);
+    sprintf(S2_temp,"trkpitchc_%s[%s][3]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp,trkpitchc[i],S2_temp);
-    sprintf(S1_temp,"ntrkhits_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"ntrkhits_%s[%s][3]/I",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"ntrkhits_%s",TrackLabel);
+    sprintf(S2_temp,"ntrkhits_%s[%s][3]/S",TrackLabel,S_temp);
     fTree->Branch(S1_temp, ntrkhits[i], S2_temp);    
-    sprintf(S1_temp,"trkdedx_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkdedx_%s[%s][3][%s]/D",fTrackModuleLabel[i].c_str(),S_temp,MaxTrackHitsStr.c_str());
+    sprintf(S1_temp,"trkdedx_%s",TrackLabel);
+    sprintf(S2_temp,"trkdedx_%s[%s][3][%s]/D",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkdedx[i],S2_temp);    
-    sprintf(S1_temp,"trkdqdx_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkdqdx_%s[%s][3][%s]/D",fTrackModuleLabel[i].c_str(),S_temp,MaxTrackHitsStr.c_str());
+    sprintf(S1_temp,"trkdqdx_%s",TrackLabel);
+    sprintf(S2_temp,"trkdqdx_%s[%s][3][%s]/D",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkdqdx[i],S2_temp);    
-    sprintf(S1_temp,"trkresrg_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkresrg_%s[%s][3][%s]/D",fTrackModuleLabel[i].c_str(),S_temp,MaxTrackHitsStr.c_str());
+    sprintf(S1_temp,"trkresrg_%s",TrackLabel);
+    sprintf(S2_temp,"trkresrg_%s[%s][3][%s]/D",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkresrg[i],S2_temp);
-    sprintf(S1_temp,"trkxyz_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkxyz_%s[%s][3][%s][3]/D",fTrackModuleLabel[i].c_str(),S_temp,MaxTrackHitsStr.c_str());
+    sprintf(S1_temp,"trkxyz_%s",TrackLabel);
+    sprintf(S2_temp,"trkxyz_%s[%s][3][%s][3]/D",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkxyz[i],S2_temp);
-    sprintf(S1_temp,"trkstartx_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkstartx_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkstartx_%s",TrackLabel);
+    sprintf(S2_temp,"trkstartx_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartx[i], S2_temp);
-    sprintf(S1_temp,"trkstarty_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkstarty_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkstarty_%s",TrackLabel);
+    sprintf(S2_temp,"trkstarty_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstarty[i], S2_temp);
-    sprintf(S1_temp,"trkstartz_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkstartz_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkstartz_%s",TrackLabel);
+    sprintf(S2_temp,"trkstartz_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartz[i], S2_temp);
-    sprintf(S1_temp,"trkstartd_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkstartd_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkstartd_%s",TrackLabel);
+    sprintf(S2_temp,"trkstartd_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartd[i], S2_temp);
-    sprintf(S1_temp,"trkendx_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkendx_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkendx_%s",TrackLabel);
+    sprintf(S2_temp,"trkendx_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkendx[i], S2_temp);
-    sprintf(S1_temp,"trkendy_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkendy_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkendy_%s",TrackLabel);
+    sprintf(S2_temp,"trkendy_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkendy[i], S2_temp);
-    sprintf(S1_temp,"trkendz_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkendz_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkendz_%s",TrackLabel);
+    sprintf(S2_temp,"trkendz_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkendz[i], S2_temp);
-    sprintf(S1_temp,"trkendd_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkendd_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkendd_%s",TrackLabel);
+    sprintf(S2_temp,"trkendd_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkendd[i], S2_temp);
-    sprintf(S1_temp,"trktheta_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trktheta_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trktheta_%s",TrackLabel);
+    sprintf(S2_temp,"trktheta_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trktheta[i], S2_temp);
-    sprintf(S1_temp,"trkphi_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkphi_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkphi_%s",TrackLabel);
+    sprintf(S2_temp,"trkphi_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkphi[i], S2_temp);
-    sprintf(S1_temp,"trkstartdcosx_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkstartdcosx_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkstartdcosx_%s",TrackLabel);
+    sprintf(S2_temp,"trkstartdcosx_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartdcosx[i], S2_temp);
-    sprintf(S1_temp,"trkstartdcosy_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkstartdcosy_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkstartdcosy_%s",TrackLabel);
+    sprintf(S2_temp,"trkstartdcosy_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartdcosy[i], S2_temp);
-    sprintf(S1_temp,"trkstartdcosz_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkstartdcosz_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkstartdcosz_%s",TrackLabel);
+    sprintf(S2_temp,"trkstartdcosz_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartdcosz[i], S2_temp);
-    sprintf(S1_temp,"trkenddcosx_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trksenddcosx_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkenddcosx_%s",TrackLabel);
+    sprintf(S2_temp,"trksenddcosx_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkenddcosx[i], S2_temp);
-    sprintf(S1_temp,"trkenddcosy_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trksenddcosy_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkenddcosy_%s",TrackLabel);
+    sprintf(S2_temp,"trksenddcosy_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkenddcosy[i], S2_temp);
-    sprintf(S1_temp,"trkenddcosz_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkenddcosz_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkenddcosz_%s",TrackLabel);
+    sprintf(S2_temp,"trkenddcosz_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkenddcosz[i], S2_temp);
-    sprintf(S1_temp,"trkthetaxz_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkthetaxz_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkthetaxz_%s",TrackLabel);
+    sprintf(S2_temp,"trkthetaxz_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkthetaxz[i], S2_temp);
-    sprintf(S1_temp,"trkthetayz_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkthetayz_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkthetayz_%s",TrackLabel);
+    sprintf(S2_temp,"trkthetayz_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkthetayz[i], S2_temp);
-    sprintf(S1_temp,"trkmom_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trkmom_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trkmom_%s",TrackLabel);
+    sprintf(S2_temp,"trkmom_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkmom[i], S2_temp);
-    sprintf(S1_temp,"trklen_%s",fTrackModuleLabel[i].c_str());
-    sprintf(S2_temp,"trklen_%s[%s]/D",fTrackModuleLabel[i].c_str(),S_temp);
+    sprintf(S1_temp,"trklen_%s",TrackLabel);
+    sprintf(S2_temp,"trklen_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trklen[i], S2_temp);
   }
   
