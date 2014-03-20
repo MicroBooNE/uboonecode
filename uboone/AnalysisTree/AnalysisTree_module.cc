@@ -109,26 +109,26 @@ namespace microboone {
     Double_t hit_peakT[kMaxHits];      //peak time
     Double_t hit_charge[kMaxHits];     //charge (area)
     Double_t hit_ph[kMaxHits];         //amplitude
-    Int_t    hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track? TODO ask Tingjun
+    Short_t  hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
 
     //track information
     Char_t kNTracker;
     Short_t  ntracks[kMaxTrackers];             //number of reconstructed tracks
     Double_t trkke[kMaxTrackers][kMaxTrack][kNplanes];
     Double_t trkrange[kMaxTrackers][kMaxTrack][kNplanes];
-    Short_t  trkidtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true geant trackid TODO ask Tingjun
+    Int_t    trkidtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true geant trackid
     Int_t    trkpdgtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true pdg code
     Double_t trkefftruth[kMaxTrackers][kMaxTrack][kNplanes]; //completeness
     Double_t trkpurtruth[kMaxTrackers][kMaxTrack][kNplanes]; //purity of track    
     Double_t trkpitchc[kMaxTrackers][kMaxTrack][kNplanes];
-    Short_t  ntrkhits[kMaxTrackers][kMaxTrack][kNplanes]; // TODO ask Tingjun
+    Short_t  ntrkhits[kMaxTrackers][kMaxTrack][kNplanes];
     Double_t trkdedx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
     Double_t trkdqdx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
     Double_t trkresrg[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
     Double_t trkxyz[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits][3];
     
     // more track info
-    Short_t   trkId[kMaxTrackers][kMaxTrack]; // TODO ask Tingjun
+    Short_t   trkId[kMaxTrackers][kMaxTrack];
     Double_t  trkstartx[kMaxTrackers][kMaxTrack];      // starting x position.
     Double_t  trkstarty[kMaxTrackers][kMaxTrack];      // starting y position.
     Double_t  trkstartz[kMaxTrackers][kMaxTrack];      // starting z position.
@@ -199,12 +199,12 @@ namespace microboone {
     Double_t  Px[kMaxPrimaries];
     Double_t  Py[kMaxPrimaries];
     Double_t  Pz[kMaxPrimaries];
-    Double_t  StartPoInt_tx[kMaxPrimaries];
-    Double_t  StartPoInt_ty[kMaxPrimaries];
-    Double_t  StartPoInt_tz[kMaxPrimaries];
-    Double_t  EndPoInt_tx[kMaxPrimaries];
-    Double_t  EndPoInt_ty[kMaxPrimaries];
-    Double_t  EndPoInt_tz[kMaxPrimaries];
+    Double_t  StartPointx[kMaxPrimaries];
+    Double_t  StartPointy[kMaxPrimaries];
+    Double_t  StartPointz[kMaxPrimaries];
+    Double_t  EndPointx[kMaxPrimaries];
+    Double_t  EndPointy[kMaxPrimaries];
+    Double_t  EndPointz[kMaxPrimaries];
     Int_t     NumberDaughters[kMaxPrimaries];
     Int_t     TrackId[kMaxPrimaries];
     Int_t     Mother[kMaxPrimaries];
@@ -326,7 +326,7 @@ void microboone::AnalysisTree::beginJob(){
   for(int i=0; i<kNTracker; i++){
     const char* TrackLabel = fTrackModuleLabel[i].c_str();
     sprintf(Str_temp,"hit_trkid_%s",TrackLabel);
-    sprintf(S1_temp,"hit_trkid_%s[no_hits]/I",TrackLabel);
+    sprintf(S1_temp,"hit_trkid_%s[no_hits]/S",TrackLabel);
     fTree->Branch(Str_temp,hit_trkid[i],S1_temp);
     sprintf(S_temp,"ntracks_%s",TrackLabel);
     sprintf(S1_temp,"ntracks_%s/S",TrackLabel);
@@ -341,7 +341,7 @@ void microboone::AnalysisTree::beginJob(){
     sprintf(S2_temp,"trkrange_%s[%s][3]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkrange[i], S2_temp);
     sprintf(S1_temp,"trkidtruth_%s",TrackLabel);
-    sprintf(S2_temp,"trkidtruth_%s[%s][3]/S",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkidtruth_%s[%s][3]/I",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkidtruth[i], S2_temp);
     sprintf(S1_temp,"trkpdgtruth_%s",TrackLabel);
     sprintf(S2_temp,"trkpdgtruth_%s[%s][3]/I",TrackLabel,S_temp);
@@ -1115,26 +1115,24 @@ void microboone::AnalysisTree::ResetVars(){
   event = -99999;
   evttime = -99999;
   beamtime = -99999;
-  isdata = -99999;
+  isdata = -99;
   taulife = -99999;
 
   no_hits = 0;
   for (int i = 0; i<kMaxHits; ++i){
-    hit_plane[i] = -99999;
-    hit_wire[i] = -99999;
-    hit_channel[i] = -99999;
+    hit_plane[i] = -99;
+    hit_wire[i] = -9999;
+    hit_channel[i] = -9999;
     hit_peakT[i] = -99999;
     hit_charge[i] = -99999;
     hit_ph[i] = -99999;
   }
 
   for (int i = 0; i < kMaxTrackers; ++i){
-    ntracks[i] = 0; 
-    for (int k=0; k< kMaxHits; k++){
-      hit_trkid[i][k] = -99999;
-    }    
+    ntracks[i] = 0;
+    std::fill(hit_trkid[i], hit_trkid[i] + kMaxHits, -9999);
     for (int j = 0; j < kMaxTrack; ++j){
-      trkId[i][j]     = -99999;
+      trkId[i][j]     = -9999;
       trkstartx[i][j] = -99999;   
       trkstarty[i][j] = -99999;   
       trkstartz[i][j] = -99999;   
@@ -1163,7 +1161,7 @@ void microboone::AnalysisTree::ResetVars(){
         trkefftruth[i][j][k] = -99999;
         trkpurtruth[i][j][k] = -99999;
         trkpitchc[i][j][k]   = -99999;
-        ntrkhits[i][j][k]    = -99999;
+        ntrkhits[i][j][k]    = -9999;
         for(int l = 0; l < kMaxTrackHits; ++l) {
          trkdedx[i][j][k][l]  = 0;
          trkdqdx[i][j][k][l]  = 0;
