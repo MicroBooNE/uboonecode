@@ -60,37 +60,22 @@
 #include "TString.h"
 #include "TTimeStamp.h"
 
-const int kNplanes       = 3;     //number of wire planes
-const int kMaxTrack      = 1000;  //maximum number of tracks
-const int kMaxClusters   = 1000;  //maximum number of clusters
-const int kMaxHits       = 20000; //maximum number of hits;
-const int kMaxPrimaries  = 20000;  //maximum number of primary particles
-const int kMaxTrackHits  = 1000;  //maximum number of hits on a track
-const int kMaxTrackers   = 10;    //number of trackers passed into fTrackModuleLabel 
+constexpr int kNplanes       = 3;     //number of wire planes
+constexpr int kMaxTrack      = 1000;  //maximum number of tracks
+constexpr int kMaxClusters   = 1000;  //maximum number of clusters
+constexpr int kMaxHits       = 20000; //maximum number of hits;
+constexpr int kMaxPrimaries  = 20000;  //maximum number of primary particles
+constexpr int kMaxTrackHits  = 1000;  //maximum number of hits on a track
+constexpr int kMaxTrackers   = 10;    //number of trackers passed into fTrackModuleLabel 
 
 namespace microboone {
    
-  class AnalysisTree : public art::EDAnalyzer {
-
-  public:
-          
-    explicit AnalysisTree(fhicl::ParameterSet const& pset); 
-    virtual ~AnalysisTree();
- 
-    /// read access to event
-    void analyze(const art::Event& evt);
-    void beginJob();
-    void beginSubRun(const art::SubRun& sr);
-
-  private:
+  class AnalysisTreeDataStruct {
+      public:
+    AnalysisTreeDataStruct() { Clear(); }
     
-    void   HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, int& trackid, double& purity, double& maxe);
-    void   ResetVars();
-    double length(const recob::Track& track);
-    double length(const simb::MCParticle& part, TVector3& start, TVector3& end);
-    double bdist(const TVector3& pos);
-
-    TTree* fTree;
+    void Clear();
+    
     //run information
     Int_t      run;                  //run number
     Int_t      subrun;               //subrun number
@@ -107,23 +92,23 @@ namespace microboone {
     Short_t  hit_wire[kMaxHits];       //wire number
     Short_t  hit_channel[kMaxHits];    //channel ID
     Double_t hit_peakT[kMaxHits];      //peak time
-    Double_t hit_charge[kMaxHits];     //charge (area)
-    Double_t hit_ph[kMaxHits];         //amplitude
+    Float_t  hit_charge[kMaxHits];     //charge (area)
+    Float_t  hit_ph[kMaxHits];         //amplitude
     Short_t  hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
 
     //track information
-    Char_t kNTracker;
+    Char_t   kNTracker;
     Short_t  ntracks[kMaxTrackers];             //number of reconstructed tracks
-    Double_t trkke[kMaxTrackers][kMaxTrack][kNplanes];
+    Float_t  trkke[kMaxTrackers][kMaxTrack][kNplanes];
     Double_t trkrange[kMaxTrackers][kMaxTrack][kNplanes];
     Int_t    trkidtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true geant trackid
     Int_t    trkpdgtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true pdg code
-    Double_t trkefftruth[kMaxTrackers][kMaxTrack][kNplanes]; //completeness
-    Double_t trkpurtruth[kMaxTrackers][kMaxTrack][kNplanes]; //purity of track    
-    Double_t trkpitchc[kMaxTrackers][kMaxTrack][kNplanes];
+    Float_t  trkefftruth[kMaxTrackers][kMaxTrack][kNplanes]; //completeness
+    Float_t  trkpurtruth[kMaxTrackers][kMaxTrack][kNplanes]; //purity of track    
+    Float_t  trkpitchc[kMaxTrackers][kMaxTrack][kNplanes];
     Short_t  ntrkhits[kMaxTrackers][kMaxTrack][kNplanes];
-    Double_t trkdedx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
-    Double_t trkdqdx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
+    Float_t  trkdedx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
+    Float_t  trkdqdx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
     Double_t trkresrg[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
     Double_t trkxyz[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits][3];
     
@@ -137,18 +122,18 @@ namespace microboone {
     Double_t  trkendy[kMaxTrackers][kMaxTrack];        // ending y position.
     Double_t  trkendz[kMaxTrackers][kMaxTrack];        // ending z position.
     Double_t  trkendd[kMaxTrackers][kMaxTrack];        // ending distance to boundary.
-    Double_t  trktheta[kMaxTrackers][kMaxTrack];       // theta.
-    Double_t  trkphi[kMaxTrackers][kMaxTrack];	      // phi.
-    Double_t  trkstartdcosx[kMaxTrackers][kMaxTrack]; 
-    Double_t  trkstartdcosy[kMaxTrackers][kMaxTrack]; 
-    Double_t  trkstartdcosz[kMaxTrackers][kMaxTrack]; 
-    Double_t  trkenddcosx[kMaxTrackers][kMaxTrack];
-    Double_t  trkenddcosy[kMaxTrackers][kMaxTrack];
-    Double_t  trkenddcosz[kMaxTrackers][kMaxTrack];
-    Double_t  trkthetaxz[kMaxTrackers][kMaxTrack];    // theta_xz.
-    Double_t  trkthetayz[kMaxTrackers][kMaxTrack];    // theta_yz.
-    Double_t  trkmom[kMaxTrackers][kMaxTrack];	      // momentum.
-    Double_t  trklen[kMaxTrackers][kMaxTrack];	      // length.
+    Float_t   trktheta[kMaxTrackers][kMaxTrack];       // theta.
+    Float_t   trkphi[kMaxTrackers][kMaxTrack];         // phi.
+    Float_t   trkstartdcosx[kMaxTrackers][kMaxTrack]; 
+    Float_t   trkstartdcosy[kMaxTrackers][kMaxTrack]; 
+    Float_t   trkstartdcosz[kMaxTrackers][kMaxTrack]; 
+    Float_t   trkenddcosx[kMaxTrackers][kMaxTrack];
+    Float_t   trkenddcosy[kMaxTrackers][kMaxTrack];
+    Float_t   trkenddcosz[kMaxTrackers][kMaxTrack];
+    Float_t   trkthetaxz[kMaxTrackers][kMaxTrack];    // theta_xz.
+    Float_t   trkthetayz[kMaxTrackers][kMaxTrack];    // theta_yz.
+    Float_t   trkmom[kMaxTrackers][kMaxTrack];	      // momentum.
+    Float_t   trklen[kMaxTrackers][kMaxTrack];	      // length.
        
     //mctruth information
     Int_t     mcevts_truth;    //number of neutrino Int_teractions in the spill
@@ -243,7 +228,32 @@ namespace microboone {
     Double_t  geant_tpcFV_theta_yz[kMaxPrimaries];    // theta_yz.
     Double_t  geant_tpcFV_mom[kMaxPrimaries];         // momentum.
     Double_t  geant_tpcFV_len[kMaxPrimaries];         // length.
+  }; // class AnalysisTreeDataStruct
+   
+  class AnalysisTree : public art::EDAnalyzer {
 
+  public:
+          
+    explicit AnalysisTree(fhicl::ParameterSet const& pset); 
+    virtual ~AnalysisTree();
+ 
+    /// read access to event
+    void analyze(const art::Event& evt);
+    void beginJob();
+    void beginSubRun(const art::SubRun& sr);
+
+  private:
+    
+    void   HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, Int_t& trackid, Float_t& purity, double& maxe);
+    void   ResetVars();
+    double length(const recob::Track& track);
+    double length(const simb::MCParticle& part, TVector3& start, TVector3& end);
+    double bdist(const TVector3& pos);
+
+    TTree* fTree;
+
+    AnalysisTreeDataStruct* pData;
+    
     std::string fDigitModuleLabel;
     std::string fHitsModuleLabel;
     std::string fLArG4ModuleLabel;
@@ -262,13 +272,21 @@ namespace microboone {
     std::vector<std::string> fCalorimetryModuleLabel;
     std::string fParticleIDModuleLabel;
 
-  };
-}
+    void CreateData() { if (!pData) pData = new AnalysisTreeDataStruct; }
+    void SetAddresses();
+    void UpdateAddresses() { CreateData(); SetAddresses(); }
+    void CreateBranch(const char* name, void* address, std::string leaflist /*, int bufsize = 32000 */);
+    void CreateBranch(const char* name, void* address, const std::stringstream& leaflist /*, int bufsize = 32000 */)
+      { CreateBranch(name, address, leaflist.str()); }
+    void CreateTree();
+  }; // class microboone::AnalysisTree
+} // namespace microboone
 
 //-------------------------------------------------
 
 microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) : 
   EDAnalyzer(pset),
+  fTree(nullptr), pData(nullptr),
   fDigitModuleLabel         (pset.get< std::string >("DigitModuleLabel")        ),
   fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
   fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
@@ -292,13 +310,32 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
 //-------------------------------------------------
 microboone::AnalysisTree::~AnalysisTree()
 {
+  delete pData;
+  pData = nullptr;
 }
 
-void microboone::AnalysisTree::beginJob(){
+void microboone::AnalysisTree::CreateBranch(
+  const char* name, void* address, std::string leaflist /*, int bufsize = 32000 */
+) {
+	if (!fTree) return;
+	TBranch* pBranch = fTree->GetBranch(name);
+	if (!pBranch) fTree->Branch(name, address, leaflist.c_str() /*, bufsize */);
+	else if (pBranch->GetAddress() != address) pBranch->SetAddress(address);
+} // microboone::AnalysisTree::CreateBranch()
 
-  art::ServiceHandle<art::TFileService> tfs;
-  fTree = tfs->make<TTree>("anatree","analysis tree");
-  fTree->Branch("run",&run,"run/I");
+void microboone::AnalysisTree::CreateTree() {
+
+  CreateData();
+  
+  if (!fTree) {
+    art::ServiceHandle<art::TFileService> tfs;
+    fTree = tfs->make<TTree>("anatree","analysis tree");
+  }
+  SetAddresses();
+} // microboone::AnalysisTree::CreateTree()
+
+void microboone::AnalysisTreeDataStruct::SetAddresses(TTree* pTree) {
+  CreateBranch("run",&run,"run/I");
   fTree->Branch("subrun",&subrun,"subrun/I");
   fTree->Branch("event",&event,"event/I");
   fTree->Branch("evttime",&evttime,"evttime/D");
@@ -312,8 +349,8 @@ void microboone::AnalysisTree::beginJob(){
   fTree->Branch("hit_wire",hit_wire,"hit_wire[no_hits]/S");
   fTree->Branch("hit_channel",hit_channel,"hit_channel[no_hits]/S");
   fTree->Branch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
-  fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/D");
-  fTree->Branch("hit_ph",hit_ph,"hit_ph[no_hits]/D");
+  fTree->Branch("hit_charge",hit_charge,"hit_charge[no_hits]/F");
+  fTree->Branch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
   
   char S_temp[50],S1_temp[50], S2_temp[50], Str_temp[50];
   
@@ -335,7 +372,7 @@ void microboone::AnalysisTree::beginJob(){
     sprintf(S2_temp,"trkId_%s[%s]/S",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkId[i], S2_temp);
     sprintf(S1_temp,"trkke_%s",TrackLabel);
-    sprintf(S2_temp,"trkke_%s[%s][3]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkke_%s[%s][3]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkke[i], S2_temp);
     sprintf(S1_temp,"trkrange_%s",TrackLabel);
     sprintf(S2_temp,"trkrange_%s[%s][3]/D",TrackLabel,S_temp);
@@ -347,22 +384,22 @@ void microboone::AnalysisTree::beginJob(){
     sprintf(S2_temp,"trkpdgtruth_%s[%s][3]/I",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkpdgtruth[i], S2_temp);
     sprintf(S1_temp,"trkefftruth_%s",TrackLabel);
-    sprintf(S2_temp,"trkefftruth_%s[%s][3]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkefftruth_%s[%s][3]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkefftruth[i], S2_temp);
     sprintf(S1_temp,"trkpurtruth_%s",TrackLabel);
-    sprintf(S2_temp,"trkpurtruth_%s[%s][3]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkpurtruth_%s[%s][3]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkpurtruth[i], S2_temp);
     sprintf(S1_temp,"trkpitchc_%s",TrackLabel);
-    sprintf(S2_temp,"trkpitchc_%s[%s][3]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkpitchc_%s[%s][3]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp,trkpitchc[i],S2_temp);
     sprintf(S1_temp,"ntrkhits_%s",TrackLabel);
     sprintf(S2_temp,"ntrkhits_%s[%s][3]/S",TrackLabel,S_temp);
     fTree->Branch(S1_temp, ntrkhits[i], S2_temp);    
     sprintf(S1_temp,"trkdedx_%s",TrackLabel);
-    sprintf(S2_temp,"trkdedx_%s[%s][3][%s]/D",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
+    sprintf(S2_temp,"trkdedx_%s[%s][3][%s]/F",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkdedx[i],S2_temp);    
     sprintf(S1_temp,"trkdqdx_%s",TrackLabel);
-    sprintf(S2_temp,"trkdqdx_%s[%s][3][%s]/D",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
+    sprintf(S2_temp,"trkdqdx_%s[%s][3][%s]/F",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
     fTree->Branch(S1_temp,trkdqdx[i],S2_temp);    
     sprintf(S1_temp,"trkresrg_%s",TrackLabel);
     sprintf(S2_temp,"trkresrg_%s[%s][3][%s]/D",TrackLabel,S_temp,MaxTrackHitsStr.c_str());
@@ -395,40 +432,40 @@ void microboone::AnalysisTree::beginJob(){
     sprintf(S2_temp,"trkendd_%s[%s]/D",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkendd[i], S2_temp);
     sprintf(S1_temp,"trktheta_%s",TrackLabel);
-    sprintf(S2_temp,"trktheta_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trktheta_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trktheta[i], S2_temp);
     sprintf(S1_temp,"trkphi_%s",TrackLabel);
-    sprintf(S2_temp,"trkphi_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkphi_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkphi[i], S2_temp);
     sprintf(S1_temp,"trkstartdcosx_%s",TrackLabel);
-    sprintf(S2_temp,"trkstartdcosx_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkstartdcosx_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartdcosx[i], S2_temp);
     sprintf(S1_temp,"trkstartdcosy_%s",TrackLabel);
-    sprintf(S2_temp,"trkstartdcosy_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkstartdcosy_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartdcosy[i], S2_temp);
     sprintf(S1_temp,"trkstartdcosz_%s",TrackLabel);
-    sprintf(S2_temp,"trkstartdcosz_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkstartdcosz_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkstartdcosz[i], S2_temp);
     sprintf(S1_temp,"trkenddcosx_%s",TrackLabel);
-    sprintf(S2_temp,"trksenddcosx_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trksenddcosx_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkenddcosx[i], S2_temp);
     sprintf(S1_temp,"trkenddcosy_%s",TrackLabel);
-    sprintf(S2_temp,"trksenddcosy_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trksenddcosy_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkenddcosy[i], S2_temp);
     sprintf(S1_temp,"trkenddcosz_%s",TrackLabel);
-    sprintf(S2_temp,"trkenddcosz_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkenddcosz_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkenddcosz[i], S2_temp);
     sprintf(S1_temp,"trkthetaxz_%s",TrackLabel);
-    sprintf(S2_temp,"trkthetaxz_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkthetaxz_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkthetaxz[i], S2_temp);
     sprintf(S1_temp,"trkthetayz_%s",TrackLabel);
-    sprintf(S2_temp,"trkthetayz_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkthetayz_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkthetayz[i], S2_temp);
     sprintf(S1_temp,"trkmom_%s",TrackLabel);
-    sprintf(S2_temp,"trkmom_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trkmom_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trkmom[i], S2_temp);
     sprintf(S1_temp,"trklen_%s",TrackLabel);
-    sprintf(S2_temp,"trklen_%s[%s]/D",TrackLabel,S_temp);
+    sprintf(S2_temp,"trklen_%s[%s]/F",TrackLabel,S_temp);
     fTree->Branch(S1_temp, trklen[i], S2_temp);
   }
   
@@ -519,7 +556,11 @@ void microboone::AnalysisTree::beginJob(){
   fTree->Branch("geant_tpcFV_theta_yz", geant_tpcFV_theta_yz, "geant_tpcFV_theta_yz[geant_list_size_in_tpcFV]/D");
   fTree->Branch("geant_tpcFV_mom", geant_tpcFV_mom, "geant_tpcFV_mom[geant_list_size_in_tpcFV]/D");
   fTree->Branch("geant_tpcFV_len", geant_tpcFV_len, "geant_tpcFV_len[geant_list_size_in_tpcFV]/D");
+} // microboone::AnalysisTree::SetAddresses()
 
+
+void microboone::AnalysisTree::beginJob(){
+  CreateTree();
 }
 
 void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
@@ -857,38 +898,38 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         double plen = length(*plist.Particle(p), mcstart, mcend);
         if ( (plen==0) || plist.Particle(p)->PdgCode() > 10000) continue;
 	else{
-	  geant_tpcFV_pdg[i] = plist.Particle(p)->PdgCode();
+	  pData->geant_tpcFV_pdg[i] = plist.Particle(p)->PdgCode();
 	  double mctheta_xz = std::atan2(plist.Particle(p)->Px(), plist.Particle(p)->Pz());
 	  double mctheta_yz = std::atan2(plist.Particle(p)->Py(), plist.Particle(p)->Pz());
 
-	  geant_tpcFV_trackId[i] = plist.Particle(p)->TrackId();
-	  geant_tpcFV_status[i]  = plist.Particle(p)->StatusCode();
+	  pData->geant_tpcFV_trackId[i] = plist.Particle(p)->TrackId();
+	  pData->geant_tpcFV_status[i]  = plist.Particle(p)->StatusCode();
 	  //
-	  geant_tpcFV_orig_E[i]	     = plist.Particle(p)->E();
-	  geant_tpcFV_orig_px[i]     = plist.Particle(p)->Px();
-	  geant_tpcFV_orig_py[i]     = plist.Particle(p)->Py();
-	  geant_tpcFV_orig_pz[i]     = plist.Particle(p)->Pz();
-	  geant_tpcFV_orig_startx[i] = plist.Particle(p)->Vx();
-	  geant_tpcFV_orig_starty[i] = plist.Particle(p)->Vy();
-	  geant_tpcFV_orig_startz[i] = plist.Particle(p)->Vz();
-	  geant_tpcFV_orig_startt[i] = plist.Particle(p)->T();
-	  geant_tpcFV_orig_endx[i]   = plist.Particle(p)->EndX();
-	  geant_tpcFV_orig_endy[i]   = plist.Particle(p)->EndY();
-	  geant_tpcFV_orig_endz[i]   = plist.Particle(p)->EndZ();
-	  geant_tpcFV_orig_endt[i]   = plist.Particle(p)->EndT();
+	  pData->geant_tpcFV_orig_E[i]	     = plist.Particle(p)->E();
+	  pData->geant_tpcFV_orig_px[i]     = plist.Particle(p)->Px();
+	  pData->geant_tpcFV_orig_py[i]     = plist.Particle(p)->Py();
+	  pData->geant_tpcFV_orig_pz[i]     = plist.Particle(p)->Pz();
+	  pData->geant_tpcFV_orig_startx[i] = plist.Particle(p)->Vx();
+	  pData->geant_tpcFV_orig_starty[i] = plist.Particle(p)->Vy();
+	  pData->geant_tpcFV_orig_startz[i] = plist.Particle(p)->Vz();
+	  pData->geant_tpcFV_orig_startt[i] = plist.Particle(p)->T();
+	  pData->geant_tpcFV_orig_endx[i]   = plist.Particle(p)->EndX();
+	  pData->geant_tpcFV_orig_endy[i]   = plist.Particle(p)->EndY();
+	  pData->geant_tpcFV_orig_endz[i]   = plist.Particle(p)->EndZ();
+	  pData->geant_tpcFV_orig_endt[i]   = plist.Particle(p)->EndT();
 	  //
-	  geant_tpcFV_startx[i]   = mcstart.X();
-	  geant_tpcFV_starty[i]   = mcstart.Y();
-	  geant_tpcFV_startz[i]   = mcstart.Z();
-	  geant_tpcFV_endx[i]	  = mcend.X();
-	  geant_tpcFV_endy[i]	  = mcend.Y();
-	  geant_tpcFV_endz[i]	  = mcend.Z();
-	  geant_tpcFV_theta[i]	  = plist.Particle(p)->Momentum().Theta();
-	  geant_tpcFV_phi[i]	  = plist.Particle(p)->Momentum().Phi();
-	  geant_tpcFV_theta_xz[i] = mctheta_xz;
-	  geant_tpcFV_theta_yz[i] = mctheta_yz;
-	  geant_tpcFV_mom[i]	  = plist.Particle(p)->Momentum().Vect().Mag();
-	  geant_tpcFV_len[i]	  = plen;    
+	  pData->geant_tpcFV_startx[i]   = mcstart.X();
+	  pData->geant_tpcFV_starty[i]   = mcstart.Y();
+	  pData->geant_tpcFV_startz[i]   = mcstart.Z();
+	  pData->geant_tpcFV_endx[i]	  = mcend.X();
+	  pData->geant_tpcFV_endy[i]	  = mcend.Y();
+	  pData->geant_tpcFV_endz[i]	  = mcend.Z();
+	  pData->geant_tpcFV_theta[i]	  = plist.Particle(p)->Momentum().Theta();
+	  pData->geant_tpcFV_phi[i]	  = plist.Particle(p)->Momentum().Phi();
+	  pData->geant_tpcFV_theta_xz[i] = mctheta_xz;
+	  pData->geant_tpcFV_theta_yz[i] = mctheta_yz;
+	  pData->geant_tpcFV_mom[i]	  = plist.Particle(p)->Momentum().Vect().Mag();
+	  pData->geant_tpcFV_len[i]	  = plen;    
 	  i++;  
         }
       }
@@ -966,7 +1007,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   fTree->Fill();
 }
 
-void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, int& trackid, double& purity, double& maxe){
+void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, Int_t& trackid, Float_t& purity, double& maxe){
 
   trackid = -1;
   purity = -1;
@@ -1228,37 +1269,37 @@ void microboone::AnalysisTree::ResetVars(){
     genie_ND[i] = -99999;
     genie_mother[i] = -99999;
     
-    geant_tpcFV_status[i] = -99999;
-    geant_tpcFV_trackId[i] = -99999;
-    geant_tpcFV_pdg[i] = -99999;
+    pData->geant_tpcFV_status[i] = -99999;
+    pData->geant_tpcFV_trackId[i] = -99999;
+    pData->geant_tpcFV_pdg[i] = -99999;
 
-    geant_tpcFV_orig_E[i] = -99999;
-    geant_tpcFV_orig_px[i] = -99999;
-    geant_tpcFV_orig_py[i] = -99999;
-    geant_tpcFV_orig_pz[i] = -99999;
-    geant_tpcFV_orig_startx[i] = -99999;
-    geant_tpcFV_orig_starty[i] = -99999;
-    geant_tpcFV_orig_startz[i] = -99999;
-    geant_tpcFV_orig_startt[i] = -99999;
-    geant_tpcFV_orig_endx[i] = -99999;
-    geant_tpcFV_orig_endy[i] = -99999;
-    geant_tpcFV_orig_endz[i] = -99999;
-    geant_tpcFV_orig_endt[i] = -99999;
+    pData->geant_tpcFV_orig_E[i] = -99999;
+    pData->geant_tpcFV_orig_px[i] = -99999;
+    pData->geant_tpcFV_orig_py[i] = -99999;
+    pData->geant_tpcFV_orig_pz[i] = -99999;
+    pData->geant_tpcFV_orig_startx[i] = -99999;
+    pData->geant_tpcFV_orig_starty[i] = -99999;
+    pData->geant_tpcFV_orig_startz[i] = -99999;
+    pData->geant_tpcFV_orig_startt[i] = -99999;
+    pData->geant_tpcFV_orig_endx[i] = -99999;
+    pData->geant_tpcFV_orig_endy[i] = -99999;
+    pData->geant_tpcFV_orig_endz[i] = -99999;
+    pData->geant_tpcFV_orig_endt[i] = -99999;
 
-    geant_tpcFV_startx[i] = -99999;  
-    geant_tpcFV_starty[i] = -99999;  
-    geant_tpcFV_startz[i] = -99999;  
-    geant_tpcFV_startd[i] = -99999;  
-    geant_tpcFV_endx[i] = -99999;    
-    geant_tpcFV_endy[i] = -99999;    
-    geant_tpcFV_endz[i] = -99999;    
-    geant_tpcFV_endd[i] = -99999;    
-    geant_tpcFV_theta[i] = -99999;   
-    geant_tpcFV_phi[i] = -99999;     
-    geant_tpcFV_theta_xz[i] = -99999;
-    geant_tpcFV_theta_yz[i] = -99999;
-    geant_tpcFV_mom[i] = -99999;     
-    geant_tpcFV_len[i] = -99999;         
+    pData->geant_tpcFV_startx[i] = -99999;  
+    pData->geant_tpcFV_starty[i] = -99999;  
+    pData->geant_tpcFV_startz[i] = -99999;  
+    pData->geant_tpcFV_startd[i] = -99999;  
+    pData->geant_tpcFV_endx[i] = -99999;    
+    pData->geant_tpcFV_endy[i] = -99999;    
+    pData->geant_tpcFV_endz[i] = -99999;    
+    pData->geant_tpcFV_endd[i] = -99999;    
+    pData->geant_tpcFV_theta[i] = -99999;   
+    pData->geant_tpcFV_phi[i] = -99999;     
+    pData->geant_tpcFV_theta_xz[i] = -99999;
+    pData->geant_tpcFV_theta_yz[i] = -99999;
+    pData->geant_tpcFV_mom[i] = -99999;     
+    pData->geant_tpcFV_len[i] = -99999;         
   }    
   
 }
