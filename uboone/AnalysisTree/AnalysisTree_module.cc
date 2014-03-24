@@ -6,6 +6,13 @@
 // \author tjyang@fnal.gov, sowjanyag@phys.ksu.edu
 //
 ////////////////////////////////////////////////////////////////////////
+// To reduce memory usage:
+// [x] create the data structure connected to the tree only when needed
+// [x] reduce the size of the elemental items (Double_t => Float_t could damage precision)
+// [x] create a different structure for each tracker, allocate only what needed
+// [ ] use variable size array buffers for each tracker datum instead of [kMaxTrack]
+////////////////////////////////////////////////////////////////////////
+
 #ifndef ANALYSISTREE_H
 #define ANALYSISTREE_H
 
@@ -51,7 +58,7 @@
 #include <sstream>
 #include <fstream>
 #include <algorithm>
-#include <functional>
+#include <functional> // std::mem_fun_ref
 
 #include "TTree.h"
 #include "TFile.h"
@@ -72,10 +79,50 @@ namespace microboone {
 
   class AnalysisTreeDataStruct {
       public:
-    AnalysisTreeDataStruct() { Clear(); }
+    
+    class TrackDataStruct {
+        public:
+      Short_t  ntracks;             //number of reconstructed tracks
+      Float_t  trkke[kMaxTrack][kNplanes];
+      Float_t  trkrange[kMaxTrack][kNplanes];
+      Int_t    trkidtruth[kMaxTrack][kNplanes]; //true geant trackid
+      Int_t    trkpdgtruth[kMaxTrack][kNplanes]; //true pdg code
+      Float_t  trkefftruth[kMaxTrack][kNplanes]; //completeness
+      Float_t  trkpurtruth[kMaxTrack][kNplanes]; //purity of track
+      Float_t  trkpitchc[kMaxTrack][kNplanes];
+      Short_t  ntrkhits[kMaxTrack][kNplanes];
+      Float_t  trkdedx[kMaxTrack][kNplanes][kMaxTrackHits];
+      Float_t  trkdqdx[kMaxTrack][kNplanes][kMaxTrackHits];
+      Float_t  trkresrg[kMaxTrack][kNplanes][kMaxTrackHits];
+      Float_t  trkxyz[kMaxTrack][kNplanes][kMaxTrackHits][3];
 
-    void Clear();
-
+      // more track info
+      Short_t   trkId[kMaxTrack];
+      Double_t  trkstartx[kMaxTrack];      // starting x position.
+      Double_t  trkstarty[kMaxTrack];      // starting y position.
+      Double_t  trkstartz[kMaxTrack];      // starting z position.
+      Double_t  trkstartd[kMaxTrack];      // starting distance to boundary.
+      Double_t  trkendx[kMaxTrack];        // ending x position.
+      Double_t  trkendy[kMaxTrack];        // ending y position.
+      Double_t  trkendz[kMaxTrack];        // ending z position.
+      Double_t  trkendd[kMaxTrack];        // ending distance to boundary.
+      Float_t   trktheta[kMaxTrack];       // theta.
+      Float_t   trkphi[kMaxTrack];         // phi.
+      Float_t   trkstartdcosx[kMaxTrack];
+      Float_t   trkstartdcosy[kMaxTrack];
+      Float_t   trkstartdcosz[kMaxTrack];
+      Float_t   trkenddcosx[kMaxTrack];
+      Float_t   trkenddcosy[kMaxTrack];
+      Float_t   trkenddcosz[kMaxTrack];
+      Float_t   trkthetaxz[kMaxTrack];    // theta_xz.
+      Float_t   trkthetayz[kMaxTrack];    // theta_yz.
+      Float_t   trkmom[kMaxTrack];              // momentum.
+      Float_t   trklen[kMaxTrack];              // length.
+      
+      TrackDataStruct() { Clear(); }
+      void Clear();
+    }; // class TrackDataStruct
+    
     /// information from the run
 /*    struct RunData_t {
         public:
@@ -115,43 +162,8 @@ namespace microboone {
 
     //track information
     Char_t   kNTracker;
-    Short_t  ntracks[kMaxTrackers];             //number of reconstructed tracks
-    Float_t  trkke[kMaxTrackers][kMaxTrack][kNplanes];
-    Float_t  trkrange[kMaxTrackers][kMaxTrack][kNplanes];
-    Int_t    trkidtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true geant trackid
-    Int_t    trkpdgtruth[kMaxTrackers][kMaxTrack][kNplanes]; //true pdg code
-    Float_t  trkefftruth[kMaxTrackers][kMaxTrack][kNplanes]; //completeness
-    Float_t  trkpurtruth[kMaxTrackers][kMaxTrack][kNplanes]; //purity of track
-    Float_t  trkpitchc[kMaxTrackers][kMaxTrack][kNplanes];
-    Short_t  ntrkhits[kMaxTrackers][kMaxTrack][kNplanes];
-    Float_t  trkdedx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
-    Float_t  trkdqdx[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
-    Float_t  trkresrg[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits];
-    Float_t  trkxyz[kMaxTrackers][kMaxTrack][kNplanes][kMaxTrackHits][3];
-
-    // more track info
-    Short_t   trkId[kMaxTrackers][kMaxTrack];
-    Double_t  trkstartx[kMaxTrackers][kMaxTrack];      // starting x position.
-    Double_t  trkstarty[kMaxTrackers][kMaxTrack];      // starting y position.
-    Double_t  trkstartz[kMaxTrackers][kMaxTrack];      // starting z position.
-    Double_t  trkstartd[kMaxTrackers][kMaxTrack];      // starting distance to boundary.
-    Double_t  trkendx[kMaxTrackers][kMaxTrack];        // ending x position.
-    Double_t  trkendy[kMaxTrackers][kMaxTrack];        // ending y position.
-    Double_t  trkendz[kMaxTrackers][kMaxTrack];        // ending z position.
-    Double_t  trkendd[kMaxTrackers][kMaxTrack];        // ending distance to boundary.
-    Float_t   trktheta[kMaxTrackers][kMaxTrack];       // theta.
-    Float_t   trkphi[kMaxTrackers][kMaxTrack];         // phi.
-    Float_t   trkstartdcosx[kMaxTrackers][kMaxTrack];
-    Float_t   trkstartdcosy[kMaxTrackers][kMaxTrack];
-    Float_t   trkstartdcosz[kMaxTrackers][kMaxTrack];
-    Float_t   trkenddcosx[kMaxTrackers][kMaxTrack];
-    Float_t   trkenddcosy[kMaxTrackers][kMaxTrack];
-    Float_t   trkenddcosz[kMaxTrackers][kMaxTrack];
-    Float_t   trkthetaxz[kMaxTrackers][kMaxTrack];    // theta_xz.
-    Float_t   trkthetayz[kMaxTrackers][kMaxTrack];    // theta_yz.
-    Float_t   trkmom[kMaxTrackers][kMaxTrack];              // momentum.
-    Float_t   trklen[kMaxTrackers][kMaxTrack];              // length.
-
+    std::vector<TrackDataStruct> TrackData;
+    
     //mctruth information
     Int_t     mcevts_truth;    //number of neutrino Int_teractions in the spill
     Int_t     nuPDG_truth;     //neutrino PDG code
@@ -246,6 +258,16 @@ namespace microboone {
     Double_t  geant_tpcFV_mom[kMaxPrimaries];         // momentum.
     Double_t  geant_tpcFV_len[kMaxPrimaries];         // length.
 
+    /// Constructor; clears all fields
+    AnalysisTreeDataStruct(size_t nTrackers = 0)
+      { SetTrackers(nTrackers); Clear(); }
+
+    /// Clear all fields
+    void Clear();
+    
+    /// Allocates data structures for the given number of trackers (no Clear())
+    void SetTrackers(size_t nTrackers) { TrackData.resize(nTrackers); }
+
     /// Connect this object with a tree
     void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
 
@@ -284,7 +306,7 @@ namespace microboone {
 
     /// read access to event
     void analyze(const art::Event& evt);
-    void beginJob();
+  //  void beginJob() {}
     void beginSubRun(const art::SubRun& sr);
 
   private:
@@ -320,12 +342,18 @@ namespace microboone {
     std::string fPOTModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
     std::string fParticleIDModuleLabel;
+    bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)
 
+    size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
+    
     // make sure the data structure exists
     void CreateData(bool bClearData = false)
       {
-        if (!fData) fData = new AnalysisTreeDataStruct; // constructor Clear()s
-        else if (bClearData) fData->Clear();
+        if (!fData) fData = new AnalysisTreeDataStruct(GetNTrackers());
+        else {
+          fData->SetTrackers(GetNTrackers());
+          if (bClearData) fData->Clear();
+        }
       } // CreateData()
     void SetAddresses()
       {
@@ -343,7 +371,9 @@ namespace microboone {
     
     /// Create the output tree and the data structures, if needed
     void CreateTree(bool bClearData = false);
-  
+    
+    /// Destroy the local buffers (existing branches will point to invalid address!)
+    void DestroyData() { if (fData) { delete fData; fData = nullptr; } }
   }; // class microboone::AnalysisTree
 } // namespace microboone
 
@@ -352,12 +382,71 @@ namespace {
       public:
     AutoResettingStringSteam& operator() () { str(""); return *this; }
   }; // class AutoResettingStringSteam
+
+  /// Fills a structure of TYPE elements with a static size (i.e. C arrays)
+  template <typename DATA, typename TYPE>
+  inline void FillWith(DATA& data, TYPE value) {
+    TYPE* start = reinterpret_cast<TYPE*>(&data);
+    size_t size = sizeof(data) / sizeof(TYPE);
+    std::fill(start, start + size, value);
+  } // FillWith<>()
+
 } // local namespace
+
+
+//------------------------------------------------------------------------------
+//---  AnalysisTreeDataStruct::TrackDataStruct
+//---
+
+void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
+  ntracks = 0;
+  for (int j = 0; j < kMaxTrack; ++j){
+    trkId[j]     = -9999;
+    trkstartx[j] = -99999;
+    trkstarty[j] = -99999;
+    trkstartz[j] = -99999;
+    trkstartd[j] = -99999;
+    trkendx[j] = -99999;
+    trkendy[j] = -99999;
+    trkendz[j] = -99999;
+    trkendd[j] = -99999;
+    trktheta[j] = -99999;
+    trkphi[j] = -99999;
+    trkstartdcosx[j] = -99999;
+    trkstartdcosy[j] = -99999;
+    trkstartdcosz[j] = -99999;
+    trkenddcosx[j] = -99999;
+    trkenddcosy[j] = -99999;
+    trkenddcosz[j] = -99999;
+    trkthetaxz[j] = -99999;
+    trkthetayz[j] = -99999;
+    trkmom[j] = -99999;
+    trklen[j] = -99999;
+    for (int k = 0; k < kNplanes; ++k){
+      trkke[j][k]       = -99999;
+      trkrange[j][k]    = -99999;
+      trkidtruth[j][k]  = -99999;
+      trkpdgtruth[j][k] = -99999;
+      trkefftruth[j][k] = -99999;
+      trkpurtruth[j][k] = -99999;
+      trkpitchc[j][k]   = -99999;
+      ntrkhits[j][k]    = -9999;
+      for(int l = 0; l < kMaxTrackHits; ++l) {
+       trkdedx[j][k][l]  = 0;
+       trkdqdx[j][k][l]  = 0;
+       trkresrg[j][k][l] = 0;
+       for (int m = 0; m<3; ++m)
+         trkxyz[j][k][l][m] = 0;
+      }
+    }
+  }
+} // microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear()
 
 
 //------------------------------------------------------------------------------
 //---  AnalysisTreeDataStruct
 //---
+
 void microboone::AnalysisTreeDataStruct::Clear() {
 
 //  RunData.Clear();
@@ -372,59 +461,21 @@ void microboone::AnalysisTreeDataStruct::Clear() {
   taulife = -99999;
 
   no_hits = 0;
-  for (int i = 0; i<kMaxHits; ++i){
-    hit_plane[i] = -99;
-    hit_wire[i] = -9999;
-    hit_channel[i] = -9999;
-    hit_peakT[i] = -99999;
-    hit_charge[i] = -99999;
-    hit_ph[i] = -99999;
-  }
+//  FillWith(hit_plane, (Char_t)-99);
+  
+  std::fill(hit_plane, hit_plane + sizeof(hit_plane)/sizeof(hit_plane[0]), -99);
+  std::fill(hit_wire, hit_wire + sizeof(hit_wire)/sizeof(hit_wire[0]), -9999);
+  std::fill(hit_channel, hit_channel + sizeof(hit_channel)/sizeof(hit_channel[0]), -9999);
+  std::fill(hit_peakT, hit_peakT + sizeof(hit_peakT)/sizeof(hit_peakT[0]), -99999.);
+  std::fill(hit_charge, hit_charge + sizeof(hit_charge)/sizeof(hit_charge[0]), -99999.);
+  std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
 
-  for (int i = 0; i < kMaxTrackers; ++i){
-    ntracks[i] = 0;
-    std::fill(hit_trkid[i], hit_trkid[i] + kMaxHits, -9999);
-    for (int j = 0; j < kMaxTrack; ++j){
-      trkId[i][j]     = -9999;
-      trkstartx[i][j] = -99999;
-      trkstarty[i][j] = -99999;
-      trkstartz[i][j] = -99999;
-      trkstartd[i][j] = -99999;
-      trkendx[i][j] = -99999;
-      trkendy[i][j] = -99999;
-      trkendz[i][j] = -99999;
-      trkendd[i][j] = -99999;
-      trktheta[i][j] = -99999;
-      trkphi[i][j] = -99999;
-      trkstartdcosx[i][j] = -99999;
-      trkstartdcosy[i][j] = -99999;
-      trkstartdcosz[i][j] = -99999;
-      trkenddcosx[i][j] = -99999;
-      trkenddcosy[i][j] = -99999;
-      trkenddcosz[i][j] = -99999;
-      trkthetaxz[i][j] = -99999;
-      trkthetayz[i][j] = -99999;
-      trkmom[i][j] = -99999;
-      trklen[i][j] = -99999;
-      for (int k = 0; k < kNplanes; ++k){
-        trkke[i][j][k]       = -99999;
-        trkrange[i][j][k]    = -99999;
-        trkidtruth[i][j][k]  = -99999;
-        trkpdgtruth[i][j][k] = -99999;
-        trkefftruth[i][j][k] = -99999;
-        trkpurtruth[i][j][k] = -99999;
-        trkpitchc[i][j][k]   = -99999;
-        ntrkhits[i][j][k]    = -9999;
-        for(int l = 0; l < kMaxTrackHits; ++l) {
-         trkdedx[i][j][k][l]  = 0;
-         trkdqdx[i][j][k][l]  = 0;
-         trkresrg[i][j][k][l] = 0;
-         for (int m = 0; m<3; ++m)
-           trkxyz[i][j][k][l][m] = 0;
-        }
-      }
-    }
+  for (size_t iTrk = 0; iTrk < kMaxTrackers; ++iTrk) {
+    std::fill(hit_trkid[iTrk], hit_trkid[iTrk] + kMaxHits, -9999);
   }
+  
+  std::for_each
+    (TrackData.begin(), TrackData.end(), std::mem_fun_ref(&TrackDataStruct::Clear));
 
   mcevts_truth = -99999;
   nuPDG_truth = -99999;
@@ -546,6 +597,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   kNTracker = trackers.size();
   CreateBranch("kNTracker",&kNTracker,"kNTracker/B");
   for(int i=0; i<kNTracker; i++){
+    TrackDataStruct& TrackerData = TrackData[i];
     std::string TrackLabel = trackers[i];
     std::string BranchName;
 
@@ -553,111 +605,111 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch(BranchName, hit_trkid[i], BranchName + "[nohits]/S");
 
     BranchName = "ntracks_" + TrackLabel;
-    CreateBranch(BranchName, &ntracks[i], BranchName + "/S");
+    CreateBranch(BranchName, &TrackerData.ntracks, BranchName + "/S");
     std::string NTracksIndexStr = "[" + BranchName + "]";
     
     BranchName = "trkId_" + TrackLabel;
-    CreateBranch(BranchName, trkId[i], BranchName + NTracksIndexStr + "/S");
+    CreateBranch(BranchName, TrackerData.trkId, BranchName + NTracksIndexStr + "/S");
     
     BranchName = "trkke_" + TrackLabel;
-    CreateBranch(BranchName, trkke[i], BranchName + NTracksIndexStr + "[3]/F");
+    CreateBranch(BranchName, TrackerData.trkke, BranchName + NTracksIndexStr + "[3]/F");
     
     BranchName = "trkrange_" + TrackLabel;
-    CreateBranch(BranchName, trkrange[i], BranchName + NTracksIndexStr + "[3]/F");
+    CreateBranch(BranchName, TrackerData.trkrange, BranchName + NTracksIndexStr + "[3]/F");
     
     BranchName = "trkidtruth_" + TrackLabel;
-    CreateBranch(BranchName, trkidtruth[i], BranchName + NTracksIndexStr + "[3]/I");
+    CreateBranch(BranchName, TrackerData.trkidtruth, BranchName + NTracksIndexStr + "[3]/I");
     
     BranchName = "trkpdgtruth_" + TrackLabel;
-    CreateBranch(BranchName, trkpdgtruth[i], BranchName + NTracksIndexStr + "[3]/I");
+    CreateBranch(BranchName, TrackerData.trkpdgtruth, BranchName + NTracksIndexStr + "[3]/I");
     
     BranchName = "trkefftruth_" + TrackLabel;
-    CreateBranch(BranchName, trkefftruth[i], BranchName + NTracksIndexStr + "[3]/F");
+    CreateBranch(BranchName, TrackerData.trkefftruth, BranchName + NTracksIndexStr + "[3]/F");
     
     BranchName = "trkpurtruth_" + TrackLabel;
-    CreateBranch(BranchName, trkpurtruth[i], BranchName + NTracksIndexStr + "[3]/F");
+    CreateBranch(BranchName, TrackerData.trkpurtruth, BranchName + NTracksIndexStr + "[3]/F");
     
     BranchName = "trkpitchc_" + TrackLabel;
-    CreateBranch(BranchName, trkpitchc[i], BranchName + NTracksIndexStr + "[3]/F");
+    CreateBranch(BranchName, TrackerData.trkpitchc, BranchName + NTracksIndexStr + "[3]/F");
     
     BranchName = "ntrkhits_" + TrackLabel;
-    CreateBranch(BranchName, ntrkhits[i], BranchName + NTracksIndexStr + "[3]/S");
+    CreateBranch(BranchName, TrackerData.ntrkhits, BranchName + NTracksIndexStr + "[3]/S");
     
     // trkdedx_<TrackerName>[ntracks_<TrackerName>][3][<kMaxTrackHits>]/F"
     BranchName = "trkdedx_" + TrackLabel;
-    CreateBranch(BranchName, trkdedx[i], BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkdedx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
     // trkdqdx_<TrackerName>[ntracks_<TrackerName>][3][<kMaxTrackHits>]/F"
     BranchName = "trkdqdx_" + TrackLabel;
-    CreateBranch(BranchName, trkdqdx[i], BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkdqdx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
     // trkresrg_<TrackerName>[ntracks_<TrackerName>][3][<kMaxTrackHits>]/F"
     BranchName = "trkresrg_" + TrackLabel;
-    CreateBranch(BranchName, trkresrg[i], BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
     // trkresrg_<TrackerName>[ntracks_<TrackerName>][3][<kMaxTrackHits>]/F"
     BranchName = "trkxyz_" + TrackLabel;
-    CreateBranch(BranchName, trkxyz[i], BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
     BranchName = "trkstartx_" + TrackLabel;
-    CreateBranch(BranchName, trkstartx[i], BranchName + NTracksIndexStr + "/D");
+    CreateBranch(BranchName, TrackerData.trkstartx, BranchName + NTracksIndexStr + "/D");
     
     BranchName = "trkstarty_" + TrackLabel;
-    CreateBranch(BranchName, trkstarty[i], BranchName + NTracksIndexStr + "/D");
+    CreateBranch(BranchName, TrackerData.trkstarty, BranchName + NTracksIndexStr + "/D");
     
     BranchName = "trkstartz_" + TrackLabel;
-    CreateBranch(BranchName, trkstartz[i], BranchName + NTracksIndexStr + "/D");
+    CreateBranch(BranchName, TrackerData.trkstartz, BranchName + NTracksIndexStr + "/D");
     
     BranchName = "trkstartd_" + TrackLabel;
-    CreateBranch(BranchName, trkstartd[i], BranchName + NTracksIndexStr + "/D");
+    CreateBranch(BranchName, TrackerData.trkstartd, BranchName + NTracksIndexStr + "/D");
     
     BranchName = "trkendx_" + TrackLabel;
-    CreateBranch(BranchName, trkendx[i], BranchName + NTracksIndexStr + "/D");
+    CreateBranch(BranchName, TrackerData.trkendx, BranchName + NTracksIndexStr + "/D");
     
     BranchName = "trkendy_" + TrackLabel;
-    CreateBranch(BranchName, trkendy[i], BranchName + NTracksIndexStr + "/D");
+    CreateBranch(BranchName, TrackerData.trkendy, BranchName + NTracksIndexStr + "/D");
     
     BranchName = "trkendz_" + TrackLabel;
-    CreateBranch(BranchName, trkendz[i], BranchName + NTracksIndexStr + "/D");
+    CreateBranch(BranchName, TrackerData.trkendz, BranchName + NTracksIndexStr + "/D");
     
     BranchName = "trkendd_" + TrackLabel;
-    CreateBranch(BranchName, trkendd[i], BranchName + NTracksIndexStr + "/D");
+    CreateBranch(BranchName, TrackerData.trkendd, BranchName + NTracksIndexStr + "/D");
     
     BranchName = "trktheta_" + TrackLabel;
-    CreateBranch(BranchName, trktheta[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trktheta, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkphi_" + TrackLabel;
-    CreateBranch(BranchName, trkphi[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkphi, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkstartdcosx_" + TrackLabel;
-    CreateBranch(BranchName, trkstartdcosx[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkstartdcosx, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkstartdcosy_" + TrackLabel;
-    CreateBranch(BranchName, trkstartdcosy[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkstartdcosy, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkstartdcosz_" + TrackLabel;
-    CreateBranch(BranchName, trkstartdcosz[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkstartdcosz, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkenddcosx_" + TrackLabel;
-    CreateBranch(BranchName, trkenddcosx[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkenddcosx, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkenddcosy_" + TrackLabel;
-    CreateBranch(BranchName, trkenddcosy[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkenddcosy, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkenddcosz_" + TrackLabel;
-    CreateBranch(BranchName, trkenddcosz[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkenddcosz, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkthetaxz_" + TrackLabel;
-    CreateBranch(BranchName, trkthetaxz[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkthetaxz, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkthetayz_" + TrackLabel;
-    CreateBranch(BranchName, trkthetayz[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkthetayz, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trkmom_" + TrackLabel;
-    CreateBranch(BranchName, trkmom[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trkmom, BranchName + NTracksIndexStr + "/F");
     
     BranchName = "trklen_" + TrackLabel;
-    CreateBranch(BranchName, trklen[i], BranchName + NTracksIndexStr + "/F");
+    CreateBranch(BranchName, TrackerData.trklen, BranchName + NTracksIndexStr + "/F");
   } // for trackers
 
   CreateBranch("mcevts_truth",&mcevts_truth,"mcevts_truth/I");
@@ -773,15 +825,15 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
-  fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   )
+  fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   ),
+  fUseBuffer                (pset.get< bool >("UseBuffers", true)               )
 {
 }
 
 //-------------------------------------------------
 microboone::AnalysisTree::~AnalysisTree()
 {
-  delete fData;
-  fData = nullptr;
+  DestroyData();
 }
 
 void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
@@ -793,10 +845,6 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
   SetAddresses();
 } // microboone::AnalysisTree::CreateTree()
 
-
-void microboone::AnalysisTree::beginJob(){
-  CreateTree(); // TODO move this to the event (optionally)
-}
 
 void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
 {
@@ -891,7 +939,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   //track information for multiple trackers
   for (unsigned int it1=0; it1<fTrackModuleLabel.size(); ++it1){
-    fData->ntracks[it1]=tracklist[it1].size();
+    AnalysisTreeDataStruct::TrackDataStruct& TrackerData = fData->TrackData[it1];
+    
+    TrackerData.ntracks=tracklist[it1].size();
     for(unsigned int i=0; i<tracklist[it1].size();++i){//loop over tracks
 
       art::Ptr<recob::Track> ptrack(trackListHandle[it1], i);
@@ -919,7 +969,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             if (btrack.NumberFitMomentum() > 0)
               mom = btrack.VertexMomentum();
             // fill bezier track reco branches
-            fData->trkId[it1][i]         = i;  //bezier has some screwed up track IDs
+            TrackerData.trkId[i]         = i;  //bezier has some screwed up track IDs
         }
       }
       else {   //use the normal methods for other kinds of tracks
@@ -934,7 +984,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             if(track.NumberFitMomentum() > 0)
               mom = track.VertexMomentum();
             // fill non-bezier-track reco branches
-            fData->trkId[it1][i]                    = track.ID();
+            TrackerData.trkId[i]                    = track.ID();
         }
       }
       double theta_xz = std::atan2(dir_start.X(), dir_start.Z());
@@ -942,43 +992,43 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       double dpos = bdist(pos);
       double dend = bdist(end);
       
-      fData->trkstartx[it1][i]             = pos.X();
-      fData->trkstarty[it1][i]             = pos.Y();
-      fData->trkstartz[it1][i]             = pos.Z();
-      fData->trkstartd[it1][i]             = dpos;
-      fData->trkendx[it1][i]               = end.X();
-      fData->trkendy[it1][i]               = end.Y();
-      fData->trkendz[it1][i]               = end.Z();
-      fData->trkendd[it1][i]               = dend;
-      fData->trktheta[it1][i]              = dir_start.Theta();
-      fData->trkphi[it1][i]                = dir_start.Phi();
-      fData->trkstartdcosx[it1][i]         = dir_start.X();
-      fData->trkstartdcosy[it1][i]         = dir_start.Y();
-      fData->trkstartdcosz[it1][i]         = dir_start.Z();
-      fData->trkenddcosx[it1][i]           = dir_end.X();
-      fData->trkenddcosy[it1][i]           = dir_end.Y();
-      fData->trkenddcosz[it1][i]           = dir_end.Z();
-      fData->trkthetaxz[it1][i]            = theta_xz;
-      fData->trkthetayz[it1][i]            = theta_yz;
-      fData->trkmom[it1][i]                = mom;
-      fData->trklen[it1][i]                = tlen;
+      TrackerData.trkstartx[i]             = pos.X();
+      TrackerData.trkstarty[i]             = pos.Y();
+      TrackerData.trkstartz[i]             = pos.Z();
+      TrackerData.trkstartd[i]             = dpos;
+      TrackerData.trkendx[i]               = end.X();
+      TrackerData.trkendy[i]               = end.Y();
+      TrackerData.trkendz[i]               = end.Z();
+      TrackerData.trkendd[i]               = dend;
+      TrackerData.trktheta[i]              = dir_start.Theta();
+      TrackerData.trkphi[i]                = dir_start.Phi();
+      TrackerData.trkstartdcosx[i]         = dir_start.X();
+      TrackerData.trkstartdcosy[i]         = dir_start.Y();
+      TrackerData.trkstartdcosz[i]         = dir_start.Z();
+      TrackerData.trkenddcosx[i]           = dir_end.X();
+      TrackerData.trkenddcosy[i]           = dir_end.Y();
+      TrackerData.trkenddcosz[i]           = dir_end.Z();
+      TrackerData.trkthetaxz[i]            = theta_xz;
+      TrackerData.trkthetayz[i]            = theta_yz;
+      TrackerData.trkmom[i]                = mom;
+      TrackerData.trklen[i]                = tlen;
 
       art::FindMany<anab::Calorimetry> fmcal(trackListHandle[it1], evt, fCalorimetryModuleLabel[it1]);
       if (fmcal.isValid()){
         std::vector<const anab::Calorimetry*> calos = fmcal.at(i);
         //std::cout<<"calo size "<<calos.size()<<std::endl;
         for (size_t j = 0; j<calos.size(); ++j){
-          fData->trkke[it1][i][j]    = calos[j]->KineticEnergy();
-          fData->trkrange[it1][i][j] = calos[j]->Range();
-          fData->trkpitchc[it1][i][j]= calos[j] -> TrkPitchC();
-          fData->ntrkhits[it1][i][j] = calos[j] -> dEdx().size();
-          for(int k = 0; k < fData->ntrkhits[it1][i][j]; ++k) {
-            fData->trkdedx[it1][i][j][k]  = (calos[j] -> dEdx())[k];
-            fData->trkdqdx[it1][i][j][k]  = (calos[j] -> dQdx())[k];
-            fData->trkresrg[it1][i][j][k] = (calos[j] -> ResidualRange())[k];
-            fData->trkxyz[it1][i][j][k][0] = (calos[j] -> XYZ())[k].X();
-            fData->trkxyz[it1][i][j][k][1] = (calos[j] -> XYZ())[k].Y();
-            fData->trkxyz[it1][i][j][k][2] = (calos[j] -> XYZ())[k].Z();
+          TrackerData.trkke[i][j]    = calos[j]->KineticEnergy();
+          TrackerData.trkrange[i][j] = calos[j]->Range();
+          TrackerData.trkpitchc[i][j]= calos[j] -> TrkPitchC();
+          TrackerData.ntrkhits[i][j] = calos[j] -> dEdx().size();
+          for(int k = 0; k < TrackerData.ntrkhits[i][j]; ++k) {
+            TrackerData.trkdedx[i][j][k]  = (calos[j] -> dEdx())[k];
+            TrackerData.trkdqdx[i][j][k]  = (calos[j] -> dQdx())[k];
+            TrackerData.trkresrg[i][j][k] = (calos[j] -> ResidualRange())[k];
+            TrackerData.trkxyz[i][j][k][0] = (calos[j] -> XYZ())[k].X();
+            TrackerData.trkxyz[i][j][k][1] = (calos[j] -> XYZ())[k].Y();
+            TrackerData.trkxyz[i][j][k][2] = (calos[j] -> XYZ())[k].Z();
           } // for track hits
         } // for calorimetry info
       } // if has calorimetry info
@@ -999,17 +1049,17 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         
         for (size_t ipl = 0; ipl < 3; ++ipl){
           double maxe = 0;
-          HitsPurity(hits[ipl],fData->trkidtruth[it1][i][ipl],fData->trkpurtruth[it1][i][ipl],maxe);
+          HitsPurity(hits[ipl],TrackerData.trkidtruth[i][ipl],TrackerData.trkpurtruth[i][ipl],maxe);
         //std::cout<<"\n"<<it1<<"\t"<<i<<"\t"<<ipl<<"\t"<<trkidtruth[it1][i][ipl]<<"\t"<<trkpurtruth[it1][i][ipl]<<"\t"<<maxe;
-          if (fData->trkidtruth[it1][i][ipl]>0){
-            const simb::MCParticle *particle = bt->TrackIDToParticle(fData->trkidtruth[it1][i][ipl]);
-            const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(fData->trkidtruth[it1][i][ipl]);
+          if (TrackerData.trkidtruth[i][ipl]>0){
+            const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[i][ipl]);
+            const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(TrackerData.trkidtruth[i][ipl]);
             double tote = 0;
             for (size_t iide = 0; iide<vide.size(); ++iide){
               tote += vide[iide].energy;
             }
-            fData->trkpdgtruth[it1][i][ipl] = particle->PdgCode();
-            fData->trkefftruth[it1][i][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
+            TrackerData.trkpdgtruth[i][ipl] = particle->PdgCode();
+            TrackerData.trkefftruth[i][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
           //std::cout<<"\n"<<trkpdgtruth[it1][i][ipl]<<"\t"<<trkefftruth[it1][i][ipl];
           }
         }
@@ -1220,6 +1270,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   }//if (!isdata){
   fData->taulife = LArProp->ElectronLifetime();
   fTree->Fill();
+  
+  // if we don't use a permanent buffer (which can be huge),
+  // delete the current buffer, and we'll create a new one on the next event
+  if (!fUseBuffer) DestroyData();
 } // microboone::AnalysisTree::analyze()
 
 void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, Int_t& trackid, Float_t& purity, double& maxe){
