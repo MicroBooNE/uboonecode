@@ -121,6 +121,9 @@ namespace microboone {
       
       TrackDataStruct() { Clear(); }
       void Clear();
+      size_t GetMaxTracks() const { return (size_t) kMaxTrack; }
+      size_t GetMaxPlanesPerTrack(int /* iTrack */) const { return (size_t) kNplanes; }
+      size_t GetMaxHitsPerTrack(int /* iTrack */) const { return (size_t) kMaxTrackHits; }
     }; // class TrackDataStruct
     
     /// information from the run
@@ -285,9 +288,20 @@ namespace microboone {
         {
           if (!pTree) return;
           TBranch* pBranch = pTree->GetBranch(name.c_str());
-          if (!pBranch)
+          if (!pBranch) {
             pTree->Branch(name.c_str(), address, leaflist.c_str() /*, bufsize */);
-          else if (pBranch->GetAddress() != address) pBranch->SetAddress(address);
+            mf::LogDebug("AnalysisTreeStructure")
+              << "Creating branch '" << name << " with leaf '" << leaflist << "'";
+          }
+          else if (pBranch->GetAddress() != address) {
+            pBranch->SetAddress(address);
+            mf::LogDebug("AnalysisTreeStructure")
+              << "Reassigning address to branch '" << name << "'";
+          }
+          else {
+            mf::LogDebug("AnalysisTreeStructure")
+              << "Branch '" << name << "' is fine";
+          }
         } // operator()
       void operator()
         (std::string name, void* address, const std::stringstream& leaflist /*, int bufsize = 32000 */)
@@ -297,6 +311,15 @@ namespace microboone {
 
   }; // class AnalysisTreeDataStruct
 
+  /**
+   * @brief Creates a simple ROOT tree with tracking and calorimetry information
+	* 
+   * <h2>Configuration parameters</h2>
+   * - <b>UseBuffers</b> (default: true): if enabled, memory is allocated for
+   *   tree data for all the run; otherwise, it's allocated on each event, used
+   *   and freed; use "true" for speed, "false" to save memory
+   */
+  
   class AnalysisTree : public art::EDAnalyzer {
 
   public:
@@ -602,7 +625,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     std::string BranchName;
 
     BranchName = "hit_trkid_" + TrackLabel;
-    CreateBranch(BranchName, hit_trkid[i], BranchName + "[nohits]/S");
+    CreateBranch(BranchName, hit_trkid[i], BranchName + "[no_hits]/S");
 
     BranchName = "ntracks_" + TrackLabel;
     CreateBranch(BranchName, &TrackerData.ntracks, BranchName + "/S");
@@ -635,19 +658,15 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     BranchName = "ntrkhits_" + TrackLabel;
     CreateBranch(BranchName, TrackerData.ntrkhits, BranchName + NTracksIndexStr + "[3]/S");
     
-    // trkdedx_<TrackerName>[ntracks_<TrackerName>][3][<kMaxTrackHits>]/F"
     BranchName = "trkdedx_" + TrackLabel;
     CreateBranch(BranchName, TrackerData.trkdedx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
-    // trkdqdx_<TrackerName>[ntracks_<TrackerName>][3][<kMaxTrackHits>]/F"
     BranchName = "trkdqdx_" + TrackLabel;
     CreateBranch(BranchName, TrackerData.trkdqdx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
-    // trkresrg_<TrackerName>[ntracks_<TrackerName>][3][<kMaxTrackHits>]/F"
     BranchName = "trkresrg_" + TrackLabel;
     CreateBranch(BranchName, TrackerData.trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
-    // trkresrg_<TrackerName>[ntracks_<TrackerName>][3][<kMaxTrackHits>]/F"
     BranchName = "trkxyz_" + TrackLabel;
     CreateBranch(BranchName, TrackerData.trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
@@ -861,6 +880,18 @@ void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
 
 void microboone::AnalysisTree::analyze(const art::Event& evt)
 {
+  // collect the sizes which might me needed to resize the tree data structure:
+  
+  // hits
+  art::Handle< std::vector<recob::Hit> > hitListHandle;
+  std::vector<art::Ptr<recob::Hit> > hitlist;
+  if (evt.getByLabel(fHitsModuleLabel,hitListHandle))
+    art::fill_ptr_vector(hitlist, hitListHandle);
+
+//  const size_t Nplanes       = 3; // number of wire planes; pretty much constant...
+  const size_t NTrackers = GetNTrackers(); // number of trackers passed into fTrackModuleLabel
+  const size_t NHits     = hitlist.size(); // number of hits
+  
   // make sure there is the data, the tree and everything
   CreateTree(true);
 
@@ -868,14 +899,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 //  fData->RunData = RunData;
   fData->SubRunData = SubRunData;
 
-  art::Handle< std::vector<recob::Hit> > hitListHandle;
-  std::vector<art::Ptr<recob::Hit> > hitlist;
-  if (evt.getByLabel(fHitsModuleLabel,hitListHandle))
-    art::fill_ptr_vector(hitlist, hitListHandle);
-
-  std::vector< art::Handle< std::vector<recob::Track> > > trackListHandle(fData->kNTracker);
-  std::vector< std::vector<art::Ptr<recob::Track> > > tracklist(fData->kNTracker);
-  for (unsigned int it = 0; it < fTrackModuleLabel.size(); ++it){
+  std::vector< art::Handle< std::vector<recob::Track> > > trackListHandle(NTrackers);
+  std::vector< std::vector<art::Ptr<recob::Track> > > tracklist(NTrackers);
+  for (unsigned int it = 0; it < NTrackers; ++it){
     if (evt.getByLabel(fTrackModuleLabel[it],trackListHandle[it]))
       art::fill_ptr_vector(tracklist[it], trackListHandle[it]);
   }
@@ -917,8 +943,14 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   fData->isdata = evt.isRealData()? 1: 0;
 
   //hit information
-  fData->no_hits=hitlist.size();
-  for (size_t i = 0; i<hitlist.size(); ++i){//loop over hits
+  fData->no_hits = (int) NHits;
+  if (NHits > kMaxHits) {
+    // got this error? consider increasing kMaxHits
+    // (or ask for a redesign using vectors)
+    mf::LogError("AnalysisTree:limits") << "event has " << NHits
+      << " hits, only kMaxHits=" << kMaxHits << " stored in tree";
+  }
+  for (size_t i = 0; i< NHits; ++i){//loop over hits
     fData->hit_channel[i] = hitlist[i]->Channel();
     fData->hit_plane[i]   = hitlist[i]->WireID().Plane;
     fData->hit_wire[i]    = hitlist[i]->WireID().Wire;
@@ -938,20 +970,28 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   }
 
   //track information for multiple trackers
-  for (unsigned int it1=0; it1<fTrackModuleLabel.size(); ++it1){
-    AnalysisTreeDataStruct::TrackDataStruct& TrackerData = fData->TrackData[it1];
+  for (unsigned int iTracker=0; iTracker < NTrackers; ++iTracker){
+    AnalysisTreeDataStruct::TrackDataStruct& TrackerData = fData->TrackData[iTracker];
     
-    TrackerData.ntracks=tracklist[it1].size();
-    for(unsigned int i=0; i<tracklist[it1].size();++i){//loop over tracks
+    size_t NTracks = tracklist[iTracker].size();
+    TrackerData.ntracks = (int) NTracks;
+    if (NTracks > TrackerData.GetMaxTracks()) {
+      // got this error? consider increasing kMaxTrack
+      // (or ask petrillo@fnal.gov for a redesign using vectors) FIXME
+      mf::LogError("AnalysisTree:limits") << "event has " << NTracks
+        << " " << fTrackModuleLabel[iTracker] << " tracks, only "
+        << TrackerData.GetMaxTracks() << " stored in tree";
+    }
+    for(unsigned int iTrk=0; iTrk<tracklist[iTracker].size();++iTrk){//loop over tracks
 
-      art::Ptr<recob::Track> ptrack(trackListHandle[it1], i);
+      art::Ptr<recob::Track> ptrack(trackListHandle[iTracker], iTrk);
       const recob::Track& track = *ptrack;
       
       TVector3 pos, dir_start, dir_end, end;
       double tlen = 0., mom = 0.;
       
       //we need to use Bezier methods for Bezier tracks
-      if(fTrackModuleLabel[it1].compare("beziertracker")==0){
+      if(fTrackModuleLabel[iTracker].compare("beziertracker")==0){
           trkf::BezierTrack btrack(*ptrack);
           int ntraj = btrack.NSegments();
           if(ntraj > 0) {
@@ -969,7 +1009,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             if (btrack.NumberFitMomentum() > 0)
               mom = btrack.VertexMomentum();
             // fill bezier track reco branches
-            TrackerData.trkId[i]         = i;  //bezier has some screwed up track IDs
+            TrackerData.trkId[iTrk]         = iTrk;  //bezier has some screwed up track IDs
         }
       }
       else {   //use the normal methods for other kinds of tracks
@@ -984,7 +1024,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             if(track.NumberFitMomentum() > 0)
               mom = track.VertexMomentum();
             // fill non-bezier-track reco branches
-            TrackerData.trkId[i]                    = track.ID();
+            TrackerData.trkId[iTrk]                    = track.ID();
         }
       }
       double theta_xz = std::atan2(dir_start.X(), dir_start.Z());
@@ -992,43 +1032,65 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       double dpos = bdist(pos);
       double dend = bdist(end);
       
-      TrackerData.trkstartx[i]             = pos.X();
-      TrackerData.trkstarty[i]             = pos.Y();
-      TrackerData.trkstartz[i]             = pos.Z();
-      TrackerData.trkstartd[i]             = dpos;
-      TrackerData.trkendx[i]               = end.X();
-      TrackerData.trkendy[i]               = end.Y();
-      TrackerData.trkendz[i]               = end.Z();
-      TrackerData.trkendd[i]               = dend;
-      TrackerData.trktheta[i]              = dir_start.Theta();
-      TrackerData.trkphi[i]                = dir_start.Phi();
-      TrackerData.trkstartdcosx[i]         = dir_start.X();
-      TrackerData.trkstartdcosy[i]         = dir_start.Y();
-      TrackerData.trkstartdcosz[i]         = dir_start.Z();
-      TrackerData.trkenddcosx[i]           = dir_end.X();
-      TrackerData.trkenddcosy[i]           = dir_end.Y();
-      TrackerData.trkenddcosz[i]           = dir_end.Z();
-      TrackerData.trkthetaxz[i]            = theta_xz;
-      TrackerData.trkthetayz[i]            = theta_yz;
-      TrackerData.trkmom[i]                = mom;
-      TrackerData.trklen[i]                = tlen;
+      TrackerData.trkstartx[iTrk]             = pos.X();
+      TrackerData.trkstarty[iTrk]             = pos.Y();
+      TrackerData.trkstartz[iTrk]             = pos.Z();
+      TrackerData.trkstartd[iTrk]             = dpos;
+      TrackerData.trkendx[iTrk]               = end.X();
+      TrackerData.trkendy[iTrk]               = end.Y();
+      TrackerData.trkendz[iTrk]               = end.Z();
+      TrackerData.trkendd[iTrk]               = dend;
+      TrackerData.trktheta[iTrk]              = dir_start.Theta();
+      TrackerData.trkphi[iTrk]                = dir_start.Phi();
+      TrackerData.trkstartdcosx[iTrk]         = dir_start.X();
+      TrackerData.trkstartdcosy[iTrk]         = dir_start.Y();
+      TrackerData.trkstartdcosz[iTrk]         = dir_start.Z();
+      TrackerData.trkenddcosx[iTrk]           = dir_end.X();
+      TrackerData.trkenddcosy[iTrk]           = dir_end.Y();
+      TrackerData.trkenddcosz[iTrk]           = dir_end.Z();
+      TrackerData.trkthetaxz[iTrk]            = theta_xz;
+      TrackerData.trkthetayz[iTrk]            = theta_yz;
+      TrackerData.trkmom[iTrk]                = mom;
+      TrackerData.trklen[iTrk]                = tlen;
 
-      art::FindMany<anab::Calorimetry> fmcal(trackListHandle[it1], evt, fCalorimetryModuleLabel[it1]);
+      art::FindMany<anab::Calorimetry> fmcal(trackListHandle[iTracker], evt, fCalorimetryModuleLabel[iTracker]);
       if (fmcal.isValid()){
-        std::vector<const anab::Calorimetry*> calos = fmcal.at(i);
+        std::vector<const anab::Calorimetry*> calos = fmcal.at(iTrk);
         //std::cout<<"calo size "<<calos.size()<<std::endl;
-        for (size_t j = 0; j<calos.size(); ++j){
-          TrackerData.trkke[i][j]    = calos[j]->KineticEnergy();
-          TrackerData.trkrange[i][j] = calos[j]->Range();
-          TrackerData.trkpitchc[i][j]= calos[j] -> TrkPitchC();
-          TrackerData.ntrkhits[i][j] = calos[j] -> dEdx().size();
-          for(int k = 0; k < TrackerData.ntrkhits[i][j]; ++k) {
-            TrackerData.trkdedx[i][j][k]  = (calos[j] -> dEdx())[k];
-            TrackerData.trkdqdx[i][j][k]  = (calos[j] -> dQdx())[k];
-            TrackerData.trkresrg[i][j][k] = (calos[j] -> ResidualRange())[k];
-            TrackerData.trkxyz[i][j][k][0] = (calos[j] -> XYZ())[k].X();
-            TrackerData.trkxyz[i][j][k][1] = (calos[j] -> XYZ())[k].Y();
-            TrackerData.trkxyz[i][j][k][2] = (calos[j] -> XYZ())[k].Z();
+        if (calos.size() > TrackerData.GetMaxPlanesPerTrack(iTrk)) {
+          // if you get this message, there is probably a bug somewhere since
+          // the calorimetry planes should be 3.
+          mf::LogError("AnalysisTree:limits")
+            << "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
+            << " has " << calos.size() << " planes for calorimetry , only "
+            << TrackerData.GetMaxPlanesPerTrack(iTrk) << " stored in tree";
+        }
+        for (size_t ipl = 0; ipl<calos.size(); ++ipl){
+          TrackerData.trkke[iTrk][ipl]    = calos[ipl]->KineticEnergy();
+          TrackerData.trkrange[iTrk][ipl] = calos[ipl]->Range();
+          TrackerData.trkpitchc[iTrk][ipl]= calos[ipl] -> TrkPitchC();
+          const size_t NHits = calos[ipl] -> dEdx().size();
+          TrackerData.ntrkhits[iTrk][ipl] = (int) NHits;
+          if (NHits > TrackerData.GetMaxHitsPerTrack(iTrk)) {
+            // if you get this error, you'll have to increase kMaxTrackHits
+            mf::LogError("AnalysisTree:limits")
+              << "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
+              << " has " << NHits << " hits on calorimetry plane #" << ipl
+              <<", only "
+              << TrackerData.GetMaxHitsPerTrack(iTrk) << " stored in tree";
+          }
+          for(size_t iTrkHit = 0; iTrkHit < NHits; ++iTrkHit) {
+            TrackerData.trkdedx[iTrk][ipl][iTrkHit]  = (calos[ipl] -> dEdx())[iTrkHit];
+            TrackerData.trkdqdx[iTrk][ipl][iTrkHit]  = (calos[ipl] -> dQdx())[iTrkHit];
+            TrackerData.trkresrg[iTrk][ipl][iTrkHit] = (calos[ipl] -> ResidualRange())[iTrkHit];
+            const auto& TrkPos = (calos[ipl] -> XYZ())[iTrkHit];
+            auto& TrkXYZ = TrackerData.trkxyz[iTrk][ipl][iTrkHit];
+            TrkXYZ[0] = TrkPos.X();
+            TrkXYZ[1] = TrkPos.Y();
+            TrkXYZ[2] = TrkPos.Z();
+//             TrackerData.trkxyz[iTrk][ipl][iTrkHit][0] = TrkPos.X(); FIXME
+//             TrackerData.trkxyz[iTrk][ipl][iTrkHit][1] = TrkPos.Y();
+//             TrackerData.trkxyz[iTrk][ipl][iTrkHit][2] = TrkPos.Z();
           } // for track hits
         } // for calorimetry info
       } // if has calorimetry info
@@ -1036,8 +1098,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       //track truth information
       if (!fData->isdata){
         //get the hits on each plane
-        art::FindManyP<recob::Hit>      fmht(trackListHandle[it1], evt, fTrackModuleLabel[it1]);
-        std::vector< art::Ptr<recob::Hit> > allHits = fmht.at(i);
+        art::FindManyP<recob::Hit>      fmht(trackListHandle[iTracker], evt, fTrackModuleLabel[iTracker]);
+        std::vector< art::Ptr<recob::Hit> > allHits = fmht.at(iTrk);
         std::vector< art::Ptr<recob::Hit> > hits[kNplanes];
 
         for(size_t ah = 0; ah < allHits.size(); ++ah){
@@ -1049,18 +1111,18 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         
         for (size_t ipl = 0; ipl < 3; ++ipl){
           double maxe = 0;
-          HitsPurity(hits[ipl],TrackerData.trkidtruth[i][ipl],TrackerData.trkpurtruth[i][ipl],maxe);
-        //std::cout<<"\n"<<it1<<"\t"<<i<<"\t"<<ipl<<"\t"<<trkidtruth[it1][i][ipl]<<"\t"<<trkpurtruth[it1][i][ipl]<<"\t"<<maxe;
-          if (TrackerData.trkidtruth[i][ipl]>0){
-            const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[i][ipl]);
-            const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(TrackerData.trkidtruth[i][ipl]);
+          HitsPurity(hits[ipl],TrackerData.trkidtruth[iTrk][ipl],TrackerData.trkpurtruth[iTrk][ipl],maxe);
+        //std::cout<<"\n"<<iTracker<<"\t"<<iTrk<<"\t"<<ipl<<"\t"<<trkidtruth[iTracker][iTrk][ipl]<<"\t"<<trkpurtruth[iTracker][iTrk][ipl]<<"\t"<<maxe;
+          if (TrackerData.trkidtruth[iTrk][ipl]>0){
+            const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[iTrk][ipl]);
+            const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]);
             double tote = 0;
             for (size_t iide = 0; iide<vide.size(); ++iide){
               tote += vide[iide].energy;
             }
-            TrackerData.trkpdgtruth[i][ipl] = particle->PdgCode();
-            TrackerData.trkefftruth[i][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
-          //std::cout<<"\n"<<trkpdgtruth[it1][i][ipl]<<"\t"<<trkefftruth[it1][i][ipl];
+            TrackerData.trkpdgtruth[iTrk][ipl] = particle->PdgCode();
+            TrackerData.trkefftruth[iTrk][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
+          //std::cout<<"\n"<<trkpdgtruth[iTracker][iTrk][ipl]<<"\t"<<trkefftruth[iTracker][iTrk][ipl];
           }
         }
       }//end if (!isdata)
