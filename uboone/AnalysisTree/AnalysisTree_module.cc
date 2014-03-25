@@ -82,8 +82,13 @@ namespace microboone {
     
     class TrackDataStruct {
         public:
+      template <typename T>
+      using PlanesData_t = T[kMaxTrack][kNplanes];
+      
+      size_t MaxTracks; ///< maximum number of storable tracks
+      
       Short_t  ntracks;             //number of reconstructed tracks
-      Float_t  trkke[kMaxTrack][kNplanes];
+      PlanesData_t<Float_t> trkke;
       Float_t  trkrange[kMaxTrack][kNplanes];
       Int_t    trkidtruth[kMaxTrack][kNplanes]; //true geant trackid
       Int_t    trkpdgtruth[kMaxTrack][kNplanes]; //true pdg code
@@ -119,12 +124,23 @@ namespace microboone {
       Float_t   trkmom[kMaxTrack];              // momentum.
       Float_t   trklen[kMaxTrack];              // length.
       
-      TrackDataStruct() { Clear(); }
+      /// Creates an empty tracker data structure
+      TrackDataStruct(): MaxTracks(0) { Clear(); }
+      /// Creates a tracker data structure allowing up to maxTracks tracks
+      TrackDataStruct(size_t maxTracks): MaxTracks(maxTracks) { Clear(); }
       void Clear();
-      size_t GetMaxTracks() const { return (size_t) kMaxTrack; }
-      size_t GetMaxPlanesPerTrack(int /* iTrack */) const { return (size_t) kNplanes; }
-      size_t GetMaxHitsPerTrack(int /* iTrack */) const { return (size_t) kMaxTrackHits; }
+      void SetMaxTracks(size_t maxTracks)
+        { MaxTracks = maxTracks; Resize(MaxTracks); }
+      void Resize(size_t nTracks);
+      void SetAddresses(TTree* pTree, std::string tracker);
+      
+      size_t GetMaxTracks() const { return MaxTracks; }
+      size_t GetMaxPlanesPerTrack(int /* iTrack */ = 0) const
+        { return (size_t) kNplanes; }
+      size_t GetMaxHitsPerTrack(int /* iTrack */ = 0) const
+        { return (size_t) kMaxTrackHits; }
     }; // class TrackDataStruct
+    
     
     /// information from the run
 /*    struct RunData_t {
@@ -265,12 +281,20 @@ namespace microboone {
     AnalysisTreeDataStruct(size_t nTrackers = 0)
       { SetTrackers(nTrackers); Clear(); }
 
+    TrackDataStruct& GetTrackerData(size_t iTracker)
+      { return TrackData.at(iTracker); }
+    const TrackDataStruct& GetTrackerData(size_t iTracker) const
+      { return TrackData.at(iTracker); }
+    
     /// Clear all fields
     void Clear();
     
     /// Allocates data structures for the given number of trackers (no Clear())
     void SetTrackers(size_t nTrackers) { TrackData.resize(nTrackers); }
 
+    /// Returns the number of trackers for which data structures are allocated
+    size_t GetNTrackers() const { return TrackData.size(); }
+    
     /// Connect this object with a tree
     void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
 
@@ -305,7 +329,11 @@ namespace microboone {
         } // operator()
       void operator()
         (std::string name, void* address, const std::stringstream& leaflist /*, int bufsize = 32000 */)
-        { return this->operator() (name, address, leaflist.str()); }
+        { return this->operator() (name, address, leaflist.str() /*, int bufsize = 32000 */); }
+      template <typename T>
+      void operator()
+        (std::string name, std::vector<T>& data, std::string leaflist /*, int bufsize = 32000 */)
+        { return this->operator() (name, (void*) data.data(), leaflist /*, int bufsize = 32000 */); }
       //@}
     }; // class BranchCreator
 
@@ -313,7 +341,7 @@ namespace microboone {
 
   /**
    * @brief Creates a simple ROOT tree with tracking and calorimetry information
-	* 
+   * 
    * <h2>Configuration parameters</h2>
    * - <b>UseBuffers</b> (default: true): if enabled, memory is allocated for
    *   tree data for all the run; otherwise, it's allocated on each event, used
@@ -380,16 +408,20 @@ namespace microboone {
       } // CreateData()
     void SetAddresses()
       {
-        if (!fData) {
-          throw art::Exception(art::errors::LogicError)
-            << "AnalysisTree::SetAddress(): no data";
-        }
-        if (!fTree) {
-          throw art::Exception(art::errors::LogicError)
-            << "AnalysisTree::SetAddress(): no tree";
-        }
+        CheckData("SetAddress()"); CheckTree("SetAddress()");
         fData->SetAddresses(fTree, fTrackModuleLabel);
       } // SetAddresses()
+    void SetTrackerAddresses(size_t iTracker)
+      {
+        CheckData("SetTrackerAddresses()"); CheckTree("SetTrackerAddresses()");
+        if (iTracker >= fData->GetNTrackers()) {
+          throw art::Exception(art::errors::LogicError)
+            << "AnalysisTree::SetTrackerAddresses(): no tracker #" << iTracker
+            << " (" << fData->GetNTrackers() << " available)";
+        }
+        fData->GetTrackerData(iTracker) \
+          .SetAddresses(fTree, fTrackModuleLabel[iTracker]);
+      } // SetTrackerAddresses()
     void UpdateAddresses() { CreateData(); SetAddresses(); }
     
     /// Create the output tree and the data structures, if needed
@@ -397,6 +429,19 @@ namespace microboone {
     
     /// Destroy the local buffers (existing branches will point to invalid address!)
     void DestroyData() { if (fData) { delete fData; fData = nullptr; } }
+    
+    void CheckData(std::string caller) const
+      {
+        if (fData) return;
+        throw art::Exception(art::errors::LogicError)
+          << "AnalysisTree::" << caller << ": no data";
+      } // CheckData()
+    void CheckTree(std::string caller) const
+      {
+        if (fTree) return;
+        throw art::Exception(art::errors::LogicError)
+          << "AnalysisTree::" << caller << ": no tree";
+      } // CheckData()
   }; // class microboone::AnalysisTree
 } // namespace microboone
 
@@ -421,50 +466,218 @@ namespace {
 //---  AnalysisTreeDataStruct::TrackDataStruct
 //---
 
+void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t /* nTracks */) {
+#if 0
+  MaxTracks = nTracks;
+  
+  trkId.resize(MaxTracks);
+  trkstartx.resize(MaxTracks);
+  trkstarty.resize(MaxTracks);
+  trkstartz.resize(MaxTracks);
+  trkstartd.resize(MaxTracks);
+  trkendx.resize(MaxTracks);
+  trkendy.resize(MaxTracks);
+  trkendz.resize(MaxTracks);
+  trkendd.resize(MaxTracks);
+  trktheta.resize(MaxTracks);
+  trkphi.resize(MaxTracks);
+  trkstartdcosx.resize(MaxTracks);
+  trkstartdcosy.resize(MaxTracks);
+  trkstartdcosz.resize(MaxTracks);
+  trkenddcosx.resize(MaxTracks);
+  trkenddcosy.resize(MaxTracks);
+  trkenddcosz.resize(MaxTracks);
+  trkthetaxz.resize(MaxTracks);
+  trkthetayz.resize(MaxTracks);
+  trkmom.resize(MaxTracks);
+  trklen.resize(MaxTracks);
+  
+  trkke.resize(MaxTracks);
+  trkrange.resize(MaxTracks);
+  trkidtruth.resize(MaxTracks);
+  trkpdgtruth.resize(MaxTracks);
+  trkefftruth.resize(MaxTracks);
+  trkpurtruth.resize(MaxTracks);
+  trkpitchc.resize(MaxTracks);
+  ntrkhits.resize(MaxTracks);
+  
+  trkdedx.resize(MaxTracks);
+  trkdqdx.resize(MaxTracks);
+  trkresrg.resize(MaxTracks);
+  trkxyz.resize(MaxTracks);
+  
+#endif // 0
+} // microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize()
+
 void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
+  Resize(MaxTracks);
   ntracks = 0;
-  for (int j = 0; j < kMaxTrack; ++j){
-    trkId[j]     = -9999;
-    trkstartx[j] = -99999;
-    trkstarty[j] = -99999;
-    trkstartz[j] = -99999;
-    trkstartd[j] = -99999;
-    trkendx[j] = -99999;
-    trkendy[j] = -99999;
-    trkendz[j] = -99999;
-    trkendd[j] = -99999;
-    trktheta[j] = -99999;
-    trkphi[j] = -99999;
-    trkstartdcosx[j] = -99999;
-    trkstartdcosy[j] = -99999;
-    trkstartdcosz[j] = -99999;
-    trkenddcosx[j] = -99999;
-    trkenddcosy[j] = -99999;
-    trkenddcosz[j] = -99999;
-    trkthetaxz[j] = -99999;
-    trkthetayz[j] = -99999;
-    trkmom[j] = -99999;
-    trklen[j] = -99999;
-    for (int k = 0; k < kNplanes; ++k){
-      trkke[j][k]       = -99999;
-      trkrange[j][k]    = -99999;
-      trkidtruth[j][k]  = -99999;
-      trkpdgtruth[j][k] = -99999;
-      trkefftruth[j][k] = -99999;
-      trkpurtruth[j][k] = -99999;
-      trkpitchc[j][k]   = -99999;
-      ntrkhits[j][k]    = -9999;
-      for(int l = 0; l < kMaxTrackHits; ++l) {
-       trkdedx[j][k][l]  = 0;
-       trkdqdx[j][k][l]  = 0;
-       trkresrg[j][k][l] = 0;
-       for (int m = 0; m<3; ++m)
-         trkxyz[j][k][l][m] = 0;
-      }
-    }
-  }
+  
+  std::fill(trkId        , trkId         + MaxTracks, -9999  );
+  std::fill(trkstartx    , trkstartx     + MaxTracks, -99999.);
+  std::fill(trkstarty    , trkstarty     + MaxTracks, -99999.);
+  std::fill(trkstartz    , trkstartz     + MaxTracks, -99999.);
+  std::fill(trkstartd    , trkstartd     + MaxTracks, -99999.);
+  std::fill(trkendx      , trkendx       + MaxTracks, -99999.);
+  std::fill(trkendy      , trkendy       + MaxTracks, -99999.);
+  std::fill(trkendz      , trkendz       + MaxTracks, -99999.);
+  std::fill(trkendd      , trkendd       + MaxTracks, -99999.);
+  std::fill(trktheta     , trktheta      + MaxTracks, -99999.);
+  std::fill(trkphi       , trkphi        + MaxTracks, -99999.);
+  std::fill(trkstartdcosx, trkstartdcosx + MaxTracks, -99999.);
+  std::fill(trkstartdcosy, trkstartdcosy + MaxTracks, -99999.);
+  std::fill(trkstartdcosz, trkstartdcosz + MaxTracks, -99999.);
+  std::fill(trkenddcosx  , trkenddcosx   + MaxTracks, -99999.);
+  std::fill(trkenddcosy  , trkenddcosy   + MaxTracks, -99999.);
+  std::fill(trkenddcosz  , trkenddcosz   + MaxTracks, -99999.);
+  std::fill(trkthetaxz   , trkthetaxz    + MaxTracks, -99999.);
+  std::fill(trkthetayz   , trkthetayz    + MaxTracks, -99999.);
+  std::fill(trkmom       , trkmom        + MaxTracks, -99999.);
+  std::fill(trklen       , trklen        + MaxTracks, -99999.);
+
+  for (size_t iTrk = 0; iTrk < MaxTracks; ++iTrk){
+    
+    std::fill(trkke[iTrk]      , trkke[iTrk]       + GetMaxPlanesPerTrack(iTrk), -99999.);
+    std::fill(trkrange[iTrk]   , trkrange[iTrk]    + GetMaxPlanesPerTrack(iTrk), -99999.);
+    std::fill(trkidtruth[iTrk] , trkidtruth[iTrk]  + GetMaxPlanesPerTrack(iTrk), -99999 );
+    std::fill(trkpdgtruth[iTrk], trkpdgtruth[iTrk] + GetMaxPlanesPerTrack(iTrk), -99999 );
+    std::fill(trkefftruth[iTrk], trkefftruth[iTrk] + GetMaxPlanesPerTrack(iTrk), -99999.);
+    std::fill(trkpurtruth[iTrk], trkpurtruth[iTrk] + GetMaxPlanesPerTrack(iTrk), -99999.);
+    std::fill(trkpitchc[iTrk]  , trkpitchc[iTrk]   + GetMaxPlanesPerTrack(iTrk), -99999.);
+    std::fill(ntrkhits[iTrk]   , ntrkhits[iTrk]    + GetMaxPlanesPerTrack(iTrk),  -9999 );
+    
+    for (size_t ipl = 0; ipl < GetMaxPlanesPerTrack(iTrk); ++ipl){
+      
+      std::fill(trkdedx[iTrk][ipl],  trkdedx[iTrk][ipl]+GetMaxHitsPerTrack(iTrk),  0.);
+      std::fill(trkdqdx[iTrk][ipl],  trkdqdx[iTrk][ipl]+GetMaxHitsPerTrack(iTrk),  0.);
+      std::fill(trkresrg[iTrk][ipl], trkresrg[iTrk][ipl]+GetMaxHitsPerTrack(iTrk), 0.);
+      
+      for(size_t iTrkHit = 0; iTrkHit < GetMaxHitsPerTrack(iTrk); ++iTrkHit) {
+        std::fill(trkxyz[iTrk][ipl][iTrkHit], trkxyz[iTrk][ipl][iTrkHit]+3, 0.);
+      } // for track hit
+    } // for plane
+  } // for track
+  
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear()
 
+
+void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
+  TTree* pTree, std::string tracker
+) {
+  if (MaxTracks == 0) return; // no tracks, no tree!
+  
+  microboone::AnalysisTreeDataStruct::BranchCreator CreateBranch(pTree);
+
+  AutoResettingStringSteam sstr;
+  sstr() << kMaxTrackHits;
+  std::string MaxTrackHitsIndexStr("[" + sstr.str() + "]");
+  
+  std::string TrackLabel = tracker;
+  std::string BranchName;
+
+  BranchName = "ntracks_" + TrackLabel;
+  CreateBranch(BranchName, &ntracks, BranchName + "/S");
+  std::string NTracksIndexStr = "[" + BranchName + "]";
+  
+  BranchName = "trkId_" + TrackLabel;
+  CreateBranch(BranchName, trkId, BranchName + NTracksIndexStr + "/S");
+  
+  BranchName = "trkke_" + TrackLabel;
+  CreateBranch(BranchName, trkke, BranchName + NTracksIndexStr + "[3]/F");
+  
+  BranchName = "trkrange_" + TrackLabel;
+  CreateBranch(BranchName, trkrange, BranchName + NTracksIndexStr + "[3]/F");
+  
+  BranchName = "trkidtruth_" + TrackLabel;
+  CreateBranch(BranchName, trkidtruth, BranchName + NTracksIndexStr + "[3]/I");
+  
+  BranchName = "trkpdgtruth_" + TrackLabel;
+  CreateBranch(BranchName, trkpdgtruth, BranchName + NTracksIndexStr + "[3]/I");
+  
+  BranchName = "trkefftruth_" + TrackLabel;
+  CreateBranch(BranchName, trkefftruth, BranchName + NTracksIndexStr + "[3]/F");
+  
+  BranchName = "trkpurtruth_" + TrackLabel;
+  CreateBranch(BranchName, trkpurtruth, BranchName + NTracksIndexStr + "[3]/F");
+  
+  BranchName = "trkpitchc_" + TrackLabel;
+  CreateBranch(BranchName, trkpitchc, BranchName + NTracksIndexStr + "[3]/F");
+  
+  BranchName = "ntrkhits_" + TrackLabel;
+  CreateBranch(BranchName, ntrkhits, BranchName + NTracksIndexStr + "[3]/S");
+  
+  BranchName = "trkdedx_" + TrackLabel;
+  CreateBranch(BranchName, trkdedx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+  
+  BranchName = "trkdqdx_" + TrackLabel;
+  CreateBranch(BranchName, trkdqdx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+  
+  BranchName = "trkresrg_" + TrackLabel;
+  CreateBranch(BranchName, trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+  
+  BranchName = "trkxyz_" + TrackLabel;
+  CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+  
+  BranchName = "trkstartx_" + TrackLabel;
+  CreateBranch(BranchName, trkstartx, BranchName + NTracksIndexStr + "/D");
+  
+  BranchName = "trkstarty_" + TrackLabel;
+  CreateBranch(BranchName, trkstarty, BranchName + NTracksIndexStr + "/D");
+  
+  BranchName = "trkstartz_" + TrackLabel;
+  CreateBranch(BranchName, trkstartz, BranchName + NTracksIndexStr + "/D");
+  
+  BranchName = "trkstartd_" + TrackLabel;
+  CreateBranch(BranchName, trkstartd, BranchName + NTracksIndexStr + "/D");
+  
+  BranchName = "trkendx_" + TrackLabel;
+  CreateBranch(BranchName, trkendx, BranchName + NTracksIndexStr + "/D");
+  
+  BranchName = "trkendy_" + TrackLabel;
+  CreateBranch(BranchName, trkendy, BranchName + NTracksIndexStr + "/D");
+  
+  BranchName = "trkendz_" + TrackLabel;
+  CreateBranch(BranchName, trkendz, BranchName + NTracksIndexStr + "/D");
+  
+  BranchName = "trkendd_" + TrackLabel;
+  CreateBranch(BranchName, trkendd, BranchName + NTracksIndexStr + "/D");
+  
+  BranchName = "trktheta_" + TrackLabel;
+  CreateBranch(BranchName, trktheta, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkphi_" + TrackLabel;
+  CreateBranch(BranchName, trkphi, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkstartdcosx_" + TrackLabel;
+  CreateBranch(BranchName, trkstartdcosx, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkstartdcosy_" + TrackLabel;
+  CreateBranch(BranchName, trkstartdcosy, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkstartdcosz_" + TrackLabel;
+  CreateBranch(BranchName, trkstartdcosz, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkenddcosx_" + TrackLabel;
+  CreateBranch(BranchName, trkenddcosx, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkenddcosy_" + TrackLabel;
+  CreateBranch(BranchName, trkenddcosy, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkenddcosz_" + TrackLabel;
+  CreateBranch(BranchName, trkenddcosz, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkthetaxz_" + TrackLabel;
+  CreateBranch(BranchName, trkthetaxz, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkthetayz_" + TrackLabel;
+  CreateBranch(BranchName, trkthetayz, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkmom_" + TrackLabel;
+  CreateBranch(BranchName, trkmom, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trklen_" + TrackLabel;
+  CreateBranch(BranchName, trklen, BranchName + NTracksIndexStr + "/F");
+} // microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses()
 
 //------------------------------------------------------------------------------
 //---  AnalysisTreeDataStruct
@@ -590,6 +803,7 @@ void microboone::AnalysisTreeDataStruct::Clear() {
 
 } // microboone::AnalysisTreeDataStruct::Clear()
 
+
 void microboone::AnalysisTreeDataStruct::SetAddresses(
   TTree* pTree,
   const std::vector<std::string>& trackers
@@ -620,115 +834,16 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   kNTracker = trackers.size();
   CreateBranch("kNTracker",&kNTracker,"kNTracker/B");
   for(int i=0; i<kNTracker; i++){
-    TrackDataStruct& TrackerData = TrackData[i];
     std::string TrackLabel = trackers[i];
     std::string BranchName;
 
     BranchName = "hit_trkid_" + TrackLabel;
     CreateBranch(BranchName, hit_trkid[i], BranchName + "[no_hits]/S");
 
-    BranchName = "ntracks_" + TrackLabel;
-    CreateBranch(BranchName, &TrackerData.ntracks, BranchName + "/S");
-    std::string NTracksIndexStr = "[" + BranchName + "]";
+    // note that if the tracker data has maximum number of tracks 0,
+    // nothing is initialized (branches are not even created)
+    TrackData[i].SetAddresses(pTree, TrackLabel);
     
-    BranchName = "trkId_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkId, BranchName + NTracksIndexStr + "/S");
-    
-    BranchName = "trkke_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkke, BranchName + NTracksIndexStr + "[3]/F");
-    
-    BranchName = "trkrange_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkrange, BranchName + NTracksIndexStr + "[3]/F");
-    
-    BranchName = "trkidtruth_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkidtruth, BranchName + NTracksIndexStr + "[3]/I");
-    
-    BranchName = "trkpdgtruth_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkpdgtruth, BranchName + NTracksIndexStr + "[3]/I");
-    
-    BranchName = "trkefftruth_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkefftruth, BranchName + NTracksIndexStr + "[3]/F");
-    
-    BranchName = "trkpurtruth_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkpurtruth, BranchName + NTracksIndexStr + "[3]/F");
-    
-    BranchName = "trkpitchc_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkpitchc, BranchName + NTracksIndexStr + "[3]/F");
-    
-    BranchName = "ntrkhits_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.ntrkhits, BranchName + NTracksIndexStr + "[3]/S");
-    
-    BranchName = "trkdedx_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkdedx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-    
-    BranchName = "trkdqdx_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkdqdx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-    
-    BranchName = "trkresrg_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-    
-    BranchName = "trkxyz_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-    
-    BranchName = "trkstartx_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkstartx, BranchName + NTracksIndexStr + "/D");
-    
-    BranchName = "trkstarty_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkstarty, BranchName + NTracksIndexStr + "/D");
-    
-    BranchName = "trkstartz_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkstartz, BranchName + NTracksIndexStr + "/D");
-    
-    BranchName = "trkstartd_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkstartd, BranchName + NTracksIndexStr + "/D");
-    
-    BranchName = "trkendx_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkendx, BranchName + NTracksIndexStr + "/D");
-    
-    BranchName = "trkendy_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkendy, BranchName + NTracksIndexStr + "/D");
-    
-    BranchName = "trkendz_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkendz, BranchName + NTracksIndexStr + "/D");
-    
-    BranchName = "trkendd_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkendd, BranchName + NTracksIndexStr + "/D");
-    
-    BranchName = "trktheta_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trktheta, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkphi_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkphi, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkstartdcosx_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkstartdcosx, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkstartdcosy_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkstartdcosy, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkstartdcosz_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkstartdcosz, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkenddcosx_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkenddcosx, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkenddcosy_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkenddcosy, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkenddcosz_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkenddcosz, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkthetaxz_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkthetaxz, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkthetayz_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkthetayz, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trkmom_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trkmom, BranchName + NTracksIndexStr + "/F");
-    
-    BranchName = "trklen_" + TrackLabel;
-    CreateBranch(BranchName, TrackerData.trklen, BranchName + NTracksIndexStr + "/F");
   } // for trackers
 
   CreateBranch("mcevts_truth",&mcevts_truth,"mcevts_truth/I");
@@ -971,18 +1086,23 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   //track information for multiple trackers
   for (unsigned int iTracker=0; iTracker < NTrackers; ++iTracker){
-    AnalysisTreeDataStruct::TrackDataStruct& TrackerData = fData->TrackData[iTracker];
+    AnalysisTreeDataStruct::TrackDataStruct& TrackerData = fData->GetTrackerData(iTracker);
     
     size_t NTracks = tracklist[iTracker].size();
     TrackerData.ntracks = (int) NTracks;
+    // allocate enough space for this number of tracks (but at least for one of them!)
+    TrackerData.SetMaxTracks(std::max(NTracks, (size_t) 1));
+    // now set the tree addresses to the newly allocated memory;
+    // this creates the tree branches in case they are not there yet
+    SetTrackerAddresses(iTracker);
     if (NTracks > TrackerData.GetMaxTracks()) {
       // got this error? consider increasing kMaxTrack
-      // (or ask petrillo@fnal.gov for a redesign using vectors) FIXME
+      // (or ask for a redesign using vectors)
       mf::LogError("AnalysisTree:limits") << "event has " << NTracks
         << " " << fTrackModuleLabel[iTracker] << " tracks, only "
         << TrackerData.GetMaxTracks() << " stored in tree";
     }
-    for(unsigned int iTrk=0; iTrk<tracklist[iTracker].size();++iTrk){//loop over tracks
+    for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
 
       art::Ptr<recob::Track> ptrack(trackListHandle[iTracker], iTrk);
       const recob::Track& track = *ptrack;
@@ -1335,7 +1455,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   
   // if we don't use a permanent buffer (which can be huge),
   // delete the current buffer, and we'll create a new one on the next event
-  if (!fUseBuffer) DestroyData();
+  if (!fUseBuffer) {
+    mf::LogDebug("AnalysisTree") << "Freeing the data structure";
+    DestroyData();
+  }
 } // microboone::AnalysisTree::analyze()
 
 void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, Int_t& trackid, Float_t& purity, double& maxe){
