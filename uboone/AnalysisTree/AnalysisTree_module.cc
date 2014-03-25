@@ -11,6 +11,58 @@
 // [x] reduce the size of the elemental items (Double_t => Float_t could damage precision)
 // [x] create a different structure for each tracker, allocate only what needed
 // [ ] use variable size array buffers for each tracker datum instead of [kMaxTrack]
+// [ ] turn the truth/GEANT information into vectors
+// [ ] fill the tree branch by branch
+// 
+// Current implementation:
+// There is one tree only, with one set of branches for each tracking algorithm.
+// The data structure which hosts the addresses of the tree branches is
+// dynamically allocated on demand, and it can be optionally destroyed at the
+// end of each event.
+// The data structure (AnalysisTreeDataStruct) firectly contains the truth and
+// simulation information as C arrays. The data from tracking algorithms is the
+// largest, and it is contained in a C++ vector of structures (TrackDataStruct),
+// one per algorithm. These structures can also be allocated on demand.
+// Each of these structures is connected to a set of branches, one branch per
+// data member. Data members are vectors of numbers or vectors of fixed-size
+// C arrays. The vector index represents the tracks reconstructed by the
+// algorithm, and each has a fixed size pool for hits (do ROOT trees support
+// branches with more than one dimension with variable size?).
+// The data structures can assign default values to their data, connect to a
+// ROOT tree (creating the branches they need) and resize.
+// The AnalysisTreeDataStruct is constructed with as many tracking algorithms as
+// there are named in the module configuration (even if they are not backed by
+// any available tracking data).
+// By default construction, TrackDataStruct is initialized in a state which does
+// not allow any track (maximum tracks number is zero), and in such state trying
+// to connect to a tree has no effect. This is done so that the
+// AnalysisTreeDataStruct can be initialized first (and with unusable track data
+// structures), and then the TrackDataStruct instances are initialized one by
+// one when the number of tracks needed is known.
+// 
+// The "UseBuffers: false" mode assumes that on each event a new
+// AnalysisTreeDataStruct is created with unusable tracker data, connected to
+// the ROOT tree (the addresses of the available branches are assigned), then
+// each of the tracking algorithm data is resized to host the correct number
+// of reconstructed tracks and connected to the tree. Then the normal process of
+// filling the event data and then the tree take place. Finally, the whole
+// data structure is freed and the tree is left in a invalid state (branch
+// addresses are invalid). It could be possible to make the tree in a valid
+// state by resetting the addresses, but there is no advantage in that.
+// 
+// The "UseBuffers: true" mode assumes that on the first event a new
+// AnalysisTreeDataStruct is created and used just as in the other mode
+// described above. At the end of the first event, the data structure is left
+// around (and the tree is in a valid state). On the next event, all the
+// addresses are checked, then for each tracker the data is resized to
+// accomodate the right number of tracks for tis event. If the memory is
+// increased, the address will be changed. All the branches are reconnected to
+// the data structure, and the procedure goes on as normal.
+// 
+// Note that reducing the maximum number of tracks in a TrackDataStruct does not
+// necessarily make memory available, because of how std::vector::resize()
+// works; that feature can be implemented, but it currently has not been.
+// 
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef ANALYSISTREE_H
@@ -83,46 +135,52 @@ namespace microboone {
     class TrackDataStruct {
         public:
       template <typename T>
-      using PlanesData_t = T[kMaxTrack][kNplanes];
+      using TrackData_t = T[kMaxTrack];
+      template <typename T>
+      using PlaneData_t = T[kMaxTrack][kNplanes];
+      template <typename T>
+      using HitData_t = T[kMaxTrack][kNplanes][kMaxTrackHits];
+      template <typename T>
+      using HitCoordData_t = T[kMaxTrack][kNplanes][kMaxTrackHits][3];
       
       size_t MaxTracks; ///< maximum number of storable tracks
       
       Short_t  ntracks;             //number of reconstructed tracks
-      PlanesData_t<Float_t> trkke;
-      Float_t  trkrange[kMaxTrack][kNplanes];
-      Int_t    trkidtruth[kMaxTrack][kNplanes]; //true geant trackid
-      Int_t    trkpdgtruth[kMaxTrack][kNplanes]; //true pdg code
-      Float_t  trkefftruth[kMaxTrack][kNplanes]; //completeness
-      Float_t  trkpurtruth[kMaxTrack][kNplanes]; //purity of track
-      Float_t  trkpitchc[kMaxTrack][kNplanes];
-      Short_t  ntrkhits[kMaxTrack][kNplanes];
-      Float_t  trkdedx[kMaxTrack][kNplanes][kMaxTrackHits];
-      Float_t  trkdqdx[kMaxTrack][kNplanes][kMaxTrackHits];
-      Float_t  trkresrg[kMaxTrack][kNplanes][kMaxTrackHits];
-      Float_t  trkxyz[kMaxTrack][kNplanes][kMaxTrackHits][3];
+      PlaneData_t<Float_t>    trkke;
+      PlaneData_t<Float_t>    trkrange;
+      PlaneData_t<Int_t>      trkidtruth;  //true geant trackid
+      PlaneData_t<Int_t>      trkpdgtruth; //true pdg code
+      PlaneData_t<Float_t>    trkefftruth; //completeness
+      PlaneData_t<Float_t>    trkpurtruth; //purity of track
+      PlaneData_t<Float_t>    trkpitchc;
+      PlaneData_t<Short_t>    ntrkhits;
+      HitData_t<Float_t>      trkdedx;
+      HitData_t<Float_t>      trkdqdx;
+      HitData_t<Float_t>      trkresrg;
+      HitCoordData_t<Float_t> trkxyz;
 
       // more track info
-      Short_t   trkId[kMaxTrack];
-      Double_t  trkstartx[kMaxTrack];      // starting x position.
-      Double_t  trkstarty[kMaxTrack];      // starting y position.
-      Double_t  trkstartz[kMaxTrack];      // starting z position.
-      Double_t  trkstartd[kMaxTrack];      // starting distance to boundary.
-      Double_t  trkendx[kMaxTrack];        // ending x position.
-      Double_t  trkendy[kMaxTrack];        // ending y position.
-      Double_t  trkendz[kMaxTrack];        // ending z position.
-      Double_t  trkendd[kMaxTrack];        // ending distance to boundary.
-      Float_t   trktheta[kMaxTrack];       // theta.
-      Float_t   trkphi[kMaxTrack];         // phi.
-      Float_t   trkstartdcosx[kMaxTrack];
-      Float_t   trkstartdcosy[kMaxTrack];
-      Float_t   trkstartdcosz[kMaxTrack];
-      Float_t   trkenddcosx[kMaxTrack];
-      Float_t   trkenddcosy[kMaxTrack];
-      Float_t   trkenddcosz[kMaxTrack];
-      Float_t   trkthetaxz[kMaxTrack];    // theta_xz.
-      Float_t   trkthetayz[kMaxTrack];    // theta_yz.
-      Float_t   trkmom[kMaxTrack];              // momentum.
-      Float_t   trklen[kMaxTrack];              // length.
+      TrackData_t<Short_t> trkId;
+      TrackData_t<Float_t> trkstartx;     // starting x position.
+      TrackData_t<Float_t> trkstarty;     // starting y position.
+      TrackData_t<Float_t> trkstartz;     // starting z position.
+      TrackData_t<Float_t> trkstartd;     // starting distance to boundary.
+      TrackData_t<Float_t> trkendx;       // ending x position.
+      TrackData_t<Float_t> trkendy;       // ending y position.
+      TrackData_t<Float_t> trkendz;       // ending z position.
+      TrackData_t<Float_t> trkendd;       // ending distance to boundary.
+      TrackData_t<Float_t> trktheta;      // theta.
+      TrackData_t<Float_t> trkphi;        // phi.
+      TrackData_t<Float_t> trkstartdcosx;
+      TrackData_t<Float_t> trkstartdcosy;
+      TrackData_t<Float_t> trkstartdcosz;
+      TrackData_t<Float_t> trkenddcosx;
+      TrackData_t<Float_t> trkenddcosy;
+      TrackData_t<Float_t> trkenddcosz;
+      TrackData_t<Float_t> trkthetaxz;    // theta_xz.
+      TrackData_t<Float_t> trkthetayz;    // theta_yz.
+      TrackData_t<Float_t> trkmom;        // momentum.
+      TrackData_t<Float_t> trklen;        // length.
       
       /// Creates an empty tracker data structure
       TrackDataStruct(): MaxTracks(0) { Clear(); }
@@ -619,28 +677,28 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
   
   BranchName = "trkstartx_" + TrackLabel;
-  CreateBranch(BranchName, trkstartx, BranchName + NTracksIndexStr + "/D");
+  CreateBranch(BranchName, trkstartx, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkstarty_" + TrackLabel;
-  CreateBranch(BranchName, trkstarty, BranchName + NTracksIndexStr + "/D");
+  CreateBranch(BranchName, trkstarty, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkstartz_" + TrackLabel;
-  CreateBranch(BranchName, trkstartz, BranchName + NTracksIndexStr + "/D");
+  CreateBranch(BranchName, trkstartz, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkstartd_" + TrackLabel;
-  CreateBranch(BranchName, trkstartd, BranchName + NTracksIndexStr + "/D");
+  CreateBranch(BranchName, trkstartd, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkendx_" + TrackLabel;
-  CreateBranch(BranchName, trkendx, BranchName + NTracksIndexStr + "/D");
+  CreateBranch(BranchName, trkendx, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkendy_" + TrackLabel;
-  CreateBranch(BranchName, trkendy, BranchName + NTracksIndexStr + "/D");
+  CreateBranch(BranchName, trkendy, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkendz_" + TrackLabel;
-  CreateBranch(BranchName, trkendz, BranchName + NTracksIndexStr + "/D");
+  CreateBranch(BranchName, trkendz, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkendd_" + TrackLabel;
-  CreateBranch(BranchName, trkendd, BranchName + NTracksIndexStr + "/D");
+  CreateBranch(BranchName, trkendd, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trktheta_" + TrackLabel;
   CreateBranch(BranchName, trktheta, BranchName + NTracksIndexStr + "/F");
