@@ -88,18 +88,18 @@ namespace detsim {
 
     std::vector<float>         GenNoiseInTime();
 
-    raw::Compress_t        fCompression;      ///< compression type to use
-    double                 fSampleRate;       ///< sampling rate in ns
-    double                 fNoiseFact;        ///< noise scale factor 
-    int                    fNTicks;           ///< number of ticks of the clock
-    unsigned int           fNSamplesReadout;  ///< number of ADC readout samples in 1 readout frame
-    unsigned int           fPedestal;         ///< pedestal amplitude [ADCs]
-    double                 fSigAmp;           ///< signal amplitude [ADCs]
-    double                 fSigWidth;         ///< signal wifdth [time ticks]
-    int                    fSigTime;          ///< Time at which pulse should happen
-    std::string            fSigType;          ///< signal type. For now gaussian or pulse
-    TH1D*                  fNoiseDist;        ///< distribution of noise counts
-    TH1D*                  fWaveform;         ///< waveform histogram
+    raw::Compress_t            fCompression;      ///< compression type to use
+    double                     fSampleRate;       ///< sampling rate in ns
+    double                     fNoiseFact;        ///< noise scale factor 
+    int                        fNTicks;           ///< number of ticks of the clock
+    unsigned int               fNSamplesReadout;  ///< number of ADC readout samples in 1 readout frame
+    unsigned int               fPedestal;         ///< pedestal amplitude [ADCs]
+    std::vector<double>        fSigAmp;           ///< signal amplitude [ADCs]
+    std::vector<double>        fSigWidth;         ///< signal wifdth [time ticks]
+    std::vector<int>           fSigTime;          ///< Time at which pulse should happen
+    std::vector<std::string>   fSigType;          ///< signal type. For now gaussian or pulse
+    TH1D*                      fNoiseDist;        ///< distribution of noise counts
+    TH1D*                      fWaveform;         ///< waveform histogram
 
   }; // class SimWire
 
@@ -133,13 +133,13 @@ namespace detsim{
   void SimWire::reconfigure(fhicl::ParameterSet const& p) 
   {
    
-    fNoiseFact        = p.get< double              >("NoiseFact");
-    fNTicks           = p.get< int                 >("NTicks");
-    fPedestal         = p.get< unsigned int        >("Pedestal");
-    fSigAmp           = p.get< double              >("SigAmp");
-    fSigWidth         = p.get< double              >("SigWidth");
-    fSigType          = p.get< std::string         >("SigType");
-    fSigTime          = p.get< int                 >("SigTime");
+    fNoiseFact        = p.get< double                    >("NoiseFact");
+    fNTicks           = p.get< int                       >("NTicks");
+    fPedestal         = p.get< unsigned int              >("Pedestal");
+    fSigAmp           = p.get< std::vector<double>       >("SigAmp");
+    fSigWidth         = p.get< std::vector<double>       >("SigWidth");
+    fSigType          = p.get< std::vector<std::string>  >("SigType");
+    fSigTime          = p.get< std::vector<int>          >("SigTime");
     
    
     art::ServiceHandle<util::DetectorProperties> detprop;
@@ -155,7 +155,7 @@ namespace detsim{
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
 
-    fNoiseDist      = tfs->make<TH1D>("Noise", ";Noise (ADC);", 1000, -20., 20.);
+    fNoiseDist      = tfs->make<TH1D>("Noise", ";Noise (ADC);", 100, -20., 20.);
     fWaveform       = tfs->make<TH1D>("Waveform", "; Pulse [ADC];", fNTicks, 0, fNTicks);
 
     art::ServiceHandle<util::LArFFT> fFFT;
@@ -190,18 +190,23 @@ namespace detsim{
 	  
     unsigned int chan = 1; 
 
-    if ( fSigType == "gauss" ){//gaussian
-      for (unsigned short i=0; i<signalSize; i++){
-	sigvec[i] += fSigAmp*TMath::Gaus(i,fSigTime,fSigWidth,0)*TMath::Sqrt((2*TMath::Pi()));
+    //fill all pulses according to their type and properties
+    for (unsigned int n=0; n<fSigType.size(); n++){
+    
+      if ( fSigType[n] == "gauss" ){//gaussian
+	for (unsigned short i=0; i<signalSize; i++){
+	  sigvec[i] += fSigAmp[n]*TMath::Gaus(i,fSigTime[n],fSigWidth[n],0)*TMath::Sqrt((2*TMath::Pi()));
+	}
       }
-    }
-    if ( fSigType == "pulse" ){//square pulse
-      for (int i=0; i<fSigTime; i++){
-	unsigned int timetmp = (int)( fSigTime/2.+ i );
-	if ( (timetmp < signalSize) && (timetmp > 0) )
-	  sigvec[timetmp] += fSigAmp;
+      if ( fSigType[n] == "pulse" ){//square pulse
+	for (int i=0; i<fSigWidth[n]; i++){
+	  unsigned int timetmp = (int)( (fSigTime[n] - fSigWidth[n]/2.) + i );
+	  if ( (timetmp < signalSize) && (timetmp > 0) )
+	    sigvec[timetmp] += fSigAmp[n];
+	}
       }
-    }
+
+    }//fill all pulses
 
 
     //generate noise
@@ -209,12 +214,14 @@ namespace detsim{
 
     for(unsigned int i = 0; i < signalSize; ++i){
       float adcval = fPedestal + noisevec[i] + sigvec[i];
-      fWaveform->SetBinContent(i+1,adcval);
+      fWaveform->SetBinContent(i+1,(unsigned int)(adcval));
       fNoiseDist->Fill(noisevec[i]);
       adcvec[i] = (unsigned short)(adcval);
     }
       
     raw::RawDigit rd(chan, signalSize, adcvec, fCompression);
+    rd.SetPedestal(fPedestal);
+
     // Then, resize adcvec back to full length!
     adcvec.clear();
     adcvec.resize(signalSize,0.0);

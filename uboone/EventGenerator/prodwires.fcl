@@ -2,7 +2,10 @@
 #include "singles.fcl"
 #include "largeantmodules.fcl"
 #include "detsimwires_microboone.fcl"
-
+#include "caldata_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "trackfindermodules_microboone.fcl"
 
 process_name: SinglesGen
 
@@ -33,14 +36,16 @@ physics:
 
  producers:
  {
-   daq:       @local::microboone_simwire  
+   daq:       @local::microboone_simwire
+   caldata:    @local::microboone_calwire	    
+   ffthit:     @local::microboone_hitfinder	    
  }
 
 
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ daq] 
+ simulate: [ daq, caldata, ffthit ] 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
 
