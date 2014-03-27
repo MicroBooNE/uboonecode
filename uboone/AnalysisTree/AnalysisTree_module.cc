@@ -11,7 +11,7 @@
 // [x] reduce the size of the elemental items (Double_t => Float_t could damage precision)
 // [x] create a different structure for each tracker, allocate only what needed
 // [x] use variable size array buffers for each tracker datum instead of [kMaxTrack]
-// [ ] turn the truth/GEANT information into vectors
+// [x] turn the truth/GEANT information into vectors
 // [ ] fill the tree branch by branch
 // 
 // Current implementation:
@@ -423,73 +423,77 @@ namespace microboone {
     Int_t     tptype_flux;     //Type of parent particle leaving BNB target
 
     //genie information
+    size_t MaxGeniePrimaries;
     Int_t     genie_no_primaries;
-    Int_t     genie_primaries_pdg[kMaxPrimaries];
-    Double_t  genie_Eng[kMaxPrimaries];
-    Double_t  genie_Px[kMaxPrimaries];
-    Double_t  genie_Py[kMaxPrimaries];
-    Double_t  genie_Pz[kMaxPrimaries];
-    Double_t  genie_P[kMaxPrimaries];
-    Int_t     genie_status_code[kMaxPrimaries];
-    Double_t  genie_mass[kMaxPrimaries];
-    Int_t     genie_trackID[kMaxPrimaries];
-    Int_t     genie_ND[kMaxPrimaries];
-    Int_t     genie_mother[kMaxPrimaries];
-
+    std::vector<Int_t>     genie_primaries_pdg;
+    std::vector<Double_t>  genie_Eng;
+    std::vector<Double_t>  genie_Px;
+    std::vector<Double_t>  genie_Py;
+    std::vector<Double_t>  genie_Pz;
+    std::vector<Double_t>  genie_P;
+    std::vector<Int_t>     genie_status_code;
+    std::vector<Double_t>  genie_mass;
+    std::vector<Int_t>     genie_trackID;
+    std::vector<Int_t>     genie_ND;
+    std::vector<Int_t>     genie_mother;
+    
     //geant information
+    size_t MaxGEANTparticles;
     Int_t     no_primaries;      //number of primary geant particles
     Int_t     geant_list_size;  //number of all geant particles
     Int_t     geant_list_size_in_tpcFV;
-    Int_t     pdg[kMaxPrimaries];
-    Double_t  Eng[kMaxPrimaries];
-    Double_t  Px[kMaxPrimaries];
-    Double_t  Py[kMaxPrimaries];
-    Double_t  Pz[kMaxPrimaries];
-    Double_t  StartPointx[kMaxPrimaries];
-    Double_t  StartPointy[kMaxPrimaries];
-    Double_t  StartPointz[kMaxPrimaries];
-    Double_t  EndPointx[kMaxPrimaries];
-    Double_t  EndPointy[kMaxPrimaries];
-    Double_t  EndPointz[kMaxPrimaries];
-    Int_t     NumberDaughters[kMaxPrimaries];
-    Int_t     TrackId[kMaxPrimaries];
-    Int_t     Mother[kMaxPrimaries];
-    Int_t     process_primary[kMaxPrimaries];
-    Int_t     MergedId[kMaxPrimaries]; //geant track segments, which belong to the same particle, get the same
+    std::vector<Int_t>     pdg;
+    std::vector<Double_t>  Eng;
+    std::vector<Double_t>  Px;
+    std::vector<Double_t>  Py;
+    std::vector<Double_t>  Pz;
+    std::vector<Double_t>  StartPointx;
+    std::vector<Double_t>  StartPointy;
+    std::vector<Double_t>  StartPointz;
+    std::vector<Double_t>  EndPointx;
+    std::vector<Double_t>  EndPointy;
+    std::vector<Double_t>  EndPointz;
+    std::vector<Int_t>     NumberDaughters;
+    std::vector<Int_t>     TrackId;
+    std::vector<Int_t>     Mother;
+    std::vector<Int_t>     process_primary;
+    std::vector<Int_t>     MergedId; //geant track segments, which belong to the same particle, get the same
 
     // more geant information
-    Int_t   geant_tpcFV_status[kMaxPrimaries];
-    Int_t   geant_tpcFV_trackId[kMaxPrimaries];
-    Int_t   geant_tpcFV_pdg[kMaxPrimaries];
+    size_t MaxGEANTparticlesInTPCFV;
+    std::vector<Int_t>   geant_tpcFV_status;
+    std::vector<Int_t>   geant_tpcFV_trackId;
+    std::vector<Int_t>   geant_tpcFV_pdg;
+    
+    std::vector<Double_t>  geant_tpcFV_orig_E;
+    std::vector<Double_t>  geant_tpcFV_orig_px;
+    std::vector<Double_t>  geant_tpcFV_orig_py;
+    std::vector<Double_t>  geant_tpcFV_orig_pz;
+    std::vector<Double_t>  geant_tpcFV_orig_startx;
+    std::vector<Double_t>  geant_tpcFV_orig_starty;
+    std::vector<Double_t>  geant_tpcFV_orig_startz;
+    std::vector<Double_t>  geant_tpcFV_orig_startt;
+    std::vector<Double_t>  geant_tpcFV_orig_endx;
+    std::vector<Double_t>  geant_tpcFV_orig_endy;
+    std::vector<Double_t>  geant_tpcFV_orig_endz;
+    std::vector<Double_t>  geant_tpcFV_orig_endt;
 
-    Double_t  geant_tpcFV_orig_E[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_px[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_py[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_pz[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_startx[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_starty[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_startz[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_startt[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_endx[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_endy[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_endz[kMaxPrimaries];
-    Double_t  geant_tpcFV_orig_endt[kMaxPrimaries];
-
-    Double_t  geant_tpcFV_startx[kMaxPrimaries];          // starting x position.
-    Double_t  geant_tpcFV_starty[kMaxPrimaries];          // starting y position.
-    Double_t  geant_tpcFV_startz[kMaxPrimaries];          // starting z position.
-    Double_t  geant_tpcFV_startd[kMaxPrimaries];          // starting distance to boundary.
-    Double_t  geant_tpcFV_endx[kMaxPrimaries];          // ending x position.
-    Double_t  geant_tpcFV_endy[kMaxPrimaries];          // ending y position.
-    Double_t  geant_tpcFV_endz[kMaxPrimaries];          // ending z position.
-    Double_t  geant_tpcFV_endd[kMaxPrimaries];          // ending distance to boundary.
-    Double_t  geant_tpcFV_theta[kMaxPrimaries];          // theta.
-    Double_t  geant_tpcFV_phi[kMaxPrimaries];          // phi.
-    Double_t  geant_tpcFV_theta_xz[kMaxPrimaries];    // theta_xz.
-    Double_t  geant_tpcFV_theta_yz[kMaxPrimaries];    // theta_yz.
-    Double_t  geant_tpcFV_mom[kMaxPrimaries];         // momentum.
-    Double_t  geant_tpcFV_len[kMaxPrimaries];         // length.
-
+    std::vector<Double_t>  geant_tpcFV_startx;          // starting x position.
+    std::vector<Double_t>  geant_tpcFV_starty;          // starting y position.
+    std::vector<Double_t>  geant_tpcFV_startz;          // starting z position.
+    std::vector<Double_t>  geant_tpcFV_startd;          // starting distance to boundary.
+    std::vector<Double_t>  geant_tpcFV_endx;          // ending x position.
+    std::vector<Double_t>  geant_tpcFV_endy;          // ending y position.
+    std::vector<Double_t>  geant_tpcFV_endz;          // ending z position.
+    std::vector<Double_t>  geant_tpcFV_endd;          // ending distance to boundary.
+    std::vector<Double_t>  geant_tpcFV_theta;          // theta.
+    std::vector<Double_t>  geant_tpcFV_phi;          // phi.
+    std::vector<Double_t>  geant_tpcFV_theta_xz;    // theta_xz.
+    std::vector<Double_t>  geant_tpcFV_theta_yz;    // theta_yz.
+    std::vector<Double_t>  geant_tpcFV_mom;         // momentum.
+    std::vector<Double_t>  geant_tpcFV_len;         // length.
+    
+    
     /// Constructor; clears all fields
     AnalysisTreeDataStruct(size_t nTrackers = 0)
       { SetTrackers(nTrackers); Clear(); }
@@ -514,41 +518,167 @@ namespace microboone {
     /// Returns the number of trackers for which memory is allocated
     size_t GetMaxTrackers() const { return TrackData.capacity(); }
     
-    /// Returns the number of GEANT primaries for which memory is allocated
-    size_t GetMaxGEANTePrimaries() const { return kMaxPrimaries; }
+    /// Returns the number of GEANT particles for which memory is allocated
+    size_t GetMaxGEANTparticles() const { return MaxGEANTparticles; }
+    
+    /// Returns the number of GEANT particles in FV for which memory is allocated
+    size_t GetMaxGEANTparticlesInTPCFV() const { return MaxGEANTparticlesInTPCFV; }
     
     /// Returns the number of GENIE primaries for which memory is allocated
-    size_t GetMaxGeniePrimaries() const { return kMaxPrimaries; }
+    size_t GetMaxGeniePrimaries() const { return MaxGeniePrimaries; }
+    
+    /// Resize the data strutcure for GEANT particles
+    void ResizeGEANT(int nParticles);
+    
+    /// Resize the data strutcure for GEANT particles in fiducial volume
+    void ResizeGEANTinTPCFV(int nParticles);
+    
+    /// Resize the data strutcure for Genie primaries
+    void ResizeGenie(int nPrimaries);
     
     /// Connect this object with a tree
     void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
 
-      /// Return the total size of data from dynamic vectors in bytes
-      size_t dynamic_data_size() const
-        {
-          size_t total = 0;
-          for(const auto& TrackerData: TrackData)
-            total += TrackerData.dynamic_data_size();
-          return total;
-        } // dynamic_data_size()
-      
-      /// Return the total size allocated for data from dynamic vectors in bytes
-      size_t dynamic_data_capacity() const
-        {
-          size_t total = 0;
-          for(const auto& TrackerData: TrackData)
-            total += TrackerData.dynamic_data_capacity();
-          return total;
-        } // dynamic_data_capacity()
-      
-      /// Return the total size of this object in bytes
-      size_t data_size() const
-        { return sizeof(*this) + dynamic_data_size(); }
-      
-      /// Return the total size of this object in bytes
-      size_t memory_size() const
-        { return sizeof(*this) + dynamic_data_capacity(); }
-      
+    /// Return the total size of data from dynamic vectors in bytes
+    size_t dynamic_data_size() const
+      {
+        size_t total
+          = genie_primaries_pdg    .size() * sizeof(typename decltype(genie_primaries_pdg    )::value_type)
+          + genie_Eng              .size() * sizeof(typename decltype(genie_Eng              )::value_type)
+          + genie_Px               .size() * sizeof(typename decltype(genie_Px               )::value_type)
+          + genie_Py               .size() * sizeof(typename decltype(genie_Py               )::value_type)
+          + genie_Pz               .size() * sizeof(typename decltype(genie_Pz               )::value_type)
+          + genie_P                .size() * sizeof(typename decltype(genie_P                )::value_type)
+          + genie_status_code      .size() * sizeof(typename decltype(genie_status_code      )::value_type)
+          + genie_mass             .size() * sizeof(typename decltype(genie_mass             )::value_type)
+          + genie_trackID          .size() * sizeof(typename decltype(genie_trackID          )::value_type)
+          + genie_ND               .size() * sizeof(typename decltype(genie_ND               )::value_type)
+          + genie_mother           .size() * sizeof(typename decltype(genie_mother           )::value_type)
+          + pdg                    .size() * sizeof(typename decltype(pdg                    )::value_type)
+          + Eng                    .size() * sizeof(typename decltype(Eng                    )::value_type)
+          + Px                     .size() * sizeof(typename decltype(Px                     )::value_type)
+          + Py                     .size() * sizeof(typename decltype(Py                     )::value_type)
+          + Pz                     .size() * sizeof(typename decltype(Pz                     )::value_type)
+          + StartPointx            .size() * sizeof(typename decltype(StartPointx            )::value_type)
+          + StartPointy            .size() * sizeof(typename decltype(StartPointy            )::value_type)
+          + StartPointz            .size() * sizeof(typename decltype(StartPointz            )::value_type)
+          + EndPointx              .size() * sizeof(typename decltype(EndPointx              )::value_type)
+          + EndPointy              .size() * sizeof(typename decltype(EndPointy              )::value_type)
+          + EndPointz              .size() * sizeof(typename decltype(EndPointz              )::value_type)
+          + NumberDaughters        .size() * sizeof(typename decltype(NumberDaughters        )::value_type)
+          + TrackId                .size() * sizeof(typename decltype(TrackId                )::value_type)
+          + Mother                 .size() * sizeof(typename decltype(Mother                 )::value_type)
+          + process_primary        .size() * sizeof(typename decltype(process_primary        )::value_type)
+          + MergedId               .size() * sizeof(typename decltype(MergedId               )::value_type)
+          + geant_tpcFV_status     .size() * sizeof(typename decltype(geant_tpcFV_status     )::value_type)
+          + geant_tpcFV_trackId    .size() * sizeof(typename decltype(geant_tpcFV_trackId    )::value_type)
+          + geant_tpcFV_pdg        .size() * sizeof(typename decltype(geant_tpcFV_pdg        )::value_type)
+          + geant_tpcFV_orig_E     .size() * sizeof(typename decltype(geant_tpcFV_orig_E     )::value_type)
+          + geant_tpcFV_orig_px    .size() * sizeof(typename decltype(geant_tpcFV_orig_px    )::value_type)
+          + geant_tpcFV_orig_py    .size() * sizeof(typename decltype(geant_tpcFV_orig_py    )::value_type)
+          + geant_tpcFV_orig_pz    .size() * sizeof(typename decltype(geant_tpcFV_orig_pz    )::value_type)
+          + geant_tpcFV_orig_startx.size() * sizeof(typename decltype(geant_tpcFV_orig_startx)::value_type)
+          + geant_tpcFV_orig_starty.size() * sizeof(typename decltype(geant_tpcFV_orig_starty)::value_type)
+          + geant_tpcFV_orig_startz.size() * sizeof(typename decltype(geant_tpcFV_orig_startz)::value_type)
+          + geant_tpcFV_orig_startt.size() * sizeof(typename decltype(geant_tpcFV_orig_startt)::value_type)
+          + geant_tpcFV_orig_endx  .size() * sizeof(typename decltype(geant_tpcFV_orig_endx  )::value_type)
+          + geant_tpcFV_orig_endy  .size() * sizeof(typename decltype(geant_tpcFV_orig_endy  )::value_type)
+          + geant_tpcFV_orig_endz  .size() * sizeof(typename decltype(geant_tpcFV_orig_endz  )::value_type)
+          + geant_tpcFV_orig_endt  .size() * sizeof(typename decltype(geant_tpcFV_orig_endt  )::value_type)
+          + geant_tpcFV_startx     .size() * sizeof(typename decltype(geant_tpcFV_startx     )::value_type)
+          + geant_tpcFV_starty     .size() * sizeof(typename decltype(geant_tpcFV_starty     )::value_type)
+          + geant_tpcFV_startz     .size() * sizeof(typename decltype(geant_tpcFV_startz     )::value_type)
+          + geant_tpcFV_startd     .size() * sizeof(typename decltype(geant_tpcFV_startd     )::value_type)
+          + geant_tpcFV_endx       .size() * sizeof(typename decltype(geant_tpcFV_endx       )::value_type)
+          + geant_tpcFV_endy       .size() * sizeof(typename decltype(geant_tpcFV_endy       )::value_type)
+          + geant_tpcFV_endz       .size() * sizeof(typename decltype(geant_tpcFV_endz       )::value_type)
+          + geant_tpcFV_endd       .size() * sizeof(typename decltype(geant_tpcFV_endd       )::value_type)
+          + geant_tpcFV_theta      .size() * sizeof(typename decltype(geant_tpcFV_theta      )::value_type)
+          + geant_tpcFV_phi        .size() * sizeof(typename decltype(geant_tpcFV_phi        )::value_type)
+          + geant_tpcFV_theta_xz   .size() * sizeof(typename decltype(geant_tpcFV_theta_xz   )::value_type)
+          + geant_tpcFV_theta_yz   .size() * sizeof(typename decltype(geant_tpcFV_theta_yz   )::value_type)
+          + geant_tpcFV_mom        .size() * sizeof(typename decltype(geant_tpcFV_mom        )::value_type)
+          + geant_tpcFV_len        .size() * sizeof(typename decltype(geant_tpcFV_len        )::value_type)
+          ;
+        for(const auto& TrackerData: TrackData)
+          total += TrackerData.dynamic_data_size();
+        return total;
+      } // dynamic_data_size()
+    
+    /// Return the total size allocated for data from dynamic vectors in bytes
+    size_t dynamic_data_capacity() const
+      {
+        size_t total
+          = genie_primaries_pdg    .capacity() * sizeof(typename decltype(genie_primaries_pdg    )::value_type)
+          + genie_Eng              .capacity() * sizeof(typename decltype(genie_Eng              )::value_type)
+          + genie_Px               .capacity() * sizeof(typename decltype(genie_Px               )::value_type)
+          + genie_Py               .capacity() * sizeof(typename decltype(genie_Py               )::value_type)
+          + genie_Pz               .capacity() * sizeof(typename decltype(genie_Pz               )::value_type)
+          + genie_P                .capacity() * sizeof(typename decltype(genie_P                )::value_type)
+          + genie_status_code      .capacity() * sizeof(typename decltype(genie_status_code      )::value_type)
+          + genie_mass             .capacity() * sizeof(typename decltype(genie_mass             )::value_type)
+          + genie_trackID          .capacity() * sizeof(typename decltype(genie_trackID          )::value_type)
+          + genie_ND               .capacity() * sizeof(typename decltype(genie_ND               )::value_type)
+          + genie_mother           .capacity() * sizeof(typename decltype(genie_mother           )::value_type)
+          + pdg                    .capacity() * sizeof(typename decltype(pdg                    )::value_type)
+          + Eng                    .capacity() * sizeof(typename decltype(Eng                    )::value_type)
+          + Px                     .capacity() * sizeof(typename decltype(Px                     )::value_type)
+          + Py                     .capacity() * sizeof(typename decltype(Py                     )::value_type)
+          + Pz                     .capacity() * sizeof(typename decltype(Pz                     )::value_type)
+          + StartPointx            .capacity() * sizeof(typename decltype(StartPointx            )::value_type)
+          + StartPointy            .capacity() * sizeof(typename decltype(StartPointy            )::value_type)
+          + StartPointz            .capacity() * sizeof(typename decltype(StartPointz            )::value_type)
+          + EndPointx              .capacity() * sizeof(typename decltype(EndPointx              )::value_type)
+          + EndPointy              .capacity() * sizeof(typename decltype(EndPointy              )::value_type)
+          + EndPointz              .capacity() * sizeof(typename decltype(EndPointz              )::value_type)
+          + NumberDaughters        .capacity() * sizeof(typename decltype(NumberDaughters        )::value_type)
+          + TrackId                .capacity() * sizeof(typename decltype(TrackId                )::value_type)
+          + Mother                 .capacity() * sizeof(typename decltype(Mother                 )::value_type)
+          + process_primary        .capacity() * sizeof(typename decltype(process_primary        )::value_type)
+          + MergedId               .capacity() * sizeof(typename decltype(MergedId               )::value_type)
+          + geant_tpcFV_status     .capacity() * sizeof(typename decltype(geant_tpcFV_status     )::value_type)
+          + geant_tpcFV_trackId    .capacity() * sizeof(typename decltype(geant_tpcFV_trackId    )::value_type)
+          + geant_tpcFV_pdg        .capacity() * sizeof(typename decltype(geant_tpcFV_pdg        )::value_type)
+          + geant_tpcFV_orig_E     .capacity() * sizeof(typename decltype(geant_tpcFV_orig_E     )::value_type)
+          + geant_tpcFV_orig_px    .capacity() * sizeof(typename decltype(geant_tpcFV_orig_px    )::value_type)
+          + geant_tpcFV_orig_py    .capacity() * sizeof(typename decltype(geant_tpcFV_orig_py    )::value_type)
+          + geant_tpcFV_orig_pz    .capacity() * sizeof(typename decltype(geant_tpcFV_orig_pz    )::value_type)
+          + geant_tpcFV_orig_startx.capacity() * sizeof(typename decltype(geant_tpcFV_orig_startx)::value_type)
+          + geant_tpcFV_orig_starty.capacity() * sizeof(typename decltype(geant_tpcFV_orig_starty)::value_type)
+          + geant_tpcFV_orig_startz.capacity() * sizeof(typename decltype(geant_tpcFV_orig_startz)::value_type)
+          + geant_tpcFV_orig_startt.capacity() * sizeof(typename decltype(geant_tpcFV_orig_startt)::value_type)
+          + geant_tpcFV_orig_endx  .capacity() * sizeof(typename decltype(geant_tpcFV_orig_endx  )::value_type)
+          + geant_tpcFV_orig_endy  .capacity() * sizeof(typename decltype(geant_tpcFV_orig_endy  )::value_type)
+          + geant_tpcFV_orig_endz  .capacity() * sizeof(typename decltype(geant_tpcFV_orig_endz  )::value_type)
+          + geant_tpcFV_orig_endt  .capacity() * sizeof(typename decltype(geant_tpcFV_orig_endt  )::value_type)
+          + geant_tpcFV_startx     .capacity() * sizeof(typename decltype(geant_tpcFV_startx     )::value_type)
+          + geant_tpcFV_starty     .capacity() * sizeof(typename decltype(geant_tpcFV_starty     )::value_type)
+          + geant_tpcFV_startz     .capacity() * sizeof(typename decltype(geant_tpcFV_startz     )::value_type)
+          + geant_tpcFV_startd     .capacity() * sizeof(typename decltype(geant_tpcFV_startd     )::value_type)
+          + geant_tpcFV_endx       .capacity() * sizeof(typename decltype(geant_tpcFV_endx       )::value_type)
+          + geant_tpcFV_endy       .capacity() * sizeof(typename decltype(geant_tpcFV_endy       )::value_type)
+          + geant_tpcFV_endz       .capacity() * sizeof(typename decltype(geant_tpcFV_endz       )::value_type)
+          + geant_tpcFV_endd       .capacity() * sizeof(typename decltype(geant_tpcFV_endd       )::value_type)
+          + geant_tpcFV_theta      .capacity() * sizeof(typename decltype(geant_tpcFV_theta      )::value_type)
+          + geant_tpcFV_phi        .capacity() * sizeof(typename decltype(geant_tpcFV_phi        )::value_type)
+          + geant_tpcFV_theta_xz   .capacity() * sizeof(typename decltype(geant_tpcFV_theta_xz   )::value_type)
+          + geant_tpcFV_theta_yz   .capacity() * sizeof(typename decltype(geant_tpcFV_theta_yz   )::value_type)
+          + geant_tpcFV_mom        .capacity() * sizeof(typename decltype(geant_tpcFV_mom        )::value_type)
+          + geant_tpcFV_len        .capacity() * sizeof(typename decltype(geant_tpcFV_len        )::value_type)
+          ;
+        for(const auto& TrackerData: TrackData)
+          total += TrackerData.dynamic_data_capacity();
+        return total;
+      } // dynamic_data_capacity()
+    
+    /// Return the total size of this object in bytes
+    size_t data_size() const
+      { return sizeof(*this) + dynamic_data_size(); }
+    
+    /// Return the total size of this object in bytes
+    size_t memory_size() const
+      { return sizeof(*this) + dynamic_data_capacity(); }
+    
   private:
     /// Little helper functor class to create or reset branches in a tree
     class BranchCreator {
@@ -995,68 +1125,149 @@ void microboone::AnalysisTreeDataStruct::Clear() {
   no_primaries = 0;
   geant_list_size=0;
   geant_list_size_in_tpcFV = 0;
-  for (int i = 0; i<kMaxPrimaries; ++i){
-    pdg[i] = -99999;
-    Eng[i] = -99999;
-    Px[i] = -99999;
-    Py[i] = -99999;
-    Pz[i] = -99999;
-    StartPointx[i] = -99999;
-    StartPointy[i] = -99999;
-    StartPointz[i] = -99999;
-    EndPointx[i] = -99999;
-    EndPointy[i] = -99999;
-    EndPointz[i] = -99999;
-    NumberDaughters[i] = -99999;
-    Mother[i] = -99999;
-    TrackId[i] = -99999;
-    process_primary[i] = -99999;
-    genie_primaries_pdg[i] = -99999;
-    genie_Eng[i] = -99999;
-    genie_Px[i] = -99999;
-    genie_Py[i] = -99999;
-    genie_Pz[i] = -99999;
-    genie_P[i] = -99999;
-    genie_status_code[i] = -99999;
-    genie_mass[i] = -99999;
-    genie_trackID[i] = -99999;
-    genie_ND[i] = -99999;
-    genie_mother[i] = -99999;
+  
+  FillWith(pdg, -99999);
+  FillWith(Eng, -99999.);
+  FillWith(Px, -99999.);
+  FillWith(Py, -99999.);
+  FillWith(Pz, -99999.);
+  FillWith(StartPointx, -99999.);
+  FillWith(StartPointy, -99999.);
+  FillWith(StartPointz, -99999.);
+  FillWith(EndPointx, -99999.);
+  FillWith(EndPointy, -99999.);
+  FillWith(EndPointz, -99999.);
+  FillWith(NumberDaughters, -99999);
+  FillWith(Mother, -99999);
+  FillWith(TrackId, -99999);
+  FillWith(process_primary, -99999);
+  FillWith(genie_primaries_pdg, -99999);
+  FillWith(genie_Eng, -99999.);
+  FillWith(genie_Px, -99999.);
+  FillWith(genie_Py, -99999.);
+  FillWith(genie_Pz, -99999.);
+  FillWith(genie_P, -99999.);
+  FillWith(genie_status_code, -99999);
+  FillWith(genie_mass, -99999.);
+  FillWith(genie_trackID, -99999);
+  FillWith(genie_ND, -99999);
+  FillWith(genie_mother, -99999);
+  
+  FillWith(geant_tpcFV_status, -99999);
+  FillWith(geant_tpcFV_trackId, -99999);
+  FillWith(geant_tpcFV_pdg, -99999);
+  
+  FillWith(geant_tpcFV_orig_E, -99999.);
+  FillWith(geant_tpcFV_orig_px, -99999.);
+  FillWith(geant_tpcFV_orig_py, -99999.);
+  FillWith(geant_tpcFV_orig_pz, -99999.);
+  FillWith(geant_tpcFV_orig_startx, -99999.);
+  FillWith(geant_tpcFV_orig_starty, -99999.);
+  FillWith(geant_tpcFV_orig_startz, -99999.);
+  FillWith(geant_tpcFV_orig_startt, -99999.);
+  FillWith(geant_tpcFV_orig_endx, -99999.);
+  FillWith(geant_tpcFV_orig_endy, -99999.);
+  FillWith(geant_tpcFV_orig_endz, -99999.);
+  FillWith(geant_tpcFV_orig_endt, -99999.);
 
-    geant_tpcFV_status[i] = -99999;
-    geant_tpcFV_trackId[i] = -99999;
-    geant_tpcFV_pdg[i] = -99999;
-
-    geant_tpcFV_orig_E[i] = -99999;
-    geant_tpcFV_orig_px[i] = -99999;
-    geant_tpcFV_orig_py[i] = -99999;
-    geant_tpcFV_orig_pz[i] = -99999;
-    geant_tpcFV_orig_startx[i] = -99999;
-    geant_tpcFV_orig_starty[i] = -99999;
-    geant_tpcFV_orig_startz[i] = -99999;
-    geant_tpcFV_orig_startt[i] = -99999;
-    geant_tpcFV_orig_endx[i] = -99999;
-    geant_tpcFV_orig_endy[i] = -99999;
-    geant_tpcFV_orig_endz[i] = -99999;
-    geant_tpcFV_orig_endt[i] = -99999;
-
-    geant_tpcFV_startx[i] = -99999;
-    geant_tpcFV_starty[i] = -99999;
-    geant_tpcFV_startz[i] = -99999;
-    geant_tpcFV_startd[i] = -99999;
-    geant_tpcFV_endx[i] = -99999;
-    geant_tpcFV_endy[i] = -99999;
-    geant_tpcFV_endz[i] = -99999;
-    geant_tpcFV_endd[i] = -99999;
-    geant_tpcFV_theta[i] = -99999;
-    geant_tpcFV_phi[i] = -99999;
-    geant_tpcFV_theta_xz[i] = -99999;
-    geant_tpcFV_theta_yz[i] = -99999;
-    geant_tpcFV_mom[i] = -99999;
-    geant_tpcFV_len[i] = -99999;
-  }
-
+  FillWith(geant_tpcFV_startx, -99999.);
+  FillWith(geant_tpcFV_starty, -99999.);
+  FillWith(geant_tpcFV_startz, -99999.);
+  FillWith(geant_tpcFV_startd, -99999.);
+  FillWith(geant_tpcFV_endx, -99999.);
+  FillWith(geant_tpcFV_endy, -99999.);
+  FillWith(geant_tpcFV_endz, -99999.);
+  FillWith(geant_tpcFV_endd, -99999.);
+  FillWith(geant_tpcFV_theta, -99999.);
+  FillWith(geant_tpcFV_phi, -99999.);
+  FillWith(geant_tpcFV_theta_xz, -99999.);
+  FillWith(geant_tpcFV_theta_yz, -99999.);
+  FillWith(geant_tpcFV_mom, -99999.);
+  FillWith(geant_tpcFV_len, -99999.);
 } // microboone::AnalysisTreeDataStruct::Clear()
+
+
+void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
+
+  // minimum size is 1, so that we always have an address
+  MaxGEANTparticles = (size_t) std::max(nParticles, 1);
+  
+  pdg.resize(MaxGEANTparticles);
+  Eng.resize(MaxGEANTparticles);
+  Px.resize(MaxGEANTparticles);
+  Py.resize(MaxGEANTparticles);
+  Pz.resize(MaxGEANTparticles);
+  StartPointx.resize(MaxGEANTparticles);
+  StartPointy.resize(MaxGEANTparticles);
+  StartPointz.resize(MaxGEANTparticles);
+  EndPointx.resize(MaxGEANTparticles);
+  EndPointy.resize(MaxGEANTparticles);
+  EndPointz.resize(MaxGEANTparticles);
+  NumberDaughters.resize(MaxGEANTparticles);
+  Mother.resize(MaxGEANTparticles);
+  TrackId.resize(MaxGEANTparticles);
+  process_primary.resize(MaxGEANTparticles);
+  
+} // microboone::AnalysisTreeDataStruct::ResizeGEANT()
+
+
+void microboone::AnalysisTreeDataStruct::ResizeGEANTinTPCFV(int nParticles) {
+
+  // minimum size is 1, so that we always have an address
+  MaxGEANTparticlesInTPCFV = (size_t) std::max(nParticles, 1);
+  
+  geant_tpcFV_status.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_trackId.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_pdg.resize(MaxGEANTparticlesInTPCFV);
+  
+  geant_tpcFV_orig_E.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_px.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_py.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_pz.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_startx.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_starty.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_startz.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_startt.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_endx.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_endy.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_endz.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_orig_endt.resize(MaxGEANTparticlesInTPCFV);
+
+  geant_tpcFV_startx.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_starty.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_startz.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_startd.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_endx.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_endy.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_endz.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_endd.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_theta.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_phi.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_theta_xz.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_theta_yz.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_mom.resize(MaxGEANTparticlesInTPCFV);
+  geant_tpcFV_len.resize(MaxGEANTparticlesInTPCFV);
+
+} // microboone::AnalysisTreeDataStruct::ResizeGEANTinTPCFV()
+
+
+void microboone::AnalysisTreeDataStruct::ResizeGenie(int nPrimaries) {
+  
+  // minimum size is 1, so that we always have an address
+  MaxGeniePrimaries = (size_t) std::max(nPrimaries, 1);
+  genie_primaries_pdg.resize(MaxGeniePrimaries);
+  genie_Eng.resize(MaxGeniePrimaries);
+  genie_Px.resize(MaxGeniePrimaries);
+  genie_Py.resize(MaxGeniePrimaries);
+  genie_Pz.resize(MaxGeniePrimaries);
+  genie_P.resize(MaxGeniePrimaries);
+  genie_status_code.resize(MaxGeniePrimaries);
+  genie_mass.resize(MaxGeniePrimaries);
+  genie_trackID.resize(MaxGeniePrimaries);
+  genie_ND.resize(MaxGeniePrimaries);
+  genie_mother.resize(MaxGeniePrimaries);
+
+} // microboone::AnalysisTreeDataStruct::ResizeGenie()
 
 
 void microboone::AnalysisTreeDataStruct::SetAddresses(
@@ -1253,14 +1464,77 @@ void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
 
 void microboone::AnalysisTree::analyze(const art::Event& evt)
 {
-  // collect the sizes which might me needed to resize the tree data structure:
+  //services
+  art::ServiceHandle<geo::Geometry> geom;
+  art::ServiceHandle<cheat::BackTracker> bt;
+  art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArProperties> LArProp;
   
-  // hits
+  // collect the sizes which might me needed to resize the tree data structure:
+  bool isMC = evt.isRealData();
+  
+  // * hits
   art::Handle< std::vector<recob::Hit> > hitListHandle;
   std::vector<art::Ptr<recob::Hit> > hitlist;
   if (evt.getByLabel(fHitsModuleLabel,hitListHandle))
     art::fill_ptr_vector(hitlist, hitListHandle);
 
+  // * MC truth information
+  art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
+  std::vector<art::Ptr<simb::MCTruth> > mclist;
+  if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
+    art::fill_ptr_vector(mclist, mctruthListHandle);
+
+  int nGeniePrimaries = 0, nGEANTparticles = 0, nGEANTparticlesInTPCFV = 0;
+  
+  art::Ptr<simb::MCTruth> mctruth;
+  int imc = 0;
+  if (isMC){ //is MC
+    // GENIE
+    const sim::ParticleList& plist = bt->ParticleList();
+    if (!mclist.empty()){//at least one mc record
+      //if (mclist[0]->NeutrinoSet()){//is neutrino
+      //sometimes there can be multiple neutrino interactions in one spill
+      //this is trying to find the primary interaction
+      //by looking for the highest energy deposition
+      std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
+      for (size_t i = 0; i<hitlist.size(); i++){
+        //if (hitlist[i]->View() == geo::kV){//collection view
+        std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+        for (size_t e = 0; e<eveIDs.size(); e++){
+          art::Ptr<simb::MCTruth> ev_mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
+          mctruthemap[ev_mctruth]+=eveIDs[e].energy;
+        }
+        //}
+      }
+      mctruth = mclist[0];
+      double maxenergy = -1;
+      int imc0 = 0;
+      for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
+        if ((ii->second)>maxenergy){
+          maxenergy = ii->second;
+          mctruth = ii->first;
+          imc = imc0;
+        }
+        imc0++;
+      }
+
+      imc = 0; //set imc to 0 to solve a confusion for BNB+cosmic files where there are two MCTruth
+
+      if (mctruth->NeutrinoSet()) nGeniePrimaries = mctruth->NParticles();
+      
+      nGEANTparticles = plist.size();
+      // to know the number of particles in FV would require
+      // looking at all of them; so we waste some memory here
+      nGEANTparticlesInTPCFV = nGEANTparticles;
+    } // if have MC truth
+  } // if MC
+  
+  CreateData();
+  fData->ResizeGenie(nGeniePrimaries);
+  fData->ResizeGEANT(nGEANTparticles);
+  fData->ResizeGEANTinTPCFV(nGEANTparticlesInTPCFV);
+  
 //  const size_t Nplanes       = 3; // number of wire planes; pretty much constant...
   const size_t NTrackers = GetNTrackers(); // number of trackers passed into fTrackModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
@@ -1276,6 +1550,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 //  fData->RunData = RunData;
   fData->SubRunData = SubRunData;
 
+  fData->isdata = int(!isMC);
+  
   std::vector< art::Handle< std::vector<recob::Track> > > trackListHandle(NTrackers);
   std::vector< std::vector<art::Ptr<recob::Track> > > tracklist(NTrackers);
   for (unsigned int it = 0; it < NTrackers; ++it){
@@ -1283,21 +1559,11 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       art::fill_ptr_vector(tracklist[it], trackListHandle[it]);
   }
 
-  art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
-  std::vector<art::Ptr<simb::MCTruth> > mclist;
-  if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
-    art::fill_ptr_vector(mclist, mctruthListHandle);
-
   art::Handle< std::vector<simb::MCFlux> > mcfluxListHandle;
   std::vector<art::Ptr<simb::MCFlux> > fluxlist;
   if (evt.getByLabel(fGenieGenModuleLabel,mcfluxListHandle))
     art::fill_ptr_vector(fluxlist, mcfluxListHandle);
 
-  //services
-  art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<cheat::BackTracker> bt;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> LArProp;
 
   fData->run = evt.run();
   fData->subrun = evt.subRun();
@@ -1317,7 +1583,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
 //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;
 //  std::cout<<geom->Nwires(0)<<" "<<geom->Nwires(1)<<" "<<geom->Nwires(2)<<std::endl;
-  fData->isdata = evt.isRealData()? 1: 0;
 
   //hit information
   fData->no_hits = (int) NHits;
@@ -1371,69 +1636,75 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       
       TVector3 pos, dir_start, dir_end, end;
       double tlen = 0., mom = 0.;
+      int TrackID = -1;
       
+      int ntraj = 0;
       //we need to use Bezier methods for Bezier tracks
-      if(fTrackModuleLabel[iTracker].compare("beziertracker")==0){
-          trkf::BezierTrack btrack(*ptrack);
-          int ntraj = btrack.NSegments();
-          if(ntraj > 0) {
-            double xyz[3];
-            btrack.GetTrackPoint(0,xyz);
-            pos.SetXYZ(xyz[0],xyz[1],xyz[2]);
-            btrack.GetTrackDirection(0,xyz);
-            dir_start.SetXYZ(xyz[0],xyz[1],xyz[2]);
-            btrack.GetTrackDirection(1,xyz);
-            dir_end.SetXYZ(xyz[0],xyz[1],xyz[2]);
-            btrack.GetTrackPoint(1,xyz);
-            end.SetXYZ(xyz[0],xyz[1],xyz[2]);
+      if (fTrackModuleLabel[iTracker] == "beziertracker") {
+        trkf::BezierTrack btrack(*ptrack);
+        ntraj = btrack.NSegments();
+        if(ntraj > 0) {
+          double xyz[3];
+          btrack.GetTrackPoint(0,xyz);
+          pos.SetXYZ(xyz[0],xyz[1],xyz[2]);
+          btrack.GetTrackDirection(0,xyz);
+          dir_start.SetXYZ(xyz[0],xyz[1],xyz[2]);
+          btrack.GetTrackDirection(1,xyz);
+          dir_end.SetXYZ(xyz[0],xyz[1],xyz[2]);
+          btrack.GetTrackPoint(1,xyz);
+          end.SetXYZ(xyz[0],xyz[1],xyz[2]);
 
-            tlen        = btrack.GetLength();
-            if (btrack.NumberFitMomentum() > 0)
-              mom = btrack.VertexMomentum();
-            // fill bezier track reco branches
-            TrackerData.trkId[iTrk]         = iTrk;  //bezier has some screwed up track IDs
+          tlen        = btrack.GetLength();
+          if (btrack.NumberFitMomentum() > 0)
+            mom = btrack.VertexMomentum();
+          // fill bezier track reco branches
+          TrackID = iTrk;  //bezier has some screwed up track IDs
         }
       }
       else {   //use the normal methods for other kinds of tracks
-        int ntraj = track.NumberTrajectoryPoints();
+        ntraj = track.NumberTrajectoryPoints();
         if (ntraj > 0) {
-            pos       = track.Vertex();
-            dir_start = track.VertexDirection();
-            dir_end   = track.EndDirection();
-            end       = track.End();
+          pos       = track.Vertex();
+          dir_start = track.VertexDirection();
+          dir_end   = track.EndDirection();
+          end       = track.End();
 
-            tlen        = length(track);
-            if(track.NumberFitMomentum() > 0)
-              mom = track.VertexMomentum();
-            // fill non-bezier-track reco branches
-            TrackerData.trkId[iTrk]                    = track.ID();
+          tlen        = length(track);
+          if(track.NumberFitMomentum() > 0)
+            mom = track.VertexMomentum();
+          // fill non-bezier-track reco branches
+          TrackID = track.ID();
         }
       }
-      double theta_xz = std::atan2(dir_start.X(), dir_start.Z());
-      double theta_yz = std::atan2(dir_start.Y(), dir_start.Z());
-      double dpos = bdist(pos);
-      double dend = bdist(end);
       
-      TrackerData.trkstartx[iTrk]             = pos.X();
-      TrackerData.trkstarty[iTrk]             = pos.Y();
-      TrackerData.trkstartz[iTrk]             = pos.Z();
-      TrackerData.trkstartd[iTrk]             = dpos;
-      TrackerData.trkendx[iTrk]               = end.X();
-      TrackerData.trkendy[iTrk]               = end.Y();
-      TrackerData.trkendz[iTrk]               = end.Z();
-      TrackerData.trkendd[iTrk]               = dend;
-      TrackerData.trktheta[iTrk]              = dir_start.Theta();
-      TrackerData.trkphi[iTrk]                = dir_start.Phi();
-      TrackerData.trkstartdcosx[iTrk]         = dir_start.X();
-      TrackerData.trkstartdcosy[iTrk]         = dir_start.Y();
-      TrackerData.trkstartdcosz[iTrk]         = dir_start.Z();
-      TrackerData.trkenddcosx[iTrk]           = dir_end.X();
-      TrackerData.trkenddcosy[iTrk]           = dir_end.Y();
-      TrackerData.trkenddcosz[iTrk]           = dir_end.Z();
-      TrackerData.trkthetaxz[iTrk]            = theta_xz;
-      TrackerData.trkthetayz[iTrk]            = theta_yz;
-      TrackerData.trkmom[iTrk]                = mom;
-      TrackerData.trklen[iTrk]                = tlen;
+      if (ntraj > 0) {
+        double theta_xz = std::atan2(dir_start.X(), dir_start.Z());
+        double theta_yz = std::atan2(dir_start.Y(), dir_start.Z());
+        double dpos = bdist(pos);
+        double dend = bdist(end);
+        
+        TrackerData.trkId[iTrk]                 = TrackID;
+        TrackerData.trkstartx[iTrk]             = pos.X();
+        TrackerData.trkstarty[iTrk]             = pos.Y();
+        TrackerData.trkstartz[iTrk]             = pos.Z();
+        TrackerData.trkstartd[iTrk]             = dpos;
+        TrackerData.trkendx[iTrk]               = end.X();
+        TrackerData.trkendy[iTrk]               = end.Y();
+        TrackerData.trkendz[iTrk]               = end.Z();
+        TrackerData.trkendd[iTrk]               = dend;
+        TrackerData.trktheta[iTrk]              = dir_start.Theta();
+        TrackerData.trkphi[iTrk]                = dir_start.Phi();
+        TrackerData.trkstartdcosx[iTrk]         = dir_start.X();
+        TrackerData.trkstartdcosy[iTrk]         = dir_start.Y();
+        TrackerData.trkstartdcosz[iTrk]         = dir_start.Z();
+        TrackerData.trkenddcosx[iTrk]           = dir_end.X();
+        TrackerData.trkenddcosy[iTrk]           = dir_end.Y();
+        TrackerData.trkenddcosz[iTrk]           = dir_end.Z();
+        TrackerData.trkthetaxz[iTrk]            = theta_xz;
+        TrackerData.trkthetayz[iTrk]            = theta_yz;
+        TrackerData.trkmom[iTrk]                = mom;
+        TrackerData.trklen[iTrk]                = tlen;
+      } // if we have trajectory
 
       art::FindMany<anab::Calorimetry> fmcal(trackListHandle[iTracker], evt, fCalorimetryModuleLabel[iTracker]);
       if (fmcal.isValid()){
@@ -1475,7 +1746,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       } // if has calorimetry info
 
       //track truth information
-      if (!fData->isdata){
+      if (isMC){
         //get the hits on each plane
         art::FindManyP<recob::Hit>      fmht(trackListHandle[iTracker], evt, fTrackModuleLabel[iTracker]);
         std::vector< art::Ptr<recob::Hit> > allHits = fmht.at(iTrk);
@@ -1504,45 +1775,15 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           //std::cout<<"\n"<<trkpdgtruth[iTracker][iTrk][ipl]<<"\t"<<trkefftruth[iTracker][iTrk][ipl];
           }
         }
-      }//end if (!isdata)
+      }//end if (isMC)
     }//end loop over track
   }//end loop over track module labels
 
   //mc truth information
-  if (!fData->isdata){//is MC
-    const sim::ParticleList& plist = bt->ParticleList();
+  if (isMC){
     //save neutrino interaction information
     fData->mcevts_truth = mclist.size();
-    if (fData->mcevts_truth){//at least one mc record
-      //if (mclist[0]->NeutrinoSet()){//is neutrino
-      //sometimes there can be multiple neutrino interactions in one spill
-      //this is trying to find the primary interaction
-      //by looking for the highest energy deposition
-      std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
-      for (size_t i = 0; i<hitlist.size(); i++){
-        //if (hitlist[i]->View() == geo::kV){//collection view
-        std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
-        for (size_t e = 0; e<eveIDs.size(); e++){
-          art::Ptr<simb::MCTruth> mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
-          mctruthemap[mctruth]+=eveIDs[e].energy;
-        }
-        //}
-      }
-      art::Ptr<simb::MCTruth> mctruth = mclist[0];
-      double maxenergy = -1;
-      int imc = 0;
-      int imc0 = 0;
-      for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
-        if ((ii->second)>maxenergy){
-          maxenergy = ii->second;
-          mctruth = ii->first;
-          imc = imc0;
-        }
-        imc0++;
-      }
-
-      imc = 0; //set imc to 0 to solve a confusion for BNB+cosmic files where there are two MCTruth
-
+    if (fData->mcevts_truth > 0){//at least one mc record
       if (mctruth->NeutrinoSet()){
         fData->nuPDG_truth = mctruth->GetNeutrino().Nu().PdgCode();
         fData->ccnc_truth = mctruth->GetNeutrino().CCNC();
@@ -1575,140 +1816,154 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         //genie particles information
         fData->genie_no_primaries=mctruth->NParticles();
 
-        for(int j = 0; j < mctruth->NParticles(); ++j){
-          simb::MCParticle part(mctruth->GetParticle(j));
-          
-          fData->genie_primaries_pdg[j]=part.PdgCode();
-          fData->genie_Eng[j]=part.E();
-          fData->genie_Px[j]=part.Px();
-          fData->genie_Py[j]=part.Py();
-          fData->genie_Pz[j]=part.Pz();
-          fData->genie_P[j]=part.Px();
-          fData->genie_status_code[j]=part.StatusCode();
-          fData->genie_mass[j]=part.Mass();
-          fData->genie_trackID[j]=part.TrackId();
-          fData->genie_ND[j]=part.NumberDaughters();
-          fData->genie_mother[j]=part.Mother();
+        size_t StoreParticles = std::min((size_t) fData->genie_no_primaries, fData->GetMaxGeniePrimaries());
+        if (fData->genie_no_primaries > (int) StoreParticles) {
+          // got this error? consider increasing kMaxTrack
+          // (or ask for a redesign using vectors)
+          mf::LogError("AnalysisTree:limits") << "event has "
+            << fData->genie_no_primaries << " MC particles, only "
+            << StoreParticles << " stored in tree";
         }
-      }
+        for(size_t iPart = 0; iPart < StoreParticles; ++iPart){
+          const simb::MCParticle& part(mctruth->GetParticle(iPart));
+          
+          fData->genie_primaries_pdg[iPart]=part.PdgCode();
+          fData->genie_Eng[iPart]=part.E();
+          fData->genie_Px[iPart]=part.Px();
+          fData->genie_Py[iPart]=part.Py();
+          fData->genie_Pz[iPart]=part.Pz();
+          fData->genie_P[iPart]=part.Px();
+          fData->genie_status_code[iPart]=part.StatusCode();
+          fData->genie_mass[iPart]=part.Mass();
+          fData->genie_trackID[iPart]=part.TrackId();
+          fData->genie_ND[iPart]=part.NumberDaughters();
+          fData->genie_mother[iPart]=part.Mother();
+        } // for particle
+      } //if neutrino set
 
       //GEANT particles information
-      std::vector<const simb::MCParticle* > geant_part;
-      int i = 0;
-      fData->geant_list_size_in_tpcFV = 0;
-      for(size_t p = 0; p < plist.size(); ++p)
-      {
-        geant_part.push_back(plist.Particle(p));
-        assert(plist.Particle(p) != 0);
-        TVector3 mcstart, mcend;
-        double plen = length(*plist.Particle(p), mcstart, mcend);
-        if ( (plen==0) || plist.Particle(p)->PdgCode() > 10000) continue;
-        else{
-          fData->geant_tpcFV_pdg[i] = plist.Particle(p)->PdgCode();
-          double mctheta_xz = std::atan2(plist.Particle(p)->Px(), plist.Particle(p)->Pz());
-          double mctheta_yz = std::atan2(plist.Particle(p)->Py(), plist.Particle(p)->Pz());
-
-          fData->geant_tpcFV_trackId[i] = plist.Particle(p)->TrackId();
-          fData->geant_tpcFV_status[i]  = plist.Particle(p)->StatusCode();
-          //
-          fData->geant_tpcFV_orig_E[i]             = plist.Particle(p)->E();
-          fData->geant_tpcFV_orig_px[i]     = plist.Particle(p)->Px();
-          fData->geant_tpcFV_orig_py[i]     = plist.Particle(p)->Py();
-          fData->geant_tpcFV_orig_pz[i]     = plist.Particle(p)->Pz();
-          fData->geant_tpcFV_orig_startx[i] = plist.Particle(p)->Vx();
-          fData->geant_tpcFV_orig_starty[i] = plist.Particle(p)->Vy();
-          fData->geant_tpcFV_orig_startz[i] = plist.Particle(p)->Vz();
-          fData->geant_tpcFV_orig_startt[i] = plist.Particle(p)->T();
-          fData->geant_tpcFV_orig_endx[i]   = plist.Particle(p)->EndX();
-          fData->geant_tpcFV_orig_endy[i]   = plist.Particle(p)->EndY();
-          fData->geant_tpcFV_orig_endz[i]   = plist.Particle(p)->EndZ();
-          fData->geant_tpcFV_orig_endt[i]   = plist.Particle(p)->EndT();
-          //
-          fData->geant_tpcFV_startx[i]   = mcstart.X();
-          fData->geant_tpcFV_starty[i]   = mcstart.Y();
-          fData->geant_tpcFV_startz[i]   = mcstart.Z();
-          fData->geant_tpcFV_endx[i]          = mcend.X();
-          fData->geant_tpcFV_endy[i]          = mcend.Y();
-          fData->geant_tpcFV_endz[i]          = mcend.Z();
-          fData->geant_tpcFV_theta[i]          = plist.Particle(p)->Momentum().Theta();
-          fData->geant_tpcFV_phi[i]          = plist.Particle(p)->Momentum().Phi();
-          fData->geant_tpcFV_theta_xz[i] = mctheta_xz;
-          fData->geant_tpcFV_theta_yz[i] = mctheta_yz;
-          fData->geant_tpcFV_mom[i]          = plist.Particle(p)->Momentum().Vect().Mag();
-          fData->geant_tpcFV_len[i]          = plen;
-          i++;
-        }
-      }
-      fData->geant_list_size_in_tpcFV = i;
-
+      const sim::ParticleList& plist = bt->ParticleList();
+      
       std::string pri("primary");
       int primary=0;
       int geant_particle=0;
-      //determine the number of primary particles from geant:
-
-      for( unsigned int i = 0; i < geant_part.size(); ++i ){
-        geant_particle++;
-        if(geant_part[i]->Process()==pri){
-          primary++;
+      size_t iFVPart = 0;
+      for(size_t iPart = 0; iPart < plist.size(); ++iPart)
+      {
+        const simb::MCParticle* pPart = plist.Particle(iPart);
+        if (!pPart) {
+          throw art::Exception(art::errors::LogicError)
+            << "GEANT particle #" << iPart << " returned a null pointer";
         }
-      }
-
-      fData->no_primaries=primary;
-      fData->geant_list_size=geant_particle;
-      //std::cout<<"\n"<<geant_list_size<<"\n";
-
-      for( unsigned int i = 0; i < geant_part.size(); ++i ){
-
-        if(geant_part[i]->Process()==pri){
-          fData->process_primary[i]=1;
+        
+        ++geant_particle;
+        bool isPrimary = pPart->Process() == pri;
+        if (isPrimary) ++primary;
+        
+        if (iPart < fData->GetMaxGEANTparticles()) {
+          fData->process_primary[iPart] = int(isPrimary);
+          fData->Mother[iPart]=pPart->Mother();
+          fData->TrackId[iPart]=pPart->TrackId();
+          fData->pdg[iPart]=pPart->PdgCode();
+          fData->Eng[iPart]=pPart->E();
+          fData->Px[iPart]=pPart->Px();
+          fData->Py[iPart]=pPart->Py();
+          fData->Pz[iPart]=pPart->Pz();
+          fData->StartPointx[iPart]=pPart->Vx();
+          fData->StartPointy[iPart]=pPart->Vy();
+          fData->StartPointz[iPart]=pPart->Vz();
+          fData->EndPointx[iPart]=pPart->EndPosition()[0];
+          fData->EndPointy[iPart]=pPart->EndPosition()[1];
+          fData->EndPointz[iPart]=pPart->EndPosition()[2];
+          fData->NumberDaughters[iPart]=pPart->NumberDaughters();
         }
-        else{
-          fData->process_primary[i]=0;
+        else if (iPart == fData->GetMaxGEANTparticles()) {
+          // got this error? consider increasing kMaxTrack
+          // (or ask for a redesign using vectors)
+          mf::LogError("AnalysisTree:limits") << "event has "
+            << plist.size() << " MC particles, only "
+            << fData->GetMaxGEANTparticles() << " will be stored in tree";
         }
+        
+        // is it fiducial?
+        TVector3 mcstart, mcend;
+        double plen = length(*pPart, mcstart, mcend);
+        if ( (plen==0) || pPart->PdgCode() > 10000) continue;
+        
+        if (iFVPart < fData->GetMaxGEANTparticlesInTPCFV()) {
+          double mctheta_xz = std::atan2(pPart->Px(), pPart->Pz());
+          double mctheta_yz = std::atan2(pPart->Py(), pPart->Pz());
+          
+          fData->geant_tpcFV_pdg[iFVPart]         = pPart->PdgCode();
+          fData->geant_tpcFV_trackId[iFVPart]     = pPart->TrackId();
+          fData->geant_tpcFV_status[iFVPart]      = pPart->StatusCode();
+          //
+          fData->geant_tpcFV_orig_E[iFVPart]      = pPart->E();
+          fData->geant_tpcFV_orig_px[iFVPart]     = pPart->Px();
+          fData->geant_tpcFV_orig_py[iFVPart]     = pPart->Py();
+          fData->geant_tpcFV_orig_pz[iFVPart]     = pPart->Pz();
+          fData->geant_tpcFV_orig_startx[iFVPart] = pPart->Vx();
+          fData->geant_tpcFV_orig_starty[iFVPart] = pPart->Vy();
+          fData->geant_tpcFV_orig_startz[iFVPart] = pPart->Vz();
+          fData->geant_tpcFV_orig_startt[iFVPart] = pPart->T();
+          fData->geant_tpcFV_orig_endx[iFVPart]   = pPart->EndX();
+          fData->geant_tpcFV_orig_endy[iFVPart]   = pPart->EndY();
+          fData->geant_tpcFV_orig_endz[iFVPart]   = pPart->EndZ();
+          fData->geant_tpcFV_orig_endt[iFVPart]   = pPart->EndT();
+          //
+          fData->geant_tpcFV_startx[iFVPart]      = mcstart.X();
+          fData->geant_tpcFV_starty[iFVPart]      = mcstart.Y();
+          fData->geant_tpcFV_startz[iFVPart]      = mcstart.Z();
+          fData->geant_tpcFV_endx[iFVPart]        = mcend.X();
+          fData->geant_tpcFV_endy[iFVPart]        = mcend.Y();
+          fData->geant_tpcFV_endz[iFVPart]        = mcend.Z();
+          fData->geant_tpcFV_theta[iFVPart]       = pPart->Momentum().Theta();
+          fData->geant_tpcFV_phi[iFVPart]         = pPart->Momentum().Phi();
+          fData->geant_tpcFV_theta_xz[iFVPart]    = mctheta_xz;
+          fData->geant_tpcFV_theta_yz[iFVPart]    = mctheta_yz;
+          fData->geant_tpcFV_mom[iFVPart]         = pPart->Momentum().Vect().Mag();
+          fData->geant_tpcFV_len[iFVPart]         = plen;
+        }
+        else if (iFVPart == fData->GetMaxGEANTparticlesInTPCFV()) {
+          // got this error? consider increasing kMaxTrack
+          // (or ask for a redesign using vectors)
+          mf::LogError("AnalysisTree:limits") << "event has "
+            << plist.size() << " MC particles in fiducial volume, only "
+            << fData->GetMaxGEANTparticlesInTPCFV() << " will be stored in tree";
+        }
+        ++iFVPart;
+      } // for particles
+      
+      fData->geant_list_size_in_tpcFV = iFVPart;
+      fData->no_primaries = primary;
+      fData->geant_list_size = geant_particle;
 
-        fData->Mother[i]=geant_part[i]->Mother();
-        fData->TrackId[i]=geant_part[i]->TrackId();
-        fData->pdg[i]=geant_part[i]->PdgCode();
-        fData->Eng[i]=geant_part[i]->E();
-        fData->Px[i]=geant_part[i]->Px();
-        fData->Py[i]=geant_part[i]->Py();
-        fData->Pz[i]=geant_part[i]->Pz();
-        fData->StartPointx[i]=geant_part[i]->Vx();
-        fData->StartPointy[i]=geant_part[i]->Vy();
-        fData->StartPointz[i]=geant_part[i]->Vz();
-        fData->EndPointx[i]=geant_part[i]->EndPosition()[0];
-        fData->EndPointy[i]=geant_part[i]->EndPosition()[1];
-        fData->EndPointz[i]=geant_part[i]->EndPosition()[2];
-        fData->NumberDaughters[i]=geant_part[i]->NumberDaughters();
-      }
+      
+      FillWith(fData->MergedId, 0);
 
-    int currentMergedId = 1;
-    int currentMotherId = 0;
-    int currentMotherTrackId = 0;
-    for(int i = 0; i < fData->geant_list_size; i++) {
-       fData->MergedId[i] = 0;
-    }
-
-    for(int i = fData->geant_list_size - 1; i >= 0; i--) {
-       if(fData->MergedId[i] == 0) {
-          fData->MergedId[i] = currentMergedId;
-          currentMotherId = fData->Mother[i];
-          currentMotherTrackId = -1;
-          while(currentMotherId > 0) {
-             for(int j = 0; j < fData->geant_list_size; j++) {
-                if(fData->TrackId[j] == currentMotherId) currentMotherTrackId = j;
-             }
-             if(fData->pdg[i] == fData->pdg[currentMotherTrackId]) {
-                fData->MergedId[currentMotherTrackId] = currentMergedId;
-                currentMotherId = fData->Mother[currentMotherTrackId];
-             }
-             else currentMotherId = 0;
-          }
-          currentMergedId++;
-       }
-    }
-   }//if (mcevts_truth){//at least one mc record
-  }//if (!isdata){
+      int currentMergedId = 1;
+      for(size_t iPart = fData->geant_list_size; iPart-- > 0; ) {
+        if (fData->MergedId[iPart]) continue;
+        fData->MergedId[iPart] = currentMergedId;
+        int currentMotherId = fData->Mother[iPart];
+        int currentMotherTrackId = -1;
+        while(currentMotherId > 0) {
+          size_t iMother = fData->TrackId.size();
+          while (iMother-- > 0) {
+            if (fData->TrackId[iMother] != currentMotherId) continue;
+            currentMotherTrackId = iMother;
+            break;
+          } // while
+          if (fData->pdg[iPart] != fData->pdg[currentMotherTrackId]) break;
+          
+          fData->MergedId[currentMotherTrackId] = currentMergedId;
+          currentMotherId = fData->Mother[currentMotherTrackId];
+        }
+        ++currentMergedId;
+      } // for merging check
+      
+    }//if (mcevts_truth){//at least one mc record
+  }//if (isMC){
   fData->taulife = LArProp->ElectronLifetime();
   fTree->Fill();
   
@@ -1720,7 +1975,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       << " allocated):"
       << "\n - " << fData->no_hits << " hits (" << fData->GetMaxHits() << ")"
       << "\n - " << fData->genie_no_primaries << " genie primaries (" << fData->GetMaxGeniePrimaries() << ")"
-      << "\n - " << fData->no_primaries << " GEANT primaries (" << fData->GetMaxGEANTePrimaries() << ")"
+      << "\n - " << fData->no_primaries << " GEANT primaries (" << fData->GetMaxGEANTparticles() << ")"
       << "\n - " << ((int) fData->kNTracker) << " trackers:"
       ;
     
