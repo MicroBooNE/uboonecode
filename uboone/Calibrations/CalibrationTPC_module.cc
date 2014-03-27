@@ -15,14 +15,16 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Handle.h" 
+#include "messagefacility/MessageLogger/MessageLogger.h" 
 
 #include "RawData/RawDigit.h"
 
-#include "CalibrationTPC_Algs.h"
+#include "CalibrationTPC_Algs.cc"
 
 namespace calibration {
 
@@ -32,7 +34,7 @@ namespace calibration {
     explicit CalibrationTPC(fhicl::ParameterSet const& pset);
     virtual ~CalibrationTPC();
 
-    void analyze(art::Event& evt);
+    void analyze(art::Event const& evt);
     void reconfigure(fhicl::ParameterSet const& pset);
     
     void beginJob();
@@ -64,7 +66,8 @@ namespace calibration {
 
 
   //-------------------------------------------------------------------
-  CalibrationTPC::CalibrationTPC(fhicl::ParameterSet const& pset){ 
+  CalibrationTPC::CalibrationTPC(fhicl::ParameterSet const& pset)
+    : EDAnalyzer(pset){ 
     this->reconfigure(pset); 
   }
 
@@ -75,8 +78,8 @@ namespace calibration {
 
   //-------------------------------------------------------------------
   void CalibrationTPC::reconfigure(fhicl::ParameterSet const& pset){
-    fRawDigitModuleLabel = p.get<std::string>("RawDigitModuleLabel");
-    fNFFTBins            = p.get<unsigned int>("NFFTBins");
+    fRawDigitModuleLabel = pset.get<std::string>("RawDigitModuleLabel");
+    fNFFTBins            = pset.get<unsigned int>("NFFTBins");
   }
 
 
@@ -106,15 +109,20 @@ namespace calibration {
 
   
   //-------------------------------------------------------------------
-  void CalibrationTPC::analyze(art::Event& evt){
-
+  void CalibrationTPC::analyze(art::Event const& evt){
+    
     unsigned int run = evt.run();
     unsigned int subrun = evt.subRun();
-
+    
+    LOG_INFO ("CalibrationTPC")
+      << "Processing Run " << run 
+      << ", Subrun " << subrun 
+      << ", Event " << evt.event();
+    
     art::Handle< std::vector<raw::RawDigit> > rawDigitHandle;
     evt.getByLabel(fRawDigitModuleLabel,rawDigitHandle);
     std::vector<raw::RawDigit> const& rawDigitVector(*rawDigitHandle);
-
+    
     //initialize per-event vectors
     const size_t n_channels = rawDigitVector.size();
     std::vector<float> pedestals(n_channels);
@@ -122,13 +130,15 @@ namespace calibration {
     std::vector< std::vector<float> > 
       noise_spectrum(n_channels, 
 		     std::vector<float>(fNFFTBins));
-
-
+    
     //now run the code
+    /*
     analyzeEmptyEvent(rawDigitVector,
 		      pedestals,
 		      noise,
 		      noise_spectrum);
+    */
+    calcPedestal(rawDigitVector,pedestals);
   }
 
 

@@ -9,7 +9,8 @@
  */
 
 #include "CalibrationTPC_Algs.h"
-#include "<math.h>"
+#include <cmath>
+#include <iostream>
 
 namespace calibration{
 
@@ -20,7 +21,7 @@ namespace calibration{
 			  std::vector<std::vector<float> > & noise_spectrum){
     
 
-    calcPedesstal(rawDigit, pedestal);
+    calcPedestal(rawDigit, pedestal);
     calcNoise(rawDigit, pedestal, noise, noise_spectrum);
 
   }
@@ -32,7 +33,7 @@ namespace calibration{
 
     const unsigned int n_channels = rawDigit.size();
     
-    for(unsigned int ich=0; ich<n_chanels; ich++)
+    for(unsigned int ich=0; ich<n_channels; ich++)
       calcPedestal_SingleChannel(rawDigit.at(ich).fADC,
 				 pedestal.at(ich));
  
@@ -57,12 +58,12 @@ namespace calibration{
   void calcNoise( std::vector<raw::RawDigit> const& rawDigit,
 		  std::vector<float> const& pedestal,
 		  std::vector<float> & noise,
-		  std::vector< st::vector<float> > & noise_spectrum){
+		  std::vector< std::vector<float> > & noise_spectrum){
 
 
     const unsigned int n_channels = rawDigit.size();
     
-    for(unsigned int ich=0; ich<n_chanels; ich++)
+    for(unsigned int ich=0; ich<n_channels; ich++)
       calcNoise_SingleChannel(rawDigit.at(ich).fADC,
 			      pedestal.at(ich),
 			      noise.at(ich),
@@ -80,20 +81,21 @@ namespace calibration{
 
     //should never happen, but let's be safe, not sorry
     if(n_samples < 2){
-      LOG_ERROR("CalibrationTPC_Algs::calcNoise_SingleChannel")
-	<< "Number of samples (" << n_samples << ") must be greater than 1!";
+      std::cerr << "Error in CalibrationTPC_Algs::calcNoise_SingleChannel" 
+		<< "\nNumber of samples (" << n_samples << ")"
+		<< " must be greater than 1!";
       noise=0;
       return;
     }
 
     noise=0;
-    for(unisgned int it=0; it<n_samples; it++){
+    for(unsigned int it=0; it<n_samples; it++){
       noise += (rawData.at(it)-pedestal)*(rawData.at(it)-pedestal);
 
       // STUFF HERE FOR NOISE SPECTRUM!!!!
     }
 
-    noise = std::sqrt(noise / (n_samples - 1));
+    noise = sqrt(noise / (n_samples - 1));
   }
 
 }

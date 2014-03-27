@@ -1,20 +1,19 @@
 #ifndef CALIBRATIONTPC_ALGS_H
 #define CALIBRATIONTPC_ALGS_H
 /*!
- * Title:   CalibrationTPC_Algs
+ * Title:   CalibrationTPC Algs
  * Author:  wketchum@lanl.gov
  * Inputs:  raw::RawDigit
  * Outputs: Histograms and other nice data
  *
  * Description:
- * This is the header file for the CalibrationTPC_Algs, which are a collection
- * algorithms for processing electronics calibrations runs.
+ * These are the actual functions that do things for electronics calibration.
  */
 
 #include <vector>
 #include "RawData/RawDigit.h"
 
-namespace calibration {
+namespace calibration{
 
   void analyzeEmptyEvent( std::vector<raw::RawDigit> const& rawDigit,
 			  std::vector<float> & pedestal,
@@ -29,12 +28,11 @@ namespace calibration {
   void calcNoise( std::vector<raw::RawDigit> const& rawDigit,
 		  std::vector<float> const& pedestal,
 		  std::vector<float> & noise,
-		  std::vector< st::vector<float> > & noise_spectrum);
+		  std::vector< std::vector<float> > & noise_spectrum);
   void calcNoise_SingleChannel( std::vector<short> const& rawData,
 				float const& pedestal,
 				float & noise,
 				std::vector<float> & noise_spectrum);
 
-} //end namespace calibration
-
+}
 #endif //CALIBRATIONTPC_ALGS_H
