@@ -10,7 +10,7 @@
 // [x] create the data structure connected to the tree only when needed
 // [x] reduce the size of the elemental items (Double_t => Float_t could damage precision)
 // [x] create a different structure for each tracker, allocate only what needed
-// [ ] use variable size array buffers for each tracker datum instead of [kMaxTrack]
+// [x] use variable size array buffers for each tracker datum instead of [kMaxTrack]
 // [ ] turn the truth/GEANT information into vectors
 // [ ] fill the tree branch by branch
 // 
@@ -63,6 +63,13 @@
 // necessarily make memory available, because of how std::vector::resize()
 // works; that feature can be implemented, but it currently has not been.
 // 
+// The BoxedArray<> class is a wrapper around a normal C array; it is needed
+// to be able to include such structure in a std::vector. This container
+// requires its objects to be default-constructable and copy-constructable,
+// and a C array is neither. BoxedArray<> is: the default construction leaves it
+// uninitialized (for speed reasons) while the copy construction is performed
+// as in a Plain Old Data structure (memcpy; really!).
+// 
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef ANALYSISTREE_H
@@ -105,12 +112,14 @@
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "RecoObjects/BezierTrack.h"
 
+#include <cstring> // std::memcpy()
 #include <vector>
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <algorithm>
 #include <functional> // std::mem_fun_ref
+#include <initializer_list>
 
 #include "TTree.h"
 #include "TFile.h"
@@ -127,21 +136,80 @@ constexpr int kMaxPrimaries  = 20000;  //maximum number of primary particles
 constexpr int kMaxTrackHits  = 1000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 10;    //number of trackers passed into fTrackModuleLabel
 
+
+/// total_extent\<T\>::value has the total number of elements of an array
+template <typename T>
+struct total_extent {
+  using value_type = size_t;
+  static constexpr value_type value
+    = sizeof(T) / sizeof(typename std::remove_all_extents<T>::type);
+}; // total_extent<>
+
+
 namespace microboone {
 
   class AnalysisTreeDataStruct {
       public:
     
+    /// A wrapper to a C array
+    template <typename Array_t>
+    class BoxedArray {
+        protected:
+      Array_t array; // actual data
+      
+        public:
+      using This_t = BoxedArray<Array_t>;
+      typedef typename std::remove_all_extents<Array_t>::type Data_t;
+      
+      BoxedArray() {} // no initialization
+      BoxedArray(const This_t& from)
+        { std::memcpy((char*) &(data()), (char*) &(from.data()), sizeof(Array_t)); }
+      
+      Array_t& data() { return array; }
+      const Array_t& data() const { return array; }
+      
+      /// Return the total data size of this object in bytes
+      static constexpr size_t data_size() { return sizeof(array); }
+      
+      /// Return the total size of this object in bytes
+      static constexpr size_t memory_size() { return sizeof(This_t); }
+      
+      //@{
+      /// begin/end interface
+      static constexpr size_t size() { return total_extent<Array_t>::value; }
+      Data_t* begin() { return reinterpret_cast<Data_t*>(&array); }
+      const Data_t* begin() const { return reinterpret_cast<const Data_t*>(&array); }
+      Data_t* end() { return begin() + size(); }
+      const Data_t* end() const { return begin() + size(); }
+      //@}
+      
+      //@{
+      /// Array interface
+      auto operator[] (size_t index) -> decltype(*array) { return array[index]; }
+      auto operator[] (size_t index) const -> decltype(*array) { return array[index]; }
+      auto operator+ (ptrdiff_t index) -> decltype(&*array) { return array + index; }
+      auto operator+ (ptrdiff_t index) const -> decltype(&*array) { return array + index; }
+      auto operator- (ptrdiff_t index) -> decltype(&*array) { return array - index; }
+      auto operator- (ptrdiff_t index) const -> decltype(&*array) { return array - index; }
+      auto operator* () -> decltype(*array) { return *array; }
+      auto operator* () const -> decltype(*array) { return *array; }
+      
+      operator decltype(&array[0]) () { return &array[0]; }
+      operator decltype(&array[0]) () const { return &array[0]; }
+      //@}
+      
+    }; // BoxedArray
+    
     class TrackDataStruct {
         public:
       template <typename T>
-      using TrackData_t = T[kMaxTrack];
+      using TrackData_t = std::vector<T>;
       template <typename T>
-      using PlaneData_t = T[kMaxTrack][kNplanes];
+      using PlaneData_t = std::vector<BoxedArray<T[kNplanes]>>;
       template <typename T>
-      using HitData_t = T[kMaxTrack][kNplanes][kMaxTrackHits];
+      using HitData_t = std::vector<BoxedArray<T[kNplanes][kMaxTrackHits]>>;
       template <typename T>
-      using HitCoordData_t = T[kMaxTrack][kNplanes][kMaxTrackHits][3];
+      using HitCoordData_t = std::vector<BoxedArray<T[kNplanes][kMaxTrackHits][3]>>;
       
       size_t MaxTracks; ///< maximum number of storable tracks
       
@@ -195,8 +263,95 @@ namespace microboone {
       size_t GetMaxTracks() const { return MaxTracks; }
       size_t GetMaxPlanesPerTrack(int /* iTrack */ = 0) const
         { return (size_t) kNplanes; }
-      size_t GetMaxHitsPerTrack(int /* iTrack */ = 0) const
+      size_t GetMaxHitsPerTrack(int /* iTrack */ = 0, int /* ipl */ = 0) const
         { return (size_t) kMaxTrackHits; }
+      
+      /// Return the total size of data from dynamic vectors in bytes
+      size_t dynamic_data_size() const
+        {
+          return trkke.size() * sizeof(typename decltype(trkke)::value_type)
+            + trkrange.size() * sizeof(typename decltype(trkrange)::value_type)
+            + trkidtruth.size() * sizeof(typename decltype(trkidtruth)::value_type)
+            + trkpdgtruth.size() * sizeof(typename decltype(trkpdgtruth)::value_type)
+            + trkefftruth.size() * sizeof(typename decltype(trkefftruth)::value_type)
+            + trkpurtruth.size() * sizeof(typename decltype(trkpurtruth)::value_type)
+            + trkpitchc.size() * sizeof(typename decltype(trkpitchc)::value_type)
+            + ntrkhits.size() * sizeof(typename decltype(ntrkhits)::value_type)
+            + trkdedx.size() * sizeof(typename decltype(trkdedx)::value_type)
+            + trkdqdx.size() * sizeof(typename decltype(trkdqdx)::value_type)
+            + trkresrg.size() * sizeof(typename decltype(trkresrg)::value_type)
+            + trkxyz.size() * sizeof(typename decltype(trkxyz)::value_type)
+            + trkId.size() * sizeof(typename decltype(trkId)::value_type)
+            + trkstartx.size() * sizeof(typename decltype(trkstartx)::value_type)
+            + trkstarty.size() * sizeof(typename decltype(trkstarty)::value_type)
+            + trkstartz.size() * sizeof(typename decltype(trkstartz)::value_type)
+            + trkstartd.size() * sizeof(typename decltype(trkstartd)::value_type)
+            + trkendx.size() * sizeof(typename decltype(trkendx)::value_type)
+            + trkendy.size() * sizeof(typename decltype(trkendy)::value_type)
+            + trkendz.size() * sizeof(typename decltype(trkendz)::value_type)
+            + trkendd.size() * sizeof(typename decltype(trkendd)::value_type)
+            + trktheta.size() * sizeof(typename decltype(trktheta)::value_type)
+            + trkphi.size() * sizeof(typename decltype(trkphi)::value_type)
+            + trkstartdcosx.size() * sizeof(typename decltype(trkstartdcosx)::value_type)
+            + trkstartdcosy.size() * sizeof(typename decltype(trkstartdcosy)::value_type)
+            + trkstartdcosz.size() * sizeof(typename decltype(trkstartdcosz)::value_type)
+            + trkenddcosx.size() * sizeof(typename decltype(trkenddcosx)::value_type)
+            + trkenddcosy.size() * sizeof(typename decltype(trkenddcosy)::value_type)
+            + trkenddcosz.size() * sizeof(typename decltype(trkenddcosz)::value_type)
+            + trkthetaxz.size() * sizeof(typename decltype(trkthetaxz)::value_type)
+            + trkthetayz.size() * sizeof(typename decltype(trkthetayz)::value_type)
+            + trkmom.size() * sizeof(typename decltype(trkmom)::value_type)
+            + trklen.size() * sizeof(typename decltype(trklen)::value_type)
+           ;
+        } // dynamic_data_size()
+      
+      /// Return the total size allocated for data from dynamic vectors in bytes
+      size_t dynamic_data_capacity() const
+        {
+          return trkke.capacity() * sizeof(typename decltype(trkke)::value_type)
+            + trkrange.capacity() * sizeof(typename decltype(trkrange)::value_type)
+            + trkidtruth.capacity() * sizeof(typename decltype(trkidtruth)::value_type)
+            + trkpdgtruth.capacity() * sizeof(typename decltype(trkpdgtruth)::value_type)
+            + trkefftruth.capacity() * sizeof(typename decltype(trkefftruth)::value_type)
+            + trkpurtruth.capacity() * sizeof(typename decltype(trkpurtruth)::value_type)
+            + trkpitchc.capacity() * sizeof(typename decltype(trkpitchc)::value_type)
+            + ntrkhits.capacity() * sizeof(typename decltype(ntrkhits)::value_type)
+            + trkdedx.capacity() * sizeof(typename decltype(trkdedx)::value_type)
+            + trkdqdx.capacity() * sizeof(typename decltype(trkdqdx)::value_type)
+            + trkresrg.capacity() * sizeof(typename decltype(trkresrg)::value_type)
+            + trkxyz.capacity() * sizeof(typename decltype(trkxyz)::value_type)
+            + trkId.capacity() * sizeof(typename decltype(trkId)::value_type)
+            + trkstartx.capacity() * sizeof(typename decltype(trkstartx)::value_type)
+            + trkstarty.capacity() * sizeof(typename decltype(trkstarty)::value_type)
+            + trkstartz.capacity() * sizeof(typename decltype(trkstartz)::value_type)
+            + trkstartd.capacity() * sizeof(typename decltype(trkstartd)::value_type)
+            + trkendx.capacity() * sizeof(typename decltype(trkendx)::value_type)
+            + trkendy.capacity() * sizeof(typename decltype(trkendy)::value_type)
+            + trkendz.capacity() * sizeof(typename decltype(trkendz)::value_type)
+            + trkendd.capacity() * sizeof(typename decltype(trkendd)::value_type)
+            + trktheta.capacity() * sizeof(typename decltype(trktheta)::value_type)
+            + trkphi.capacity() * sizeof(typename decltype(trkphi)::value_type)
+            + trkstartdcosx.capacity() * sizeof(typename decltype(trkstartdcosx)::value_type)
+            + trkstartdcosy.capacity() * sizeof(typename decltype(trkstartdcosy)::value_type)
+            + trkstartdcosz.capacity() * sizeof(typename decltype(trkstartdcosz)::value_type)
+            + trkenddcosx.capacity() * sizeof(typename decltype(trkenddcosx)::value_type)
+            + trkenddcosy.capacity() * sizeof(typename decltype(trkenddcosy)::value_type)
+            + trkenddcosz.capacity() * sizeof(typename decltype(trkenddcosz)::value_type)
+            + trkthetaxz.capacity() * sizeof(typename decltype(trkthetaxz)::value_type)
+            + trkthetayz.capacity() * sizeof(typename decltype(trkthetayz)::value_type)
+            + trkmom.capacity() * sizeof(typename decltype(trkmom)::value_type)
+            + trklen.capacity() * sizeof(typename decltype(trklen)::value_type)
+            ;
+        } // dynamic_data_capacity()
+      
+      /// Return the total size of this object in bytes
+      size_t data_size() const
+        { return sizeof(MaxTracks) + sizeof(ntracks) + dynamic_data_size(); }
+      
+      /// Return the total size of this object in bytes
+      size_t memory_size() const
+        { return sizeof(*this) + dynamic_data_capacity(); }
+      
     }; // class TrackDataStruct
     
     
@@ -353,9 +508,47 @@ namespace microboone {
     /// Returns the number of trackers for which data structures are allocated
     size_t GetNTrackers() const { return TrackData.size(); }
     
+    /// Returns the number of hits for which memory is allocated
+    size_t GetMaxHits() const { return kMaxHits; }
+    
+    /// Returns the number of trackers for which memory is allocated
+    size_t GetMaxTrackers() const { return TrackData.capacity(); }
+    
+    /// Returns the number of GEANT primaries for which memory is allocated
+    size_t GetMaxGEANTePrimaries() const { return kMaxPrimaries; }
+    
+    /// Returns the number of GENIE primaries for which memory is allocated
+    size_t GetMaxGeniePrimaries() const { return kMaxPrimaries; }
+    
     /// Connect this object with a tree
     void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
 
+      /// Return the total size of data from dynamic vectors in bytes
+      size_t dynamic_data_size() const
+        {
+          size_t total = 0;
+          for(const auto& TrackerData: TrackData)
+            total += TrackerData.dynamic_data_size();
+          return total;
+        } // dynamic_data_size()
+      
+      /// Return the total size allocated for data from dynamic vectors in bytes
+      size_t dynamic_data_capacity() const
+        {
+          size_t total = 0;
+          for(const auto& TrackerData: TrackData)
+            total += TrackerData.dynamic_data_capacity();
+          return total;
+        } // dynamic_data_capacity()
+      
+      /// Return the total size of this object in bytes
+      size_t data_size() const
+        { return sizeof(*this) + dynamic_data_size(); }
+      
+      /// Return the total size of this object in bytes
+      size_t memory_size() const
+        { return sizeof(*this) + dynamic_data_capacity(); }
+      
   private:
     /// Little helper functor class to create or reset branches in a tree
     class BranchCreator {
@@ -372,16 +565,16 @@ namespace microboone {
           TBranch* pBranch = pTree->GetBranch(name.c_str());
           if (!pBranch) {
             pTree->Branch(name.c_str(), address, leaflist.c_str() /*, bufsize */);
-            mf::LogDebug("AnalysisTreeStructure")
+            LOG_DEBUG("AnalysisTreeStructure")
               << "Creating branch '" << name << " with leaf '" << leaflist << "'";
           }
           else if (pBranch->GetAddress() != address) {
             pBranch->SetAddress(address);
-            mf::LogDebug("AnalysisTreeStructure")
+            LOG_DEBUG("AnalysisTreeStructure")
               << "Reassigning address to branch '" << name << "'";
           }
           else {
-            mf::LogDebug("AnalysisTreeStructure")
+            LOG_DEBUG("AnalysisTreeStructure")
               << "Branch '" << name << "' is fine";
           }
         } // operator()
@@ -401,7 +594,7 @@ namespace microboone {
    * @brief Creates a simple ROOT tree with tracking and calorimetry information
    * 
    * <h2>Configuration parameters</h2>
-   * - <b>UseBuffers</b> (default: true): if enabled, memory is allocated for
+   * - <b>UseBuffers</b> (default: false): if enabled, memory is allocated for
    *   tree data for all the run; otherwise, it's allocated on each event, used
    *   and freed; use "true" for speed, "false" to save memory
    */
@@ -503,19 +696,27 @@ namespace microboone {
   }; // class microboone::AnalysisTree
 } // namespace microboone
 
+
 namespace {
   class AutoResettingStringSteam: public std::ostringstream {
       public:
     AutoResettingStringSteam& operator() () { str(""); return *this; }
   }; // class AutoResettingStringSteam
 
-  /// Fills a structure of TYPE elements with a static size (i.e. C arrays)
-  template <typename DATA, typename TYPE>
-  inline void FillWith(DATA& data, TYPE value) {
-    TYPE* start = reinterpret_cast<TYPE*>(&data);
-    size_t size = sizeof(data) / sizeof(TYPE);
-    std::fill(start, start + size, value);
-  } // FillWith<>()
+  /// Fills a sequence of TYPE elements
+  template <typename ITER, typename TYPE>
+  inline void FillWith(ITER from, ITER to, TYPE value)
+    { std::fill(from, to, value); }
+
+  /// Fills a sequence of TYPE elements
+  template <typename ITER, typename TYPE>
+  inline void FillWith(ITER from, size_t n, TYPE value)
+    { std::fill(from, from + n, value); }
+
+  /// Fills a container with begin()/end() interface
+  template <typename CONT, typename V>
+  inline void FillWith(CONT& data, const V& value)
+    { FillWith(data.begin(), data.end(), value); }
 
 } // local namespace
 
@@ -524,8 +725,8 @@ namespace {
 //---  AnalysisTreeDataStruct::TrackDataStruct
 //---
 
-void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t /* nTracks */) {
-#if 0
+void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
+{
   MaxTracks = nTracks;
   
   trkId.resize(MaxTracks);
@@ -564,56 +765,53 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t /* nTrac
   trkresrg.resize(MaxTracks);
   trkxyz.resize(MaxTracks);
   
-#endif // 0
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize()
 
 void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   Resize(MaxTracks);
   ntracks = 0;
   
-  std::fill(trkId        , trkId         + MaxTracks, -9999  );
-  std::fill(trkstartx    , trkstartx     + MaxTracks, -99999.);
-  std::fill(trkstarty    , trkstarty     + MaxTracks, -99999.);
-  std::fill(trkstartz    , trkstartz     + MaxTracks, -99999.);
-  std::fill(trkstartd    , trkstartd     + MaxTracks, -99999.);
-  std::fill(trkendx      , trkendx       + MaxTracks, -99999.);
-  std::fill(trkendy      , trkendy       + MaxTracks, -99999.);
-  std::fill(trkendz      , trkendz       + MaxTracks, -99999.);
-  std::fill(trkendd      , trkendd       + MaxTracks, -99999.);
-  std::fill(trktheta     , trktheta      + MaxTracks, -99999.);
-  std::fill(trkphi       , trkphi        + MaxTracks, -99999.);
-  std::fill(trkstartdcosx, trkstartdcosx + MaxTracks, -99999.);
-  std::fill(trkstartdcosy, trkstartdcosy + MaxTracks, -99999.);
-  std::fill(trkstartdcosz, trkstartdcosz + MaxTracks, -99999.);
-  std::fill(trkenddcosx  , trkenddcosx   + MaxTracks, -99999.);
-  std::fill(trkenddcosy  , trkenddcosy   + MaxTracks, -99999.);
-  std::fill(trkenddcosz  , trkenddcosz   + MaxTracks, -99999.);
-  std::fill(trkthetaxz   , trkthetaxz    + MaxTracks, -99999.);
-  std::fill(trkthetayz   , trkthetayz    + MaxTracks, -99999.);
-  std::fill(trkmom       , trkmom        + MaxTracks, -99999.);
-  std::fill(trklen       , trklen        + MaxTracks, -99999.);
-
+  FillWith(trkId        , -9999  );
+  FillWith(trkstartx    , -99999.);
+  FillWith(trkstarty    , -99999.);
+  FillWith(trkstartz    , -99999.);
+  FillWith(trkstartd    , -99999.);
+  FillWith(trkendx      , -99999.);
+  FillWith(trkendy      , -99999.);
+  FillWith(trkendz      , -99999.);
+  FillWith(trkendd      , -99999.);
+  FillWith(trktheta     , -99999.);
+  FillWith(trkphi       , -99999.);
+  FillWith(trkstartdcosx, -99999.);
+  FillWith(trkstartdcosy, -99999.);
+  FillWith(trkstartdcosz, -99999.);
+  FillWith(trkenddcosx  , -99999.);
+  FillWith(trkenddcosy  , -99999.);
+  FillWith(trkenddcosz  , -99999.);
+  FillWith(trkthetaxz   , -99999.);
+  FillWith(trkthetayz   , -99999.);
+  FillWith(trkmom       , -99999.);
+  FillWith(trklen       , -99999.);
+  
   for (size_t iTrk = 0; iTrk < MaxTracks; ++iTrk){
     
-    std::fill(trkke[iTrk]      , trkke[iTrk]       + GetMaxPlanesPerTrack(iTrk), -99999.);
-    std::fill(trkrange[iTrk]   , trkrange[iTrk]    + GetMaxPlanesPerTrack(iTrk), -99999.);
-    std::fill(trkidtruth[iTrk] , trkidtruth[iTrk]  + GetMaxPlanesPerTrack(iTrk), -99999 );
-    std::fill(trkpdgtruth[iTrk], trkpdgtruth[iTrk] + GetMaxPlanesPerTrack(iTrk), -99999 );
-    std::fill(trkefftruth[iTrk], trkefftruth[iTrk] + GetMaxPlanesPerTrack(iTrk), -99999.);
-    std::fill(trkpurtruth[iTrk], trkpurtruth[iTrk] + GetMaxPlanesPerTrack(iTrk), -99999.);
-    std::fill(trkpitchc[iTrk]  , trkpitchc[iTrk]   + GetMaxPlanesPerTrack(iTrk), -99999.);
-    std::fill(ntrkhits[iTrk]   , ntrkhits[iTrk]    + GetMaxPlanesPerTrack(iTrk),  -9999 );
+    // the following are BoxedArray's;
+    // their iterators traverse all the array dimensions
+    FillWith(trkke[iTrk]      , -99999.);
+    FillWith(trkrange[iTrk]   , -99999.);
+    FillWith(trkidtruth[iTrk] , -99999 );
+    FillWith(trkpdgtruth[iTrk], -99999 );
+    FillWith(trkefftruth[iTrk], -99999.);
+    FillWith(trkpurtruth[iTrk], -99999.);
+    FillWith(trkpitchc[iTrk]  , -99999.);
+    FillWith(ntrkhits[iTrk]   ,  -9999 );
     
-    for (size_t ipl = 0; ipl < GetMaxPlanesPerTrack(iTrk); ++ipl){
-      
-      std::fill(trkdedx[iTrk][ipl],  trkdedx[iTrk][ipl]+GetMaxHitsPerTrack(iTrk),  0.);
-      std::fill(trkdqdx[iTrk][ipl],  trkdqdx[iTrk][ipl]+GetMaxHitsPerTrack(iTrk),  0.);
-      std::fill(trkresrg[iTrk][ipl], trkresrg[iTrk][ipl]+GetMaxHitsPerTrack(iTrk), 0.);
-      
-      for(size_t iTrkHit = 0; iTrkHit < GetMaxHitsPerTrack(iTrk); ++iTrkHit) {
-        std::fill(trkxyz[iTrk][ipl][iTrkHit], trkxyz[iTrk][ipl][iTrkHit]+3, 0.);
-      } // for track hit
-    } // for plane
+    FillWith(trkdedx[iTrk], 0.);
+    FillWith(trkdqdx[iTrk], 0.);
+    FillWith(trkresrg[iTrk], 0.);
+    
+    FillWith(trkxyz[iTrk], 0.);
+    
   } // for track
   
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear()
@@ -755,7 +953,6 @@ void microboone::AnalysisTreeDataStruct::Clear() {
   taulife = -99999;
 
   no_hits = 0;
-//  FillWith(hit_plane, (Char_t)-99);
   
   std::fill(hit_plane, hit_plane + sizeof(hit_plane)/sizeof(hit_plane[0]), -99);
   std::fill(hit_wire, hit_wire + sizeof(hit_wire)/sizeof(hit_wire[0]), -9999);
@@ -1018,8 +1215,11 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   ),
-  fUseBuffer                (pset.get< bool >("UseBuffers", true)               )
+  fUseBuffer                (pset.get< bool >("UseBuffers", false)              )
 {
+  mf::LogInfo("AnalysisTree") << "Configuration:"
+    << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
+    ;
 }
 
 //-------------------------------------------------
@@ -1068,6 +1268,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   // make sure there is the data, the tree and everything
   CreateTree(true);
 
+  mf::LogDebug("AnalysisTreeStructure") << "After initialization, tree data structure has "
+    << fData->data_size() << " bytes in data, " << fData->memory_size()
+    << " allocated";
+  
   /// transfer the run and subrun data to the tree data object
 //  fData->RunData = RunData;
   fData->SubRunData = SubRunData;
@@ -1255,7 +1459,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               << "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
               << " has " << NHits << " hits on calorimetry plane #" << ipl
               <<", only "
-              << TrackerData.GetMaxHitsPerTrack(iTrk) << " stored in tree";
+              << TrackerData.GetMaxHitsPerTrack(iTrk, ipl) << " stored in tree";
           }
           for(size_t iTrkHit = 0; iTrkHit < NHits; ++iTrkHit) {
             TrackerData.trkdedx[iTrk][ipl][iTrkHit]  = (calos[ipl] -> dEdx())[iTrkHit];
@@ -1266,9 +1470,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             TrkXYZ[0] = TrkPos.X();
             TrkXYZ[1] = TrkPos.Y();
             TrkXYZ[2] = TrkPos.Z();
-//             TrackerData.trkxyz[iTrk][ipl][iTrkHit][0] = TrkPos.X(); FIXME
-//             TrackerData.trkxyz[iTrk][ipl][iTrkHit][1] = TrkPos.Y();
-//             TrackerData.trkxyz[iTrk][ipl][iTrkHit][2] = TrkPos.Z();
           } // for track hits
         } // for calorimetry info
       } // if has calorimetry info
@@ -1511,10 +1712,42 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   fData->taulife = LArProp->ElectronLifetime();
   fTree->Fill();
   
+  if (mf::MessageDrop::instance()->debugEnabled) {
+    mf::LogDebug logStream("AnalysisTreeStructure");
+    logStream
+      << "Tree data structure has "
+      << fData->data_size() << " bytes in data (" << fData->memory_size()
+      << " allocated):"
+      << "\n - " << fData->no_hits << " hits (" << fData->GetMaxHits() << ")"
+      << "\n - " << fData->genie_no_primaries << " genie primaries (" << fData->GetMaxGeniePrimaries() << ")"
+      << "\n - " << fData->no_primaries << " GEANT primaries (" << fData->GetMaxGEANTePrimaries() << ")"
+      << "\n - " << ((int) fData->kNTracker) << " trackers:"
+      ;
+    
+    size_t iTracker = 0;
+    for (auto tracker = fData->TrackData.cbegin();
+      tracker != fData->TrackData.cend(); ++tracker, ++iTracker
+    ) {
+      logStream
+         << "\n -> " << tracker->ntracks << " " << fTrackModuleLabel[iTracker]
+           << " tracks (" << tracker->GetMaxTracks() << ")"
+         ;
+      for (int iTrk = 0; iTrk < tracker->ntracks; ++iTrk) {
+        logStream << "\n    [" << iTrk << "] "<< tracker->ntrkhits[iTrk][0];
+        for (size_t ipl = 1; ipl < tracker->GetMaxPlanesPerTrack(iTrk); ++ipl)
+          logStream << " + " << tracker->ntrkhits[iTrk][ipl];
+        logStream << " hits (" << tracker->GetMaxHitsPerTrack(iTrk, 0);
+        for (size_t ipl = 1; ipl < tracker->GetMaxPlanesPerTrack(iTrk); ++ipl)
+          logStream << " + " << tracker->GetMaxHitsPerTrack(iTrk, ipl);
+        logStream << ")";
+      } // for tracks
+    } // for trackers
+  } // if logging enabled
+  
   // if we don't use a permanent buffer (which can be huge),
   // delete the current buffer, and we'll create a new one on the next event
   if (!fUseBuffer) {
-    mf::LogDebug("AnalysisTree") << "Freeing the data structure";
+    mf::LogDebug("AnalysisTreeStructure") << "Freeing the tree data structure";
     DestroyData();
   }
 } // microboone::AnalysisTree::analyze()
