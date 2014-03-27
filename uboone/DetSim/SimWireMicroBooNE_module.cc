@@ -390,7 +390,10 @@ namespace detsim {
       raw::Compress(adcvec, fCompression); 
       
       // add this digit to the collection
-      digcol->emplace_back(chan, fNSamplesReadout, adcvec, fCompression);
+      raw::RawDigit rd(chan, fNSamplesReadout, adcvec, fCompression);
+      rd.SetPedestal(ped_mean);
+      digcol->push_back(rd);
+
 
       //same for pre & post spill
       if( fNSamplesReadout != fNTimeSamples ) {
@@ -398,8 +401,12 @@ namespace detsim {
 	adcvecPostSpill.resize(fNSamplesReadout);
 	raw::Compress(adcvecPreSpill, fCompression); 
 	raw::Compress(adcvecPostSpill, fCompression); 
-	digcolPreSpill->emplace_back(chan, fNSamplesReadout, adcvecPreSpill, fCompression);
-	digcolPostSpill->emplace_back(chan, fNSamplesReadout, adcvecPostSpill, fCompression);
+	raw::RawDigit rdPreSpill(chan, fNSamplesReadout, adcvecPreSpill, fCompression);
+	rdPreSpill.SetPedestal(ped_mean);
+	raw::RawDigit rdPostSpill(chan, fNSamplesReadout, adcvecPostSpill, fCompression);
+	rdPostSpill.SetPedestal(ped_mean);
+	digcolPreSpill->push_back(rdPreSpill);
+	digcolPostSpill->push_back(rdPostSpill);
       }
     }// end loop over channels      
 
@@ -531,7 +538,9 @@ namespace detsim {
       raw::Compress(adcvec, fCompression); 
       
       // add this digit to the collection
-      digcol->emplace_back(chan, fNSamplesReadout, adcvec, fCompression);
+      raw::RawDigit rd(chan, fNSamplesReadout, adcvec, fCompression);
+      rd.SetPedestal(ped_mean);
+      digcol->push_back(rd);
 
     }// end loop over channels      
 
