@@ -12,6 +12,8 @@
 // [x] create a different structure for each tracker, allocate only what needed
 // [x] use variable size array buffers for each tracker datum instead of [kMaxTrack]
 // [x] turn the truth/GEANT information into vectors
+// [ ] move hit_trkid into the track information, remove kMaxTrackers
+// [ ] turn the hit information into vectors (~1 MB worth), remove kMaxHits
 // [ ] fill the tree branch by branch
 // 
 // Current implementation:
@@ -39,6 +41,7 @@
 // AnalysisTreeDataStruct can be initialized first (and with unusable track data
 // structures), and then the TrackDataStruct instances are initialized one by
 // one when the number of tracks needed is known.
+// A similar mechanism is implemented for the truth information.
 // 
 // The "UseBuffers: false" mode assumes that on each event a new
 // AnalysisTreeDataStruct is created with unusable tracker data, connected to
@@ -129,11 +132,8 @@
 #include "TTimeStamp.h"
 
 constexpr int kNplanes       = 3;     //number of wire planes
-constexpr int kMaxTrack      = 1000;  //maximum number of tracks
-constexpr int kMaxClusters   = 1000;  //maximum number of clusters
 constexpr int kMaxHits       = 20000; //maximum number of hits;
-constexpr int kMaxPrimaries  = 20000;  //maximum number of primary particles
-constexpr int kMaxTrackHits  = 1000;  //maximum number of hits on a track
+constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 10;    //number of trackers passed into fTrackModuleLabel
 
 
@@ -148,10 +148,13 @@ struct total_extent {
 
 namespace microboone {
 
+  /// Data structure with all the tree information.
+  /// 
+  /// Can connect to a tree, clear its fields and resize its data.
   class AnalysisTreeDataStruct {
       public:
     
-    /// A wrapper to a C array
+    /// A wrapper to a C array (needed to embed an array into a vector)
     template <typename Array_t>
     class BoxedArray {
         protected:
@@ -200,8 +203,19 @@ namespace microboone {
       
     }; // BoxedArray
     
+    /// Tracker algorithm result
+    /// 
+    /// Can connect to a tree, clear its fields and resize its data.
     class TrackDataStruct {
         public:
+      /* Data structure size:
+       *
+       * TrackData_t<Short_t>                    :  2  bytes/track
+       * TrackData_t<Float_t>                    :  4  bytes/track
+       * PlaneData_t<Float_t>, PlaneData_t<Int_t>: 12  bytes/track
+       * HitData_t<Float_t>                      : 24k bytes/track
+       * HitCoordData_t<Float_t>                 : 72k bytes/track
+       */
       template <typename T>
       using TrackData_t = std::vector<T>;
       template <typename T>
@@ -355,19 +369,19 @@ namespace microboone {
     }; // class TrackDataStruct
     
     
-    /// information from the run
-/*    struct RunData_t {
+/*    /// information from the run
+    struct RunData_t {
         public:
       RunData_t() { Clear(); }
       void Clear() {}
-    };
+    }; // struct RunData_t
 */
     /// information from the subrun
     struct SubRunData_t {
       SubRunData_t() { Clear(); }
       void Clear() { pot = -99999.; }
       Double_t pot; //protons on target
-    };
+    }; // struct SubRunData_t
 
 //    RunData_t    RunData; ///< run data collected at begin of run
     SubRunData_t SubRunData; ///< subrun data collected at begin of subrun
@@ -382,7 +396,7 @@ namespace microboone {
     Double_t   taulife;              //electron lifetime
     Char_t     isdata;               //flag, 0=MC 1=data
 
-    //hit information
+    // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
     Char_t   hit_plane[kMaxHits];      //plane number
     Short_t  hit_wire[kMaxHits];       //wire number
@@ -478,16 +492,16 @@ namespace microboone {
     std::vector<Double_t>  geant_tpcFV_orig_endz;
     std::vector<Double_t>  geant_tpcFV_orig_endt;
 
-    std::vector<Double_t>  geant_tpcFV_startx;          // starting x position.
-    std::vector<Double_t>  geant_tpcFV_starty;          // starting y position.
-    std::vector<Double_t>  geant_tpcFV_startz;          // starting z position.
-    std::vector<Double_t>  geant_tpcFV_startd;          // starting distance to boundary.
-    std::vector<Double_t>  geant_tpcFV_endx;          // ending x position.
-    std::vector<Double_t>  geant_tpcFV_endy;          // ending y position.
-    std::vector<Double_t>  geant_tpcFV_endz;          // ending z position.
-    std::vector<Double_t>  geant_tpcFV_endd;          // ending distance to boundary.
-    std::vector<Double_t>  geant_tpcFV_theta;          // theta.
-    std::vector<Double_t>  geant_tpcFV_phi;          // phi.
+    std::vector<Double_t>  geant_tpcFV_startx;      // starting x position.
+    std::vector<Double_t>  geant_tpcFV_starty;      // starting y position.
+    std::vector<Double_t>  geant_tpcFV_startz;      // starting z position.
+    std::vector<Double_t>  geant_tpcFV_startd;      // starting distance to boundary.
+    std::vector<Double_t>  geant_tpcFV_endx;        // ending x position.
+    std::vector<Double_t>  geant_tpcFV_endy;        // ending y position.
+    std::vector<Double_t>  geant_tpcFV_endz;        // ending z position.
+    std::vector<Double_t>  geant_tpcFV_endd;        // ending distance to boundary.
+    std::vector<Double_t>  geant_tpcFV_theta;       // theta.
+    std::vector<Double_t>  geant_tpcFV_phi;         // phi.
     std::vector<Double_t>  geant_tpcFV_theta_xz;    // theta_xz.
     std::vector<Double_t>  geant_tpcFV_theta_yz;    // theta_yz.
     std::vector<Double_t>  geant_tpcFV_mom;         // momentum.
@@ -503,12 +517,31 @@ namespace microboone {
     const TrackDataStruct& GetTrackerData(size_t iTracker) const
       { return TrackData.at(iTracker); }
     
+    
+    /// Clear all fields if this object (not the tracker algorithm data)
+    void ClearLocalData();
+    
     /// Clear all fields
     void Clear();
     
+    
     /// Allocates data structures for the given number of trackers (no Clear())
     void SetTrackers(size_t nTrackers) { TrackData.resize(nTrackers); }
-
+    
+    /// Resize the data strutcure for GEANT particles
+    void ResizeGEANT(int nParticles);
+    
+    /// Resize the data strutcure for GEANT particles in fiducial volume
+    void ResizeGEANTinTPCFV(int nParticles);
+    
+    /// Resize the data strutcure for Genie primaries
+    void ResizeGenie(int nPrimaries);
+    
+    
+    /// Connect this object with a tree
+    void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
+    
+    
     /// Returns the number of trackers for which data structures are allocated
     size_t GetNTrackers() const { return TrackData.size(); }
     
@@ -527,18 +560,7 @@ namespace microboone {
     /// Returns the number of GENIE primaries for which memory is allocated
     size_t GetMaxGeniePrimaries() const { return MaxGeniePrimaries; }
     
-    /// Resize the data strutcure for GEANT particles
-    void ResizeGEANT(int nParticles);
     
-    /// Resize the data strutcure for GEANT particles in fiducial volume
-    void ResizeGEANTinTPCFV(int nParticles);
-    
-    /// Resize the data strutcure for Genie primaries
-    void ResizeGenie(int nPrimaries);
-    
-    /// Connect this object with a tree
-    void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
-
     /// Return the total size of data from dynamic vectors in bytes
     size_t dynamic_data_size() const
       {
@@ -719,7 +741,8 @@ namespace microboone {
     }; // class BranchCreator
 
   }; // class AnalysisTreeDataStruct
-
+  
+  
   /**
    * @brief Creates a simple ROOT tree with tracking and calorimetry information
    * 
@@ -728,7 +751,6 @@ namespace microboone {
    *   tree data for all the run; otherwise, it's allocated on each event, used
    *   and freed; use "true" for speed, "false" to save memory
    */
-  
   class AnalysisTree : public art::EDAnalyzer {
 
   public:
@@ -776,9 +798,10 @@ namespace microboone {
     std::string fParticleIDModuleLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)
 
+    /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
     
-    // make sure the data structure exists
+    /// Creates the structure for the tree data; optionally initializes it
     void CreateData(bool bClearData = false)
       {
         if (!fData) fData = new AnalysisTreeDataStruct(GetNTrackers());
@@ -787,11 +810,16 @@ namespace microboone {
           if (bClearData) fData->Clear();
         }
       } // CreateData()
+    
+    /// Sets the addresses of all the tree branches, creating the missing ones
     void SetAddresses()
       {
         CheckData("SetAddress()"); CheckTree("SetAddress()");
         fData->SetAddresses(fTree, fTrackModuleLabel);
       } // SetAddresses()
+    
+    /// Sets the addresses of all the tree branches of the specified tracking algo,
+    /// creating the missing ones
     void SetTrackerAddresses(size_t iTracker)
       {
         CheckData("SetTrackerAddresses()"); CheckTree("SetTrackerAddresses()");
@@ -803,7 +831,6 @@ namespace microboone {
         fData->GetTrackerData(iTracker) \
           .SetAddresses(fTree, fTrackModuleLabel[iTracker]);
       } // SetTrackerAddresses()
-    void UpdateAddresses() { CreateData(); SetAddresses(); }
     
     /// Create the output tree and the data structures, if needed
     void CreateTree(bool bClearData = false);
@@ -811,12 +838,14 @@ namespace microboone {
     /// Destroy the local buffers (existing branches will point to invalid address!)
     void DestroyData() { if (fData) { delete fData; fData = nullptr; } }
     
+    /// Helper function: throws if no data structure is available
     void CheckData(std::string caller) const
       {
         if (fData) return;
         throw art::Exception(art::errors::LogicError)
           << "AnalysisTree::" << caller << ": no data";
       } // CheckData()
+    /// Helper function: throws if no tree is available
     void CheckTree(std::string caller) const
       {
         if (fTree) return;
@@ -827,7 +856,8 @@ namespace microboone {
 } // namespace microboone
 
 
-namespace {
+namespace { // local namespace
+  /// Simple stringstream which empties its buffer on operator() call
   class AutoResettingStringSteam: public std::ostringstream {
       public:
     AutoResettingStringSteam& operator() () { str(""); return *this; }
@@ -1069,7 +1099,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
 //---  AnalysisTreeDataStruct
 //---
 
-void microboone::AnalysisTreeDataStruct::Clear() {
+void microboone::AnalysisTreeDataStruct::ClearLocalData() {
 
 //  RunData.Clear();
   SubRunData.Clear();
@@ -1095,9 +1125,6 @@ void microboone::AnalysisTreeDataStruct::Clear() {
     std::fill(hit_trkid[iTrk], hit_trkid[iTrk] + kMaxHits, -9999);
   }
   
-  std::for_each
-    (TrackData.begin(), TrackData.end(), std::mem_fun_ref(&TrackDataStruct::Clear));
-
   mcevts_truth = -99999;
   nuPDG_truth = -99999;
   ccnc_truth = -99999;
@@ -1141,6 +1168,7 @@ void microboone::AnalysisTreeDataStruct::Clear() {
   FillWith(Mother, -99999);
   FillWith(TrackId, -99999);
   FillWith(process_primary, -99999);
+  FillWith(MergedId, -99999);
   FillWith(genie_primaries_pdg, -99999);
   FillWith(genie_Eng, -99999.);
   FillWith(genie_Px, -99999.);
@@ -1184,6 +1212,13 @@ void microboone::AnalysisTreeDataStruct::Clear() {
   FillWith(geant_tpcFV_theta_yz, -99999.);
   FillWith(geant_tpcFV_mom, -99999.);
   FillWith(geant_tpcFV_len, -99999.);
+} // microboone::AnalysisTreeDataStruct::ClearLocalData()
+
+
+void microboone::AnalysisTreeDataStruct::Clear() {
+  ClearLocalData();
+  std::for_each
+    (TrackData.begin(), TrackData.end(), std::mem_fun_ref(&TrackDataStruct::Clear));
 } // microboone::AnalysisTreeDataStruct::Clear()
 
 
@@ -1207,6 +1242,7 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   Mother.resize(MaxGEANTparticles);
   TrackId.resize(MaxGEANTparticles);
   process_primary.resize(MaxGEANTparticles);
+  MergedId.resize(MaxGEANTparticles);
   
 } // microboone::AnalysisTreeDataStruct::ResizeGEANT()
 
@@ -1431,7 +1467,13 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   mf::LogInfo("AnalysisTree") << "Configuration:"
     << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
     ;
-}
+  if (GetNTrackers() > kMaxTrackers) {
+    throw art::Exception(art::errors::Configuration)
+      << "AnalysisTree currently supports only up to " << kMaxTrackers
+      << " tracking algorithms, but " << GetNTrackers() << " are specified."
+      << "\nYou can increase kMaxTrackers and recompile.";
+  } // if too many trackers
+} // microboone::AnalysisTree::AnalysisTree()
 
 //-------------------------------------------------
 microboone::AnalysisTree::~AnalysisTree()
@@ -1471,7 +1513,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   art::ServiceHandle<util::LArProperties> LArProp;
   
   // collect the sizes which might me needed to resize the tree data structure:
-  bool isMC = evt.isRealData();
+  bool isMC = !evt.isRealData();
   
   // * hits
   art::Handle< std::vector<recob::Hit> > hitListHandle;
@@ -1489,9 +1531,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   
   art::Ptr<simb::MCTruth> mctruth;
   int imc = 0;
-  if (isMC){ //is MC
+  if (isMC) { //is MC
     // GENIE
-    const sim::ParticleList& plist = bt->ParticleList();
     if (!mclist.empty()){//at least one mc record
       //if (mclist[0]->NeutrinoSet()){//is neutrino
       //sometimes there can be multiple neutrino interactions in one spill
@@ -1523,26 +1564,31 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
       if (mctruth->NeutrinoSet()) nGeniePrimaries = mctruth->NParticles();
       
+      const sim::ParticleList& plist = bt->ParticleList();
       nGEANTparticles = plist.size();
       // to know the number of particles in FV would require
       // looking at all of them; so we waste some memory here
       nGEANTparticlesInTPCFV = nGEANTparticles;
     } // if have MC truth
+    mf::LogDebug("AnalysisTree") << "Expected "
+      << nGEANTparticles << " GEANT particles, "
+      << nGeniePrimaries << " GENIE particles";
   } // if MC
   
-  CreateData();
+  CreateData(); // tracker data is created with default constructor
   fData->ResizeGenie(nGeniePrimaries);
   fData->ResizeGEANT(nGEANTparticles);
   fData->ResizeGEANTinTPCFV(nGEANTparticlesInTPCFV);
+  fData->ClearLocalData(); // don't bother clearing tracker data yet
   
 //  const size_t Nplanes       = 3; // number of wire planes; pretty much constant...
   const size_t NTrackers = GetNTrackers(); // number of trackers passed into fTrackModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
   
-  // make sure there is the data, the tree and everything
-  CreateTree(true);
+  // make sure there is the data, the tree and everything;
+  CreateTree();
 
-  mf::LogDebug("AnalysisTreeStructure") << "After initialization, tree data structure has "
+  LOG_DEBUG("AnalysisTreeStructure") << "After initialization, tree data structure has "
     << fData->data_size() << " bytes in data, " << fData->memory_size()
     << " allocated";
   
@@ -1616,15 +1662,18 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     AnalysisTreeDataStruct::TrackDataStruct& TrackerData = fData->GetTrackerData(iTracker);
     
     size_t NTracks = tracklist[iTracker].size();
-    TrackerData.ntracks = (int) NTracks;
     // allocate enough space for this number of tracks (but at least for one of them!)
     TrackerData.SetMaxTracks(std::max(NTracks, (size_t) 1));
+    TrackerData.Clear(); // clear all the data
+    
+    TrackerData.ntracks = (int) NTracks;
+    
     // now set the tree addresses to the newly allocated memory;
     // this creates the tree branches in case they are not there yet
     SetTrackerAddresses(iTracker);
     if (NTracks > TrackerData.GetMaxTracks()) {
-      // got this error? consider increasing kMaxTrack
-      // (or ask for a redesign using vectors)
+      // got this error? it might be a bug,
+      // since we are supposed to have allocated enough space to fit all tracks
       mf::LogError("AnalysisTree:limits") << "event has " << NTracks
         << " " << fTrackModuleLabel[iTracker] << " tracks, only "
         << TrackerData.GetMaxTracks() << " stored in tree";
@@ -1765,11 +1814,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         //std::cout<<"\n"<<iTracker<<"\t"<<iTrk<<"\t"<<ipl<<"\t"<<trkidtruth[iTracker][iTrk][ipl]<<"\t"<<trkpurtruth[iTracker][iTrk][ipl]<<"\t"<<maxe;
           if (TrackerData.trkidtruth[iTrk][ipl]>0){
             const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[iTrk][ipl]);
-            const std::vector<sim::IDE> vide = bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]);
             double tote = 0;
-            for (size_t iide = 0; iide<vide.size(); ++iide){
-              tote += vide[iide].energy;
-            }
+            std::vector<sim::IDE> vide(std::move(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl])));
+            for (const sim::IDE& ide: vide) tote += ide.energy;
             TrackerData.trkpdgtruth[iTrk][ipl] = particle->PdgCode();
             TrackerData.trkefftruth[iTrk][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
           //std::cout<<"\n"<<trkpdgtruth[iTracker][iTrk][ipl]<<"\t"<<trkefftruth[iTracker][iTrk][ipl];
@@ -1814,12 +1861,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         fData->tptype_flux = mcflux->ftptype;
 
         //genie particles information
-        fData->genie_no_primaries=mctruth->NParticles();
+        fData->genie_no_primaries = mctruth->NParticles();
 
         size_t StoreParticles = std::min((size_t) fData->genie_no_primaries, fData->GetMaxGeniePrimaries());
         if (fData->genie_no_primaries > (int) StoreParticles) {
-          // got this error? consider increasing kMaxTrack
-          // (or ask for a redesign using vectors)
+          // got this error? it might be a bug,
+          // since the structure should have enough room for everything
           mf::LogError("AnalysisTree:limits") << "event has "
             << fData->genie_no_primaries << " MC particles, only "
             << StoreParticles << " stored in tree";
@@ -1878,8 +1925,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->NumberDaughters[iPart]=pPart->NumberDaughters();
         }
         else if (iPart == fData->GetMaxGEANTparticles()) {
-          // got this error? consider increasing kMaxTrack
-          // (or ask for a redesign using vectors)
+          // got this error? it might be a bug,
+          // since the structure should have enough room for everything
           mf::LogError("AnalysisTree:limits") << "event has "
             << plist.size() << " MC particles, only "
             << fData->GetMaxGEANTparticles() << " will be stored in tree";
@@ -1925,8 +1972,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->geant_tpcFV_len[iFVPart]         = plen;
         }
         else if (iFVPart == fData->GetMaxGEANTparticlesInTPCFV()) {
-          // got this error? consider increasing kMaxTrack
-          // (or ask for a redesign using vectors)
+          // got this error? it might be a bug,
+          // since the structure should have enough room for everything
           mf::LogError("AnalysisTree:limits") << "event has "
             << plist.size() << " MC particles in fiducial volume, only "
             << fData->GetMaxGEANTparticlesInTPCFV() << " will be stored in tree";
@@ -1937,7 +1984,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->geant_list_size_in_tpcFV = iFVPart;
       fData->no_primaries = primary;
       fData->geant_list_size = geant_particle;
-
+      
+      mf::LogDebug("AnalysisTree") << "Counted "
+        << fData->geant_list_size << " GEANT particles ("
+        << fData->geant_list_size_in_tpcFV << " in FV), "
+        << fData->no_primaries << " primaries, "
+        << fData->genie_no_primaries << " GENIE particles";
       
       FillWith(fData->MergedId, 0);
 
@@ -1975,7 +2027,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       << " allocated):"
       << "\n - " << fData->no_hits << " hits (" << fData->GetMaxHits() << ")"
       << "\n - " << fData->genie_no_primaries << " genie primaries (" << fData->GetMaxGeniePrimaries() << ")"
-      << "\n - " << fData->no_primaries << " GEANT primaries (" << fData->GetMaxGEANTparticles() << ")"
+      << "\n - " << fData->geant_list_size << " GEANT particles (" << fData->GetMaxGEANTparticles() << "), "
+        << fData->no_primaries << " primaries"
+      << "\n - " << fData->geant_list_size_in_tpcFV << " GEANT particles in FV (" << fData->GetMaxGEANTparticlesInTPCFV() << ")"
       << "\n - " << ((int) fData->kNTracker) << " trackers:"
       ;
     
@@ -2002,7 +2056,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   // if we don't use a permanent buffer (which can be huge),
   // delete the current buffer, and we'll create a new one on the next event
   if (!fUseBuffer) {
-    mf::LogDebug("AnalysisTreeStructure") << "Freeing the tree data structure";
+    LOG_DEBUG("AnalysisTreeStructure") << "Freeing the tree data structure";
     DestroyData();
   }
 } // microboone::AnalysisTree::analyze()
