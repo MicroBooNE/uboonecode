@@ -1815,7 +1815,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           if (TrackerData.trkidtruth[iTrk][ipl]>0){
             const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[iTrk][ipl]);
             double tote = 0;
-            std::vector<sim::IDE> vide(std::move(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl])));
+            std::vector<sim::IDE> vide(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]));
             for (const sim::IDE& ide: vide) tote += ide.energy;
             TrackerData.trkpdgtruth[iTrk][ipl] = particle->PdgCode();
             TrackerData.trkefftruth[iTrk][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
