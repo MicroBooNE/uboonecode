@@ -10,6 +10,8 @@
  * These are the actual functions that do things for electronics calibration.
  */
 
+#include "TVirtualFFT.h"
+#include "TF1.h"
 #include <vector>
 #include "RawData/RawDigit.h"
 
