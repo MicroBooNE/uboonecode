@@ -70,6 +70,14 @@ outputs:
  }
 }
 
-physics.producers.daq.GenNoise:       true
-physics.producers.daq.GenNoiseInTime: true
-physics.producers.daq.NoiseFact:      4.0   #IN ADCs
+
+physics.producers.daq.module_type:        "SimWire"
+physics.producers.daq.DriftEModuleLabel:  "largeant"
+#physics.producers.daq.SigType:            []#Signal Type: 'gauss' or 'pulse'
+#physics.producers.daq.SigWidth:           []             #in time-ticks: signal width
+#physics.producers.daq.SigAmp:             []          #in ADCs: signal amplitude
+#physics.producers.daq.Pedestal:           0                      #in ADCs: signal pedestal value
+#physics.producers.daq.NTicks:             3200                     #in time-ticks: length of pulse
+#physics.producers.daq.SigTime:            []         #in time-ticks: when pulse will happen
+#physics.producers.daq.NoiseFact:          0.00                     #Noise Scale to use with histogram
+physics.producers.daq.CompressionType:    "none"                   #could also be none		

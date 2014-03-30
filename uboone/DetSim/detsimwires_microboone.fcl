@@ -4,7 +4,7 @@ BEGIN_PROLOG
 
 microboone_simwire:  
 { 
- module_type:        "SimWire"
+ module_type:        "RawDigitSimulator"
  DriftEModuleLabel:  "largeant"
  SigType:            ["gauss","gauss","pulse"]#Signal Type: 'gauss' or 'pulse'
  SigWidth:           [10, 20, 50]             #in time-ticks: signal width
