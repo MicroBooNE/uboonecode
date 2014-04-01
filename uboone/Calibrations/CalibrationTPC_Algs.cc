@@ -89,22 +89,17 @@ namespace calibration{
     }
 
     noise=0;
-    /*
     TH1D *BaselineSubtracted = new TH1D("BaselineSubtracted", "Baseline Subtracted ADCs", n_samples, 0, n_samples);
     std::vector<float> FreqSpectrum;
-    */
     for(unsigned int it=0; it<n_samples; it++){
       noise += (rawData.at(it)-pedestal)*(rawData.at(it)-pedestal);
       // STUFF HERE FOR NOISE SPECTRUM!!!!
-      /*
       BaselineSubtracted->SetBinContent(it+1,noise);
       TH1 *NoiseSpectrum = BaselineSubtracted->FFT(NULL,"MAG");
-      */
     }
-    /*
+
     for (unsigned int it=0; it<(n_samples/2+1); it++)
       FreqSpectrum.push_back(NoiseSpectrum->GetBinContent(it));
-    */
     //Now Freq Spectrum is a vector of noise levels in freq. space
     //scale determined by 1/Bin_Time_Duration
     noise = sqrt(noise / (n_samples - 1));
