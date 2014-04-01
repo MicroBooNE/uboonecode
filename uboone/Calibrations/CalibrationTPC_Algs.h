@@ -11,7 +11,7 @@
  */
 
 #include "TVirtualFFT.h"
-#include "TF1.h"
+#include "TH1.h"
 #include <vector>
 #include "RawData/RawDigit.h"
 
