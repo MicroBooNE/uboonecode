@@ -24,6 +24,7 @@ gdmldir product_dir gdml
 table_fragment_begin
     pathPrepend(FW_SEARCH_PATH, ${UBOONECODE_DIR}/gdml)
     pathPrepend(FHICL_FILE_PATH, .:./job)
+    pathPrepend(PYTHONPATH, ${UPS_PROD_DIR}/python:${${UPS_PROD_NAME_UC}_FQ_DIR}/bin)
 table_fragment_end
 
 # With "product  version" table below, we now define depdendencies
