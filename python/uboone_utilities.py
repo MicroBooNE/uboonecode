@@ -11,7 +11,13 @@
 #----------------------------------------------------------------------
 
 import sys, os
-import samweb_cli
+
+# Don't fail if samweb is not available.
+
+try:
+    import samweb_cli
+except ImportError:
+    pass
 
 # Function to return the current sam experiment.
 # The following places for obtaining this information are
@@ -46,7 +52,7 @@ def get_bluearc_server():
     
 
 # Function to determine dropbox directory based on sam metadata.
-# Raise an exception of the specified file doesn't have metadata.
+# Raise an exception if the specified file doesn't have metadata.
 
 def get_dropbox(filename):
 
