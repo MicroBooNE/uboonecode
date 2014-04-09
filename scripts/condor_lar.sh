@@ -804,7 +804,9 @@ if [ $SRT -ne 0 ]; then
     # from the version we setup at the beginning of this script.
     # That _should_ be OK.
 
-    unsetup ifdhc
+    if [ x$IFDHC_DIR != x ]; then
+      unsetup ifdhc
+    fi
     echo "Setting up larsoft release ${REL}, ${QUAL} build."
     . /grid/fermiapp/lbne/lar/code/larsoft/setup/setup_larsoft_fnal.sh -r $REL -b ${QUAL}
 
@@ -910,7 +912,9 @@ fi
     #echo "MRB_INSTALL=${MRB_INSTALL}."
     #echo "MRB_QUALS=${MRB_QUALS}."
     echo "Setting up all localProducts."
-    unsetup ifdhc
+    if [ x$IFDHC_DIR != x ]; then
+      unsetup ifdhc
+    fi
     source mrb slp
   fi
   cd $TMP/work
@@ -951,7 +955,9 @@ fi
     #echo "MRB_INSTALL=${MRB_INSTALL}."
     #echo "MRB_QUALS=${MRB_QUALS}."
     echo "Setting up all localProducts."
-    unsetup ifdhc
+    if [ x$IFDHC_DIR != x ]; then
+      unsetup ifdhc
+    fi
     source mrb slp
   fi
 
@@ -960,7 +966,9 @@ fi
 
   if [ x$UBOONECODE_DIR == x -a x$REL != x ]; then
     echo "Setting up uboonecode $REL -q ${QUAL}."
-    unsetup ifdhc
+    if [ x$IFDHC_DIR != x ]; then
+      unsetup ifdhc
+    fi
     setup uboonecode $REL -q $QUAL
   fi
 
@@ -1333,7 +1341,9 @@ echo "lar completed with exit status ${stat}."
 # Setup up current version of ifdhc (may be different than version setup by larsoft).
 
 echo "Setting up current version of ifdhc."
-unsetup ifdhc
+if [ x$IFDHC_DIR != x ]; then
+  unsetup ifdhc
+fi
 setup ifdhc v1_3_2
 echo "IFDHC_DIR=$IFDHC_DIR"
 
