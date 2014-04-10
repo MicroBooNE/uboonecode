@@ -1704,6 +1704,12 @@ sub gen_world()
     deltaphi="360" 
     lunit="cm"
     aunit="deg"/>
+  <tube name="GroundBottom"
+    rmax="((50*12)+310)*2.54"
+    z="50*12*2.54"
+    deltaphi="360"
+    lunit="cm"
+    aunit="deg"/>
   <tube name="ConcreteEnclosure"
     rmin="292*2.54"
     rmax="310*2.54"
@@ -1745,6 +1751,10 @@ sub gen_world()
     <materialref ref="Dirt" />
     <solidref ref="Ground" />
   </volume>
+  <volume name="volGroundBottom" >
+     <materialref ref="Dirt" />
+     <solidref ref="GroundBottom" />
+   </volume>
   <volume name="volOverburden" >
     <materialref ref="Dirt" />
     <solidref ref="Overburden" />
@@ -1792,7 +1802,13 @@ sub gen_world()
        <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>  
+    </physvol> 
+    <physvol>
+       <volumeref ref="volGroundBottom"/>
+      <position name="posGroundBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> 
+ 
     <!--physvol>
       <volumeref ref="volOverburden"/>
       <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="(41-10)*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>

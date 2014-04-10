@@ -455,6 +455,12 @@
     deltaphi="360" 
     lunit="cm"
     aunit="deg"/>
+  <tube name="GroundBottom"
+    rmax="((50*12)+310)*2.54"
+    z="50*12*2.54"
+    deltaphi="360"
+    lunit="cm"
+    aunit="deg"/>
   <tube name="ConcreteEnclosure"
     rmin="292*2.54"
     rmax="310*2.54"
@@ -564,7 +570,7 @@
     <volume name="volTankBox1">
       <materialref ref="Air"/>
       <solidref ref="TankBox1"/>
-      <physvol>
+  <!--    <physvol>
         <volumeref ref="volTank1"/>
         <position name="posvolTank1" unit="cm" x="0" y="0" z="0"/>
         <rotationref ref="rPlus90AboutX"/>
@@ -578,7 +584,7 @@
         <volumeref ref="volTankCap1"/> 
         <position name="posvolTankCap1_2" unit="cm" x="0" y="-90.15-.001" z="0"/>
         <rotationref ref="rPlus90AboutX"/>
-      </physvol>
+      </physvol> -->
     </volume>
 
     <volume name="volStandConcrete">
@@ -602,7 +608,7 @@
     <volume name="volRack">
       <materialref ref="Air"/>
       <solidref ref="rackBox"/>
-      <physvol>
+   <!--   <physvol>
         <volumeref ref="volRackX"/>
         <position name="posRackX1" unit="cm" x="0" y="(212.7-5.8)/2" z="(60.7-5.8)/2"/>
       </physvol>
@@ -649,7 +655,7 @@
       <physvol>
         <volumeref ref="volRackZ"/>
         <position name="posRackZ4" unit="cm" z="0" y="-(212.7-5.8)/2" x="-(90.5-5.8)/2"/>
-      </physvol>  
+      </physvol>  -->
     </volume>
 
   <volume name="volFloorTank1">
@@ -675,7 +681,7 @@
  <volume name="volFloorTankBox1">
       <materialref ref="Air"/>
       <solidref ref="floorTankBox1"/>
-      <physvol>
+<!--      <physvol>
         <volumeref ref="volFloorTank1"/>
         <position name="posFloorTank1" unit="cm" x="0" y="0" z="0"/>
         <rotationref ref="rPlus90AboutX"/>
@@ -704,7 +710,7 @@
         <volumeref ref="volFloorTankCap2"/>
         <position name="posFloorTankCap2" unit="cm" x="0" y="-26.98" z="0"/>
         <rotationref ref="rPlus90AboutX"/>
-      </physvol>
+      </physvol> -->
     </volume>
 
      <volume name="volWalkway">
@@ -722,11 +728,11 @@
  <volume name="volDetEnclosure">
   <materialref ref="Air"/>
   <solidref ref="DetEnclosure"/>
-  <physvol>
+<!--  <physvol>
    <volumeref ref="volCryostat"/>
    <position name="posCryostat" unit="cm" x="0" y="0" z="0"/>
   </physvol>
-<!--  <physvol>
+      <physvol>
         <volumeref ref="volInsulation"/>
         <position name="posInsulation" unit="cm" x="0" y="0" z="0"/>
       </physvol>
@@ -766,7 +772,7 @@
          <volumeref ref="volStandConcrete"/>
        <position name="posConcreteStand2" unit="cm" x="0" y="-424" z="-335.28"/>
       </physvol>
- <!--     <physvol>
+<!--      <physvol>
         <volumeref ref="volRack"/>
         <position name="posRack1" unit="cm" x="-75" y="408.91" z="0"/>
       </physvol>
@@ -853,6 +859,10 @@
     <materialref ref="Dirt" />
     <solidref ref="Ground" />
   </volume>
+  <volume name="volGroundBottom" >
+     <materialref ref="Dirt" />
+     <solidref ref="GroundBottom" />
+   </volume>
   <volume name="volOverburden" >
     <materialref ref="Dirt" />
     <solidref ref="Overburden" />
@@ -881,27 +891,32 @@
       <position name="posConcreteEnclosure" unit="cm" x="0.5*256.35" y="36*2.54/2" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
-   <!-- <physvol>
+<!--    <physvol>
       <volumeref ref="volPolystyreneEnclosure"/>
       <position name="posPolystyreneEnclosure" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>  
-   <physvol>
-      <volumeref ref="volPolystyreneEnclosureBottom"/>
-      <position name="posPolystyreneEnclosureBottom" unit="cm" x="0.5*256.35" y="-(38*12 - 36)*2.54/2" z="0.5*1037"/>
-      <rotationref ref="rPlus90AboutX"/>
-    </physvol> -->
+    </physvol>  -->
     <physvol>
       <volumeref ref="volConcreteEnclosureBottom"/>
       <position name="posConcreteEnclosureBottom" unit="cm" x="0.5*256.35" y="-38*12*2.54/2" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
-
+<!--   <physvol>
+      <volumeref ref="volPolystyreneEnclosureBottom"/>
+      <position name="posPolystyreneEnclosureBottom" unit="cm" x="0.5*256.35" y="-(38*12 - 36)*2.54/2" z="0.5*1037"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> -->
     <physvol>
        <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>  
+    </physvol> 
+ <!--   <physvol>
+       <volumeref ref="volGroundBottom"/>
+      <position name="posGroundBottom" unit="cm" x="0.5*256.35" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*1037"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> 
+ -->
     <!--physvol>
       <volumeref ref="volOverburden"/>
       <position name="posOverburden" unit="cm" x="0.5*256.35" y="(41-10)*12*2.54/2" z="0.5*1037"/>
