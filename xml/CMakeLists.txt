@@ -1,0 +1,7 @@
+add_subdirectory(mcc2.1)
+add_subdirectory(mcc3.0)
+add_subdirectory(mcc4.0)
+add_subdirectory(osgtest)
+add_subdirectory(S2012.12.17)
+add_subdirectory(S2013.06.25)
+add_subdirectory(v1_00_02)
