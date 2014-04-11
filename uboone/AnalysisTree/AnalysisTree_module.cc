@@ -1638,7 +1638,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     mf::LogError("AnalysisTree:limits") << "event has " << NHits
       << " hits, only kMaxHits=" << kMaxHits << " stored in tree";
   }
-  for (size_t i = 0; i< NHits; ++i){//loop over hits
+  for (size_t i = 0; i < NHits && i < kMaxHits ; ++i){//loop over hits
     fData->hit_channel[i] = hitlist[i]->Channel();
     fData->hit_plane[i]   = hitlist[i]->WireID().Plane;
     fData->hit_wire[i]    = hitlist[i]->WireID().Wire;
@@ -1773,7 +1773,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           TrackerData.trkpitchc[iTrk][ipl]= calos[ipl] -> TrkPitchC();
           const size_t NHits = calos[ipl] -> dEdx().size();
           TrackerData.ntrkhits[iTrk][ipl] = (int) NHits;
-          if (NHits > TrackerData.GetMaxHitsPerTrack(iTrk)) {
+          if (NHits > TrackerData.GetMaxHitsPerTrack(iTrk, ipl)) {
             // if you get this error, you'll have to increase kMaxTrackHits
             mf::LogError("AnalysisTree:limits")
               << "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
@@ -1781,7 +1781,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               <<", only "
               << TrackerData.GetMaxHitsPerTrack(iTrk, ipl) << " stored in tree";
           }
-          for(size_t iTrkHit = 0; iTrkHit < NHits; ++iTrkHit) {
+          for(size_t iTrkHit = 0; iTrkHit < NHits && iTrkHit < TrackerData.GetMaxHitsPerTrack(iTrk, ipl); ++iTrkHit) {
             TrackerData.trkdedx[iTrk][ipl][iTrkHit]  = (calos[ipl] -> dEdx())[iTrkHit];
             TrackerData.trkdqdx[iTrk][ipl][iTrkHit]  = (calos[ipl] -> dQdx())[iTrkHit];
             TrackerData.trkresrg[iTrk][ipl][iTrkHit] = (calos[ipl] -> ResidualRange())[iTrkHit];
