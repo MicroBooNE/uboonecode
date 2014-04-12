@@ -1,28 +1,18 @@
-////////////////////////////////////////////////////////////////////////
-// \file UBTriggerAlgo.h
-//
-// \brief UBTriggerAlgo class header file
-//
-// \author kazuhiro@nevis.columbia.edu
-//
-////////////////////////////////////////////////////////////////////////
+/**
+ * \file UBTriggerAlgo.h
+ *
+ * \ingroup UBTriggerSim
+ * 
+ * \brief MicroBooNE trigger algorithm class
+ *
+ * @author kazuhiro
+ */
 
+/** \addtogroup UBTriggerSim
+
+@{*/
 #ifndef UBTRIGGERALGO_H
 #define UBTRIGGERALGO_H
-
-// ART includes
-//#include "art/Persistency/Common/Ptr.h" 
-//#include "fhiclcpp/ParameterSet.h"
-//#include "messagefacility/MessageLogger/MessageLogger.h"
-
-// LArSoft
-//#include "Simulation/BeamGateInfo.h"
-//#include "OpticalDetectorData/PMTTrigger.h"
-//#include "UBTriggerTypes.h"
-
-// Uboonecode
-//#include "uboone/TriggerData/TriggerData.h"
-//#include "uboone/ClockManager/SimpleClock.h"
 
 // STL
 #include <map>
@@ -31,32 +21,19 @@
 //LArSoft
 #include "RawData/TriggerData.h"
 #include "Utilities/ElecClock.h"
+#include "UBTrigException.h"
 
 namespace trigger
 {
-  
-  struct time_window_t {
-    
-    unsigned int start_sample;
-    unsigned int start_frame;
-    unsigned int duration;
-
-    time_window_t() {
-      start_sample = 0;
-      start_frame  = 0;
-      duration     = 0;
-    }
-
-    time_window_t(unsigned int sample,
-		  unsigned int frame,
-		  unsigned int period)
-    {
-      start_sample = sample;
-      start_frame  = frame;
-      duration     = period;
-    }
-  };
-
+  /**
+     \class UBTriggerAlgo
+     MicroBooNE trigger algorithm implementation. SetXXX attributes receives configuration
+     parameters for actual trigger board. It can take exact same 12 bit integers to be
+     configured (though function call names are not inheriting PCIE command label). AddTriggerXXX
+     attributes can be used to mimic pulse input to the trigger module front face by simply
+     providing the timing. Supports Calibration, Ext, PC, BNB, NuMI, PMT-Cosmic, PMT-Beam
+     input on the front face at the moment.
+  */ 
   class UBTriggerAlgo {
 
   private:
@@ -67,7 +44,6 @@ namespace trigger
   public:
 
     /// Default constructor with fhicl parameters
-    //UBTriggerAlgo(fhicl::ParameterSet const& pset);
     UBTriggerAlgo();
 
     /// Default destructor
@@ -78,15 +54,6 @@ namespace trigger
 
     /// Method to clear input trigger information
     void ClearInputTriggers();
-
-    /// Method to append PMT-Trigger information
-    //void AppendTriggerPMT(const art::Ptr<optdata::PMTTrigger> pmt_trigger);
-
-    /// Method to append BeamGateInfo for BNB beamgate
-    //void AppendTriggerBNB(const art::Ptr<sim::BeamGateInfo> bgi);
-
-    /// Method to append BeamGateInfo for NuMI beamgate
-    //void AppendTriggerNuMI(const art::Ptr<sim::BeamGateInfo> bgi);
 
     /// Function to process algorithm
     void ProcessTrigger(std::vector<raw::Trigger> &triggers);
@@ -106,16 +73,16 @@ namespace trigger
     /// Given trigger time, return NuMI beam gate window start time
     util::ElecClock NuMIStartTime(const util::ElecClock& time) const;
     
-  protected: // Change this to protected for LArSoft and public for LArLight
+  public:
 
     /// Function to set an individual trigger mask
-    void SetMask(unsigned char index, uint32_t mask);
+    void SetMask(unsigned char index, bool mask);
 
     /// Function to set an individual trigger prescale
     void SetPrescale(unsigned char index, bool prescale);
 
     /// Function to set trigger masks for 8 trigger conditions
-    void SetMask(const std::vector<unsigned short> &mask);
+    void SetMask(const std::vector<bool> &mask);
 
     /// Function to set prescales for 8 trigger conditions
     void SetPrescale(const std::vector<bool> &prescale);
@@ -163,9 +130,6 @@ namespace trigger
 
   protected:
     
-    /// Function to raise an error
-    void RaiseTriggerException(std::string msg) const;
-
     /// Function to send a string to stdout stream
     void Report(const std::string &msg) const;
 
@@ -198,8 +162,8 @@ namespace trigger
     bool           _debug_mode; ///< Verbose mode for debugging
     unsigned short _deadtime;   ///< Trigger dead time
 
-    std::vector<unsigned short> _mask;     ///< Masks for 8 trigger conditions
-    std::vector<bool>           _prescale; ///< Prescales for 8 trigger conditions
+    std::vector<bool> _mask;     ///< Masks for 8 trigger conditions
+    std::vector<bool> _prescale; ///< Prescales for 8 trigger conditions
 
     short _readout_frame_offset;  ///< Offset from the triggered frame to the beginning of readout window
     short _tpc_readout_offset;    ///< Offset from trigger time to TPC readout window start in sample number
@@ -233,3 +197,4 @@ namespace trigger
   
 } //namespace cluster
 #endif
+/** @} */ // end of doxygen group 

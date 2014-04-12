@@ -100,15 +100,6 @@ namespace trigger{
     std::cout << msg.c_str() << std::endl;
   }
 
-  //##############################################################
-  void UBTriggerAlgo::RaiseTriggerException(std::string msg) const
-  //##############################################################
-  {
-    //throw cet::exception(__FUNCTION__) << msg.c_str();
-    throw std::invalid_argument(msg.c_str());
-    std::exit(1);
-  }
-  
   //#########################################################
   void UBTriggerAlgo::SetBNBParams(unsigned short width,
 				   unsigned short delay,
@@ -117,7 +108,7 @@ namespace trigger{
   //#########################################################
   {
     if(_bnb_cosmic_allow_max < _bnb_cosmic_allow_min) {
-      RaiseTriggerException("BNB Cosmic allow window max is smaller than min!");
+      throw UBTrigException("BNB Cosmic allow window max is smaller than min!");
       _bnb_cosmic_allow_max = _bnb_cosmic_allow_min;
     }
     _bnb_gate_width       = width;
@@ -145,27 +136,27 @@ namespace trigger{
 
 
   //#############################################################
-  void UBTriggerAlgo::SetMask(unsigned char index, uint32_t mask)
+  void UBTriggerAlgo::SetMask(unsigned char index, bool mask)
   //#############################################################
   {
-    if(index>9) RaiseTriggerException("Index >9 cannot be set!");
-    _mask[index]=mask;
+    if(index>9) throw UBTrigException("Index >9 cannot be set!");
+    _mask.at(index)=mask;
   }
 
   //#################################################################
   void UBTriggerAlgo::SetPrescale(unsigned char index, bool prescale)
   //#################################################################
   {
-    if(index>9) RaiseTriggerException("Index >9 cannot be set!");
-    _prescale[index]=prescale;
+    if(index>9) throw UBTrigException("Index >9 cannot be set!");
+    _prescale.at(index)=prescale;
   }
 
   //##################################################################
-  void UBTriggerAlgo::SetMask(const std::vector<unsigned short> &mask) 
+  void UBTriggerAlgo::SetMask(const std::vector<bool> &mask) 
   //##################################################################
   {
     if(_mask.size()!=9) {
-      RaiseTriggerException(Form("Length of masks (=%zu) is invalid! Initializing to right length...",
+      throw UBTrigException(Form("Length of masks (=%zu) is invalid! Initializing to right length...",
 				 mask.size()));
       _mask.resize(9,0);
     }else
@@ -178,7 +169,7 @@ namespace trigger{
   //##################################################################
   {
     if(_prescale.size()!=9) {
-      RaiseTriggerException(Form("Length of prescales (=%zu) is invalid! Initializing to right length...",
+      throw UBTrigException(Form("Length of prescales (=%zu) is invalid! Initializing to right length...",
 				 prescale.size()));
       _prescale.resize(9,0);
     }else
@@ -370,17 +361,17 @@ namespace trigger{
 	     );
 
     if( trig1_number != trig2_number ) {
-      RaiseTriggerException("Cannot combine triggers with different trigger counters!");
+      throw UBTrigException("Cannot combine triggers with different trigger counters!");
       return raw::Trigger();
     }
 
     if( _trig_clock.Frame(trig1_time) != _trig_clock.Frame(trig2_time) ) {
-      RaiseTriggerException("Cannot combine triggers in different frames!");
+      throw UBTrigException("Cannot combine triggers in different frames!");
       return raw::Trigger();
     }
 
     if( _trig_clock.Sample(trig1_time) != _trig_clock.Sample(trig2_time) ) {
-      RaiseTriggerException("Cannot combine triggers in different trigger clock sample number!");
+      throw UBTrigException("Cannot combine triggers in different trigger clock sample number!");
       return raw::Trigger();
     }
 
@@ -398,7 +389,7 @@ namespace trigger{
     // Case1: both are beam ... not supported for now
     if( (trigger1.Triggered(trigger::kTriggerBNB) || trigger1.Triggered(trigger::kTriggerNuMI)) &&
 	(trigger2.Triggered(trigger::kTriggerBNB) || trigger2.Triggered(trigger::kTriggerNuMI)) ) {
-      RaiseTriggerException("Combining two beam gates not supported for now!");
+      throw UBTrigException("Combining two beam gates not supported for now!");
       return raw::Trigger();
     }
     // Case2: only trigger 1 is beam
@@ -671,7 +662,7 @@ namespace trigger{
       
       if( sample_iter == (*frame_iter).second.end() ) {
 	
-	RaiseTriggerException("Logic error: found candidate frame but no associated sample & trigger!");
+	throw UBTrigException("Logic error: found candidate frame but no associated sample & trigger!");
 	triggers.clear();
 	return;
       }    
