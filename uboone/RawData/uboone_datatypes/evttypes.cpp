@@ -1,11 +1,9 @@
 #include "evttypes.h"
 
 /* event type variables here */
-#ifndef __CXX__                 /* g++ doesn't like multiple definitions. - 10/12/04 - sm */
 uint32_t ev_type_toggle[N_EVENT_TYPES_MAX];
 uint32_t ev_type_prescale[N_EVENT_TYPES_MAX];
 uint32_t ev_type_count[N_EVENT_TYPES_MAX];
-#endif
 
 const char * TranslateEventType(uint16_t event_type, const int abbrev) {
     /* if abbrev is set to non-zero, then the abbreviation is used in some cases. Use macro

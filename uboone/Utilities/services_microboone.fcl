@@ -122,6 +122,7 @@ microboone_message_services_prod_debug.destinations.LogDebugFile.categories:{
   default: { }
   RecoBaseDefaultCtor: { limit: 0 }
   AnaBaseDefaultCtor:  { limit: 0 }
+  Track3DKalmanSPS_GenFit: { limit: 0 }
   GeometryBadInputPoint: { limit: 5 timespan: 1000}
 }
 
