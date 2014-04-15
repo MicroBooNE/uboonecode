@@ -1,0 +1,13 @@
+#include "timeservice.fcl"
+
+BEGIN_PROLOG
+
+microboone_timeservice: @local::standard_timeservice
+
+microboone_timeservice.G4RefTime:         0     # G4 time [ns] where electronics clock counting start 
+microboone_timeservice.FramePeriod:       1.6e6 # Frame period [ns]
+microboone_timeservice.ClockSpeedTPC:     0.002 # TPC clock speed in GHz
+microboone_timeservice.ClockSpeedOptical: 0.064 # Optical clock speed in GHz
+microboone_timeservice.ClockSpeedTrigger: 0.016 # Trigger clock speed in GHz
+
+END_PROLOG

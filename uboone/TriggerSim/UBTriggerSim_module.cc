@@ -220,7 +220,7 @@ namespace trigger {
     for(auto const &name : fBeamModBNB) {
       art::Handle<std::vector<sim::BeamGateInfo> > bnbArray;
       evt.getByLabel(name,bnbArray);
-      
+      if(!(bnbArray.isValid())) continue;
       for(size_t i=0; i<bnbArray->size(); ++i) {
 	art::Ptr<sim::BeamGateInfo> beam_ptr (bnbArray,i);
 	auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
@@ -233,7 +233,7 @@ namespace trigger {
     for(auto const &name : fBeamModNuMI) {
       art::Handle<std::vector<sim::BeamGateInfo> > numiArray;
       evt.getByLabel(name,numiArray);
-      
+      if(!(numiArray.isValid())) continue;
       for(size_t i=0; i<numiArray->size(); ++i) {
 	art::Ptr<sim::BeamGateInfo> beam_ptr (numiArray,i);
 	auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
@@ -247,28 +247,33 @@ namespace trigger {
 
       art::Handle<std::vector<optdata::PMTTrigger> > pmtArray;
       evt.getByLabel(fOpticalFEMMod,pmtArray);
-      for(size_t i=0; i<pmtArray->size(); ++i) {
-	art::Ptr<optdata::PMTTrigger> pmt_ptr (pmtArray,i);
-	clock.SetTime( pmt_ptr->TimeSlice(), pmt_ptr->Frame() );
-	switch(pmt_ptr->Category()) {
-	case optdata::kCosmicPMTTrigger:
-	  fAlg.AddTriggerPMTCosmic(clock);
-	  break;
-	case optdata::kBeamPMTTrigger:
-	  fAlg.AddTriggerPMTBeam(clock);
-	  break;
-	default:
-	  throw UBTrigException(Form("Unexpected OpticalCategory (%d) found from PMTTrigger",pmt_ptr->Category()));
-	  return;
+      if(pmtArray.isValid()) {
+
+	for(size_t i=0; i<pmtArray->size(); ++i) {
+	  
+	  art::Ptr<optdata::PMTTrigger> pmt_ptr (pmtArray,i);
+	  clock.SetTime( pmt_ptr->TimeSlice(), pmt_ptr->Frame() );
+	  switch(pmt_ptr->Category()) {
+	  case optdata::kCosmicPMTTrigger:
+	    fAlg.AddTriggerPMTCosmic(clock);
+	    break;
+	  case optdata::kBeamPMTTrigger:
+	    fAlg.AddTriggerPMTBeam(clock);
+	    break;
+	  default:
+	    throw UBTrigException(Form("Unexpected OpticalCategory (%d) found from PMTTrigger",pmt_ptr->Category()));
+	    return;
+	  }
 	}
       }
     }
 
     // Run trigger simulation
     fAlg.ProcessTrigger(*triggers);
-
+    
     // Store
-    evt.put(std::move(triggers));
+    if(triggers->size())
+      evt.put(std::move(triggers));
   }
 } 
 /** @} */ // end of doxygen group 

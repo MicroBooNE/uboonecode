@@ -503,6 +503,7 @@ namespace trigger{
   void UBTriggerAlgo::ShowCandidateTriggers() const
   //###############################################
   {
+
     auto frame_iter = _candidates.begin();
     std::ostringstream msg;
 
@@ -569,6 +570,7 @@ namespace trigger{
   void UBTriggerAlgo::ProcessTrigger(std::vector<raw::Trigger> &triggers)
   //#########################################################################
   {
+
     triggers.clear();
 
     if(_debug_mode)
