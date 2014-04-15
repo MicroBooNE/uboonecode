@@ -16,67 +16,6 @@
 
 namespace trigger{
 
-  /*
-  //##################################################################
-  UBTriggerAlgo::UBTriggerAlgo(fhicl::ParameterSet const& pset)
-    : _tpc_clock(pset.get< fhicl::ParameterSet >("ClockTPC")),
-      _pmt_clock(pset.get< fhicl::ParameterSet >("ClockPMT")),
-      _trigger_clock(pset.get< fhicl::ParameterSet >("ClockTrigger"))
-  //##################################################################
-  {    
-    _trigger_counter=0;
-
-    // Debug flag
-    SetDebugMode(pset.get<bool>("DebugMode"));
-
-    // Deadtime 
-    SetDeadtime(pset.get<uint16_t>("Deadtime") );
-
-    // Mask
-    SetMask(pset.get<std::vector<uint16_t> >("Mask"));
-
-    // Prescale
-    SetPrescale(pset.get<std::vector<bool> >("Prescale"));
-
-    // BNB gate parameters
-    SetBNBParams( pset.get<uint16_t>("GateWidthBNB"),
-                  pset.get<uint16_t>("TrigDelayBNB"),
-		  pset.get<uint16_t>("CosmicStartBNB"),
-		  pset.get<uint16_t>("CosmicEndBNB") );
-
-    // NuMI gate parameters
-    SetNuMIParams( pset.get<uint16_t>("GateWidthNuMI"),
-                   pset.get<uint16_t>("TrigDelayNuMI"),
-		   pset.get<uint16_t>("CosmicStartNuMI"),
-		   pset.get<uint16_t>("CosmicEndNuMI") );
-
-
-    ClearPredefinedTriggers();
-
-    // BNB trigger
-    _bnb_timings = pset.get<std::vector<double> >("PermTriggerBNB",std::vector<double>())
-
-    // NuMI trigger
-    _numi_timings = pset.get<std::vector<double> >("PermTriggerNuMI",std::vector<double>())
-
-    // Calib trigger
-    _calib_timings = pset.get<std::vector<double> >("PermTriggerCalib",std::vector<double>())
-
-    // Calib trigger
-    _calib_timings = pset.get<std::vector<double> >("PermTriggerCalib",std::vector<double>())
-
-    // Ext trigger
-    _ext_timings = pset.get<std::vector<double> >("PermTriggerExt",std::vector<double>())
-
-    // PC trigger
-    _pc_timings = pset.get<std::vector<double> >("PermTriggerPC",std::vector<double>())
-
-    ReportConfig();
-
-    ClearInputTriggers();
-  }
-  */
-
   //##############################################################
   UBTriggerAlgo::UBTriggerAlgo() : _mask(9,0),
 				   _prescale(9,false)
