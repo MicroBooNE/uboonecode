@@ -1,3 +1,4 @@
+cet_enable_asserts()
 
 art_make( BASENAME_ONLY
 	  MODULE_LIBRARIES Utilities
