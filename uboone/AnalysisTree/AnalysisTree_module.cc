@@ -1570,7 +1570,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       // looking at all of them; so we waste some memory here
       nGEANTparticlesInTPCFV = nGEANTparticles;
     } // if have MC truth
-    mf::LogDebug("AnalysisTree") << "Expected "
+    LOG_DEBUG("AnalysisTree") << "Expected "
       << nGEANTparticles << " GEANT particles, "
       << nGeniePrimaries << " GENIE particles";
   } // if MC
@@ -1985,7 +1985,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->no_primaries = primary;
       fData->geant_list_size = geant_particle;
       
-      mf::LogDebug("AnalysisTree") << "Counted "
+      LOG_DEBUG("AnalysisTree") << "Counted "
         << fData->geant_list_size << " GEANT particles ("
         << fData->geant_list_size_in_tpcFV << " in FV), "
         << fData->no_primaries << " primaries, "
@@ -2019,7 +2019,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   fData->taulife = LArProp->ElectronLifetime();
   fTree->Fill();
   
-  if (mf::MessageDrop::instance()->debugEnabled) {
+  if (mf::isDebugEnabled()) {
+    // use mf::LogDebug instead of LOG_DEBUG because we reuse it in many lines;
+    // thus, we protect this part of the code with the line above
     mf::LogDebug logStream("AnalysisTreeStructure");
     logStream
       << "Tree data structure has "
