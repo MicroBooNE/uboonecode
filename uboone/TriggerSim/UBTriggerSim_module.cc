@@ -116,18 +116,20 @@ namespace trigger {
     fOpticalFEMMod = pset.get< std::string > ("OpticalFEMMod","");
 
     // Get trigger module configuration parameters
-    fAlg.SetDebugMode  ( pset.get< bool              > ("DebugMode"      ) );
-    fAlg.SetMask       ( pset.get< std::vector<bool> > ("Mask"           ) );
-    fAlg.SetPrescale   ( pset.get< std::vector<bool> > ("Prescale"       ) );
-    fAlg.SetDeadtime   ( pset.get< unsigned short    > ("DeadTime"       ) );
-    fAlg.SetBNBParams  ( pset.get< unsigned short    > ("BNBGateWidth"   ),
-			 pset.get< unsigned short    > ("BNBGateDelay"   ),
-			 pset.get< unsigned short    > ("BNBCosmicStart" ),
-			 pset.get< unsigned short    > ("BNBCosmicEnd"   ) );
-    fAlg.SetNuMIParams ( pset.get< unsigned short    > ("NuMIGateWidth"   ),
-			 pset.get< unsigned short    > ("NuMIGateDelay"   ),
-			 pset.get< unsigned short    > ("NuMICosmicStart" ),
-			 pset.get< unsigned short    > ("NuMICosmicEnd"   ) );
+    fAlg.SetDebugMode  ( pset.get< bool                  > ("DebugMode"      ) );
+    fAlg.SetMask       ( pset.get< std::vector<uint32_t> > ("Mask"           ) );
+    fAlg.SetPrescale   ( pset.get< std::vector<bool>     > ("Prescale"       ) );
+    fAlg.SetDeadtime   ( pset.get< unsigned short        > ("DeadTime"       ) );
+
+    fAlg.SetBNBParams  ( pset.get< unsigned short        > ("BNBGateWidth"   ),
+			 pset.get< unsigned short        > ("BNBGateDelay"   ),
+			 pset.get< unsigned short        > ("BNBCosmicStart" ),
+			 pset.get< unsigned short        > ("BNBCosmicEnd"   ) );
+
+    fAlg.SetNuMIParams ( pset.get< unsigned short        > ("NuMIGateWidth"   ),
+			 pset.get< unsigned short        > ("NuMIGateDelay"   ),
+			 pset.get< unsigned short        > ("NuMICosmicStart" ),
+			 pset.get< unsigned short        > ("NuMICosmicEnd"   ) );
 
     // Get user-defined trigger timings
     std::vector<double> trig_calib ( pset.get< std::vector<double> > ("CalibTrigger",

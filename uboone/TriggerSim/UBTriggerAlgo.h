@@ -76,13 +76,13 @@ namespace trigger
   public:
 
     /// Function to set an individual trigger mask
-    void SetMask(unsigned char index, bool mask);
+    void SetMask(unsigned char index, uint32_t mask);
 
     /// Function to set an individual trigger prescale
     void SetPrescale(unsigned char index, bool prescale);
 
     /// Function to set trigger masks for 8 trigger conditions
-    void SetMask(const std::vector<bool> &mask);
+    void SetMask(const std::vector<uint32_t> &mask);
 
     /// Function to set prescales for 8 trigger conditions
     void SetPrescale(const std::vector<bool> &prescale);
@@ -162,7 +162,7 @@ namespace trigger
     bool           _debug_mode; ///< Verbose mode for debugging
     unsigned short _deadtime;   ///< Trigger dead time
 
-    std::vector<bool> _mask;     ///< Masks for 8 trigger conditions
+    std::vector<uint32_t> _mask; ///< Masks for 8 trigger conditions
     std::vector<bool> _prescale; ///< Prescales for 8 trigger conditions
 
     short _readout_frame_offset;  ///< Offset from the triggered frame to the beginning of readout window

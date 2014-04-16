@@ -75,7 +75,7 @@ namespace trigger{
 
 
   //#############################################################
-  void UBTriggerAlgo::SetMask(unsigned char index, bool mask)
+  void UBTriggerAlgo::SetMask(unsigned char index, uint32_t mask)
   //#############################################################
   {
     if(index>9) throw UBTrigException("Index >9 cannot be set!");
@@ -91,7 +91,7 @@ namespace trigger{
   }
 
   //##################################################################
-  void UBTriggerAlgo::SetMask(const std::vector<bool> &mask) 
+  void UBTriggerAlgo::SetMask(const std::vector<uint32_t> &mask) 
   //##################################################################
   {
     if(_mask.size()!=9) {

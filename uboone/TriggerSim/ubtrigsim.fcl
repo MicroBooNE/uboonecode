@@ -20,8 +20,8 @@ ubtriggersim:
   # Trigger module configuration
   #
   DeadTime: 4 # Trigger deadtime in number of frames
-  Mask:     [true, true, false,false,false,false,false,false,true ] # Trigger condition bit mask
-  Prescale: [false,false,false,false,false,false,false,false,false] # Trigger prescale bit mask
+  Mask:     [0x3,   0x4,   0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0x7a ] # Trigger condition bit mask
+  Prescale: [false, false, false, false, false, false, false, false, false] # Trigger prescale bit mask
 
   BNBGateWidth:    102 # BNB gate width in number of samples (Optical clock)
   BNBGateDelay:    256 # BNB gate delay in number of samples (Optical clock)
