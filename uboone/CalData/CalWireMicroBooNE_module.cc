@@ -219,7 +219,10 @@ namespace caldata {
       // adaptive baseline subtraction
       if(fBaseSampleBins) SubtractBaseline(holder, fBaseSampleBins);
 
-      wirecol->push_back(recob::Wire(holder,digitVec));
+      // Make a single ROI that spans the entire data size
+      std::vector<std::pair<unsigned int, std::vector<float>>> hvec;
+      hvec.push_back(std::make_pair(0, holder));
+      wirecol->push_back(recob::Wire(hvec,digitVec));
     }
 
 
