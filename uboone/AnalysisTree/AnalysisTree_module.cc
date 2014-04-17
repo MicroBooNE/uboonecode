@@ -1548,7 +1548,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         }
         //}
       }
-      mctruth = mclist[0];
       double maxenergy = -1;
       int imc0 = 0;
       for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
@@ -1561,6 +1560,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
 
       imc = 0; //set imc to 0 to solve a confusion for BNB+cosmic files where there are two MCTruth
+      mctruth = mclist[0];
 
       if (mctruth->NeutrinoSet()) nGeniePrimaries = mctruth->NParticles();
       
@@ -1873,7 +1873,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         }
         for(size_t iPart = 0; iPart < StoreParticles; ++iPart){
           const simb::MCParticle& part(mctruth->GetParticle(iPart));
-          
           fData->genie_primaries_pdg[iPart]=part.PdgCode();
           fData->genie_Eng[iPart]=part.E();
           fData->genie_Px[iPart]=part.Px();
