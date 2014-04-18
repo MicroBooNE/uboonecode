@@ -189,6 +189,7 @@ namespace caldata {
     std::vector<std::pair<unsigned int, std::vector<float>>> ROIVec;
     
     // loop over all wires
+    wirecol->reserve(digitVecHandle->size());
     for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){
     
       ROIVec.clear();
@@ -223,10 +224,10 @@ namespace caldata {
       
       // skip bad channels
       if(!chanFilt->BadChannel(channel)) {
-	
-	// uncompress the data
-	raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
-	// loop over all adc values and subtract the pedestal
+        
+        // uncompress the data
+        raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
+        // loop over all adc values and subtract the pedestal
         float pdstl = digitVec->GetPedestal();
         unsigned int roiStart = 0;
         // search for ROIs
@@ -345,7 +346,8 @@ namespace caldata {
           doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
       } // end if not a bad channel 
       
-      wirecol->push_back(recob::Wire(ROIVec,digitVec));
+      // create the new wire directly in wirecol
+      wirecol->emplace_back(ROIVec, digitVec);
     }
 
     if(wirecol->size() == 0)

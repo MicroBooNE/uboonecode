@@ -179,6 +179,7 @@ namespace caldata {
     std::vector<TComplex> freqHolder(transformSize+1); // temporary frequency data
     
     // loop over all wires    
+    wirecol->reserve(digitVecHandle->size());
     for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){ // ++ move
       holder.clear();
       
