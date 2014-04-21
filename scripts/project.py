@@ -1097,9 +1097,18 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     # Open files.
 
-    filelist = open(os.path.join(dir, 'files.list'), 'w')
-    eventslist = open(os.path.join(dir, 'events.list'), 'w')
-    missing = open(os.path.join(dir, 'missing.txt'), 'w')
+    filelistname = os.path.join(dir, 'files.list')
+    if os.path.exists(filelistname):
+        os.remove(filelistname)
+    filelist = open(filelistname, 'w')
+    eventslistname = os.path.join(dir, 'events.list')
+    if os.path.exists(eventslistname):
+        os.remove(eventslistname)
+    eventslist = open(eventslistname, 'w')
+    missingname = os.path.join(dir, 'missing.txt')
+    if os.path.exists(missingname):
+        os.remove(missingname)
+    missing = open(missingname, 'w')
 
     # See if there are any missing processes and generate file "missing.txt."
     # Skip this step for sam input.
