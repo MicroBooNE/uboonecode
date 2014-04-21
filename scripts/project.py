@@ -952,6 +952,8 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # 4.  sam_projects.list - List of successful sam projects.
     # 5.  cpids.list        - list of successful consumer process ids.
 
+    import_samweb()
+
     print 'Checking directory %s' % dir
 
     # Default result is success.
@@ -1165,13 +1167,19 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         for cpid in cpids:
             cpids_list = cpids_list + '%s%s' % (sep, cpid)
             sep = ','
-        dim = 'consumer_process_id %s and consumed_status consumed' % cpids_list
-        import_samweb()
-        nconsumed = samweb.countFiles(dimensions=dim)
+        if cpids_list != '':
+            dim = 'consumer_process_id %s and consumed_status consumed' % cpids_list
+            import_samweb()
+            nconsumed = samweb.countFiles(dimensions=dim)
+        else:
+            nconsumed = 0
 
         # Get number of unconsumed files.
 
-        udim = '(defname: %s) minus (%s)' % (input_def, dim)
+        if cpids_list != '':
+            udim = '(defname: %s) minus (%s)' % (input_def, dim)
+        else:
+            udim = 'defname: %s' % input_def
         nunconsumed = samweb.countFiles(dimensions=udim)
         
         # Sam summary.
