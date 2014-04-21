@@ -158,7 +158,7 @@ fi
 # and its contents recursively.
 
 if [ x$OUTDIR != x ]; then
-  OUTPUT_SUBDIR=${CLUSTER}_start
+  OUTPUT_SUBDIR=${CLUSTER}_stop
   mkdir $OUTPUT_SUBDIR
   for outfile in *; do
     if [ $outfile != $OUTPUT_SUBDIR ]; then
