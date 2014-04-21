@@ -27,6 +27,7 @@ table_fragment_begin
     pathPrepend(PYTHONPATH, ${UPS_PROD_DIR}/python)
     setupOptional("sam_web_client")
     setupOptional("jobsub_tools")
+    envSet(SAM_EXPERIMENT, uboone)
 table_fragment_end
 
 # With "product  version" table below, we now define depdendencies
