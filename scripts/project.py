@@ -1140,14 +1140,18 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
         # List of successful sam projects.
         
-        sam_projects_file = open(os.path.join(dir, 'sam_projects.list'), 'w')
+        sam_projects_filename = os.path.join(dir, 'sam_projects.list')
+        os.remove(sam_projects_filename)
+        sam_projects_file = open(sam_projects_filename, 'w')
         for sam_project in sam_projects:
             sam_projects_file.write('%s\n' % sam_project)
         sam_projects_file.close()
 
         # List of successfull consumer process ids.
 
-        cpids_file = open(os.path.join(dir, 'cpids.list'), 'w')
+        cpids_filename = os.path.join(dir, 'cpids.list')
+        os.remove(cpids_filename)
+        cpids_file = open(cpids_filename, 'w')
         for cpid in cpids:
             cpids_file.write('%s\n' % cpid)
         cpids_file.close()
