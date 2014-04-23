@@ -144,7 +144,7 @@ util::SignalShapingServiceMicroBooNE::SignalShaping(unsigned int channel) const
     return fColSignalShaping;
   else
     throw cet::exception("SignalShapingServiceMicroBooNE")<< "can't determine"
-                                                          << " SignalType";
+                                                          << " SignalType\n";
 							  
 return fColSignalShaping;
 }

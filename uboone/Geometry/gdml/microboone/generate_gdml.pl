@@ -18,7 +18,8 @@ GetOptions( "input|i:s" => \$input,
 	    "help|h" => \$help,
 	    "suffix|s:s" => \$suffix,
 	    "output|o:s" => \$output,
-	    "wires|w:s" => \$wires);
+	    "wires|w:s" => \$wires,
+	    "cryostat|c:s" => \$cryostat);
 
 if ( defined $help )
 {
@@ -70,15 +71,20 @@ my $CosUVAngle = cos( deg2rad($UVAngle) );
 my $TanUVAngle = tan( deg2rad($UVAngle) );
 
 my $inch=2.54;
-
+my $cryostat_on=1;			# turn cryostat on=1 or off=0 
 my $wires_on=1; 			# turn wires on=1 or off=0
+
 if ( defined $wires )
 {
 #The user supplied the wires on parameter, so using that. Otherwise the default=1 is used.
 $wires_on = $wires;
 }
 
-
+if (defined $cryostat)
+{
+#The user supplied the cryo on parameter; default is set to 1 (cryostat included)
+$cryostat_on = $cryostat;
+}
 
 
 my $WireInterval=10;
@@ -122,9 +128,12 @@ exit;
 sub usage()
 {
     print "Usage: $0 [-h|--help] -i|--input <parameters-file> [-o|--output <fragments-file>] [-s|--suffix <string>]\n";
+    print "	  [-w wires] [-c cryostat]\n";
     print "       -i/--input can be omitted; <parameters-file> contains geometry and material parameters\n";
     print "       if -o is omitted, output goes to STDOUT; <fragments-file> is input to make_gdml.pl\n";
     print "       -s <string> appends the string to the file names; useful for multiple detector versions\n";
+    print " 	  -w wires excludes wires from gdml when wires=0, default to wires=1; -c cryostat excludes\n";
+    print "	  cryostat, default to cryostat=1\n"; 
     print "       -h prints this message, then quits\n";
 }
 
@@ -636,7 +645,7 @@ sub gen_tpc()
     $TPCActiveHeight = $TPCWirePlaneWidth;   #  
     $TPCActiveLength = $TPCWirePlaneLength-0.2;   # extra subtraction to arrive at TPCActive values in the TDR
 
-
+if( $cryostat_on ==1){    
     print GDML <<EOF;
 <?xml version='1.0'?>
 <gdml>
@@ -773,12 +782,14 @@ EOF
 EOF
 
    close(GDML);
+  }#if cryostat_on 
 }
 
 
 # Generates Ben Jones's PMT micro-pmtdef (with temporary edit to ellipsoid shapes
 sub gen_pmt {
 
+    if( $cryostat_on ==1 ){
     $PMT = "micro-pmtdef" . $suffix . ".gdml";
     push (@gdmlFiles, $PMT); # Add file to list of GDML fragments
     $PMT = ">" . $PMT;
@@ -891,7 +902,7 @@ EOF
  </volume>
 </structure>
 EOF
-
+  }#if cryostat_on
 }
 
 
@@ -1291,6 +1302,8 @@ EOF
 #Parameterize the steel cryostat that encloses the TPC.
 sub gen_cryostat()
 {
+  if($cryostat_on==1){
+
     # Set up the output file.
     $CRYOSTAT = "micro-cryostat" . $suffix . ".gdml";
     push (@gdmlFiles, $CRYOSTAT); # Add file to list of GDML fragments
@@ -1414,6 +1427,7 @@ EOF
 EOF
 
    close(CRYOSTAT);
+  } #if cryostat_on
 }
 
 #Generates Tia Miceli's scintillator veto wall
@@ -1690,6 +1704,12 @@ sub gen_world()
     deltaphi="360" 
     lunit="cm"
     aunit="deg"/>
+  <tube name="GroundBottom"
+    rmax="((50*12)+310)*2.54"
+    z="50*12*2.54"
+    deltaphi="360"
+    lunit="cm"
+    aunit="deg"/>
   <tube name="ConcreteEnclosure"
     rmin="292*2.54"
     rmax="310*2.54"
@@ -1731,6 +1751,10 @@ sub gen_world()
     <materialref ref="Dirt" />
     <solidref ref="Ground" />
   </volume>
+  <volume name="volGroundBottom" >
+     <materialref ref="Dirt" />
+     <solidref ref="GroundBottom" />
+   </volume>
   <volume name="volOverburden" >
     <materialref ref="Dirt" />
     <solidref ref="Overburden" />
@@ -1773,12 +1797,18 @@ sub gen_world()
       <volumeref ref="volPolystyreneEnclosureBottom"/>
       <position name="posPolystyreneEnclosureBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-(38*12 - 36)*2.54/2" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol> 
+    </physvol>
     <physvol>
        <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>  
+    </physvol> 
+    <physvol>
+       <volumeref ref="volGroundBottom"/>
+      <position name="posGroundBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> 
+ 
     <!--physvol>
       <volumeref ref="volOverburden"/>
       <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="(41-10)*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>

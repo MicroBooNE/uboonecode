@@ -66,6 +66,18 @@ add_subdirectory(uboone)
 # subdirectory for test code
 add_subdirectory(test)
 
+# Top level fcl files.
+add_subdirectory(fcl)
+
+# XML project files.
+add_subdirectory(xml)
+
+# Scripts and utilities.
+add_subdirectory(scripts)
+
+# Python modules.
+add_subdirectory(python)
+
 # ups - table and config files
 add_subdirectory(ups)
 

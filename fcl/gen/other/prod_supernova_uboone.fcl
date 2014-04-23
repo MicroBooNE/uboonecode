@@ -1,0 +1,22 @@
+#include "prodgenie_common_uboone.fcl"
+
+process_name: GenieGenSN
+
+services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
+                                                    "fileFormat", "root",
+                                                    "runType",    "physics",
+                                                    "fclName",    "prod_supernova_uboone.fcl",
+                                                    "fclVersion", "v1_5",
+                                                    "ubProjectStage",   "gen",
+                                                    "ubProjectVersion", "v1_3" ]
+services.user.FileCatalogMetadataExtras.RenameTemplate: "prod_supernova_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
+
+
+physics.producers.generator:                    @local::microboone_genie_hist
+physics.producers.generator.GenFlavors:		[12]				#Make electron neutrinos
+physics.producers.generator.FluxFiles:		["SNFlueForGENIE.root"] 	#read in flux from a custom file.(.root format)
+physics.producers.generator.GlobalTimeOffset: 	0
+physics.producers.generator.RandomTimeOffset:   0.
+#physics.producers.generator.BeamDirection:	[1,0,0]				#beam direction
+physics.producers.generator.BeamRadius:		1				#beam radius
+
