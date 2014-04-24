@@ -7,8 +7,8 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef SIMWIRE_H
-#define SIMWIRE_H
+#ifndef RAWDIGITSIMULATOR_H
+#define RAWDIGITSIMULATOR_H
 
 extern "C" {
 #include <sys/types.h>
@@ -155,8 +155,8 @@ namespace detsim{
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
 
-    fNoiseDist      = tfs->make<TH1D>("Noise", ";Noise [ADC];", 100, -20., 20.);
-    fWaveform       = tfs->make<TH1D>("Waveform", "; Time Ticks ; ADC counts", fNTicks, 0, fNTicks);
+    fNoiseDist      = tfs->make<TH1D>("Noise", ";Noise (ADC);", 100, -20., 20.);
+    fWaveform       = tfs->make<TH1D>("Waveform", "; Pulse [ADC];", fNTicks, 0, fNTicks);
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fNTicks = fFFT->FFTSize();
@@ -174,7 +174,7 @@ namespace detsim{
   void RawDigitSimulator::produce(art::Event& evt)
   {
 
-    //std::cout << "in RawDigitSimulator::produce " << std::endl;
+    //std::cout << "in SimWire::produce " << std::endl;
 
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
@@ -268,6 +268,6 @@ namespace detsim{
 
 }
 
-#endif // SIMWIRE_H
+#endif // RAWDIGITSIMULATOR_H
 
 
