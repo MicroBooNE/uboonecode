@@ -975,6 +975,8 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # 4.  sam_projects.list - List of successful sam projects.
     # 5.  cpids.list        - list of successful consumer process ids.
     # 6.  hists.list  - List of non-art histogram root files (histograms and/or ntuples).
+    # 7.  hist.root   - Merged histogram file (excludes TTrees).
+    #                   Made using "hadd -T hist.root @hlists.list"
 
     import_samweb()
 
@@ -1188,6 +1190,15 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     eventslist.close()
     missing.close()
     histlist.close()
+
+    # Make merged histogram file using hadd.
+
+    if len(hists) > 0:
+        rc = subprocess.call(["hadd", "-f", "-k", "-T", "-v", "1", 
+                              os.path.join(dir, "hist.root"), 
+                              "@" + os.path.join(dir, "hists.list")])
+        if rc != 0:
+            print "hadd exit status %d" % rc
 
     # Make sam files.
 
