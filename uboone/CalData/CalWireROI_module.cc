@@ -10,13 +10,9 @@
 
 #include <string>
 #include <vector>
-#include <stdint.h>
 
-extern "C" {
-#include <sys/types.h>
-#include <sys/stat.h>
-}
-
+#include "fhiclcpp/ParameterSet.h" 
+#include "messagefacility/MessageLogger/MessageLogger.h" 
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h" 
@@ -24,12 +20,7 @@ extern "C" {
 #include "art/Persistency/Common/Ptr.h" 
 #include "art/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
-#include "art/Framework/Services/Optional/TFileService.h" 
-#include "art/Framework/Services/Optional/TFileDirectory.h" 
-#include "fhiclcpp/ParameterSet.h" 
-#include "messagefacility/MessageLogger/MessageLogger.h" 
-#include "cetlib/exception.h"
-#include "cetlib/search_path.h"
+#include "art/Utilities/Exception.h"
 
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Geometry/Geometry.h"
@@ -39,8 +30,123 @@ extern "C" {
 #include "RecoBase/Wire.h"
 #include "Utilities/LArFFT.h"
 
-//#include "TComplex.h"
-//#include "TFile.h"
+
+namespace {
+
+/* // old recob::Wire version
+	void DumpWire(const recob::Wire& wire) {
+		
+		const size_t pagesize = 10;
+		mf::LogDebug log("DumpWire");
+		
+		const recob::Wire::RegionsOfInterest_t& wireSignalRoI = wire.SignalROI();
+		
+		log << "\nDumpWire: wire on view " << ((int) wire.View())
+			<< " channel " << wire.Channel()
+			<< " with " << wireSignalRoI.size() << " regions of interest:";
+		size_t iRoI = 0;
+		for (auto RoI: wireSignalRoI) {
+			log << "\nDumpWire: [RoI " << iRoI << "] starts at " << RoI.first
+				<< ", " << RoI.second.size() << " samples:";
+			++iRoI;
+			for (size_t i = 0; i < RoI.second.size(); ++i) {
+				if (i % pagesize == 0)
+					log << "\nDumpWire: [RoI " << iRoI << "/" << i << "]";
+				log << '\t' << RoI.second[i];
+			} // for sample
+		} // for RoI
+		
+		
+		const std::vector<float> wireSignal{wire.Signal()};
+		std::vector<float> buffer(pagesize), prev_buffer;
+		log << "\nDumpWire: wire on view " << ((int)wire.View())
+			<< " channel " << wire.Channel()
+			<< " with " << wireSignal.size() << " samples:";
+		size_t i = 0, nSame = 0;
+		auto iSample = wireSignal.begin(), send = wireSignal.end();
+		while (iSample != send) {
+			i += prev_buffer.size();
+			buffer.assign(iSample, iSample + pagesize);
+			iSample += buffer.size();
+			if (buffer == prev_buffer) {
+				++nSame;
+			}
+			else {
+				if (nSame > 0) {
+					log << "\nDumpWire: [" << i << "]  ... and " << nSame << " more";
+					nSame = 0;
+				}
+				
+				if (i % pagesize == 0) log << "\nDumpWire: [" << i << "]";
+				for (auto value: buffer) log << '\t' << value;
+				buffer.swap(prev_buffer);
+			}
+		} // while
+		if (nSame > 0) {
+			log << "\nDumpWire: [" << i << "]  ... and " << nSame << " more to the end";
+			nSame = 0;
+		}
+	} // DumpWire()
+*/
+	void DumpWire(const recob::Wire& wire) {
+		
+		const size_t pagesize = 10;
+		mf::LogDebug log("DumpWire");
+		
+		const recob::Wire::RegionsOfInterest_t& wireSignalRoI = wire.SignalROI();
+		
+		log << "\nDumpWire: wire on view " << ((int) wire.View())
+			<< " channel " << wire.Channel()
+			<< " with " << wireSignalRoI.n_ranges() << " regions of interest:";
+		size_t iRoI = 0;
+		auto RoI = wireSignalRoI.begin_range(), rend = wireSignalRoI.end_range();
+		while (RoI != rend) {
+			++iRoI;
+			log << "\nDumpWire: [RoI " << iRoI << "] starts at " << RoI->begin_index()
+				<< ", " << RoI->size() << " samples:";
+			size_t iSample = 0;
+			for (auto sample: *RoI) {
+				if (iSample % pagesize == 0)
+					log << "\nDumpWire: [RoI " << iRoI << "/" << iSample << "]";
+				log << '\t' << sample;
+				++iSample;
+			} // for sample
+			++RoI;
+		} // for RoI
+		
+		
+		const recob::Wire::RegionsOfInterest_t& wireSignal = wireSignalRoI;
+		std::vector<float> buffer(pagesize), prev_buffer;
+		log << "\nDumpWire: wire on view " << ((int)wire.View())
+			<< " channel " << wire.Channel()
+			<< " with " << wireSignal.size() << " samples:";
+		size_t i = 0, nSame = 0;
+		auto iSample = wireSignal.begin(), send = wireSignal.end();
+		while (iSample < send) {
+			i += prev_buffer.size();
+			buffer.assign(iSample, std::min(iSample + pagesize, send));
+			iSample += buffer.size();
+			if (buffer == prev_buffer) {
+				++nSame;
+			}
+			else {
+				if (nSame > 0) {
+					log << "\nDumpWire: [" << i << "]  ... and " << nSame << " more";
+					nSame = 0;
+				}
+				
+				if (i % pagesize == 0) log << "\nDumpWire: [" << i << "]";
+				for (auto value: buffer) log << '\t' << value;
+				buffer.swap(prev_buffer);
+			}
+		} // while
+		if (nSame > 0) {
+			log << "\nDumpWire: [" << i << "]  ... and " << nSame << " more to the end";
+			nSame = 0;
+		}
+	} // DumpWire()
+}
+
 
 ///creation of calibrated signals on wires
 namespace caldata {
@@ -79,7 +185,7 @@ namespace caldata {
       uint32_t channel, unsigned int thePlane,
       std::vector<std::pair<unsigned int, unsigned int>> rois,
       std::vector<std::pair<unsigned int, unsigned int>> holderInfo,
-      std::vector<std::pair<unsigned int, std::vector<float>>>& ROIVec,
+      recob::Wire::RegionsOfInterest_t& ROIVec,
       art::ServiceHandle<util::SignalShapingServiceMicroBooNE>& sss);
     
   protected: 
@@ -115,15 +221,15 @@ namespace caldata {
     fThreshold        = p.get< std::vector<unsigned short> >   ("Threshold");
     fMinWid           = p.get< unsigned short >       ("MinWid");
     fMinSep           = p.get< unsigned short >       ("MinSep");
-    uin =   p.get< std::vector<unsigned short> >      ("uPlaneROIPad");
-    vin =   p.get< std::vector<unsigned short> >      ("vPlaneROIPad");
-    zin =   p.get< std::vector<unsigned short> >      ("zPlaneROIPad");
+    uin               = p.get< std::vector<unsigned short> >   ("uPlaneROIPad");
+    vin               = p.get< std::vector<unsigned short> >   ("vPlaneROIPad");
+    zin               = p.get< std::vector<unsigned short> >   ("zPlaneROIPad");
     fDoBaselineSub    = p.get< bool >                 ("DoBaselineSub");
-    fuPlaneRamp    = p.get< bool >                 ("uPlaneRamp");
+    fuPlaneRamp       = p.get< bool >                 ("uPlaneRamp");
     
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
-      mf::LogError("CalWireROI")<<"u/v/z plane ROI pad size != 2";
-      return;
+      throw art::Exception(art::errors::Configuration)
+        << "u/v/z plane ROI pad size != 2";
     }
 
     fPreROIPad.resize(3);
@@ -185,15 +291,13 @@ namespace caldata {
     
     filter::ChannelFilter *chanFilt = new filter::ChannelFilter();  
     
-    // vector that will be put into the Wire object
-    std::vector<std::pair<unsigned int, std::vector<float>>> ROIVec;
-    
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
     for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){
-    
-      ROIVec.clear();
-
+      
+      // vector that will be moved into the Wire object
+      recob::Wire::RegionsOfInterest_t ROIVec;
+      
       // the starting position and length of each ROI in the packed holder vector
       std::vector<std::pair<unsigned int, unsigned int>> holderInfo;
       // vector of ROI begin and end bins
@@ -342,12 +446,14 @@ namespace caldata {
           } // bin
         } // ir < rois.size
         // do the last deconvolution if needed
-        if(holderInfo.size() > 0) 
+        if(holderInfo.size() > 0)
           doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
       } // end if not a bad channel 
       
       // create the new wire directly in wirecol
-      wirecol->emplace_back(ROIVec, digitVec);
+      wirecol->emplace_back(std::move(ROIVec), digitVec);
+      
+      DumpWire(wirecol->back());
     }
 
     if(wirecol->size() == 0)
@@ -366,7 +472,7 @@ namespace caldata {
     uint32_t channel, unsigned int thePlane,
     std::vector<std::pair<unsigned int, unsigned int> > rois,
     std::vector<std::pair<unsigned int, unsigned int> > holderInfo,
-    std::vector<std::pair<unsigned int, std::vector<float>>>& ROIVec,
+    recob::Wire::RegionsOfInterest_t& ROIVec,
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE>& sss)
   {
       
@@ -394,11 +500,9 @@ namespace caldata {
       for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
         sigTemp.push_back(holder[jj] - baseLine);
       } // jj
-      // make the start tick, ROI pair
-      std::pair<unsigned int, std::vector<float>> 
-        aROI = std::make_pair(rois[theROI].first,sigTemp);
-      // push it onto ROIVec 
-      ROIVec.push_back(aROI);
+      
+      // add the range into ROIVec 
+      ROIVec.add_range(rois[theROI].first, std::move(sigTemp));
     } // jr
   } // doDecon
 

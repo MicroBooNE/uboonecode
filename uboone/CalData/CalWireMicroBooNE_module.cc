@@ -221,9 +221,7 @@ namespace caldata {
       if(fBaseSampleBins) SubtractBaseline(holder, fBaseSampleBins);
 
       // Make a single ROI that spans the entire data size
-      std::vector<std::pair<unsigned int, std::vector<float>>> hvec;
-      hvec.push_back(std::make_pair(0, holder));
-      wirecol->push_back(recob::Wire(hvec,digitVec));
+      wirecol->emplace_back(holder,digitVec);
     }
 
 
