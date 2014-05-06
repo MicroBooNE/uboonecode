@@ -453,7 +453,7 @@ namespace caldata {
       // create the new wire directly in wirecol
       wirecol->emplace_back(std::move(ROIVec), digitVec);
       
-      DumpWire(wirecol->back());
+    //  DumpWire(wirecol->back()); // for debugging
     }
 
     if(wirecol->size() == 0)
