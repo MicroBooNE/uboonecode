@@ -1,7 +1,7 @@
 #include "services_microboone.fcl"
 #include "largeantmodules.fcl"
 #include "singles.fcl"
-#include "caldata.fcl"
+#include "caldata_microboone.fcl"
 #include "detsimmodules.fcl"
 #include "mccheatermodules.fcl"
 

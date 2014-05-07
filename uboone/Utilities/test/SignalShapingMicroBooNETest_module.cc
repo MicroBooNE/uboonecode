@@ -95,7 +95,7 @@ namespace util
     // Make collection plane histograms.
 
     art::TFileDirectory dirc = tfs->mkdir("Collection", "Collection");
-    int nhist = std::min(200, nticks);
+    int nhist = std::min(300, nticks);
     int nfilt = std::min(5000, nticks/2);
     int nkern = nticks/2;
 
@@ -147,52 +147,100 @@ namespace util
 
     // Make induction plane histograms.
 
-    art::TFileDirectory diri = tfs->mkdir("Induction", "Induction");
+    art::TFileDirectory udiri = tfs->mkdir("InductionU", "InductionU");
+
+    // Make input pulse.
+
+    std::vector<double> utini(nticks, 0.);
+    fill_delta(utini, nhist/2);
+    TH1D* uhini = udiri.make<TH1D>("input", "InductionU Input", nhist+1, -0.5, nhist+0.5);
+    vector_to_hist(utini, uhini);
+
+    // Convoluted pulse.
+
+    std::vector<double> utconvi(utini);
+    sss->Convolute(0, utconvi);
+    TH1D* uhconvi = udiri.make<TH1D>("conv", "InductionU Convoluted", nhist+1, -0.5, nhist+0.5);
+    vector_to_hist(utconvi, uhconvi);
+
+    // Deconvoluted pulse.
+
+    std::vector<double> utdeconvi(utconvi);
+    sss->Deconvolute(0, utdeconvi);
+    TH1D* uhdeconvi = udiri.make<TH1D>("deconv", "InductionU Deconvoluted", nhist+1, -0.5, nhist+0.5);
+    vector_to_hist(utdeconvi, uhdeconvi);
+
+    // Get induction response function and fill histogram.
+
+    const std::vector<double>&  urespi = sss->SignalShaping(0).Response();
+    TH1D* uhrfi = udiri.make<TH1D>("resp", "InductionU Response", nhist+1, -nhist/2-0.5, nhist/2+0.5);
+    vector_to_hist(urespi, uhrfi);
+
+    // Get induction convolution kernel and fill histogram.
+
+    const std::vector<TComplex>&  ukerni = sss->SignalShaping(0).ConvKernel();
+    std::vector<double> ukernri(ukerni.size());
+    for(unsigned int i=0; i<ukernri.size(); ++i)
+      ukernri[i] = ukerni[i].Rho();
+    TH1D* hukerni = udiri.make<TH1D>("kern", "InductionU Convolution Kernel", nkern+1, -0.5, nkern+0.5);
+    hukerni->SetMinimum(0.);
+    vector_to_hist(ukernri, hukerni);
+
+    // Get induction filter function and fill histogram.
+
+    const std::vector<TComplex>&  ufilti = sss->SignalShaping(3000).Filter();
+    std::vector<double> ufiltri(ufilti.size());
+    for(unsigned int i=0; i<ufiltri.size(); ++i)
+      ufiltri[i] = ufilti[i].Re();
+    TH1D* uhffi = udiri.make<TH1D>("filt", "InductionU Filter", nfilt+1, -0.5, nfilt+0.5);
+    vector_to_hist(ufiltri, uhffi);
+
+    art::TFileDirectory diri = tfs->mkdir("InductionV", "InductionV");
 
     // Make input pulse.
 
     std::vector<double> tini(nticks, 0.);
     fill_delta(tini, nhist/2);
-    TH1D* hini = diri.make<TH1D>("input", "Induction Input", nhist+1, -0.5, nhist+0.5);
+    TH1D* hini = diri.make<TH1D>("input", "InductionV Input", nhist+1, -0.5, nhist+0.5);
     vector_to_hist(tini, hini);
 
     // Convoluted pulse.
 
     std::vector<double> tconvi(tini);
-    sss->Convolute(0, tconvi);
-    TH1D* hconvi = diri.make<TH1D>("conv", "Induction Convoluted", nhist+1, -0.5, nhist+0.5);
+    sss->Convolute(3000, tconvi);
+    TH1D* hconvi = diri.make<TH1D>("conv", "InductionV Convoluted", nhist+1, -0.5, nhist+0.5);
     vector_to_hist(tconvi, hconvi);
 
     // Deconvoluted pulse.
 
     std::vector<double> tdeconvi(tconvi);
-    sss->Deconvolute(0, tdeconvi);
-    TH1D* hdeconvi = diri.make<TH1D>("deconv", "Induction Deconvoluted", nhist+1, -0.5, nhist+0.5);
+    sss->Deconvolute(3000, tdeconvi);
+    TH1D* hdeconvi = diri.make<TH1D>("deconv", "InductionV Deconvoluted", nhist+1, -0.5, nhist+0.5);
     vector_to_hist(tdeconvi, hdeconvi);
 
     // Get induction response function and fill histogram.
 
-    const std::vector<double>&  respi = sss->SignalShaping(0).Response();
-    TH1D* hrfi = diri.make<TH1D>("resp", "Induction Response", nhist+1, -nhist/2-0.5, nhist/2+0.5);
+    const std::vector<double>&  respi = sss->SignalShaping(3000).Response();
+    TH1D* hrfi = diri.make<TH1D>("resp", "InductionV Response", nhist+1, -nhist/2-0.5, nhist/2+0.5);
     vector_to_hist(respi, hrfi);
 
     // Get induction convolution kernel and fill histogram.
 
-    const std::vector<TComplex>&  kerni = sss->SignalShaping(0).ConvKernel();
+    const std::vector<TComplex>&  kerni = sss->SignalShaping(3000).ConvKernel();
     std::vector<double> kernri(kerni.size());
     for(unsigned int i=0; i<kernri.size(); ++i)
       kernri[i] = kerni[i].Rho();
-    TH1D* hkerni = diri.make<TH1D>("kern", "Induction Convolution Kernel", nkern+1, -0.5, nkern+0.5);
+    TH1D* hkerni = diri.make<TH1D>("kern", "InductionV Convolution Kernel", nkern+1, -0.5, nkern+0.5);
     hkerni->SetMinimum(0.);
     vector_to_hist(kernri, hkerni);
 
     // Get induction filter function and fill histogram.
 
-    const std::vector<TComplex>&  filti = sss->SignalShaping(0).Filter();
+    const std::vector<TComplex>&  filti = sss->SignalShaping(3000).Filter();
     std::vector<double> filtri(filti.size());
     for(unsigned int i=0; i<filtri.size(); ++i)
       filtri[i] = filti[i].Re();
-    TH1D* hffi = diri.make<TH1D>("filt", "Induction Filter", nfilt+1, -0.5, nfilt+0.5);
+    TH1D* hffi = diri.make<TH1D>("filt", "InductionV Filter", nfilt+1, -0.5, nfilt+0.5);
     vector_to_hist(filtri, hffi);
   }
 
