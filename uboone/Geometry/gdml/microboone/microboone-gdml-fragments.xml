@@ -29,9 +29,7 @@
       <filename> micro-cathode.gdml </filename>
       <filename> micro-fieldcage.gdml </filename>
       <filename> micro-tpc.gdml </filename>
-      <filename> micro-pmtdef.gdml </filename>
       <filename> micro-enclosureExtras.gdml </filename>
-      <filename> micro-cryostat.gdml </filename>
       <filename> micro-enclosure.gdml </filename>
       <filename> micro-world.gdml </filename>
 
