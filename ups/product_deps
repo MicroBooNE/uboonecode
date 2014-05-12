@@ -22,12 +22,13 @@ gdmldir product_dir gdml
 # table fragment to set FW_SEARCH_PATH needed 
 # to find gdml files:
 table_fragment_begin
+    envSet(GROUP, uboone)
+    envSet(SAM_EXPERIMENT, uboone)
     pathPrepend(FW_SEARCH_PATH, ${UBOONECODE_DIR}/gdml)
     pathPrepend(FHICL_FILE_PATH, .:./job)
     pathPrepend(PYTHONPATH, ${UPS_PROD_DIR}/python)
     setupOptional("sam_web_client")
     setupOptional("jobsub_tools")
-    envSet(SAM_EXPERIMENT, uboone)
 table_fragment_end
 
 # With "product  version" table below, we now define depdendencies
