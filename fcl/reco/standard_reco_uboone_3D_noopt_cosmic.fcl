@@ -4,7 +4,7 @@
 #include "calorimetry_microboone.fcl"
 #include "showerfindermodules.fcl"
 #include "vertexfindermodules.fcl"
-#include "pandoraservices.fcl"
+#include "pandoramodules.fcl"
 #include "triggeralgo_service.fcl"
 #include "opticaldetectormodules.fcl"
 #include "photpropservices_microboone.fcl"

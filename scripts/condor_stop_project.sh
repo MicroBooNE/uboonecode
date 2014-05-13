@@ -25,7 +25,7 @@ SAM_STATION="uboone"
 SAM_PROJECT=""
 OUTDIR=""
 GRID=0
-OUTPUT_URI=""
+IFDH_OPT=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -89,20 +89,15 @@ if [ x$SAM_PROJECT = x ]; then
   exit 1
 fi
 
-# Set base uri's for ifdh.
+# Set options for ifdh.
 
 if [ $GRID -ne 0 ]; then
-  OUTPUT_URI=gsiftp://if-gridftp-uboone.fnal.gov:2811/
-
-  # Figure out if this is a production job.
-  # If so, use a different output server.
-
   echo "X509_USER_PROXY = $X509_USER_PROXY"
-  if echo $X509_USER_PROXY | grep -q Production; then
-    OUTPUT_URI=gsiftp://fg-bestman1.fnal.gov:2811/
+  if ! echo $X509_USER_PROXY | grep -q Production; then
+    IFDH_OPT="--force=expgridftp"
   fi
 fi
-echo "Output ifdh base uri = $OUTPUT_URI"
+echo "IFDH_OPT=$IFDH_OPT"
 
 # Create the scratch directory in the condor scratch diretory.
 # Copied from condor_lBdetMC.sh.
@@ -163,14 +158,15 @@ fi
 # and its contents recursively.
 
 if [ x$OUTDIR != x ]; then
-  OUTPUT_SUBDIR=${CLUSTER}_start
+  OUTPUT_SUBDIR=${CLUSTER}_stop
   mkdir $OUTPUT_SUBDIR
   for outfile in *; do
     if [ $outfile != $OUTPUT_SUBDIR ]; then
       mv $outfile $OUTPUT_SUBDIR
     fi
   done
-  ifdh cp -r $OUTPUT_SUBDIR ${OUTPUT_URI}${OUTDIR}/$OUTPUT_SUBDIR
+  echo "ifdh cp -r $IFDH_OPT $OUTPUT_SUBDIR ${OUTDIR}/$OUTPUT_SUBDIR"
+  ifdh cp -r $IFDH_OPT $OUTPUT_SUBDIR ${OUTDIR}/$OUTPUT_SUBDIR
   stat=$?
   if [ $stat -ne 0 ]; then
     echo "ifdh cp failed with status ${stat}."

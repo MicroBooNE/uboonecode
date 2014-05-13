@@ -4,7 +4,7 @@
 #include "clustermodules.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "vertexfindermodules.fcl"
-#include "pandoraservices.fcl"
+#include "pandoramodules.fcl"
 #include "triggeralgo_service.fcl"
 
 process_name: Reco2D

@@ -856,9 +856,13 @@ def check_root(dir):
     # If such files are found, it also checks for the existence of
     # an Events TTree.
     #
-    # Returns a 2-tuple containing the total number of events and
-    # a list of 2-tuples the name of the root file and number of
-    # events in the root file for root files with valid Events TTrees.
+    # Returns a 3-tuple containing the following information.
+    # 1.  Total number of events in art root files.
+    # 2.  A list of 2-tuples with an entry for each art root file.
+    #     The 2-tuple contains the following information.
+    #     a) Number of events
+    #     b) Filename.
+    # 3.  A list of histogram root files.
 
     # Make sure ROOT module is imported.
 
@@ -866,6 +870,7 @@ def check_root(dir):
 
     nev = -1
     roots = []
+    hists = []
 
     filenames = os.listdir(dir)
     for filename in filenames:
@@ -874,15 +879,31 @@ def check_root(dir):
             if file.IsOpen() and not file.IsZombie():
                 obj = file.Get('Events')
                 if obj and obj.InheritsFrom('TTree'):
+
+                    # This is an art root file.
+
                     if nev < 0:
                         nev = 0
                     nevroot = obj.GetEntriesFast()
                     nev = nev + nevroot
                     roots.append((os.path.join(dir, filename), nevroot))
 
+                else:
+
+                    # This is not an art root file.  Assume it is a histogram/ntuple file.
+
+                    hists.append(os.path.join(dir, filename))
+
+            else:
+
+                # Found a .root file that is not openable.
+                # Print a warning, but don't trigger any other error.
+
+                print 'Warning: File %s in directory %s is not a valid root file.' % (filename, dir)
+
     # Done.
                     
-    return (nev, roots)
+    return (nev, roots, hists)
     
 
 # Get the list of input files for a project stage.
@@ -929,17 +950,19 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # 1.  Make sure subdirectories are as expected (complain about missing
     #     subdirectories).
     #
-    # 2.  Look for at least one root file in each subdirectory (*.root)
+    # 2.  Look for at least one art root file in each subdirectory (*.root)
     #     containing a valid Events TTree.  Complain about any
     #     that do not contain such a root file.
     #
     # 3.  Check that the number of events in the Events tree are as expected.
     #
-    # 4.  Complain about any duplicated root file names (if sam metadata is defined).
+    # 4.  Complain about any duplicated art root file names (if sam metadata is defined).
     #
     # 5.  Check job exit status (saved in lar.stat).
     #
     # 6.  For sam input, make sure that file sam_project.txt and cpid.txt is present.
+    #
+    # 7.  Check that any non-art root files are openable.
     #
     # In analysis mode (if argumment ana != 0), skip checks 2-4, but still do
     # checks 1 and 5-7.
@@ -951,6 +974,11 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # 3.  missing.txt - List of missing (cluster, process).
     # 4.  sam_projects.list - List of successful sam projects.
     # 5.  cpids.list        - list of successful consumer process ids.
+    # 6.  hists.list  - List of non-art histogram root files (histograms and/or ntuples).
+    # 7.  hist.root   - Merged histogram file (excludes TTrees).
+    #                   Made using "hadd -T hist.root @hlists.list"
+
+    import_samweb()
 
     print 'Checking directory %s' % dir
 
@@ -967,7 +995,8 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     cluster = 0    # Most recent cluster.
     process = 0    # Most recent process.
-    procmap = {}   # procmap[process][cluster] = <list of root files and event counts>
+    procmap = {}   # procmap[process][cluster] = <list of art root files and event counts>
+    hists = []     # List of non-art root files.
     sam_projects = []
     cpids = []
 
@@ -1043,8 +1072,8 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
             if not bad:
                 nev = 0
                 roots = []
+                nev, roots, subhists = check_root(subpath)
                 if not ana:
-                    nev, roots = check_root(subpath)
                     if len(roots) == 0 or nev < 0:
                         print 'Problem with root file(s) in subdirectory %s.' % subdir
                         bad = 1
@@ -1077,6 +1106,10 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
                             procmap[process] = {}
                         procmap[process][cluster] = roots
 
+                        # Save good histogram files.
+
+                        hists.extend(subhists)
+
                         # Count good events and root files.
 
                         nev_tot = nev_tot + nev
@@ -1095,9 +1128,25 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     # Open files.
 
-    filelist = open(os.path.join(dir, 'files.list'), 'w')
-    eventslist = open(os.path.join(dir, 'events.list'), 'w')
-    missing = open(os.path.join(dir, 'missing.txt'), 'w')
+    filelistname = os.path.join(dir, 'files.list')
+    if os.path.exists(filelistname):
+        os.remove(filelistname)
+    filelist = open(filelistname, 'w')
+
+    eventslistname = os.path.join(dir, 'events.list')
+    if os.path.exists(eventslistname):
+        os.remove(eventslistname)
+    eventslist = open(eventslistname, 'w')
+
+    missingname = os.path.join(dir, 'missing.txt')
+    if os.path.exists(missingname):
+        os.remove(missingname)
+    missing = open(missingname, 'w')
+
+    histlistname = os.path.join(dir, 'hists.list')
+    if os.path.exists(histlistname):
+        os.remove(histlistname)
+    histlist = open(histlistname, 'w')
 
     # See if there are any missing processes and generate file "missing.txt."
     # Skip this step for sam input.
@@ -1120,19 +1169,36 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
                 filelist.write('%s\n' % root[0])
                 eventslist.write('%s %d\n' % root)
 
+    # Generate "hists.list."
+
+    for hist in hists:
+        histlist.write('%s\n' % hist)
+
     # Print summary.
 
     if ana:
         print "%d processes completed successfully." % nproc
+        print "%d total good histogram files." % len(hists)
     else:
         print "%d total good events." % nev_tot
         print "%d total good root files." % nroot_tot
+        print "%d total good histogram files." % len(hists)
 
     # Close files.
 
     filelist.close()
     eventslist.close()
     missing.close()
+    histlist.close()
+
+    # Make merged histogram file using hadd.
+
+    if len(hists) > 0:
+        rc = subprocess.call(["hadd", "-f", "-k", "-T", "-v", "1", 
+                              os.path.join(dir, "hist.root"), 
+                              "@" + os.path.join(dir, "hists.list")])
+        if rc != 0:
+            print "hadd exit status %d" % rc
 
     # Make sam files.
 
@@ -1140,14 +1206,20 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
         # List of successful sam projects.
         
-        sam_projects_file = open(os.path.join(dir, 'sam_projects.list'), 'w')
+        sam_projects_filename = os.path.join(dir, 'sam_projects.list')
+        if os.path.exists(sam_projects_filename):
+            os.remove(sam_projects_filename)
+        sam_projects_file = open(sam_projects_filename, 'w')
         for sam_project in sam_projects:
             sam_projects_file.write('%s\n' % sam_project)
         sam_projects_file.close()
 
         # List of successfull consumer process ids.
 
-        cpids_file = open(os.path.join(dir, 'cpids.list'), 'w')
+        cpids_filename = os.path.join(dir, 'cpids.list')
+        if os.path.exists(cpids_filename):
+            os.remove(cpids_filename)
+        cpids_file = open(cpids_filename, 'w')
         for cpid in cpids:
             cpids_file.write('%s\n' % cpid)
         cpids_file.close()
@@ -1159,13 +1231,19 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         for cpid in cpids:
             cpids_list = cpids_list + '%s%s' % (sep, cpid)
             sep = ','
-        dim = 'consumer_process_id %s and consumed_status consumed' % cpids_list
-        import_samweb()
-        nconsumed = samweb.countFiles(dimensions=dim)
+        if cpids_list != '':
+            dim = 'consumer_process_id %s and consumed_status consumed' % cpids_list
+            import_samweb()
+            nconsumed = samweb.countFiles(dimensions=dim)
+        else:
+            nconsumed = 0
 
         # Get number of unconsumed files.
 
-        udim = '(defname: %s) minus (%s)' % (input_def, dim)
+        if cpids_list != '':
+            udim = '(defname: %s) minus (%s)' % (input_def, dim)
+        else:
+            udim = 'defname: %s' % input_def
         nunconsumed = samweb.countFiles(dimensions=udim)
         
         # Sam summary.

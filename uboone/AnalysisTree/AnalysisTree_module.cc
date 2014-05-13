@@ -122,13 +122,8 @@
 #include <fstream>
 #include <algorithm>
 #include <functional> // std::mem_fun_ref
-#include <initializer_list>
 
 #include "TTree.h"
-#include "TFile.h"
-#include "TH1.h"
-#include "TSystem.h"
-#include "TString.h"
 #include "TTimeStamp.h"
 
 constexpr int kNplanes       = 3;     //number of wire planes
@@ -170,12 +165,6 @@ namespace microboone {
       
       Array_t& data() { return array; }
       const Array_t& data() const { return array; }
-      
-      /// Return the total data size of this object in bytes
-      static constexpr size_t data_size() { return sizeof(array); }
-      
-      /// Return the total size of this object in bytes
-      static constexpr size_t memory_size() { return sizeof(This_t); }
       
       //@{
       /// begin/end interface
@@ -279,92 +268,6 @@ namespace microboone {
         { return (size_t) kNplanes; }
       size_t GetMaxHitsPerTrack(int /* iTrack */ = 0, int /* ipl */ = 0) const
         { return (size_t) kMaxTrackHits; }
-      
-      /// Return the total size of data from dynamic vectors in bytes
-      size_t dynamic_data_size() const
-        {
-          return trkke.size() * sizeof(typename decltype(trkke)::value_type)
-            + trkrange.size() * sizeof(typename decltype(trkrange)::value_type)
-            + trkidtruth.size() * sizeof(typename decltype(trkidtruth)::value_type)
-            + trkpdgtruth.size() * sizeof(typename decltype(trkpdgtruth)::value_type)
-            + trkefftruth.size() * sizeof(typename decltype(trkefftruth)::value_type)
-            + trkpurtruth.size() * sizeof(typename decltype(trkpurtruth)::value_type)
-            + trkpitchc.size() * sizeof(typename decltype(trkpitchc)::value_type)
-            + ntrkhits.size() * sizeof(typename decltype(ntrkhits)::value_type)
-            + trkdedx.size() * sizeof(typename decltype(trkdedx)::value_type)
-            + trkdqdx.size() * sizeof(typename decltype(trkdqdx)::value_type)
-            + trkresrg.size() * sizeof(typename decltype(trkresrg)::value_type)
-            + trkxyz.size() * sizeof(typename decltype(trkxyz)::value_type)
-            + trkId.size() * sizeof(typename decltype(trkId)::value_type)
-            + trkstartx.size() * sizeof(typename decltype(trkstartx)::value_type)
-            + trkstarty.size() * sizeof(typename decltype(trkstarty)::value_type)
-            + trkstartz.size() * sizeof(typename decltype(trkstartz)::value_type)
-            + trkstartd.size() * sizeof(typename decltype(trkstartd)::value_type)
-            + trkendx.size() * sizeof(typename decltype(trkendx)::value_type)
-            + trkendy.size() * sizeof(typename decltype(trkendy)::value_type)
-            + trkendz.size() * sizeof(typename decltype(trkendz)::value_type)
-            + trkendd.size() * sizeof(typename decltype(trkendd)::value_type)
-            + trktheta.size() * sizeof(typename decltype(trktheta)::value_type)
-            + trkphi.size() * sizeof(typename decltype(trkphi)::value_type)
-            + trkstartdcosx.size() * sizeof(typename decltype(trkstartdcosx)::value_type)
-            + trkstartdcosy.size() * sizeof(typename decltype(trkstartdcosy)::value_type)
-            + trkstartdcosz.size() * sizeof(typename decltype(trkstartdcosz)::value_type)
-            + trkenddcosx.size() * sizeof(typename decltype(trkenddcosx)::value_type)
-            + trkenddcosy.size() * sizeof(typename decltype(trkenddcosy)::value_type)
-            + trkenddcosz.size() * sizeof(typename decltype(trkenddcosz)::value_type)
-            + trkthetaxz.size() * sizeof(typename decltype(trkthetaxz)::value_type)
-            + trkthetayz.size() * sizeof(typename decltype(trkthetayz)::value_type)
-            + trkmom.size() * sizeof(typename decltype(trkmom)::value_type)
-            + trklen.size() * sizeof(typename decltype(trklen)::value_type)
-           ;
-        } // dynamic_data_size()
-      
-      /// Return the total size allocated for data from dynamic vectors in bytes
-      size_t dynamic_data_capacity() const
-        {
-          return trkke.capacity() * sizeof(typename decltype(trkke)::value_type)
-            + trkrange.capacity() * sizeof(typename decltype(trkrange)::value_type)
-            + trkidtruth.capacity() * sizeof(typename decltype(trkidtruth)::value_type)
-            + trkpdgtruth.capacity() * sizeof(typename decltype(trkpdgtruth)::value_type)
-            + trkefftruth.capacity() * sizeof(typename decltype(trkefftruth)::value_type)
-            + trkpurtruth.capacity() * sizeof(typename decltype(trkpurtruth)::value_type)
-            + trkpitchc.capacity() * sizeof(typename decltype(trkpitchc)::value_type)
-            + ntrkhits.capacity() * sizeof(typename decltype(ntrkhits)::value_type)
-            + trkdedx.capacity() * sizeof(typename decltype(trkdedx)::value_type)
-            + trkdqdx.capacity() * sizeof(typename decltype(trkdqdx)::value_type)
-            + trkresrg.capacity() * sizeof(typename decltype(trkresrg)::value_type)
-            + trkxyz.capacity() * sizeof(typename decltype(trkxyz)::value_type)
-            + trkId.capacity() * sizeof(typename decltype(trkId)::value_type)
-            + trkstartx.capacity() * sizeof(typename decltype(trkstartx)::value_type)
-            + trkstarty.capacity() * sizeof(typename decltype(trkstarty)::value_type)
-            + trkstartz.capacity() * sizeof(typename decltype(trkstartz)::value_type)
-            + trkstartd.capacity() * sizeof(typename decltype(trkstartd)::value_type)
-            + trkendx.capacity() * sizeof(typename decltype(trkendx)::value_type)
-            + trkendy.capacity() * sizeof(typename decltype(trkendy)::value_type)
-            + trkendz.capacity() * sizeof(typename decltype(trkendz)::value_type)
-            + trkendd.capacity() * sizeof(typename decltype(trkendd)::value_type)
-            + trktheta.capacity() * sizeof(typename decltype(trktheta)::value_type)
-            + trkphi.capacity() * sizeof(typename decltype(trkphi)::value_type)
-            + trkstartdcosx.capacity() * sizeof(typename decltype(trkstartdcosx)::value_type)
-            + trkstartdcosy.capacity() * sizeof(typename decltype(trkstartdcosy)::value_type)
-            + trkstartdcosz.capacity() * sizeof(typename decltype(trkstartdcosz)::value_type)
-            + trkenddcosx.capacity() * sizeof(typename decltype(trkenddcosx)::value_type)
-            + trkenddcosy.capacity() * sizeof(typename decltype(trkenddcosy)::value_type)
-            + trkenddcosz.capacity() * sizeof(typename decltype(trkenddcosz)::value_type)
-            + trkthetaxz.capacity() * sizeof(typename decltype(trkthetaxz)::value_type)
-            + trkthetayz.capacity() * sizeof(typename decltype(trkthetayz)::value_type)
-            + trkmom.capacity() * sizeof(typename decltype(trkmom)::value_type)
-            + trklen.capacity() * sizeof(typename decltype(trklen)::value_type)
-            ;
-        } // dynamic_data_capacity()
-      
-      /// Return the total size of this object in bytes
-      size_t data_size() const
-        { return sizeof(MaxTracks) + sizeof(ntracks) + dynamic_data_size(); }
-      
-      /// Return the total size of this object in bytes
-      size_t memory_size() const
-        { return sizeof(*this) + dynamic_data_capacity(); }
       
     }; // class TrackDataStruct
     
@@ -560,146 +463,6 @@ namespace microboone {
     /// Returns the number of GENIE primaries for which memory is allocated
     size_t GetMaxGeniePrimaries() const { return MaxGeniePrimaries; }
     
-    
-    /// Return the total size of data from dynamic vectors in bytes
-    size_t dynamic_data_size() const
-      {
-        size_t total
-          = genie_primaries_pdg    .size() * sizeof(typename decltype(genie_primaries_pdg    )::value_type)
-          + genie_Eng              .size() * sizeof(typename decltype(genie_Eng              )::value_type)
-          + genie_Px               .size() * sizeof(typename decltype(genie_Px               )::value_type)
-          + genie_Py               .size() * sizeof(typename decltype(genie_Py               )::value_type)
-          + genie_Pz               .size() * sizeof(typename decltype(genie_Pz               )::value_type)
-          + genie_P                .size() * sizeof(typename decltype(genie_P                )::value_type)
-          + genie_status_code      .size() * sizeof(typename decltype(genie_status_code      )::value_type)
-          + genie_mass             .size() * sizeof(typename decltype(genie_mass             )::value_type)
-          + genie_trackID          .size() * sizeof(typename decltype(genie_trackID          )::value_type)
-          + genie_ND               .size() * sizeof(typename decltype(genie_ND               )::value_type)
-          + genie_mother           .size() * sizeof(typename decltype(genie_mother           )::value_type)
-          + pdg                    .size() * sizeof(typename decltype(pdg                    )::value_type)
-          + Eng                    .size() * sizeof(typename decltype(Eng                    )::value_type)
-          + Px                     .size() * sizeof(typename decltype(Px                     )::value_type)
-          + Py                     .size() * sizeof(typename decltype(Py                     )::value_type)
-          + Pz                     .size() * sizeof(typename decltype(Pz                     )::value_type)
-          + StartPointx            .size() * sizeof(typename decltype(StartPointx            )::value_type)
-          + StartPointy            .size() * sizeof(typename decltype(StartPointy            )::value_type)
-          + StartPointz            .size() * sizeof(typename decltype(StartPointz            )::value_type)
-          + EndPointx              .size() * sizeof(typename decltype(EndPointx              )::value_type)
-          + EndPointy              .size() * sizeof(typename decltype(EndPointy              )::value_type)
-          + EndPointz              .size() * sizeof(typename decltype(EndPointz              )::value_type)
-          + NumberDaughters        .size() * sizeof(typename decltype(NumberDaughters        )::value_type)
-          + TrackId                .size() * sizeof(typename decltype(TrackId                )::value_type)
-          + Mother                 .size() * sizeof(typename decltype(Mother                 )::value_type)
-          + process_primary        .size() * sizeof(typename decltype(process_primary        )::value_type)
-          + MergedId               .size() * sizeof(typename decltype(MergedId               )::value_type)
-          + geant_tpcFV_status     .size() * sizeof(typename decltype(geant_tpcFV_status     )::value_type)
-          + geant_tpcFV_trackId    .size() * sizeof(typename decltype(geant_tpcFV_trackId    )::value_type)
-          + geant_tpcFV_pdg        .size() * sizeof(typename decltype(geant_tpcFV_pdg        )::value_type)
-          + geant_tpcFV_orig_E     .size() * sizeof(typename decltype(geant_tpcFV_orig_E     )::value_type)
-          + geant_tpcFV_orig_px    .size() * sizeof(typename decltype(geant_tpcFV_orig_px    )::value_type)
-          + geant_tpcFV_orig_py    .size() * sizeof(typename decltype(geant_tpcFV_orig_py    )::value_type)
-          + geant_tpcFV_orig_pz    .size() * sizeof(typename decltype(geant_tpcFV_orig_pz    )::value_type)
-          + geant_tpcFV_orig_startx.size() * sizeof(typename decltype(geant_tpcFV_orig_startx)::value_type)
-          + geant_tpcFV_orig_starty.size() * sizeof(typename decltype(geant_tpcFV_orig_starty)::value_type)
-          + geant_tpcFV_orig_startz.size() * sizeof(typename decltype(geant_tpcFV_orig_startz)::value_type)
-          + geant_tpcFV_orig_startt.size() * sizeof(typename decltype(geant_tpcFV_orig_startt)::value_type)
-          + geant_tpcFV_orig_endx  .size() * sizeof(typename decltype(geant_tpcFV_orig_endx  )::value_type)
-          + geant_tpcFV_orig_endy  .size() * sizeof(typename decltype(geant_tpcFV_orig_endy  )::value_type)
-          + geant_tpcFV_orig_endz  .size() * sizeof(typename decltype(geant_tpcFV_orig_endz  )::value_type)
-          + geant_tpcFV_orig_endt  .size() * sizeof(typename decltype(geant_tpcFV_orig_endt  )::value_type)
-          + geant_tpcFV_startx     .size() * sizeof(typename decltype(geant_tpcFV_startx     )::value_type)
-          + geant_tpcFV_starty     .size() * sizeof(typename decltype(geant_tpcFV_starty     )::value_type)
-          + geant_tpcFV_startz     .size() * sizeof(typename decltype(geant_tpcFV_startz     )::value_type)
-          + geant_tpcFV_startd     .size() * sizeof(typename decltype(geant_tpcFV_startd     )::value_type)
-          + geant_tpcFV_endx       .size() * sizeof(typename decltype(geant_tpcFV_endx       )::value_type)
-          + geant_tpcFV_endy       .size() * sizeof(typename decltype(geant_tpcFV_endy       )::value_type)
-          + geant_tpcFV_endz       .size() * sizeof(typename decltype(geant_tpcFV_endz       )::value_type)
-          + geant_tpcFV_endd       .size() * sizeof(typename decltype(geant_tpcFV_endd       )::value_type)
-          + geant_tpcFV_theta      .size() * sizeof(typename decltype(geant_tpcFV_theta      )::value_type)
-          + geant_tpcFV_phi        .size() * sizeof(typename decltype(geant_tpcFV_phi        )::value_type)
-          + geant_tpcFV_theta_xz   .size() * sizeof(typename decltype(geant_tpcFV_theta_xz   )::value_type)
-          + geant_tpcFV_theta_yz   .size() * sizeof(typename decltype(geant_tpcFV_theta_yz   )::value_type)
-          + geant_tpcFV_mom        .size() * sizeof(typename decltype(geant_tpcFV_mom        )::value_type)
-          + geant_tpcFV_len        .size() * sizeof(typename decltype(geant_tpcFV_len        )::value_type)
-          ;
-        for(const auto& TrackerData: TrackData)
-          total += TrackerData.dynamic_data_size();
-        return total;
-      } // dynamic_data_size()
-    
-    /// Return the total size allocated for data from dynamic vectors in bytes
-    size_t dynamic_data_capacity() const
-      {
-        size_t total
-          = genie_primaries_pdg    .capacity() * sizeof(typename decltype(genie_primaries_pdg    )::value_type)
-          + genie_Eng              .capacity() * sizeof(typename decltype(genie_Eng              )::value_type)
-          + genie_Px               .capacity() * sizeof(typename decltype(genie_Px               )::value_type)
-          + genie_Py               .capacity() * sizeof(typename decltype(genie_Py               )::value_type)
-          + genie_Pz               .capacity() * sizeof(typename decltype(genie_Pz               )::value_type)
-          + genie_P                .capacity() * sizeof(typename decltype(genie_P                )::value_type)
-          + genie_status_code      .capacity() * sizeof(typename decltype(genie_status_code      )::value_type)
-          + genie_mass             .capacity() * sizeof(typename decltype(genie_mass             )::value_type)
-          + genie_trackID          .capacity() * sizeof(typename decltype(genie_trackID          )::value_type)
-          + genie_ND               .capacity() * sizeof(typename decltype(genie_ND               )::value_type)
-          + genie_mother           .capacity() * sizeof(typename decltype(genie_mother           )::value_type)
-          + pdg                    .capacity() * sizeof(typename decltype(pdg                    )::value_type)
-          + Eng                    .capacity() * sizeof(typename decltype(Eng                    )::value_type)
-          + Px                     .capacity() * sizeof(typename decltype(Px                     )::value_type)
-          + Py                     .capacity() * sizeof(typename decltype(Py                     )::value_type)
-          + Pz                     .capacity() * sizeof(typename decltype(Pz                     )::value_type)
-          + StartPointx            .capacity() * sizeof(typename decltype(StartPointx            )::value_type)
-          + StartPointy            .capacity() * sizeof(typename decltype(StartPointy            )::value_type)
-          + StartPointz            .capacity() * sizeof(typename decltype(StartPointz            )::value_type)
-          + EndPointx              .capacity() * sizeof(typename decltype(EndPointx              )::value_type)
-          + EndPointy              .capacity() * sizeof(typename decltype(EndPointy              )::value_type)
-          + EndPointz              .capacity() * sizeof(typename decltype(EndPointz              )::value_type)
-          + NumberDaughters        .capacity() * sizeof(typename decltype(NumberDaughters        )::value_type)
-          + TrackId                .capacity() * sizeof(typename decltype(TrackId                )::value_type)
-          + Mother                 .capacity() * sizeof(typename decltype(Mother                 )::value_type)
-          + process_primary        .capacity() * sizeof(typename decltype(process_primary        )::value_type)
-          + MergedId               .capacity() * sizeof(typename decltype(MergedId               )::value_type)
-          + geant_tpcFV_status     .capacity() * sizeof(typename decltype(geant_tpcFV_status     )::value_type)
-          + geant_tpcFV_trackId    .capacity() * sizeof(typename decltype(geant_tpcFV_trackId    )::value_type)
-          + geant_tpcFV_pdg        .capacity() * sizeof(typename decltype(geant_tpcFV_pdg        )::value_type)
-          + geant_tpcFV_orig_E     .capacity() * sizeof(typename decltype(geant_tpcFV_orig_E     )::value_type)
-          + geant_tpcFV_orig_px    .capacity() * sizeof(typename decltype(geant_tpcFV_orig_px    )::value_type)
-          + geant_tpcFV_orig_py    .capacity() * sizeof(typename decltype(geant_tpcFV_orig_py    )::value_type)
-          + geant_tpcFV_orig_pz    .capacity() * sizeof(typename decltype(geant_tpcFV_orig_pz    )::value_type)
-          + geant_tpcFV_orig_startx.capacity() * sizeof(typename decltype(geant_tpcFV_orig_startx)::value_type)
-          + geant_tpcFV_orig_starty.capacity() * sizeof(typename decltype(geant_tpcFV_orig_starty)::value_type)
-          + geant_tpcFV_orig_startz.capacity() * sizeof(typename decltype(geant_tpcFV_orig_startz)::value_type)
-          + geant_tpcFV_orig_startt.capacity() * sizeof(typename decltype(geant_tpcFV_orig_startt)::value_type)
-          + geant_tpcFV_orig_endx  .capacity() * sizeof(typename decltype(geant_tpcFV_orig_endx  )::value_type)
-          + geant_tpcFV_orig_endy  .capacity() * sizeof(typename decltype(geant_tpcFV_orig_endy  )::value_type)
-          + geant_tpcFV_orig_endz  .capacity() * sizeof(typename decltype(geant_tpcFV_orig_endz  )::value_type)
-          + geant_tpcFV_orig_endt  .capacity() * sizeof(typename decltype(geant_tpcFV_orig_endt  )::value_type)
-          + geant_tpcFV_startx     .capacity() * sizeof(typename decltype(geant_tpcFV_startx     )::value_type)
-          + geant_tpcFV_starty     .capacity() * sizeof(typename decltype(geant_tpcFV_starty     )::value_type)
-          + geant_tpcFV_startz     .capacity() * sizeof(typename decltype(geant_tpcFV_startz     )::value_type)
-          + geant_tpcFV_startd     .capacity() * sizeof(typename decltype(geant_tpcFV_startd     )::value_type)
-          + geant_tpcFV_endx       .capacity() * sizeof(typename decltype(geant_tpcFV_endx       )::value_type)
-          + geant_tpcFV_endy       .capacity() * sizeof(typename decltype(geant_tpcFV_endy       )::value_type)
-          + geant_tpcFV_endz       .capacity() * sizeof(typename decltype(geant_tpcFV_endz       )::value_type)
-          + geant_tpcFV_endd       .capacity() * sizeof(typename decltype(geant_tpcFV_endd       )::value_type)
-          + geant_tpcFV_theta      .capacity() * sizeof(typename decltype(geant_tpcFV_theta      )::value_type)
-          + geant_tpcFV_phi        .capacity() * sizeof(typename decltype(geant_tpcFV_phi        )::value_type)
-          + geant_tpcFV_theta_xz   .capacity() * sizeof(typename decltype(geant_tpcFV_theta_xz   )::value_type)
-          + geant_tpcFV_theta_yz   .capacity() * sizeof(typename decltype(geant_tpcFV_theta_yz   )::value_type)
-          + geant_tpcFV_mom        .capacity() * sizeof(typename decltype(geant_tpcFV_mom        )::value_type)
-          + geant_tpcFV_len        .capacity() * sizeof(typename decltype(geant_tpcFV_len        )::value_type)
-          ;
-        for(const auto& TrackerData: TrackData)
-          total += TrackerData.dynamic_data_capacity();
-        return total;
-      } // dynamic_data_capacity()
-    
-    /// Return the total size of this object in bytes
-    size_t data_size() const
-      { return sizeof(*this) + dynamic_data_size(); }
-    
-    /// Return the total size of this object in bytes
-    size_t memory_size() const
-      { return sizeof(*this) + dynamic_data_capacity(); }
     
   private:
     /// Little helper functor class to create or reset branches in a tree
@@ -1548,7 +1311,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         }
         //}
       }
-      mctruth = mclist[0];
       double maxenergy = -1;
       int imc0 = 0;
       for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
@@ -1561,6 +1323,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
 
       imc = 0; //set imc to 0 to solve a confusion for BNB+cosmic files where there are two MCTruth
+      mctruth = mclist[0];
 
       if (mctruth->NeutrinoSet()) nGeniePrimaries = mctruth->NParticles();
       
@@ -1570,7 +1333,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       // looking at all of them; so we waste some memory here
       nGEANTparticlesInTPCFV = nGEANTparticles;
     } // if have MC truth
-    mf::LogDebug("AnalysisTree") << "Expected "
+    LOG_DEBUG("AnalysisTree") << "Expected "
       << nGEANTparticles << " GEANT particles, "
       << nGeniePrimaries << " GENIE particles";
   } // if MC
@@ -1588,10 +1351,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   // make sure there is the data, the tree and everything;
   CreateTree();
 
-  LOG_DEBUG("AnalysisTreeStructure") << "After initialization, tree data structure has "
-    << fData->data_size() << " bytes in data, " << fData->memory_size()
-    << " allocated";
-  
   /// transfer the run and subrun data to the tree data object
 //  fData->RunData = RunData;
   fData->SubRunData = SubRunData;
@@ -1873,7 +1632,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         }
         for(size_t iPart = 0; iPart < StoreParticles; ++iPart){
           const simb::MCParticle& part(mctruth->GetParticle(iPart));
-          
           fData->genie_primaries_pdg[iPart]=part.PdgCode();
           fData->genie_Eng[iPart]=part.E();
           fData->genie_Px[iPart]=part.Px();
@@ -1985,7 +1743,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->no_primaries = primary;
       fData->geant_list_size = geant_particle;
       
-      mf::LogDebug("AnalysisTree") << "Counted "
+      LOG_DEBUG("AnalysisTree") << "Counted "
         << fData->geant_list_size << " GEANT particles ("
         << fData->geant_list_size_in_tpcFV << " in FV), "
         << fData->no_primaries << " primaries, "
@@ -2019,12 +1777,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   fData->taulife = LArProp->ElectronLifetime();
   fTree->Fill();
   
-  if (mf::MessageDrop::instance()->debugEnabled) {
+  if (mf::isDebugEnabled()) {
+    // use mf::LogDebug instead of LOG_DEBUG because we reuse it in many lines;
+    // thus, we protect this part of the code with the line above
     mf::LogDebug logStream("AnalysisTreeStructure");
     logStream
-      << "Tree data structure has "
-      << fData->data_size() << " bytes in data (" << fData->memory_size()
-      << " allocated):"
+      << "Tree data structure contains:"
       << "\n - " << fData->no_hits << " hits (" << fData->GetMaxHits() << ")"
       << "\n - " << fData->genie_no_primaries << " genie primaries (" << fData->GetMaxGeniePrimaries() << ")"
       << "\n - " << fData->geant_list_size << " GEANT particles (" << fData->GetMaxGEANTparticles() << "), "

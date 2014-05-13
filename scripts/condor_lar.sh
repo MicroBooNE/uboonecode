@@ -1329,6 +1329,10 @@ fi
 
 env > env.txt
 
+# Save a canonicalized version of the fcl configuration.
+
+ART_DEBUG_CONFIG=cfg.fcl lar -c $FCL
+
 # Run lar.
 
 echo "lar $LAROPT"
