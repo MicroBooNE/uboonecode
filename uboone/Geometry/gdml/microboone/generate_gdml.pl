@@ -1490,7 +1490,7 @@ EOF
 #if the extra pieces in the enclosure are desired, put them in the correct places within volEnclosure
   if ( $enclosureExtras eq "on" ) {
     print GDML <<EOF;
-      <physvol>
+  <!--    <physvol>
         <volumeref ref="volInsulation"/>
         <position name="posInsulation" unit="cm" x="0" y="0" z="0"/>
       </physvol>
@@ -1610,7 +1610,7 @@ EOF
       <physvol>
          <volumeref ref="volPump"/>
          <position name="posPump" unit="cm" x="0" y="-424" z="200"/>
-      </physvol>
+      </physvol>  -->
 EOF
 }
 
@@ -1698,7 +1698,7 @@ sub gen_world()
     y="$WorldHeight" 
     z="$WorldLength"/>
   <tube name="Ground"
-    rmin="310*2.54"
+    rmin="312*2.54"
     rmax="((50*12)+310)*2.54"
     z="41*12*2.54"
     deltaphi="360" 
@@ -1782,33 +1782,33 @@ sub gen_world()
       <volumeref ref="volConcreteEnclosure"/>
       <position name="posConcreteEnclosure" unit="cm" x="0.5*$TPCActiveDepth" y="36*2.54/2" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>
-    <physvol>
-      <volumeref ref="volPolystyreneEnclosure"/>
-      <position name="posPolystyreneEnclosure" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
-      <rotationref ref="rPlus90AboutX"/>
     </physvol>  
     <physvol>
       <volumeref ref="volConcreteEnclosureBottom"/>
       <position name="posConcreteEnclosureBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-38*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
-   <physvol>
+    <physvol>
+      <volumeref ref="volPolystyreneEnclosure"/>
+      <position name="posPolystyreneEnclosure" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol>   
+<!--   <physvol>
       <volumeref ref="volPolystyreneEnclosureBottom"/>
       <position name="posPolystyreneEnclosureBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-(38*12 - 36)*2.54/2" z="0.5*$TPCWirePlaneLength"/>
-      <rotationref ref="rPlus90AboutX"/>
-    </physvol>
+      <rotationref ref="rPlus90AboutX"/>  
+    </physvol> -->
     <physvol>
        <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol> 
-    <physvol>
+<!--    <physvol>
        <volumeref ref="volGroundBottom"/>
       <position name="posGroundBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol> 
- 
+ -->
     <!--physvol>
       <volumeref ref="volOverburden"/>
       <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="(41-10)*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>

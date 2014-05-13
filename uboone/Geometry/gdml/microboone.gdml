@@ -4545,7 +4545,7 @@
     y="106000" 
     z="207300"/>
   <tube name="Ground"
-    rmin="310*2.54"
+    rmin="312*2.54"
     rmax="((50*12)+310)*2.54"
     z="41*12*2.54"
     deltaphi="360" 
@@ -38210,7 +38210,7 @@
    <volumeref ref="volCryostat"/>
    <position name="posCryostat" unit="cm" x="0" y="0" z="0"/>
   </physvol>
-      <physvol>
+  <!--    <physvol>
         <volumeref ref="volInsulation"/>
         <position name="posInsulation" unit="cm" x="0" y="0" z="0"/>
       </physvol>
@@ -38330,7 +38330,7 @@
       <physvol>
          <volumeref ref="volPump"/>
          <position name="posPump" unit="cm" x="0" y="-424" z="200"/>
-      </physvol>
+      </physvol>  -->
  </volume>
 
   <volume name="volGround" >
@@ -38368,33 +38368,33 @@
       <volumeref ref="volConcreteEnclosure"/>
       <position name="posConcreteEnclosure" unit="cm" x="0.5*256.35" y="36*2.54/2" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>
-    <physvol>
-      <volumeref ref="volPolystyreneEnclosure"/>
-      <position name="posPolystyreneEnclosure" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
-      <rotationref ref="rPlus90AboutX"/>
     </physvol>  
     <physvol>
       <volumeref ref="volConcreteEnclosureBottom"/>
       <position name="posConcreteEnclosureBottom" unit="cm" x="0.5*256.35" y="-38*12*2.54/2" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
-   <physvol>
+    <physvol>
+      <volumeref ref="volPolystyreneEnclosure"/>
+      <position name="posPolystyreneEnclosure" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol>   
+<!--   <physvol>
       <volumeref ref="volPolystyreneEnclosureBottom"/>
       <position name="posPolystyreneEnclosureBottom" unit="cm" x="0.5*256.35" y="-(38*12 - 36)*2.54/2" z="0.5*1037"/>
-      <rotationref ref="rPlus90AboutX"/>
-    </physvol>
+      <rotationref ref="rPlus90AboutX"/>  
+    </physvol> -->
     <physvol>
        <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol> 
-    <physvol>
+<!--    <physvol>
        <volumeref ref="volGroundBottom"/>
       <position name="posGroundBottom" unit="cm" x="0.5*256.35" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol> 
- 
+ -->
     <!--physvol>
       <volumeref ref="volOverburden"/>
       <position name="posOverburden" unit="cm" x="0.5*256.35" y="(41-10)*12*2.54/2" z="0.5*1037"/>
