@@ -153,6 +153,17 @@ samweb_cli = None
 samweb = None           # SAMWebClient object
 extractor_dict = None   # Metadata extractor
 
+# dCache-safe method to return contents (list of lines) of file.
+
+def saferead(name):
+    lines = []
+    if name[0:6] == '/pnfs/':
+        proc = subprocess.Popen(['ifdh', 'cp', name, '/dev/fd/1'], stdout=subprocess.PIPE)
+        lines = proc.stdout.readlines()
+    else:
+        lines = open(name).readlines()
+    return lines
+
 # XML exception class.
 
 class XMLError(Exception):
@@ -1034,7 +1045,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
                 if os.path.exists(stat_filename):
                     status = 0
                     try:
-                        status = int(open(stat_filename).readline())
+                        status = int(saferead(stat_filename)[0].strip())
                         if status != 0:
                             print 'Job in subdirectory %s ended with non-zero exit status %d.' % (
                                 subdir, status)
@@ -1051,7 +1062,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
                 if not os.path.exists(filename):
                     bad = 1
                 if not bad:
-                    sam_project = open(filename, 'r').readlines()[0].strip()
+                    sam_project = saferead(filename)[0].strip()
                     if not sam_project in sam_projects:
                         sam_projects.append(sam_project)
 
@@ -1063,7 +1074,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
                 if not os.path.exists(filename):
                     bad = 1
                 if not bad:
-                    cpid = open(filename, 'r').readlines()[0].strip()
+                    cpid = saferead(filename)[0].strip()
                     if not cpid in cpids:
                         cpids.append(cpid)
 

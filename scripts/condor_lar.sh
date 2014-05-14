@@ -1,4 +1,4 @@
-# /bin/bash
+#! /bin/bash
 #------------------------------------------------------------------
 #
 # Purpose: A general purpose larsoft batch worker script.
@@ -859,7 +859,7 @@ if [ $SRT -ne 0 ]; then
 
     # Extract the tarball.
 
-    tar -xvf local.tar
+    tar -xf local.tar
 
     # Setup the environment.
 
@@ -915,7 +915,7 @@ fi
     if [ x$IFDHC_DIR != x ]; then
       unsetup ifdhc
     fi
-    source mrb slp
+    mrbslp
   fi
   cd $TMP/work
 
@@ -945,7 +945,7 @@ fi
 
     # Extract the tarball.
 
-    tar -xvf local.tar
+    tar -xf local.tar
 
     # Setup the environment.
 
@@ -958,7 +958,7 @@ fi
     if [ x$IFDHC_DIR != x ]; then
       unsetup ifdhc
     fi
-    source mrb slp
+    mrbslp
   fi
 
   # Setup specified version of uboonecode (if specified, and if local
@@ -1344,11 +1344,11 @@ echo "lar completed with exit status ${stat}."
 
 # Setup up current version of ifdhc (may be different than version setup by larsoft).
 
-echo "Setting up current version of ifdhc."
-if [ x$IFDHC_DIR != x ]; then
-  unsetup ifdhc
-fi
-setup ifdhc v1_3_2
+#echo "Setting up current version of ifdhc."
+#if [ x$IFDHC_DIR != x ]; then
+#  unsetup ifdhc
+#fi
+#setup ifdhc v1_3_2
 echo "IFDHC_DIR=$IFDHC_DIR"
 
 # Sam cleanups.
