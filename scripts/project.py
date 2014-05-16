@@ -1362,7 +1362,7 @@ def docheck_declarations(outdir, declare):
         if single_subdir == '' or single_subdir == subdir:
             subpath = os.path.join(outdir, subdir)
             if os.path.isdir(subpath):
-                nev, roots = check_root(subpath)
+                nev, roots, subhists = check_root(subpath)
                 for root in roots:
                     fn = os.path.basename(root[0])
 
