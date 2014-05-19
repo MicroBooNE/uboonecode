@@ -12,26 +12,23 @@ def getmetadata(inputfile):
 	# Set up the experiment name for samweb Python API	
 	samweb = samweb_cli.SAMWebClient(experiment='uboone')
 
-	# Dump the metadata into a text file	
-	f = open('meta_data.txt','w')
-	subprocess.call(["sam_metadata_dumper",inputfile],stdout=f)
+	# Extract metadata into a pipe.
+        proc = subprocess.Popen(["sam_metadata_dumper", inputfile], stdout=subprocess.PIPE)
+        lines = proc.stdout.readlines()
 
-	# Count the number of lines in the file (for later use!)	
-	with open('meta_data.txt', 'r') as f2:
-    		lines = f2.readlines()
-    		num_lines = len([l for l in lines])
+	# Count the number of lines in the file (for later use!)
+	num_lines = len(lines)
 
 	# define an empty python dictionary
 	md = {}	
 
-	f2 = open('meta_data.txt','r')
 	#Read tbe columns from the file and fill the dictionary
 	c = 0
 	p = 0
 	parents = []
 	PName = False
 	gen = False
-	for line in f2:
+	for line in lines:
 		c = c+1
 		columns = line.split(" ")
 		columns = [col.strip() for col in columns]	
@@ -108,10 +105,6 @@ def getmetadata(inputfile):
 				mdparent = samweb.getMetadata(parent)
 				if mdparent.has_key('ub_project.name'):
 					md['ub_project.name'] = mdparent['ub_project.name']
-			
-	f2.close()
-	f.close()
-	os.remove('meta_data.txt')
 
 	return md
 
