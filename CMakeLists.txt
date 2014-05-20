@@ -78,6 +78,9 @@ add_subdirectory(scripts)
 # Python modules.
 add_subdirectory(python)
 
+# Stand alone compiled executables.
+add_subdirectory(tools)
+
 # ups - table and config files
 add_subdirectory(ups)
 
