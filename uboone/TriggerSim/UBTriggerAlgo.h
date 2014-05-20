@@ -95,6 +95,12 @@ namespace trigger
     void SetDeadtime(unsigned short deadtime) 
     {_deadtime = deadtime;}
 
+    /// Function to set readout frame offset
+    void SetReadOutFrameOffset(short offset) { _readout_frame_offset = offset; }
+
+    /// Function to set TPC readout start offset (in TPC clock count)
+    void SetReadOutTPCOffset(short offset) { _tpc_readout_offset = offset; }
+
     /// Function to set BNB related parameters
     void SetBNBParams(unsigned short width,
 		      unsigned short delay,
@@ -166,7 +172,7 @@ namespace trigger
     std::vector<bool> _prescale; ///< Prescales for 8 trigger conditions
 
     short _readout_frame_offset;  ///< Offset from the triggered frame to the beginning of readout window
-    short _tpc_readout_offset;    ///< Offset from trigger time to TPC readout window start in sample number
+    short _tpc_readout_offset;    ///< Offset from trigger time to TPC readout window start in TPC sample number
     
     unsigned short _bnb_gate_width;        ///< BNB trigger gate width
     unsigned short _bnb_delay;             ///< BNB trigger delay

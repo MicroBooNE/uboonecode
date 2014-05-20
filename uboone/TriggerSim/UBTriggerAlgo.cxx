@@ -165,10 +165,8 @@ namespace trigger{
   //###################################################################################
   {
     art::ServiceHandle<util::TimeService> ts;
-    auto clock = ts->OpticalClock(_pmt_clock.Time(time.Time()));
+    auto clock = ts->OpticalClock(_tpc_clock.Time(time.Time()) + _tpc_clock.Time(_tpc_readout_offset));
     //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
-
-    clock += _tpc_readout_offset;
 
     return clock;
 

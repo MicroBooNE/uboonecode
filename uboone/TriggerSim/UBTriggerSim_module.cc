@@ -70,14 +70,17 @@ namespace trigger {
     /// Algorithm
     UBTriggerAlgo fAlg;
 
-    /// Module labels for NuMI beam gate data product
-    std::vector<std::string> fBeamModNuMI;
-
-    /// Module labels for BNB beam gate data product
-    std::vector<std::string> fBeamModBNB;
+    /// Module labels for event generator(s) that produced sim::BeamGateInfo data product
+    std::vector<std::string> fBeamModName;
 
     /// Module label for OpticalFEM
     std::string fOpticalFEMMod;
+
+    /// TPC readout start time offset in TPC clock counting
+    short fTPCReadOutOffset;
+
+    /// PMT readout start frame offset
+    short fPMTReadOutOffset;
 
     //-- ElecClock for user-defined trigger times --//
     std::vector<util::ElecClock> fTriggerCalib; ///< user-defined calibration trigger (per-event)
@@ -106,11 +109,8 @@ namespace trigger {
   UBTriggerSim::UBTriggerSim(fhicl::ParameterSet const& pset)
   //#########################################################
   {
-    /// Get NuMI event generator label
-    fBeamModNuMI = pset.get< std::vector<std::string> > ("BeamModNuMI", std::vector<std::string>());
-
-    /// Get BNB event generator label
-    fBeamModBNB  = pset.get< std::vector<std::string> > ("BeamModBNB",  std::vector<std::string>());
+    /// Get beam event generator label
+    fBeamModName = pset.get< std::vector<std::string> > ("BeamModName", std::vector<std::string>());
 
     /// Get OpticalFEM module label
     fOpticalFEMMod = pset.get< std::string > ("OpticalFEMMod","");
@@ -130,6 +130,9 @@ namespace trigger {
 			 pset.get< unsigned short        > ("NuMIGateDelay"   ),
 			 pset.get< unsigned short        > ("NuMICosmicStart" ),
 			 pset.get< unsigned short        > ("NuMICosmicEnd"   ) );
+
+    fAlg.SetReadOutFrameOffset ( pset.get<short> ("ReadOutFrameOffset") );
+    fAlg.SetReadOutTPCOffset   ( pset.get<short> ("ReadOutTPCOffset")   );
 
     // Get user-defined trigger timings
     std::vector<double> trig_calib ( pset.get< std::vector<double> > ("CalibTrigger",
@@ -218,29 +221,21 @@ namespace trigger {
     for( auto const &t : fTriggerBNB   ) fAlg.AddTriggerBNB   (t);
     for( auto const &t : fTriggerNuMI  ) fAlg.AddTriggerNuMI  (t);
 
-    // Register input BNB beam trigger
-    for(auto const &name : fBeamModBNB) {
-      art::Handle<std::vector<sim::BeamGateInfo> > bnbArray;
-      evt.getByLabel(name,bnbArray);
-      if(!(bnbArray.isValid())) continue;
-      for(size_t i=0; i<bnbArray->size(); ++i) {
-	art::Ptr<sim::BeamGateInfo> beam_ptr (bnbArray,i);
+    // Register input BNB/NuMI beam trigger
+    for(auto const &name : fBeamModName) {
+      art::Handle<std::vector<sim::BeamGateInfo> > beamArray;
+      evt.getByLabel(name,beamArray);
+      if(!(beamArray.isValid())) continue;
+      for(size_t i=0; i<beamArray->size(); ++i) {
+	art::Ptr<sim::BeamGateInfo> beam_ptr (beamArray,i);
 	auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
 	clock.SetTime(clock.Sample(elec_time),clock.Frame(elec_time));
-	fAlg.AddTriggerBNB(clock);
-      }
-    }
-
-    // Register input NuMI beam trigger
-    for(auto const &name : fBeamModNuMI) {
-      art::Handle<std::vector<sim::BeamGateInfo> > numiArray;
-      evt.getByLabel(name,numiArray);
-      if(!(numiArray.isValid())) continue;
-      for(size_t i=0; i<numiArray->size(); ++i) {
-	art::Ptr<sim::BeamGateInfo> beam_ptr (numiArray,i);
-	auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
-	clock.SetTime(clock.Sample(elec_time),clock.Frame(elec_time));
-	fAlg.AddTriggerNuMI(clock);
+	if(beam_ptr->BeamType() == sim::kBNB) 
+	  fAlg.AddTriggerBNB(clock);
+	else if(beam_ptr->BeamType() == sim::kNuMI)
+	  fAlg.AddTriggerBNB(clock);
+	else
+	  throw UBTrigException(Form("Beam type %d not supported!",beam_ptr->BeamType()));
       }
     }
 
