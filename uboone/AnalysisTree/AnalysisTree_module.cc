@@ -307,6 +307,7 @@ namespace microboone {
     Double_t hit_peakT[kMaxHits];      //peak time
     Float_t  hit_charge[kMaxHits];     //charge (area)
     Float_t  hit_ph[kMaxHits];         //amplitude
+    Float_t  hit_startT[kMaxHits];     //hit start time
     Short_t  hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
 
     //track information
@@ -883,6 +884,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_peakT, hit_peakT + sizeof(hit_peakT)/sizeof(hit_peakT[0]), -99999.);
   std::fill(hit_charge, hit_charge + sizeof(hit_charge)/sizeof(hit_charge[0]), -99999.);
   std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
+  std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
 
   for (size_t iTrk = 0; iTrk < kMaxTrackers; ++iTrk) {
     std::fill(hit_trkid[iTrk], hit_trkid[iTrk] + kMaxHits, -9999);
@@ -1091,6 +1093,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
   CreateBranch("hit_charge",hit_charge,"hit_charge[no_hits]/F");
   CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
+  CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
 
   AutoResettingStringSteam sstr;
   sstr() << kMaxTrackHits;
@@ -1403,7 +1406,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     fData->hit_wire[i]    = hitlist[i]->WireID().Wire;
     fData->hit_peakT[i]   = hitlist[i]->PeakTime();
     fData->hit_charge[i]  = hitlist[i]->Charge();
-    fData->hit_charge[i]  = hitlist[i]->Charge(true);
+    fData->hit_ph[i]  = hitlist[i]->Charge(true);
+    fData->hit_startT[i] = hitlist[i]->StartTime();
     /*
     for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
       art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[it]);
@@ -1448,7 +1452,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       
       int ntraj = 0;
       //we need to use Bezier methods for Bezier tracks
-      if (fTrackModuleLabel[iTracker] == "beziertracker") {
+      if (fTrackModuleLabel[iTracker].find("beziertracker")!=std::string::npos) {
         trkf::BezierTrack btrack(*ptrack);
         ntraj = btrack.NSegments();
         if(ntraj > 0) {
