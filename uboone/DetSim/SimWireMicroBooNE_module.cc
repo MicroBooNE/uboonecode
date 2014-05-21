@@ -34,7 +34,9 @@ extern "C" {
 #include "Utilities/LArFFT.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
+#include "RawData/TriggerData.h"
 #include "Utilities/LArProperties.h"
+#include "Utilities/TimeService.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Geometry/Geometry.h"
 #include "Simulation/sim.h"
@@ -65,16 +67,14 @@ namespace detsim {
     
     // read/write access to event
     void produce (art::Event& evt);
-    void produce_1W(art::Event& evt);
-    void produce_3W(art::Event& evt);
     void beginJob();
     void endJob();
     void reconfigure(fhicl::ParameterSet const& p);
 
   private:
 
-    std::vector<float>         GenNoiseInTime();
-    std::vector<float>         GenNoiseInFreq();
+    std::vector<float>     GenNoiseInTime();
+    std::vector<float>     GenNoiseInFreq();
 
     std::string            fDriftEModuleLabel;///< module making the ionization electrons
     raw::Compress_t        fCompression;      ///< compression type to use
@@ -85,7 +85,6 @@ namespace detsim {
     double                 fLowCutoff;        ///< low frequency filter cutoff (kHz)
     int                    fNTicks;           ///< number of ticks of the clock
     double                 fSampleRate;       ///< sampling rate in ns
-    unsigned int           fNSamplesReadout;  ///< number of ADC readout samples in 1 readout frame
     unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)
     float                  fCollectionPed;    ///< ADC value of baseline for collection plane
     float                  fInductionPed;     ///< ADC value of baseline for induction plane
@@ -99,10 +98,12 @@ namespace detsim {
     std::string fNoiseHistoName; 
     TH1D*             fNoiseHist;             ///< distribution of noise counts
 
+    std::string fTrigModName;                 ///< Trigger data product producer name
     //define max ADC value - if one wishes this can
     //be made a fcl parameter but not likely to ever change
     const float adcsaturation = 4095;
-
+    
+    ::util::ElecClock fClock; ///< TPC electronics clock
     
   }; // class SimWireMicroBooNE
   
@@ -114,10 +115,6 @@ namespace detsim {
     this->reconfigure(pset);
 
     produces< std::vector<raw::RawDigit>   >();
-    if(fNSamplesReadout != fNTimeSamples ) {
-      produces< std::vector<raw::RawDigit>   >("preSpill");
-      produces< std::vector<raw::RawDigit>   >("postSpill");
-    } 
 
     fCompression = raw::kNone;
     TString compression(pset.get< std::string >("CompressionType"));
@@ -133,10 +130,7 @@ namespace detsim {
   //-------------------------------------------------
   SimWireMicroBooNE::~SimWireMicroBooNE()
   {
-
     fChargeWork.clear();
- 
-
   }
 
   //-------------------------------------------------
@@ -153,6 +147,8 @@ namespace detsim {
     fCollectionPed    = p.get< float               >("CollectionPed");
     fInductionPed     = p.get< float               >("InductionPed");
     fBaselineRMS      = p.get< float               >("BaselineRMS");
+
+    fTrigModName      = p.get< std::string         >("TrigModName");
     
     if(fGetNoiseFromHisto)
       {
@@ -176,9 +172,9 @@ namespace detsim {
       }
     //detector properties information
     art::ServiceHandle<util::DetectorProperties> detprop;
-    fSampleRate       = detprop->SamplingRate();
-    fNSamplesReadout  = detprop->ReadOutWindowSize();
     fNTimeSamples  = detprop->NumberTimeSamples();
+    art::ServiceHandle<util::TimeService> ts;
+    fClock = ts->TPCClock();
     return;
   }
 
@@ -199,10 +195,10 @@ namespace detsim {
       LOG_DEBUG("SimWireMicroBooNE") << "Warning: FFTSize not a power of 2. "
 				     << "May cause issues in (de)convolution.\n";
 
-    if ( (int)fNSamplesReadout > fNTicks ) 
+    if ( (int)fNTimeSamples > fNTicks ) 
       mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
 					<< "greater than FFTSize!";
-
+    
     fChargeWork.resize(fNTicks, 0.);
     art::ServiceHandle<geo::Geometry> geo;
     
@@ -214,219 +210,26 @@ namespace detsim {
   void SimWireMicroBooNE::endJob() 
   {}
 
-  //-------------------------------------------------
   void SimWireMicroBooNE::produce(art::Event& evt)
   {
+    //
+    // Retrieve raw::Trigger data product which tells us from where to record raw::RawDigit
+    //
+    art::Handle<std::vector<raw::Trigger> > trig_array;
+    evt.getByLabel(fTrigModName,trig_array);
+    if(!trig_array.isValid()) throw cet::exception("SimWireMicroBooNE") << "Trigger data product not found!";
+    if(trig_array->size()>1) throw cet::exception("SimWireMicroBooNE") << "Currently >1 Trigger data product / event not supported!";
+    const art::Ptr<raw::Trigger> trig_ptr(trig_array,0);
 
-    if ( fNSamplesReadout != fNTimeSamples )
-      produce_3W(evt);
-    else
-      produce_1W(evt);
-  
-  }
-
-  void SimWireMicroBooNE::produce_3W(art::Event& evt)
-  {
+    fClock.SetTime(trig_ptr->TriggerTime());
     
+    art::ServiceHandle<util::DetectorProperties> detp;
+    fClock.SetTime(fClock.Time() +  (detp->TriggerOffset()) * fClock.TickPeriod());
+    if(fClock.Time()<0) fClock.SetTime(0);
+
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
     unsigned int signalSize = fNTicks;
-    
-    
-    std::vector<const sim::SimChannel*> chanHandle;
-    evt.getView(fDriftEModuleLabel,chanHandle);
-
-    //Get fIndShape and fColShape from SignalShapingService, on the fly
-    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
-
-    // make a vector of const sim::SimChannel* that has same number
-    // of entries as the number of channels in the detector
-    // and set the entries for the channels that have signal on them
-    // using the chanHandle
-    std::vector<const sim::SimChannel*> channels(geo->Nchannels());
-    for(size_t c = 0; c < chanHandle.size(); ++c){
-      channels[chanHandle[c]->Channel()] = chanHandle[c];
-    }
-    
-    const auto NChannels = geo->Nchannels();
-
-    // vectors for working
-    std::vector<short>    adcvec(signalSize, 0);
-    std::vector<short>    adcvecPreSpill(signalSize, 0);        
-    std::vector<short>    adcvecPostSpill(signalSize, 0);           
-    // make a unique_ptr of sim::SimDigits that allows ownership of the produced
-    // digits to be transferred to the art::Event after the put statement below
-    std::unique_ptr< std::vector<raw::RawDigit>> digcol(new std::vector<raw::RawDigit>);
-    std::unique_ptr< std::vector<raw::RawDigit>> digcolPreSpill(new std::vector<raw::RawDigit>);
-    std::unique_ptr< std::vector<raw::RawDigit>> digcolPostSpill(new std::vector<raw::RawDigit>);
-    digcol->reserve(NChannels);
-    digcolPreSpill->reserve(NChannels);
-    digcolPostSpill->reserve(NChannels);
-    
-
-    unsigned int chan = 0; 
-    fChargeWork.clear();
-    fChargeWork.resize(fNTicks, 0.);
-    
-    std::vector<double> fChargeWorkPreSpill, fChargeWorkPostSpill; 
-    
-    art::ServiceHandle<util::LArFFT> fFFT;
-
-    //LOOP OVER ALL CHANNELS
-    std::map<int,double>::iterator mapIter;      
-    for(chan = 0; chan < geo->Nchannels(); chan++) {    
-      
-      fChargeWork.clear();    
-      fChargeWork.resize(fNTimeSamples, 0.);    
-      // Then, resize adcvec back to full length!
-      adcvec.clear();
-      adcvec.resize(signalSize,0.0); 
-
-      if ( fNSamplesReadout != fNTimeSamples ){
-	fChargeWorkPreSpill.clear();
-	fChargeWorkPostSpill.clear();
-	fChargeWorkPreSpill.resize(fNTicks,0);
-	fChargeWorkPostSpill.resize(fNTicks,0);
-	adcvecPreSpill.clear();
-	adcvecPreSpill.resize(signalSize,0.0);
-	adcvecPostSpill.clear();
-	adcvecPostSpill.resize(signalSize,0.0);
-      }
-
-      // get the sim::SimChannel for this channel
-      const sim::SimChannel* sc = channels[chan];
-
-      if( sc ){      
-
-	// loop over the tdcs and grab the number of electrons for each
-	for(size_t t = 0; t < fChargeWork.size(); ++t) 
-	  fChargeWork[t] = sc->Charge(t);      
-	
-	// Convolve charge with appropriate response function 
-	if( fNSamplesReadout != fNTimeSamples ) {
-	  fChargeWorkPreSpill.assign(fChargeWork.begin(), fChargeWork.begin()+fNSamplesReadout);
-	  fChargeWorkPostSpill.assign(fChargeWork.begin()+2*fNSamplesReadout, fChargeWork.end());
-	  fChargeWork.erase( fChargeWork.begin()+2*fNSamplesReadout, fChargeWork.end() );
-	  fChargeWork.erase( fChargeWork.begin(), fChargeWork.begin()+fNSamplesReadout );
-	  fChargeWorkPreSpill.resize(fNTicks,0);
-	  fChargeWorkPostSpill.resize(fNTicks,0);
-	  sss->Convolute(chan, fChargeWorkPreSpill);
-	  sss->Convolute(chan, fChargeWorkPostSpill);
-	}
-	fChargeWork.resize(fNTicks,0);
-	
-        // Convolve charge with appropriate response function 
-	sss->Convolute(chan,fChargeWork);
-	
-      }
-      
-      //Generate Noise:
-      std::vector<float> noisetmp;
-      if (fGenNoise){
-	if (fGenNoiseInTime)
-	  noisetmp = GenNoiseInTime();
-	else
-	  noisetmp = GenNoiseInFreq();
-      }
-      else{
-	noisetmp.clear();
-	noisetmp.resize(fNTicks, 0.);
-      }
-
-      //Pedestal determination
-      float ped_mean = fCollectionPed;
-      geo::SigType_t sigtype = geo->SignalType(chan);
-      if (sigtype == geo::kInduction)
-        ped_mean = fInductionPed;
-      else if (sigtype == geo::kCollection)
-        ped_mean = fCollectionPed;
-      //slight variation on ped on order of RMS of baselien variation
-      art::ServiceHandle<art::RandomNumberGenerator> rng;
-      CLHEP::HepRandomEngine &engine = rng->getEngine();
-      CLHEP::RandGaussQ rGaussPed(engine, 0.0, fBaselineRMS);
-      ped_mean += rGaussPed.fire();
-      
-      for(unsigned int i = 0; i < signalSize; ++i){
- 	float adcval = noisetmp[i] + fChargeWork[i] + ped_mean;
-	
-	//Add Noise to NoiseDist Histogram
-	if (i%100==0)
-	  fNoiseDist->Fill(noisetmp[i]);
-
-	//allow for ADC saturation
-	if ( adcval > adcsaturation )
-	  adcval = adcsaturation;
-	//don't allow for "negative" saturation
-	if ( adcval < 0 )
-	  adcval = 0;
-
-	adcvec[i] = (unsigned short)(adcval);
-
-	//same for prespill and postspill if present
-	if( fNSamplesReadout != fNTimeSamples ) {
-	  float adcval_prespill  =  noisetmp[i] + fChargeWorkPreSpill[i] + ped_mean;
-	  float adcval_postspill =  noisetmp[i] + fChargeWorkPostSpill[i] + ped_mean;
-	  if ( adcval_prespill > adcsaturation )
-	    adcval_prespill = adcsaturation;
-	  if ( adcval_postspill > adcsaturation )
-	    adcval_postspill = adcsaturation;
-	  if ( adcval_prespill < 0 )
-	    adcval_prespill = 0;
-	  if ( adcval_postspill < 0 )
-	    adcval_postspill = 0;
-	  adcvecPreSpill[i]  = (unsigned short)(adcval_prespill);
-	  adcvecPostSpill[i] = (unsigned short)(adcval_postspill);
-	}
-	
-      }// end loop over signal size
-
-      // resize the adcvec to be the correct number of time samples, 
-      // just drop the extra samples
-      adcvec.resize(fNSamplesReadout);
-      
-      // compress the adc vector using the desired compression scheme,
-      // if raw::kNone is selected nothing happens to adcvec
-      // This shrinks adcvec, if fCompression is not kNone.
-      raw::Compress(adcvec, fCompression); 
-      
-      // add this digit to the collection
-      raw::RawDigit rd(chan, fNSamplesReadout, adcvec, fCompression);
-      rd.SetPedestal(ped_mean);
-      digcol->push_back(rd);
-
-
-      //same for pre & post spill
-      if( fNSamplesReadout != fNTimeSamples ) {
-	adcvecPreSpill.resize(fNSamplesReadout);
-	adcvecPostSpill.resize(fNSamplesReadout);
-	raw::Compress(adcvecPreSpill, fCompression); 
-	raw::Compress(adcvecPostSpill, fCompression); 
-	raw::RawDigit rdPreSpill(chan, fNSamplesReadout, adcvecPreSpill, fCompression);
-	rdPreSpill.SetPedestal(ped_mean);
-	raw::RawDigit rdPostSpill(chan, fNSamplesReadout, adcvecPostSpill, fCompression);
-	rdPostSpill.SetPedestal(ped_mean);
-	digcolPreSpill->push_back(rdPreSpill);
-	digcolPostSpill->push_back(rdPostSpill);
-      }
-    }// end loop over channels      
-
-    evt.put(std::move(digcol));
-    if(fNSamplesReadout != fNTimeSamples ) {
-      evt.put(std::move(digcolPreSpill), "preSpill");
-      evt.put(std::move(digcolPostSpill), "postSpill");
-    }
-
-    return;
-  }
-
-
-  void SimWireMicroBooNE::produce_1W(art::Event& evt)
-  {
-    
-    // get the geometry to be able to figure out signal types and chan -> plane mappings
-    art::ServiceHandle<geo::Geometry> geo;
-    unsigned int signalSize = fNTicks;
-    
     
     std::vector<const sim::SimChannel*> chanHandle;
     evt.getView(fDriftEModuleLabel,chanHandle);
@@ -460,22 +263,23 @@ namespace detsim {
 
     //LOOP OVER ALL CHANNELS
     std::map<int,double>::iterator mapIter;      
-    for(chan = 0; chan < geo->Nchannels(); chan++) {    
+    for(chan = 0; chan < geo->Nchannels(); chan++) {
       
-      fChargeWork.clear();    
-      fChargeWork.resize(fNTimeSamples, 0.);    
+      fChargeWork.clear();
+      fChargeWork.resize(fNTimeSamples, 0.);
       // Then, resize adcvec back to full length!
       adcvec.clear();
-      adcvec.resize(signalSize,0.0); 
+      adcvec.resize(signalSize,0.0);
 
       // get the sim::SimChannel for this channel
       const sim::SimChannel* sc = channels[chan];
 
-      if( sc ){      
+      if( sc ){
 
 	// loop over the tdcs and grab the number of electrons for each
 	for(size_t t = 0; t < fChargeWork.size(); ++t) 
-	  fChargeWork[t] = sc->Charge(t);      
+
+	  fChargeWork[t] = sc->Charge(fClock.Ticks() + t);
 	
 	fChargeWork.resize(fNTicks,0);
 	
@@ -530,7 +334,7 @@ namespace detsim {
 
       // resize the adcvec to be the correct number of time samples, 
       // just drop the extra samples
-      adcvec.resize(fNSamplesReadout);
+      adcvec.resize(fNTimeSamples);
       
       // compress the adc vector using the desired compression scheme,
       // if raw::kNone is selected nothing happens to adcvec
@@ -538,7 +342,7 @@ namespace detsim {
       raw::Compress(adcvec, fCompression); 
       
       // add this digit to the collection
-      raw::RawDigit rd(chan, fNSamplesReadout, adcvec, fCompression);
+      raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
       rd.SetPedestal(ped_mean);
       digcol->push_back(rd);
 

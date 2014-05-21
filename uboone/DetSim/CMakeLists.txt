@@ -4,6 +4,7 @@ art_make( BASENAME_ONLY
 			Geometry_service
 			Simulation
 	                Utilities
+			TimeService_service
 			Filters
 			RawData
 			SignalShapingServiceMicroBooNE_service
