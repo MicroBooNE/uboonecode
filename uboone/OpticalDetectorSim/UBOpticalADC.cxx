@@ -64,7 +64,6 @@ namespace opdet {
     low_tmp_wf.reserve(nticks);
 
     art::ServiceHandle<opdet::UBChConfig> ch_conf;
-
     //
     // Generate Signal & DarkNoise
     //
