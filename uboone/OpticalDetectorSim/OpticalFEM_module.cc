@@ -80,7 +80,8 @@ namespace opdet {
     timeVector_t         fm_disc3deadtime;      // dead time for disc 3, in time slices
     timeVector_t         fm_disc1width;         // pulse width for disc 1, in time slices
     timeVector_t         fm_disc3width;         // pulse width for disc 3, in time slices
-    timeVector_t         fm_beamWords;          // number of time slices to save for each beam gate
+    timeVector_t         fm_beamWordsBNB;       // number of time slices to save for each BNB beam gate
+    timeVector_t         fm_beamWordsNuMI;      // number of time slices to save for each NuMI beam gate
     timeVector_t         fm_beamDelayBNB;       // number of time slices to include prior to start of BNB beam gate
     timeVector_t         fm_beamDelayNuMI;      // number of time slices to include prior to start of NuMI beam gate
     timeVector_t         fm_triggerDeadtime;    // minimum number of time slices between successive PMT triggers
@@ -119,7 +120,8 @@ namespace opdet {
     fm_delay1             = p.get< std::vector<int> >    ("PMTDelay1");
     fm_disc0window        = p.get< timeVector_t >        ("Discriminator0Window");
     fm_cosmicSlices       = p.get< timeVector_t >        ("PMTWords");
-    fm_beamWords          = p.get< timeVector_t >        ("BeamWords");
+    fm_beamWordsBNB       = p.get< timeVector_t >        ("BeamWordsBNB");
+    fm_beamWordsNuMI      = p.get< timeVector_t >        ("BeamWordsNuMI");
     fm_beamDelayBNB       = p.get< timeVector_t >        ("BeamDelayBNB");
     fm_beamDelayNuMI      = p.get< timeVector_t >        ("BeamDelayNuMI");
     fm_beamThreshold      = p.get< timeVector_t >        ("BeamThreshold");
@@ -268,12 +270,15 @@ namespace opdet {
 	optdata::TimeSlice_t firstSlice = channelDataGroup.TimeSlice();
 	beginBin[gateIndex] = 0;
 	optdata::TimeSlice_t beam_delay = 0;
+	optdata::TimeSlice_t beam_words = 0;
 	switch( beamGateInfo.BeamType()) {
 	case ::sim::kBNB:
 	  beam_delay = fm_beamDelayBNB.at(gain);
+	  beam_words = fm_beamWordsBNB.at(gain);
 	  break;
 	case ::sim::kNuMI:
 	  beam_delay = fm_beamDelayNuMI.at(gain);
+	  beam_words = fm_beamWordsNuMI.at(gain);
 	  break;
 	default:
 	  throw cet::exception("OpticalFEM") << Form("Unsupported Beam Type: %d",beamGateInfo.BeamType());
@@ -291,12 +296,12 @@ namespace opdet {
 	// Figure out the last bin to be saved. Assume that the
 	// length of the first channel in the group is the same
 	// for all the channels in the group.
-	endBin[gateIndex] = beginBin[gateIndex] + fm_beamWords[gain];
+	endBin[gateIndex] = beginBin[gateIndex] + beam_words;
 	if ( endBin[gateIndex] > sizeFirstChannel ) {
 	  mf::LogWarning("OpticalFEM") 
 	    << "First beam gate bin to save = " << beginBin[gateIndex]
 	    << "; beam gate width = " << gateWidth
-	    << "; slices to save = " << fm_beamWords[gain]
+	    << "; slices to save = " << beam_words
 	    << "; sum is greather than the length of the first channel = " 
 	    << sizeFirstChannel;
 	  endBin[gateIndex] = sizeFirstChannel;
@@ -314,7 +319,7 @@ namespace opdet {
 	  << "; beam gate width = " << gateWidth
 	  << "; beam gate frame = " << gateFrame[gateIndex]
 	  << "; starts at sample = " << gateWindowTime[gateIndex]
-	  << "; slices to save = " << fm_beamWords[gain];
+	  << "; slices to save = " << beam_words;
       }
 
       // For each beam gate...
@@ -332,7 +337,7 @@ namespace opdet {
 
 	  // Create a new FIFOChannel, copying the channel
 	  // number from the input channel, with length
-	  // fm_beamWords[gain].
+	  // beam_words.
 	  optdata::Channel_t channel = channelData.ChannelNumber();
 
 	  // Skip if this channel is a part of logic pulse channel
@@ -347,7 +352,7 @@ namespace opdet {
 			     gateWindowTime[gateIndex], 
 			     gateFrame[gateIndex],
 			     channel,
-			     fm_beamWords[gain] );
+			     endBin[gateIndex] - beginBin[gateIndex]);
 		      
 	  // Copy the time slices.
 	  for ( optdata::TimeSlice_t t = beginBin[gateIndex]; 
