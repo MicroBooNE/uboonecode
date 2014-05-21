@@ -54,8 +54,6 @@ find_ups_product( nutools v0_00_00 )
 find_ups_product( art v1_06_00 )
 find_ups_product( cetbuildtools v3_05_00 )
 
-cet_check_gcc()
-
 # macros for dictionary and simple_plugin
 include(ArtDictionary)
 include(ArtMake)
