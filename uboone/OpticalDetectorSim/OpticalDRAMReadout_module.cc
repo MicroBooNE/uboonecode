@@ -93,6 +93,11 @@ namespace opdet {
   
   void OpticalDRAMReadout::reconfigure(fhicl::ParameterSet const& p)
   {
+    
+    fFIFOModuleName     = p.get<std::string> ("FIFOModuleName");
+
+    fTrigModuleName     = p.get<std::string> ("TrigModuleName");
+    
     fReadoutFrameOffset = p.get<std::vector<optdata::Frame_t> >("ReadoutFrameOffset");
 
     if(fReadoutFrameOffset.size()!=2)
@@ -128,9 +133,13 @@ namespace opdet {
 
       optdata::Frame_t trig_frame = clock.Frame(trig_ptr->TriggerTime());
 
-      readout_frames.push_back(std::pair<optdata::Frame_t,optdata::Frame_t>(trig_frame - fReadoutFrameOffset.at(0),
-									    trig_frame + fReadoutFrameOffset.at(1) )
-			       );
+      optdata::Frame_t start_frame = 0;
+      optdata::Frame_t end_frame = trig_frame + fReadoutFrameOffset.at(1);
+
+      if(trig_frame < fReadoutFrameOffset.at(0)) start_frame = 0;
+      else start_frame = trig_frame - fReadoutFrameOffset.at(0);
+
+      readout_frames.push_back(std::pair<optdata::Frame_t,optdata::Frame_t>(start_frame,end_frame) );
     }
     
     // Read in optdata::FIFOChannel & store relevant portion
