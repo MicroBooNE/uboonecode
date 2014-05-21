@@ -5,6 +5,7 @@ BEGIN_PROLOG
 microboone_simwire:  
 { 
  module_type:        "SimWireMicroBooNE"
+ TrigModName:        "triggersim"
  DriftEModuleLabel:  "largeant"
  NoiseFact:          0.15       #Noise Scale to use with histogram
  NoiseWidth:         62.4         #Exponential Noise width (kHz)
