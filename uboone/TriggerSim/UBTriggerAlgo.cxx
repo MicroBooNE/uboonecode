@@ -46,27 +46,29 @@ namespace trigger{
 				   unsigned short cosmic_max) 
   //#########################################################
   {
-    if(_bnb_cosmic_allow_max < _bnb_cosmic_allow_min) {
-      throw UBTrigException("BNB Cosmic allow window max is smaller than min!");
-      _bnb_cosmic_allow_max = _bnb_cosmic_allow_min;
-    }
+    if(cosmic_max < cosmic_min)
+      throw UBTrigException(Form("BNB Cosmic allow window max (%d) is smaller than min (%d)!",
+				 cosmic_min,
+				 cosmic_max)
+			    );
     _bnb_gate_width       = width;
     _bnb_delay            = delay;
     _bnb_cosmic_allow_min = cosmic_min;
     _bnb_cosmic_allow_max = cosmic_max;
   }
 
-  //######################################################
+  //##########################################################
   void UBTriggerAlgo::SetNuMIParams(unsigned short width,
-			       unsigned short delay,
-			       unsigned short cosmic_min,
-			       unsigned short cosmic_max) 
-  //######################################################
+				    unsigned short delay,
+				    unsigned short cosmic_min,
+				    unsigned short cosmic_max) 
+  //##########################################################
   {
-    if(_numi_cosmic_allow_max < _numi_cosmic_allow_min) {
-
-      _numi_cosmic_allow_max = _numi_cosmic_allow_min;
-    }    
+    if( cosmic_max < cosmic_min)
+      throw UBTrigException(Form("NuMI Cosmic allow window max (%d) is smaller than min (%d)!",
+				 cosmic_min,
+				 cosmic_max)
+			    );
     _numi_gate_width       = width;
     _numi_delay            = delay;
     _numi_cosmic_allow_min = cosmic_min;
@@ -538,11 +540,15 @@ namespace trigger{
     _trig_clock.SetTime(0);
     util::ElecClock trig_time = _trig_clock;
 
-    time_window_t deadtime    (_trig_clock,_trig_clock);
     time_window_t bnb_active  (_trig_clock,_trig_clock);
     time_window_t numi_active (_trig_clock,_trig_clock);
     time_window_t bnb_gate    (_trig_clock,_trig_clock);
     time_window_t numi_gate   (_trig_clock,_trig_clock);
+
+    // Deadtime initialized to unrealistic range
+    _trig_clock.SetTime(::util::kTIME_MAX);
+    time_window_t deadtime    (_trig_clock,_trig_clock);
+    _trig_clock.SetTime(0);
 
     auto const mask0 = _mask.at(0);
     auto const mask1 = _mask.at(1);
