@@ -17,10 +17,6 @@
 // LArSoft
 #include "SimulationBase/MCTruth.h"
 #include "SimulationBase/MCParticle.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoAlg/SpacePointAlg.h"
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/LArProperties.h"
 #include "Geometry/Geometry.h"

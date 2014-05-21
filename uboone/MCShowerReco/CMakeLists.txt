@@ -11,9 +11,6 @@ art_make( BASENAME_ONLY
 			   Utilities
 			   Filters
 			   RawData
-			   RecoAlg
-			   RecoBase
-			   RecoObjects
 			   LArProperties_service
 			   DetectorProperties_service
 			   #SignalShapingServiceMicroBooNE_service
@@ -47,9 +44,6 @@ art_make( BASENAME_ONLY
 			   Utilities
 			   Filters
 			   RawData
-			   RecoAlg
-			   RecoBase
-			   RecoObjects
 			   LArProperties_service
 			   DetectorProperties_service
 			   #SignalShapingServiceMicroBooNE_service
