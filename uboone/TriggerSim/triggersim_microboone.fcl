@@ -1,6 +1,6 @@
 BEGIN_PROLOG
 
-ubtriggersim:
+microboone_trigger_sim:
 {
 
   module_type: "UBTriggerSim"
@@ -12,15 +12,14 @@ ubtriggersim:
   #
   # Input beam pulse / PMT-Trigger module labels
   #
-  BeamModNuMI:   ["generator"]  # producer module name for NuMI's BeamGateInfo
-  BeamModBNB:    ["generator"]  # producer module name for BNB's BeamGateInfo
-  OpticalFEMMod: "optreadout"   # producer module name for PMTTrigger
+  BeamModName:   ["generator"]  # producer module name for BeamGateInfo
+  OpticalFEMMod: "optfem"       # producer module name for PMTTrigger
 
   #
   # Trigger module configuration
   #
   DeadTime: 4 # Trigger deadtime in number of frames
-  Mask:     [0x3,   0x4,   0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0x7a ] # Trigger condition bit mask
+  Mask:     [0x7,   0x7,   0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0x7a ] # Trigger condition bit mask
   Prescale: [false, false, false, false, false, false, false, false, false] # Trigger prescale bit mask
 
   BNBGateWidth:    102 # BNB gate width in number of samples (Optical clock)
@@ -39,7 +38,7 @@ ubtriggersim:
   # issues a readout trigger).
   CalibTrigger: []
   ExtTrigger:   []
-  PCTrigger:    []
+  PCTrigger:    [0]
   BNBTrigger:   []
   NuMITrigger:  []
 }

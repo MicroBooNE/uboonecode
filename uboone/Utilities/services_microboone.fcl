@@ -11,6 +11,7 @@
 #include "photpropservices_microboone.fcl"
 #include "opticaldetectorservices_microboone.fcl"
 #include "sam_microboone.fcl"
+#include "timeservice_microboone.fcl"
 
 BEGIN_PROLOG
 
@@ -25,6 +26,7 @@ microboone_services:
  SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
  BackTracker:                    @local::microboone_backtracker  
  OpDigiProperties:               @local::microboone_opdigiproperties
+ TimeService:                    @local::microboone_timeservice
 }
 
 microboone_optical_services:                          @local::microboone_services
@@ -41,7 +43,8 @@ microboone_simulation_services:
  DatabaseUtil:	                 @local::microboone_database           
  SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
  MagneticField:                  @local::no_mag 	       
- BackTracker:                    @local::microboone_backtracker  
+ BackTracker:                    @local::microboone_backtracker
+ TimeService:                    @local::microboone_timeservice
 }
 
 microboone_optical_simulation_services:                          @local::microboone_simulation_services
