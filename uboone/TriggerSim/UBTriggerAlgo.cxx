@@ -160,31 +160,6 @@ namespace trigger{
     return clock;
   }
 
-  //###################################################################################
-  util::ElecClock UBTriggerAlgo::ReadOutStartTimeTPC(const util::ElecClock& time) const
-  //###################################################################################
-  {
-    art::ServiceHandle<util::TimeService> ts;
-    auto clock = ts->OpticalClock(_tpc_clock.Time(time.Time()) + _tpc_clock.Time(_tpc_readout_offset));
-    //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
-
-    return clock;
-
-  }
-
-  //#######################################################################################
-  util::ElecClock UBTriggerAlgo::ReadOutStartTimeOptical(const util::ElecClock& time) const
-  //#######################################################################################
-  {
-    art::ServiceHandle<util::TimeService> ts;
-    auto clock = ts->OpticalClock(_pmt_clock.Time(time.Time()));
-    //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
-
-    clock += _readout_frame_offset * clock.FrameTicks();
-
-    return clock;
-  }
-
   //##############################################################
   void UBTriggerAlgo::AddTriggerCalib(const util::ElecClock &time)
   //##############################################################
@@ -194,8 +169,6 @@ namespace trigger{
     AddTrigger(raw::Trigger(0,
 			    _pmt_clock.Time(),
 			    _pmt_clock.Time(),
-			    ReadOutStartTimeTPC(_pmt_clock).Time(),
-			    ReadOutStartTimeOptical(_pmt_clock).Time(),
 			    ( (0x1) << trigger::kTriggerCalib )) 
 	       );
     _pmt_clock.SetTime(0);
@@ -210,8 +183,6 @@ namespace trigger{
     AddTrigger(raw::Trigger(0,
 			    _pmt_clock.Time(),
 			    _pmt_clock.Time(),
-			    ReadOutStartTimeTPC(_pmt_clock).Time(),
-			    ReadOutStartTimeOptical(_pmt_clock).Time(),
 			    ( (0x1) << trigger::kTriggerEXT ))
 	       );
     _pmt_clock.SetTime(0);
@@ -226,8 +197,6 @@ namespace trigger{
     AddTrigger(raw::Trigger(0,
 			    _pmt_clock.Time(),
 			    _pmt_clock.Time(),
-			    ReadOutStartTimeTPC(_pmt_clock).Time(),
-			    ReadOutStartTimeOptical(_pmt_clock).Time(),
 			    ( (0x1) << trigger::kTriggerPC ))
 	       );
     _pmt_clock.SetTime(0);
@@ -369,8 +338,6 @@ namespace trigger{
     return raw::Trigger(res_number,
 			trig_time.Time(),
 			beam_time.Time(),
-			ReadOutStartTimeTPC(trig_time).Time(),
-			ReadOutStartTimeOptical(trig_time).Time(),
 			res_bits);
     
   }
@@ -425,8 +392,6 @@ namespace trigger{
     raw::Trigger trig_candidate(0,
 				_pmt_clock.Time(),
 				_pmt_clock.Time(),
-				ReadOutStartTimeTPC(_pmt_clock).Time(),
-				ReadOutStartTimeOptical(_pmt_clock).Time(),
 				trig_bits);
     
     // Add this trigger candidate
@@ -448,8 +413,6 @@ namespace trigger{
     raw::Trigger trig_candidate(0,
 				_pmt_clock.Time(),
 				_pmt_clock.Time(),
-				ReadOutStartTimeTPC(_pmt_clock).Time(),
-				ReadOutStartTimeOptical(_pmt_clock).Time(),
 				trig_bits);
     
     // Add this trigger candidate
@@ -468,8 +431,6 @@ namespace trigger{
     raw::Trigger trig_candidate(0,
 				_pmt_clock.Time(),
 				BNBStartTime(_pmt_clock).Time(),
-				ReadOutStartTimeTPC(_pmt_clock).Time(),
-				ReadOutStartTimeOptical(_pmt_clock).Time(),
 				trig_bits);
     
     // Add this trigger candidate
@@ -488,8 +449,6 @@ namespace trigger{
     raw::Trigger trig_candidate(0,
 				_pmt_clock.Time(),
 				NuMIStartTime(_pmt_clock).Time(),
-				ReadOutStartTimeTPC(_pmt_clock).Time(),
-				ReadOutStartTimeOptical(_pmt_clock).Time(),
 				trig_bits);
 
     // Add this trigger candidate
@@ -750,8 +709,6 @@ namespace trigger{
 	  triggers.push_back( raw::Trigger(_trigger_counter,
 					   (*sample_iter).second.TriggerTime(),
 					   (*sample_iter).second.BeamGateTime(),
-					   (*sample_iter).second.ReadOutStartTPC(),
-					   (*sample_iter).second.ReadOutStartOptical(),
 					   (*sample_iter).second.TriggerBits()) 
 			      );
 	  _trigger_counter++;

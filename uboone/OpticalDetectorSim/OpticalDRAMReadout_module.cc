@@ -132,7 +132,7 @@ namespace opdet {
 									    trig_frame + fReadoutFrameOffset.at(1) )
 			       );
     }
-
+    
     // Read in optdata::FIFOChannel & store relevant portion
     art::Handle< std::vector<optdata::FIFOChannel> > fifo_array;
     event.getByLabel(fFIFOModuleName, fifo_array);

@@ -76,12 +76,6 @@ namespace trigger {
     /// Module label for OpticalFEM
     std::string fOpticalFEMMod;
 
-    /// TPC readout start time offset in TPC clock counting
-    short fTPCReadOutOffset;
-
-    /// PMT readout start frame offset
-    short fPMTReadOutOffset;
-
     //-- ElecClock for user-defined trigger times --//
     std::vector<util::ElecClock> fTriggerCalib; ///< user-defined calibration trigger (per-event)
     std::vector<util::ElecClock> fTriggerPC;    ///< user-defined PC trigger (per-event)
@@ -130,9 +124,6 @@ namespace trigger {
 			 pset.get< unsigned short        > ("NuMIGateDelay"   ),
 			 pset.get< unsigned short        > ("NuMICosmicStart" ),
 			 pset.get< unsigned short        > ("NuMICosmicEnd"   ) );
-
-    fAlg.SetReadOutFrameOffset ( pset.get<short> ("ReadOutFrameOffset") );
-    fAlg.SetReadOutTPCOffset   ( pset.get<short> ("ReadOutTPCOffset")   );
 
     // Get user-defined trigger timings
     std::vector<double> trig_calib ( pset.get< std::vector<double> > ("CalibTrigger",

@@ -61,12 +61,6 @@ namespace trigger
     /// Function to print out current list of candidate triggers
     void ShowCandidateTriggers() const;
 
-    /// Given trigger time, return TPC readout start time
-    util::ElecClock ReadOutStartTimeTPC(const util::ElecClock& time) const;
-
-    /// Given trigger time, return PMT readout start time
-    util::ElecClock ReadOutStartTimeOptical(const util::ElecClock& time) const;
-
     /// Given trigger time, return BNB beam gate window start time
     util::ElecClock BNBStartTime(const util::ElecClock& time) const;
 
@@ -94,12 +88,6 @@ namespace trigger
     /// Function to set deadtime in # of frames
     void SetDeadtime(unsigned short deadtime) 
     {_deadtime = deadtime;}
-
-    /// Function to set readout frame offset
-    void SetReadOutFrameOffset(short offset) { _readout_frame_offset = offset; }
-
-    /// Function to set TPC readout start offset (in TPC clock count)
-    void SetReadOutTPCOffset(short offset) { _tpc_readout_offset = offset; }
 
     /// Function to set BNB related parameters
     void SetBNBParams(unsigned short width,
