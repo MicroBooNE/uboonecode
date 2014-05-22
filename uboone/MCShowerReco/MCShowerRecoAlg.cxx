@@ -125,12 +125,6 @@ namespace larreco {
     }
   }
 
-  const std::vector<float> MCShowerRecoAlg::HitPurity(recob::Hit hit) const
-  { return std::vector<float>(); }
-  
-  const std::vector<float> MCShowerRecoAlg::ClusterPurity(recob::Hit hit) const
-  { return std::vector<float>(); }
-  
   void MCShowerRecoAlg::Compute3DAngle(const double x, const double y, const double z,
 				       double &theta, double&phi) const
   {

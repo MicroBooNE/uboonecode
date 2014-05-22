@@ -152,10 +152,6 @@ namespace larreco
       return fPartAlg.ShowerIndex(part_index);
     }
     
-    const std::vector<float> HitPurity(recob::Hit hit) const;
-
-    const std::vector<float> ClusterPurity(recob::Hit hit) const;
-
     void Compute3DAngle(const double x, const double y, const double z,
 			double &theta, double&phi) const;
 
