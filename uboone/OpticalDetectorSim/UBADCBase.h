@@ -43,9 +43,6 @@ namespace opdet {
 
   protected:
 
-    /// Function to generate dark noise photon timings (called in GenWaveform)
-    void GenDarkNoise(double dark_rate,double period);
-
     /// Method to digitize waveform
     void Digitize(const std::vector<float>& orig,
 		  std::vector<unsigned short>& res) const;

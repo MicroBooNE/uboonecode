@@ -205,6 +205,7 @@ namespace opdet {
       fOpticalGen.GenWaveform(ch,
 		       wfs->at(hg_index).at(ch),
 		       wfs->at(lg_index).at(ch));
+
     }
 
     //

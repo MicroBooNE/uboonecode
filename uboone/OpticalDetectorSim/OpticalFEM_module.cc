@@ -201,7 +201,7 @@ namespace opdet {
 
     // For each ChannelDataGroup object in this event:
     for ( auto const& channelDataGroup : (*channelDataHandle) ) {
-
+      
       // Determine the gain category.
       size_t gain;  
       if ( channelDataGroup.Category() == optdata::kLowGain )
@@ -263,8 +263,8 @@ namespace opdet {
 	//art::ServiceHandle<opdet::OpDigiProperties> odp;
 	//optdata::TimeSlice_t gateTime = odp->GetTimeSlice( beamGateInfo.Start() );
 	//optdata::TimeSlice_t gateWidth = odp->GetTimeSlice( beamGateInfo.Width() );
-	optdata::TimeSlice_t gateTime = clock.Ticks( beamGateInfo.Start() );
-	optdata::TimeSlice_t gateWidth = clock.Ticks( beamGateInfo.Width() );
+	optdata::TimeSlice_t gateTime = ts->OpticalG4Time2TDC(beamGateInfo.Start());
+	optdata::TimeSlice_t gateWidth = ts->OpticalG4Time2TDC(beamGateInfo.Width());
 
 	// Figure out the first bin we should start to save.
 	optdata::TimeSlice_t firstSlice = channelDataGroup.TimeSlice();
@@ -592,7 +592,7 @@ namespace opdet {
 		+ saveSlice / clock.FrameTicks();
 	      optdata::TimeSlice_t cosmicTime 
 		= saveSlice % clock.FrameTicks();
-				  
+	      
 	      LOG_DEBUG("OpticalFEM")
 		<< "Disc 1 fires, Writing cosmic channel=" << channel
 		<< " at frame=" << cosmicFrame
@@ -600,7 +600,7 @@ namespace opdet {
 		<< " begin=" << saveSlice
 		<< " end=" << saveSlice+fm_cosmicSlices[gain]
 		<< " max ADC=" << maxADC; 
-				
+
 	      // Create a new FIFO channel, copying the channel
 	      // number from the input.
 

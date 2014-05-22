@@ -29,6 +29,8 @@ namespace opdet {
     // Predefine variables to save time later
     ::util::ElecClock rel_spe_start = start_time;
 
+    ::art::ServiceHandle<util::TimeService> ts;
+
     rel_spe_start.SetTime(0);
 
     for(auto const &t : fPhotonTime) {
@@ -38,9 +40,11 @@ namespace opdet {
       //
 
       // Time in electronics clock frame (with T0)
-      double time = ::util::TimeService::GetME().G4ToElecTime(t);
+      //double time = ::util::TimeService::GetME().G4ToElecTime(t);
 
-      if(fEnableSpread) time += RandomServer::GetME().Gaus(fT0,fT0Sigma);
+      double time = ts->G4ToElecTime(t);
+
+      if(fEnableSpread) time += RandomServer::GetME().Gaus(fT0,fT0Sigma) * 1.e-3;
       else time += fT0;
 
       // If before waveform vector, ignore
@@ -48,10 +52,9 @@ namespace opdet {
 
       // If after waveform vector, ignore
       if(time > (start_time.Time() + start_time.Time((int)(wf.size())))) continue;
-
+      
       // Figure out time stamp of the beginning of SPE
       rel_spe_start.SetTime(time - start_time.Time());
-
 
       //
       // Add signal
@@ -61,7 +64,7 @@ namespace opdet {
 
 	double func_time = rel_spe_start.Time(i+1,0) - rel_spe_start.Time();
 
-	double amp = EvaluateSPE(func_time);
+	double amp = EvaluateSPE(func_time * 1.e3);
 
 	if(fEnableSpread) amp *= RandomServer::GetME().Gaus(fGain,fGainSigma * fGain);
 	else amp *= fGain;

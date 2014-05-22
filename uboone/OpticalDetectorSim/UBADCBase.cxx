@@ -9,7 +9,8 @@ namespace opdet {
   UBADCBase::UBADCBase()
   //--------------------
   {
-    fTimeInfo = ::util::TimeService::GetME().OpticalClock();
+    art::ServiceHandle<util::TimeService> ts;
+    fTimeInfo = ts->OpticalClock();
     fDuration = fTimeInfo.TickPeriod();
     Reset();
   }
