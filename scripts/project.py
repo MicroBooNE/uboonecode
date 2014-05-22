@@ -124,6 +124,7 @@
 # <stage><endscript>  - Worker end-of-job script (condor_lar.sh --end-script).
 #                       Initialization/end-of-job scripts can be specified using an
 #                       absolute or relative path relative to the current directory.
+# <stage><histmerge>  - Name of histogram merging program or script (default hadd).
 #
 #
 #
@@ -199,6 +200,7 @@ class StageDef:
         self.init_script = ''  # Worker initialization script.
         self.init_source = ''  # Worker initialization bash source script.
         self.end_script = ''   # Worker end-of-job script.
+        self.histmerge = 'hadd' # Histogram merging program
 
         # Extract values from xml.
 
@@ -310,6 +312,12 @@ class StageDef:
         if end_script_elements:
             self.end_script = end_script_elements[0].firstChild.data
 
+        # Histogram merging program.
+
+        histmerge_elements = stage_element.getElementsByTagName('histmerge')
+        if histmerge_elements:
+            self.histmerge = histmerge_elements[0].firstChild.data
+
         # Done.
 
         return
@@ -331,6 +339,7 @@ class StageDef:
         result += 'Worker initialization script = %s\n' % self.init_script
         result += 'Worker initialization source script = %s\n' % self.init_source
         result += 'Worker end-of-job script = %s\n' % self.end_script
+        result += 'Histogram merging program = %s\n' % self.histmerge
         return result
 
     # Raise an exception if any specified input file/list doesn't exist.
@@ -943,7 +952,7 @@ def get_input_files(stage):
 
 # Check project results in the specified directory.
 
-def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_metadata):
+def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_metadata, histmerge):
 
     # This method expects to find several subdirectories named as
     # <cluster>_<process>, where the <process> part of the subdirectory
@@ -987,7 +996,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # 5.  cpids.list        - list of successful consumer process ids.
     # 6.  hists.list  - List of non-art histogram root files (histograms and/or ntuples).
     # 7.  hist.root   - Merged histogram file (excludes TTrees).
-    #                   Made using "hadd -T hist.root @hlists.list"
+    #                   Made using "hadd -T hist.root @hlists.list" (or equivalent).
 
     import_samweb()
 
@@ -1214,14 +1223,15 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     missing.close()
     histlist.close()
 
-    # Make merged histogram file using hadd.
+    # Make merged histogram file using histmerge.
 
     if len(hists) > 0:
-        rc = subprocess.call(["hadd", "-f", "-k", "-T", "-v", "1", 
+        print "Merging %d histogram files using %s." % (len(hists), histmerge)
+        rc = subprocess.call([histmerge, "-f", "-k", "-T", 
                               os.path.join(dir, "hist.root"), 
                               "@" + os.path.join(dir, "hists.list")])
         if rc != 0:
-            print "hadd exit status %d" % rc
+            print "%s exit status %d" % (histmerge, rc)
 
     # Make sam files.
 
@@ -2114,7 +2124,7 @@ def main(argv):
         has_input_files = stage.inputfile != '' or stage.inputlist != ''
         rc = docheck(stage.outdir, project.num_events, stage.num_jobs,
                      has_input_files, stage.inputdef,
-                     checkana, xml_has_metadata)
+                     checkana, xml_has_metadata, stage.histmerge)
 
     if check_definition or define:
 

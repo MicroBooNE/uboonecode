@@ -5,7 +5,6 @@ set( uboone_util_lib_list LArFFT_service
 			Geometry
 			Geometry_service
 			Utilities
-                        SignalShapingServiceMicroBooNE_service
   			${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
