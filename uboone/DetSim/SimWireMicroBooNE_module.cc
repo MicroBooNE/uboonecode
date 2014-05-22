@@ -112,7 +112,6 @@ namespace detsim {
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)
   {
-    std::cout<<"\033[95m"<<"Constructor Start!!!"<<"\033[00m"<<std::endl;
     this->reconfigure(pset);
 
     produces< std::vector<raw::RawDigit>   >();
@@ -126,7 +125,6 @@ namespace detsim {
     unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
 
     createEngine(seed);
-    std::cout<<"\033[95m"<<"Constructor End!!!"<<"\033[00m"<<std::endl;
   }
 
   //-------------------------------------------------
@@ -138,7 +136,6 @@ namespace detsim {
   //-------------------------------------------------
   void SimWireMicroBooNE::reconfigure(fhicl::ParameterSet const& p) 
   {
-    std::cout<<"\033[95m"<<"reconfigure Start!!!"<<"\033[00m"<<std::endl;
     fDriftEModuleLabel= p.get< std::string         >("DriftEModuleLabel");
     fNoiseFact        = p.get< double              >("NoiseFact");
     fNoiseWidth       = p.get< double              >("NoiseWidth");
@@ -177,14 +174,12 @@ namespace detsim {
     art::ServiceHandle<util::DetectorProperties> detprop;
     fNTimeSamples  = detprop->NumberTimeSamples();
 
-    std::cout<<"\033[95m"<<"reconfigure End!!!"<<"\033[00m"<<std::endl;
     return;
   }
 
   //-------------------------------------------------
   void SimWireMicroBooNE::beginJob() 
   { 
-    std::cout<<"\033[95m"<<"beginJob Start!!!"<<"\033[00m"<<std::endl;    
 
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
@@ -205,7 +200,6 @@ namespace detsim {
     fChargeWork.resize(fNTicks, 0.);
     art::ServiceHandle<geo::Geometry> geo;
 
-    std::cout<<"\033[95m"<<"beginJob End!!!"<<"\033[00m"<<std::endl;    
     return;
 
   }
@@ -216,7 +210,6 @@ namespace detsim {
 
   void SimWireMicroBooNE::produce(art::Event& evt)
   {
-    std::cout<<"\033[95m"<<"produce Start!!!"<<"\033[00m"<<std::endl;
 
     art::ServiceHandle<util::TimeService> ts;
     int start_tdc = ts->TPCTick2TDC(0);
@@ -226,8 +219,6 @@ namespace detsim {
     art::ServiceHandle<geo::Geometry> geo;
     //unsigned int signalSize = fNTicks;
 
-    std::cout<<"\033[95m"<<"Start TDC @ "<<start_tdc<<"\033[00m"<<std::endl;
-    
     std::vector<const sim::SimChannel*> chanHandle;
     evt.getView(fDriftEModuleLabel,chanHandle);
 
@@ -262,10 +253,6 @@ namespace detsim {
     std::map<int,double>::iterator mapIter;      
     for(chan = 0; chan < geo->Nchannels(); chan++) {
 
-      // No need to clear fChargeWork as all contents will be over-written
-      //fChargeWork.clear();
-      //fChargeWork.resize(fNTicks,0);
-
       // get the sim::SimChannel for this channel
       const sim::SimChannel* sc = channels[chan];
 
@@ -279,22 +266,11 @@ namespace detsim {
 
 	  fChargeWork[t] = sc->Charge(t);
 
-	  if(sc->Charge(t))
-
-	    std::cout<<chan<<" : "<<t<<" : "<<sc->Charge(t)<<std::endl;
-
 	}
 
-	std::cout<<"Finished reading Ch "<<chan<<std::endl;
-	std::cout<<"Size comparison: "<<fChargeWork.size()<<" ?= "<<fNTicks<<std::endl; 
-	//fChargeWork.resize(fNTicks,0);
-
-	std::cout<<"Running convolution starting!"<<std::endl;
-	
         // Convolve charge with appropriate response function 
 	sss->Convolute(chan,fChargeWork);
 
-	std::cout<<"Running convolution finished!"<<std::endl;
       }
       
       //Generate Noise:
@@ -358,14 +334,12 @@ namespace detsim {
     }// end loop over channels      
 
     evt.put(std::move(digcol));
-    std::cout<<"\033[95m"<<"produce End!!!"<<"\033[00m"<<std::endl;    
     return;
   }
   
   //-------------------------------------------------                                                                                                 
   std::vector<float> SimWireMicroBooNE::GenNoiseInTime()
   {
-    std::cout<<"\033[95m"<<"GenNoiseInTime Start!!!"<<"\033[00m"<<std::endl;
     //ART random number service                                                                                                                       
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine();
@@ -381,7 +355,6 @@ namespace detsim {
     //and insert random noise value
     for (unsigned int i=0; i<noise.size(); i++)
       noise.at(i) = rGauss.fire();
-    std::cout<<"\033[95m"<<"GenNoiseInTime End!!!"<<"\033[00m"<<std::endl;
     return noise;
   }
 
@@ -389,7 +362,6 @@ namespace detsim {
   //-------------------------------------------------
   std::vector<float> SimWireMicroBooNE::GenNoiseInFreq()
   {
-    std::cout<<"\033[95m"<<"GenNoiseInFreq Start!!!"<<"\033[00m"<<std::endl;    
     std::vector<float> noise;
     
     art::ServiceHandle<art::RandomNumberGenerator> rng;
@@ -450,7 +422,6 @@ namespace detsim {
     // has already been done.
     for(unsigned int i = 0; i < noise.size(); ++i) noise[i] *= 1.*fNTicks;
 
-    std::cout<<"\033[95m"<<"GenNoiseInFreq End!!!"<<"\033[00m"<<std::endl;    
     return noise;
     
   }
