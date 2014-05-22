@@ -12,7 +12,7 @@ microboone_simwire:
  NoiseRand:          0.1          #frac of randomness of noise freq-spec
  LowCutoff:          7.5          #Low frequency filter cutoff (kHz)
  CompressionType:    "none"       #could also be none		
- GenNoise:            true        #gen noise...if false function not called
+ GenNoise:            false        #gen noise...if false function not called
  GetNoiseFromHisto:   false
  GenNoiseInTime:      false
  CollectionPed:       400         #ADC baseline for coll plane
@@ -22,7 +22,13 @@ microboone_simwire:
  NoiseHistoName:      "NoiseFreq"    
 
 }
-microboone_simwireana: @local::standard_simwireana
+#microboone_simwireana: @local::standard_simwireana
+microboone_simwireana:
+{
+    module_type: "SimWireMicroBooNEAna"
+    DigitModuleLabel: "daq"
+
+}
 
 microboone_wienerfilterana: @local::standard_wienerfilterana
 
