@@ -7,7 +7,7 @@ microboone_trigger_sim:
   #
   # Verbosity configuration
   #
-  DebugMode:  true  # Make verbose output listing input triggers & process of accepting/ignoring them
+  DebugMode: false  # Make verbose output listing input triggers & process of accepting/ignoring them
 
   #
   # Input beam pulse / PMT-Trigger module labels

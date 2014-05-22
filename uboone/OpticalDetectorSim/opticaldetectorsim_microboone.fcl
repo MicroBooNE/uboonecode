@@ -7,8 +7,6 @@ microboone_optical_fem_sim:
   BeamGateModule:            "generator"    # the name of the process used to generate the simulated beam gate
   OpticalDigitizationModule: "optdigitizer" # the name of the process used to generate the input ADC counts
 
-  FrameSize: 102400                   # Number of time slices in a clock frame, units=time slices
-
   # For all the remaining parameters there are two values:
   # the first is for the low-gain FEMs,
   # the second for the high-gain FEMs.
@@ -72,7 +70,7 @@ microboone_optical_adc_sim:
 
   EnableSpread: true
 
-  Duration:     6.4e6
+  Duration:     6.4e3
 
   G4StartTime:  0
 
@@ -155,13 +153,13 @@ microboone_optical_ch_config:
               # 0, 0, 0, 0, 0, 0, 0, 0,
               # 0, 0, 0, 0, 0, 0, 0, 0 ]
 
-  # Dark noise rate in GHz
-  DarkRate: [ 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5,
-              1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5,
-              1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5,
-              1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5 ]
-              # 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5,
-              # 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5,
-              # 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5, 1.e-5 ]
+  # Dark noise rate in MHz
+  DarkRate: [ 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2,
+              1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2,
+              1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2,
+              1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2 ]
+              # 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2,
+              # 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2,
+              # 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2, 1.e-2 ]
 }
 END_PROLOG

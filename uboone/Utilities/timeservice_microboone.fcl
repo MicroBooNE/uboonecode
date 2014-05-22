@@ -4,10 +4,13 @@ BEGIN_PROLOG
 
 microboone_timeservice: @local::standard_timeservice
 
-microboone_timeservice.G4RefTime:         0     # G4 time [ns] where electronics clock counting start 
-microboone_timeservice.FramePeriod:       1.6e6 # Frame period [ns]
-microboone_timeservice.ClockSpeedTPC:     0.002 # TPC clock speed in GHz
-microboone_timeservice.ClockSpeedOptical: 0.064 # Optical clock speed in GHz
-microboone_timeservice.ClockSpeedTrigger: 0.016 # Trigger clock speed in GHz
+microboone_timeservice.TrigModuleName:     "triggersim"
+microboone_timeservice.InheritClockConfig: true
+microboone_timeservice.G4RefTime:         0     # G4 time [us] where electronics clock counting start
+microboone_timeservice.TriggerOffsetTPC: -1.6e3 # Time [us] for TPC readout start w.r.t. trigger time
+microboone_timeservice.FramePeriod:       1.6e3 # Frame period [us]
+microboone_timeservice.ClockSpeedTPC:     2.    # TPC clock speed in MHz
+microboone_timeservice.ClockSpeedOptical: 64.   # Optical clock speed in MHz
+microboone_timeservice.ClockSpeedTrigger: 16.   # Trigger clock speed in MHz
 
 END_PROLOG
