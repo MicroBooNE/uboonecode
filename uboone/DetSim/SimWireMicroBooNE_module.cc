@@ -112,6 +112,7 @@ namespace detsim {
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)
   {
+    std::cout<<"\033[95m"<<"Constructor Start!!!"<<"\033[00m"<<std::endl;
     this->reconfigure(pset);
 
     produces< std::vector<raw::RawDigit>   >();
@@ -125,6 +126,7 @@ namespace detsim {
     unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
 
     createEngine(seed);
+    std::cout<<"\033[95m"<<"Constructor End!!!"<<"\033[00m"<<std::endl;
   }
 
   //-------------------------------------------------
@@ -136,6 +138,7 @@ namespace detsim {
   //-------------------------------------------------
   void SimWireMicroBooNE::reconfigure(fhicl::ParameterSet const& p) 
   {
+    std::cout<<"\033[95m"<<"reconfigure Start!!!"<<"\033[00m"<<std::endl;
     fDriftEModuleLabel= p.get< std::string         >("DriftEModuleLabel");
     fNoiseFact        = p.get< double              >("NoiseFact");
     fNoiseWidth       = p.get< double              >("NoiseWidth");
@@ -173,15 +176,15 @@ namespace detsim {
     //detector properties information
     art::ServiceHandle<util::DetectorProperties> detprop;
     fNTimeSamples  = detprop->NumberTimeSamples();
-    art::ServiceHandle<util::TimeService> ts;
-    fClock = ts->TPCClock();
+
+    std::cout<<"\033[95m"<<"reconfigure End!!!"<<"\033[00m"<<std::endl;
     return;
   }
 
   //-------------------------------------------------
   void SimWireMicroBooNE::beginJob() 
   { 
-    
+    std::cout<<"\033[95m"<<"beginJob Start!!!"<<"\033[00m"<<std::endl;    
 
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
@@ -201,7 +204,8 @@ namespace detsim {
     
     fChargeWork.resize(fNTicks, 0.);
     art::ServiceHandle<geo::Geometry> geo;
-    
+
+    std::cout<<"\033[95m"<<"beginJob End!!!"<<"\033[00m"<<std::endl;    
     return;
 
   }
@@ -212,24 +216,17 @@ namespace detsim {
 
   void SimWireMicroBooNE::produce(art::Event& evt)
   {
-    //
-    // Retrieve raw::Trigger data product which tells us from where to record raw::RawDigit
-    //
-    art::Handle<std::vector<raw::Trigger> > trig_array;
-    evt.getByLabel(fTrigModName,trig_array);
-    if(!trig_array.isValid()) throw cet::exception("SimWireMicroBooNE") << "Trigger data product not found!";
-    if(trig_array->size()>1) throw cet::exception("SimWireMicroBooNE") << "Currently >1 Trigger data product / event not supported!";
-    const art::Ptr<raw::Trigger> trig_ptr(trig_array,0);
+    std::cout<<"\033[95m"<<"produce Start!!!"<<"\033[00m"<<std::endl;
 
-    fClock.SetTime(trig_ptr->TriggerTime());
-    
-    art::ServiceHandle<util::DetectorProperties> detp;
-    fClock.SetTime(fClock.Time() +  (detp->TriggerOffset()) * fClock.TickPeriod());
-    if(fClock.Time()<0) fClock.SetTime(0);
+    art::ServiceHandle<util::TimeService> ts;
+    int start_tdc = ts->TPCTick2TDC(0);
 
+    ts->debugReport();
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
-    unsigned int signalSize = fNTicks;
+    //unsigned int signalSize = fNTicks;
+
+    std::cout<<"\033[95m"<<"Start TDC @ "<<start_tdc<<"\033[00m"<<std::endl;
     
     std::vector<const sim::SimChannel*> chanHandle;
     evt.getView(fDriftEModuleLabel,chanHandle);
@@ -249,7 +246,7 @@ namespace detsim {
     const auto NChannels = geo->Nchannels();
 
     // vectors for working
-    std::vector<short>    adcvec(signalSize, 0);
+    std::vector<short>    adcvec(fNTimeSamples, 0);
     // make a unique_ptr of sim::SimDigits that allows ownership of the produced
     // digits to be transferred to the art::Event after the put statement below
     std::unique_ptr< std::vector<raw::RawDigit>> digcol(new std::vector<raw::RawDigit>);
@@ -264,12 +261,10 @@ namespace detsim {
     //LOOP OVER ALL CHANNELS
     std::map<int,double>::iterator mapIter;      
     for(chan = 0; chan < geo->Nchannels(); chan++) {
-      
-      fChargeWork.clear();
-      fChargeWork.resize(fNTimeSamples, 0.);
-      // Then, resize adcvec back to full length!
-      adcvec.clear();
-      adcvec.resize(signalSize,0.0);
+
+      // No need to clear fChargeWork as all contents will be over-written
+      //fChargeWork.clear();
+      //fChargeWork.resize(fNTicks,0);
 
       // get the sim::SimChannel for this channel
       const sim::SimChannel* sc = channels[chan];
@@ -277,15 +272,29 @@ namespace detsim {
       if( sc ){
 
 	// loop over the tdcs and grab the number of electrons for each
-	for(size_t t = 0; t < fChargeWork.size(); ++t) 
+	for(int t = start_tdc; t < (int)(fChargeWork.size()); ++t) {
 
-	  fChargeWork[t] = sc->Charge(fClock.Ticks() + t);
-	
-	fChargeWork.resize(fNTicks,0);
+	  // continue if tdc < 0
+	  if( t < 0 ) continue;
+
+	  fChargeWork[t] = sc->Charge(t);
+
+	  if(sc->Charge(t))
+
+	    std::cout<<chan<<" : "<<t<<" : "<<sc->Charge(t)<<std::endl;
+
+	}
+
+	std::cout<<"Finished reading Ch "<<chan<<std::endl;
+	std::cout<<"Size comparison: "<<fChargeWork.size()<<" ?= "<<fNTicks<<std::endl; 
+	//fChargeWork.resize(fNTicks,0);
+
+	std::cout<<"Running convolution starting!"<<std::endl;
 	
         // Convolve charge with appropriate response function 
 	sss->Convolute(chan,fChargeWork);
-	
+
+	std::cout<<"Running convolution finished!"<<std::endl;
       }
       
       //Generate Noise:
@@ -314,7 +323,7 @@ namespace detsim {
       CLHEP::RandGaussQ rGaussPed(engine, 0.0, fBaselineRMS);
       ped_mean += rGaussPed.fire();
       
-      for(unsigned int i = 0; i < signalSize; ++i){
+      for(unsigned int i = 0; i < fNTimeSamples; ++i){
  	float adcval = noisetmp[i] + fChargeWork[i] + ped_mean;
 	
 	//Add Noise to NoiseDist Histogram
@@ -334,7 +343,7 @@ namespace detsim {
 
       // resize the adcvec to be the correct number of time samples, 
       // just drop the extra samples
-      adcvec.resize(fNTimeSamples);
+      //adcvec.resize(fNTimeSamples);
       
       // compress the adc vector using the desired compression scheme,
       // if raw::kNone is selected nothing happens to adcvec
@@ -349,14 +358,14 @@ namespace detsim {
     }// end loop over channels      
 
     evt.put(std::move(digcol));
-    
+    std::cout<<"\033[95m"<<"produce End!!!"<<"\033[00m"<<std::endl;    
     return;
   }
   
   //-------------------------------------------------                                                                                                 
   std::vector<float> SimWireMicroBooNE::GenNoiseInTime()
   {
-
+    std::cout<<"\033[95m"<<"GenNoiseInTime Start!!!"<<"\033[00m"<<std::endl;
     //ART random number service                                                                                                                       
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine();
@@ -372,7 +381,7 @@ namespace detsim {
     //and insert random noise value
     for (unsigned int i=0; i<noise.size(); i++)
       noise.at(i) = rGauss.fire();
-
+    std::cout<<"\033[95m"<<"GenNoiseInTime End!!!"<<"\033[00m"<<std::endl;
     return noise;
   }
 
@@ -380,7 +389,7 @@ namespace detsim {
   //-------------------------------------------------
   std::vector<float> SimWireMicroBooNE::GenNoiseInFreq()
   {
-    
+    std::cout<<"\033[95m"<<"GenNoiseInFreq Start!!!"<<"\033[00m"<<std::endl;    
     std::vector<float> noise;
     
     art::ServiceHandle<art::RandomNumberGenerator> rng;
@@ -440,7 +449,8 @@ namespace detsim {
     // divides each bin by fNTicks assuming that a forward FFT
     // has already been done.
     for(unsigned int i = 0; i < noise.size(); ++i) noise[i] *= 1.*fNTicks;
-    
+
+    std::cout<<"\033[95m"<<"GenNoiseInFreq End!!!"<<"\033[00m"<<std::endl;    
     return noise;
     
   }
