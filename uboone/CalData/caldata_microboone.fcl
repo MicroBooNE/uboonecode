@@ -2,6 +2,22 @@
 
 BEGIN_PROLOG
 
+microboone_calroi:
+{
+ module_type:        "CalWireROI"
+ DigitModuleLabel:   "daq"
+ Threshold: [ 3, 3, 3 ] # abs(threshold) for finding a Region Of Interest
+ MinWid:              4 # min width (time bins) for a ROI
+ MinSep:             10 # min separation (time bins) between ROIs
+ uPlaneROIPad: [ 150, 10 ] # number of bins to pad both ends of the ROIs
+ vPlaneROIPad: [  10, 10 ] # number of bins to pad both ends of the ROIs
+ zPlaneROIPad: [  10, 10 ] # number of bins to pad both ends of the ROIs
+ DoBaselineSub:    true # subtract baseline after deconvolution?
+ uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
+}
+# set FFT size used by CalWireROI
+services.user.LArFFT.FFTSize: 2048
+
 microboone_calwire:
 {
  module_type:        "CalWireMicroBooNE"
@@ -16,6 +32,7 @@ microboone_calwirePrespill:  @local::microboone_calwire
 microboone_calwirePostspill: @local::microboone_calwire
 microboone_calwirePrespill.DigitModuleLabel: "daq:preSpill"
 microboone_calwirePostspill.DigitModuleLabel: "daq:postSpill"
+
 
 microboone_calwireana: @local::standard_calwireana
 

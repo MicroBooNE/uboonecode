@@ -179,6 +179,7 @@ namespace caldata {
     std::vector<TComplex> freqHolder(transformSize+1); // temporary frequency data
     
     // loop over all wires    
+    wirecol->reserve(digitVecHandle->size());
     for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){ // ++ move
       holder.clear();
       
@@ -219,7 +220,8 @@ namespace caldata {
       // adaptive baseline subtraction
       if(fBaseSampleBins) SubtractBaseline(holder, fBaseSampleBins);
 
-      wirecol->push_back(recob::Wire(holder,digitVec));
+      // Make a single ROI that spans the entire data size
+      wirecol->emplace_back(holder,digitVec);
     }
 
 
