@@ -1227,7 +1227,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     if len(hists) > 0:
         print "Merging %d histogram files using %s." % (len(hists), histmerge)
-        rc = subprocess.call([histmerge, "-f", "-k", "-T", 
+        rc = subprocess.call([histmerge, "-v", "0", "-f", "-k", "-T", 
                               os.path.join(dir, "hist.root"), 
                               "@" + os.path.join(dir, "hists.list")])
         if rc != 0:
