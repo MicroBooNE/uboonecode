@@ -3,19 +3,15 @@
 BEGIN_PROLOG
 
 microboone_detproperties:                   @local::standard_detproperties
-microboone_detproperties.SamplingRate:      500.         #in ns  
-microboone_detproperties.TriggerOffset:     -3200        # in clock ticks
 microboone_detproperties.ElectronsToADC:    6.8906513e-3 # 1fC = 43.008 ADC counts for MicroBooNE  
 microboone_detproperties.NumberTimeSamples: 9600
 microboone_detproperties.TimeOffsetU:       0.
 microboone_detproperties.TimeOffsetV:       0.
 microboone_detproperties.TimeOffsetZ:       0.
 microboone_detproperties.ReadOutWindowSize: 9600
-microboone_detproperties.InheritTriggerOffset:     true
 microboone_detproperties.InheritNumberTimeSamples: true
 
 microboone_detproperties_1window:                   @local::microboone_detproperties
-microboone_detproperties_1window.TriggerOffset:     0
 microboone_detproperties_1window.NumberTimeSamples: 3200
 microboone_detproperties_1window.ReadOutWindowSize: 3200
 
