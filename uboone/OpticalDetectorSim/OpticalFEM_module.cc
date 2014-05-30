@@ -203,7 +203,7 @@ namespace opdet {
     for ( auto const& channelDataGroup : (*channelDataHandle) ) {
       
       // Determine the gain category.
-      size_t gain;  
+      size_t gain;
       if ( channelDataGroup.Category() == optdata::kLowGain )
 	gain = 0;
       else if ( channelDataGroup.Category() == optdata::kHighGain )
@@ -253,8 +253,8 @@ namespace opdet {
 
       // The time of first slice in the gate window
       std::vector< optdata::TimeSlice_t > gateWindowTime(numberOfGates);
-
-      for ( size_t gateIndex = 0; gateIndex != numberOfGates; ++gateIndex ) {
+      
+      for ( size_t gateIndex = 0; gain < 2 && gateIndex != numberOfGates; ++gateIndex ) {
 
 	// Fetch the start and width of the beam gate.
 	const sim::BeamGateInfo& beamGateInfo = beamGates->at(gateIndex);
@@ -263,11 +263,21 @@ namespace opdet {
 	//art::ServiceHandle<opdet::OpDigiProperties> odp;
 	//optdata::TimeSlice_t gateTime = odp->GetTimeSlice( beamGateInfo.Start() );
 	//optdata::TimeSlice_t gateWidth = odp->GetTimeSlice( beamGateInfo.Width() );
+
+	if(ts->G4ToElecTime(beamGateInfo.Start()) < 0)
+
+	  throw cet::exception("OpticalFEM") 
+	    << "\033[93m"
+	    << " Found BeamGateInfo @ " << beamGateInfo.Start() << " [ns] (G4 time)"
+	    << " which is " << ts->G4ToElecTime(beamGateInfo.Start()) << " [us] (Elec. time)"
+	    << " ... aborting."
+	    << "\033[00m" << std::endl;
+
 	optdata::TimeSlice_t gateTime = ts->OpticalG4Time2TDC(beamGateInfo.Start());
 	optdata::TimeSlice_t gateWidth = ts->OpticalG4Time2TDC(beamGateInfo.Width());
 
 	// Figure out the first bin we should start to save.
-	optdata::TimeSlice_t firstSlice = channelDataGroup.TimeSlice();
+	//optdata::TimeSlice_t firstSlice = channelDataGroup.TimeSlice();
 	beginBin[gateIndex] = 0;
 	optdata::TimeSlice_t beam_delay = 0;
 	optdata::TimeSlice_t beam_words = 0;
@@ -281,17 +291,22 @@ namespace opdet {
 	  beam_words = fm_beamWordsNuMI.at(gain);
 	  break;
 	default:
-	  throw cet::exception("OpticalFEM") << Form("Unsupported Beam Type: %d",beamGateInfo.BeamType());
+	  throw cet::exception("OpticalFEM") 
+	    << "\033[93m"
+	    << "Unsupported Beam Type: " << beamGateInfo.BeamType()
+	    << "\033[00m" << std::endl;
 	}
 
-	if ( gateTime < beam_delay + firstSlice )
-	  mf::LogWarning("OpticalFEM") 
-	    << "Beam gate time = " << gateTime
-	    << "; beam gate delay = " << beam_delay
-	    << "; difference is less than the time of the first slice = " << firstSlice
-	    << " in the first frame = " << channelDataGroup.Frame();
-	else
-	  beginBin[gateIndex] = ( gateTime - beam_delay ) - firstSlice;
+	if( gateTime < beam_delay )
+
+	  throw cet::exception("OpticalFEM") 
+	    << "\033[93m"
+	    << " Beam delay " << beam_delay 
+	    << " is larger than BeamGateStart time slice " << gateTime
+	    << " ... aborting."
+	    << "\033[00m" << std::endl;
+
+	beginBin[gateIndex] = ( gateTime - beam_delay );
 	    
 	// Figure out the last bin to be saved. Assume that the
 	// length of the first channel in the group is the same
@@ -308,7 +323,7 @@ namespace opdet {
 	}
 
 	// Compute the frame number of the first slice to be saved. 
-	gateFrame[gateIndex] = channelDataGroup.Frame() + ( beginBin[gateIndex] / clock.FrameTicks() );
+	gateFrame[gateIndex] = ( beginBin[gateIndex] / clock.FrameTicks() );
 	// The time of the "beginBin[gateIndex]" slice within the gateFrame.
 	gateWindowTime[gateIndex] = beginBin[gateIndex] % clock.FrameTicks(); 
 
@@ -324,7 +339,8 @@ namespace opdet {
 
       // For each beam gate...
       for ( size_t gateIndex = 0; gateIndex != numberOfGates; ++gateIndex ) {
-	LOG_DEBUG("OpticalFEM")
+	//LOG_DEBUG("OpticalFEM")
+	mf::LogDebug("OpticalFEM")
 	  << "Writing beam gate channels:"
 	  << " at frame=" << gateFrame[gateIndex]
 	  << " slice=" << gateWindowTime[gateIndex]
@@ -345,7 +361,7 @@ namespace opdet {
 
 	  optdata::Optical_Category_t category = optdata::kFEMBeamLowGain;
 	  if( gain == 1 ) category = optdata::kFEMBeamHighGain;
-	  else category = optdata::kFEMBeamLogicPulse;
+	  else if( gain == 2) category = optdata::kFEMBeamLogicPulse;
 	  
 	  optdata::FIFOChannel 
 	    beamFIFOChannel( category, 
