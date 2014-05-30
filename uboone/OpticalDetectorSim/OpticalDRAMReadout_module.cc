@@ -113,6 +113,7 @@ namespace opdet {
   {
     // Obtain optical clock to be used for sample/frame number generation
     art::ServiceHandle<util::TimeService> ts;
+    ts->preProcessEvent(event);
     ::util::ElecClock clock = ts->OpticalClock();
 
     std::unique_ptr< std::vector<optdata::OpticalRawDigit> > wf_array( new std::vector<optdata::OpticalRawDigit> );
