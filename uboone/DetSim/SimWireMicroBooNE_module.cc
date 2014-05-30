@@ -73,8 +73,8 @@ namespace detsim {
 
   private:
 
-    std::vector<float>     GenNoiseInTime();
-    std::vector<float>     GenNoiseInFreq();
+    void GenNoiseInTime(std::vector<float> &noise);
+    void GenNoiseInFreq(std::vector<float> &noise);
 
     std::string            fDriftEModuleLabel;///< module making the ionization electrons
     raw::Compress_t        fCompression;      ///< compression type to use
@@ -83,13 +83,12 @@ namespace detsim {
     double                 fNoiseWidth;       ///< exponential noise width (kHz) 
     double                 fNoiseRand;        ///< fraction of random "wiggle" in noise in freq. spectrum
     double                 fLowCutoff;        ///< low frequency filter cutoff (kHz)
-    int                    fNTicks;           ///< number of ticks of the clock
+    size_t                 fNTicks;           ///< number of ticks of the clock
     double                 fSampleRate;       ///< sampling rate in ns
     unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)
     float                  fCollectionPed;    ///< ADC value of baseline for collection plane
     float                  fInductionPed;     ///< ADC value of baseline for induction plane
     float                  fBaselineRMS;      ///< ADC value of baseline RMS within each channel                    
-    std::vector<double>    fChargeWork;
     TH1D*                  fNoiseDist;        ///< distribution of noise counts
     bool fGetNoiseFromHisto;                  ///< if True -> Noise from Histogram of Freq. spectrum
     bool fGenNoiseInTime;                     ///< if True -> Noise with Gaussian dsitribution in Time-domain 
@@ -130,7 +129,7 @@ namespace detsim {
   //-------------------------------------------------
   SimWireMicroBooNE::~SimWireMicroBooNE()
   {
-    fChargeWork.clear();
+    delete fNoiseHist;
   }
 
   //-------------------------------------------------
@@ -193,13 +192,10 @@ namespace detsim {
       LOG_DEBUG("SimWireMicroBooNE") << "Warning: FFTSize not a power of 2. "
 				     << "May cause issues in (de)convolution.\n";
 
-    if ( (int)fNTimeSamples > fNTicks ) 
+    if ( fNTimeSamples > fNTicks ) 
       mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
 					<< "greater than FFTSize!";
     
-    fChargeWork.resize(fNTicks, 0.);
-    art::ServiceHandle<geo::Geometry> geo;
-
     return;
 
   }
@@ -212,9 +208,10 @@ namespace detsim {
   {
 
     art::ServiceHandle<util::TimeService> ts;
+    ts->preProcessEvent(evt);
     int start_tdc = ts->TPCTick2TDC(0);
+    //ts->debugReport();
 
-    ts->debugReport();
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
     //unsigned int signalSize = fNTicks;
@@ -229,24 +226,23 @@ namespace detsim {
     // of entries as the number of channels in the detector
     // and set the entries for the channels that have signal on them
     // using the chanHandle
-    std::vector<const sim::SimChannel*> channels(geo->Nchannels());
+    std::vector<const sim::SimChannel*> channels(geo->Nchannels(),nullptr);
     for(size_t c = 0; c < chanHandle.size(); ++c){
-      channels[chanHandle[c]->Channel()] = chanHandle[c];
+      channels.at(chanHandle.at(c)->Channel()) = chanHandle.at(c);
     }
     
     const auto NChannels = geo->Nchannels();
 
     // vectors for working
     std::vector<short>    adcvec(fNTimeSamples, 0);
+    std::vector<double>   chargeWork(fNTicks,0.);
+
     // make a unique_ptr of sim::SimDigits that allows ownership of the produced
     // digits to be transferred to the art::Event after the put statement below
     std::unique_ptr< std::vector<raw::RawDigit>> digcol(new std::vector<raw::RawDigit>);
     digcol->reserve(NChannels);
 
     unsigned int chan = 0; 
-    fChargeWork.clear();
-    fChargeWork.resize(fNTicks, 0.);
-    
     art::ServiceHandle<util::LArFFT> fFFT;
 
     //LOOP OVER ALL CHANNELS
@@ -254,36 +250,32 @@ namespace detsim {
     for(chan = 0; chan < geo->Nchannels(); chan++) {
 
       // get the sim::SimChannel for this channel
-      const sim::SimChannel* sc = channels[chan];
+      const sim::SimChannel* sc = channels.at(chan);
 
       if( sc ){
 
 	// loop over the tdcs and grab the number of electrons for each
-	for(int t = start_tdc; t < (int)(fChargeWork.size()); ++t) {
+	for(int t = start_tdc; t < (int)(chargeWork.size()); ++t) {
 
 	  // continue if tdc < 0
 	  if( t < 0 ) continue;
 
-	  fChargeWork[t] = sc->Charge(t);
+	  chargeWork.at(t) = sc->Charge(t);
 
 	}
 
         // Convolve charge with appropriate response function 
-	sss->Convolute(chan,fChargeWork);
+	sss->Convolute(chan,chargeWork);
 
       }
       
       //Generate Noise:
-      std::vector<float> noisetmp;
+      std::vector<float> noisetmp(fNTicks,0.);
       if (fGenNoise){
 	if (fGenNoiseInTime)
-	  noisetmp = GenNoiseInTime();
+	  GenNoiseInTime(noisetmp);
 	else
-	  noisetmp = GenNoiseInFreq();
-      }
-      else{
-	noisetmp.clear();
-	noisetmp.resize(fNTicks, 0.);
+	  GenNoiseInFreq(noisetmp);
       }
 
       //Pedestal determination
@@ -300,11 +292,11 @@ namespace detsim {
       ped_mean += rGaussPed.fire();
       
       for(unsigned int i = 0; i < fNTimeSamples; ++i){
- 	float adcval = noisetmp[i] + fChargeWork[i] + ped_mean;
+ 	float adcval = noisetmp.at(i) + chargeWork.at(i) + ped_mean;
 	
 	//Add Noise to NoiseDist Histogram
 	if (i%100==0)
-	  fNoiseDist->Fill(noisetmp[i]);
+	  fNoiseDist->Fill(noisetmp.at(i));
 
 	//allow for ADC saturation
 	if ( adcval > adcsaturation )
@@ -313,7 +305,7 @@ namespace detsim {
 	if ( adcval < 0 )
 	  adcval = 0;
 
-	adcvec[i] = (unsigned short)(adcval);
+	adcvec.at(i) = (unsigned short)(adcval);
 
       }// end loop over signal size
 
@@ -338,38 +330,37 @@ namespace detsim {
   }
   
   //-------------------------------------------------                                                                                                 
-  std::vector<float> SimWireMicroBooNE::GenNoiseInTime()
+  void SimWireMicroBooNE::GenNoiseInTime(std::vector<float> &noise)
   {
     //ART random number service                                                                                                                       
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine();
     CLHEP::RandGaussQ rGauss(engine, 0.0, fNoiseFact);
 
-    std::vector<float> noise;
-
-    noise.clear();
-    noise.resize(fNTicks, 0.);
     //In this case fNoiseFact is a value in ADC counts
     //It is going to be the Noise RMS
     //loop over all bins in "noise" vector
     //and insert random noise value
     for (unsigned int i=0; i<noise.size(); i++)
       noise.at(i) = rGauss.fire();
-    return noise;
   }
 
 
   //-------------------------------------------------
-  std::vector<float> SimWireMicroBooNE::GenNoiseInFreq()
+  void SimWireMicroBooNE::GenNoiseInFreq(std::vector<float> &noise)
   {
-    std::vector<float> noise;
-    
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine();
     CLHEP::RandFlat flat(engine,-1,1);
 
-    noise.clear();
-    noise.resize(fNTicks, 0.);
+    if(noise.size() != fNTicks)
+      throw cet::exception("SimWireMicroBooNE")
+	<< "\033[93m"
+	<< "Frequency noise vector length must match fNTicks (FFT size)"
+	<< " ... " << noise.size() << " != " << fNTicks
+	<< "\033[00m"
+	<< std::endl;
+
     // noise in frequency space
     std::vector<TComplex> noiseFrequency(fNTicks/2+1, 0.);
 
@@ -381,7 +372,7 @@ namespace detsim {
     // width of frequencyBin in kHz
     double binWidth = 1.0/(fNTicks*fSampleRate*1.0e-6);
 
-    for(int i=0; i< fNTicks/2+1; ++i){
+    for(size_t i=0; i< fNTicks/2+1; ++i){
       // exponential noise spectrum 
       flat.fireArray(2,rnd,0,1);
       //if not from histo or in time --> then hardcoded freq. spectrum
@@ -405,7 +396,7 @@ namespace detsim {
       
       phase = rnd[1]*2.*TMath::Pi();
       TComplex tc(pval*cos(phase),pval*sin(phase));
-      noiseFrequency[i] += tc;
+      noiseFrequency.at(i) += tc;
     }
     
     
@@ -420,10 +411,8 @@ namespace detsim {
     // multiply each noise value by fNTicks as the InvFFT 
     // divides each bin by fNTicks assuming that a forward FFT
     // has already been done.
-    for(unsigned int i = 0; i < noise.size(); ++i) noise[i] *= 1.*fNTicks;
+    for(unsigned int i = 0; i < noise.size(); ++i) noise.at(i) *= 1.*fNTicks;
 
-    return noise;
-    
   }
   
   
