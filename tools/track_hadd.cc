@@ -268,6 +268,11 @@ int main(int argc, char** argv)
     else if(arg == "-k")
       skip = true;
 
+    // Process -v option (for compatibility with hadd, not implemented here).
+
+    else if(arg == "-v")
+      ++i;
+
     // Ignore any other arguments that begin with "-".
 
     else if(arg[0] == '-');
