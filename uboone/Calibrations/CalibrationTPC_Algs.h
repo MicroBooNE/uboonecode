@@ -10,9 +10,12 @@
  * These are the actual functions that do things for electronics calibration.
  */
 
-
 #include <vector>
 #include "RawData/RawDigit.h"
+#include <map>
+
+#include "TMath.h"
+#include "TComplex.h"
 
 namespace calibration{
 
@@ -21,8 +24,13 @@ namespace calibration{
 			  std::vector<float> & noise,
 			  std::vector<std::vector<float> > & noise_spectrum);
 
+  void genChanMap( std::vector<raw::RawDigit> const& rawDigit,
+		   std::map< unsigned int, uint32_t > & chanmap,
+		   uint32_t & NChanMax);
+
   void calcPedestal( std::vector<raw::RawDigit> const& rawDigit,
 		     std::vector<float> & pedestal);
+
   void calcPedestal_SingleChannel( std::vector<short> const& rawData,
 				   float & pedestal);
   
@@ -34,6 +42,7 @@ namespace calibration{
 				float const& pedestal,
 				float & noise,
 				std::vector<float> & noise_spectrum);
+
 
 }
 #endif //CALIBRATIONTPC_ALGS_H

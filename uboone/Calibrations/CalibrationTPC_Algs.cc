@@ -11,6 +11,8 @@
 #include "CalibrationTPC_Algs.h"
 #include <cmath>
 #include <iostream>
+#include "TMath.h"
+#include "TComplex.h"
 
 namespace calibration{
 
@@ -28,6 +30,20 @@ namespace calibration{
 
 
   //-------------------------------------------------------------------------
+  void genChanMap( std::vector<raw::RawDigit> const& rawDigit,
+		   std::map< unsigned int, uint32_t > & chanmap,
+		   uint32_t & NChanMax){
+    
+    const unsigned int n_channels = rawDigit.size();
+
+    for (unsigned int ich=0; ich < n_channels; ich++){
+      chanmap[ich] = rawDigit.at(ich).Channel();
+    }
+
+  }
+
+
+  //-------------------------------------------------------------------------
   void calcPedestal( std::vector<raw::RawDigit> const& rawDigit,
 		     std::vector<float> & pedestal){
 
@@ -35,7 +51,8 @@ namespace calibration{
     
     for(unsigned int ich=0; ich<n_channels; ich++)
       calcPedestal_SingleChannel(rawDigit.at(ich).fADC,
-				 pedestal.at(ich));
+				 pedestal.at(ich) );
+
  
   }
 
@@ -47,8 +64,9 @@ namespace calibration{
     const unsigned int n_samples = rawData.size();
 
     pedestal = 0;
-    for(unsigned int it=0; it<n_samples; it++)
+    for(unsigned int it=0; it<n_samples; it++){
       pedestal += rawData.at(it);
+    }
 
     pedestal = pedestal / n_samples;
 
@@ -78,7 +96,11 @@ namespace calibration{
 				std::vector<float> & noise_spectrum){
 
     const unsigned int n_samples = rawData.size();
-
+    //prepare vector to store baseline subtracted value for FFT
+    std::vector<float> BaselineSubtracted(n_samples, 0.);
+    //std::vector<TComplex> noiseFrequency( n_samples/2+1, 0.);
+    //for ( unsigned int i=0; i < n_samples/2+1; i++)
+    //  noiseFrequency.push_back(TC0.0);
     //should never happen, but let's be safe, not sorry
     if(n_samples < 2){
       std::cerr << "Error in CalibrationTPC_Algs::calcNoise_SingleChannel" 
@@ -91,12 +113,17 @@ namespace calibration{
     noise=0;
     for(unsigned int it=0; it<n_samples; it++){
       noise += (rawData.at(it)-pedestal)*(rawData.at(it)-pedestal);
-      // STUFF HERE FOR NOISE SPECTRUM!!!!
+      BaselineSubtracted.at(it) = (rawData.at(it)-pedestal);
     }
 
+    //do FFT
+    //    art::ServiceHandle<util::LArFFT> fFFT;
+    //    fFFT->DoFFT(BaselineSubtracted,noiseFrequency);
+    //BaselineSubtracted.clear();
+
     for (unsigned int it=0; it<(n_samples/2+1); it++)
-    //Now Freq Spectrum is a vector of noise levels in freq. space
-    //scale determined by 1/Bin_Time_Duration
+      noise_spectrum.at(it) = 0.0;
+
     noise = sqrt(noise / (n_samples - 1));
   }
 
