@@ -208,9 +208,8 @@ namespace detsim {
   {
 
     art::ServiceHandle<util::TimeService> ts;
+    // In case trigger simulation is run in the same job...
     ts->preProcessEvent(evt);
-    int start_tdc = ts->TPCTick2TDC(0);
-    //ts->debugReport();
 
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
@@ -255,12 +254,14 @@ namespace detsim {
       if( sc ){
 
 	// loop over the tdcs and grab the number of electrons for each
-	for(int t = start_tdc; t < (int)(chargeWork.size()); ++t) {
+	for(int t = 0; t < (int)(chargeWork.size()); ++t) {
+
+	  int tdc = ts->TPCTick2TDC(t);
 
 	  // continue if tdc < 0
-	  if( t < 0 ) continue;
+	  if( tdc < 0 ) continue;
 
-	  chargeWork.at(t) = sc->Charge(t);
+	  chargeWork.at(t) = sc->Charge(tdc);
 
 	}
 
