@@ -1,0 +1,28 @@
+
+BEGIN_PROLOG
+
+standard_mcshowerrecopart:
+{
+    DebugMode:   true
+#    TimeCut:     500
+#    Dist2Cut:    10
+#    EnableMerge: true
+}
+
+standard_mcshowerrecoedep:
+{
+    DebugMode:  false
+    SaveMCHit:  true
+}
+
+standard_mcshowerrecoalg:
+{
+    DebugMode:  false
+    G4ModName:        "largeant"
+    MinShowerEnergy:  0
+    MinNumDaughters:  1
+    MCShowerRecoEdep: @local::standard_mcshowerrecoedep
+    MCShowerRecoPart: @local::standard_mcshowerrecopart
+}
+
+END_PROLOG

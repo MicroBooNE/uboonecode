@@ -1,0 +1,46 @@
+#include "mcshowerreco.fcl"
+#include "services_microboone.fcl"
+
+process_name: MCShowerAna
+
+standard_mcshowerana:
+{
+  module_type:            "MCShowerAna"
+  MCShowerRecoAlg:        @local::standard_mcshowerrecoalg
+}
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "ana_hist.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  message:      @local::standard_warning
+  user:         @local::microboone_services 	     
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  -1        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ analyzers:
+ {
+   myana: @local::standard_mcshowerana
+ }
+
+ analyzeIt: [ myana ]
+
+ end_paths:     [ analyzeIt ]
+}
+
+
+#  LocalWords:  microboone

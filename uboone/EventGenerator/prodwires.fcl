@@ -1,15 +1,18 @@
 #include "services_microboone.fcl"
 #include "singles.fcl"
 #include "largeantmodules.fcl"
-#include "detsimmodules_microboone.fcl"
-#include "mccheatermodules.fcl"
+#include "detsimwires_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "trackfindermodules_microboone.fcl"
 
 process_name: SinglesGen
 
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "single_hist_uboone.root" }
+  TFileService: { fileName: "wires_hist_uboone.root" }
   Timing:       {}
   RandomNumberGenerator: {} #ART native random number generator
   user:         @local::microboone_simulation_services
@@ -33,21 +36,16 @@ physics:
 
  producers:
  {
-   generator: @local::microboone_singlep	  
-   largeant:  @local::microboone_largeant	  
-   daq:       @local::microboone_simwire  
-   backtrack: @local::standard_backtrackerloader
+   daq:       @local::microboone_simwire
+   caldata:    @local::microboone_calwire	    
+   ffthit:     @local::microboone_hitfinder	    
  }
 
- analyzers:
- {
-   largana:   @local::microboone_largeantana
- }
+
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ generator, largeant, daq, backtrack ] 
- analyzeIt:  [ largana ]
+ simulate: [ daq, caldata, ffthit ] 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
 
@@ -57,7 +55,7 @@ physics:
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
- end_paths:     [analyzeIt, stream1]  
+ end_paths:     [stream1]  
 }
 
 #block to define where the output goes.  if you defined a filter in the physics
@@ -68,21 +66,18 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "single_gen_uboone.root" #default file name, can override from command line with -o or --output
+   fileName:    "wires_gen_uboone.root" #default file name, can override from command line with -o or --output
  }
 }
 
-physics.producers.generator.SigmaThetaXZ:   [ 0.0 ]
-physics.producers.generator.SigmaThetaYZ:   [ 0.0 ]
-physics.producers.generator.X0:             [ 100.0 ]
-physics.producers.generator.SigmaX:         [ 0.0 ]
-physics.producers.generator.Y0:             [ 0.0 ]
-physics.producers.generator.SigmaY:         [ 0.0 ]
-physics.producers.generator.Z0:             [ 500.0 ]
-physics.producers.generator.SigmaZ:         [ 0.0 ]
-physics.producers.generator.P0:             [ 0.01 ]
-physics.producers.generator.PDG:            [ 11 ]
 
-physics.producers.daq.GenNoise:       true
-physics.producers.daq.GenNoiseInTime: true
-physics.producers.daq.NoiseFact:      3.0   #IN ADCs
+physics.producers.daq.module_type:        "SimWire"
+physics.producers.daq.DriftEModuleLabel:  "largeant"
+#physics.producers.daq.SigType:            []#Signal Type: 'gauss' or 'pulse'
+#physics.producers.daq.SigWidth:           []             #in time-ticks: signal width
+#physics.producers.daq.SigAmp:             []          #in ADCs: signal amplitude
+#physics.producers.daq.Pedestal:           0                      #in ADCs: signal pedestal value
+#physics.producers.daq.NTicks:             3200                     #in time-ticks: length of pulse
+#physics.producers.daq.SigTime:            []         #in time-ticks: when pulse will happen
+#physics.producers.daq.NoiseFact:          0.00                     #Noise Scale to use with histogram
+physics.producers.daq.CompressionType:    "none"                   #could also be none		
