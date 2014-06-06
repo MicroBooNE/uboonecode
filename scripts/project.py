@@ -1184,10 +1184,12 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # Skip this step for sam input.
 
     nmiss = 0
+    nerror = 0
     if input_def == '':
         for process in xrange(num_jobs):
             if not procmap.has_key(process):
                 nmiss = nmiss + 1
+                nerror = nerror + 1
                 missing.write('%d %d\n' % (cluster, process))
                 print 'Missing process %d.' % process
 
@@ -1278,6 +1280,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         else:
             udim = 'defname: %s' % input_def
         nunconsumed = samweb.countFiles(dimensions=udim)
+        nerror = nerror + nunconsumed
         
         # Sam summary.
 
@@ -1328,7 +1331,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     # Done
 
-    print '%d processes with errors.' % nmiss
+    print '%d processes with errors.' % nerror
     return nmiss
 
 # Construct dimension string for project, stage.
@@ -2210,6 +2213,7 @@ def main(argv):
         # Construct jobsub command line for workers.
 
         command = ['jobsub']
+        command_njobs = 1
 
         # Jobsub options.
         
@@ -2222,12 +2226,16 @@ def main(argv):
         if project.os != '':
             command.append('--OS=%s' % project.os)
         if submit:
-            command.extend(['-N', '%d' % stage.num_jobs])
+            command_njobs = stage.num_jobs
+            command.extend(['-N', '%d' % command_njobs])
         elif makeup:
             if inputdef != '':
-                command.extend(['-N', '%d' % min(makeup_count, stage.num_jobs)])
+                command_njobs = min(makeup_count, stage.num_jobs)
+                command.extend(['-N', '%d' % command_njobs])
+                
             else:
-                command.extend(['-N', '%d' % len(missing_pairs)])
+                command_njobs = len(missing_pairs)
+                command.extend(['-N', '%d' % command_njobs])
 
         # Batch script.
 
@@ -2337,18 +2345,54 @@ def main(argv):
 
             dagfilepath = os.path.join(stage.workdir, 'submit.dag')
             dag = open(dagfilepath, 'w')
+
+            # Write start section.
+
             dag.write('<serial>\n')
-            for jobsub in start_command, command, stop_command:
+            first = True
+            for word in start_command:
+                if not first:
+                    dag.write(' ')
+                dag.write(word)
+                if word == 'jobsub':
+                    dag.write(' -n')
+                first = False
+            dag.write('\n</serial>\n')
+
+            # Write main section.
+
+            dag.write('<parallel>\n')
+            for process in range(command_njobs):
                 first = True
-                for word in jobsub:
-                    if not first:
-                        dag.write(' ')
-                    dag.write(word)
-                    if word == 'jobsub':
-                        dag.write(' -n')
-                    first = False
-                dag.write('\n')
-            dag.write('</serial>\n')
+                skip = False
+                for word in command:
+                    if skip:
+                        skip = False
+                    else:
+                        if word == '-N':
+                            skip = True
+                        else:
+                            if not first:
+                                dag.write(' ')
+                            dag.write(word)
+                            if word == 'jobsub':
+                                dag.write(' -n')
+                            first = False
+                dag.write(' --process %d\n' % process)
+            dag.write('</parallel>\n')
+
+            # Write stop section.
+
+            dag.write('<serial>\n')
+            first = True
+            for word in stop_command:
+                if not first:
+                    dag.write(' ')
+                dag.write(word)
+                if word == 'jobsub':
+                    dag.write(' -n')
+                first = False
+            dag.write('\n</serial>\n')
             dag.close()
 
             # Update the main submission command to use dagNabbit.py instead of jobsub.
