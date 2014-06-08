@@ -12,8 +12,8 @@ microboone_timeservice.FramePeriod:       1.6e3 # Frame period [us]
 microboone_timeservice.ClockSpeedTPC:     2.    # TPC clock speed in MHz
 microboone_timeservice.ClockSpeedOptical: 64.   # Optical clock speed in MHz
 microboone_timeservice.ClockSpeedTrigger: 16.   # Trigger clock speed in MHz
-microboone_timeservice.DefaultTrigTime:   1600. # Trigger clock speed in MHz
-microboone_timeservice.DefaultBeamTime:   1600. # Trigger clock speed in MHz
+microboone_timeservice.DefaultTrigTime:   1600. # Default trigger time [us].
+microboone_timeservice.DefaultBeamTime:   1600. # Default beam time [us].
 
 microboone_timeservice_1window: @local::microboone_timeservice
 microboone_timeservice_1window.G4RefTime: 0
