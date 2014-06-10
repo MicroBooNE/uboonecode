@@ -1,6 +1,6 @@
 /*!
  * Title:   CalibrationTPC Algs
- * Author:  wketchum@lanl.gov
+ * Author:  wketchum@lanl.gov, dcaratelli@nevis.columbia.edu
  * Inputs:  raw::RawDigit
  * Outputs: Histograms and other nice data
  *
@@ -28,17 +28,36 @@ namespace calibration{
 
   }
 
+  //-------------------------------------------------------------------------
+  void analyzeGainEvent( std::vector<raw::RawDigit> const& rawDigit,
+			 std::vector<float> & pedestal,
+			 std::vector<float> & maxADC,
+			 std::vector<float> & minADC,
+			 int const& prePulseTicks){
+    
+    calcGain(rawDigit, pedestal, maxADC, minADC, prePulseTicks);
+
+  }
+
 
   //-------------------------------------------------------------------------
   void genChanMap( std::vector<raw::RawDigit> const& rawDigit,
-		   std::map< unsigned int, uint32_t > & chanmap,
-		   uint32_t & NChanMax){
+		   std::map< unsigned int, uint32_t > & chanmap){
     
     const unsigned int n_channels = rawDigit.size();
+    unsigned int ChanMin = 20000;
 
     for (unsigned int ich=0; ich < n_channels; ich++){
       chanmap[ich] = rawDigit.at(ich).Channel();
+      if ( rawDigit.at(ich).Channel() < ChanMin )
+	ChanMin = rawDigit.at(ich).Channel();
     }
+
+    //shift channels so that they start at 0
+    for (unsigned int ich=0; ich < n_channels; ich++){
+      chanmap[ich] -= ChanMin;
+    }
+
 
   }
 
@@ -51,7 +70,7 @@ namespace calibration{
     
     for(unsigned int ich=0; ich<n_channels; ich++)
       calcPedestal_SingleChannel(rawDigit.at(ich).fADC,
-				 pedestal.at(ich) );
+				 pedestal.at(ich)  );
 
  
   }
@@ -64,11 +83,65 @@ namespace calibration{
     const unsigned int n_samples = rawData.size();
 
     pedestal = 0;
-    for(unsigned int it=0; it<n_samples; it++){
+
+    for(unsigned int it=0; it<n_samples; it++)
       pedestal += rawData.at(it);
-    }
 
     pedestal = pedestal / n_samples;
+
+  }
+
+  //-------------------------------------------------------------------------
+  void calcGain( std::vector<raw::RawDigit> const& rawDigit,
+		 std::vector<float> & pedestal,
+		 std::vector<float> & maxADC,
+		 std::vector<float> & minADC,
+		 int const& prePulseTicks){
+
+    const unsigned int n_channels = rawDigit.size();
+    
+    for(unsigned int ich=0; ich<n_channels; ich++)
+      calcGain_SingleChannel(rawDigit.at(ich).fADC,
+			     pedestal.at(ich),
+			     maxADC.at(ich),
+			     minADC.at(ich),
+			     prePulseTicks);
+ 
+  }
+
+
+  void calcGain_SingleChannel( std::vector<short> const& rawData,
+			       float & pedestal,
+			       float & maxADC,
+			       float & minADC,
+			       int const& prePulseTicks){
+
+    const unsigned int n_samples = rawData.size();
+
+    pedestal = 0;
+    maxADC = 0;
+    minADC = 0;
+
+    for(unsigned int it=0; it<n_samples; it++){
+      short thisADC = rawData.at(it);
+      if ( (int)it < prePulseTicks ) { pedestal += thisADC; }
+      if ( thisADC > maxADC ) { maxADC = thisADC; }
+      if ( thisADC < minADC ) { minADC = thisADC; }
+    }
+
+    pedestal /= (float)prePulseTicks;
+
+    //Subtract baseline
+    //maxADC -= pedestal;
+    //minADC -= pedestal;
+
+    //calculate RMS on pre-pulse to make sure it is not too high (what threshold?)
+    double prePulseRMS = 0;
+    for(int it=0; it < prePulseTicks; it++)
+      prePulseRMS += (rawData.at(it)-pedestal)*(rawData.at(it)-pedestal);
+    prePulseRMS = sqrt( prePulseRMS / (prePulseTicks -1) );
+    //if ( prePulseRMS > 10. )
+    // std::cout << "HELP! RMS noise on first " << prePulseTicks << " is: " << prePulseRMS << " Baseline is: " << pedestal << std::endl;
 
   }
 

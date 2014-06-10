@@ -24,20 +24,38 @@ namespace calibration{
 			  std::vector<float> & noise,
 			  std::vector<std::vector<float> > & noise_spectrum);
 
+  void analyzeGainEvent( std::vector<raw::RawDigit> const& rawDigit,
+			 std::vector<float> & pedestal,
+			 std::vector<float> & maxADC,
+			 std::vector<float> & mainDC,
+			 int const& prePulseTicks);
+
   void genChanMap( std::vector<raw::RawDigit> const& rawDigit,
-		   std::map< unsigned int, uint32_t > & chanmap,
-		   uint32_t & NChanMax);
+		   std::map< unsigned int, uint32_t > & chanmap);
 
   void calcPedestal( std::vector<raw::RawDigit> const& rawDigit,
 		     std::vector<float> & pedestal);
 
   void calcPedestal_SingleChannel( std::vector<short> const& rawData,
 				   float & pedestal);
+
+  void calcGain( std::vector<raw::RawDigit> const& rawDigit,
+		 std::vector<float> & pedestal,
+		 std::vector<float> & maxADC,
+		 std::vector<float> & minADC,
+		 int const& prePulseTicks);
+
+  void calcGain_SingleChannel( std::vector<short> const& rawData,
+			       float & pedestal,
+			       float & maxADC,
+			       float & minADC,
+			       int const& prePulseTicks);
   
   void calcNoise( std::vector<raw::RawDigit> const& rawDigit,
 		  std::vector<float> const& pedestal,
 		  std::vector<float> & noise,
 		  std::vector< std::vector<float> > & noise_spectrum);
+
   void calcNoise_SingleChannel( std::vector<short> const& rawData,
 				float const& pedestal,
 				float & noise,
