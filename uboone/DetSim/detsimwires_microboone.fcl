@@ -17,7 +17,7 @@ microboone_simwire:
  NoiseRand:          0.1                      #frac of randomness of noise freq-spec
  LowCutoff:          7.5                      #Low frequency filter cutoff (kHz)
  CompressionType:    "none"                   #could also be none		
- GenNoise:            true                    #gen noise...if false function not called
+ GenNoise:            false                    #gen noise...if false function not called
  GetNoiseFromHisto:   false
  GenNoiseInTime:      false
  BaselineRMS:         0.3                     #ADC baseline fluctuation within channel        

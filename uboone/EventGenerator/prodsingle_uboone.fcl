@@ -20,7 +20,7 @@ services:
 source:
 {
   module_type: EmptyEvent
-  maxEvents:   1           # Number of events to create
+  maxEvents:   5          # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
 }
@@ -72,17 +72,12 @@ outputs:
  }
 }
 
-physics.producers.generator.SigmaThetaXZ:   [ 0.0 ]
-physics.producers.generator.SigmaThetaYZ:   [ 0.0 ]
-physics.producers.generator.X0:             [ 100.0 ]
-physics.producers.generator.SigmaX:         [ 0.0 ]
-physics.producers.generator.Y0:             [ 0.0 ]
-physics.producers.generator.SigmaY:         [ 0.0 ]
-physics.producers.generator.Z0:             [ 500.0 ]
-physics.producers.generator.SigmaZ:         [ 0.0 ]
-physics.producers.generator.P0:             [ 0.01 ]
-physics.producers.generator.PDG:            [ 11 ]
+physics.producers.generator.SigmaThetaXZ: [ 5.0 ]
+physics.producers.generator.SigmaThetaYZ: [ 5.0 ]
+physics.producers.generator.X0: [ 100.0 ]
+physics.producers.generator.Z0: [ 50.0 ]
+physics.producers.generator.P0: [ 1.5 ]
 
-physics.producers.daq.GenNoise:       true
-physics.producers.daq.GenNoiseInTime: true
-physics.producers.daq.NoiseFact:      3.0   #IN ADCs
+physics.producers.daq.GenNoise:       false
+#physics.producers.daq.GenNoiseInTime: true
+physics.producers.daq.NoiseFact:      0.0   #IN ADCs
