@@ -176,6 +176,7 @@ namespace caldata {
     std::vector<unsigned short> fThreshold;   ///< abs(threshold) ADC counts for ROI
     unsigned short fMinWid;         ///< min width for a ROI
     unsigned short fMinSep;          ///< min separation between ROIs
+    int fFFTSize;        ///< FFT size for ROI deconvolution
     std::vector<unsigned short> fPreROIPad; ///< ROI padding
     std::vector<unsigned short> fPostROIPad; ///< ROI padding
     bool fDoBaselineSub;  ///< Do baseline subtraction after deconvolution?
@@ -226,6 +227,7 @@ namespace caldata {
     zin               = p.get< std::vector<unsigned short> >   ("zPlaneROIPad");
     fDoBaselineSub    = p.get< bool >                 ("DoBaselineSub");
     fuPlaneRamp       = p.get< bool >                 ("uPlaneRamp");
+    fFFTSize          = p.get< int  >                 ("FFTSize");
     
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
       throw art::Exception(art::errors::Configuration)
@@ -250,6 +252,12 @@ namespace caldata {
       fSpillName = fDigitModuleLabel.substr( pos+1 );
       fDigitModuleLabel = fDigitModuleLabel.substr( 0, pos );
     }
+    
+    // re-initialize the FFT service for the request size
+    art::ServiceHandle<util::LArFFT> fFFT;
+    std::string options = fFFT->FFTOptions();
+    int fitbins = fFFT->FFTFitBins();
+    fFFT->ReinitializeFFT(fFFTSize, options, fitbins);
     
   }
 

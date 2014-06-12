@@ -14,9 +14,8 @@ microboone_calroi:
  zPlaneROIPad: [  10, 10 ] # number of bins to pad both ends of the ROIs
  DoBaselineSub:    true # subtract baseline after deconvolution?
  uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
+ FFTSize:     2048      # re-initialize FFT service to this size
 }
-# set FFT size used by CalWireROI
-services.user.LArFFT.FFTSize: 2048
 
 microboone_calwire:
 {
