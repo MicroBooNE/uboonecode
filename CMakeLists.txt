@@ -80,6 +80,9 @@ add_subdirectory(python)
 # Stand alone compiled executables.
 add_subdirectory(tools)
 
+# release database
+add_subdirectory(releaseDB)
+
 # ups - table and config files
 add_subdirectory(ups)
 
