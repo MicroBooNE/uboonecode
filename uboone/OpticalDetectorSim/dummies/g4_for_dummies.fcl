@@ -1,9 +1,10 @@
+
 #include "services_microboone.fcl"
-#include "singles.fcl"
-#include "largeantmodules.fcl"
+#include "singles_microboone.fcl"
+#include "largeantmodules_microboone.fcl"
 #include "detsimmodules_microboone.fcl"
 #include "mccheatermodules.fcl"
-
+#include "opticaldetectormodules_microboone.fcl"
 process_name: SinglesGen
 
 services:
@@ -11,8 +12,10 @@ services:
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "single_hist_uboone.root" }
   Timing:       {}
+  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
   user:         @local::microboone_simulation_services
+#  user:         @local::microboone_services
 }
 
 
@@ -20,11 +23,14 @@ services:
 source:
 {
   module_type: EmptyEvent
-  maxEvents:   5          # Number of events to create
+  maxEvents:   2        # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
 }
 
+services.user.PhotonVisibilityService: @local::standard_photonvisibilityservice
+services.user.OpDigiProperties:        @local::microboone_opdigiproperties
+#services.user.TimeService              @local::microboone_timeservice
 # Define and configure some modules to do work on each event.
 # First modules are defined; they are scheduled later.
 # Modules are grouped by type.
@@ -46,7 +52,8 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ generator, largeant, daq, backtrack ] 
+ #simulate: [ generator, largeant, daq, backtrack ]
+ simulate: [ generator, largeant, backtrack ] 
  analyzeIt:  [ largana ]
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -72,12 +79,25 @@ outputs:
  }
 }
 
+# set quantum efficiency supressed scint yield to 0.03 * 24000
+#services.user.LArProperties.ScintYield: 24000
+
+# enable optical physics in LArG4
+services.user.LArG4Parameters.EnabledPhysics: [ "Em",
+                                                "FastOptical",
+                                                "SynchrotronAndGN",
+                                               "Ion",
+                                               "Hadron",
+                                               "Decay",
+                                               "HadronElastic",
+                                               "Stopping",
+                                               "NeutronTrackingCut" ]
+
+# enable this custom physics list
+services.user.LArG4Parameters.UseCustomPhysics: true
+services.user.LArProperties.EnableCerenkovLight: false
 physics.producers.generator.SigmaThetaXZ: [ 5.0 ]
 physics.producers.generator.SigmaThetaYZ: [ 5.0 ]
 physics.producers.generator.X0: [ 100.0 ]
 physics.producers.generator.Z0: [ 50.0 ]
 physics.producers.generator.P0: [ 1.5 ]
-
-physics.producers.daq.GenNoise:       false
-#physics.producers.daq.GenNoiseInTime: true
-physics.producers.daq.NoiseFact:      0.0   #IN ADCs

@@ -1,0 +1,46 @@
+BEGIN_PROLOG
+
+microboone_trigger_sim:
+{
+
+  module_type: "UBTriggerSim"
+  #
+  # Verbosity configuration
+  #
+  DebugMode: false  # Make verbose output listing input triggers & process of accepting/ignoring them
+
+  #
+  # Input beam pulse / PMT-Trigger module labels
+  #
+  BeamModName:   ["generator"]  # producer module name for BeamGateInfo
+  OpticalFEMMod: "optfem"       # producer module name for PMTTrigger
+
+  #
+  # Trigger module configuration
+  #
+  DeadTime: 4 # Trigger deadtime in number of frames
+  Mask:     [0x7,   0x7,   0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0x7a ] # Trigger condition bit mask
+  Prescale: [false, false, false, false, false, false, false, false, false] # Trigger prescale bit mask
+
+  BNBGateWidth:    102 # BNB gate width in number of samples (Optical clock)
+  BNBGateDelay:    256 # BNB gate delay in number of samples (Optical clock)
+  BNBCosmicStart:  8   # Cosmic allow start w.r.t. BNB pulse timing in number of frames
+  BNBCosmicEnd:    34  # Cosmic allow start w.r.t. BNB pulse timing in number of frames
+
+  NuMIGateWidth:   640 # NuMI gate width in number of samples (Optical clock)
+  NuMIGateDelay:   256 # NuMI gate delay in number of samples (Optical clock)
+  NuMICosmicStart: 8   # Cosmic allow start w.r.t. NuMI pulse timing in number of frames
+  NuMICosmicEnd:   823 # Cosmic allow start w.r.t. NuMI pulse timing in number of frames
+  
+  # Configuration to force a readout trigger per event in G4 clock [ns]
+  # Note if you are running NuMI or BNB beam simulation which generates BeamGateInfo,
+  # you do not need to force a readout trigger here (the code takes BeamGateInfo and
+  # issues a readout trigger).
+  CalibTrigger: []
+  ExtTrigger:   []
+  PCTrigger:    [0]
+  BNBTrigger:   []
+  NuMITrigger:  []
+}
+
+END_PROLOG

@@ -13,9 +13,11 @@ add_subdirectory(PhotonPropagation)
 add_subdirectory(DetSim)
 add_subdirectory(EventGenerator)
 add_subdirectory(CalData)
-add_subdirectory(TriggerAlgo)
+add_subdirectory(TriggerSim)
 add_subdirectory(AnalysisTree)
 add_subdirectory(Calibrations)
+add_subdirectory(OpticalDetectorSim)
+add_subdirectory(MCShowerReco)
 
 # Respect the order specified in lar_build, which is:
 #
