@@ -17,7 +17,7 @@ art_make( BASENAME_ONLY
 			RawData
 			OpticalDetectorData
 			Utilities
-			uboonecode_uboone_TriggerSim
+			uboone_TriggerSim
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
