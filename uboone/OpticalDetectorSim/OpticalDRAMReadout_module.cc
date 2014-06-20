@@ -20,7 +20,7 @@
 #include "OpticalDetectorData/OpticalRawDigit.h"
 #include "RawData/TriggerData.h"
 #include "Utilities/TimeService.h"
-#include "uboonecode/uboone/OpticalDetectorSim/UBOpticalException.h"
+#include "uboone/OpticalDetectorSim/UBOpticalException.h"
 
 // ART includes.
 #include "fhiclcpp/ParameterSet.h"
