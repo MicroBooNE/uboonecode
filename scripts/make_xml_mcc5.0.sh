@@ -1,0 +1,283 @@
+#! /bin/bash
+#----------------------------------------------------------------------
+#
+# Name: make_xml_mcc5.0.sh
+#
+# Purpose: Make xml files for mcc 5.0.  This script loops over all
+#          generator-level fcl files in the source area of the currently 
+#          setup version of uboonecode (that is, under 
+#          $UBOONECODE_DIR/source/fcl/gen), and makes a corresponding xml
+#          project file in the local directory.
+#
+# Usage:
+#
+# make_xml_mcc5.0.sh [--user <user>] [--nev <n>] [--njob <n>]
+#
+# Options:
+#
+# --user <user> - Use users/<user> as working and output directories
+#                 (default is to use uboonepro).
+# --nev <n>     - Specify number of events for all samples.  Otherwise
+#                 use hardwired defaults.
+# --njob <n>    - Specify the number of worker jobs.
+#
+#----------------------------------------------------------------------
+
+# Parse arguments.
+
+userdir=uboonepro
+nevarg=0
+njobarg=0
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+
+    # User directory.
+
+    --user )
+    if [ $# -gt 1 ]; then
+      userdir=users/$2
+      shift
+    fi
+    ;;
+
+    # Number of events.
+
+    --nev )
+    if [ $# -gt 1 ]; then
+      nevarg=$2
+      shift
+    fi
+    ;;
+
+    # Number of worker jobs.
+
+    --njob )
+    if [ $# -gt 1 ]; then
+      njobarg=$2
+      shift
+    fi
+    ;;
+
+  esac
+  shift
+done
+
+# Delete existing xml files.
+
+rm -f *.xml
+
+find $UBOONECODE_DIR/source/fcl/gen -name \*.fcl | while read fcl
+do
+  if ! echo $fcl | grep -q common; then
+    newprj=`basename $fcl .fcl`
+    newxml=${newprj}.xml
+
+    # Make xml file.
+
+    echo "Making ${newprj}.xml"
+
+    # Generator
+
+    genfcl=`basename $fcl`
+
+    # G4
+
+    g4fcl=standard_g4_uboone.fcl
+
+    # Detsim (optical + tpc).
+
+    detsimfcl=''
+    #if echo $newprj | grep -q 3window; then
+    #  detsimfcl=standard_detsim_3window_uboone.fcl
+    #fi
+    #echo "Using ${detsimfcl}."
+
+    # Detsim optical
+
+    optsimfcl=''
+    if echo $newprj | grep -q 3window; then
+      optsimfcl=standard_detsim_3window_uboone_optical.fcl
+    fi
+    echo "Using ${optsimfcl}."
+
+    # Detsim tpc
+
+    tpcsimfcl=standard_detsim_uboone.fcl
+    if echo $newprj | grep -q 3window; then
+      tpcsimfcl=standard_detsim_3window_uboone_tpc.fcl
+    fi
+    echo "Using ${tpcsimfcl}."
+
+    # Reco 2D
+
+    reco2dfcl=standard_reco_uboone_2D_noopt_nowires.fcl
+    if echo $newprj | grep -q cosmic; then
+      reco2dfcl=standard_reco_uboone_2D_noopt_nowires_cosmic.fcl
+    fi
+    echo "Using ${reco2dfcl}."
+
+    # Reco 3D
+
+    reco3dfcl=standard_reco_uboone_3D_noopt.fcl
+    if echo $newprj | grep -q cosmic; then
+      reco3dfcl=standard_reco_uboone_3D_noopt_cosmic.fcl
+    fi
+    echo "Using ${reco3dfcl}."
+
+    # Merge
+
+    mergefcl=copy.fcl
+
+    nev=$nevarg
+    njob=$njobarg
+
+    # Set default number of events.
+
+    if [ $nev -eq 0 ]; then
+      if [ $newprj = prodgenie_bnb_nu_cosmic_3window_uboone ]; then
+        nev=50000
+      elif [ $newprj = prodgenie_bnb_nu_3window_uboone ]; then
+        nev=20000
+      else
+        nev=10000
+      fi
+    fi
+
+    # Set default number of workers, assuming 100 events/worker.
+
+    if [ $njob -eq 0 ]; then
+      njob=$(( $nev / 100 ))
+    fi
+
+  cat <<EOF > $newxml
+<?xml version="1.0"?>
+
+<!-- Production Project -->
+
+<!DOCTYPE project [
+<!ENTITY release "v02_01_01">
+<!ENTITY file_type "mc">
+<!ENTITY run_type "physics">
+<!ENTITY name "$newprj">
+<!ENTITY tag "mcc4.0">
+]>
+
+<project name="&name;">
+
+  <!-- Group -->
+  <group>uboone</group>
+
+  <!-- Project size -->
+  <numevents>$nev</numevents>
+
+  <!-- Operating System -->
+  <os>SL5,SL6</os>
+
+  <!-- Larsoft information -->
+  <larsoft>
+    <tag>&release;</tag>
+    <qual>e5:prof</qual>
+  </larsoft>
+
+  <!-- Project stages -->
+
+  <stage name="gen">
+    <fcl>$genfcl</fcl>
+    <outdir>/uboone/data/${userdir}/&release;/gen/&name;</outdir>
+    <workdir>/uboone/app/users/${userdir}/&release;/gen/&name;</workdir>
+    <numjobs>$njob</numjobs>
+    <datatier>generated</datatier>
+    <defname>&name;_&tag;_gen</defname>
+  </stage>
+
+  <stage name="g4">
+    <fcl>$g4fcl</fcl>
+    <outdir>/uboone/data/${userdir}/&release;/g4/&name;</outdir>
+    <workdir>/uboone/app/users/${userdir}/&release;/g4/&name;</workdir>
+    <numjobs>$njob</numjobs>
+    <datatier>simulated</datatier>
+    <defname>&name;_&tag;_g4</defname>
+  </stage>
+
+EOF
+  if [ x$detsimfcl != x ]; then
+    cat <<EOF >> $newxml
+  <stage name="detsim">
+    <fcl>$detsimfcl</fcl>
+    <outdir>/uboone/data/${userdir}/&release;/detsim/&name;</outdir>
+    <workdir>/uboone/app/users/${userdir}/&release;/detsim/&name;</workdir>
+    <numjobs>$njob</numjobs>
+    <datatier>optical-simulated</datatier>
+    <defname>&name;_&tag;_detsim</defname>
+  </stage>
+
+EOF
+  fi
+  if [ x$optsimfcl != x ]; then
+    cat <<EOF >> $newxml
+  <stage name="optsim">
+    <fcl>$optsimfcl</fcl>
+    <outdir>/uboone/data/${userdir}/&release;/optsim/&name;</outdir>
+    <workdir>/uboone/app/users/${userdir}/&release;/optsim/&name;</workdir>
+    <numjobs>$njob</numjobs>
+    <datatier>optical-simulated</datatier>
+    <defname>&name;_&tag;_optsim</defname>
+  </stage>
+
+EOF
+  fi
+  if [ x$tpcsimfcl != x ]; then
+    cat <<EOF >> $newxml
+  <stage name="tpcsim">
+    <fcl>$tpcsimfcl</fcl>
+    <outdir>/uboone/data/${userdir}/&release;/tpcsim/&name;</outdir>
+    <workdir>/uboone/app/users/${userdir}/&release;/tpcsim/&name;</workdir>
+    <numjobs>$njob</numjobs>
+    <datatier>tpc-simulated</datatier>
+    <defname>&name;_&tag;_tpcsim</defname>
+  </stage>
+
+EOF
+  fi
+  cat <<EOF >> $newxml
+  <stage name="reco2D">
+    <fcl>$reco2dfcl</fcl>
+    <outdir>/uboone/data/${userdir}/&release;/reco2D/&name;</outdir>
+    <workdir>/uboone/app/users/${userdir}/&release;/reco2D/&name;</workdir>
+    <numjobs>$njob</numjobs>
+    <datatier>reconstructed-2d</datatier>
+    <defname>&name;_&tag;_reco2D</defname>
+  </stage>
+
+  <stage name="reco3D">
+    <fcl>$reco3dfcl</fcl>
+    <outdir>/uboone/data/${userdir}/&release;/reco3D/&name;</outdir>
+    <workdir>/uboone/app/users/${userdir}/&release;/reco3D/&name;</workdir>
+    <numjobs>$njob</numjobs>
+    <datatier>reconstructed-3d</datatier>
+    <defname>&name;_&tag;_reco3D</defname>
+  </stage>
+
+  <stage name="merge">
+    <fcl>$mergefcl</fcl>
+    <outdir>/uboone/data/${userdir}/&release;/reco/&name;</outdir>
+    <workdir>/uboone/app/users/${userdir}/&release;/reco/&name;</workdir>
+    <numjobs>$njob</numjobs>
+    <targetsize>2000000000</targetsize>
+    <datatier>reconstructed</datatier>
+    <defname>&name;_&tag;</defname>
+  </stage>
+
+  <!-- file type -->
+  <filetype>&file_type;</filetype>
+
+  <!-- run type -->
+  <runtype>&run_type;</runtype>
+
+</project>
+EOF
+
+  fi
+
+done
