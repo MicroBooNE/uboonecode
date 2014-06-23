@@ -2,7 +2,9 @@
 #define CALIBRATIONTPC_H
 /*!
  * Title:   CalibrationTPC class
- * Author:  wketchum@lanl.gov, dcaratelli@nevis.columbia.edu
+ * Authors:  wketchum@lanl.gov
+ *           dcaratelli@nevis.columbia.edu
+ *           ansmith01@email.wm.edu
  * Inputs:  raw::RawDigit
  * Outputs: Histograms and other nice data
  *
@@ -18,6 +20,10 @@
 #include <iostream>
 #include <map>
 #include <TH1.h>
+#include <TF1.h>
+#include <TCanvas.h>
+#include <TStyle.h>
+#include <TTree.h>
 
 
 #include "art/Framework/Core/ModuleMacros.h" 
@@ -54,8 +60,14 @@ namespace calibration {
     void endSubRun(art::SubRun const& subrun);
     void MakeHisto( TH1D* & histo,
 		    std::vector< std::vector<float> > Data);
-
+    void GetWaveforms( std::vector<raw::RawDigit> const& rawDigit,
+		       std::vector<TH1I*> & InductionWaveforms,
+		       std::vector<TH1I*> & CollectionWaveforms );
+    
   private:
+
+    //Keep Track of event number
+    int fEvtNum; //Number of current event
     
     std::string       fRawDigitModuleLabel;   //label for rawdigit module
     unsigned int      fNFFTBins;              //number of bins in noise FFT
@@ -66,9 +78,9 @@ namespace calibration {
     int               fEmptyRun;
     int               fGainRun;
     int               fprePulseTicks;         //N of ticks to use for baseline when pulse is present
-    float             fVmin;
-    float             fVmax;
-    float             fVstep;
+    std::vector<float> fVmin;
+    std::vector<float> fVmax;
+    std::vector<float> fVstep;
     int               fLinBegin;
     std::vector<int>  fSubRunGain;
     std::vector<int>  fSubRunShape;
@@ -86,18 +98,26 @@ namespace calibration {
     std::vector< std::map< unsigned int, uint32_t> > fChanMapEndRun;
     
 
-    // noise_spectra[ie][ich][ifbin] 
-    //   = fft spectrum amplitude for freq. bin ifbin, channel ich, event ie
+    //Vector for Noise Spectrum (a vector of floats) per event per channel
     std::vector< std::vector< std::vector<float> > > fNoiseSpectra;
 
     //Output Histograms etc..
     //----------------------
+    //TTree for baseline and noise values
+    TTree* fDistributions;
+    //Variables for TTree
+    Double_t fBaselineVal;
+    Double_t fNoiseVal;
     //Histograms for Empty run - generally just one per run
     std::vector<TH1I*> fAllChan;
     std::vector<TH1D*> fChannelBaseline;
     std::vector<TH1D*> fChannelNoise;
     //Histograms one per run: one per gain setting, per rise-time, per input voltage
     std::vector<TH1D*> fChannelGain;
+    std::vector<TH1I*> fWFCollection; 
+    std::vector<TH1I*> fWFInduction; 
+    //make histograms per channel, per gain, per shaping time
+    std::vector<TH1D*>  fLinearity;
 
   }; //end class CalibrationTPC
 
@@ -121,12 +141,12 @@ namespace calibration {
     fGainRun             = pset.get<int>("GainRun");
     fEmptyRun            = pset.get<int>("EmptyRun");
     fprePulseTicks       = pset.get<int>("prePulseTicks");
-    fVmin                = pset.get<float>("Vmin"); 
-    fVmax                = pset.get<float>("Vmax");
-    fVstep               = pset.get<float>("Vstep");
+    fVmin                = pset.get<std::vector <float> >("Vmin"); 
+    fVmax                = pset.get<std::vector <float> >("Vmax");
+    fVstep               = pset.get<std::vector <float> >("Vstep");
     fLinBegin            = pset.get<int>("LinBegin");
-    fSubRunGain          = pset.get< std::vector<int> >("SubRunGain");
-    fSubRunShape         = pset.get< std::vector<int> >("SubRunShape");
+    fSubRunGain          = pset.get< std::vector <int> >("SubRunGain");
+    fSubRunShape         = pset.get< std::vector <int> >("SubRunShape");
   }
 
 
@@ -154,47 +174,75 @@ namespace calibration {
   void CalibrationTPC::endRun(art::Run const& run){
 
     art::ServiceHandle<art::TFileService> tfs;
-    
-    //Number of steps in voltage:
-    int nsteps = 1+(int)((fVmax-fVmin)/fVstep);
-    unsigned int lincounter = 0;
-    //Here take histos produced at the end of each subrun and produce
-    //linearity-test plots etc...
 
-    //fLinBegin gives number of subrun from start=0 where
-    //linearity tests begin
+    if ( fGainRun ){
+      //Here take histos produced at the end of each subrun and produce
+      //linearity-test plots etc...
+      
+      //fLinBegin gives number of subrun from start=0 where
+      //linearity tests begin
+      
+      unsigned int lincounter = 0;
 
-    //make histograms per channel, per gain, per shaping time
-    std::vector<TH1D*>  fLinearity;
-    for ( uint32_t sr=0; sr < fsubRunNum; sr++ ){ // loop through subruns
-      //subruns where linearity start
-      //2, 13, 24, ... (starts from 1)
-      if ( lincounter == fSubRunShape.size() )
-	return;
-      if ( ((sr-1)%11) == 0 ){ //means we have a new linearity start (Vin=0)
-	std::cout << "Subrun Begin number: " << sr << std::endl;
-	for ( int ch = 0; ch < fNChannels; ch++){
-	  //check and see if there are events for this chan number
-	  if ( fAllChan.at(0)->GetBinContent(ch) > 0 ){ //means there are events
-	    char HistoName[50];
-	    sprintf(HistoName, "Linearity_Ch_%d_Gain_%d_ShT_%d", ch,
-		    fSubRunGain.at(lincounter), fSubRunShape.at(lincounter) );
-	    char HistoTitle[50];
-	    sprintf(HistoTitle, "Linearity Test Ch %d Gain %d ShT %d; Pulse Voltage [mV]; Amplitude [ADCs]", ch, 
-		    fSubRunGain.at(lincounter), fSubRunShape.at(lincounter) );
-	    fLinearity.push_back( tfs->make<TH1D>(HistoName, HistoTitle, nsteps, 0, fVmax) );
-	    //now loop through next 11 subruns and fill histogram
-	    for (int i = 0; i < nsteps; i++){
-	      fLinearity.back()->SetBinContent( i+1, fChannelGain.at(sr+i)->GetBinContent(ch) );
-	      fLinearity.back()->SetBinError( i+1,  fChannelGain.at(sr+i)->GetBinError(ch) / sqrt( fAllChan.at(sr+i)->GetBinContent(ch) ) );
-	    }//for all voltages
-	  }//for channel is not empty
-	}//for all channels
-	//begin of new linearity test
-	lincounter += 1;
-      }//if the beginning of a new linearity test
-    }//for all subruns
-    
+      for ( uint32_t sr=0; sr < fsubRunNum; sr++ ){ // loop through subruns
+	std::cout << "subrun number: " << sr << std::endl;
+	std::cout << "lincounter: " << lincounter << std::endl;
+	//subruns where linearity start
+	//2, 13, 24, ... (starts from 1)
+	if ( lincounter == fSubRunShape.size() ) {
+	  std::cout << "passed limit! quit!" << std::endl;
+	  return;
+	}
+	else {
+	  if ( ((sr-1)%11) == 0 ){ //means we have a new linearity start (Vin=0)
+	    std::cout << "Subrun Begin number: " << sr << std::endl;
+	    std::cout << "Vmax: " << fVmax.at(lincounter) << std::endl;
+	    //Number of steps in voltage:
+	    int nsteps = 1+(int)((fVmax.at(lincounter)-fVmin.at(lincounter))/fVstep.at(lincounter));
+	    for ( int ch = 0; ch < fNChannels; ch++){
+	      //check and see if there are events for this chan number
+	      if ( fAllChan.at(0)->GetBinContent(ch) > 0 ){ //means there are events
+		fLinearity.push_back( tfs->make<TH1D>(Form("Linearity_Ch_%d_Gain_%d_ShT_%d", ch, fSubRunGain.at(lincounter), fSubRunShape.at(lincounter)),
+						      Form("Linearity Test Ch %d Gain %d mV/fC Shaping Time %d usec; Pulse Voltage [mV]; Amplitude [ADCs]", ch, fSubRunGain.at(lincounter), fSubRunShape.at(lincounter) ), 
+						      nsteps,
+						      0-(fVstep.at(lincounter)/2.),
+						      fVmax.at(lincounter)+(fVstep.at(lincounter)/2.) ) );
+		//now loop through next 11 subruns and fill histogram
+		for (int i = 0; i < nsteps; i++){
+		  //Need to avoid points with Vin < 50 mV from being plotted
+		  //That is because the pulser used on MRT sends huge pulses if input set to < 50 mV.
+		  //This will distort linearity plot and fit therefore affecting the gain measurement
+		  //Vin = i*fVstep.at(lincounter)
+		  if ( (i == 0) or (i*fVstep.at(lincounter) >= 0.05) ) {
+		    fLinearity.back()->SetBinContent( i+1, fChannelGain.at(sr+i)->GetBinContent(ch) );
+		    fLinearity.back()->SetBinError( i+1,  fChannelGain.at(sr+i)->GetBinError(ch) / sqrt( fAllChan.at(sr+i)->GetBinContent(ch) ) );
+		  }
+		}//for all voltages
+		
+		//fit histogram
+		/*
+		  fFit.push_back( tfs->make<TF1>(HistoName, "[0]+x*[1]", 0, fVmax.at(lincounter) ) );
+		  fFit.back()->SetParameter(0,0);
+		  fFit.back()->SetParameter(1,1);
+		  fFit.back()->SetParName(0,"b");
+		  fFit.back()->SetParName(1,"a");
+		*/
+		//gStyle->SetOptStat(0);
+		//fLinearity.back()->Fit( fFit.back(), "r");
+		
+	      }//for channel is not empty
+	    }//for all channels
+	    //begin of new linearity test
+	    lincounter += 1;
+	  }//if the beginning of a new linearity test
+	}
+      }//for all subruns
+      
+    }//if gain run
+
+    std::cout << "Make sure we are done..." << std::endl;
+
+    return;
   }
 
 
@@ -203,36 +251,47 @@ namespace calibration {
 
     art::ServiceHandle<art::TFileService> tfs;
 
+    fWFInduction.clear();
+    fWFCollection.clear();
+
     //First Make a channel map: number of events per channel
-    char AllChanName[50];
-    sprintf(AllChanName,"AllChan_SubRun_%d",fsubRunNum);
-    fAllChan.push_back( tfs->make<TH1I>(AllChanName,           "Channels ;Chan Num; Num Evts", 
+    fAllChan.push_back( tfs->make<TH1I>(Form("AllChan_SubRun_%d",fsubRunNum),
+					"Channels ;Chan Num; Num Evts", 
 					fNChanMax+1, fChanBegin, fChanBegin+fNChanMax+1) );
     
 
     //if subrunnumber indicates pulse-type subrun
     if ( fGainRun ){
 
-      char GainHistoName[50];
-      sprintf(GainHistoName,"ChannelGain_%d",fsubRunNum);
-      fChannelGain.push_back( tfs->make<TH1D>(GainHistoName,   "ADC Gain by channel ;Chan Num; Max - baseline [ADCs]",
+      fChannelGain.push_back( tfs->make<TH1D>(Form("ChannelGain_%d",fsubRunNum),   "ADC Gain by channel ;Chan Num; Max - baseline [ADCs]",
 					      fNChanMax+1, fChanBegin, fChanBegin+fNChanMax+1) );
-      char ChannelbaselineName[50];
-      sprintf(ChannelbaselineName,"Channelbaseline_%d",fsubRunNum);
-      fChannelBaseline.push_back( tfs->make<TH1D>(ChannelbaselineName,   "Baseline By Channel ;Chan Num; Baseline [ADCs]",
+
+      fChannelBaseline.push_back( tfs->make<TH1D>(Form("Channelbaseline_%d",fsubRunNum),
+						  "Baseline By Channel ;Chan Num; Baseline [ADCs]",
 						  fNChanMax+1, fChanBegin, fChanBegin+fNChanMax+1) );
+
+      fChannelNoise.push_back( tfs->make<TH1D>(Form("ChannelNoise_%d",fsubRunNum),
+					       "RMS Noise by Channel ;Chan Num; RMS Noise [ADCs]",
+					       fNChanMax+1, fChanBegin, fChanBegin+fNChanMax+1) );
+
     }
 
     if ( fEmptyRun ){
 
-      char ChannelbaselineName[50];
-      sprintf(ChannelbaselineName,"Channelbaseline_%d",fsubRunNum);
-      fChannelBaseline.push_back( tfs->make<TH1D>(ChannelbaselineName,   "Baseline By Channel ;Chan Num; Baseline [ADCs]",
+      fDistributions = tfs->make<TTree>(Form("Distributions_SubRun_%d",fsubRunNum),
+					Form("Distributions_SubRun_%d",fsubRunNum) );
+
+      fChannelBaseline.push_back( tfs->make<TH1D>(Form("Channelbaseline_%d",fsubRunNum),
+						  "Baseline By Channel ;Chan Num; Baseline [ADCs]",
 						  fNChanMax+1, fChanBegin, fChanBegin+fNChanMax+1) );
-      char ChannelNoiseName[50];
-      sprintf(ChannelNoiseName,"ChannelNoise_%d",fsubRunNum);
-      fChannelNoise.push_back( tfs->make<TH1D>(ChannelNoiseName,      "RMS Noise by Channel ;Chan Num; RMS Noise [ADCs]",
+
+      fDistributions->Branch("BaselineVal", &fBaselineVal, "BaselineVal/D");
+
+      fChannelNoise.push_back( tfs->make<TH1D>(Form("ChannelNoise_%d",fsubRunNum),
+					       "RMS Noise by Channel ;Chan Num; RMS Noise [ADCs]",
 					       fNChanMax+1, fChanBegin, fChanBegin+fNChanMax+1) );
+
+      fDistributions->Branch("NoiseVal", &fNoiseVal, "BaselineVal/D");
             
     }
      
@@ -245,6 +304,34 @@ namespace calibration {
 
     //Take containers with all info and insert that info in Histograms
     art::ServiceHandle<art::TFileService> tfs;
+    /*
+    //Make canvas overlaying histograms
+    TCanvas* collCanvas = tfs->make<TCanvas>( Form("CollectionOverlay_SubRun_%d",fsubRunNum), 
+					      "Collection Waveforms",
+					      600, 800 );
+    
+    for (unsigned int it=0; it < fWFCollection.size(); it++){
+      if ( it == 0 )
+	fWFCollection.at(it)->Draw();
+      else
+	fWFCollection.at(it)->Draw("same");
+    }
+
+    collCanvas->Write();
+
+    TCanvas* indCanvas = tfs->make<TCanvas>( Form("InductionOverlay_SubRun_%d",fsubRunNum),
+					     "Induction Waveforms",
+					     600, 800 );
+
+    for (unsigned int it=0; it < fWFInduction.size(); it++){
+      if ( it == 0 )
+	fWFInduction.at(it)->Draw();
+      else
+	fWFInduction.at(it)->Draw("same");
+    }
+    indCanvas->Write();
+    */
+      
 
     std::vector<int> EvtsPerChan(fNChanMax, 0);
     
@@ -269,11 +356,22 @@ namespace calibration {
     if ( fEmptyRun ){
       MakeHisto( fChannelBaseline.at(fsubRunNum-1), fPedestalData);
       MakeHisto( fChannelNoise.at(fsubRunNum-1), fNoiseData);
-    }
+
+      //Loop through vectors and fill TTree:
+      for ( size_t ev = 0; ev < fPedestalData.size(); ev++ ){
+	for ( size_t ch = 0; ch < fPedestalData.at(ev).size(); ch++) {
+	  fBaselineVal = fPedestalData.at(ev).at(ch);
+	  fNoiseVal = fNoiseData.at(ev).at(ch);
+	  fDistributions->Fill();
+	}
+      }
+
+    }//end emptyrun
     
     if ( fGainRun ){
       MakeHisto( fChannelGain.at(fsubRunNum-1), fGainData);
       MakeHisto( fChannelBaseline.at(fsubRunNum-1), fPedestalData);
+      MakeHisto( fChannelNoise.at(fsubRunNum-1), fNoiseData);
     }
 
 
@@ -296,6 +394,8 @@ namespace calibration {
     std::vector<int> EvtsPerChan(fNChanMax, 0);
     std::vector<float> DataPerChan(fNChanMax, 0);
     std::vector<float> DataErrPerChan(fNChanMax, 0);
+
+    gStyle->SetOptStat(0);
 
     int currentChan = 0;
     for ( size_t evtN=0; evtN < fChanMap.size(); evtN++ ){
@@ -340,9 +440,50 @@ namespace calibration {
 
   }
 
+ 
+  //-------------------------------------------------------------------------
+  void CalibrationTPC::GetWaveforms( std::vector<raw::RawDigit> const& rawDigit,
+		     std::vector<TH1I*> & InductionWaveforms,
+		     std::vector<TH1I*> & CollectionWaveforms ){
+
+    art::ServiceHandle<art::TFileService> tfs;
+    //Make a directory specific for waveforms
+    //tfs->mkdir("WaveForms","Histograms of ADC Waveforms");
+
+    const unsigned int n_channels = rawDigit.size();
+    std::cout << "Number of Channels: " << n_channels << std::endl;
+
+    for (unsigned int ich=0; ich < n_channels; ich++){
+      std::cout << "wf size: " << rawDigit.at(ich).fADC.size() << std::endl;
+      if ( ich < 32 ){ //induction pulse
+	InductionWaveforms.push_back( tfs->make<TH1I>(Form("WF_ev_%d_chan_%d",fEvtNum, ich), "Waveform", 
+						      0, rawDigit.at(ich).fADC.size(),
+						      rawDigit.at(ich).fADC.size() ) );
+	
+	for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
+	  InductionWaveforms.back()->SetBinContent( tick+1, rawDigit.at(ich).fADC.at(tick) );
+      }
+      else { //collection pulse
+	CollectionWaveforms.push_back( tfs->make<TH1I>(Form("WF_ev_%d_chan_%d",fEvtNum, ich), "Waveform", 
+						      0, rawDigit.at(ich).fADC.size(),
+						      rawDigit.at(ich).fADC.size() ) );
+	
+	for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
+	  CollectionWaveforms.back()->SetBinContent( tick+1, rawDigit.at(ich).fADC.at(tick) );
+      }
+    }//for all channels
+
+    return;
+    
+  }
+  
+
+
   
   //-------------------------------------------------------------------
   void CalibrationTPC::analyze(art::Event const& evt){
+
+    fEvtNum = evt.event();
 
     unsigned int run = evt.run();
     unsigned int subrun = evt.subRun();
@@ -388,21 +529,31 @@ namespace calibration {
       const size_t n_channels = rawDigitVector.size();
       std::cout << "number of channels: " << n_channels << std::endl;
       std::vector<float> pedestals(n_channels);
+      std::vector<float> noise(n_channels);
+      std::vector< std::vector<float> > noise_spectrum(n_channels, std::vector<float>(fNFFTBins));
       std::vector<float> maxADCs(n_channels);
       std::vector<float> minADCs(n_channels);
       std::map< unsigned int, uint32_t > chanmap;
+      /*
+      if ( evt.event() == 1 )
+	GetWaveforms( rawDigitVector,
+		      fWFInduction,
+		      fWFCollection );
+      */
       
       //now run the code
       analyzeGainEvent(rawDigitVector,
-			pedestals,
-			maxADCs,
-			minADCs,
-			fprePulseTicks);
+		       pedestals,
+		       noise,
+		       maxADCs,
+		       minADCs,
+		       fprePulseTicks);
       
       //make map for channel index to channel number
       genChanMap( rawDigitVector, chanmap );
 
       fPedestalData.push_back( pedestals );
+      fNoiseData.push_back( noise );
       fGainData.push_back( maxADCs );
       fChanMap.push_back( chanmap );
     }//empty subrun
