@@ -1,0 +1,73 @@
+#include "calorimetry_microboone.fcl"
+#include "evdservices_base.fcl"
+#include "services_microboone.fcl"
+#include "trackfinderalgorithms_microboone.fcl"
+
+BEGIN_PROLOG
+
+microboone_colordrawingopt:                  @local::standard_colordrawingopt
+microboone_colordrawingopt.ColorOrGrayScale: 0
+
+microboone_rawdrawingopt:            @local::standard_rawdrawingopt
+microboone_rawdrawingopt.TotalTicks: 3300
+
+microboone_recodrawingopt:        @local::standard_recodrawingopt
+microboone_recodrawingopt.CalorimetryAlgorithm: @local::microboone_calorimetryalgmc
+
+microboone_analysisdrawingopt:
+{
+ DrawCalorimetry:                  1           
+ DrawParticleID:                   1
+ CalorimetryModuleLabels:          ["calo"]               
+ ParticleIDModuleLabels:           ["pid"] 
+ CalorTemplateFileNames:           ["dEdxKinErestemplate.root"]
+}  
+
+microboone_simdrawingopt:                         @local::standard_simdrawingopt
+microboone_simdrawingopt.ShowMCTruthText:         false
+microboone_simdrawingopt.ShowMCTruthVectors:      false
+microboone_simdrawingopt.ShowMCTruthTrajectories: false
+
+microboone_evdlayoutopt:                   @local::standard_evdlayoutopt
+microboone_evdlayoutopt.ChangeWire: 	   0
+
+microboone_scanopt:               @local::standard_scanopt
+microboone_scanopt.IncludeMCInfo: true
+microboone_scanopt.Categories:    ["Interaction Type", "Particles Coinciding with the Vertex"]
+microboone_scanopt.FieldLabels:   ["nu_e", "nu_mu", "NC","unknown", 
+				    "# of muons ","# of protons","# of charged pions","# other tracks",
+				    "# of electrons","# of single photons","# of pi0"]
+microboone_scanopt.FieldTypes:    ["RadioButton", "RadioButton", "RadioButton", "RadioButton",
+				  "Number","Number","Number","Number","Number","Number","Number"]  # type of each field
+microboone_scanopt.FieldsPerCategory: [4,7]
+
+microboone_evd: @local::standard_evd
+
+microboone_infotransfer: @local::standard_infotransfer
+
+microboone_disp:
+{
+ ExptGeoHelperInterface:   @local::microboone_geometry_helper
+ Geometry:                 @local::microboone_geo 
+ LArProperties:            @local::microboone_properties
+ DetectorProperties:       @local::microboone_detproperties
+ DatabaseUtil:		   @local::microboone_database   
+ ColorDrawingOptions:      @local::microboone_colordrawingopt
+ SimulationDrawingOptions: @local::microboone_simdrawingopt  
+ RawDrawingOptions:        @local::microboone_rawdrawingopt  
+ RecoDrawingOptions:       @local::microboone_recodrawingopt
+ AnalysisDrawingOptions:   @local::microboone_analysisdrawingopt
+ EvdLayoutOptions:	   @local::microboone_evdlayoutopt
+ EventDisplay:             @local::microboone_evd            
+ ScanOptions:              @local::microboone_scanopt
+ LArG4Parameters:          @local::microboone_largeantparameters
+ LArVoxelCalculator:       @local::microboone_larvoxelcalculator
+ InfoTransfer: 		   @local::microboone_infotransfer
+ TimeService:              @local::microboone_timeservice
+}
+
+#######################################
+
+microboone_graphcluster:                 @local::standard_graphcluster
+
+END_PROLOG
