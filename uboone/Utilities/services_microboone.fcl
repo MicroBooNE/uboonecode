@@ -11,9 +11,11 @@
 #include "photpropservices_microboone.fcl"
 #include "opticaldetectorservices_microboone.fcl"
 #include "sam_microboone.fcl"
+#include "timeservice_microboone.fcl"
 
 BEGIN_PROLOG
 
+# Define microboone_services (exclude simulatio specific component)
 microboone_services:
 {
  ExptGeoHelperInterface:         @local::microboone_geometry_helper
@@ -25,10 +27,13 @@ microboone_services:
  SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
  BackTracker:                    @local::microboone_backtracker  
  OpDigiProperties:               @local::microboone_opdigiproperties
+ TimeService:                    @local::microboone_timeservice
 }
 
+# Define microboone_optical_service (exclude simulation specific component)
 microboone_optical_services:                          @local::microboone_services
 
+# Define microboone_simulation_services
 microboone_simulation_services:
 {
  LArG4Parameters:                @local::microboone_largeantparameters 
@@ -41,9 +46,11 @@ microboone_simulation_services:
  DatabaseUtil:	                 @local::microboone_database           
  SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
  MagneticField:                  @local::no_mag 	       
- BackTracker:                    @local::microboone_backtracker  
+ BackTracker:                    @local::microboone_backtracker
+ TimeService:                    @local::microboone_timeservice
 }
 
+# Define microboone_optical_simulation_services
 microboone_optical_simulation_services:                          @local::microboone_simulation_services
 microboone_optical_simulation_services.PhotonVisibilityService:  @local::microboone_photonvisibilityservice
 microboone_optical_simulation_services.OpDigiProperties:         @local::microboone_opdigiproperties 
@@ -59,19 +66,31 @@ microboone_optical_simulation_services.LArG4Parameters.EnabledPhysics: [ "Em",
                                                                          "HadronElastic",
                                                                          "Stopping",
                                                                          "NeutronTrackingCut" ]
-
-
+#
+# Define 1window services
+#
 microboone_services_1window:                               @local::microboone_services
-microboone_services_1window.DetectorProperties:            @local::microboone_detproperties_1window
 microboone_simulation_services_1window:                    @local::microboone_simulation_services
-microboone_simulation_services_1window.DetectorProperties: @local::microboone_detproperties_1window
+microboone_optical_simulation_services_1window:            @local::microboone_optical_simulation_services
 
-microboone_optical_simulation_services_1window:                    @local::microboone_optical_simulation_services
+# Reset DetectorProperties for 1 window
+microboone_services_1window.DetectorProperties:                    @local::microboone_detproperties_1window
+microboone_simulation_services_1window.DetectorProperties:         @local::microboone_detproperties_1window
 microboone_optical_simulation_services_1window.DetectorProperties: @local::microboone_detproperties_1window
+# Reset TimeService for 1 window
+microboone_services_1window.TimeService:                    @local::microboone_timeservice_1window
+microboone_simulation_services_1window.TimeService:         @local::microboone_timeservice_1window
+microboone_optical_simulation_services_1window.TimeService: @local::microboone_timeservice_1window
 
+
+#
+# Define 3window services
+#
 microboone_services_3windows:                              @local::microboone_services
 microboone_simulation_services_3windows:                   @local::microboone_simulation_services
-microboone_optical_simulation_services_3windows:                   @local::microboone_optical_simulation_services
+microboone_optical_simulation_services_3windows:           @local::microboone_optical_simulation_services
+
+### Following is for message service. Whoever modified should add comments or say "only for expert hence no comment" or something. ###
 
 microboone_message_services:
 {

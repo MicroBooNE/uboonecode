@@ -31,11 +31,12 @@ namespace calibration{
   //-------------------------------------------------------------------------
   void analyzeGainEvent( std::vector<raw::RawDigit> const& rawDigit,
 			 std::vector<float> & pedestal,
+			 std::vector<float> & noise,
 			 std::vector<float> & maxADC,
 			 std::vector<float> & minADC,
 			 int const& prePulseTicks){
     
-    calcGain(rawDigit, pedestal, maxADC, minADC, prePulseTicks);
+    calcGain(rawDigit, pedestal, noise, maxADC, minADC, prePulseTicks);
 
   }
 
@@ -57,7 +58,6 @@ namespace calibration{
     for (unsigned int ich=0; ich < n_channels; ich++){
       chanmap[ich] -= ChanMin;
     }
-
 
   }
 
@@ -94,6 +94,7 @@ namespace calibration{
   //-------------------------------------------------------------------------
   void calcGain( std::vector<raw::RawDigit> const& rawDigit,
 		 std::vector<float> & pedestal,
+		 std::vector<float> & noise,
 		 std::vector<float> & maxADC,
 		 std::vector<float> & minADC,
 		 int const& prePulseTicks){
@@ -103,6 +104,7 @@ namespace calibration{
     for(unsigned int ich=0; ich<n_channels; ich++)
       calcGain_SingleChannel(rawDigit.at(ich).fADC,
 			     pedestal.at(ich),
+			     noise.at(ich),
 			     maxADC.at(ich),
 			     minADC.at(ich),
 			     prePulseTicks);
@@ -112,6 +114,7 @@ namespace calibration{
 
   void calcGain_SingleChannel( std::vector<short> const& rawData,
 			       float & pedestal,
+			       float & noise,
 			       float & maxADC,
 			       float & minADC,
 			       int const& prePulseTicks){
@@ -119,6 +122,7 @@ namespace calibration{
     const unsigned int n_samples = rawData.size();
 
     pedestal = 0;
+    noise = 0;
     maxADC = 0;
     minADC = 0;
 
@@ -136,12 +140,9 @@ namespace calibration{
     //minADC -= pedestal;
 
     //calculate RMS on pre-pulse to make sure it is not too high (what threshold?)
-    double prePulseRMS = 0;
     for(int it=0; it < prePulseTicks; it++)
-      prePulseRMS += (rawData.at(it)-pedestal)*(rawData.at(it)-pedestal);
-    prePulseRMS = sqrt( prePulseRMS / (prePulseTicks -1) );
-    //if ( prePulseRMS > 10. )
-    // std::cout << "HELP! RMS noise on first " << prePulseTicks << " is: " << prePulseRMS << " Baseline is: " << pedestal << std::endl;
+      noise += (rawData.at(it)-pedestal)*(rawData.at(it)-pedestal);
+    noise = sqrt( noise / (prePulseTicks -1) );
 
   }
 
@@ -159,7 +160,6 @@ namespace calibration{
 			      pedestal.at(ich),
 			      noise.at(ich),
 			      noise_spectrum.at(ich));
-    
   }
 
   //-------------------------------------------------------------------------
@@ -198,6 +198,8 @@ namespace calibration{
       noise_spectrum.at(it) = 0.0;
 
     noise = sqrt(noise / (n_samples - 1));
+
+    std::cout << "Noise: " << noise << std::endl;
   }
 
 
