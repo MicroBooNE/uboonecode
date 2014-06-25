@@ -30,6 +30,7 @@ namespace calibration{
 			 std::vector<float> & noise,
 			 std::vector<float> & maxADC,
 			 std::vector<float> & mainDC,
+			 std::vector<float> & maxTime,
 			 int const& prePulseTicks);
 
   void genChanMap( std::vector<raw::RawDigit> const& rawDigit,
@@ -47,6 +48,7 @@ namespace calibration{
 		 std::vector<float> & noise,
 		 std::vector<float> & maxADC,
 		 std::vector<float> & minADC,
+		 std::vector<float> & maxTime,
 		 int const& prePulseTicks);
 
   void calcGain_SingleChannel( std::vector<short> const& rawData,
@@ -54,8 +56,9 @@ namespace calibration{
 			       float & noise,
 			       float & maxADC,
 			       float & minADC,
+			       float & time,
 			       int const& prePulseTicks);
-  
+
   void calcNoise( std::vector<raw::RawDigit> const& rawDigit,
 		  std::vector<float> const& pedestal,
 		  std::vector<float> & noise,
