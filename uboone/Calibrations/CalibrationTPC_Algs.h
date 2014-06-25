@@ -14,6 +14,7 @@
 #include "RawData/RawDigit.h"
 #include <map>
 
+
 #include "TMath.h"
 #include "TComplex.h"
 
@@ -26,12 +27,14 @@ namespace calibration{
 
   void analyzeGainEvent( std::vector<raw::RawDigit> const& rawDigit,
 			 std::vector<float> & pedestal,
+			 std::vector<float> & noise,
 			 std::vector<float> & maxADC,
 			 std::vector<float> & mainDC,
 			 int const& prePulseTicks);
 
   void genChanMap( std::vector<raw::RawDigit> const& rawDigit,
 		   std::map< unsigned int, uint32_t > & chanmap);
+
 
   void calcPedestal( std::vector<raw::RawDigit> const& rawDigit,
 		     std::vector<float> & pedestal);
@@ -41,12 +44,14 @@ namespace calibration{
 
   void calcGain( std::vector<raw::RawDigit> const& rawDigit,
 		 std::vector<float> & pedestal,
+		 std::vector<float> & noise,
 		 std::vector<float> & maxADC,
 		 std::vector<float> & minADC,
 		 int const& prePulseTicks);
 
   void calcGain_SingleChannel( std::vector<short> const& rawData,
 			       float & pedestal,
+			       float & noise,
 			       float & maxADC,
 			       float & minADC,
 			       int const& prePulseTicks);

@@ -24,7 +24,7 @@ art_make( EXCLUDE UBChConfig_service.cc
           MODULE_LIBRARIES Simulation
 			OpticalDetectorData
 			UBChConfig_service
-			uboone_OpticalDetectorSim
+			uboonecode_uboone_OpticalDetectorSim
 			TimeService_service
 			Utilities
                         ${SIMULATIONBASE}

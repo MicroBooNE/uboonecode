@@ -31,15 +31,15 @@ physics:
     module_type: "CalibrationTPC"
     RawDigitModuleLabel: "daq"
     NFFTBins: 9600
-    NChanMax: 20000
+    NChanMax: 2000
     EmptyRun: 0 #false or true: 0 or 1
     GainRun:  1 #false or true: 0 or 1
     Nempty:   0
     Gainempty: 1
     prePulseTicks: 30
-    Vmin:     0.
-    Vmax:     0.750
-    Vstep:    0.075
+    Vmin:     [ 0., 0., 0., 0., 0., 0., 0., 0. ]
+    Vmax:     [ 0.75, 0.75, 0.75, 0.75, 0.5, 0.5, 0.2, 0.2 ]
+    Vstep:    [ 0.075, 0.075, 0.075, 0.075, 0.05, 0.05, 0.02, 0.02 ]
     LinBegin: 2 #subrun (1 being first) where linearity tests start
     SubRunGain:   [ 0, 0, 1, 1, 2, 2, 3, 3 ]
     SubRunShape:  [ 1, 3, 1, 3, 1, 3, 1, 3 ]

@@ -35,7 +35,7 @@ art_make( BASENAME_ONLY
 			   ${ROOT_XMLIO}
 			   ${ROOT_GDML}
 			   ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES uboone_MCShowerReco
+          MODULE_LIBRARIES uboonecode_uboone_MCShowerReco
 			   Geometry
 			   Geometry_service
 			   Simulation

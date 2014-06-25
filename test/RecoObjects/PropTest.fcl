@@ -1,0 +1,49 @@
+#include "larproperties.fcl"
+#include "databaseutil.fcl"
+
+process_name: PropTest
+
+services:
+{
+  user: {}
+}
+
+services.user.DatabaseUtil:       @local::standard_database
+services.user.DatabaseUtil.ShouldConnect: false
+services.user.LArProperties:      @local::standard_properties
+
+source:
+{
+  module_type: EmptyEvent
+  maxEvents:   0       # Number of events to create
+}
+
+outputs:
+{
+}
+
+physics:
+{
+
+ analyzers:
+ {
+  proptest: { module_type: "PropTest" }
+ }
+
+ #define the path for analyzer modules, order does not matter.
+ #see lines starting physics.analyzers below
+ ana:  [ proptest ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [ ] 
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ana]  
+}
+
+physics.analyzers.proptest:
+{
+  module_type: "PropTest"
+}
