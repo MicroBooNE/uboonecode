@@ -77,6 +77,8 @@ physics:
   trackkalspscc:       @local::microboone_kalman
   stitchcc:	       @local::microboone_trackstitcher
   beziertrackercc:     @local::microboone_beziertrackermodule
+  costrk:              @local::microboone_cosmictracker
+  costrkcc:            @local::microboone_cosmictracker
 
   ### shower-finder producers
 
@@ -92,6 +94,8 @@ physics:
   stitchcccalo:	       @local::microboone_calomc
   beziertrackercalo:   @local::microboone_beziercalorimetry
   beziertrackercccalo: @local::microboone_beziercalorimetry
+  costrkcalo:          @local::microboone_calomc
+  costrkcccalo:        @local::microboone_calomc
 
   ### flash-track matching
   #beamflashcompat:     @local::standard_beamflashcompat
@@ -101,9 +105,9 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
          trackkalmanhit, trackkalmanhitcc, spacepointfinder, trackkalsps, stitch, stitchkalmanhit, beziertracker, 
-         spacepointfindercc, trackkalspscc, stitchcc, beziertrackercc, 
+         spacepointfindercc, trackkalspscc, stitchcc, beziertrackercc, costrk, costrkcc,
          trackkalmanhitcalo, trackkalmanhitcccalo, trackkalspscalo, stitchcalo, stitchkalmanhitcalo,
-         trackkalspscccalo, stitchcccalo, beziertrackercccalo, beziertrackercalo ]
+         trackkalspscccalo, stitchcccalo, beziertrackercccalo, beziertrackercalo, costrkcalo, costrkcccalo ]
 #         beamflashcompat ]
  ana:  [ analysistree ]
 
@@ -169,6 +173,9 @@ physics.producers.stitchcc.SpptModuleLabel:                     "spacepointfinde
 
 physics.producers.beziertrackercc.ClusterModuleLabel:           "cccluster"
 
+physics.producers.costrk.ClusterModuleLabel:                    "fuzzycluster"
+physics.producers.costrkcc.ClusterModuleLabel:                  "cccluster"
+
 physics.producers.trackkalmanhitcalo.TrackModuleLabel:          "trackkalmanhit"
 physics.producers.trackkalmanhitcalo.SpacePointModuleLabel:     "trackkalmanhit"
 
@@ -194,12 +201,18 @@ physics.producers.beziertrackercalo.BTrackModuleLabel:          "beziertracker"
 
 physics.producers.beziertrackercccalo.BTrackModuleLabel:        "beziertrackercc"
 
+physics.producers.costrkcalo.TrackModuleLabel:                   "costrk"
+physics.producers.costrkcalo.SpacePointModuleLabel:              "costrk"
+
+physics.producers.costrkcccalo.TrackModuleLabel:                 "costrkcc"
+physics.producers.costrkcccalo.SpacePointModuleLabel:            "costrkcc"
+
 #physics.producers.beamflashcompat.TrackModuleLabel:             "beziertracker"
 #physics.producers.beamflashcompat.FlashModuleLabel:             "opflash"
 
 physics.analyzers.analysistree:  @local::microboone_analysistree
 physics.analyzers.analysistree.HitsModuleLabel:                 "gaushit"
-physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit", "trackkalmanhitcc", "trackkalsps", "stitch", "stitchkalmanhit","trackkalspscc", "stitchcc", "beziertrackercc", "beziertracker"]
-physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo", "trackkalmanhitcccalo", "trackkalspscalo", "stitchcalo", "stitchkalmanhitcalo","trackkalspscccalo", "stitchcccalo", "beziertrackercccalo", "beziertrackercalo"]
+physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit", "trackkalmanhitcc", "trackkalsps", "stitch", "stitchkalmanhit","trackkalspscc", "stitchcc", "beziertrackercc", "beziertracker", "costrk", "costrkcc"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo", "trackkalmanhitcccalo", "trackkalspscalo", "stitchcalo", "stitchkalmanhitcalo","trackkalspscccalo", "stitchcccalo", "beziertrackercccalo", "beziertrackercalo", "costrkcalo", "costrkcccalo"]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
