@@ -410,7 +410,6 @@ class ProjectDef:
         self.num_events = 0               # Total events (all jobs).
         self.num_jobs = 1                 # Number of jobs.
         self.os = ''                      # Batch OS.
-        self.environment=''               # SRT or MRB.
         self.release_tag = ''             # Larsoft release tag.
         self.release_qual = 'debug'       # Larsoft release qualifier.
         self.local_release_dir = ''       # Larsoft local release directory.
@@ -489,14 +488,6 @@ class ProjectDef:
                     self.local_release_dir = local
                 else:
                     self.local_release_tar = local
-
-            # Decide if we are using SRT or MRB.
-
-            if self.release_tag != '' and self.release_tag[0] == 'S' or \
-               self.release_tag == 'development':
-                self.environment = 'srt'
-            else:
-                self.environment = 'mrb'
 
         # Make sure local test release directory/tarball exists, if specified.
         # Existence of non-null local_release_dir has already been tested.
@@ -592,27 +583,6 @@ class ProjectDef:
                 dir = line.replace('"','').strip()
                 if os.path.exists(dir):
                     self.fclpath.append(dir)
-
-        # Add local larsoft test release and its job subdirectory (srt only).
-
-        if self.environment == 'srt' and self.local_release_dir != '':
-            self.fclpath.append(self.local_release_dir)
-            fcldir = os.path.join(self.local_release_dir, 'job')
-            self.fclpath.append(fcldir)
-
-        # Add directory part of local tarball path, and its job subdirectory (srt only).
-
-        if self.environment == 'srt' and self.local_release_tar != '':
-            tardir = os.path.dirname(self.local_release_tar)
-            self.fclpath.append(tardir)
-            fcldir = os.path.join(tardir, 'job')
-            self.fclpath.append(tardir)
-
-        # Add global job subdirectory from larsoft release (srt only).
-
-        if self.environment == 'srt' and os.environ.has_key('SRT_DIST') and self.release_tag != '':
-            fcldir = os.path.join(os.environ['SRT_DIST'], 'releases', self.release_tag, 'job')
-            self.fclpath.append(fcldir)
 
         # Add $FHICL_FILE_PATH.
 
@@ -2247,10 +2217,6 @@ def main(argv):
         command.extend(['-g'])
         #command.extend(['-c', os.path.basename(stage.fclname)])
         command.extend(['-c', 'wrapper.fcl'])
-        if project.environment == 'srt':
-            command.extend(['--srt'])
-        if project.environment == 'mrb':
-            command.extend(['--mrb'])
         if project.release_tag != '':
             command.extend(['-r', project.release_tag])
         command.extend(['-b', project.release_qual])

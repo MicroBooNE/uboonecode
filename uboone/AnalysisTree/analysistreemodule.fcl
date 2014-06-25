@@ -9,17 +9,11 @@ microboone_analysistree:
  CalDataModuleLabel:       "caldata"
  GenieGenModuleLabel:      "generator"
  G4ModuleLabel:            "largeant"
- ClusterModuleLabel:       "linemerger"
- KingaModuleLabel:         "kingacluster" 
- LineMergerModuleLabel:    "linemerger"
- DbscanModuleLabel:        "dbcluster"
- FuzzyModuleLabel:         "fuzzy"
- TrackModuleLabel:         "track3d"
- EndPoint2DModuleLabel:    "vertex2d"
- VertexModuleLabel:        "vertex2d"
+ TrackModuleLabel:         [ "track3d" ]
+ VertexModuleLabel:        [ "vertex3d" ]
+ CalorimetryModuleLabel:   [ "calo" ]
+ ParticleIDModuleLabel:    [ "pid" ]
  POTModuleLabel:           "generator"
- CalorimetryModuleLabel:   "calo"
- ParticleIDModuleLabel:    "pid"
 }
 
 END_PROLOG
