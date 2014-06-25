@@ -130,7 +130,7 @@ constexpr int kNplanes       = 3;     //number of wire planes
 constexpr int kMaxHits       = 20000; //maximum number of hits;
 constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 10;    //number of trackers passed into fTrackModuleLabel
-
+constexpr unsigned short kMaxVertices   = 10;    //max number of 3D vertices
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -252,6 +252,19 @@ namespace microboone {
       TrackData_t<Float_t> trkthetayz;    // theta_yz.
       TrackData_t<Float_t> trkmom;        // momentum.
       TrackData_t<Float_t> trklen;        // length.
+      TrackData_t<Short_t> trksvtxid;     // Vertex ID associated with the track start
+      TrackData_t<Short_t> trkevtxid;     // Vertex ID associated with the track end
+      TrackData_t<Int_t> trkpidpdg;       // particle PID pdg code
+      TrackData_t<Float_t> trkpidchi;     // particle PID chisq
+      TrackData_t<Float_t> trkpidchipr;   // particle PID chisq for proton
+      TrackData_t<Float_t> trkpidchika;   // particle PID chisq for kaon
+      TrackData_t<Float_t> trkpidchipi;   // particle PID chisq for pion
+      TrackData_t<Float_t> trkpidchimu;   // particle PID chisq for muon
+      TrackData_t<Float_t> trkpidpida;    // particle PIDA
+      
+      // BB vertex info
+      unsigned short nvtx;
+      std::vector<std::array<Float_t, 3>> vtx;
       
       /// Creates an empty tracker data structure
       TrackDataStruct(): MaxTracks(0) { Clear(); }
@@ -549,17 +562,11 @@ namespace microboone {
     std::string fCalDataModuleLabel;
     std::string fGenieGenModuleLabel;
     std::string fG4ModuleLabel;
-    std::string fClusterModuleLabel;
-    std::string fKingaModuleLabel;
-    std::string fLineMergerModuleLabel;
-    std::string fDbscanModuleLabel;
-    std::string fFuzzyModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
-    std::string fEndPoint2DModuleLabel;
-    std::string fVertexModuleLabel;
-    std::string fPOTModuleLabel;
+    std::vector<std::string> fVertexModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
-    std::string fParticleIDModuleLabel;
+    std::vector<std::string> fParticleIDModuleLabel;
+    std::string fPOTModuleLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)
 
     /// Returns the number of trackers configured
@@ -674,6 +681,16 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkthetayz.resize(MaxTracks);
   trkmom.resize(MaxTracks);
   trklen.resize(MaxTracks);
+  trksvtxid.resize(MaxTracks);
+  trkevtxid.resize(MaxTracks);
+  // PID variables
+  trkpidpdg.resize(MaxTracks);
+  trkpidchi.resize(MaxTracks);
+  trkpidchipr.resize(MaxTracks);
+  trkpidchika.resize(MaxTracks);
+  trkpidchipi.resize(MaxTracks);
+  trkpidchimu.resize(MaxTracks);
+  trkpidpida.resize(MaxTracks);
   
   trkke.resize(MaxTracks);
   trkrange.resize(MaxTracks);
@@ -688,6 +705,8 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkdqdx.resize(MaxTracks);
   trkresrg.resize(MaxTracks);
   trkxyz.resize(MaxTracks);
+  
+  vtx.resize(kMaxVertices);
   
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize()
 
@@ -716,6 +735,15 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkthetayz   , -99999.);
   FillWith(trkmom       , -99999.);
   FillWith(trklen       , -99999.);
+  FillWith(trksvtxid    , -1);
+  FillWith(trkevtxid    , -1);
+  FillWith(trkpidpdg    , -1);
+  FillWith(trkpidchi    , -99999.);
+  FillWith(trkpidchipr  , -99999.);
+  FillWith(trkpidchika  , -99999.);
+  FillWith(trkpidchipi  , -99999.);
+  FillWith(trkpidchimu  , -99999.);
+  FillWith(trkpidpida   , -99999.);
   
   for (size_t iTrk = 0; iTrk < MaxTracks; ++iTrk){
     
@@ -737,6 +765,10 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkxyz[iTrk], 0.);
     
   } // for track
+
+  // BB vertices
+  std::array<Float_t, 3> zeroes = {0.};
+  FillWith(vtx, zeroes);
   
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear()
 
@@ -857,6 +889,43 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trklen_" + TrackLabel;
   CreateBranch(BranchName, trklen, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trksvtxid_" + TrackLabel;
+  CreateBranch(BranchName, trksvtxid, BranchName + NTracksIndexStr + "/S");
+  
+  BranchName = "trkevtxid_" + TrackLabel;
+  CreateBranch(BranchName, trkevtxid, BranchName + NTracksIndexStr + "/S");
+
+  BranchName = "nvtx_" + TrackLabel;
+  CreateBranch(BranchName, &nvtx, BranchName + "/S");
+
+  sstr() << kMaxVertices;
+  std::string MaxVerticesIndexStr("[" + sstr.str() + "]");
+  
+  BranchName = "vtx_" + TrackLabel;
+  CreateBranch(BranchName, vtx, BranchName + MaxVerticesIndexStr + "[3]" + "/F");
+
+  BranchName = "trkpidpdg_" + TrackLabel;
+  CreateBranch(BranchName, &trkpidpdg, BranchName + "/I");
+
+  BranchName = "trkpidchi_" + TrackLabel;
+  CreateBranch(BranchName, &trkpidchi, BranchName + "/F");
+
+  BranchName = "trkpidchipr_" + TrackLabel;
+  CreateBranch(BranchName, &trkpidchipr, BranchName + "/F");
+
+  BranchName = "trkpidchika_" + TrackLabel;
+  CreateBranch(BranchName, &trkpidchika, BranchName + "/F");
+
+  BranchName = "trkpidchipi_" + TrackLabel;
+  CreateBranch(BranchName, &trkpidchipi, BranchName + "/F");
+
+  BranchName = "trkpidchimu_" + TrackLabel;
+  CreateBranch(BranchName, &trkpidchimu, BranchName + "/F");
+
+  BranchName = "trkpidpida_" + TrackLabel;
+  CreateBranch(BranchName, &trkpidpida, BranchName + "/F");
+
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses()
 
 //------------------------------------------------------------------------------
@@ -1217,17 +1286,11 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fCalDataModuleLabel       (pset.get< std::string >("CalDataModuleLabel")      ),
   fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
-  fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")      ),
-  fKingaModuleLabel         (pset.get< std::string >("KingaModuleLabel")        ),
-  fLineMergerModuleLabel    (pset.get< std::string >("LineMergerModuleLabel")   ),
-  fDbscanModuleLabel        (pset.get< std::string >("DbscanModuleLabel")       ),
-  fFuzzyModuleLabel         (pset.get< std::string >("FuzzyModuleLabel")       ),
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
-  fEndPoint2DModuleLabel    (pset.get< std::string >("EndPoint2DModuleLabel")   ),
-  fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
-  fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
+  fVertexModuleLabel        (pset.get< std::vector<std::string> >("VertexModuleLabel")       ),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
-  fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   ),
+  fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
+  fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fUseBuffer                (pset.get< bool >("UseBuffers", false)              )
 {
   mf::LogInfo("AnalysisTree") << "Configuration:"
@@ -1441,6 +1504,22 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         << " " << fTrackModuleLabel[iTracker] << " tracks, only "
         << TrackerData.GetMaxTracks() << " stored in tree";
     }
+
+    // Stuff vertices first so we can define a track->vertex pointer
+    art::Handle< std::vector<recob::Vertex> > vtxListHandle;
+    std::vector<art::Ptr<recob::Vertex> > vtxlist;
+    if(evt.getByLabel(fVertexModuleLabel[iTracker], vtxListHandle)) 
+      art::fill_ptr_vector(vtxlist, vtxListHandle);
+    double xyz[3] = {0.};
+    TrackerData.nvtx = vtxlist.size();
+    if(TrackerData.nvtx > kMaxVertices) TrackerData.nvtx = kMaxVertices;
+    for(size_t ivx = 0; ivx < TrackerData.nvtx; ++ivx) {
+      vtxlist[ivx]->XYZ(xyz);
+      TrackerData.vtx[ivx][0] = xyz[0];
+      TrackerData.vtx[ivx][1] = xyz[1];
+      TrackerData.vtx[ivx][2] = xyz[2];
+    }
+
     for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
 
       art::Ptr<recob::Track> ptrack(trackListHandle[iTracker], iTrk);
@@ -1518,10 +1597,54 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         TrackerData.trklen[iTrk]                = tlen;
       } // if we have trajectory
 
+      // find vertices associated with this track
+      art::FindMany<recob::Vertex> fmvtx(trackListHandle[iTracker], evt, fVertexModuleLabel[iTracker]);
+      if(fmvtx.isValid()) {
+        std::vector<const recob::Vertex*> verts = fmvtx.at(iTrk);
+        // should have two at most
+        for(size_t ivx = 0; ivx < verts.size(); ++ivx) {
+          verts[ivx]->XYZ(xyz);
+          // find the vertex in TrackerData to get the index
+          short theVtx = -1;
+          for(short jvx = 0; jvx < TrackerData.nvtx; ++jvx) {
+            if(TrackerData.vtx[jvx][2] == xyz[2]) {
+              theVtx = jvx;
+              break;
+            }
+          } // jvx
+          // decide if it should be assigned to the track Start or End.
+          // A simple dz test should suffice
+          if(fabs(xyz[2] - TrackerData.trkstartz[iTrk]) < 
+             fabs(xyz[2] - TrackerData.trkendz[iTrk])) {
+            TrackerData.trksvtxid[iTrk] = theVtx;
+          } else {
+            TrackerData.trkevtxid[iTrk] = theVtx;
+          }
+        } // vertices
+      } // fmvtx.isValid()
+      
+      // find particle ID info
+      art::FindMany<anab::ParticleID> fmpid(trackListHandle[iTracker], evt, fParticleIDModuleLabel[iTracker]);
+      if(fmpid.isValid()) {
+        std::vector<const anab::ParticleID*> pids = fmpid.at(iTrk);
+        if(pids.size() > 1) {
+          mf::LogError("AnalysisTree:limits")
+            << "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
+            << " has " << pids.size() 
+            << " set of ParticleID variables. Only one stored in the tree";
+        }
+        TrackerData.trkpidpdg[iTrk] = pids[0]->Pdg();
+        TrackerData.trkpidchi[iTrk] = pids[0]->MinChi2();
+        TrackerData.trkpidchipr[iTrk] = pids[0]->Chi2Proton();
+        TrackerData.trkpidchika[iTrk] = pids[0]->Chi2Kaon();
+        TrackerData.trkpidchipi[iTrk] = pids[0]->Chi2Pion();
+        TrackerData.trkpidchimu[iTrk] = pids[0]->Chi2Muon();
+        TrackerData.trkpidpida[iTrk] = pids[0]->PIDA();
+      } // fmpid.isValid()
+
       art::FindMany<anab::Calorimetry> fmcal(trackListHandle[iTracker], evt, fCalorimetryModuleLabel[iTracker]);
       if (fmcal.isValid()){
         std::vector<const anab::Calorimetry*> calos = fmcal.at(iTrk);
-        //std::cout<<"calo size "<<calos.size()<<std::endl;
         if (calos.size() > TrackerData.GetMaxPlanesPerTrack(iTrk)) {
           // if you get this message, there is probably a bug somewhere since
           // the calorimetry planes should be 3.
@@ -1897,7 +2020,7 @@ double microboone::AnalysisTree::length(const recob::Track& track)
   return result;
 }
 
-// Length of MC particle, tracjectory by tracjectory.
+// Length of MC particle, trajectory by trajectory.
 
 double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
 {
