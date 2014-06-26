@@ -375,7 +375,6 @@ while [ $# -gt 0 ]; do
 
     # MRB flag.
     --mrb )
-      MRB=1
       ;;
 
     # SRT flag.
