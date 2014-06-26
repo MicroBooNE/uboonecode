@@ -32,16 +32,16 @@
 #
 # Larsoft options.
 #
-# -r, --release <arg>     - Release tag (default "development").
+# -r, --release <arg>     - Release tag.
 # -q, -b, --build <arg>   - Release build qualifier (default "debug", or "prof").
 # --localdir <arg>        - Larsoft local test release directory (default none).
 # --localtar <arg>        - Tarball of local test release.
-# --mrb                   - Use mrb-style environment initialization (see below).
-# --srt                   - Use srt-style environment initialization (see below).
+# --mrb                   - Ignored (for compatibility).
+# --srt                   - Exit with error status (SRT run time no longer supported).
 #
 # Microboone options.
 #
-# --ubfcl <arg>           - Ubfcl version (default none).
+# --ubfcl <arg>           - Ubfcl version (default none, depracated).
 #
 # Other options.
 #
@@ -61,33 +61,25 @@
 #
 # End options.
 #
-# MRB vs. SRT environment setup.
+# Run time environment setup.
 #
-# Environmental setup is controlled by four options --release (-r), 
-# --build (-b, -q), --localdir, and --localtar.  These options are 
-# interpreted differently depending on whether one is using an MRB (--mrb) 
-# or SRT (--srt) environment.  Options --srt and --mrb are mutually
-# exclusive.  At least one of them must be specified.
-#
-# For SRT-style environment:
-#
-# a) Use option --release or -r to specify larsoft frozen release.
-# b) Use option --build, -b, or -q to specify build type ("debug" or "prof")
-# c) If you have a local test release, specify the (bluearc) location of
-#    the test release using --localdir, or use --localtar to specify the 
-#    absolute or relative path of the local release tarball.
-#
-# For MRB-style environment:
+# MRB run-time environmental setup is controlled by four options:
+#  --release (-r), --build (-b, -q), --localdir, and --localtar.  
 #
 # a) Use option --release or -r to specify uboonecode version.  Note that
 #    larsoft is setup as a dependent product of uboonecode.
 # b) Use option --build or -b to specify build full qualifiers (e.g. 
-#    "debug:e4" or "e4:prof").
-# c) Options --localdir and --localtar are used in a similar way as for
-#    SRT.  Here, --localdir should point to, or your tarball should be 
-#    made relative to, the mrb localProducts directory ($MRB_INSTALL).
-#    If your local test release includes uboonecode, then you do not
-#    need options --release or --build.
+#    "debug:e5" or "e5:prof").
+# c) Options --localdir or --localtar are used to specify your local
+#    test release.  Use one or the other (not both).
+#
+#    Use --localdir to specify the location of your local install
+#    directory ($MRB_INSTALL).
+#
+#    Use --localtar to specify thye location of a tarball of your
+#    install directory (made relative to $MRB_INSTALL).
+#
+#    Note that --localdir is not grid-friendly.
 #
 # Notes.
 #
@@ -196,8 +188,6 @@ REL=""
 QUAL=""
 LOCALDIR=""
 LOCALTAR=""
-MRB=0
-SRT=0
 UBFCL=""
 INTERACTIVE=0
 GRP=""
@@ -390,7 +380,8 @@ while [ $# -gt 0 ]; do
 
     # SRT flag.
     --srt )
-      SRT=1
+      echo "SRT run time environment is no longer supported."
+      exit 1
       ;;
 
     # Ubfcl version.
@@ -529,42 +520,13 @@ done
 echo "Nodename: `hostname`"
 id
 
-# Do MRB/SRT checks, and set some environment-specific defaults.
+# Set defaults.
 
-# Make sure at lease one of MRB and SRT is specified.
-
-if [ $MRB -eq 0 -a $SRT -eq 0 ]; then
-  echo "Use option --mrb or --srt to specify environment style."
-  exit 1
+if [ x$QUAL = x ]; then
+  QUAL="debug:e5"
 fi
 
-# Make sure both MRB and SRT are not set.
-
-if [ $MRB -ne 0 -a $SRT -ne 0 ]; then
-  echo "Both --mrb and --srt were specified."
-  exit 1
-fi
-
-# Set defaults for MRB.
-
-if [ $MRB -ne 0 ]; then
-  if [ x$QUAL = x ]; then
-    QUAL="debug:e4"
-  fi
-fi
-
-# Set defaults for SRT.
-
-if [ $SRT -ne 0 ]; then
-  if [ x$REL = x ]; then
-    REL="development"
-  fi
-  if [ x$QUAL = x ]; then
-    QUAL="debug"
-  fi
-fi
-
-# Initialize microboone ups products (do this for both mrb and srt).
+# Initialize microboone ups products.
 
 #. /grid/fermiapp/products/uboone/etc/setups.sh
 
@@ -788,201 +750,116 @@ if [ x$ENDSCRIPT != x -a ! -x "$ENDSCRIPT" ]; then
   exit 1
 fi
 
-# MRB/SRT environment setup goes here.
+# MRB run time environment setup goes here.
 
-if [ $SRT -ne 0 ]; then
-  echo "Using SRT environment."
+# Source experiment-specific mrb initialization script.
 
-  # Setup larsoft environment.
-  # If larsoft environment is already setup interactively, don't do anything
-  # and inherit whatever version is already setup, regardless of --rel option
-  # (larsoft setup is not reentrant).
-
-  if [ x$LARSOFT_SETUP = x ]; then
-
-    # Unsetup ifdhc because larsoft/art might want a conflicting version
-    # from the version we setup at the beginning of this script.
-    # That _should_ be OK.
-
-    if [ x$IFDHC_DIR != x ]; then
-      unsetup ifdhc
-    fi
-    echo "Setting up larsoft release ${REL}, ${QUAL} build."
-    . /grid/fermiapp/lbne/lar/code/larsoft/setup/setup_larsoft_fnal.sh -r $REL -b ${QUAL}
-
-    # In case larsoft setup didn't provide a version of ifdhc, set up ifdhc
-    # again.  This might happen because of using an old frozen release of larsoft.
-
-    if [ x$IFDHC_DIR = x ]; then
-      echo "Setting up ifdhc again, because larsoft did not set it up."
-      setup ifdhc
-    fi
-
-  fi
-  echo "IFDH_ART_DIR=$IFDH_ART_DIR"
-  echo "IFDHC_DIR=$IFDHC_DIR"
-
-  # Setup local larsoft test release, if any.
-  # Use srt_environment instead of srt_setup alias because alias might
-  # not be defined here.
-
-  if [ x$LOCALDIR != x ]; then
-    #if [ $GRID -ne 0 ]; then
-    #  echo "Local test release may not be specified in grid-friendly mode."
-    #  exit 1
-    #fi
-    echo "Setting up local test release in directory ${LOCALDIR}."
-    if [ ! -d $LOCALDIR ]; then
-      echo "Local test release directory $LOCALDIR does not exist."
-      exit 1
-    fi
-    cd $LOCALDIR
-    . `srt_environment_lar -X -a`
-  fi
-  cd $TMP/work
-
-  # Setup local larsoft test release from tarball.
-
-  if [ x$LOCALTAR != x ]; then
-    mkdir $TMP/local
-    cd $TMP/local
-
-    # Fetch the tarball.
-
-    echo "Fetching test release tarball ${LOCALTAR}."
-    ifdh cp $LOCALTAR local.tar
-    stat=$?
-    if [ $stat -ne 0 ]; then
-      echo "ifdh cp failed with status ${stat}."
-      exit $stat
-    fi 
-
-    # Extract the tarball.
-
-    tar -xf local.tar
-
-    # Setup the environment.
-
-    . `srt_environment_lar -X -a`
-  fi
-  cd $TMP/work
-
-  echo "SRT_PUBLIC_CONTEXT=${SRT_PUBLIC_CONTEXT}"
-  echo "SRT_PRIVATE_CONTEXT=${SRT_PRIVATE_CONTEXT}"
-fi
-
-if [ $MRB -ne 0 ]; then
-  echo "Using MRB environment."
-
-  # Source experiment-specific mrb initialization script.
-
-  echo "Initializing mrb."
+echo "Initializing mrb."
   
 if [[ -d "${FERMIAPP_UBOONE_DIR}" ]]; then
-    echo "Sourcing ${FERMIAPP_UBOONE_DIR}setup_uboone.sh file"
-    source ${FERMIAPP_UBOONE_DIR}/setup_uboone.sh
+  echo "Sourcing ${FERMIAPP_UBOONE_DIR}setup_uboone.sh file"
+  source ${FERMIAPP_UBOONE_DIR}/setup_uboone.sh
 
 elif [[ -d "${OASIS_UBOONE_DIR}" ]]; then
-    echo "Sourcing the ${OASIS_UBOONE_DIR}setup_uboone.sh file"
-    source ${OASIS_UBOONE_DIR}/setup_uboone.sh
+  echo "Sourcing the ${OASIS_UBOONE_DIR}setup_uboone.sh file"
+  source ${OASIS_UBOONE_DIR}/setup_uboone.sh
 
 else
-    echo "Could not find MRB initialization script setup_uboone.sh"
-    exit 1
+  echo "Could not find MRB initialization script setup_uboone.sh"
+  exit 1
 fi
 
-  # Setup local test release, if any.
+# Setup local test release, if any.
 
-  if [ x$LOCALDIR != x ]; then
-    #if [ $GRID -ne 0 ]; then
-    #  echo "Local test release may not be specified in grid-friendly mode."
-    #  exit 1
-    #fi
-    echo "Setting up local test release in directory ${LOCALDIR}."
-    if [ ! -d $LOCALDIR ]; then
-      echo "Local test release directory $LOCALDIR does not exist."
-      exit 1
-    fi
-    if [ ! -f ${LOCALDIR}/setup ]; then
-      echo "Local test release directory $LOCALDIR does not contain a setup script."
-      exit
-    fi
-    echo "Initializing localProducts from ${LOCALDIR}."
-    . $LOCALDIR/setup
-    #echo "MRB_INSTALL=${MRB_INSTALL}."
-    #echo "MRB_QUALS=${MRB_QUALS}."
-    echo "Setting up all localProducts."
-    if [ x$IFDHC_DIR != x ]; then
-      unsetup ifdhc
-    fi
-    mrbslp
+if [ x$LOCALDIR != x ]; then
+  #if [ $GRID -ne 0 ]; then
+  #  echo "Local test release may not be specified in grid-friendly mode."
+  #  exit 1
+  #fi
+  echo "Setting up local test release in directory ${LOCALDIR}."
+  if [ ! -d $LOCALDIR ]; then
+    echo "Local test release directory $LOCALDIR does not exist."
+    exit 1
   fi
-  cd $TMP/work
-
-  # Setup local larsoft test release from tarball.
-
-  if [ x$LOCALTAR != x ]; then
-    mkdir $TMP/local
-    cd $TMP/local
-
-    # Fetch the tarball.
-
-    echo "Fetching test release tarball ${LOCALTAR}."
-
-    # Make sure ifdhc is setup.
-
-    if [ x$IFDHC_DIR = x ]; then
-      echo "Setting up ifdhc before fetching tarball."
-      setup ifdhc
-    fi
-    echo "IFDHC_DIR=$IFDHC_DIR"
-    ifdh cp $LOCALTAR local.tar
-    stat=$?
-    if [ $stat -ne 0 ]; then
-      echo "ifdh cp failed with status ${stat}."
-      exit $stat
-    fi 
-
-    # Extract the tarball.
-
-    tar -xf local.tar
-
-    # Setup the environment.
-
-    cd $TMP/work
-    echo "Initializing localProducts from tarball ${LOCALTAR}."
-    . $TMP/local/setup
-    #echo "MRB_INSTALL=${MRB_INSTALL}."
-    #echo "MRB_QUALS=${MRB_QUALS}."
-    echo "Setting up all localProducts."
-    if [ x$IFDHC_DIR != x ]; then
-      unsetup ifdhc
-    fi
-    mrbslp
+  if [ ! -f ${LOCALDIR}/setup ]; then
+    echo "Local test release directory $LOCALDIR does not contain a setup script."
+    exit
   fi
-
-  # Setup specified version of uboonecode (if specified, and if local
-  # test release did not set it up).
-
-  if [ x$UBOONECODE_DIR == x -a x$REL != x ]; then
-    echo "Setting up uboonecode $REL -q ${QUAL}."
-    if [ x$IFDHC_DIR != x ]; then
-      unsetup ifdhc
-    fi
-    setup uboonecode $REL -q $QUAL
+  echo "Initializing localProducts from ${LOCALDIR}."
+  . $LOCALDIR/setup
+  #echo "MRB_INSTALL=${MRB_INSTALL}."
+  #echo "MRB_QUALS=${MRB_QUALS}."
+  echo "Setting up all localProducts."
+  if [ x$IFDHC_DIR != x ]; then
+    unsetup ifdhc
   fi
+  mrbslp
+fi
+cd $TMP/work
 
-  cd $TMP/work
+# Setup local larsoft test release from tarball.
 
-  # In case mrb setup didn't setup a version of ifdhc, set up ifdhc again.
+if [ x$LOCALTAR != x ]; then
+  mkdir $TMP/local
+  cd $TMP/local
+
+  # Fetch the tarball.
+
+  echo "Fetching test release tarball ${LOCALTAR}."
+
+  # Make sure ifdhc is setup.
 
   if [ x$IFDHC_DIR = x ]; then
-    echo "Setting up ifdhc again, because larsoft did not set it up."
+    echo "Setting up ifdhc before fetching tarball."
     setup ifdhc
   fi
-  echo "IFDH_ART_DIR=$IFDH_ART_DIR"
   echo "IFDHC_DIR=$IFDHC_DIR"
+  ifdh cp $LOCALTAR local.tar
+  stat=$?
+  if [ $stat -ne 0 ]; then
+    echo "ifdh cp failed with status ${stat}."
+    exit $stat
+  fi 
+
+  # Extract the tarball.
+
+  tar -xf local.tar
+
+  # Setup the environment.
+
+  cd $TMP/work
+  echo "Initializing localProducts from tarball ${LOCALTAR}."
+  . $TMP/local/setup
+  #echo "MRB_INSTALL=${MRB_INSTALL}."
+  #echo "MRB_QUALS=${MRB_QUALS}."
+  echo "Setting up all localProducts."
+  if [ x$IFDHC_DIR != x ]; then
+    unsetup ifdhc
+  fi
+  mrbslp
 fi
+
+# Setup specified version of uboonecode (if specified, and if local
+# test release did not set it up).
+
+if [ x$UBOONECODE_DIR == x -a x$REL != x ]; then
+  echo "Setting up uboonecode $REL -q ${QUAL}."
+  if [ x$IFDHC_DIR != x ]; then
+    unsetup ifdhc
+  fi
+  setup uboonecode $REL -q $QUAL
+fi
+
+cd $TMP/work
+
+# In case mrb setup didn't setup a version of ifdhc, set up ifdhc again.
+
+if [ x$IFDHC_DIR = x ]; then
+  echo "Setting up ifdhc again, because larsoft did not set it up."
+  setup ifdhc
+fi
+echo "IFDH_ART_DIR=$IFDH_ART_DIR"
+echo "IFDHC_DIR=$IFDHC_DIR"
 
 # Set up ubfcl product version, if any.
 
@@ -990,14 +867,6 @@ if [ x$UBFCL != x ]; then
   setup ubfcl $UBFCL
 fi 
 echo "UBFCL_DIR=${UBFCL_DIR}"
-
-# Set up ifdh_art product version, if necessary.
-# Should not be necessary for larsoft development and frozen
-# releases starting Oct. 2013.
-
-#if [ $USE_SAM -ne 0 ]; then
-#  setup ifdh_art v1_2_0 -q debug:e2:nu
-#fi
 
 # Get input files to process, either single file, file list, or sam.
 #

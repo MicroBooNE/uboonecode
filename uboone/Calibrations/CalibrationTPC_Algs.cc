@@ -34,9 +34,10 @@ namespace calibration{
 			 std::vector<float> & noise,
 			 std::vector<float> & maxADC,
 			 std::vector<float> & minADC,
+			 std::vector<float> & maxTime,
 			 int const& prePulseTicks){
     
-    calcGain(rawDigit, pedestal, noise, maxADC, minADC, prePulseTicks);
+    calcGain(rawDigit, pedestal, noise, maxADC, minADC, maxTime, prePulseTicks);
 
   }
 
@@ -97,6 +98,7 @@ namespace calibration{
 		 std::vector<float> & noise,
 		 std::vector<float> & maxADC,
 		 std::vector<float> & minADC,
+		 std::vector<float> & maxTime,
 		 int const& prePulseTicks){
 
     const unsigned int n_channels = rawDigit.size();
@@ -107,6 +109,7 @@ namespace calibration{
 			     noise.at(ich),
 			     maxADC.at(ich),
 			     minADC.at(ich),
+			     maxTime.at(ich),
 			     prePulseTicks);
  
   }
@@ -117,6 +120,7 @@ namespace calibration{
 			       float & noise,
 			       float & maxADC,
 			       float & minADC,
+			       float & time,
 			       int const& prePulseTicks){
 
     const unsigned int n_samples = rawData.size();
@@ -125,11 +129,15 @@ namespace calibration{
     noise = 0;
     maxADC = 0;
     minADC = 0;
+    time = 0;
 
     for(unsigned int it=0; it<n_samples; it++){
       short thisADC = rawData.at(it);
       if ( (int)it < prePulseTicks ) { pedestal += thisADC; }
-      if ( thisADC > maxADC ) { maxADC = thisADC; }
+      if ( thisADC > maxADC ){
+	maxADC = thisADC;
+	time = it;
+      }
       if ( thisADC < minADC ) { minADC = thisADC; }
     }
 
