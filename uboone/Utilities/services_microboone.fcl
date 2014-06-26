@@ -32,6 +32,8 @@ microboone_services:
 
 # Define microboone_optical_service (exclude simulation specific component)
 microboone_optical_services:                          @local::microboone_services
+microboone_optical_services.PhotonVisibilityService:  @local::microboone_photonvisibilityservice
+microboone_optical_services.OpDigiProperties:         @local::microboone_opdigiproperties 
 
 # Define microboone_simulation_services
 microboone_simulation_services:
@@ -87,6 +89,7 @@ microboone_optical_simulation_services_1window.TimeService: @local::microboone_t
 # Define 3window services
 #
 microboone_services_3windows:                              @local::microboone_services
+microboone_optical_services_3windows:                      @local::microboone_optical_services
 microboone_simulation_services_3windows:                   @local::microboone_simulation_services
 microboone_optical_simulation_services_3windows:           @local::microboone_optical_simulation_services
 
