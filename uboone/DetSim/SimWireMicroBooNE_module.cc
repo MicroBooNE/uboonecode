@@ -110,7 +110,7 @@ namespace detsim {
 
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)
-   :fNoiseHist(0)
+  : fNoiseHist(0)
   {
     this->reconfigure(pset);
 
@@ -130,7 +130,7 @@ namespace detsim {
   //-------------------------------------------------
   SimWireMicroBooNE::~SimWireMicroBooNE()
   {
-    delete fNoiseHist;
+      delete fNoiseHist;
   }
 
   //-------------------------------------------------
@@ -149,7 +149,7 @@ namespace detsim {
     fBaselineRMS      = p.get< float               >("BaselineRMS");
 
     fTrigModName      = p.get< std::string         >("TrigModName");
-    
+
     if(fGetNoiseFromHisto)
       {
       fNoiseHistoName= p.get< std::string         >("NoiseHistoName"); 
@@ -172,6 +172,7 @@ namespace detsim {
       }
     //detector properties information
     art::ServiceHandle<util::DetectorProperties> detprop;
+    fSampleRate    = detprop->SamplingRate();
     fNTimeSamples  = detprop->NumberTimeSamples();
 
     return;
@@ -249,8 +250,7 @@ namespace detsim {
     std::map<int,double>::iterator mapIter;      
     for(chan = 0; chan < geo->Nchannels(); chan++) {
 
-      chargeWork.clear();
-      chargeWork.resize(fNTicks,0.);
+      for(auto& v : chargeWork) v=0;
 
       // get the sim::SimChannel for this channel
       const sim::SimChannel* sc = channels.at(chan);
@@ -300,7 +300,7 @@ namespace detsim {
  	float adcval = noisetmp.at(i) + chargeWork.at(i) + ped_mean;
 	
 	//Add Noise to NoiseDist Histogram
-	if (i%100==0)
+	if (i%1000==0)
 	  fNoiseDist->Fill(noisetmp.at(i));
 
 	//allow for ADC saturation
@@ -376,7 +376,6 @@ namespace detsim {
 
     // width of frequencyBin in kHz
     double binWidth = 1.0/(fNTicks*fSampleRate*1.0e-6);
-
     for(size_t i=0; i< fNTicks/2+1; ++i){
       // exponential noise spectrum 
       flat.fireArray(2,rnd,0,1);
@@ -398,7 +397,6 @@ namespace detsim {
 	  pval = fNoiseHist->GetBinContent(i)*((1-fNoiseRand)+2*fNoiseRand*rnd[0])*fNoiseFact; 
 	  //mf::LogInfo("SimWireMicroBooNE")  << " pval: " << pval;
 	}
-      
       phase = rnd[1]*2.*TMath::Pi();
       TComplex tc(pval*cos(phase),pval*sin(phase));
       noiseFrequency.at(i) += tc;
@@ -416,7 +414,10 @@ namespace detsim {
     // multiply each noise value by fNTicks as the InvFFT 
     // divides each bin by fNTicks assuming that a forward FFT
     // has already been done.
-    for(unsigned int i = 0; i < noise.size(); ++i) noise.at(i) *= 1.*fNTicks;
+    //Also need to scale so that noise RMS matches that asked
+    //in fhicl parameter (somewhat arbitrary scaling otherwise)
+    //harcode this scaling factor (~20) for now
+    for(unsigned int i = 0; i < noise.size(); ++i) noise.at(i) *= 1.*(fNTicks/20.);
 
   }
   
