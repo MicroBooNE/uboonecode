@@ -528,7 +528,7 @@ fi
 
 # Initialize microboone ups products and mrb.
 
-OASIS_UBOONE_DIR="/cvmfs/oasis.opensciencegrid.org/uboone/products/"
+OASIS_UBOONE_DIR="/cvmfs/oasis.opensciencegrid.org/microboone/products/"
 FERMIAPP_UBOONE_DIR="/grid/fermiapp/products/uboone/"
 
 echo "Initializing ups and mrb."
