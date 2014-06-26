@@ -110,6 +110,7 @@ namespace detsim {
 
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)
+   :fNoiseHist(0)
   {
     this->reconfigure(pset);
 
@@ -247,6 +248,9 @@ namespace detsim {
     //LOOP OVER ALL CHANNELS
     std::map<int,double>::iterator mapIter;      
     for(chan = 0; chan < geo->Nchannels(); chan++) {
+
+      chargeWork.clear();
+      chargeWork.resize(fNTicks,0.);
 
       // get the sim::SimChannel for this channel
       const sim::SimChannel* sc = channels.at(chan);
