@@ -526,31 +526,24 @@ if [ x$QUAL = x ]; then
   QUAL="debug:e5"
 fi
 
-# Initialize microboone ups products.
+# Initialize microboone ups products and mrb.
 
-#. /grid/fermiapp/products/uboone/etc/setups.sh
-
-OASIS_LARSOFT_DIR="/cvmfs/oasis.opensciencegrid.org/fermilab/products/larsoft/"
-FERMIAPP_LARSOFT_DIR="/grid/fermiapp/products/larsoft/"
 OASIS_UBOONE_DIR="/cvmfs/oasis.opensciencegrid.org/uboone/products/"
 FERMIAPP_UBOONE_DIR="/grid/fermiapp/products/uboone/"
 
-if [[ -d "${FERMIAPP_LARSOFT_DIR}" ]]; then
-    echo "Setting up the Grid Fermiapp Larsoft UPS area..."
-    source ${FERMIAPP_LARSOFT_DIR}/setups
-
-elif [[ -d "${OASIS_LARSOFT_DIR}" ]]; then
-    echo "Setting up the OASIS Fermilab UPS area..."
-    source ${OASIS_LARSOFT_DIR}/setups
-fi
-
+echo "Initializing ups and mrb."
+  
 if [[ -d "${FERMIAPP_UBOONE_DIR}" ]]; then
-    echo "Setting up the Grid Fermiapp uboone UPS area..."
-    source ${FERMIAPP_UBOONE_DIR}/setups
+  echo "Sourcing ${FERMIAPP_UBOONE_DIR}setup_uboone.sh file"
+  source ${FERMIAPP_UBOONE_DIR}/setup_uboone.sh
 
 elif [[ -d "${OASIS_UBOONE_DIR}" ]]; then
-    echo "Setting up the OASIS uboone UPS area..."
-    source ${OASIS_UBOONE_DIR}/setups
+  echo "Sourcing the ${OASIS_UBOONE_DIR}setup_uboone.sh file"
+  source ${OASIS_UBOONE_DIR}/setup_uboone.sh
+
+else
+  echo "Could not find MRB initialization script setup_uboone.sh"
+  exit 1
 fi
 
 # Ifdh may already be setup by jobsub wrapper.
@@ -580,7 +573,8 @@ echo "Group: $GROUP"
 if [ $GRID -ne 0 ]; then
 
   # Figure out if this is a production job.
-  # If so, use a different output server.
+  # This option is only used when copying back output.
+  # It affects the ownership of copied back files.
 
   echo "X509_USER_PROXY = $X509_USER_PROXY"
   if ! echo $X509_USER_PROXY | grep -q Production; then
@@ -751,23 +745,6 @@ if [ x$ENDSCRIPT != x -a ! -x "$ENDSCRIPT" ]; then
 fi
 
 # MRB run time environment setup goes here.
-
-# Source experiment-specific mrb initialization script.
-
-echo "Initializing mrb."
-  
-if [[ -d "${FERMIAPP_UBOONE_DIR}" ]]; then
-  echo "Sourcing ${FERMIAPP_UBOONE_DIR}setup_uboone.sh file"
-  source ${FERMIAPP_UBOONE_DIR}/setup_uboone.sh
-
-elif [[ -d "${OASIS_UBOONE_DIR}" ]]; then
-  echo "Sourcing the ${OASIS_UBOONE_DIR}setup_uboone.sh file"
-  source ${OASIS_UBOONE_DIR}/setup_uboone.sh
-
-else
-  echo "Could not find MRB initialization script setup_uboone.sh"
-  exit 1
-fi
 
 # Setup local test release, if any.
 
