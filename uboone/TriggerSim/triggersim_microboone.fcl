@@ -1,6 +1,6 @@
 BEGIN_PROLOG
 
-microboone_trigger_sim:
+ubtrigger_standard:
 {
 
   module_type: "UBTriggerSim"
@@ -19,7 +19,7 @@ microboone_trigger_sim:
   # Trigger module configuration
   #
   DeadTime: 4 # Trigger deadtime in number of frames
-  Mask:     [0x7,   0x7,   0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0x7a ] # Trigger condition bit mask
+  Mask:     [0x3,   0x4,   0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0xa  ] # Trigger condition bit mask
   Prescale: [false, false, false, false, false, false, false, false, false] # Trigger prescale bit mask
 
   BNBGateWidth:    102 # BNB gate width in number of samples (Optical clock)
@@ -38,9 +38,23 @@ microboone_trigger_sim:
   # issues a readout trigger).
   CalibTrigger: []
   ExtTrigger:   []
-  PCTrigger:    [0]
+  PCTrigger:    []
   BNBTrigger:   []
   NuMITrigger:  []
 }
+
+#
+# Single-particle trigger: use DAQ trigger fired @ G4 T=0
+#
+ubtrigger_singlep: @local::ubtrigger_standard
+ubtrigger_singlep.PCTrigger: [0]
+ubtrigger_singlep.Mask: [0x8, 0x8, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x7f]
+
+#
+# Beam trigger w/o optical simulation
+#
+ubtrigger_dark_beam: @local::ubtrigger_standard
+ubtrigger_dark_beam.Mask: [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x30]
+
 
 END_PROLOG

@@ -601,8 +601,8 @@ namespace trigger{
 		 );
 	}
 
-	auto const pmt0   = (*sample_iter).second.Triggered(trigger::kPMTTriggerCosmic);
-	auto const pmt1   = (*sample_iter).second.Triggered(trigger::kPMTTriggerBeam);
+	auto const pmt0   = (*sample_iter).second.Triggered(trigger::kPMTTriggerBeam);
+	auto const pmt1   = (*sample_iter).second.Triggered(trigger::kPMTTriggerCosmic);
 	auto const numi   = (*sample_iter).second.Triggered(trigger::kTriggerNuMI);
 	auto const bnb    = (*sample_iter).second.Triggered(trigger::kTriggerBNB);
 	auto const calib  = (*sample_iter).second.Triggered(trigger::kTriggerCalib);
@@ -627,8 +627,8 @@ namespace trigger{
 	  {
 	    std::ostringstream msg;
 	    msg 
-	      << Form("    PMT Cosmic? %s", (pmt0  ? "yes" : "no")) << std::endl
-	      << Form("    PMT Beam?   %s", (pmt1  ? "yes" : "no")) << std::endl
+	      << Form("    PMT Beam?   %s", (pmt0  ? "yes" : "no")) << std::endl
+	      << Form("    PMT Cosmic? %s", (pmt1  ? "yes" : "no")) << std::endl
 	      << Form("    NuMI Gate?  %s", (numi  ? "yes" : "no")) << std::endl
 	      << Form("    BNB Gate?   %s", (bnb   ? "yes" : "no")) << std::endl
 	      << Form("    Calib?      %s", (calib ? "yes" : "no")) << std::endl
@@ -645,17 +645,17 @@ namespace trigger{
 
 	// Evaludate trigger condition p0 ... this is for PMT Cosmic trigger
 	// Equation follows Nevis FPGA code including similar notations
-	bool p0 = ( (numi   && pmt0 && ((0x1) & (mask0 >> 0))           ) ||
-		    (bnb    && pmt0 && ((0x1) & (mask0 >> 1))           ) ||
-		    (active && pmt0 && ((0x1) & (mask0 >> 2)) && !scale0) ||
-		    (          pmt0 && ((0x1) & (mask0 >> 3)) && !scale0) );
+	bool p0 = ( (numi_gate_active && pmt0 && ((0x1) & (mask0 >> 0))           ) ||
+		    (bnb_gate_active  && pmt0 && ((0x1) & (mask0 >> 1))           ) ||
+		    (active           && pmt0 && ((0x1) & (mask0 >> 2)) && !scale0) ||
+		    (                    pmt0 && ((0x1) & (mask0 >> 3)) && !scale0) );
 
 	// Evaluate trigger condition p1 ... this is for PMT Beam trigger
 	// Equation follows Nevis FPGA code including similar notations
-	bool p1 = ( (numi   && pmt1 && ((0x1) & (mask1 >> 0))           ) || 
-		    (bnb    && pmt1 && ((0x1) & (mask1 >> 1))           ) ||
-		    (active && pmt1 && ((0x1) & (mask1 >> 2)) && !scale1) ||
-		    (          pmt1 && ((0x1) & (mask1 >> 3)) && !scale1) );
+	bool p1 = ( (numi_gate_active && pmt1 && ((0x1) & (mask1 >> 0))           ) || 
+		    (bnb_gate_active  && pmt1 && ((0x1) & (mask1 >> 1))           ) ||
+		    (active           && pmt1 && ((0x1) & (mask1 >> 2)) && !scale1) ||
+		    (                    pmt1 && ((0x1) & (mask1 >> 3)) && !scale1) );
 
 	// Evaluate trigger condition p8 ... this is for Beam trigger input
 	// Equation follows Nevis FPGA code including similar notations

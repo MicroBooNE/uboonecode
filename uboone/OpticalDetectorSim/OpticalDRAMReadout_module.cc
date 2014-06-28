@@ -118,15 +118,40 @@ namespace opdet {
 
     std::unique_ptr< std::vector<optdata::OpticalRawDigit> > wf_array( new std::vector<optdata::OpticalRawDigit> );
 
-    // Read in raw::Trigger
+    // Check if trigger data product exists or not. If not, throw a warning
     art::Handle< std::vector<raw::Trigger> > trig_array;
     event.getByLabel(fTrigModuleName, trig_array);
     if(!trig_array.isValid()) 
 
+      std::cout << std::endl << "  "
+		<< "\033[95m" << "<<" << __PRETTY_FUNCTION__ << ">>" << "\033[00m"
+		<< std::endl << "  "
+		<< "\033[93m"
+		<< " No trigger data exists => will use the default trigger time set in TimeService..."
+		<< "\033[00m"
+		<< std::endl;
+
+    // Figure out the range of frame numbers to be readout
+    std::vector<std::pair<optdata::Frame_t,optdata::Frame_t> > readout_frames;
+
+    optdata::Frame_t trig_frame = clock.Frame(ts->TriggerTime());
+    
+    optdata::Frame_t start_frame = 0;
+    optdata::Frame_t end_frame = trig_frame + fReadoutFrameOffset.at(1);
+
+    if(trig_frame < fReadoutFrameOffset.at(0)) start_frame = 0;
+    else start_frame = trig_frame - fReadoutFrameOffset.at(0);
+
+    readout_frames.push_back(std::make_pair(start_frame,end_frame));
+
+    /*
+    //
+    // In case of multipl trigger data products ... commented out for now
+    //
+    if(!trig_array.isValid())
+
       throw UBOpticalException(Form("Did not find raw::Trigger data product from module %s",fTrigModuleName.c_str()));
 
-    // Store readout frame boundaries
-    std::vector<std::pair<optdata::Frame_t,optdata::Frame_t> > readout_frames;
     readout_frames.reserve(trig_array->size());
     for(size_t i=0; i<trig_array->size(); ++i) {
 
@@ -142,6 +167,8 @@ namespace opdet {
 
       readout_frames.push_back(std::pair<optdata::Frame_t,optdata::Frame_t>(start_frame,end_frame) );
     }
+    */   
+    
     
     // Read in optdata::FIFOChannel & store relevant portion
     art::Handle< std::vector<optdata::FIFOChannel> > fifo_array;
