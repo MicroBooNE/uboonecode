@@ -1,9 +1,9 @@
 /**
- * \file UBChConfig.h
+ * \file UBOpticalChConfig.h
  *
  * \ingroup OpticalDetectorSim
  * 
- * \brief Class def header for a class UBChConfig
+ * \brief Class def header for a class UBOpticalChConfig
  *
  * @author kazuhiro
  */
@@ -11,8 +11,8 @@
 /** \addtogroup OpticalDetectorSim
 
     @{*/
-#ifndef UBCHCONFIG_H
-#define UBCHCONFIG_H
+#ifndef UBOPTICALCHCONFIG_H
+#define UBOPTICALCHCONFIG_H
 
 #include "Geometry/Geometry.h"
 #include "SimpleChConfig.h"
@@ -27,15 +27,15 @@ namespace opdet {
      User defined class ChConfig ... these comments are used to generate
      doxygen documentation!
   */
-  class UBChConfig : public SimpleChConfig{
+  class UBOpticalChConfig : public SimpleChConfig{
     
   public:
     
     /// Default constructor
-    UBChConfig(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
+    UBOpticalChConfig(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
     
     /// Default destructor
-    virtual ~UBChConfig(){};
+    virtual ~UBOpticalChConfig(){};
 
     void reconfigure(fhicl::ParameterSet const& pset);
 
@@ -44,7 +44,7 @@ namespace opdet {
 }
 
 
-DECLARE_ART_SERVICE(opdet::UBChConfig, LEGACY)
+DECLARE_ART_SERVICE(opdet::UBOpticalChConfig, LEGACY)
 
 #endif
 /** @} */ // end of doxygen group 

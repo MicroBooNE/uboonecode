@@ -1,19 +1,19 @@
-#ifndef UBCHCONFIG_CXX
-#define UBCHCONFIG_CXX
+#ifndef UBOPTICALCHCONFIG_CXX
+#define UBOPTICALCHCONFIG_CXX
 
-#include "UBChConfig.h"
+#include "UBOpticalChConfig.h"
 
 namespace opdet {
 
   //---------------------------------------------------------------------------------
-  UBChConfig::UBChConfig(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg)
+  UBOpticalChConfig::UBOpticalChConfig(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg)
   //---------------------------------------------------------------------------------
   {
     this->reconfigure(pset);
   }
   
   //-----------------------------------------------------------
-  void UBChConfig::reconfigure(fhicl::ParameterSet const& pset)
+  void UBOpticalChConfig::reconfigure(fhicl::ParameterSet const& pset)
   //-----------------------------------------------------------
   {
     
@@ -38,7 +38,7 @@ namespace opdet {
   }
 
 
-  DEFINE_ART_SERVICE(UBChConfig)
+  DEFINE_ART_SERVICE(UBOpticalChConfig)
     
 }
 #endif
