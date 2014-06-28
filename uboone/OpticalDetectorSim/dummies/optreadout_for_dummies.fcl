@@ -41,7 +41,7 @@ physics:
    rns:       { module_type: "RandomNumberSaver" }
    optdigitizer:   @local::microboone_optical_adc_sim
    optfem:         @local::microboone_optical_fem_sim
-   triggersim:     @local::microboone_trigger_sim
+   triggersim:     @local::ubtrigger_standard
    optreadout:     @local::microboone_optical_dram_readout_sim
  }
 

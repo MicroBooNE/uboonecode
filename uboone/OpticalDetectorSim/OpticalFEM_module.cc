@@ -307,7 +307,7 @@ namespace opdet {
 	    << "\033[00m" << std::endl;
 
 	beginBin[gateIndex] = ( gateTime - beam_delay );
-	    
+
 	// Figure out the last bin to be saved. Assume that the
 	// length of the first channel in the group is the same
 	// for all the channels in the group.
