@@ -1,7 +1,7 @@
-art_make( EXCLUDE UBChConfig_service.cc
+art_make( EXCLUDE UBOpticalChConfig_service.cc
 	  #NO_PLUGINS
 	  BASENAME_ONLY
-          LIB_LIBRARIES UBChConfig_service
+          LIB_LIBRARIES UBOpticalChConfig_service
 			RawData
 			Utilities
 			Geometry
@@ -23,7 +23,7 @@ art_make( EXCLUDE UBChConfig_service.cc
 
           MODULE_LIBRARIES Simulation
 			OpticalDetectorData
-			UBChConfig_service
+			UBOpticalChConfig_service
 			uboonecode_uboone_OpticalDetectorSim
 			TimeService_service
 			Utilities
@@ -45,7 +45,7 @@ art_make( EXCLUDE UBChConfig_service.cc
 
          )
 
-simple_plugin(UBChConfig "service"
+simple_plugin(UBOpticalChConfig "service"
 	      Geometry_service
 	      Geometry
 	      ${ART_UTILITIES}

@@ -1,4 +1,4 @@
-#include "services_microboone.fcl"
+#include "services_microboone_simulation.fcl"
 #include "largeantmodules_microboone.fcl"
 
 process_name: G4
@@ -11,7 +11,7 @@ services:
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_optical_simulation_services
+  user:         @local::microboone_g4_services
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 services.user.LArG4Parameters.UseModBoxRecomb:          true

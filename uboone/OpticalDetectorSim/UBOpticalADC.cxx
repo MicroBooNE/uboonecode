@@ -63,7 +63,7 @@ namespace opdet {
     std::vector<float> low_tmp_wf;
     low_tmp_wf.reserve(nticks);
 
-    art::ServiceHandle<opdet::UBChConfig> ch_conf;
+    art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
     //
     // Generate Signal & DarkNoise
     //

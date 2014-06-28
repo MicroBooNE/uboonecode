@@ -213,6 +213,19 @@ namespace detsim {
     // In case trigger simulation is run in the same job...
     ts->preProcessEvent(evt);
 
+    // Check if trigger data product exists or not. If not, throw a warning
+    art::Handle< std::vector<raw::Trigger> > trig_array;
+    evt.getByLabel(fTrigModName, trig_array);
+    if(!trig_array.isValid()) 
+      
+      std::cout << std::endl << "  "
+		<< "\033[95m" << "<<" << __PRETTY_FUNCTION__ << ">>" << "\033[00m"
+		<< std::endl << "  "
+		<< "\033[93m"
+		<< " No trigger data exists => will use the default trigger time set in TimeService..."
+		<< "\033[00m"
+		<< std::endl;
+
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
     //unsigned int signalSize = fNTicks;

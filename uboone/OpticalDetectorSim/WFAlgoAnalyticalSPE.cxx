@@ -45,7 +45,7 @@ namespace opdet {
       double time = ts->G4ToElecTime(t);
 
       if(fEnableSpread) time += RandomServer::GetME().Gaus(fT0,fT0Sigma) * 1.e-3;
-      else time += fT0;
+      else time += fT0 * 1.e-3;
 
       // If before waveform vector, ignore
       if(time < start_time.Time()) continue;

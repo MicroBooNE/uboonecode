@@ -130,6 +130,12 @@ namespace opdet {
     ::std::unique_ptr< std::vector<optdata::ChannelDataGroup> > wfs(new ::std::vector<optdata::ChannelDataGroup>);
     ::util::ElecClock clock = ts->OpticalClock();
     clock.SetTime(ts->G4ToElecTime(fG4StartTime));
+    if(clock.Time()<0)
+      throw UBOpticalException(Form("Cannot start readout @ %g (before Electronics Clock start time %g)",
+				    fG4StartTime,
+				    (-1)*(ts->G4ToElecTime(0))
+				    )
+			       );
 
     fOpticalGen.SetTimeInfo(clock,fDuration);
     fLogicGen.SetTimeInfo(clock,fDuration);
@@ -150,8 +156,16 @@ namespace opdet {
 
     // Create entries ... # PMTs + 2 channels (NuMI & BNB readout channels)
     wfs->at(hg_index).reserve(geom->NOpChannels());
+    wfs->at(hg_index).SetFrame(clock.Frame());
+    wfs->at(hg_index).SetTimeSlice(clock.Sample());
+
     wfs->at(lg_index).reserve(geom->NOpChannels());
+    wfs->at(lg_index).SetFrame(clock.Frame());
+    wfs->at(lg_index).SetTimeSlice(clock.Sample());
+
     wfs->at(logic_index).reserve(kLogicNChannel);
+    wfs->at(logic_index).SetFrame(clock.Frame());
+    wfs->at(logic_index).SetTimeSlice(clock.Sample());
 
     //
     // Read-in data
@@ -196,16 +210,15 @@ namespace opdet {
 	photon_time.reserve(photon_time.size() + pmt_ptr->size());
 	
 	for(size_t photon_index=0; photon_index<pmt_ptr->size(); ++photon_index)
-
+	  
 	  photon_time.push_back(pmt_ptr->at(photon_index).Time);
 
       }
 
       fOpticalGen.SetPhotons(photon_time);
       fOpticalGen.GenWaveform(ch,
-		       wfs->at(hg_index).at(ch),
-		       wfs->at(lg_index).at(ch));
-
+			      wfs->at(hg_index).at(ch),
+			      wfs->at(lg_index).at(ch));
     }
 
     //

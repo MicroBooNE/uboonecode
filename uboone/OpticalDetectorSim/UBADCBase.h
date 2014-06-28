@@ -14,7 +14,7 @@
 #ifndef UBADCBase_H
 #define UBADCBase_H
 
-#include "UBChConfig.h"
+#include "UBOpticalChConfig.h"
 #include "WFAlgoPedestal.h"
 #include "WFAlgoAnalyticalSPE.h"
 #include "RandomServer.h"

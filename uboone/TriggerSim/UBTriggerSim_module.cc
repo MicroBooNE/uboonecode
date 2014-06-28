@@ -238,7 +238,7 @@ namespace trigger {
       if(pmtArray.isValid()) {
 
 	for(size_t i=0; i<pmtArray->size(); ++i) {
-	  
+
 	  art::Ptr<optdata::PMTTrigger> pmt_ptr (pmtArray,i);
 	  clock.SetTime( pmt_ptr->TimeSlice(), pmt_ptr->Frame() );
 	  switch(pmt_ptr->Category()) {

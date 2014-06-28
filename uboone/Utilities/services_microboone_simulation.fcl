@@ -1,0 +1,98 @@
+#include "services_microboone_basic.fcl"
+
+#
+# This file defines a set of service configurations for MicroBooNE simulation.
+# Simulation consists of 3 steps:
+#
+#  (0) event generator ... making a particle to inject into G4
+#  (1) Geant4 ............ G4 particle tracking simulation in the detector
+#  (2) readout ........... Readout electronics simulation (make waveforms)
+#
+# Fhicl configurations for each simulation steps above are:
+# 
+#  (0) microboone_gen_services
+#  (1) microboone_dark_g4_services
+#  (2) microboone_dark_detsim_services
+#
+#  (all) microboone_dark_simulation_services ... include all services in (0), (1), and (2).
+#
+# Above configurations do not include scintillation light or optical detector
+# readout simulation. If you wish to include those, use followings:
+#
+#  (1*) microboone_g4_services
+#  (2*) microboone_detsim_services
+#
+#  (all*) microboone_simulation_services
+#
+
+BEGIN_PROLOG
+
+#
+# First define services w/o optical simulation
+#
+
+# Define microboone_gen_services ... (0)
+microboone_gen_services:               @local::microboone_basic_services
+microboone_gen_services.MagneticField: @local::no_mag
+
+# Define microboone_dark_g4_services ... (1)
+microboone_dark_g4_services:                    @local::microboone_gen_services
+microboone_dark_g4_services.LArG4Parameters:    @local::microboone_largeantparameters
+microboone_dark_g4_services.LArVoxelCalculator: @local::microboone_larvoxelcalculator
+microboone_dark_g4_services.MagneticField:      @local::no_mag
+
+# Define microboone_dark_detsim_services ... (2)
+microboone_dark_detsim_services:                                @local::microboone_basic_services
+microboone_dark_detsim_services.LArFFT:                         @local::microboone_larfft
+microboone_dark_detsim_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+
+# Define microboone_dark_simulation ... (all)
+microboone_dark_simulation_services:                    @local::microboone_basic_services
+microboone_dark_simulation_services.LArG4Parameters:    @local::microboone_largeantparameters
+microboone_dark_simulation_services.LArVoxelCalculator: @local::microboone_larvoxelcalculator
+microboone_dark_simulation_services.MagneticField:      @local::no_mag
+microboone_dark_simulation_services.LArFFT:             @local::microboone_larfft
+microboone_dark_simulation_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+
+#
+# Define optical simulation included ones
+#
+
+# Define microboone_g4_services ... (1*)
+microboone_g4_services:                         @local::microboone_dark_g4_services
+microboone_g4_services.PhotonVisibilityService: @local::microboone_photonvisibilityservice
+microboone_g4_services.LArProperties.ScintYield:          240   # note this is 1% QE on 24000 (which is for 100% QE)
+microboone_g4_services.LArProperties.EnableCerenkovLight: false # Cerenkov light OFF by default
+microboone_g4_services.LArG4Parameters.UseCustomPhysics:  true
+microboone_g4_services.LArG4Parameters.EnabledPhysics:    [ "Em",
+                                                            "FastOptical",
+                                                            "SynchrotronAndGN",
+                                                            "Ion",
+                                                            "Hadron",
+                                                            "Decay",
+                                                            "HadronElastic",
+                                                            "Stopping",
+                                                            "NeutronTrackingCut" ]
+
+# Define microboone_detsim_services ... (2*)
+microboone_detsim_services:                   @local::microboone_dark_detsim_services
+microboone_detsim_services.UBOpticalChConfig: @local::microboone_optical_ch_config
+
+# Define microboone_simulation_services ... (all*)
+microboone_simulation_services:                          @local::microboone_dark_simulation_services
+microboone_simulation_services.PhotonVisibilityService:  @local::microboone_photonvisibilityservice
+microboone_simulation_services.UBOpticalChConfig:        @local::microboone_optical_ch_config
+microboone_simulation_services.LArProperties.ScintYield:          240   # note this is 1% QE on 24000 (which is for 100% QE)
+microboone_simulation_services.LArProperties.EnableCerenkovLight: false # Cerenkov light OFF by default
+microboone_simulation_services.LArG4Parameters.UseCustomPhysics:  true
+microboone_simulation_services.LArG4Parameters.EnabledPhysics:    [ "Em",
+                                                                    "FastOptical",
+                                                                    "SynchrotronAndGN",
+                                                                    "Ion",
+                                                                    "Hadron",
+                                                                    "Decay",
+                                                                    "HadronElastic",
+                                                                    "Stopping",
+                                                                    "NeutronTrackingCut" ]
+
+END_PROLOG
