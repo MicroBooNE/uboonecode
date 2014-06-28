@@ -1,0 +1,37 @@
+#include "geometry_microboone.fcl"
+#include "detectorproperties_microboone.fcl"
+#include "larproperties.fcl"
+#include "larfft_microboone.fcl"
+#include "messageservice.fcl"
+#include "simulationservices_microboone.fcl"
+#include "signalservices_microboone.fcl"
+#include "magfield.fcl"
+#include "databaseutil_microboone.fcl"
+#include "backtracker.fcl"
+#include "photpropservices_microboone.fcl"
+#include "opticaldetectorservices_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "timeservice_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+
+#
+# This file defines a set of most basic MicroBooNE services.
+# Services in this set must not use a large memory (<1MB) nor slow execution of
+# functions in the back ground ( < 10us/even if any ).
+#
+
+BEGIN_PROLOG
+
+# Define base set of microboone services shared in all inheriting configuration
+microboone_basic_services:
+{
+ ExptGeoHelperInterface:         @local::microboone_geometry_helper
+ Geometry:                       @local::microboone_geo 	           
+ DetectorProperties:             @local::microboone_detproperties      
+ LArProperties:                  @local::microboone_properties	   
+ DatabaseUtil:	                 @local::microboone_database           
+ TimeService:                    @local::microboone_timeservice
+}
+
+END_PROLOG
+
