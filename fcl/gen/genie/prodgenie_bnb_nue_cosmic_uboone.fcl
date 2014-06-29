@@ -1,0 +1,20 @@
+#include "prodgenie_common_cosmic_uboone.fcl"
+
+process_name: GenieGen
+
+services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
+                                                    "fileFormat", "root",
+                                                    "runType",    "physics",
+                                                    "fclName",    "prodgenie_bnb_nue_cosmic_uboone.fcl",
+                                                    "fclVersion", "v1_5",
+                                                    "ubProjectStage",   "gen",
+                                                    "ubProjectVersion", "v1_2" ]
+services.user.FileCatalogMetadataExtras.RenameTemplate: "prodgenie_bnb_nue_cosmic_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
+
+
+physics.producers.generator: @local::microboone_genie_simple
+physics.producers.generator.GlobalTimeOffset: 0.
+physics.producers.generator.RandomTimeOffset: 1600.
+physics.producers.generator.MixerConfig:     "map 12:14 -12:-14 14:12 -14:-12" # example flavor swapping
+physics.producers.generator.TopVolume: "volTPCActive"
+

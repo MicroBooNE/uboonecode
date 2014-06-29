@@ -1,6 +1,6 @@
 #include "standard_g4_uboone.fcl"
 
-services.user: @local::microboone_g4_dark_services_1window
+services.user: @local::microboone_g4_dark_services
 
 services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
 services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",

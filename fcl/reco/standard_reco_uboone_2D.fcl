@@ -18,14 +18,11 @@ services:
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_optical_services_3windows
+  user:         @local::microboone_services
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-#services.user.TriggerAlgoMicroBoone:   @local::microboone_triggeralgo
 
-# For FlashFinder to work, set trigger module clock frequency to 64MHz: same as PMT
-#services.user.TriggerAlgoMicroBoone.ClockFrequency_Trigger: 64
-#services.user.TriggerAlgoMicroBoone.FrameSize_Trigger:      102400
+services.user.PhotonVisibilityService: @local::microboone_photonvisibilityservice
 
 services.user.DatabaseUtil.ShouldConnect: false
 
@@ -135,4 +132,6 @@ physics.producers.cccluster.CCHitFinderAlg.CalDataModuleLabel:  "caldata"
 
 physics.producers.pandora.GeantModuleLabel:                     "largeant"
 physics.producers.pandora.HitFinderModuleLabel:                 "gaushit"
+
+
 
