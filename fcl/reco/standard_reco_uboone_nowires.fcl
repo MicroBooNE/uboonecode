@@ -22,7 +22,7 @@ services:
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_servicess
+  user:         @local::microboone_services
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
@@ -218,4 +218,5 @@ physics.producers.beziercalo.BTrackModuleLabel:                 "beziertracker"
 
 physics.producers.beamflashcompat.TrackModuleLabel:             "beziertracker"
 physics.producers.beamflashcompat.FlashModuleLabel:             "opflash"
+
 
