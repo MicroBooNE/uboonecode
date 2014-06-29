@@ -1,5 +1,4 @@
 #include "services_microboone_simulation.fcl"
-#include "services_microboone_simulation_1window.fcl"
 
 BEGIN_PROLOG
 
@@ -8,20 +7,7 @@ microboone_services:                                @local::microboone_basic_ser
 microboone_services.LArFFT:                         @local::microboone_larfft
 microboone_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
 microboone_services.BackTracker:                    @local::microboone_backtracker  
-microboone_services.OpDigiProperties:               @local::microboone_opdigiproperties
-
-#
-# We agreed to remove 1 window & 3 window from names (and just have one "standard" from former 3 window)
-# Below is temporary till we agree how we actually remove them.
-#
-
-# Define microboone_services_3window
-microboone_services_3window:                    @local::microboone_services
-
-# Define microboone_services_1window 
-microboone_services_1window:                    @local::microboone_services
-microboone_services_1window.TimeService:        @local::microboone_timeservice_1window
-microboone_services_1window.DetectorProperties: @local::microboone_detproperties_1window
+#microboone_services.OpDigiProperties:               @local::microboone_opdigiproperties
 
 microboone_message_services:
 {
