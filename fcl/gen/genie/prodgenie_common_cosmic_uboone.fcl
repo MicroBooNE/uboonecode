@@ -78,5 +78,5 @@ outputs:
  }
 }
 
-physics.producers.cry.TimeOffset: -1.6e-3
-physics.producers.cry.SampleTime: 3.2e-3
+physics.producers.cry.TimeOffset: -3.2e-3
+physics.producers.cry.SampleTime: 6.4e-3
