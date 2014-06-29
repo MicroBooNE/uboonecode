@@ -40,6 +40,8 @@ microboone_g4_dark_services:                    @local::microboone_gen_services
 microboone_g4_dark_services.LArG4Parameters:    @local::microboone_largeantparameters
 microboone_g4_dark_services.LArVoxelCalculator: @local::microboone_larvoxelcalculator
 microboone_g4_dark_services.MagneticField:      @local::no_mag
+microboone_g4_dark_services.LArG4Parameters.KeepEMShowerDaughters: true
+microboone_g4_dark_services.LArG4Parameters.StoreTrajectories: true
 
 # Define microboone_detsim_dark_services ... (2)
 microboone_detsim_dark_services:                                @local::microboone_basic_services
