@@ -1,17 +1,14 @@
 #include "standard_g4_3window_uboone.fcl"
 
-services.user: @local::microboone_g4_services_1window
+services.user: @local::microboone_g4_dark_services
 
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-services.user.LArG4Parameters.UseModBoxRecomb:          true
 services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
 services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
                                                     "fileFormat", "root",
                                                     "runType",    "physics",
-                                                    "fclName",    "standard_g4_uboone.fcl",
+                                                    "fclName",    "standard_g4_dark_3window_uboone.fcl",
                                                     "fclVersion", "v1_5",
                                                     "ubProjectStage",   "g4",
                                                     "ubProjectVersion", "v1_3" ]
 
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_g4.root"
-
+services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_g4_dark.root"

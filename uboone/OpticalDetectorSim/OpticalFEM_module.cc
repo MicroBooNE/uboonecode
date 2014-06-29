@@ -180,6 +180,18 @@ namespace opdet {
     art::Handle< std::vector<optdata::ChannelDataGroup> > channelDataHandle;
     event.getByLabel(fInputModule, channelDataHandle);
 
+    // If no channel data group found, provide warning an return
+    if(!channelDataHandle.isValid()){
+
+      std::cout << std::endl
+		<<"\033[93m" 
+		<< "<<" << __PRETTY_FUNCTION__ << ">>" << "  No channel data found. Skipping...."
+		<< "\033[00m" 
+		<< std::endl
+		<< std::endl;
+      return;
+    }
+
     // Create a work vector for the channel diff subtraction. To save
     // on execution time and memory use, make a rough estimate to the
     // size of this vector and allocate it now. That estimate will be

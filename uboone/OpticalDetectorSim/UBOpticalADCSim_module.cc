@@ -172,8 +172,10 @@ namespace opdet {
     //
     art::Handle< std::vector<sim::SimPhotons> > pmtHandle;
     evt.getByLabel(fG4ModName, pmtHandle);
-    if(!pmtHandle.isValid())
-      throw UBOpticalException(Form("Did not find any G4 photons from a prodcuer: %s",fG4ModName.c_str()));
+    if(!pmtHandle.isValid()) {
+      std::cout << Form("Did not find any G4 photons from a prodcuer: %s",fG4ModName.c_str()) << std::endl;
+      return;
+    }
 
     //std::vector<sim::SimPhotons> const& pmts(*pmtHandle);
 
@@ -233,8 +235,7 @@ namespace opdet {
 	for(auto const& name : fBeamModName) {
 	  art::Handle< std::vector<sim::BeamGateInfo> > beamHandle;
 	  evt.getByLabel(name, beamHandle);
-	  if(!beamHandle.isValid())
-	    throw UBOpticalException(Form("Did not find any BeamGateInfo from a prodcuer: %s",name.c_str()));
+	  if(!beamHandle.isValid()) continue;
 	  
 	  for(size_t i=0; i<beamHandle->size(); ++i) {
 

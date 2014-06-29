@@ -1,4 +1,4 @@
-#include "services_microboone_simulation.fcl"
+#include "services_microboone.fcl"
 #include "genie_microboone.fcl"
 #include "cry.fcl"
 

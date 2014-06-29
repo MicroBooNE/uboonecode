@@ -16,7 +16,10 @@ microboone_timeservice.DefaultTrigTime:   3200. # Default trigger time [us].
 microboone_timeservice.DefaultBeamTime:   3200. # Default beam time [us].
 
 microboone_timeservice_1window: @local::microboone_timeservice
-microboone_timeservice_1window.G4RefTime: 0
-microboone_timeservice_1window.TriggerOffset: 0
+microboone_timeservice_1window.G4RefTime:       0
+microboone_timeservice_1window.TriggerOffset:   0
+microboone_timeservice_1window.DefaultTrigTime: 0
+microboone_timeservice_1window.DefaultBeamTime: 0
+
 
 END_PROLOG
