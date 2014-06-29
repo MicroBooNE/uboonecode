@@ -537,17 +537,15 @@ namespace trigger{
       ShowCandidateTriggers();
 
     // Just make sure trigger clock is only used for sample/frame getter (i.e. no time used)
-    _trig_clock.SetTime(0);
+    _trig_clock.SetTime(::util::kTIME_MAX);
     util::ElecClock trig_time = _trig_clock;
 
     time_window_t bnb_active  (_trig_clock,_trig_clock);
     time_window_t numi_active (_trig_clock,_trig_clock);
     time_window_t bnb_gate    (_trig_clock,_trig_clock);
     time_window_t numi_gate   (_trig_clock,_trig_clock);
-
-    // Deadtime initialized to unrealistic range
-    _trig_clock.SetTime(::util::kTIME_MAX);
     time_window_t deadtime    (_trig_clock,_trig_clock);
+
     _trig_clock.SetTime(0);
 
     auto const mask0 = _mask.at(0);
@@ -608,6 +606,8 @@ namespace trigger{
 	auto const calib  = (*sample_iter).second.Triggered(trigger::kTriggerCalib);
 	auto const ext    = (*sample_iter).second.Triggered(trigger::kTriggerEXT);
 	auto const pc     = (*sample_iter).second.Triggered(trigger::kTriggerPC);
+
+	// Evaluate "active" = this trigger is within bnb/numi cosmic allow window
 	auto const active = ( InWindow(trig_time, bnb_active) || InWindow(trig_time, numi_active) );
 
 	// If BNB or NuMI, open new beam trigger gate
@@ -620,8 +620,8 @@ namespace trigger{
 	  numi_gate.second.SetTime(numi_gate.first.Time() + _trig_clock.Time(_bnb_gate_width));
 	}
 	
-	auto const bnb_gate_active  = InWindow(trig_time, bnb_gate);
-	auto const numi_gate_active = InWindow(trig_time, numi_gate);
+	auto const bnb_gate_active  = InWindow(trig_time, bnb_gate);  // true = this trigger is within bnb gate
+	auto const numi_gate_active = InWindow(trig_time, numi_gate); // true = this trigger is within numi gate
 
 	if(_debug_mode)
 	  {
@@ -635,8 +635,8 @@ namespace trigger{
 	      << Form("    External?   %s", (ext   ? "yes" : "no")) << std::endl
 	      << Form("    PC?         %s", (pc    ? "yes" : "no")) << std::endl
 	      << std::endl
-	      << Form("    NuMI   Window? %s", (numi_gate_active  ? "yes" : "no")) << std::endl
-	      << Form("    BNB    Window? %s", (bnb_gate_active ? "yes" : "no")) << std::endl
+	      << Form("    NuMI   Window? %s", (numi_gate_active ? "yes" : "no")) << std::endl
+	      << Form("    BNB    Window? %s", (bnb_gate_active  ? "yes" : "no")) << std::endl
 	      << Form("    Cosmic Window? %s", (active           ? "yes" : "no")) << std::endl;
 	    Report(msg.str());
 	  }
