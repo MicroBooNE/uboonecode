@@ -1,4 +1,4 @@
-#include "services_microboone_simulation.fcl"
+#include "services_microboone.fcl"
 #include "detsimmodules_microboone.fcl"
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
