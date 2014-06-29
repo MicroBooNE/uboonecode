@@ -1,15 +1,15 @@
-#include "prodsingle_common_3window_uboone.fcl"
+#include "prodsingle_common_uboone.fcl"
 
 process_name: SinglesGen
 
 services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
                                                     "fileFormat", "root",
                                                     "runType",    "physics",
-                                                    "fclName",    "prod_n_0.1-2.0GeV_isotropic_3window_uboone.fcl",
+                                                    "fclName",    "prod_n_0.1-2.0GeV_isotropic_uboone.fcl",
                                                     "fclVersion", "v1_5",
                                                     "ubProjectStage",   "gen",
                                                     "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "prod_n_0.1-2.0GeV_isotropic_3window_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
+services.user.FileCatalogMetadataExtras.RenameTemplate: "prod_n_0.1-2.0GeV_isotropic_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
 
 
 physics.producers.generator.PDG: [ 2112 ]           # n
