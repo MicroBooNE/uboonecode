@@ -33,20 +33,25 @@ namespace opdet {
     for(auto const &v : g4time) fInputPhotonTime.push_back(v);
   }
 
-  //--------------------------------------------------------------
-  void UBOpticalADC::GenDarkNoise(double dark_rate, double period)
-  //--------------------------------------------------------------
+  //--------------------------------------------------------------------------
+  //void UBOpticalADC::GenDarkNoise(double dark_rate, double period)
+  void UBOpticalADC::GenDarkNoise(const unsigned int ch, const double g4start)
+  //--------------------------------------------------------------------------
   {
     fDarkPhotonTime.clear();
 
+    art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
+
+    double dark_rate = ch_conf->GetParameter(kDarkRate,ch);
+
     unsigned int dark_count = RandomServer::GetME().Poisson(dark_rate * fDuration);
 
-    fDarkPhotonTime.resize(dark_count, fTimeInfo.Time());
+    fDarkPhotonTime.reserve(dark_count);
 
     for(size_t i=0; i<dark_count; ++i)
 
-      fDarkPhotonTime.at(i) += RandomServer::GetME().Uniform(period);
-    
+      fDarkPhotonTime.push_back(RandomServer::GetME().Uniform(fDuration*1.e3) + g4start);
+
   }
 
   //-------------------------------------------------------------------
@@ -77,19 +82,16 @@ namespace opdet {
 		 ch_conf->GetParameter(kHighGain,ch) *
 		 ch_conf->GetParameter(kGainSpread,ch));
     
-    GenDarkNoise(ch_conf->GetParameter(kDarkRate,ch),
-		 fDuration);
-
     // Create combined photon time with QE applied on signal photons
 
     fPhotonTime.clear();
-    fPhotonTime.reserve(fInputPhotonTime.size() * fDarkPhotonTime.size());
+    fPhotonTime.reserve(fInputPhotonTime.size() + fDarkPhotonTime.size());
     const double qe = ch_conf->GetParameter(kQE,ch);
     for(auto const &v : fDarkPhotonTime) fPhotonTime.push_back(v);
     for(auto const &v : fInputPhotonTime)
-      
+
       if(RandomServer::GetME().Uniform(1.) < qe) fPhotonTime.push_back(v);
-    
+
     fSPE.SetPhotons(fPhotonTime);
     fSPE.Process(high_tmp_wf,fTimeInfo);
 

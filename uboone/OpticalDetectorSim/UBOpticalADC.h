@@ -54,10 +54,8 @@ namespace opdet {
     /// Method to retrieve dark-noise photon time vector
     const std::vector<double>& DarkPhotonTime() const { return fDarkPhotonTime; }
     
-  protected:
-
     /// Function to generate dark noise photon timings (called in GenWaveform)
-    void GenDarkNoise(double dark_rate,double period);
+    void GenDarkNoise(const unsigned int ch, const double g4start);
 
   protected:
 

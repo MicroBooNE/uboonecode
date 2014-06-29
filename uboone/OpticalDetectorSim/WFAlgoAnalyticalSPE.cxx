@@ -41,7 +41,6 @@ namespace opdet {
 
       // Time in electronics clock frame (with T0)
       //double time = ::util::TimeService::GetME().G4ToElecTime(t);
-
       double time = ts->G4ToElecTime(t);
 
       if(fEnableSpread) time += RandomServer::GetME().Gaus(fT0,fT0Sigma) * 1.e-3;
@@ -62,9 +61,9 @@ namespace opdet {
       bool peaked=false;
       for(size_t i=rel_spe_start.Ticks(); i<wf.size(); ++i) {
 
-	double func_time = rel_spe_start.Time(i+1,0) - rel_spe_start.Time();
+	double func_time = rel_spe_start.Time(i,0) - rel_spe_start.Time() + rel_spe_start.TickPeriod()/2.;
 
-	double amp = EvaluateSPE(func_time * 1.e3);
+	double amp = EvaluateSPE(func_time*1.e3);
 
 	if(fEnableSpread) amp *= RandomServer::GetME().Gaus(fGain,fGainSigma * fGain);
 	else amp *= fGain;
@@ -72,7 +71,7 @@ namespace opdet {
 	wf.at(i) += amp;
 
 	if(!peaked && amp >0.01) peaked = true;
-	else if(amp<0.01) break;
+	else if(peaked && amp<0.01) break;
       }
       
     }

@@ -78,9 +78,9 @@ microboone_optical_adc_sim:
 
 }
 
-microboone_optical_adc_sim_1window:             @local::microboone_optical_adc_sim
-microboone_optical_adc_sim_1window.Duration:    1.6e3
-microboone_optical_adc_sim_1window.G4StartTime: 0
+#microboone_optical_adc_sim_1window:             @local::microboone_optical_adc_sim
+#microboone_optical_adc_sim_1window.Duration:    1.6e3
+#microboone_optical_adc_sim_1window.G4StartTime: 0
 
 
 END_PROLOG

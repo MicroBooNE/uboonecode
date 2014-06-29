@@ -212,12 +212,13 @@ namespace opdet {
 	photon_time.reserve(photon_time.size() + pmt_ptr->size());
 	
 	for(size_t photon_index=0; photon_index<pmt_ptr->size(); ++photon_index)
-	  
+
 	  photon_time.push_back(pmt_ptr->at(photon_index).Time);
 
       }
 
       fOpticalGen.SetPhotons(photon_time);
+      fOpticalGen.GenDarkNoise(ch,fG4StartTime);
       fOpticalGen.GenWaveform(ch,
 			      wfs->at(hg_index).at(ch),
 			      wfs->at(lg_index).at(ch));
