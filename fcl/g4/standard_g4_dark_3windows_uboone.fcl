@@ -1,12 +1,12 @@
-#include "standard_g4_uboone.fcl"
+#include "standard_g4_3window_uboone.fcl"
 
-services.user: @local::microboone_g4_dark_services_1window
+services.user: @local::microboone_g4_dark_services
 
 services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
 services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
                                                     "fileFormat", "root",
                                                     "runType",    "physics",
-                                                    "fclName",    "standard_g4_dark_uboone.fcl",
+                                                    "fclName",    "standard_g4_dark_3window_uboone.fcl",
                                                     "fclVersion", "v1_5",
                                                     "ubProjectStage",   "g4",
                                                     "ubProjectVersion", "v1_3" ]
