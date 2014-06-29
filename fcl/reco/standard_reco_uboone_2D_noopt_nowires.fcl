@@ -18,18 +18,11 @@ services:
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_services_3windows
+  user:         @local::microboone_servicess
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-services.user.TriggerAlgoMicroBoone:   @local::microboone_triggeralgo
 
-# For FlashFinder to work, set trigger module clock frequency to 64MHz: same as PMT
-#services.user.TriggerAlgoMicroBoone.ClockFrequency_Trigger: 64
-#services.user.TriggerAlgoMicroBoone.FrameSize_TPC:          102400
 
-# Set the time at which pmt readout sim's discrete clock counting starts/ends [us
-#services.user.OpDigiProperties.TimeBegin:     -3200
-#services.user.OpDigiProperties.TimeEnd:        3200
 
 services.user.DatabaseUtil.ShouldConnect: false
 
@@ -149,4 +142,5 @@ physics.producers.cccluster.CCHitFinderAlg.CalDataModuleLabel:  "caldata"
 
 physics.producers.pandora.GeantModuleLabel:                     "largeant"
 physics.producers.pandora.HitFinderModuleLabel:                 "gaushit"
+
 
