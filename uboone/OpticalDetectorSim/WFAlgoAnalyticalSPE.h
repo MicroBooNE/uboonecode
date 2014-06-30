@@ -46,26 +46,10 @@ namespace opdet {
     virtual void Process(std::vector<float> &wf,
 			 const ::util::ElecClock &start_time);
 
-    /// Function to set SPE function parameter (for generation)
-    void SetSPEFuncParams(double power_factor,
-			  double time_constant)
-    {
-      fSPEParam_PowerFactor  = power_factor;
-      fSPEParam_TimeConstant = time_constant;
-    }
-
   protected:
 
     /// Function to evaluate SPE formula @ time = x
     double EvaluateSPE(const double x) const;
-
-  protected:
-
-    /// SPE function power factor
-    double fSPEParam_PowerFactor;
-
-    /// SPE function Time constant
-    double fSPEParam_TimeConstant;
 
   };
 }

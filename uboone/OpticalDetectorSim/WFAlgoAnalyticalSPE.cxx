@@ -10,8 +10,6 @@ namespace opdet {
   //----------------------------------------------------------
   {
     Reset();
-    fSPEParam_TimeConstant = 6.; // 6 ns
-    fSPEParam_PowerFactor  = 10; // "(n-1)" power factor
   }
 
   //-------------------------------
@@ -58,21 +56,26 @@ namespace opdet {
       //
       // Add signal
       //
-      bool peaked=false;
+      //bool peaked=false;
       for(size_t i=rel_spe_start.Ticks(); i<wf.size(); ++i) {
 
 	double func_time = rel_spe_start.Time(i,0) - rel_spe_start.Time() + rel_spe_start.TickPeriod()/2.;
-
+	
+	if(func_time<0) continue;
+	
 	double amp = EvaluateSPE(func_time*1.e3);
 
 	if(fEnableSpread) amp *= RandomServer::GetME().Gaus(fGain,fGainSigma * fGain);
 	else amp *= fGain;
 
 	wf.at(i) += amp;
-
+	/*
 	if(!peaked && amp >0.01) peaked = true;
 	else if(peaked && amp<0.01) break;
+	*/
+	if(func_time>0.4) break;
       }
+      std::cout<<std::endl;
       
     }
   }
@@ -81,10 +84,10 @@ namespace opdet {
   double WFAlgoAnalyticalSPE::EvaluateSPE(const double x) const
   //------------------------------------------------------------
   {
-    double factorial = 1;
-    for(int i=1; i<=((int)(fSPEParam_PowerFactor)); ++i)
-      factorial *= (double)(i);
-    return  1./(7565.e3) * pow(x,fSPEParam_PowerFactor) * exp(-x/fSPEParam_TimeConstant) / factorial;
+    //
+    // x should be in ns.
+    //
+    return (0.002854 * pow(x,3) * exp( -x / 20.94) - 3.26e-5 * exp( -x / 110000)) / 36.22604;
   }
 
 }

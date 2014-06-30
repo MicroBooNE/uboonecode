@@ -79,7 +79,6 @@ namespace opdet {
 	       ch_conf->GetParameter(kT0Spread,ch));
 
     fSPE.SetGain(ch_conf->GetParameter(kHighGain,ch),
-		 ch_conf->GetParameter(kHighGain,ch) *
 		 ch_conf->GetParameter(kGainSpread,ch));
     
     // Create combined photon time with QE applied on signal photons
