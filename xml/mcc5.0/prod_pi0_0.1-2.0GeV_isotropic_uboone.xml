@@ -6,7 +6,7 @@
 <!ENTITY release "v02_01_01">
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
-<!ENTITY name "prod_muplus_0.1-2.0GeV_isotropic_3window_uboone">
+<!ENTITY name "prod_pi0_0.1-2.0GeV_isotropic_uboone">
 <!ENTITY tag "mcc4.0">
 ]>
 
@@ -30,7 +30,7 @@
   <!-- Project stages -->
 
   <stage name="gen">
-    <fcl>prod_muplus_0.1-2.0GeV_isotropic_3window_uboone.fcl</fcl>
+    <fcl>prod_pi0_0.1-2.0GeV_isotropic_uboone.fcl</fcl>
     <outdir>/uboone/data/uboonepro/&release;/gen/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/gen/&name;</workdir>
     <numjobs>100</numjobs>
@@ -47,26 +47,17 @@
     <defname>&name;_&tag;_g4</defname>
   </stage>
 
-  <stage name="optsim">
-    <fcl>standard_detsim_3window_uboone_optical.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/optsim/&name;</outdir>
-    <workdir>/uboone/app/users/uboonepro/&release;/optsim/&name;</workdir>
+  <stage name="detsim">
+    <fcl>standard_detsim_uboone.fcl</fcl>
+    <outdir>/uboone/data/uboonepro/&release;/detsim/&name;</outdir>
+    <workdir>/uboone/app/users/uboonepro/&release;/detsim/&name;</workdir>
     <numjobs>100</numjobs>
     <datatier>optical-simulated</datatier>
-    <defname>&name;_&tag;_optsim</defname>
-  </stage>
-
-  <stage name="tpcsim">
-    <fcl>standard_detsim_3window_uboone_tpc.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/tpcsim/&name;</outdir>
-    <workdir>/uboone/app/users/uboonepro/&release;/tpcsim/&name;</workdir>
-    <numjobs>100</numjobs>
-    <datatier>tpc-simulated</datatier>
-    <defname>&name;_&tag;_tpcsim</defname>
+    <defname>&name;_&tag;_detsim</defname>
   </stage>
 
   <stage name="reco2D">
-    <fcl>standard_reco_uboone_2D_noopt_nowires.fcl</fcl>
+    <fcl>standard_reco_uboone_2D.fcl</fcl>
     <outdir>/uboone/data/uboonepro/&release;/reco2D/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/reco2D/&name;</workdir>
     <numjobs>100</numjobs>
@@ -75,7 +66,7 @@
   </stage>
 
   <stage name="reco3D">
-    <fcl>standard_reco_uboone_3D_noopt.fcl</fcl>
+    <fcl>standard_reco_uboone_3D.fcl</fcl>
     <outdir>/uboone/data/uboonepro/&release;/reco3D/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/reco3D/&name;</workdir>
     <numjobs>100</numjobs>

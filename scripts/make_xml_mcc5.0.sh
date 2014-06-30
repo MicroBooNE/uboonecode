@@ -87,41 +87,37 @@ do
 
     # Detsim (optical + tpc).
 
-    detsimfcl=''
-    #if echo $newprj | grep -q 3window; then
-    #  detsimfcl=standard_detsim_3window_uboone.fcl
-    #fi
-    #echo "Using ${detsimfcl}."
+    detsimfcl=standard_detsim_uboone.fcl
 
     # Detsim optical
 
-    optsimfcl=''
-    if echo $newprj | grep -q 3window; then
-      optsimfcl=standard_detsim_3window_uboone_optical.fcl
-    fi
-    echo "Using ${optsimfcl}."
+    #optsimfcl=''
+    #if echo $newprj | grep -q 3window; then
+    #  optsimfcl=standard_detsim_3window_uboone_optical.fcl
+    #fi
+    #echo "Using ${optsimfcl}."
 
     # Detsim tpc
 
-    tpcsimfcl=standard_detsim_uboone.fcl
-    if echo $newprj | grep -q 3window; then
-      tpcsimfcl=standard_detsim_3window_uboone_tpc.fcl
-    fi
-    echo "Using ${tpcsimfcl}."
+    #tpcsimfcl=standard_detsim_uboone.fcl
+    #if echo $newprj | grep -q 3window; then
+    #  tpcsimfcl=standard_detsim_3window_uboone_tpc.fcl
+    #fi
+    #echo "Using ${tpcsimfcl}."
 
     # Reco 2D
 
-    reco2dfcl=standard_reco_uboone_2D_noopt_nowires.fcl
+    reco2dfcl=standard_reco_uboone_2D.fcl
     if echo $newprj | grep -q cosmic; then
-      reco2dfcl=standard_reco_uboone_2D_noopt_nowires_cosmic.fcl
+      reco2dfcl=standard_reco_uboone_2D_cosmic.fcl
     fi
     echo "Using ${reco2dfcl}."
 
     # Reco 3D
 
-    reco3dfcl=standard_reco_uboone_3D_noopt.fcl
+    reco3dfcl=standard_reco_uboone_3D.fcl
     if echo $newprj | grep -q cosmic; then
-      reco3dfcl=standard_reco_uboone_3D_noopt_cosmic.fcl
+      reco3dfcl=standard_reco_uboone_3D_cosmic.fcl
     fi
     echo "Using ${reco3dfcl}."
 
