@@ -1,11 +1,7 @@
 #include "services_microboone.fcl"
-#include "singles.fcl"
-#include "largeantmodules.fcl"
 #include "detsimwires_microboone.fcl"
 #include "caldata_microboone.fcl"
 #include "hitfindermodules_microboone.fcl"
-#include "cluster_microboone.fcl"
-#include "trackfindermodules_microboone.fcl"
 
 process_name: SinglesGen
 

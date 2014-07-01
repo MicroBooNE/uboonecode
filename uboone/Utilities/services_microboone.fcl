@@ -9,6 +9,10 @@ microboone_services.SignalShapingServiceMicroBooNE: @local::microboone_signalsha
 microboone_services.BackTracker:                    @local::microboone_backtracker  
 #microboone_services.OpDigiProperties:               @local::microboone_opdigiproperties
 
+# Define microboone_full_services ... this includes ALL services and we don't care about resource usage!
+microboone_full_services:                           @local::microboone_simulation_services
+microboone_full_services.BackTracker:               @local::microboone_backtracker
+
 microboone_message_services:
 {
   debugModules: ["*"]
