@@ -75,7 +75,6 @@ namespace opdet {
 	*/
 	if(func_time>0.4) break;
       }
-      std::cout<<std::endl;
       
     }
   }
@@ -87,7 +86,10 @@ namespace opdet {
     //
     // x should be in ns.
     //
-    return (0.002854 * pow(x,3) * exp( -x / 20.94) - 3.26e-5 * exp( -x / 110000)) / 36.22604;
+    // Max @ x=62.8000 (and I believe we don't need sub pico-second accuracy) 
+    //
+    return (2.853e-3 * pow(x,3) * exp( -x / 20.94) - 4.988e-3 * exp( -x / 110000)) / 35.208752;
+    
   }
 
 }
