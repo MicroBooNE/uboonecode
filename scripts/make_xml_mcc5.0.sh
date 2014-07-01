@@ -11,12 +11,14 @@
 #
 # Usage:
 #
-# make_xml_mcc5.0.sh [--user <user>] [--nev <n>] [--njob <n>]
+# make_xml_mcc5.0.sh [-h|--help] [--user <user>] [--local <dir|tar>] [--nev <n>] [--njob <n>]
 #
 # Options:
 #
 # --user <user> - Use users/<user> as working and output directories
 #                 (default is to use uboonepro).
+# --local <dir|tar> - Specify larsoft local directory or tarball (xml 
+#                     tag <local>...</local>).
 # --nev <n>     - Specify number of events for all samples.  Otherwise
 #                 use hardwired defaults.
 # --njob <n>    - Specify the number of worker jobs.
@@ -28,15 +30,28 @@
 userdir=uboonepro
 nevarg=0
 njobarg=0
+local=''
 
 while [ $# -gt 0 ]; do
   case "$1" in
 
     # User directory.
 
+    -h|--help )
+      echo "Usage: make_xml_mcc5.0.sh [-h|--help] [--user <user>] [--local <dir|tar>] [--nev <n>] [--njob <n>]"
+      exit
+    ;;
+
     --user )
     if [ $# -gt 1 ]; then
       userdir=users/$2
+      shift
+    fi
+    ;;
+
+    --local )
+    if [ $# -gt 1 ]; then
+      local=$2
       shift
     fi
     ;;
@@ -174,6 +189,12 @@ do
   <larsoft>
     <tag>&release;</tag>
     <qual>e5:prof</qual>
+EOF
+  echo "local=$local"
+  if [ x$local != x ]; then
+    echo "    <local>${local}</local>" >> $newxml
+  fi
+  cat <<EOF >> $newxml
   </larsoft>
 
   <!-- Project stages -->
