@@ -205,8 +205,8 @@ physics.producers.costrkcccalo.SpacePointModuleLabel:            "costrkcc"
 
 physics.analyzers.analysistree:  @local::microboone_analysistree
 physics.analyzers.analysistree.HitsModuleLabel:                 "gaushit"
-physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit", "trackkalmanhitcc", "trackkalsps", "stitch", "stitchkalmanhit","trackkalspscc", "stitchcc", "beziertrackercc", "beziertracker", "costrk", "costrkcc"]
-physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo", "trackkalmanhitcccalo", "trackkalspscalo", "stitchcalo", "stitchkalmanhitcalo","trackkalspscccalo", "stitchcccalo", "beziertrackercccalo", "beziertrackercalo", "costrkcalo", "costrkcccalo"]
+physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit", "trackkalmanhitcc", "trackkalsps", "stitch", "trackkalspscc", "stitchcc", "beziertrackercc", "beziertracker", "costrk", "costrkcc"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo", "trackkalmanhitcccalo", "trackkalspscalo", "stitchcalo", "trackkalspscccalo", "stitchcccalo", "beziertrackercccalo", "beziertrackercalo", "costrkcalo", "costrkcccalo"]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
 
