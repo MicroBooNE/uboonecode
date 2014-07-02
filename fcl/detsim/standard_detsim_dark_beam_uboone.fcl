@@ -16,4 +16,3 @@ services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER
 
 physics.producers.triggersim: @local::ubtrigger_dark_beam
 
-physics.simulate: [ triggersim, daq ]
