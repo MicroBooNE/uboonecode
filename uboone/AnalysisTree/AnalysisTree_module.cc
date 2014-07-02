@@ -1302,6 +1302,21 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
       << " tracking algorithms, but " << GetNTrackers() << " are specified."
       << "\nYou can increase kMaxTrackers and recompile.";
   } // if too many trackers
+  if (fTrackModuleLabel.size() != fCalorimetryModuleLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fCalorimetryModuleLabel.size() = "<<fCalorimetryModuleLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fVertexModuleLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fVertexModuleLabel.size() = "<<fVertexModuleLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fParticleIDModuleLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fParticleIDModuleLabel.size() = "<<fParticleIDModuleLabel.size();
+  }
 } // microboone::AnalysisTree::AnalysisTree()
 
 //-------------------------------------------------
