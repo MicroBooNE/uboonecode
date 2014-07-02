@@ -805,7 +805,9 @@ if [ x$LOCALTAR != x ]; then
 
   cd $TMP/work
   echo "Initializing localProducts from tarball ${LOCALTAR}."
-  . $TMP/local/setup
+  sed "s@setenv MRB_INSTALL.*@setenv MRB_INSTALL ${TMP}/local@" $TMP/local/setup | \
+  sed "s@setenv MRB_TOP.*@setenv MRB_TOP ${TMP}@" > $TMP/local/setup.local
+  . $TMP/local/setup.local
   #echo "MRB_INSTALL=${MRB_INSTALL}."
   #echo "MRB_QUALS=${MRB_QUALS}."
   echo "Setting up all localProducts."
