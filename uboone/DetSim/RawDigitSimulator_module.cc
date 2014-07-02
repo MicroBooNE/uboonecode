@@ -59,6 +59,7 @@ extern "C" {
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/LArFFT.h"
 #include "Utilities/LArProperties.h"
+#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 
 namespace art {
   class Event;
@@ -74,6 +75,12 @@ namespace detsim {
   class RawDigitSimulator : public art::EDProducer {
     
   public:
+
+    enum SignalGenType {
+      kGaus,
+      kSquare,
+      kSignalGenTypeMax
+    };
         
     explicit RawDigitSimulator(fhicl::ParameterSet const& pset); 
     virtual ~RawDigitSimulator();
@@ -94,12 +101,14 @@ namespace detsim {
     int                        fNTicks;           ///< number of ticks of the clock
     unsigned int               fNSamplesReadout;  ///< number of ADC readout samples in 1 readout frame
     unsigned int               fPedestal;         ///< pedestal amplitude [ADCs]
-    std::vector<double>        fSigAmp;           ///< signal amplitude [ADCs]
+    std::vector<double>        fSigAmp;           ///< signal amplitude [ADCs] or [# electrons]
     std::vector<double>        fSigWidth;         ///< signal wifdth [time ticks]
     std::vector<int>           fSigTime;          ///< Time at which pulse should happen
-    std::vector<std::string>   fSigType;          ///< signal type. For now gaussian or pulse
-    TH1D*                      fNoiseDist;        ///< distribution of noise counts
-    TH1D*                      fWaveform;         ///< waveform histogram
+    std::vector<unsigned char> fSigType;          ///< signal type. For now gaussian or pulse
+    bool                       fSigUnit;          ///< true = ADC, false = electrons
+    unsigned int               fChannel;          ///< Channel number
+
+    size_t fEventCount; ///< count of event processed
 
   }; // class RawDigitSimulator
 
@@ -123,6 +132,8 @@ namespace detsim{
     unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
 
     createEngine(seed);
+
+    fEventCount = 0;
   }
 
   //-------------------------------------------------
@@ -133,18 +144,31 @@ namespace detsim{
   void RawDigitSimulator::reconfigure(fhicl::ParameterSet const& p) 
   {
    
-    fNoiseFact        = p.get< double                    >("NoiseFact");
-    fNTicks           = p.get< int                       >("NTicks");
-    fPedestal         = p.get< unsigned int              >("Pedestal");
-    fSigAmp           = p.get< std::vector<double>       >("SigAmp");
-    fSigWidth         = p.get< std::vector<double>       >("SigWidth");
-    fSigType          = p.get< std::vector<std::string>  >("SigType");
-    fSigTime          = p.get< std::vector<int>          >("SigTime");
-    
-   
+    fNoiseFact        = p.get< double                     >("NoiseFact");
+    fNTicks           = p.get< int                        >("NTicks");
+    fPedestal         = p.get< unsigned int               >("Pedestal");
+    fSigAmp           = p.get< std::vector<double>        >("SigAmp");
+    fSigWidth         = p.get< std::vector<double>        >("SigWidth");
+    fSigType          = p.get< std::vector<unsigned char> >("SigType");
+    fSigTime          = p.get< std::vector<int>           >("SigTime");
+    fSigUnit          = p.get< bool                       >("SigUnit");
+    fChannel          = p.get< unsigned int               >("Channel");
     art::ServiceHandle<util::DetectorProperties> detprop;
     fSampleRate       = detprop->SamplingRate();
     fNSamplesReadout  = detprop->NumberTimeSamples();
+
+    // Simple check:
+    if( fSigAmp.size() != fSigWidth.size() ||
+	fSigAmp.size() != fSigType.size()  ||
+	fSigAmp.size() != fSigTime.size() )
+
+      throw cet::exception(__PRETTY_FUNCTION__) << "Input signal info vector have different length!";
+
+    for(auto const& v : fSigType)
+      
+      if(v >= kSignalGenTypeMax) 
+
+	throw cet::exception(__PRETTY_FUNCTION__) << "Invalid signal type found!";
 
     return;
   }
@@ -152,11 +176,7 @@ namespace detsim{
   //-------------------------------------------------
   void RawDigitSimulator::beginJob() 
   { 
-    // get access to the TFile service
-    art::ServiceHandle<art::TFileService> tfs;
-
-    fNoiseDist      = tfs->make<TH1D>("Noise", ";Noise (ADC);", 100, -20., 20.);
-    fWaveform       = tfs->make<TH1D>("Waveform", "; Pulse [ADC];", fNTicks, 0, fNTicks);
+    fEventCount = 0;
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fNTicks = fFFT->FFTSize();
@@ -181,45 +201,53 @@ namespace detsim{
     unsigned int signalSize = fNTicks;
     // vectors for working
     std::vector<short>    adcvec(signalSize, 0);	
-    std::vector<float>    sigvec(signalSize, 0);
+    std::vector<double>   sigvec(signalSize, 0);
     std::vector<float>    noisevec(signalSize, 0);
 
     // make an unique_ptr of sim::SimDigits that allows ownership of the produced
     // digits to be transferred to the art::Event after the put statement below
     std::unique_ptr< std::vector<raw::RawDigit>   >  digcol(new std::vector<raw::RawDigit>);
 	  
-    unsigned int chan = 1; 
-
     //fill all pulses according to their type and properties
     for (unsigned int n=0; n<fSigType.size(); n++){
     
-      if ( fSigType[n] == "gauss" ){//gaussian
+      if ( fSigType.at(n) == kGaus ){//gaussian
 	for (unsigned short i=0; i<signalSize; i++){
-	  sigvec[i] += fSigAmp[n]*TMath::Gaus(i,fSigTime[n],fSigWidth[n],0)*TMath::Sqrt((2*TMath::Pi()));
+	  sigvec.at(i) += fSigAmp.at(n)*TMath::Gaus(i,fSigTime.at(n),fSigWidth.at(n),0)*TMath::Sqrt((2*TMath::Pi()));
 	}
       }
-      if ( fSigType[n] == "pulse" ){//square pulse
-	for (int i=0; i<fSigWidth[n]; i++){
-	  unsigned int timetmp = (int)( (fSigTime[n] - fSigWidth[n]/2.) + i );
+      if ( fSigType.at(n) == kSquare ){//square pulse
+	for (int i=0; i<fSigWidth.at(n); i++){
+	  unsigned int timetmp = (int)( (fSigTime.at(n) - fSigWidth.at(n)/2.) + i );
 	  if ( (timetmp < signalSize) && (timetmp > 0) )
-	    sigvec[timetmp] += fSigAmp[n];
+	    sigvec.at(timetmp) += fSigAmp.at(n);
 	}
       }
-
+      
     }//fill all pulses
 
+    // If the unit is # electrons, run convolution
+    if(!fSigUnit) {
+      art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+      sss->Convolute(fChannel,sigvec);
+    }
 
     //generate noise
     noisevec = GenNoiseInTime();
 
+    // get access to the TFile service
+    art::ServiceHandle<art::TFileService> tfs;
+    TH1D* fNoiseDist = tfs->make<TH1D>(Form("Noise_%04zu",fEventCount), ";Noise (ADC);", fNTicks,-0.5,fNTicks-0.5);
+    TH1D* fWaveform  = tfs->make<TH1D>(Form("Waveform_%04zu",fEventCount), "; Pulse [ADC];", fNTicks, -0.5, fNTicks-0.5);
+
     for(unsigned int i = 0; i < signalSize; ++i){
-      float adcval = fPedestal + noisevec[i] + sigvec[i];
+      float adcval = fPedestal + noisevec.at(i) + sigvec.at(i);
       fWaveform->SetBinContent(i+1,(unsigned int)(adcval));
-      fNoiseDist->Fill(noisevec[i]);
-      adcvec[i] = (unsigned short)(adcval);
+      fNoiseDist->Fill(noisevec.at(i));
+      adcvec.at(i) = (unsigned short)(adcval);
     }
       
-    raw::RawDigit rd(chan, signalSize, adcvec, fCompression);
+    raw::RawDigit rd(fChannel, signalSize, adcvec, fCompression);
     rd.SetPedestal(fPedestal);
 
     // Then, resize adcvec back to full length!
@@ -231,7 +259,9 @@ namespace detsim{
     
     
     evt.put(std::move(digcol));
-    
+
+    fEventCount++;
+
     return;
   }
 

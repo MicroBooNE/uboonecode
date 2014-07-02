@@ -1,32 +1,37 @@
-#include "detsimmodules.fcl"
-
 BEGIN_PROLOG
 
-microboone_simwire:  
+standard_rawdigitsim:
 { 
  module_type:        "RawDigitSimulator"
  DriftEModuleLabel:  "largeant"
- SigType:            ["gauss","gauss","pulse"]#Signal Type: 'gauss' or 'pulse'
- SigWidth:           [10, 20, 50]             #in time-ticks: signal width
- SigAmp:             [100, 100, 100]          #in ADCs: signal amplitude
+
+ #
+ # Signal configuration
+ #
+ # Signal shape ... 0=gaus, 1=square
+ SigType:            [1,    1,    1,       1,       1,       1,       1,       1,       1,       1      ] 
+ # Signal width (for shape) in time-ticks
+ SigWidth:           [1,    1,    1,       1,       1,       1,       1,       1,       1,       1      ] 
+ # Signal amplitude in ADC OR #electrons (control unit by fSigUnit)
+ SigAmp:             [600,  600,  1601.25, 1282.87, 3774.56, 2108.34, 4502.82, 4036.27, 2907.63, 567.65 ]
+ # Signal timing in ticks
+ SigTime:            [5310, 5311, 5312,    5313,    5314,    5315,    5316,    5317,    5318,    5319   ]
+ SigUnit:            false
+ Channel:            7775
  Pedestal:           400                      #in ADCs: signal pedestal value
- NTicks:             3200                     #in time-ticks: length of pulse
- SigTime:            [200, 500, 2500]         #in time-ticks: when pulse will happen
+ NTicks:             9600                     #in time-ticks: length of pulse
  NoiseFact:          3.00                     #Noise Scale to use with histogram
  NoiseWidth:         62.4                     #Exponential Noise width (kHz)
  NoiseRand:          0.1                      #frac of randomness of noise freq-spec
  LowCutoff:          7.5                      #Low frequency filter cutoff (kHz)
  CompressionType:    "none"                   #could also be none		
- GenNoise:            false                    #gen noise...if false function not called
- GetNoiseFromHisto:   false
- GenNoiseInTime:      false
- BaselineRMS:         0.3                     #ADC baseline fluctuation within channel        
- NoiseFileFname:      "uboone_noise_v0.1.root"
- NoiseHistoName:      "NoiseFreq"    
-
+ GenNoise:           false                    #gen noise...if false function not called
+ GetNoiseFromHisto:  false
+ GenNoiseInTime:     false
+ BaselineRMS:        0.3                     #ADC baseline fluctuation within channel        
+ NoiseFileFname:     "uboone_noise_v0.1.root"
+ NoiseHistoName:     "NoiseFreq"    
+ 
 }
-microboone_simwireana: @local::standard_simwireana
-
-microboone_wienerfilterana: @local::standard_wienerfilterana
 
 END_PROLOG
