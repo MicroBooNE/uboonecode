@@ -167,7 +167,7 @@ do
 <!-- Production Project -->
 
 <!DOCTYPE project [
-<!ENTITY release "v02_01_01">
+<!ENTITY release "v02_02_00">
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
 <!ENTITY name "$newprj">
