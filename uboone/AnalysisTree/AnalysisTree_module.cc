@@ -1156,7 +1156,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("taulife",&taulife,"taulife/D");
 
   CreateBranch("no_hits",&no_hits,"no_hits/I");
-  CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits]/S");
+  CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits]/B");
   CreateBranch("hit_wire",hit_wire,"hit_wire[no_hits]/S");
   CreateBranch("hit_channel",hit_channel,"hit_channel[no_hits]/S");
   CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
