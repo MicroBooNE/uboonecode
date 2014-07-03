@@ -9,18 +9,26 @@
 // - save the electron clusters associated with each digit.
 //
 ////////////////////////////////////////////////////////////////////////
+
+// C/C++ standard library
+#include <stdexcept> // std::range_error
 #include <vector>
 #include <string>
-#include <algorithm>
-#include <sstream>
-#include <fstream>
-#include <bitset>
+#include <algorithm> // std::fill()
 
-extern "C" {
-#include <sys/types.h>
-#include <sys/stat.h>
-}
+// CLHEP libraries
+#include "CLHEP/Random/RandFlat.h"
+#include "CLHEP/Random/RandGaussQ.h"
 
+// ROOT libraries
+#include "TMath.h"
+#include "TComplex.h"
+#include "TString.h"
+#include "TH2.h"
+#include "TH1D.h"
+#include "TFile.h"
+
+// art library and utilities
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
@@ -31,28 +39,19 @@ extern "C" {
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Utilities/LArFFT.h"
+// LArSoft libraries
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RawData/TriggerData.h"
+#include "Simulation/SimChannel.h"
+#include "Geometry/Geometry.h"
+#include "Utilities/LArFFT.h"
 #include "Utilities/LArProperties.h"
+#include "Utilities/DetectorProperties.h"
 #include "Utilities/TimeService.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "Geometry/Geometry.h"
 #include "Simulation/sim.h"
-#include "Simulation/SimChannel.h"
-#include "Utilities/DetectorProperties.h"
 
-#include "TMath.h"
-#include "TComplex.h"
-#include "TString.h"
-#include "TH2.h"
-#include "TH1D.h"
-#include "TFile.h"
-#include "TRandom.h"
-
-#include "CLHEP/Random/RandFlat.h"
-#include "CLHEP/Random/RandGaussQ.h"
 
 ///Detector simulation of raw signals on wires
 namespace detsim {
@@ -162,11 +161,11 @@ namespace detsim {
       
       if(temp!=NULL)
       {
-	fNoiseHist=new TH1D(fNoiseHistoName.c_str(),fNoiseHistoName.c_str(),temp->GetNbinsX(),0,temp->GetNbinsX());
-	temp->Copy(*fNoiseHist);
+        fNoiseHist=new TH1D(fNoiseHistoName.c_str(),fNoiseHistoName.c_str(),temp->GetNbinsX(),0,temp->GetNbinsX());
+        temp->Copy(*fNoiseHist);
       }
       else
-	throw cet::exception("SimWireMicroBooNE") << " Could not find noise histogram in Root file\n";
+        throw cet::exception("SimWireMicroBooNE") << " Could not find noise histogram in Root file\n";
       in->Close();
     
       }
@@ -192,11 +191,11 @@ namespace detsim {
 
    if ( fNTicks%2 != 0 ) 
       LOG_DEBUG("SimWireMicroBooNE") << "Warning: FFTSize not a power of 2. "
-				     << "May cause issues in (de)convolution.\n";
+                                     << "May cause issues in (de)convolution.\n";
 
     if ( fNTimeSamples > fNTicks ) 
       mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
-					<< "greater than FFTSize!";
+                                        << "greater than FFTSize!";
     
     return;
 
@@ -219,12 +218,12 @@ namespace detsim {
     if(!trig_array.isValid()) 
       
       std::cout << std::endl << "  "
-		<< "\033[95m" << "<<" << __PRETTY_FUNCTION__ << ">>" << "\033[00m"
-		<< std::endl << "  "
-		<< "\033[93m"
-		<< " No trigger data exists => will use the default trigger time set in TimeService..."
-		<< "\033[00m"
-		<< std::endl;
+                << "\033[95m" << "<<" << __PRETTY_FUNCTION__ << ">>" << "\033[00m"
+                << std::endl << "  "
+                << "\033[93m"
+                << " No trigger data exists => will use the default trigger time set in TimeService..."
+                << "\033[00m"
+                << std::endl;
 
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
@@ -263,37 +262,37 @@ namespace detsim {
     std::map<int,double>::iterator mapIter;      
     for(chan = 0; chan < geo->Nchannels(); chan++) {
 
-      for(auto& v : chargeWork) v=0;
+      std::fill(chargeWork.begin(), chargeWork.end(), 0.);
 
       // get the sim::SimChannel for this channel
       const sim::SimChannel* sc = channels.at(chan);
 
       if( sc ){
 
-	// loop over the tdcs and grab the number of electrons for each
-	for(int t = 0; t < (int)(chargeWork.size()); ++t) {
+        // loop over the tdcs and grab the number of electrons for each
+        for(int t = 0; t < (int)(chargeWork.size()); ++t) {
 
-	  int tdc = ts->TPCTick2TDC(t);
+          int tdc = ts->TPCTick2TDC(t);
 
-	  // continue if tdc < 0
-	  if( tdc < 0 ) continue;
+          // continue if tdc < 0
+          if( tdc < 0 ) continue;
 
-	  chargeWork.at(t) = sc->Charge(tdc);
+          chargeWork.at(t) = sc->Charge(tdc);
 
-	}
+        }
 
         // Convolve charge with appropriate response function 
-	sss->Convolute(chan,chargeWork);
+        sss->Convolute(chan,chargeWork);
 
       }
       
       //Generate Noise:
       std::vector<float> noisetmp(fNTicks,0.);
       if (fGenNoise){
-	if (fGenNoiseInTime)
-	  GenNoiseInTime(noisetmp);
-	else
-	  GenNoiseInFreq(noisetmp);
+        if (fGenNoiseInTime)
+          GenNoiseInTime(noisetmp);
+        else
+          GenNoiseInFreq(noisetmp);
       }
 
       //Pedestal determination
@@ -309,34 +308,50 @@ namespace detsim {
       CLHEP::RandGaussQ rGaussPed(engine, 0.0, fBaselineRMS);
       ped_mean += rGaussPed.fire();
       
+      // resize the adcvec to be the correct number of time samples
+      // (the compression from the previous loop might have changed size)
+      // almost no-op after the first loop, since the memory is already there
+      adcvec.resize(fNTimeSamples);
+      
+      // rather than checking each single one of the sequential accesses we are
+      // going to perform, we do it once for all here:
+      if (noisetmp.size() < fNTimeSamples)
+        throw std::range_error("SimWireMicroBooNE: noisetmp vector too small");
+      if (chargeWork.size() < fNTimeSamples)
+        throw std::range_error("SimWireMicroBooNE: chargeWork vector too small");
+      if (adcvec.size() < fNTimeSamples)
+        throw std::range_error("SimWireMicroBooNE: adcvec vector too small");
+      
       for(unsigned int i = 0; i < fNTimeSamples; ++i){
- 	float adcval = noisetmp.at(i) + chargeWork.at(i) + ped_mean;
-	
-	//Add Noise to NoiseDist Histogram
-	if (i%1000==0)
-	  fNoiseDist->Fill(noisetmp.at(i));
+        float adcval = noisetmp[i] + chargeWork[i] + ped_mean;
+        
+        //Add Noise to NoiseDist Histogram
+        if (i%1000==0)
+          fNoiseDist->Fill(noisetmp[i]);
 
-	//allow for ADC saturation
-	if ( adcval > adcsaturation )
-	  adcval = adcsaturation;
-	//don't allow for "negative" saturation
-	if ( adcval < 0 )
-	  adcval = 0;
+        //allow for ADC saturation
+        if ( adcval > adcsaturation )
+          adcval = adcsaturation;
+        //don't allow for "negative" saturation
+        if ( adcval < 0 )
+          adcval = 0;
 
-	adcvec.at(i) = (unsigned short)(adcval);
+        adcvec[i] = (unsigned short)(adcval);
 
       }// end loop over signal size
 
-      // resize the adcvec to be the correct number of time samples, 
-      // just drop the extra samples
-      //adcvec.resize(fNTimeSamples);
-      
       // compress the adc vector using the desired compression scheme,
       // if raw::kNone is selected nothing happens to adcvec
       // This shrinks adcvec, if fCompression is not kNone.
       raw::Compress(adcvec, fCompression); 
       
-      // add this digit to the collection
+      // add this digit to the collection;
+      // adcvec is copied, not moved: in case of compression, adcvec will show
+      // less data: e.g. if the uncompressed adcvec has 9600 items, after
+      // compression it will have maybe 5000, but the memory of the other 4600
+      // is still there, although unused; a copy of adcvec will instead have
+      // only 5000 items. All 9600 items of adcvec will be recovered for free
+      // and used on the next loop.
       raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
       rd.SetPedestal(ped_mean);
       digcol->push_back(rd);
@@ -373,11 +388,11 @@ namespace detsim {
 
     if(noise.size() != fNTicks)
       throw cet::exception("SimWireMicroBooNE")
-	<< "\033[93m"
-	<< "Frequency noise vector length must match fNTicks (FFT size)"
-	<< " ... " << noise.size() << " != " << fNTicks
-	<< "\033[00m"
-	<< std::endl;
+        << "\033[93m"
+        << "Frequency noise vector length must match fNTicks (FFT size)"
+        << " ... " << noise.size() << " != " << fNTicks
+        << "\033[00m"
+        << std::endl;
 
     // noise in frequency space
     std::vector<TComplex> noiseFrequency(fNTicks/2+1, 0.);
@@ -394,22 +409,22 @@ namespace detsim {
       flat.fireArray(2,rnd,0,1);
       //if not from histo or in time --> then hardcoded freq. spectrum
       if( !fGetNoiseFromHisto )
-	{
-	  pval = fNoiseFact*exp(-(double)i*binWidth/fNoiseWidth);
-	  // low frequency cutoff     
-	  lofilter = 1.0/(1.0+exp(-(i-fLowCutoff/binWidth)/0.5));
-	  // randomize 10%
-	  
-	  pval *= lofilter*((1-fNoiseRand)+2*fNoiseRand*rnd[0]);
-	}
+        {
+          pval = fNoiseFact*exp(-(double)i*binWidth/fNoiseWidth);
+          // low frequency cutoff     
+          lofilter = 1.0/(1.0+exp(-(i-fLowCutoff/binWidth)/0.5));
+          // randomize 10%
+          
+          pval *= lofilter*((1-fNoiseRand)+2*fNoiseRand*rnd[0]);
+        }
       
       
       else
-	{
-	  
-	  pval = fNoiseHist->GetBinContent(i)*((1-fNoiseRand)+2*fNoiseRand*rnd[0])*fNoiseFact; 
-	  //mf::LogInfo("SimWireMicroBooNE")  << " pval: " << pval;
-	}
+        {
+          
+          pval = fNoiseHist->GetBinContent(i)*((1-fNoiseRand)+2*fNoiseRand*rnd[0])*fNoiseFact; 
+          //mf::LogInfo("SimWireMicroBooNE")  << " pval: " << pval;
+        }
       phase = rnd[1]*2.*TMath::Pi();
       TComplex tc(pval*cos(phase),pval*sin(phase));
       noiseFrequency.at(i) += tc;
