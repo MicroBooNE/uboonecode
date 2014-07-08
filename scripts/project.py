@@ -356,9 +356,9 @@ class StageDef:
         # of jobs.
 
         if self.target_size != 0 and self.inputlist != '':
-            input_list_file = open(self.inputlist, 'r')
+            input_filenames = saferead(self.inputlist)
             size_tot = 0
-            for line in input_list_file.readlines():
+            for line in input_filenames:
                 filename = string.split(line)[0]
                 filesize = os.stat(filename).st_size
                 size_tot = size_tot + filesize
@@ -843,8 +843,8 @@ def parsedir(dirname):
 
 def path_to_url(path):
     url = path
-    if path[:5] == '/pnfs':
-        url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr' + path[5:]
+    if path[0:6] == '/pnfs/':
+        url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/' + path[6:]
     return url
 
 # Check root files (*.root) in the specified directory.
@@ -921,8 +921,8 @@ def get_input_files(stage):
 
     elif stage.inputlist != '':
         try:
-            input_list_file = open(stage.inputlist, 'r')
-            for line in input_list_file.readlines():
+            input_filenames = saferead(stage.inputlist)
+            for line in input_filenames:
                 words = string.split(line)
                 result.append(words[0])
         except:
@@ -2038,11 +2038,11 @@ def main(argv):
             missing_pairs = []
             missing_filename = os.path.join(stage.outdir, 'missing.txt')
             try:
-                missing_file = open(missing_filename, 'r')
+                missing_files = saferead(missing_filename)
             except:
                 print 'Cound not open %s.' % missing_filename
                 return 1
-            for line in missing_file.readlines():
+            for line in missing_files:
                 words = string.split(line)
                 missing_pair = (int(words[0]), int(words[1]))
                 missing_pairs.append(missing_pair)
@@ -2062,8 +2062,8 @@ def main(argv):
             cpids = []
             cpids_filename = os.path.join(stage.outdir, 'cpids.list')
             try:
-                cpids_file = open(cpids_filename, 'r')
-                for line in cpids_file.readlines():
+                cpids_files = saferead(cpids_filename)
+                for line in cpids_files:
                     cpids.append(line.strip())
             except:
                 pass
