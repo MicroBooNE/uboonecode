@@ -1175,6 +1175,11 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         os.remove(histlistname_temp)
     histlist = open(histlistname_temp, 'w')
 
+    histurlsname_temp = 'histurls.list'
+    if os.path.exists(histurlsname_temp):
+        os.remove(histurlsname_temp)
+    histurls = open(histurlsname_temp, 'w')
+
     # See if there are any missing processes and generate file "missing.txt."
     # Skip this step for sam input.
 
@@ -1202,6 +1207,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     for hist in hists:
         histlist.write('%s\n' % hist)
+        histurls.write('%s\n' % path_to_url(hist))
 
     # Print summary.
 
@@ -1235,15 +1241,25 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     subprocess.call(['ifdh', 'cp', histlistname_temp, histlistname])
     os.remove(histlistname_temp)
 
+    histurls.close()
+
     # Make merged histogram file using histmerge.
 
     if len(hists) > 0:
         print "Merging %d histogram files using %s." % (len(hists), histmerge)
-        rc = subprocess.call([histmerge, "-v", "0", "-f", "-k", "-T", 
-                              os.path.join(dir, "hist.root"), 
-                              "@" + os.path.join(dir, "hists.list")])
+
+        histname = os.path.join(dir, 'hist.root')
+        histname_temp = 'hist.root'
+        if os.path.exists(histname_temp):
+            os.remove(histname_temp)
+        rc = subprocess.call([histmerge, "-v", "0", "-f", "-k", "-T",
+                              histname_temp, '@' + histurlsname_temp])
         if rc != 0:
             print "%s exit status %d" % (histmerge, rc)
+        subprocess.call(['ifdh', 'rm', histname], stdout=-1, stderr=-1)
+        subprocess.call(['ifdh', 'cp', histname_temp, histname])
+        os.remove(histurlsname_temp)
+        os.remove(histname_temp)
 
     # Make sam files.
 
