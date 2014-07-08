@@ -154,15 +154,24 @@ samweb_cli = None
 samweb = None           # SAMWebClient object
 extractor_dict = None   # Metadata extractor
 
+# dCache-safe method to test whether path exists without opening file.
+
+def safeexist(path):
+    try:
+        os.stat(path)
+        return True
+    except:
+        return False
+
 # dCache-safe method to return contents (list of lines) of file.
 
-def saferead(name):
+def saferead(path):
     lines = []
-    if name[0:6] == '/pnfs/':
-        proc = subprocess.Popen(['ifdh', 'cp', name, '/dev/fd/1'], stdout=subprocess.PIPE)
+    if path[0:6] == '/pnfs/':
+        proc = subprocess.Popen(['ifdh', 'cp', path, '/dev/fd/1'], stdout=subprocess.PIPE)
         lines = proc.stdout.readlines()
     else:
-        lines = open(name).readlines()
+        lines = open(path).readlines()
     return lines
 
 # XML exception class.
@@ -346,9 +355,9 @@ class StageDef:
     # (We don't currently check sam input datasets).
 
     def checkinput(self):
-        if self.inputfile != '' and not os.path.exists(self.inputfile):
+        if self.inputfile != '' and not safeexist(self.inputfile):
             raise IOError, 'Input file %s does not exist.' % self.inputfile
-        if self.inputlist != '' and not os.path.exists(self.inputlist):
+        if self.inputlist != '' and not safeexist(self.inputlist):
             raise IOError, 'Input list %s does not exist.' % self.inputlist
 
         # If target size is nonzero, and input is from a file list, calculate
@@ -1010,7 +1019,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
         if os.path.isdir(subpath) and subpath[-6:] == '_start':
             filename = os.path.join(subpath, 'sam_project.txt')
-            if os.path.exists(filename):
+            if safeexist(filename):
                 sam_project = saferead(filename)[0].strip()
                 if sam_project != '' and not sam_project in sam_projects:
                     sam_projects.append(sam_project)
@@ -1045,7 +1054,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad:
                 stat_filename = os.path.join(subpath, 'lar.stat')
-                if os.path.exists(stat_filename):
+                if safeexist(stat_filename):
                     status = 0
                     try:
                         status = int(saferead(stat_filename)[0].strip())
@@ -1062,7 +1071,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad and input_def != '':
                 filename = os.path.join(subpath, 'sam_project.txt')
-                if not os.path.exists(filename):
+                if not safeexist(filename):
                     bad = 1
                 if not bad:
                     sam_project = saferead(filename)[0].strip()
@@ -1074,7 +1083,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad and input_def != '':
                 filename = os.path.join(subpath, 'cpid.txt')
-                if not os.path.exists(filename):
+                if not safeexist(filename):
                     bad = 1
                 if not bad:
                     cpid = saferead(filename)[0].strip()
@@ -1143,24 +1152,28 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # Open files.
 
     filelistname = os.path.join(dir, 'files.list')
-    if os.path.exists(filelistname):
-        os.remove(filelistname)
-    filelist = open(filelistname, 'w')
+    filelistname_temp = 'files.list'
+    if os.path.exists(filelistname_temp):
+        os.remove(filelistname_temp)
+    filelist = open(filelistname_temp, 'w')
 
     eventslistname = os.path.join(dir, 'events.list')
-    if os.path.exists(eventslistname):
-        os.remove(eventslistname)
-    eventslist = open(eventslistname, 'w')
+    eventslistname_temp = 'events.list'
+    if os.path.exists(eventslistname_temp):
+        os.remove(eventslistname_temp)
+    eventslist = open(eventslistname_temp, 'w')
 
     missingname = os.path.join(dir, 'missing.txt')
-    if os.path.exists(missingname):
-        os.remove(missingname)
-    missing = open(missingname, 'w')
+    missingname_temp = 'missing.txt'
+    if os.path.exists(missingname_temp):
+        os.remove(missingname_temp)
+    missing = open(missingname_temp, 'w')
 
     histlistname = os.path.join(dir, 'hists.list')
-    if os.path.exists(histlistname):
-        os.remove(histlistname)
-    histlist = open(histlistname, 'w')
+    histlistname_temp = 'hists.list'
+    if os.path.exists(histlistname_temp):
+        os.remove(histlistname_temp)
+    histlist = open(histlistname_temp, 'w')
 
     # See if there are any missing processes and generate file "missing.txt."
     # Skip this step for sam input.
@@ -1203,9 +1216,24 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # Close files.
 
     filelist.close()
+    subprocess.call(['ifdh', 'rm', filelistname], stdout=-1, stderr=-1)
+    subprocess.call(['ifdh', 'cp', filelistname_temp, filelistname])
+    os.remove(filelistname_temp)
+
     eventslist.close()
+    subprocess.call(['ifdh', 'rm', eventslistname], stdout=-1, stderr=-1)
+    subprocess.call(['ifdh', 'cp', eventslistname_temp, eventslistname])
+    os.remove(eventslistname_temp)
+
     missing.close()
+    subprocess.call(['ifdh', 'rm', missingname], stdout=-1, stderr=-1)
+    subprocess.call(['ifdh', 'cp', missingname_temp, missingname])
+    os.remove(missingname_temp)
+
     histlist.close()
+    subprocess.call(['ifdh', 'rm', histlistname], stdout=-1, stderr=-1)
+    subprocess.call(['ifdh', 'cp', histlistname_temp, histlistname])
+    os.remove(histlistname_temp)
 
     # Make merged histogram file using histmerge.
 
@@ -1553,7 +1581,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
                     # Split off the node, if any, from the location.
 
                     local_path = os.path.join(sam_loc['location'].split(':')[-1], filename)
-                    if not os.path.exists(local_path):
+                    if not safeexist(local_path):
                         locs_to_remove.append(sam_loc['location'])
 
         # Loop over sam locations and identify files that can be uploaded.
@@ -1603,7 +1631,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
                 # Test whether this file has already been copied to dropbox directory.
                 
                 dropbox_filename = os.path.join(dropbox, filename)
-                if os.path.exists(dropbox_filename):
+                if safeexist(dropbox_filename):
                     print 'File %s already exists in dropbox %s.' % (filename, dropbox)
                 else:
 
