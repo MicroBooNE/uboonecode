@@ -838,6 +838,15 @@ def parsedir(dirname):
     
     return result
 
+# Convert pnfs path to xrootd url.
+# Don't do anything to non-pnfs paths.
+
+def path_to_url(path):
+    url = path
+    if path[:5] == '/pnfs':
+        url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr' + path[5:]
+    return url
+
 # Check root files (*.root) in the specified directory.
 
 def check_root(dir):
@@ -865,7 +874,9 @@ def check_root(dir):
     filenames = os.listdir(dir)
     for filename in filenames:
         if filename[-5:] == '.root':
-            file = ROOT.TFile(os.path.join(dir, filename))
+            path = os.path.join(dir, filename)
+            url = path_to_url(path)
+            file = ROOT.TFile.Open(url)
             if file.IsOpen() and not file.IsZombie():
                 obj = file.Get('Events')
                 if obj and obj.InheritsFrom('TTree'):
@@ -890,6 +901,7 @@ def check_root(dir):
                 # Print a warning, but don't trigger any other error.
 
                 print 'Warning: File %s in directory %s is not a valid root file.' % (filename, dir)
+                sys.exit(1)
 
     # Done.
                     
