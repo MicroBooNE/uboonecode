@@ -231,6 +231,16 @@ class SafeFile:
         self.file = None
         return
 
+# Function for opening files for writing using either python's built-in
+# file object or SafeFile for dCache/pnfs files, as appropriate.
+
+def safeopen(destination):
+    if destination[0:6] == '/pnfs':
+        file = SafeFile(destination)
+    else:
+        file = open(destination, 'w')
+    return file
+
 # Stage definition class.
 
 class StageDef:
@@ -1197,16 +1207,16 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # Open files.
 
     filelistname = os.path.join(dir, 'files.list')
-    filelist = SafeFile(filelistname)
+    filelist = safeopen(filelistname)
 
     eventslistname = os.path.join(dir, 'events.list')
-    eventslist = SafeFile(eventslistname)
+    eventslist = safeopen(eventslistname)
 
     missingname = os.path.join(dir, 'missing.txt')
-    missing = SafeFile(missingname)
+    missing = safeopen(missingname)
 
     histlistname = os.path.join(dir, 'hists.list')
-    histlist = SafeFile(histlistname)
+    histlist = safeopen(histlistname)
 
     histurlsname_temp = 'histurls.list'
     if os.path.exists(histurlsname_temp):
@@ -1266,17 +1276,21 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         print "Merging %d histogram files using %s." % (len(hists), histmerge)
 
         histname = os.path.join(dir, 'hist.root')
-        histname_temp = 'hist.root'
+        if histname[0:6] == '/pnfs/':
+            histname_temp = 'hist.root'
+        else:
+            histname_temp = histname
         if os.path.exists(histname_temp):
             os.remove(histname_temp)
         rc = subprocess.call([histmerge, "-v", "0", "-f", "-k", "-T",
                               histname_temp, '@' + histurlsname_temp])
         if rc != 0:
             print "%s exit status %d" % (histmerge, rc)
-        if safeexist(histname):
-            subprocess.call(['ifdh', 'rm', histname])
-        subprocess.call(['ifdh', 'cp', histname_temp, histname])
-        os.remove(histname_temp)
+        if histname != histname_temp:
+            if safeexist(histname):
+                os.remove(histname)
+            subprocess.call(['ifdh', 'cp', histname_temp, histname])
+            os.remove(histname_temp)
     os.remove(histurlsname_temp)
 
     # Make sam files.
@@ -1286,7 +1300,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         # List of successful sam projects.
         
         sam_projects_filename = os.path.join(dir, 'sam_projects.list')
-        sam_projects_file = SafeFile(sam_projects_filename)
+        sam_projects_file = safeopen(sam_projects_filename)
         for sam_project in sam_projects:
             sam_projects_file.write('%s\n' % sam_project)
         sam_projects_file.close()
@@ -1294,7 +1308,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         # List of successfull consumer process ids.
 
         cpids_filename = os.path.join(dir, 'cpids.list')
-        cpids_file = SafeFile(cpids_filename)
+        cpids_file = safeopen(cpids_filename)
         for cpid in cpids:
             cpids_file.write('%s\n' % cpid)
         cpids_file.close()
