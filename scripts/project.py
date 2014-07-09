@@ -185,6 +185,52 @@ class XMLError(Exception):
     def __str__(self):
         return self.value
 
+# File-like class for writing files in pnfs space.
+# Temporary file is opened in current directory and copied to final destination
+# on close using ifdh.
+
+class SafeFile:
+
+    # Constructor.
+
+    def __init__(self, destination=''):
+        self.destination = ''
+        self.filename = ''
+        self.file = None
+        if destination != '':
+            self.open(destination)
+        return
+
+    # Open method.
+    
+    def open(self, destination):
+        self.destination = destination
+        if safeexist(self.destination):
+            subprocess.call(['ifdh', 'rm', self.destination])
+        self.filename = os.path.basename(destination)
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+        self.file = open(self.filename, 'w')
+        return self.file
+
+    # Write method.
+
+    def write(self, line):
+        self.file.write(line)
+        return
+
+    # Close method.
+
+    def close(self):
+        if self.file is not None and not self.file.closed:
+            self.file.close()
+        subprocess.call(['ifdh', 'cp', self.filename, self.destination])
+        os.remove(self.filename)
+        self.destination = ''
+        self.filename = ''
+        self.file = None
+        return
+
 # Stage definition class.
 
 class StageDef:
@@ -910,7 +956,6 @@ def check_root(dir):
                 # Print a warning, but don't trigger any other error.
 
                 print 'Warning: File %s in directory %s is not a valid root file.' % (filename, dir)
-                sys.exit(1)
 
     # Done.
                     
@@ -1152,28 +1197,16 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # Open files.
 
     filelistname = os.path.join(dir, 'files.list')
-    filelistname_temp = 'files.list'
-    if os.path.exists(filelistname_temp):
-        os.remove(filelistname_temp)
-    filelist = open(filelistname_temp, 'w')
+    filelist = SafeFile(filelistname)
 
     eventslistname = os.path.join(dir, 'events.list')
-    eventslistname_temp = 'events.list'
-    if os.path.exists(eventslistname_temp):
-        os.remove(eventslistname_temp)
-    eventslist = open(eventslistname_temp, 'w')
+    eventslist = SafeFile(eventslistname)
 
     missingname = os.path.join(dir, 'missing.txt')
-    missingname_temp = 'missing.txt'
-    if os.path.exists(missingname_temp):
-        os.remove(missingname_temp)
-    missing = open(missingname_temp, 'w')
+    missing = SafeFile(missingname)
 
     histlistname = os.path.join(dir, 'hists.list')
-    histlistname_temp = 'hists.list'
-    if os.path.exists(histlistname_temp):
-        os.remove(histlistname_temp)
-    histlist = open(histlistname_temp, 'w')
+    histlist = SafeFile(histlistname)
 
     histurlsname_temp = 'histurls.list'
     if os.path.exists(histurlsname_temp):
@@ -1222,25 +1255,9 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # Close files.
 
     filelist.close()
-    subprocess.call(['ifdh', 'rm', filelistname], stdout=-1, stderr=-1)
-    subprocess.call(['ifdh', 'cp', filelistname_temp, filelistname])
-    os.remove(filelistname_temp)
-
     eventslist.close()
-    subprocess.call(['ifdh', 'rm', eventslistname], stdout=-1, stderr=-1)
-    subprocess.call(['ifdh', 'cp', eventslistname_temp, eventslistname])
-    os.remove(eventslistname_temp)
-
     missing.close()
-    subprocess.call(['ifdh', 'rm', missingname], stdout=-1, stderr=-1)
-    subprocess.call(['ifdh', 'cp', missingname_temp, missingname])
-    os.remove(missingname_temp)
-
     histlist.close()
-    subprocess.call(['ifdh', 'rm', histlistname], stdout=-1, stderr=-1)
-    subprocess.call(['ifdh', 'cp', histlistname_temp, histlistname])
-    os.remove(histlistname_temp)
-
     histurls.close()
 
     # Make merged histogram file using histmerge.
@@ -1256,7 +1273,8 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
                               histname_temp, '@' + histurlsname_temp])
         if rc != 0:
             print "%s exit status %d" % (histmerge, rc)
-        subprocess.call(['ifdh', 'rm', histname], stdout=-1, stderr=-1)
+        if safeexist(histname):
+            subprocess.call(['ifdh', 'rm', histname])
         subprocess.call(['ifdh', 'cp', histname_temp, histname])
         os.remove(histurlsname_temp)
         os.remove(histname_temp)
@@ -1935,9 +1953,13 @@ def main(argv):
         input_list_name = ''
         if stage.inputlist != '':
             input_list_name = os.path.basename(stage.inputlist)
-            work_list = os.path.join(stage.workdir, input_list_name)
-            if stage.inputlist != work_list:
-                shutil.copy(stage.inputlist, work_list)
+            work_list_name = os.path.join(stage.workdir, input_list_name)
+            if stage.inputlist != work_list_name:
+                input_files = saferead(stage.inputlist)
+                work_list = open(work_list_name, 'w')
+                for input_file in input_files:
+                    work_list.write('%s\n' % input_file.strip())
+                work_list.close()
 
         # Now locate the fcl file on the fcl search path.
 
