@@ -954,7 +954,7 @@ def check_root(dir):
             path = os.path.join(dir, filename)
             url = path_to_url(path)
             file = ROOT.TFile.Open(url)
-            if file.IsOpen() and not file.IsZombie():
+            if file and file.IsOpen() and not file.IsZombie():
                 obj = file.Get('Events')
                 if obj and obj.InheritsFrom('TTree'):
 
