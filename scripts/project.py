@@ -235,7 +235,7 @@ class SafeFile:
 # file object or SafeFile for dCache/pnfs files, as appropriate.
 
 def safeopen(destination):
-    if destination[0:6] == '/pnfs':
+    if destination[0:6] == '/pnfs/':
         file = SafeFile(destination)
     else:
         file = open(destination, 'w')
@@ -1936,7 +1936,7 @@ def main(argv):
 
         # If output is on dcache, make output directory group-writable.
 
-        if stage.outdir[0:5] == '/pnfs':
+        if stage.outdir[0:6] == '/pnfs/':
             mode = os.stat(stage.outdir).st_mode
             if not mode & stat.S_IWGRP:
                 mode = mode | stat.S_IWGRP
