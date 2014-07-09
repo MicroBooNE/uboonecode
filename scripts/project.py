@@ -1276,8 +1276,8 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         if safeexist(histname):
             subprocess.call(['ifdh', 'rm', histname])
         subprocess.call(['ifdh', 'cp', histname_temp, histname])
-        os.remove(histurlsname_temp)
         os.remove(histname_temp)
+    os.remove(histurlsname_temp)
 
     # Make sam files.
 
