@@ -154,15 +154,35 @@ samweb_cli = None
 samweb = None           # SAMWebClient object
 extractor_dict = None   # Metadata extractor
 
+# dCache-safe method to test whether path exists without opening file.
+
+def safeexist(path):
+    try:
+        os.stat(path)
+        return True
+    except:
+        return False
+
+# Test whether user has a valid grid proxy.  Exit if no.
+
+def test_proxy():
+    try:
+        subprocess.check_call('voms-proxy-info', stdout=-1)
+    except:
+        print 'Please get a grid proxy.'
+        os._exit(1)
+    return
+
 # dCache-safe method to return contents (list of lines) of file.
 
-def saferead(name):
+def saferead(path):
     lines = []
-    if name[0:6] == '/pnfs/':
-        proc = subprocess.Popen(['ifdh', 'cp', name, '/dev/fd/1'], stdout=subprocess.PIPE)
+    if path[0:6] == '/pnfs/':
+        test_proxy()
+        proc = subprocess.Popen(['ifdh', 'cp', path, '/dev/fd/1'], stdout=subprocess.PIPE)
         lines = proc.stdout.readlines()
     else:
-        lines = open(name).readlines()
+        lines = open(path).readlines()
     return lines
 
 # XML exception class.
@@ -175,6 +195,63 @@ class XMLError(Exception):
 
     def __str__(self):
         return self.value
+
+# File-like class for writing files in pnfs space.
+# Temporary file is opened in current directory and copied to final destination
+# on close using ifdh.
+
+class SafeFile:
+
+    # Constructor.
+
+    def __init__(self, destination=''):
+        self.destination = ''
+        self.filename = ''
+        self.file = None
+        if destination != '':
+            self.open(destination)
+        return
+
+    # Open method.
+    
+    def open(self, destination):
+        test_proxy()
+        self.destination = destination
+        if safeexist(self.destination):
+            subprocess.call(['ifdh', 'rm', self.destination])
+        self.filename = os.path.basename(destination)
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+        self.file = open(self.filename, 'w')
+        return self.file
+
+    # Write method.
+
+    def write(self, line):
+        self.file.write(line)
+        return
+
+    # Close method.
+
+    def close(self):
+        if self.file is not None and not self.file.closed:
+            self.file.close()
+        subprocess.call(['ifdh', 'cp', self.filename, self.destination])
+        os.remove(self.filename)
+        self.destination = ''
+        self.filename = ''
+        self.file = None
+        return
+
+# Function for opening files for writing using either python's built-in
+# file object or SafeFile for dCache/pnfs files, as appropriate.
+
+def safeopen(destination):
+    if destination[0:6] == '/pnfs/':
+        file = SafeFile(destination)
+    else:
+        file = open(destination, 'w')
+    return file
 
 # Stage definition class.
 
@@ -346,9 +423,9 @@ class StageDef:
     # (We don't currently check sam input datasets).
 
     def checkinput(self):
-        if self.inputfile != '' and not os.path.exists(self.inputfile):
+        if self.inputfile != '' and not safeexist(self.inputfile):
             raise IOError, 'Input file %s does not exist.' % self.inputfile
-        if self.inputlist != '' and not os.path.exists(self.inputlist):
+        if self.inputlist != '' and not safeexist(self.inputlist):
             raise IOError, 'Input list %s does not exist.' % self.inputlist
 
         # If target size is nonzero, and input is from a file list, calculate
@@ -356,9 +433,9 @@ class StageDef:
         # of jobs.
 
         if self.target_size != 0 and self.inputlist != '':
-            input_list_file = open(self.inputlist, 'r')
+            input_filenames = saferead(self.inputlist)
             size_tot = 0
-            for line in input_list_file.readlines():
+            for line in input_filenames:
                 filename = string.split(line)[0]
                 filesize = os.stat(filename).st_size
                 size_tot = size_tot + filesize
@@ -838,6 +915,15 @@ def parsedir(dirname):
     
     return result
 
+# Convert pnfs path to xrootd url.
+# Don't do anything to non-pnfs paths.
+
+def path_to_url(path):
+    url = path
+    if path[0:6] == '/pnfs/':
+        url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/' + path[6:]
+    return url
+
 # Check root files (*.root) in the specified directory.
 
 def check_root(dir):
@@ -865,8 +951,10 @@ def check_root(dir):
     filenames = os.listdir(dir)
     for filename in filenames:
         if filename[-5:] == '.root':
-            file = ROOT.TFile(os.path.join(dir, filename))
-            if file.IsOpen() and not file.IsZombie():
+            path = os.path.join(dir, filename)
+            url = path_to_url(path)
+            file = ROOT.TFile.Open(url)
+            if file and file.IsOpen() and not file.IsZombie():
                 obj = file.Get('Events')
                 if obj and obj.InheritsFrom('TTree'):
 
@@ -909,8 +997,8 @@ def get_input_files(stage):
 
     elif stage.inputlist != '':
         try:
-            input_list_file = open(stage.inputlist, 'r')
-            for line in input_list_file.readlines():
+            input_filenames = saferead(stage.inputlist)
+            for line in input_filenames:
                 words = string.split(line)
                 result.append(words[0])
         except:
@@ -998,7 +1086,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
         if os.path.isdir(subpath) and subpath[-6:] == '_start':
             filename = os.path.join(subpath, 'sam_project.txt')
-            if os.path.exists(filename):
+            if safeexist(filename):
                 sam_project = saferead(filename)[0].strip()
                 if sam_project != '' and not sam_project in sam_projects:
                     sam_projects.append(sam_project)
@@ -1033,7 +1121,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad:
                 stat_filename = os.path.join(subpath, 'lar.stat')
-                if os.path.exists(stat_filename):
+                if safeexist(stat_filename):
                     status = 0
                     try:
                         status = int(saferead(stat_filename)[0].strip())
@@ -1050,7 +1138,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad and input_def != '':
                 filename = os.path.join(subpath, 'sam_project.txt')
-                if not os.path.exists(filename):
+                if not safeexist(filename):
                     bad = 1
                 if not bad:
                     sam_project = saferead(filename)[0].strip()
@@ -1062,7 +1150,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad and input_def != '':
                 filename = os.path.join(subpath, 'cpid.txt')
-                if not os.path.exists(filename):
+                if not safeexist(filename):
                     bad = 1
                 if not bad:
                     cpid = saferead(filename)[0].strip()
@@ -1131,24 +1219,21 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     # Open files.
 
     filelistname = os.path.join(dir, 'files.list')
-    if os.path.exists(filelistname):
-        os.remove(filelistname)
-    filelist = open(filelistname, 'w')
+    filelist = safeopen(filelistname)
 
     eventslistname = os.path.join(dir, 'events.list')
-    if os.path.exists(eventslistname):
-        os.remove(eventslistname)
-    eventslist = open(eventslistname, 'w')
+    eventslist = safeopen(eventslistname)
 
     missingname = os.path.join(dir, 'missing.txt')
-    if os.path.exists(missingname):
-        os.remove(missingname)
-    missing = open(missingname, 'w')
+    missing = safeopen(missingname)
 
     histlistname = os.path.join(dir, 'hists.list')
-    if os.path.exists(histlistname):
-        os.remove(histlistname)
-    histlist = open(histlistname, 'w')
+    histlist = safeopen(histlistname)
+
+    histurlsname_temp = 'histurls.list'
+    if os.path.exists(histurlsname_temp):
+        os.remove(histurlsname_temp)
+    histurls = open(histurlsname_temp, 'w')
 
     # See if there are any missing processes and generate file "missing.txt."
     # Skip this step for sam input.
@@ -1177,6 +1262,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     for hist in hists:
         histlist.write('%s\n' % hist)
+        histurls.write('%s\n' % path_to_url(hist))
 
     # Print summary.
 
@@ -1194,16 +1280,30 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     eventslist.close()
     missing.close()
     histlist.close()
+    histurls.close()
 
     # Make merged histogram file using histmerge.
 
     if len(hists) > 0:
         print "Merging %d histogram files using %s." % (len(hists), histmerge)
-        rc = subprocess.call([histmerge, "-v", "0", "-f", "-k", "-T", 
-                              os.path.join(dir, "hist.root"), 
-                              "@" + os.path.join(dir, "hists.list")])
+
+        histname = os.path.join(dir, 'hist.root')
+        if histname[0:6] == '/pnfs/':
+            histname_temp = 'hist.root'
+        else:
+            histname_temp = histname
+        if os.path.exists(histname_temp):
+            os.remove(histname_temp)
+        rc = subprocess.call([histmerge, "-v", "0", "-f", "-k", "-T",
+                              histname_temp, '@' + histurlsname_temp])
         if rc != 0:
             print "%s exit status %d" % (histmerge, rc)
+        if histname != histname_temp:
+            if safeexist(histname):
+                os.remove(histname)
+            subprocess.call(['ifdh', 'cp', histname_temp, histname])
+            os.remove(histname_temp)
+    os.remove(histurlsname_temp)
 
     # Make sam files.
 
@@ -1212,9 +1312,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         # List of successful sam projects.
         
         sam_projects_filename = os.path.join(dir, 'sam_projects.list')
-        if os.path.exists(sam_projects_filename):
-            os.remove(sam_projects_filename)
-        sam_projects_file = open(sam_projects_filename, 'w')
+        sam_projects_file = safeopen(sam_projects_filename)
         for sam_project in sam_projects:
             sam_projects_file.write('%s\n' % sam_project)
         sam_projects_file.close()
@@ -1222,9 +1320,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         # List of successfull consumer process ids.
 
         cpids_filename = os.path.join(dir, 'cpids.list')
-        if os.path.exists(cpids_filename):
-            os.remove(cpids_filename)
-        cpids_file = open(cpids_filename, 'w')
+        cpids_file = safeopen(cpids_filename)
         for cpid in cpids:
             cpids_file.write('%s\n' % cpid)
         cpids_file.close()
@@ -1541,7 +1637,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
                     # Split off the node, if any, from the location.
 
                     local_path = os.path.join(sam_loc['location'].split(':')[-1], filename)
-                    if not os.path.exists(local_path):
+                    if not safeexist(local_path):
                         locs_to_remove.append(sam_loc['location'])
 
         # Loop over sam locations and identify files that can be uploaded.
@@ -1591,7 +1687,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
                 # Test whether this file has already been copied to dropbox directory.
                 
                 dropbox_filename = os.path.join(dropbox, filename)
-                if os.path.exists(dropbox_filename):
+                if safeexist(dropbox_filename):
                     print 'File %s already exists in dropbox %s.' % (filename, dropbox)
                 else:
 
@@ -1852,7 +1948,7 @@ def main(argv):
 
         # If output is on dcache, make output directory group-writable.
 
-        if stage.outdir[0:5] == '/pnfs':
+        if stage.outdir[0:6] == '/pnfs/':
             mode = os.stat(stage.outdir).st_mode
             if not mode & stat.S_IWGRP:
                 mode = mode | stat.S_IWGRP
@@ -1879,9 +1975,13 @@ def main(argv):
         input_list_name = ''
         if stage.inputlist != '':
             input_list_name = os.path.basename(stage.inputlist)
-            work_list = os.path.join(stage.workdir, input_list_name)
-            if stage.inputlist != work_list:
-                shutil.copy(stage.inputlist, work_list)
+            work_list_name = os.path.join(stage.workdir, input_list_name)
+            if stage.inputlist != work_list_name:
+                input_files = saferead(stage.inputlist)
+                work_list = open(work_list_name, 'w')
+                for input_file in input_files:
+                    work_list.write('%s\n' % input_file.strip())
+                work_list.close()
 
         # Now locate the fcl file on the fcl search path.
 
@@ -2026,11 +2126,11 @@ def main(argv):
             missing_pairs = []
             missing_filename = os.path.join(stage.outdir, 'missing.txt')
             try:
-                missing_file = open(missing_filename, 'r')
+                missing_files = saferead(missing_filename)
             except:
                 print 'Cound not open %s.' % missing_filename
                 return 1
-            for line in missing_file.readlines():
+            for line in missing_files:
                 words = string.split(line)
                 missing_pair = (int(words[0]), int(words[1]))
                 missing_pairs.append(missing_pair)
@@ -2050,8 +2150,8 @@ def main(argv):
             cpids = []
             cpids_filename = os.path.join(stage.outdir, 'cpids.list')
             try:
-                cpids_file = open(cpids_filename, 'r')
-                for line in cpids_file.readlines():
+                cpids_files = saferead(cpids_filename)
+                for line in cpids_files:
                     cpids.append(line.strip())
             except:
                 pass
