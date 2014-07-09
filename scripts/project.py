@@ -163,11 +163,22 @@ def safeexist(path):
     except:
         return False
 
+# Test whether user has a valid grid proxy.  Exit if no.
+
+def test_proxy():
+    try:
+        subprocess.check_call('voms-proxy-info', stdout=-1)
+    except:
+        print 'Please get a grid proxy.'
+        os._exit(1)
+    return
+
 # dCache-safe method to return contents (list of lines) of file.
 
 def saferead(path):
     lines = []
     if path[0:6] == '/pnfs/':
+        test_proxy()
         proc = subprocess.Popen(['ifdh', 'cp', path, '/dev/fd/1'], stdout=subprocess.PIPE)
         lines = proc.stdout.readlines()
     else:
@@ -204,6 +215,7 @@ class SafeFile:
     # Open method.
     
     def open(self, destination):
+        test_proxy()
         self.destination = destination
         if safeexist(self.destination):
             subprocess.call(['ifdh', 'rm', self.destination])
