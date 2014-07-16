@@ -220,6 +220,7 @@ namespace microboone {
       PlaneData_t<Float_t>    trkke;
       PlaneData_t<Float_t>    trkrange;
       PlaneData_t<Int_t>      trkidtruth;  //true geant trackid
+      PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles
       PlaneData_t<Int_t>      trkpdgtruth; //true pdg code
       PlaneData_t<Float_t>    trkefftruth; //completeness
       PlaneData_t<Float_t>    trkpurtruth; //purity of track
@@ -322,7 +323,7 @@ namespace microboone {
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
     Short_t  hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
-
+    
     //track information
     Char_t   kNTracker;
     std::vector<TrackDataStruct> TrackData;
@@ -695,6 +696,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkke.resize(MaxTracks);
   trkrange.resize(MaxTracks);
   trkidtruth.resize(MaxTracks);
+  trkorigin.resize(MaxTracks);
   trkpdgtruth.resize(MaxTracks);
   trkefftruth.resize(MaxTracks);
   trkpurtruth.resize(MaxTracks);
@@ -752,6 +754,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkke[iTrk]      , -99999.);
     FillWith(trkrange[iTrk]   , -99999.);
     FillWith(trkidtruth[iTrk] , -99999 );
+    FillWith(trkorigin[iTrk] , -1 );
     FillWith(trkpdgtruth[iTrk], -99999 );
     FillWith(trkefftruth[iTrk], -99999.);
     FillWith(trkpurtruth[iTrk], -99999.);
@@ -802,6 +805,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkidtruth_" + TrackLabel;
   CreateBranch(BranchName, trkidtruth, BranchName + NTracksIndexStr + "[3]/I");
+
+  BranchName = "trkorigin_" + TrackLabel;
+  CreateBranch(BranchName, trkorigin, BranchName + NTracksIndexStr + "[3]/S");
   
   BranchName = "trkpdgtruth_" + TrackLabel;
   CreateBranch(BranchName, trkpdgtruth, BranchName + NTracksIndexStr + "[3]/I");
@@ -1714,6 +1720,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           HitsPurity(hits[ipl],TrackerData.trkidtruth[iTrk][ipl],TrackerData.trkpurtruth[iTrk][ipl],maxe);
         //std::cout<<"\n"<<iTracker<<"\t"<<iTrk<<"\t"<<ipl<<"\t"<<trkidtruth[iTracker][iTrk][ipl]<<"\t"<<trkpurtruth[iTracker][iTrk][ipl]<<"\t"<<maxe;
           if (TrackerData.trkidtruth[iTrk][ipl]>0){
+	    const art::Ptr<simb::MCTruth> mc = bt->TrackIDToMCTruth(TrackerData.trkidtruth[iTrk][ipl]);
+	    TrackerData.trkorigin[iTrk][ipl] = mc->Origin();
             const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[iTrk][ipl]);
             double tote = 0;
             std::vector<sim::IDE> vide(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]));
