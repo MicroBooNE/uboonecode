@@ -31,7 +31,7 @@ physics:
     module_type: "CalibrationTPC"
     RawDigitModuleLabel: "daq"
     NFFTBins: 9600
-    NChanMax: 2000
+    NChanMax: 2001
     EmptyRun: 0 #false or true: 0 or 1
     GainRun:  0 #false or true: 0 or 1
     ShortRun: 1 #false or true: 0 or 1
