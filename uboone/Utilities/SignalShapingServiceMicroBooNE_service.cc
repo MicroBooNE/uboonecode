@@ -50,7 +50,8 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 
   fADCTicksPerPCAtLowestASICGainSetting = pset.get<double>("ADCTicksPerPCAtLowestASICGainSetting");
   fASICGainInMVPerFC = pset.get<double>("ASICGainInMVPerFC");
-  fNoiseFact = pset.get<double>("NoiseFact");
+  fNoiseFactColl = pset.get<std::vector<double> >("NoiseFactColl");
+  fNoiseFactInd = pset.get<std::vector<double> >("NoiseFactInd");
   fNFieldBins = pset.get<int>("FieldBins");
   fCol3DCorrection = pset.get<double>("Col3DCorrection");
   fInd3DCorrection = pset.get<double>("Ind3DCorrection");
@@ -139,22 +140,6 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   }
 
 }
-
-
-//Getter for ASIC Gain
-double util::SignalShapingServiceMicroBooNE::GetASICGain(){
-  
-  return fASICGainInMVPerFC;
-
-}
-
-//Getter for NoiseFact in ADCs at lowest ASIC Gain
-double util::SignalShapingServiceMicroBooNE::GetNoiseFact(){
-  
-  return fNoiseFact;
-
-}
-
 
 //----------------------------------------------------------------------
 // Accessor for single-plane signal shaper.

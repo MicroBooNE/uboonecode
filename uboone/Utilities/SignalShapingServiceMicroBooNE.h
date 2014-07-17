@@ -54,8 +54,10 @@ namespace util {
 
     // Accessors.
 
-    double GetASICGain();
-    double GetNoiseFact();
+    double GetASICGain() { return fASICGainInMVPerFC; }
+    std::vector<double> GetNoiseFactInd() { return fNoiseFactInd; }
+    std::vector<double> GetNoiseFactColl() { return fNoiseFactColl; }
+    double GetShapingTime() { return fShapeTimeConst.at(1); }
 
     const util::SignalShaping& SignalShaping(unsigned int channel) const;
 
@@ -94,7 +96,8 @@ namespace util {
     double fADCTicksPerPCAtLowestASICGainSetting; ///< Pulse area (in ADC*ticks) for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
     double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
-    double fNoiseFact;                          ///< RMS Noise in ADCs for lowest Gain Setting
+    std::vector<double> fNoiseFactColl;         ///< RMS Noise in ADCs for lowest Gain Setting
+    std::vector<double> fNoiseFactInd;          ///< RMS Noise in ADCs for lowest Gain Setting
 
     int fNFieldBins;         			///< number of bins for field response
     double fCol3DCorrection; 			///< correction factor to account for 3D path of 
