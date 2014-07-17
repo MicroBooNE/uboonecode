@@ -95,6 +95,7 @@ namespace detsim {
     std::string fNoiseFileFname; 
     std::string fNoiseHistoName; 
     TH1D*             fNoiseHist;             ///< distribution of noise counts
+    float                  fASICGain;
 
     std::string fTrigModName;                 ///< Trigger data product producer name
     //define max ADC value - if one wishes this can
@@ -136,7 +137,6 @@ namespace detsim {
   void SimWireMicroBooNE::reconfigure(fhicl::ParameterSet const& p) 
   {
     fDriftEModuleLabel= p.get< std::string         >("DriftEModuleLabel");
-    fNoiseFact        = p.get< double              >("NoiseFact");
     fNoiseWidth       = p.get< double              >("NoiseWidth");
     fNoiseRand        = p.get< double              >("NoiseRand");
     fLowCutoff        = p.get< double              >("LowCutoff");
@@ -146,7 +146,6 @@ namespace detsim {
     fCollectionPed    = p.get< float               >("CollectionPed");
     fInductionPed     = p.get< float               >("InductionPed");
     fBaselineRMS      = p.get< float               >("BaselineRMS");
-
     fTrigModName      = p.get< std::string         >("TrigModName");
 
     if(fGetNoiseFromHisto)
@@ -165,7 +164,7 @@ namespace detsim {
         temp->Copy(*fNoiseHist);
       }
       else
-        throw cet::exception("SimWireMicroBooNE") << " Could not find noise histogram in Root file\n";
+        throw cet::exception("SimWireMicroBooNE") << "Could not find noise histogram in Root file\n";
       in->Close();
     
       }
@@ -234,6 +233,11 @@ namespace detsim {
 
     //Get fIndShape and fColShape from SignalShapingService, on the fly
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    //get ASIC Gain and Noise in ADCatLowestGain:
+    fASICGain  = sss->GetASICGain();
+    fNoiseFact = sss->GetNoiseFact();
+    //Take into account ASIC Gain
+    fNoiseFact *= fASICGain/4.7;
 
     // make a vector of const sim::SimChannel* that has same number
     // of entries as the number of channels in the detector

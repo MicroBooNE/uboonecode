@@ -7,7 +7,6 @@ microboone_simwire:
  module_type:        "SimWireMicroBooNE"
  TrigModName:        "triggersim"
  DriftEModuleLabel:  "largeant"
- NoiseFact:          1.5          #Noise Scale to use with histogram - This will be RMS value of noise in ADCs
  NoiseWidth:         62.4         #Exponential Noise width (kHz)
  NoiseRand:          0.1          #frac of randomness of noise freq-spec
  LowCutoff:          7.5          #Low frequency filter cutoff (kHz)
