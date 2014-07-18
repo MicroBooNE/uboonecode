@@ -29,6 +29,7 @@ namespace calibration{
 			 std::vector<float> & pedestal,
 			 std::vector<float> & noise,
 			 std::vector<float> & maxADC,
+			 std::vector<float> & Area,
 			 std::vector<float> & mainDC,
 			 std::vector<float> & maxTime,
 			 int const& prePulseTicks);
@@ -47,6 +48,7 @@ namespace calibration{
 		 std::vector<float> & pedestal,
 		 std::vector<float> & noise,
 		 std::vector<float> & maxADC,
+		 std::vector<float> & Area,
 		 std::vector<float> & minADC,
 		 std::vector<float> & maxTime,
 		 int const& prePulseTicks);
@@ -55,6 +57,7 @@ namespace calibration{
 			       float & pedestal,
 			       float & noise,
 			       float & maxADC,
+			       float & Airea,
 			       float & minADC,
 			       float & time,
 			       int const& prePulseTicks);
