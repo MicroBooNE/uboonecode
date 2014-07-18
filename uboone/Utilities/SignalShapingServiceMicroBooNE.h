@@ -24,6 +24,48 @@
 /// IndFilter       - Root parameterized induction plane filter function.
 /// IndFilterParams - Induction filter function parameters.
 ///
+/// \update notes:  Yun-Tse Tsai (yuntse@slac.stanford.edu), July 17th, 2014
+///                 1. Read in field responses from input histograms
+///                 2. Allow different sampling rates in the input
+///                    field response
+///                    NOTE: The InputFieldRespSamplingRate parameter has
+///                    NOT implemented for the field response input
+///                    as a function (UseFunctionFieldShape)
+///                 3. Allow different electron drift velocities from
+///                    which the input field responses are obtained
+///                 4. Convolute the field and electronic responses,
+///                    and then sample the convoluted function with
+///                    the nominal sampling rate (util::DetectorProperties).
+///                    NOTE: Currently this doesn't include the filter 
+///                    function and the deconvolution kernel.
+///                    We may want to include them later?
+///                 5. Disable fColSignalShaping.SetPeakResponseTime(0.),
+///                    so that the peak time in the input field response
+///                    is preserved.
+///                 6. Somebody needs to unify the units of time (microsec
+///                    or nanosec); I'm fainting!
+///
+/// New function:   void SetResponseSampling();
+///
+/// Modified functions: void init();
+///                     void SetFieldResponse();
+///
+/// New FCL parameters:
+/// DefaultDriftVelocity       - The electron drift velocity used to obtain
+///                              the input field response waveforms
+/// InputFieldRespSamplingRate - The sampling rate in the input field response
+/// UseHistogramFieldShape     - Use the field response from an input histogram,
+///                              if both UseFunctionFieldShape and 
+///                              UseHistogramFieldShape are false, we will
+///                              use the toy field responses (a bipolar square
+///                              function for induction planes, a ramp function
+///                              for collection planes.)
+/// FieldResponseFname         - Name of the file containing the input field 
+///                              response histograms
+/// FieldResponseHistoName     - Name of the field response histograms,
+///                              the format in the code will be 
+///                              FieldResponseHistoName_U(V,Y)
+///
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef SIGNALSHAPINGSERVICEMICROBOONE_H
@@ -87,12 +129,19 @@ namespace util {
 
     bool fInit;               ///< Initialization flag.
 
+    // Sample the response function, including a configurable
+    // drift velocity of electrons
+
+    void SetResponseSampling();
+
     // Fcl parameters.
     double fADCTicksPerPCAtLowestASICGainSetting; ///< Pulse area (in ADC*ticks) for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
     double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
 
+    double fDefaultDriftVelocity;               ///< Default drift velocity of electrons in cm/usec
     int fNFieldBins;         			///< number of bins for field response
+    double fInputFieldRespSamplingRate;         ///< Sampling rate in the input field response.
     double fCol3DCorrection; 			///< correction factor to account for 3D path of 
 						///< electrons thru wires
     double fInd3DCorrection;  			///< correction factor to account for 3D path of 
@@ -107,12 +156,14 @@ namespace util {
 
     
     bool fUseFunctionFieldShape;   		///< Flag that allows to use a parameterized field response instead of the hardcoded version
-    bool fUseSimpleFieldShape;                 ///< Flag that turns on new field response shapes
+    bool fUseHistogramFieldShape;               ///< Flag that turns on field response shapes from histograms
     bool fGetFilterFromHisto;   		///< Flag that allows to use a filter function from a histogram instead of the functional dependency
     TF1* fColFieldFunc;      			///< Parameterized collection field shape function.
     TF1* fIndUFieldFunc;      			///< Parameterized induction field shape function for U plane.
     TF1* fIndVFieldFunc;      			///< Parameterized induction field shape function for V plane.
-    
+
+    TH1F *fFieldResponseHist[3];                ///< Histogram used to hold the field response, hardcoded for the time being
+
     TH1D *fFilterHist[3];    			///< Histogram used to hold the collection filter, hardcoded for the time being
     
     // Following attributes hold the convolution and deconvolution kernels

@@ -4,6 +4,7 @@
 /// \author H. Greenlee 
 ////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -50,7 +51,9 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 
   fADCTicksPerPCAtLowestASICGainSetting = pset.get<double>("ADCTicksPerPCAtLowestASICGainSetting");
   fASICGainInMVPerFC = pset.get<double>("ASICGainInMVPerFC");
+  fDefaultDriftVelocity = pset.get<double>("DefaultDriftVelocity");
   fNFieldBins = pset.get<int>("FieldBins");
+  fInputFieldRespSamplingRate = pset.get<double>("InputFieldRespSamplingRate");
   fCol3DCorrection = pset.get<double>("Col3DCorrection");
   fInd3DCorrection = pset.get<double>("Ind3DCorrection");
   fColFieldRespAmp = pset.get<double>("ColFieldRespAmp");
@@ -58,13 +61,16 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   fIndVFieldRespAmp = pset.get<double>("IndVFieldRespAmp");
   fShapeTimeConst = pset.get<std::vector<double> >("ShapeTimeConst");
 
+  // Currently we have three options of field response shapes:
+  // 1. UseFunctionFieldShape
+  // 2. UseHistogramFieldShape, i.e. the waveforms from Leon Rochester
+  // 3. Otherwise, a square function for induction planes, and
+  //    a ramp function for collection planes
   fUseFunctionFieldShape= pset.get<bool>("UseFunctionFieldShape");
-  fUseSimpleFieldShape = pset.get<bool>("UseSimpleFieldShape");
-  if(fUseSimpleFieldShape) {
-    fNFieldBins = 300;
-  }
+  fUseHistogramFieldShape = pset.get<bool>("UseHistogramFieldShape");
+
   fGetFilterFromHisto= pset.get<bool>("GetFilterFromHisto");
-  
+
   // Construct parameterized collection filter function.
   if(!fGetFilterFromHisto) {
 
@@ -107,7 +113,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
     }
    
     in->Close();
-   
+    delete in; 
   }
  
   /////////////////////////////////////
@@ -135,8 +141,36 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
       fIndVFieldFunc->SetParameter(i, indVFieldParams[i]);
     // Warning, last parameter needs to be multiplied by the FFTSize, in current version of the code,
 
-  }
+  } else if ( fUseHistogramFieldShape ) {
+    mf::LogInfo("SignalShapingServiceMicroBooNE") << " using the field response provided from a .root file " ;
+    int fNPlanes = 3;
 
+    // constructor decides if initialized value is a path or an environment variable
+    std::string fname;
+    cet::search_path sp("FW_SEARCH_PATH");
+    sp.find_file( pset.get<std::string>("FieldResponseFname"), fname );
+    std::string histoname = pset.get<std::string>("FieldResponseHistoName");
+
+    std::unique_ptr<TFile> fin(new TFile(fname.c_str(), "READ"));
+    if ( !fin->IsOpen() ) throw art::Exception( art::errors::NotFound ) << "Could not find the field response file " << fname << "!" << std::endl;
+
+    std::string iPlane[3] = { "U", "V", "Y" };
+
+    for ( int i = 0; i < fNPlanes; i++ ) {
+      TString iHistoName = Form( "%s_%s", histoname.c_str(), iPlane[i].c_str());
+      TH1F *temp = (TH1F*) fin->Get( iHistoName );
+      if ( !temp ) throw art::Exception( art::errors::NotFound ) << "Could not find the field response histogram " << iHistoName << std::endl;
+
+      if ( temp->GetNbinsX() > fNFieldBins ) throw art::Exception( art::errors::InvalidNumber ) << "FieldBins should always be larger than or equal to the number of the bins in the input histogram!" << std::endl;
+
+      fFieldResponseHist[i] = new TH1F( iHistoName, iHistoName, temp->GetNbinsX(), temp->GetBinLowEdge(1), temp->GetBinLowEdge( temp->GetNbinsX() + 1) );
+      temp->Copy(*fFieldResponseHist[i]);
+    }
+
+    fin->Close();
+  } else {
+    fNFieldBins = 300;
+  }  
 }
 
 
@@ -166,7 +200,7 @@ util::SignalShapingServiceMicroBooNE::SignalShaping(unsigned int channel) const
     return fColSignalShaping;
   else
     throw cet::exception("SignalShapingServiceMicroBooNE")<< "can't determine"
-                                                          << " SignalType\n";
+                                                          << " View\n";
   return fColSignalShaping;
 }
 
@@ -192,15 +226,22 @@ void util::SignalShapingServiceMicroBooNE::init()
 
     fColSignalShaping.AddResponseFunction(fColFieldResponse);
     fColSignalShaping.AddResponseFunction(fElectResponse);
-    fColSignalShaping.SetPeakResponseTime(0.);
+    // fColSignalShaping.SetPeakResponseTime(0.);
 
     fIndUSignalShaping.AddResponseFunction(fIndUFieldResponse);
     fIndUSignalShaping.AddResponseFunction(fElectResponse);
-    fIndUSignalShaping.SetPeakResponseTime(0.);
+    // fIndUSignalShaping.SetPeakResponseTime(0.);
 
     fIndVSignalShaping.AddResponseFunction(fIndVFieldResponse);
     fIndVSignalShaping.AddResponseFunction(fElectResponse);
-    fIndVSignalShaping.SetPeakResponseTime(0.);
+    // fIndVSignalShaping.SetPeakResponseTime(0.);
+
+    // Currently we only have fine binning "fInputFieldRespSamplingRate"
+    // for the field and electronic responses.
+    // Now we are sampling the convoluted field-electronic response
+    // with the nominal sampling rate.
+    // We may consider to do the same for the filters as well.
+    SetResponseSampling();
 
     // Calculate filter functions.
 
@@ -250,7 +291,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
   // set the response for the collection plane first
   // the first entry is 0
 
-  double driftvelocity=larp->DriftVelocity()/1000.;  
+  double driftvelocity=larp->DriftVelocity()/1000.; // in cm/nsec 
   double integral = 0.;
   ////////////////////////////////////////////////////
   if(fUseFunctionFieldShape) {
@@ -292,106 +333,27 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
     fft->ShiftData(fIndUFieldResponse,signalSize/2.0);
     fft->ShiftData(fIndVFieldResponse,signalSize/2.0);
 
-  } else if (fUseSimpleFieldShape) {
-   
-    mf::LogInfo("SignalShapingServiceMicroBooNE") << " using try-2 hard-coded field shapes " ;
+  } else if ( fUseHistogramFieldShape ) {
+    // Ticks in nanosecond
+    // Calculate the normalization of the collection plane
+    for ( int ibin = 1; ibin <= fFieldResponseHist[2]->GetNbinsX(); ibin++ )
+      integral += fFieldResponseHist[2]->GetBinContent( ibin ) * fInputFieldRespSamplingRate;
 
-    const int nbincPlane = 16;
-    double cPlaneResponse[nbincPlane] = {
-      0,               0,               0,   0.02620087336,   0.02620087336, 
-      0.04366812227,    0.1310043668,    0.1659388646,    0.1397379913,    0.3711790393, 
-      0.06550218341,    0.0480349345,  -0.01310043668, -0.004366812227,               0, 
-      0
-    };
+    // Induction plane
+    for ( int ibin = 1; ibin <= fFieldResponseHist[0]->GetNbinsX(); ibin++ )
+      fIndUFieldResponse[ibin-1] = fIndUFieldRespAmp*fFieldResponseHist[0]->GetBinContent( ibin )/integral;
 
-    for(int i = 1; i < nbincPlane; ++i){
-      fColFieldResponse[i] = cPlaneResponse[i];
-      integral += fColFieldResponse[i];
-    }
+    for ( int ibin = 1; ibin <= fFieldResponseHist[1]->GetNbinsX(); ibin++ )
+      fIndVFieldResponse[ibin-1] = fIndVFieldRespAmp*fFieldResponseHist[1]->GetBinContent( ibin )/integral;
 
-    for(int i = 0; i < nbincPlane; ++i){
-      //fColFieldResponse[i] *= fColFieldRespAmp/integral;
-      fColFieldResponse[i] /= integral;
-    }
+    for ( int ibin = 1; ibin <= fFieldResponseHist[2]->GetNbinsX(); ibin++ )
+      fColFieldResponse[ibin-1] = fColFieldRespAmp*fFieldResponseHist[2]->GetBinContent( ibin )/integral;
 
-    //const int nbiniOld = 6;
-    const int nbinuPlane = 228;
-    // now induction plane 0 ("U")
-    // this response function has a very long (first) positive lobe, ~ 100 usec
-    // So for starters, we us the single-lobe filter
-
-    double uPlaneResponse[nbinuPlane] = {
-      0, 0.0001881008778, 0.0003762017556, 0.0005643026334, 0.0007524035112, 
-      0.000940504389,  0.001128605267,  0.001316706145,  0.001504807022,    0.0016929079, 
-      0.001881008778,  0.002069109656,  0.002257210534,  0.002445311411,  0.002633412289, 
-      0.002821513167,  0.003009614045,  0.003197714923,    0.0033858158,  0.003573916678, 
-      0.003762017556,  0.003950118434,  0.004138219312,  0.004326320189,  0.004514421067, 
-      0.004702521945,  0.004890622823,  0.005078723701,  0.005266824579,  0.005454925456, 
-      0.005643026334,  0.005831127212,   0.00601922809,  0.006207328968,  0.006395429845, 
-      0.006583530723,  0.006771631601,  0.006959732479,  0.007147833357,  0.007335934234, 
-      0.007524035112,   0.00771213599,  0.007900236868,  0.008088337746,  0.008276438623, 
-      0.008464539501,  0.008652640379,  0.008840741257,  0.009028842135,  0.009216943012, 
-      0.00940504389,  0.009593144768,  0.009781245646,  0.009969346524,    0.0101574474, 
-      0.01034554828,   0.01053364916,   0.01072175003,   0.01090985091,   0.01109795179, 
-      0.01128605267,   0.01147415355,   0.01166225442,    0.0118503553,   0.01203845618, 
-      0.01222655706,   0.01241465794,   0.01260275881,   0.01279085969,   0.01297896057, 
-      0.01316706145,   0.01335516232,    0.0135432632,   0.01373136408,   0.01391946496, 
-      0.01410756584,   0.01429566671,   0.01448376759,   0.01467186847,   0.01485996935, 
-      0.01504807022,    0.0152361711,   0.01542427198,   0.01561237286,   0.01580047374, 
-      0.01598857461,   0.01617667549,   0.01636477637,   0.01655287725,   0.01674097812, 
-      0.016929079,   0.01711717988,   0.01730528076,   0.01749338164,   0.01768148251, 
-      0.01786958339,   0.01805768427,   0.01824578515,   0.01843388602,    0.0186219869, 
-      0.01881008778,   0.01899818866,   0.01918628954,   0.01937439041,   0.01956249129, 
-      0.01975059217,   0.01993869305,   0.02012679393,    0.0203148948,   0.02050299568, 
-      0.02069109656,   0.02087919744,   0.02106729831,   0.02125539919,   0.02144350007, 
-      0.02163160095,   0.02181970183,    0.0220078027,   0.02219590358,   0.02238400446, 
-      0.02257210534,   0.02302354744,   0.02347498955,   0.02392643166,   0.02437787376, 
-      0.02482931587,   0.02528075798,   0.02573220008,   0.02618364219,    0.0266350843, 
-      0.0270865264,   0.02753796851,   0.02798941062,   0.02844085272,   0.02889229483, 
-      0.02934373694,   0.02979517904,   0.03024662115,   0.03069806326,   0.03114950536, 
-      0.03160094747,    0.0321652501,   0.03272955274,   0.03329385537,     0.033858158, 
-      0.03442246064,   0.03498676327,    0.0355510659,   0.03611536854,   0.03667967117, 
-      0.03724397381,   0.03780827644,   0.03837257907,   0.03893688171,   0.03950118434, 
-      0.04006548697,   0.04062978961,   0.04119409224,   0.04175839487,   0.04232269751, 
-      0.04288700014,    0.0435641633,   0.04424132646,   0.04491848962,   0.04559565278, 
-      0.04627281594,    0.0469499791,   0.04762714226,   0.04830430542,   0.04898146858, 
-      0.04965863174,    0.0503357949,   0.05101295806,   0.05169012122,   0.05236728438, 
-      0.05304444754,    0.0537216107,   0.05439877386,   0.05507593702,   0.05575310018, 
-      0.05643026334,    0.0572579072,   0.05808555107,   0.05891319493,   0.05974083879, 
-      0.06056848265,   0.06139612652,   0.06222377038,   0.06305141424,    0.0638790581, 
-      0.06470670196,   0.06553434583,   0.06636198969,   0.06718963355,   0.06801727741, 
-      0.06884492128,   0.06967256514,     0.070500209,   0.07132785286,   0.07215549673, 
-      0.07298314059,   0.07305838094,   0.07313362129,   0.07320886164,   0.07328410199, 
-      0.07335934234,   0.07524035112,   0.07524035112,   0.07524035112,   0.07524035112, 
-      0.07524035112,   0.07524035112,   0.07524035112,   0.07565835307,   0.06688031211, 
-      -1.508982036,    -1.401197605,    -1.293413174,   -0.5748502994,   -0.3233532934, 
-      -0.2694610778,   -0.2694610778,   -0.1796407186,   -0.1437125749,  -0.03592814371, 
-      0,               0,               0
-    };
-
-    for(int i = 0; i < nbinuPlane; ++i){
-      //fIndUFieldResponse[i] = fIndUFieldRespAmp*uPlaneResponse[i]/(nbiniOld);
-      fIndUFieldResponse[i] = uPlaneResponse[i]/integral;
-    }
-   
-    const int nbinvPlane = 20;
-    double vPlaneResponse[nbinvPlane] = {
-      0,               0,   0.01090909091,   0.01090909091,   0.01090909091, 
-      0.02181818182,   0.03272727273,    0.7636363636,     2.018181818,            2.04, 
-      1.090909091,     -1.03861518,    -1.757656458,    -1.757656458,    -1.118508655, 
-      -0.2396804261,  -0.07989347537, -0.007989347537,               0,               0
-    };
-
-    for (int i = 0; i < nbinvPlane; ++i) {
-      //fIndVFieldResponse[i] = vPlaneResponse[i]*fIndVFieldRespAmp/(nbiniOld);
-      fIndVFieldResponse[i] = vPlaneResponse[i]/integral;
-    }
-
-   } else {
+  } else {
 
     //////////////////////////////////////////////////
     mf::LogInfo("SignalShapingServiceMicroBooNE") << " using the old field shape " ;
-    int nbinc = TMath::Nint(fCol3DCorrection*(std::abs(pitch))/(driftvelocity*detprop->SamplingRate())); ///number of bins //KP
+    int nbinc = TMath::Nint(fCol3DCorrection*(std::abs(pitch))/(driftvelocity* fInputFieldRespSamplingRate)); ///number of bins //KP
     
     double integral = 0.;
     for(int i = 1; i < nbinc; ++i){
@@ -405,7 +367,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
 
     // now the induction plane
     
-    int nbini = TMath::Nint(fInd3DCorrection*(std::abs(pitch))/(driftvelocity*detprop->SamplingRate()));//KP
+    int nbini = TMath::Nint(fInd3DCorrection*(std::abs(pitch))/(driftvelocity*fInputFieldRespSamplingRate));//KP
     for(int i = 0; i < nbini; ++i){
       fIndUFieldResponse[i] = fIndUFieldRespAmp/(1.*nbini);
       fIndUFieldResponse[nbini+i] = -fIndUFieldRespAmp/(1.*nbini);
@@ -461,7 +423,7 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse()
   for(int i = 0; i < nticks; ++i){
 
     //convert time to microseconds, to match fElectResponse[i] definition
-    time[i] = (1.*i)*detprop->SamplingRate()*1e-3; 
+    time[i] = (1.*i) * fInputFieldRespSamplingRate * 1e-3; 
     fElectResponse[i] = 
       4.31054*exp(-2.94809*time[i]/To)*Ao - 2.6202*exp(-2.82833*time[i]/To)*cos(1.19361*time[i]/To)*Ao
       -2.6202*exp(-2.82833*time[i]/To)*cos(1.19361*time[i]/To)*cos(2.38722*time[i]/To)*Ao
@@ -488,7 +450,8 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse()
   // This code is executed only during initialization of service,
   // so don't worry about code inefficiencies here.
    for(int i = 0; i < nticks; ++i){
-     fElectResponse[i] /= integral;
+     // The sampling rate was not taken into account in the older version
+     fElectResponse[i] /= integral * fInputFieldRespSamplingRate;
      fElectResponse[i] *= fADCTicksPerPCAtLowestASICGainSetting*1.6e-7;
      fElectResponse[i] *= fASICGainInMVPerFC/4.7;
    }
@@ -567,7 +530,123 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
   
 }
 
+//----------------------------------------------------------------------
+// Sample microboone response (the convoluted field and electronic
+// response), will probably add the filter later
+void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
+{
+  // Get services
+  art::ServiceHandle<util::LArProperties> larp;
+  art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArFFT> fft;
 
+  // We allow different drift velocities
+  double kDVel = larp->DriftVelocity() / fDefaultDriftVelocity;
+  // Rounding
+  if ( std::abs( 1. - kDVel ) < 10e-5 ) kDVel = 1.;
+  if ( kDVel > 1. ) mf::LogInfo("SignalShapingServiceMicroBooNE") << "The drift velocity "
+    << larp->DriftVelocity() << "cm/usec is faster than the default " << fDefaultDriftVelocity
+    << "cm/usec!" << std::endl;
+
+  int nticks = fft->FFTSize();
+  std::vector<double> InputTime( nticks, 0. );
+  std::vector<double> SamplingTime( nticks, 0. );
+
+  for ( int itime = 0; itime < nticks; itime++ ) {
+    InputTime[itime] = (1.*itime) * fInputFieldRespSamplingRate;
+    SamplingTime[itime] = (1.*itime) * detprop->SamplingRate() / kDVel;
+  }
+
+  // Sampling
+  int fNPlanes = 3;
+  for ( int iplane = 0; iplane < fNPlanes; iplane++ ) {
+    const std::vector<double>* pResp;
+    std::vector<double> SamplingResp( nticks, 0. );
+    int SamplingCount = 0;
+
+    switch ( iplane ) {
+      case 0: pResp = &(fIndUSignalShaping.Response()); break;
+      case 1: pResp = &(fIndVSignalShaping.Response()); break;
+      default: pResp = &(fColSignalShaping.Response()); break;
+    }
+
+    /* Check the convoluted response, will remove this piece
+    std::string iPlaneName[3] = { "u", "v", "y" };
+    std::cout << "The convoluted response, before sampling: " << std::endl;
+    std::cout << iPlaneName[iplane] << " Field Response: " << std::endl;
+    std::cout << "   const int nbin" << iPlaneName[iplane] << "Plane = " << 1200 << ";" << std::endl;
+    std::cout << "   const double " << iPlaneName[iplane] << "PlaneResponse[nbin" << iPlaneName[iplane] << "Plane] = {";
+    for ( unsigned j = 0; j < 1200; j++ ) {
+      if ( j%4 == 0 )  std::cout << std::endl;
+      std::cout << "   " << (*pResp)[j] << ", ";
+    }
+    std::cout << "};" << std::endl;
+    */
+
+    for ( int itime = 0; itime < nticks; itime++ ) {
+      int low = -1, up = -1;
+      for ( int jtime = 0; jtime < nticks; jtime++ ) {
+        if ( InputTime[jtime] == SamplingTime[itime] ) {
+          SamplingResp[itime] = kDVel * (*pResp)[jtime];
+          SamplingCount++;
+          break;
+        } else if ( InputTime[jtime] > SamplingTime[itime] ) {
+          low = jtime - 1;
+          up = jtime;
+          SamplingResp[itime] = (*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * ( (*pResp)[up] - (*pResp)[low] ) / ( InputTime[up] - InputTime[low] );
+          SamplingResp[itime] *= kDVel;
+          SamplingCount++;
+          break;
+        } else {
+          SamplingResp[itime] = 0.;
+        }
+      } // for ( int jtime = 0; jtime < nticks; jtime++ )
+    } // for ( int itime = 0; itime < nticks; itime++ )
+
+    SamplingResp.resize( SamplingCount, 0.);
+
+    /* Check the convoluted, sampled response, will remove this piece
+    std::cout << "The convoluted response, after sampling: " << std::endl;
+    std::cout << iPlaneName[iplane] << " Field Response: " << std::endl;
+    std::cout << "   const int nbin" << iPlaneName[iplane] << "Plane = " << SamplingResp.size() << ";" << std::endl;
+    std::cout << "   const double " << iPlaneName[iplane] << "PlaneResponse[nbin" << iPlaneName[iplane] << "Plane] = {";
+    for ( unsigned j = 0; j < SamplingResp.size(); j++ ) {
+      if ( j%4 == 0 )  std::cout << std::endl;
+      std::cout << "   " << SamplingResp[j] << ", ";
+    }
+    std::cout << "};" << std::endl;
+    */
+
+    switch ( iplane ) {
+      case 0: fIndUSignalShaping.AddResponseFunction( SamplingResp, true ); break;
+      case 1: fIndVSignalShaping.AddResponseFunction( SamplingResp, true ); break;
+      default: fColSignalShaping.AddResponseFunction( SamplingResp, true ); break;
+    }
+
+
+    /* Check the convoluted response, will remove this piece
+    const std::vector<double>* pTemp;
+    switch ( iplane ) {
+      case 0: pTemp = &(fIndUSignalShaping.Response()); break;
+      case 1: pTemp = &(fIndVSignalShaping.Response()); break;
+      default: pTemp = &(fColSignalShaping.Response()); break;
+    }
+
+    std::cout << "The convoluted response, after sampling and pushing back to the SignalShaping object: " << std::endl;
+    std::cout << iPlaneName[iplane] << " Field Response: " << std::endl;
+    std::cout << "   const int nbin" << iPlaneName[iplane] << "Plane = 1200;" << std::endl;
+    std::cout << "   const double " << iPlaneName[iplane] << "PlaneResponse[nbin" << iPlaneName[iplane] << "Plane] = {";
+    for ( unsigned j = 0; j < 1200; j++ ) {
+      if ( j%4 == 0 )  std::cout << std::endl;
+      std::cout << "   " << (*pTemp)[j] << ", ";
+    }
+    std::cout << "};" << std::endl;
+    */
+
+  } // for ( int iplane = 0; iplane < fNPlanes; iplane++ )
+
+  return;
+}
 
 namespace util {
 
