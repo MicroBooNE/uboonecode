@@ -153,6 +153,7 @@ ROOT = None
 samweb_cli = None
 samweb = None           # SAMWebClient object
 extractor_dict = None   # Metadata extractor
+proxy_ok = False
 
 # dCache-safe method to test whether path exists without opening file.
 
@@ -166,11 +167,14 @@ def safeexist(path):
 # Test whether user has a valid grid proxy.  Exit if no.
 
 def test_proxy():
-    try:
-        subprocess.check_call('voms-proxy-info', stdout=-1)
-    except:
-        print 'Please get a grid proxy.'
-        os._exit(1)
+    global proxy_ok
+    if not proxy_ok:
+        try:
+            subprocess.check_call(['voms-proxy-info', '-exists'], stdout=-1)
+            proxy_ok = True
+        except:
+            print 'Please get a grid proxy.'
+            os._exit(1)
     return
 
 # dCache-safe method to return contents (list of lines) of file.
@@ -922,6 +926,7 @@ def path_to_url(path):
     url = path
     if path[0:6] == '/pnfs/':
         url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/' + path[6:]
+        test_proxy()
     return url
 
 # Check root files (*.root) in the specified directory.
