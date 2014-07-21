@@ -4,14 +4,15 @@ BEGIN_PROLOG
 
 microboone_signalshapingservice:
 {
-  ADCTicksPerPCAtLowestASICGainSetting: 25172.1 #ADC/pC
+  ADCPerPCAtLowestASICGain: 1878 #ADC/pC
   #ASICGain: Options: (4.7, 7.8, 14, 25). Default: 7.8
   ASICGainInMVPerFC:                    7.8     #mV/fC
   
-  DefaultDriftVelocity: 0.160563  # in cm/usec
+  DefaultDriftVelocity: [-1,-1,-1] # in cm/usec per drift region ... if negative value, use LArSoft derived drift velocity
+  FieldResponseTOffset: [-26.6e3, -26.3e3, -26e3] # in ns, time offset of field response shape
   # FieldBins:        75  # for UseFunctionFieldShape: true
   FieldBins:        1000
-  InputFieldRespSamplingRate: 30. # in nano second
+  InputFieldRespSamplingPeriod: 30. # in nano second
   Col3DCorrection:  2.5
   Ind3DCorrection:  1.5
   #ColFieldRespAmp:  0.0354
@@ -44,7 +45,7 @@ microboone_signalshapingservice:
 
   UseFunctionFieldShape: false
   UseHistogramFieldShape: true
-  FieldResponseFname:     "uboone_response_v1.2.root"
+  FieldResponseFname:     "uboone_response_v1.3.root"
   FieldResponseHistoName: "FieldResponse"
   IndUFieldShape: "[0]*(1.0+[3]*tanh(x-[4]))*([4]-x)*exp(-0.5*((x-[4])/[2])^2.0)"
   IndUFieldParams:  [.00843,.1534,1.77,0.,0.5]    #last parameter needs to be half of FFT vector, correct for in code

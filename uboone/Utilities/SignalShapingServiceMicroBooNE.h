@@ -79,6 +79,12 @@
 #include "TF1.h"
 #include "TH1D.h"
 
+// LArSoft include
+#include "Geometry/Geometry.h"
+#include "Geometry/TPCGeo.h"
+#include "Geometry/PlaneGeo.h"
+#include "Utilities/TimeService.h"
+
 
 namespace util {
   class SignalShapingServiceMicroBooNE {
@@ -97,6 +103,8 @@ namespace util {
     // Accessors.
 
     const util::SignalShaping& SignalShaping(unsigned int channel) const;
+
+    int FieldResponseTOffset(unsigned int const channel) const;
 
     // Do convolution calcution (for simulation).
 
@@ -135,13 +143,14 @@ namespace util {
     void SetResponseSampling();
 
     // Fcl parameters.
-    double fADCTicksPerPCAtLowestASICGainSetting; ///< Pulse area (in ADC*ticks) for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
+    double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
     double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
 
-    double fDefaultDriftVelocity;               ///< Default drift velocity of electrons in cm/usec
+    std::vector<double> fDefaultDriftVelocity;  ///< Default drift velocity of electrons in cm/usec
+    std::vector<double> fFieldResponseTOffset;  ///< Time offset for field response in ns
     int fNFieldBins;         			///< number of bins for field response
-    double fInputFieldRespSamplingRate;         ///< Sampling rate in the input field response.
+    double fInputFieldRespSamplingPeriod;       ///< Sampling period in the input field response.
     double fCol3DCorrection; 			///< correction factor to account for 3D path of 
 						///< electrons thru wires
     double fInd3DCorrection;  			///< correction factor to account for 3D path of 
@@ -171,7 +180,6 @@ namespace util {
     util::SignalShaping fIndUSignalShaping;
     util::SignalShaping fIndVSignalShaping;
     util::SignalShaping fColSignalShaping;
-
     // Field response.
 
     std::vector<double> fIndUFieldResponse;
@@ -189,6 +197,29 @@ namespace util {
     std::vector<TComplex> fColFilter;
   };
 }
+
+int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int const channel) const
+{
+  art::ServiceHandle<geo::Geometry> geom;
+  geo::View_t view = geom->View(channel);
+  double time_offset = 0;
+  switch(view){
+  case geo::kU: 
+    time_offset = fFieldResponseTOffset.at(0); 
+    break;
+  case geo::kV: 
+    time_offset = fFieldResponseTOffset.at(1); 
+    break;
+  case geo::kZ: 
+    time_offset = fFieldResponseTOffset.at(2); 
+    break;
+  default:
+    throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
+  }
+  auto tpc_clock = art::ServiceHandle<util::TimeService>()->TPCClock();
+  return tpc_clock.Ticks(time_offset/1.e3);
+}
+
 //----------------------------------------------------------------------
 // Do convolution.
 template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(unsigned int channel, std::vector<T>& func) const
