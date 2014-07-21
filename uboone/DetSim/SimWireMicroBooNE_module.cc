@@ -301,10 +301,11 @@ namespace detsim {
 
       if( sc ){
 
+	int time_offset = sss->FieldResponseTOffset(chan);
         // loop over the tdcs and grab the number of electrons for each
         for(int t = 0; t < (int)(chargeWork.size()); ++t) {
 
-          int tdc = ts->TPCTick2TDC(t);
+          int tdc = ts->TPCTick2TDC(t) + time_offset;
 
           // continue if tdc < 0
           if( tdc < 0 ) continue;

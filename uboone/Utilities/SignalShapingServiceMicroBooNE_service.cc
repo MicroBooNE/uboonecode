@@ -491,15 +491,18 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse()
   // This code is executed only during initialization of service,
   // so don't worry about code inefficiencies here.
   double last_integral=0;
+  double last_max=0;
   for(int i = 0; i < nticks; ++i){
 
     fElectResponse.at(i) /= max;
     fElectResponse.at(i) *= fADCPerPCAtLowestASICGain * 1.60217657e-7;
     //fElectResponse.at(i) *= fInputFieldRespSamplingPeriod / detprop->SamplingRate();
     fElectResponse.at(i) *= fASICGainInMVPerFC / 4.7;
-    last_integral += fElectResponse.at(i);
+
+    if(fElectResponse.at(i) > last_max) last_max = fElectResponse.at(i);
+    last_integral += fElectResponse.at(i) * fInputFieldRespSamplingPeriod / detprop->SamplingRate();
   }
-  std::cout<<"\033[93m"<<"Sum: "<<last_integral<<" ... peak@ "<<fADCPerPCAtLowestASICGain*1.6e-7<<"\033[00m"<<std::endl;
+  //std::cout<<"\033[93m"<<"Sum: "<<last_integral<<" ... peak@ "<<last_max<<"\033[00m"<<std::endl;
   return;
 
 }
@@ -590,8 +593,18 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
 				       << "Invalid operation: cannot rebin to a more finely binned vector!"
 				       << "\033[00m" << std::endl;
 
+  int nticks = fft->FFTSize();
+  std::vector<double> InputTime( nticks, 0. );
+  std::vector<double> SamplingTime( nticks, 0. );
+  for ( int itime = 0; itime < nticks; itime++ ) {
+    InputTime[itime] = (1.*itime) * fInputFieldRespSamplingPeriod;
+    SamplingTime[itime] = (1.*itime) * detprop->SamplingRate();
+    /// VELOCITY-OUT ... comment out kDVel usage here
+    //SamplingTime[itime] = (1.*itime) * detprop->SamplingRate() / kDVel;
+  }
+
   // Sampling
-  int fNPlanes = 3;
+  int fNPlanes = geo->Nplanes();
   for ( int iplane = 0; iplane < fNPlanes; iplane++ ) {
     const std::vector<double>* pResp;
     switch ( iplane ) {
@@ -601,11 +614,15 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
     }
     std::vector<double> SamplingResp( pResp->size(), 0. );
 
+    /*
     if(iplane==2) {
       double last_integral=0;
-      for(auto const& v : *pResp) last_integral += v;
-      std::cout<<"\033[93m"<<"Sum: "<<last_integral<<"\033[00m"<<std::endl;
+      double last_peak =0;
+      for(auto const& v : *pResp) {last_integral += v * fInputFieldRespSamplingPeriod / detprop->SamplingRate(); if(last_peak<v) last_peak=v;}
+      std::cout<<"\033[93m"<<"Sum: "<<last_integral<<" ... peak: "<<last_peak<<"\033[00m"<<std::endl;
     }
+    */
+
     /*
       We allow different drift velocities. 
       kDVel is ratio of what was used in LArG4 to field response simulation.
@@ -639,6 +656,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
     //
     // Rebinning operation assumes the output has a larger bin width than input.
     //
+    /*
     size_t out_index = 0;
     double q = 0;
     double t = 0;
@@ -662,24 +680,28 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
       }
     }
     SamplingResp.resize(out_index+1, 0.);
+    */
 
     /*
-      Much more sophisticated approach using a linear (trapezoidal) interpolation ... currently commented
-      out due to Kazu not being able to incoorporate correctly w/o using drift velocity!
+      Much more sophisticated approach using a linear (trapezoidal) interpolation 
+      Current default!
     */
-    /*
+    int SamplingCount = 0;    
     for ( int itime = 0; itime < nticks; itime++ ) {
       int low = -1, up = -1;
       for ( int jtime = 0; jtime < nticks; jtime++ ) {
         if ( InputTime[jtime] == SamplingTime[itime] ) {
-          SamplingResp[itime] = kDVel * (*pResp)[jtime];
+          SamplingResp[itime] = (*pResp)[jtime];
+	  /// VELOCITY-OUT ... comment out kDVel usage here
+          //SamplingResp[itime] = kDVel * (*pResp)[jtime];
           SamplingCount++;
           break;
         } else if ( InputTime[jtime] > SamplingTime[itime] ) {
           low = jtime - 1;
           up = jtime;
           SamplingResp[itime] = (*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * ( (*pResp)[up] - (*pResp)[low] ) / ( InputTime[up] - InputTime[low] );
-          SamplingResp[itime] *= kDVel;
+	  /// VELOCITY-OUT ... comment out kDVel usage here
+          //SamplingResp[itime] *= kDVel;
           SamplingCount++;
           break;
         } else {
@@ -688,12 +710,16 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
       } // for ( int jtime = 0; jtime < nticks; jtime++ )
     } // for ( int itime = 0; itime < nticks; itime++ )
     SamplingResp.resize( SamplingCount, 0.);    
-    */
+
+    /*
     if(iplane==2) {
       double last_integral=0;
-      for(auto const& v : SamplingResp) last_integral += v;
-      std::cout<<"\033[93m"<<"Sum: "<<last_integral<<"\033[00m"<<std::endl;
+      double last_peak=0;
+      for(auto const& v : SamplingResp) {last_integral += v; if(last_peak<v) last_peak=v;}
+      std::cout<<"\033[93m"<<"Sum: "<<last_integral<<" ... peak: "<<last_peak<<"\033[00m"<<std::endl;
     }  
+    */
+
     /* Check the convoluted, sampled response, will remove this piece
     std::cout << "The convoluted response, after sampling: " << std::endl;
     std::cout << iPlaneName[iplane] << " Field Response: " << std::endl;
