@@ -58,6 +58,8 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
       << "\033[93m" 
       << "Drift velocity vector and Field response time offset fcl parameter must have length = Nplanes!"
       << "\033[00m" << std::endl;
+  fNoiseFactColl = pset.get<std::vector<double> >("NoiseFactColl");
+  fNoiseFactInd = pset.get<std::vector<double> >("NoiseFactInd");
   fNFieldBins = pset.get<int>("FieldBins");
   fInputFieldRespSamplingPeriod = pset.get<double>("InputFieldRespSamplingPeriod");
   fCol3DCorrection = pset.get<double>("Col3DCorrection");
@@ -212,7 +214,6 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
     fNFieldBins = 300;
   }  
 }
-
 
 //----------------------------------------------------------------------
 // Accessor for single-plane signal shaper.
@@ -489,14 +490,16 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse()
   // then normalize by the actual ASIC gain setting used.
   // This code is executed only during initialization of service,
   // so don't worry about code inefficiencies here.
+  double last_integral=0;
   for(int i = 0; i < nticks; ++i){
 
     fElectResponse.at(i) /= max;
     fElectResponse.at(i) *= fADCPerPCAtLowestASICGain * 1.60217657e-7;
-    fElectResponse.at(i) *= fInputFieldRespSamplingPeriod / detprop->SamplingRate();
+    //fElectResponse.at(i) *= fInputFieldRespSamplingPeriod / detprop->SamplingRate();
     fElectResponse.at(i) *= fASICGainInMVPerFC / 4.7;
+    last_integral += fElectResponse.at(i);
   }
-  
+  std::cout<<"\033[93m"<<"Sum: "<<last_integral<<" ... peak@ "<<fADCPerPCAtLowestASICGain*1.6e-7<<"\033[00m"<<std::endl;
   return;
 
 }
@@ -598,6 +601,11 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
     }
     std::vector<double> SamplingResp( pResp->size(), 0. );
 
+    if(iplane==2) {
+      double last_integral=0;
+      for(auto const& v : *pResp) last_integral += v;
+      std::cout<<"\033[93m"<<"Sum: "<<last_integral<<"\033[00m"<<std::endl;
+    }
     /*
       We allow different drift velocities. 
       kDVel is ratio of what was used in LArG4 to field response simulation.
@@ -633,19 +641,21 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
     //
     size_t out_index = 0;
     double q = 0;
+    double t = 0;
     for(size_t in_index=0; in_index < pResp->size(); ++in_index) {
 
       double bin_end_time = (in_index + 1) * fInputFieldRespSamplingPeriod;
       double out_end_time = (out_index+1) * detprop->SamplingRate();
-      if( bin_end_time < out_end_time )
-
+      if( bin_end_time < out_end_time ) {
+	t += 1.;
 	q += pResp->at(in_index);
-
+      }
       else {
-	
+	t += 1. - (bin_end_time - out_end_time)/fInputFieldRespSamplingPeriod;
 	q += pResp->at(in_index) * (1. + (out_end_time - bin_end_time) / fInputFieldRespSamplingPeriod);
-	SamplingResp.at(out_index) = q;
+	SamplingResp.at(out_index) = q / t;
 	
+	t = (bin_end_time - out_end_time)/fInputFieldRespSamplingPeriod;
 	q = pResp->at(in_index) * (bin_end_time - out_end_time) / fInputFieldRespSamplingPeriod;
 	out_index++;
 
@@ -657,8 +667,8 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
       Much more sophisticated approach using a linear (trapezoidal) interpolation ... currently commented
       out due to Kazu not being able to incoorporate correctly w/o using drift velocity!
     */
-    /*      
-      for ( int itime = 0; itime < nticks; itime++ ) {
+    /*
+    for ( int itime = 0; itime < nticks; itime++ ) {
       int low = -1, up = -1;
       for ( int jtime = 0; jtime < nticks; jtime++ ) {
         if ( InputTime[jtime] == SamplingTime[itime] ) {
@@ -679,7 +689,11 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
     } // for ( int itime = 0; itime < nticks; itime++ )
     SamplingResp.resize( SamplingCount, 0.);    
     */
-  
+    if(iplane==2) {
+      double last_integral=0;
+      for(auto const& v : SamplingResp) last_integral += v;
+      std::cout<<"\033[93m"<<"Sum: "<<last_integral<<"\033[00m"<<std::endl;
+    }  
     /* Check the convoluted, sampled response, will remove this piece
     std::cout << "The convoluted response, after sampling: " << std::endl;
     std::cout << iPlaneName[iplane] << " Field Response: " << std::endl;

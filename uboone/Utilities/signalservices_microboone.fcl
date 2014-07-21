@@ -7,6 +7,11 @@ microboone_signalshapingservice:
   ADCPerPCAtLowestASICGain: 1878 #ADC/pC
   #ASICGain: Options: (4.7, 7.8, 14, 25). Default: 7.8
   ASICGainInMVPerFC:                    7.8     #mV/fC
+
+  #Noise Factor - rms ADCs @ lowest ASIC Gain (4.7 mV/fC)
+  #Entries listed per shaping time, in increasing order
+  NoiseFactColl:        [ 0.89, 0.66, 0.48, 0.43 ]
+  NoiseFactInd:         [ 1.12, 0.86, 0.60, 0.55 ]
   
   DefaultDriftVelocity: [-1,-1,-1] # in cm/usec per drift region ... if negative value, use LArSoft derived drift velocity
   FieldResponseTOffset: [-26.6e3, -26.3e3, -26e3] # in ns, time offset of field response shape

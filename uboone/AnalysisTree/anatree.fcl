@@ -8,6 +8,12 @@
 #include "particleid.fcl"
 #include "analysistreemodule.fcl"
 #include "filters.fcl"
+#include "signalservices_microboone.fcl"
+##include "services_microboone_1window.fcl"
+##include "services_microboone_basic.fcl"
+##include "services_microboone.fcl"
+##include "services_microboone_simulation.fcl"
+ 
 
 process_name: AnaTree
 
@@ -49,7 +55,7 @@ physics:
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ trackkalmanhitcalo, trackkalspscalo, beziercalo ]
+ #reco: [ trackkalmanhitcalo, trackkalspscalo, beziercalo ]
  ana:  [ analysistree ]
  
  #define the output stream, there could be more than one if using filters 
@@ -81,10 +87,11 @@ physics.producers.beziercalo.BTrackModuleLabel:                 "beziertracker"
 #physics.producers.calo.CaloAlg.CaloUseModBox:            true
 #physics.producers.pid.TrackModuleLabel:                 "spacepts"
 #physics.producers.pid.CalorimetryModuleLabel:           "calo"
+physics.analyzers.analysistree.VertexModuleLabel:       ["trackkalmanhit", "trackkalsps", "beziertracker"]
 physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "trackkalsps", "beziertracker"]
 physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "trackkalspscalo", "beziercalo"]
 physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "generator"
 #physics.analyzers.analysistree.ParticleIDModuleLabel:   "pid"
-
+physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid",  "trackkalspspid","beziertrackerpid"]
 

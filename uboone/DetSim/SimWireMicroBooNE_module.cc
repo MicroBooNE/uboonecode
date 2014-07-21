@@ -78,7 +78,10 @@ namespace detsim {
     std::string            fDriftEModuleLabel;///< module making the ionization electrons
     raw::Compress_t        fCompression;      ///< compression type to use
 
-    double                 fNoiseFact;        ///< noise scale factor (ADC RMS for gaussian noise)
+    double                 fNoiseFact;        ///< Flexible noise factor, taken from induction and collection as wires change
+    double                 fNoiseFactInd;     ///< noise scale factor for Induction channels (ADC RMS for gaussian noise)
+    double                 fNoiseFactColl;    ///< noise scale factor for Collection channels (ADC RMS for gaussian noise)
+    double                 fShapingTime;      ///< Shaping time in usec
     double                 fNoiseWidth;       ///< exponential noise width (kHz) 
     double                 fNoiseRand;        ///< fraction of random "wiggle" in noise in freq. spectrum
     double                 fLowCutoff;        ///< low frequency filter cutoff (kHz)
@@ -95,7 +98,10 @@ namespace detsim {
     std::string fNoiseFileFname; 
     std::string fNoiseHistoName; 
     TH1D*             fNoiseHist;             ///< distribution of noise counts
+    float                  fASICGain;
 
+    
+    std::map< double, int > fShapingTimeOrder;
     std::string fTrigModName;                 ///< Trigger data product producer name
     //define max ADC value - if one wishes this can
     //be made a fcl parameter but not likely to ever change
@@ -136,7 +142,6 @@ namespace detsim {
   void SimWireMicroBooNE::reconfigure(fhicl::ParameterSet const& p) 
   {
     fDriftEModuleLabel= p.get< std::string         >("DriftEModuleLabel");
-    fNoiseFact        = p.get< double              >("NoiseFact");
     fNoiseWidth       = p.get< double              >("NoiseWidth");
     fNoiseRand        = p.get< double              >("NoiseRand");
     fLowCutoff        = p.get< double              >("LowCutoff");
@@ -146,8 +151,13 @@ namespace detsim {
     fCollectionPed    = p.get< float               >("CollectionPed");
     fInductionPed     = p.get< float               >("InductionPed");
     fBaselineRMS      = p.get< float               >("BaselineRMS");
-
     fTrigModName      = p.get< std::string         >("TrigModName");
+
+    //Map the Shaping Times to the entry position for the noise ADC
+    //level in fNoiseFactInd and fNoiseFactColl
+    fShapingTimeOrder = { {0.5, 0}, {1.0, 1}, {2.0, 2}, {3.0, 3} };
+
+    
 
     if(fGetNoiseFromHisto)
       {
@@ -165,7 +175,7 @@ namespace detsim {
         temp->Copy(*fNoiseHist);
       }
       else
-        throw cet::exception("SimWireMicroBooNE") << " Could not find noise histogram in Root file\n";
+        throw cet::exception("SimWireMicroBooNE") << "Could not find noise histogram in Root file\n";
       in->Close();
     
       }
@@ -184,7 +194,7 @@ namespace detsim {
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
 
-    fNoiseDist  = tfs->make<TH1D>("Noise", ";Noise  (ADC);", 1000,   -10., 10.);
+    fNoiseDist  = tfs->make<TH1D>("Noise", ";Noise  (ADC);", 1000,   -30., 30.);
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fNTicks = fFFT->FFTSize();
@@ -234,6 +244,28 @@ namespace detsim {
 
     //Get fIndShape and fColShape from SignalShapingService, on the fly
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    //get ASIC Gain and Noise in ADCatLowestGain:
+    fASICGain      = sss->GetASICGain();
+    fShapingTime   = sss->GetShapingTime();
+    //Check that shaping time is an allowed value
+    //If so, Pick out noise factor 
+    //If not, through exception
+    if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
+      fNoiseFactInd   = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
+      fNoiseFactColl  = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
+    }
+    else{//Throw exception...
+      throw cet::exception("SimWireMicroBooNE")
+        << "\033[93m"
+        << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
+	<< std::endl
+        << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
+        << "\033[00m"
+        << std::endl;
+    }
+    //Take into account ASIC Gain
+    fNoiseFactInd *= fASICGain/4.7;
+    fNoiseFactColl *= fASICGain/4.7;
 
     // make a vector of const sim::SimChannel* that has same number
     // of entries as the number of channels in the detector
@@ -285,6 +317,18 @@ namespace detsim {
         sss->Convolute(chan,chargeWork);
 
       }
+
+      //Pedestal determination
+      float ped_mean = fCollectionPed;
+      geo::SigType_t sigtype = geo->SignalType(chan);
+      if (sigtype == geo::kInduction){
+        ped_mean = fInductionPed;
+	fNoiseFact = fNoiseFactInd;
+      }
+      else if (sigtype == geo::kCollection){
+        ped_mean = fCollectionPed;
+	fNoiseFact = fNoiseFactColl;
+      }
       
       //Generate Noise:
       std::vector<float> noisetmp(fNTicks,0.);
@@ -295,13 +339,7 @@ namespace detsim {
           GenNoiseInFreq(noisetmp);
       }
 
-      //Pedestal determination
-      float ped_mean = fCollectionPed;
-      geo::SigType_t sigtype = geo->SignalType(chan);
-      if (sigtype == geo::kInduction)
-        ped_mean = fInductionPed;
-      else if (sigtype == geo::kCollection)
-        ped_mean = fCollectionPed;
+
       //slight variation on ped on order of RMS of baselien variation
       art::ServiceHandle<art::RandomNumberGenerator> rng;
       CLHEP::HepRandomEngine &engine = rng->getEngine();

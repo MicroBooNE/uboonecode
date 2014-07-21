@@ -220,6 +220,7 @@ namespace microboone {
       PlaneData_t<Float_t>    trkke;
       PlaneData_t<Float_t>    trkrange;
       PlaneData_t<Int_t>      trkidtruth;  //true geant trackid
+      PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles
       PlaneData_t<Int_t>      trkpdgtruth; //true pdg code
       PlaneData_t<Float_t>    trkefftruth; //completeness
       PlaneData_t<Float_t>    trkpurtruth; //purity of track
@@ -322,7 +323,7 @@ namespace microboone {
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
     Short_t  hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
-
+    
     //track information
     Char_t   kNTracker;
     std::vector<TrackDataStruct> TrackData;
@@ -695,6 +696,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkke.resize(MaxTracks);
   trkrange.resize(MaxTracks);
   trkidtruth.resize(MaxTracks);
+  trkorigin.resize(MaxTracks);
   trkpdgtruth.resize(MaxTracks);
   trkefftruth.resize(MaxTracks);
   trkpurtruth.resize(MaxTracks);
@@ -752,6 +754,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkke[iTrk]      , -99999.);
     FillWith(trkrange[iTrk]   , -99999.);
     FillWith(trkidtruth[iTrk] , -99999 );
+    FillWith(trkorigin[iTrk] , -1 );
     FillWith(trkpdgtruth[iTrk], -99999 );
     FillWith(trkefftruth[iTrk], -99999.);
     FillWith(trkpurtruth[iTrk], -99999.);
@@ -802,6 +805,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkidtruth_" + TrackLabel;
   CreateBranch(BranchName, trkidtruth, BranchName + NTracksIndexStr + "[3]/I");
+
+  BranchName = "trkorigin_" + TrackLabel;
+  CreateBranch(BranchName, trkorigin, BranchName + NTracksIndexStr + "[3]/S");
   
   BranchName = "trkpdgtruth_" + TrackLabel;
   CreateBranch(BranchName, trkpdgtruth, BranchName + NTracksIndexStr + "[3]/I");
@@ -1244,7 +1250,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("geant_tpcFV_pdg", geant_tpcFV_pdg, "geant_tpcFV_pdg[geant_list_size_in_tpcFV]/I");
   CreateBranch("geant_tpcFV_status", geant_tpcFV_status, "geant_tpcFV_status[geant_list_size_in_tpcFV]/I");
   CreateBranch("geant_tpcFV_trackId", geant_tpcFV_trackId, "geant_tpcFV_trackId[geant_list_size_in_tpcFV]/I");
-  CreateBranch("geant_tpcFV_orig_E", geant_tpcFV_orig_E, "geant_tpcFV_orig_E[geant_list_size_in_tpcFV]/F");
+  CreateBranch("geant_tpcFV_orig_E", geant_tpcFV_orig_E, "geant_tpcFV_orig_E[geant_list_size_in_tpcFV]/D");
   CreateBranch("geant_tpcFV_orig_px", geant_tpcFV_orig_px, "geant_tpcFV_orig_px[geant_list_size_in_tpcFV]/D");
   CreateBranch("geant_tpcFV_orig_py", geant_tpcFV_orig_py, "geant_tpcFV_orig_py[geant_list_size_in_tpcFV]/D");
   CreateBranch("geant_tpcFV_orig_pz", geant_tpcFV_orig_pz, "geant_tpcFV_orig_pz[geant_list_size_in_tpcFV]/D");
@@ -1714,6 +1720,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           HitsPurity(hits[ipl],TrackerData.trkidtruth[iTrk][ipl],TrackerData.trkpurtruth[iTrk][ipl],maxe);
         //std::cout<<"\n"<<iTracker<<"\t"<<iTrk<<"\t"<<ipl<<"\t"<<trkidtruth[iTracker][iTrk][ipl]<<"\t"<<trkpurtruth[iTracker][iTrk][ipl]<<"\t"<<maxe;
           if (TrackerData.trkidtruth[iTrk][ipl]>0){
+	    const art::Ptr<simb::MCTruth> mc = bt->TrackIDToMCTruth(TrackerData.trkidtruth[iTrk][ipl]);
+	    TrackerData.trkorigin[iTrk][ipl] = mc->Origin();
             const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[iTrk][ipl]);
             double tote = 0;
             std::vector<sim::IDE> vide(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]));
@@ -2036,7 +2044,6 @@ double microboone::AnalysisTree::length(const recob::Track& track)
 }
 
 // Length of MC particle, trajectory by trajectory.
-
 double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
 {
   // Get geometry.
@@ -2045,19 +2052,15 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
 
   // Get fiducial volume boundary.
   //double xmin = 0.;
-  //double xmax = 2.*geom->DetHalfWidth();
+  double xmax = 2.*geom->DetHalfWidth();
   double ymin = -geom->DetHalfHeight();
   double ymax = geom->DetHalfHeight();
   double zmin = 0.;
   double zmax = geom->DetLength();
 
-  const double fSamplingRate = 500;
-  const double fReadOutWindowSize = 3200;
-  int whatSpill=1;
-  if (detprop->NumberTimeSamples()==3200)
-           whatSpill = 0;
-  else
-         whatSpill = 1;
+  //const double fSamplingRate = 500;
+  //const double fReadOutWindowSize = 3200;
+  double        vDrift = 160*pow(10,-6);
 
   double result = 0.;
   TVector3 disp;
@@ -2066,7 +2069,7 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
 
   for(int i = 0; i < n; ++i) {
     try{
-      // check if the particle is inside a TPC
+      // check if the particle is inside a TPC  											
       double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
       unsigned int tpc   = 0;
       unsigned int cstat = 0;
@@ -2075,20 +2078,27 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
     catch(cet::exception &e){
       continue;
     }
-    if(part.Vx(i) < (2.0*geom->DetHalfWidth()/fReadOutWindowSize)*(whatSpill*fReadOutWindowSize - part.T(i)*1./fSamplingRate ) ) continue;
-    if(part.Vx(i) > (2.0*geom->DetHalfWidth()/fReadOutWindowSize)*((whatSpill+1) *fReadOutWindowSize - part.T(i)*1./fSamplingRate ) )
-      continue;
-    if(part.Vy(i) < ymin || part.Vy(i) > ymax) continue;
-    if(part.Vz(i) < zmin || part.Vz(i) > zmax) continue;
-    // Doing some manual shifting to account for
-    // an interaction not occuring with the beam dump
-    // we will reconstruct an x distance different from
-    // where the particle actually passed to to the time
-    // being different from in-spill interactions
-    double newX = -(2.0*geom->DetHalfWidth()/fReadOutWindowSize)*(whatSpill*fReadOutWindowSize - part.T(i)*1./fSamplingRate ) + part.Vx(i);
+    
+    double xGen   = part.Vx(i);
+    double tGen   = part.T(i);
+    //double tDrift = xGen/vDrift;
+    
+    
+//std::cout<<"\n"<<xGen<<"\t"<<tGen<<"\t"<<(-xmax-tGen*vDrift)<<"\t"<<((2*xmax)-(tGen*vDrift));									
+       
+    if (xGen < (-xmax-tGen*vDrift) || xGen > ((2*xmax)-tGen*vDrift) ) continue;
+    if (part.Vy(i) < ymin || part.Vy(i) > ymax) continue;
+    if (part.Vz(i) < zmin || part.Vz(i) > zmax) continue;
+    // Doing some manual shifting to account for											
+    // an interaction not occuring with the beam dump											
+    // we will reconstruct an x distance different from 										
+    // where the particle actually passed to to the time										
+    // being different from in-spill interactions	
+    double newX = xGen+tGen*vDrift;	
+    
 
     TVector3 pos(newX,part.Vy(i),part.Vz(i));
-
+    
     if(first){
       start = pos;
     }
@@ -2102,6 +2112,7 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
   }
   return result;
 }
+
 
 namespace microboone{
 
