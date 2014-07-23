@@ -199,6 +199,9 @@ do
   <!-- Operating System -->
   <os>SL5,SL6</os>
 
+  <!-- Batch resources -->
+  <resource>DEDICATED,OPPORTUNISTIC</resource>
+
   <!-- Larsoft information -->
   <larsoft>
     <tag>&release;</tag>
