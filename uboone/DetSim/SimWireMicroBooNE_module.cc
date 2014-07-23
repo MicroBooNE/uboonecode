@@ -252,7 +252,7 @@ namespace detsim {
     //If not, through exception
     if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
       fNoiseFactInd   = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
-      fNoiseFactColl  = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
+      fNoiseFactColl  = sss->GetNoiseFactColl().at( fShapingTimeOrder.find( fShapingTime )->second );
     }
     else{//Throw exception...
       throw cet::exception("SimWireMicroBooNE")
