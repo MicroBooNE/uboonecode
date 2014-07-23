@@ -16,8 +16,8 @@ standard_rawdigitsim:
  SigAmp:             [22000]
  # Signal timing in ticks
  SigTime:            [5000]
- SigUnit:            false
- Channel:            7775
+ SigUnit:            false # true = ADC counts, false = electrons
+ Channel:            7775 # 7775 = collection wire, 33 = induction wire (U/V?), 3000 = ?
 # Channel:            33
  Pedestal:           400                      #in ADCs: signal pedestal value
  NTicks:             9600                     #in time-ticks: length of pulse
