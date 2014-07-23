@@ -1,0 +1,29 @@
+BEGIN_PROLOG
+
+standard_rawdigitsim:
+{ 
+ module_type:        "RawDigitSimulator"
+ DriftEModuleLabel:  "largeant"
+
+ #
+ # Signal configuration
+ #
+ # Signal shape ... 0=gaus, 1=square
+ SigType:            [1]
+ # Signal width (for shape) in time-ticks
+ SigWidth:           [1]
+ # Signal amplitude in ADC OR #electrons (control unit by fSigUnit)
+ SigAmp:             [22000]
+ # Signal timing in ticks
+ SigTime:            [5000]
+ SigUnit:            false
+ Channel:            7775
+# Channel:            33
+ Pedestal:           400                      #in ADCs: signal pedestal value
+ NTicks:             9600                     #in time-ticks: length of pulse
+ CompressionType:    "none"                   #could also be none		
+ GenNoise:           true                     #gen noise...if false function not called
+ BaselineRMS:        0.3                     #ADC baseline fluctuation within channel        
+}
+
+END_PROLOG
