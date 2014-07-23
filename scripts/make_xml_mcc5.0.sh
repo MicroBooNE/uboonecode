@@ -298,7 +298,7 @@ EOF
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/reco/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/reco/&name;</workdir>
     <numjobs>$njob</numjobs>
-    <targetsize>2000000000</targetsize>
+    <targetsize>8000000000</targetsize>
     <datatier>reconstructed</datatier>
     <defname>&name;_&tag;</defname>
   </stage>
