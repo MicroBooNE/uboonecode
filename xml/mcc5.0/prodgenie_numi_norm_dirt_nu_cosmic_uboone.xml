@@ -16,7 +16,7 @@
   <group>uboone</group>
 
   <!-- Project size -->
-  <numevents>10000</numevents>
+  <numevents>6</numevents>
 
   <!-- Operating System -->
   <os>SL5,SL6</os>
@@ -25,15 +25,16 @@
   <larsoft>
     <tag>&release;</tag>
     <qual>e5:prof</qual>
+    <local>/uboone/app/users/echurch/lgm/prof.slf6.v02_03_01/localProducts_larsoft_v02_03_01_e5_prof</local>
   </larsoft>
 
   <!-- Project stages -->
 
   <stage name="gen">
     <fcl>prodgenie_simple_numi_norm_dirt_nu_cosmic_uboone.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/gen/&name;</outdir>
-    <workdir>/uboone/app/users/uboonepro/&release;/gen/&name;</workdir>
-    <numjobs>100</numjobs>
+    <outdir>/uboone/data/users/echurch/&release;/gen/&name;</outdir>
+    <workdir>/uboone/app/users/echurch/&release;/gen/&name;</workdir>
+    <numjobs>3</numjobs>
     <datatier>generated</datatier>
     <defname>&name;_&tag;_gen</defname>
   </stage>
