@@ -1423,7 +1423,10 @@ def dimensions(project, stage):
     dim = dim + ' and data_tier %s' % stage.data_tier
     dim = dim + ' and ub_project.name %s' % project.name
     dim = dim + ' and ub_project.stage %s' % stage.name
-    dim = dim + ' and ub_project.version %s' % project.ubxml
+    if project.ubxml != '': 
+        dim = dim + ' and ub_project.version %s' % project.ubxml
+    else:
+        dim = dim + ' and ub_project.version %s' % project.release_tag
     dim = dim + ' and availability: anylocation'
     return dim
 
@@ -2045,13 +2048,14 @@ def main(argv):
             # Add overrides for project (name, stage, version).
             # These are the main metadata attributes for identifying mc samples.
             
+            wrapper_fcl.write('%s "ubProjectName", "%s"\n  ' % (sep, project.name))
+            sep = ','
+            if stage.name:
+                wrapper_fcl.write('%s "ubProjectStage", "%s"\n  ' % (sep, stage.name))
             if project.ubxml:
-                wrapper_fcl.write('%s "ubProjectName", "%s"\n  ' % (sep, project.name))
-                sep = ','
-                if stage.name:
-                    wrapper_fcl.write('%s "ubProjectStage", "%s"\n  ' % (sep, stage.name))
-                if project.ubxml:
-                    wrapper_fcl.write('%s "ubProjectVersion", "%s"\n  ' % (sep, project.ubxml))
+                wrapper_fcl.write('%s "ubProjectVersion", "%s"\n  ' % (sep, project.ubxml))
+            elif project.release_tag:
+                wrapper_fcl.write('%s "ubProjectVersion", "%s"\n  ' % (sep, project.release_tag))
 
             # Run type.
 
