@@ -9,15 +9,16 @@ microboone_geo(TString volName="")
   gSystem->Load("libGeom");
   gSystem->Load("libGdml");
 
-  TGeoManager::Import("microboone_LArTF.gdml");
+  TGeoManager::Import("microboone_nowires.gdml");
 
   drawopt optuboone[] = {
     {"volGround",       kOrange-7},
     {"volConcreteEnclosure", kGray},
     {"volConcreteEnclosureBottom", kGray},
+    {"volOverburden",       kOrange-7}// taken out of above
     {0, 0}
   };
-//"    {"volOverburden",       kOrange-7}" taken out of above
+
 
   for (int i=0;; ++i) {
      if (optuboone[i].volume==0) break;
