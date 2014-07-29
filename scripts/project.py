@@ -936,16 +936,6 @@ def parsedir(dirname):
     
     return result
 
-# Convert pnfs path to xrootd url.
-# Don't do anything to non-pnfs paths.
-
-def path_to_url(path):
-    url = path
-    if path[0:6] == '/pnfs/':
-        url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/' + path[6:]
-        test_proxy()
-    return url
-
 # Check root files (*.root) in the specified directory.
 
 def check_root(dir):
@@ -974,7 +964,9 @@ def check_root(dir):
     for filename in filenames:
         if filename[-5:] == '.root':
             path = os.path.join(dir, filename)
-            url = path_to_url(path)
+            url = uboone_utilities.path_to_url(path)
+            if url != path:
+                test_proxy()
             file = ROOT.TFile.Open(url)
             if file and file.IsOpen() and not file.IsZombie():
                 obj = file.Get('Events')
@@ -1285,7 +1277,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     for hist in hists:
         histlist.write('%s\n' % hist)
-        histurls.write('%s\n' % path_to_url(hist))
+        histurls.write('%s\n' % uboone_utilities.path_to_url(hist))
 
     # Print summary.
 
