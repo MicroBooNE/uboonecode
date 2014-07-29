@@ -91,7 +91,8 @@ namespace detsim {
     float                  fCollectionPed;    ///< ADC value of baseline for collection plane
     float                  fInductionPed;     ///< ADC value of baseline for induction plane
     float                  fBaselineRMS;      ///< ADC value of baseline RMS within each channel                    
-    TH1D*                  fNoiseDist;        ///< distribution of noise counts
+    TH1D*                  fNoiseDistColl;    ///< distribution of noise counts
+    TH1D*                  fNoiseDistInd;     ///< distribution of noise counts
     bool fGetNoiseFromHisto;                  ///< if True -> Noise from Histogram of Freq. spectrum
     bool fGenNoiseInTime;                     ///< if True -> Noise with Gaussian dsitribution in Time-domain 
     bool fGenNoise;                           ///< if True -> Gen Noise. if False -> Skip noise generation entierly
@@ -194,7 +195,8 @@ namespace detsim {
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
 
-    fNoiseDist  = tfs->make<TH1D>("Noise", ";Noise  (ADC);", 1000,   -30., 30.);
+    fNoiseDistColl  = tfs->make<TH1D>("NoiseCollection", ";Noise on Collection Wires (ADC);", 1000,   -30., 30.);
+    fNoiseDistInd  = tfs->make<TH1D>("NoiseInduction", ";Noise on Induction Wires (ADC);", 1000,   -30., 30.);
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fNTicks = fFFT->FFTSize();
@@ -365,8 +367,12 @@ namespace detsim {
         float adcval = noisetmp[i] + chargeWork[i] + ped_mean;
         
         //Add Noise to NoiseDist Histogram
-        if (i%1000==0)
-          fNoiseDist->Fill(noisetmp[i]);
+        if (i%1000==0){
+	  if (sigtype == geo::kCollection)
+	    fNoiseDistColl->Fill(noisetmp[i]);
+	  if (sigtype == geo::kInduction)
+	    fNoiseDistInd->Fill(noisetmp[i]);
+	}
 
         //allow for ADC saturation
         if ( adcval > adcsaturation )
