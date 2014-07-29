@@ -189,6 +189,23 @@ def saferead(path):
         lines = open(path).readlines()
     return lines
 
+# Like os.path.isdir, but faster by avoiding unnecessary i/o.
+
+def fast_isdir(path):
+    result = False
+    if path[-5:] != '.list' and \
+            path[-5:] != '.root' and \
+            path[-4:] != '.txt' and \
+            path[-4:] != '.fcl' and \
+            path[-4:] != '.out' and \
+            path[-4:] != '.err' and \
+            path[-3:] != '.sh' and \
+            path[-5:] != '.stat' and \
+            os.path.isdir(path):
+        result = True
+    return result
+
+
 # XML exception class.
 
 class XMLError(Exception):
@@ -1086,10 +1103,11 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     subdirs = os.listdir(dir)
     for subdir in subdirs:
         subpath = os.path.join(dir, subdir)
+        dirok = fast_isdir(subpath)
 
         # Update list of sam projects from start job.
 
-        if os.path.isdir(subpath) and subpath[-6:] == '_start':
+        if dirok and subpath[-6:] == '_start':
             filename = os.path.join(subpath, 'sam_project.txt')
             if safeexist(filename):
                 sam_project = saferead(filename)[0].strip()
@@ -1098,7 +1116,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
         # Regular worker jobs checked here.
 
-        if os.path.isdir(subpath) and not subpath[-6:] == '_start' and not subpath[-5:] == '_stop':
+        if dirok and not subpath[-6:] == '_start' and not subpath[-5:] == '_stop':
 
             # Found a subdirectory.
 
@@ -1437,7 +1455,7 @@ def docheck_declarations(outdir, declare):
 
     single_subdir = ''
     sam_subdir = os.path.join(outdir, 'sam')
-    if os.path.isdir(sam_subdir):
+    if fast_isdir(sam_subdir):
         single_subdir = 'sam'
 
     # Loop over root files.
@@ -1445,7 +1463,7 @@ def docheck_declarations(outdir, declare):
     for subdir in os.listdir(outdir):
         if single_subdir == '' or single_subdir == subdir:
             subpath = os.path.join(outdir, subdir)
-            if os.path.isdir(subpath):
+            if fast_isdir(subpath):
                 nev, roots, subhists = check_root(subpath)
                 for root in roots:
                     fn = os.path.basename(root[0])
@@ -1593,7 +1611,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
         disk_locs = []
         for subdir in os.listdir(outdir):
             subpath = os.path.join(outdir, subdir)
-            if os.path.isdir(subpath):
+            if fast_isdir(subpath):
                 for fn in os.listdir(subpath):
                     if fn == filename:
                         filepath = os.path.join(subpath, fn)
