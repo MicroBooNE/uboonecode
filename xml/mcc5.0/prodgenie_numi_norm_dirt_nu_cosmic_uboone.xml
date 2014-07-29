@@ -16,7 +16,7 @@
   <group>uboone</group>
 
   <!-- Project size -->
-  <numevents>33</numevents>
+  <numevents>10000</numevents>
 
   <!-- Operating System -->
   <os>SL5,SL6</os>
@@ -32,8 +32,8 @@
   <stage name="gen">
     <fcl>prodgenie_simple_numi_norm_dirt_nu_cosmic_uboone.fcl</fcl>
     <outdir>/uboone/data/uboonepro/&release;/gen/&name;</outdir>
-    <workdir>/uboone/app/users/echurch/&release;/gen/&name;</workdir>
-    <numjobs>3</numjobs>
+    <workdir>/uboone/app/users/uboonepro/&release;/gen/&name;</workdir>
+    <numjobs>100</numjobs>
     <datatier>generated</datatier>
     <defname>&name;_&tag;_gen</defname>
   </stage>
