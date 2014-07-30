@@ -124,7 +124,6 @@ namespace caldata {
   void CalWireMicroBooNE::beginJob()
   {  
     fEventCount = 0;
-    std::cout << "Job is Beginning!" << std::endl;
   }
 
   //////////////////////////////////////////////////////
@@ -136,7 +135,6 @@ namespace caldata {
   void CalWireMicroBooNE::produce(art::Event& evt)
   {      
 
-    std::cout << "Producer started..." << std::endl;
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
 
@@ -249,7 +247,6 @@ namespace caldata {
     //Make Histogram of recob::wire objects from Signal() vector
     // get access to the TFile service
     if ( fSaveWireWF ){
-      std::cout << "saving wf..." << std::endl;
       art::ServiceHandle<art::TFileService> tfs;
       for (size_t wireN = 0; wireN < wirecol->size(); wireN++){
 	std::vector<float> sigTMP = wirecol->at(wireN).Signal();
