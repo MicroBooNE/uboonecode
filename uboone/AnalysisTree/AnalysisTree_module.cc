@@ -256,12 +256,12 @@ namespace microboone {
       TrackData_t<Short_t> trksvtxid;     // Vertex ID associated with the track start
       TrackData_t<Short_t> trkevtxid;     // Vertex ID associated with the track end
       TrackData_t<Int_t> trkpidpdg;       // particle PID pdg code
-      TrackData_t<Float_t> trkpidchi;     // particle PID chisq
-      TrackData_t<Float_t> trkpidchipr;   // particle PID chisq for proton
-      TrackData_t<Float_t> trkpidchika;   // particle PID chisq for kaon
-      TrackData_t<Float_t> trkpidchipi;   // particle PID chisq for pion
-      TrackData_t<Float_t> trkpidchimu;   // particle PID chisq for muon
-      TrackData_t<Float_t> trkpidpida;    // particle PIDA
+      TrackData_t<Double_t> trkpidchi;     // particle PID chisq
+      TrackData_t<Double_t> trkpidchipr;   // particle PID chisq for proton
+      TrackData_t<Double_t> trkpidchika;   // particle PID chisq for kaon
+      TrackData_t<Double_t> trkpidchipi;   // particle PID chisq for pion
+      TrackData_t<Double_t> trkpidchimu;   // particle PID chisq for muon
+      TrackData_t<Double_t> trkpidpida;    // particle PIDA
       
       // BB vertex info
       unsigned short nvtx;
@@ -912,25 +912,25 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   CreateBranch(BranchName, vtx, BranchName + MaxVerticesIndexStr + "[3]" + "/F");
 
   BranchName = "trkpidpdg_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidpdg, BranchName + "/I");
+  CreateBranch(BranchName, trkpidpdg, BranchName + "/I");
 
   BranchName = "trkpidchi_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchi, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchi, BranchName + "/D");
 
   BranchName = "trkpidchipr_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchipr, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchipr, BranchName + "/D");
 
   BranchName = "trkpidchika_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchika, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchika, BranchName + "/D");
 
   BranchName = "trkpidchipi_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchipi, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchipi, BranchName + "/D");
 
   BranchName = "trkpidchimu_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchimu, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchimu, BranchName + "/D");
 
   BranchName = "trkpidpida_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidpida, BranchName + "/F");
+  CreateBranch(BranchName, trkpidpida, BranchName + "/D");
 
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses()
 
@@ -1654,6 +1654,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             << " has " << pids.size() 
             << " set of ParticleID variables. Only one stored in the tree";
         }
+        mf::LogError("AnalysisTree:limits") << pids[0] -> Pdg() << "\t" << pids[0] -> MinChi2() << "\t" << pids[0]->PIDA();
         TrackerData.trkpidpdg[iTrk] = pids[0]->Pdg();
         TrackerData.trkpidchi[iTrk] = pids[0]->MinChi2();
         TrackerData.trkpidchipr[iTrk] = pids[0]->Chi2Proton();
