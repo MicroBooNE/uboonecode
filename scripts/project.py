@@ -1677,8 +1677,10 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
         
         # Report results and do the actual adding/removing/uploading.
 
-        node = uboone_utilities.get_bluearc_server()
         for loc in locs_to_add:
+            node = uboone_utilities.get_bluearc_server()
+            if loc[0:6] == '/pnfs/':
+                node = uboone_utilities.get_dcache_server()
             loc = node + loc.split(':')[-1]
             if add:
                 print 'Adding location: %s.' % loc

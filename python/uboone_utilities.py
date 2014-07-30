@@ -49,7 +49,12 @@ def get_experiment():
 
 def get_bluearc_server():
     return get_experiment() + 'data:'
-    
+
+# Function to return the fictitious disk server node
+# name to use for dCache disks.
+
+def get_dcache_server():
+    return 'fnal-dcache:'
 
 # Function to determine dropbox directory based on sam metadata.
 # Raise an exception if the specified file doesn't have metadata.
