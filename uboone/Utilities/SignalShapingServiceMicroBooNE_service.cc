@@ -68,6 +68,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   fIndUFieldRespAmp = pset.get<double>("IndUFieldRespAmp");
   fIndVFieldRespAmp = pset.get<double>("IndVFieldRespAmp");
   fShapeTimeConst = pset.get<std::vector<double> >("ShapeTimeConst");
+  fDeconvPol = pset.get<std::vector<int> >("DeconvPol");
 
   // Currently we have three options of field response shapes:
   // 1. UseFunctionFieldShape
@@ -291,12 +292,15 @@ void util::SignalShapingServiceMicroBooNE::init()
     // Configure deconvolution kernels.
 
     fColSignalShaping.AddFilterFunction(fColFilter);
+    fColSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(2) );
     fColSignalShaping.CalculateDeconvKernel();
 
     fIndUSignalShaping.AddFilterFunction(fIndUFilter);
+    fIndUSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(0) );
     fIndUSignalShaping.CalculateDeconvKernel();
 
     fIndVSignalShaping.AddFilterFunction(fIndVFilter);
+    fIndVSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(1) );
     fIndVSignalShaping.CalculateDeconvKernel();
   }
 }

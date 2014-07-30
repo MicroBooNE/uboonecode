@@ -11,9 +11,6 @@ services:
   RandomNumberGenerator: {} #ART native random number generator
   user:         @local::microboone_simulation_services
 }
-services.user.SignalShapingServiceMicroBooNE.ShapeTimeConst: [1.4,0.5]
-services.user.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: 14
-#services.user.SignalShapingServiceMicroBooNE.UseHistogramFieldShape: false
 
 #services.user.DetectorProperties.NumberTimeSamples: 1200
 #services.user.DetectorProperties.ReadOutWindowSize: 1200

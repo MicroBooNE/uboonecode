@@ -249,6 +249,7 @@ namespace caldata {
     //Make Histogram of recob::wire objects from Signal() vector
     // get access to the TFile service
     if ( fSaveWireWF ){
+      std::cout << "saving wf..." << std::endl;
       art::ServiceHandle<art::TFileService> tfs;
       for (size_t wireN = 0; wireN < wirecol->size(); wireN++){
 	std::vector<float> sigTMP = wirecol->at(wireN).Signal();

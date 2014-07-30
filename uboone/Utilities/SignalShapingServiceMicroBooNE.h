@@ -166,6 +166,7 @@ namespace util {
     double fIndUFieldRespAmp;  			///< amplitude of response to field in U plane
     double fIndVFieldRespAmp;  			///< amplitude of response to field in V plane
     std::vector<double> fShapeTimeConst;  	///< time constants for exponential shaping
+    std::vector<int> fDeconvPol;                ///< switch for DeconvKernel normalization sign (+ -> max pos ADC, - -> max neg ADC). Entry 0,1,2 = U,V,Y plane settings
     TF1* fColFilterFunc;      			///< Parameterized collection filter function.
     TF1* fIndUFilterFunc;      			///< Parameterized induction filter function for U plane.
     TF1* fIndVFilterFunc;      			///< Parameterized induction filter function for V plane

@@ -27,6 +27,8 @@ microboone_signalshapingservice:
   #IndVFieldRespAmp:  0.018
   IndVFieldRespAmp:  1.0
   ShapeTimeConst:  [ 1.4, 0.5 ] #Gain and Peaking time (microseconds)
+  DeconvPol:       [ -1, 1, 1 ]#Switch for RawDigit-RecobWire normalization. Entry 0,1,2 are U,V,Y respectively
+                               #-1 means normalizes to min ADC count, +1 to max
 
   # For IndFilter and ColFilter, frequency (x) is measured in
   # cycles/microsecond.  The conversion to frequency bin depends on FFT size
