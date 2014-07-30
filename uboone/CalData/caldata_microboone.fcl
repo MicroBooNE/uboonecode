@@ -5,7 +5,7 @@ BEGIN_PROLOG
 microboone_calroi:
 {
  module_type:        "CalWireROI"
- DigitModuleLabel:   "simwire"
+ DigitModuleLabel:   "daq"
  Threshold: [ 3, 3, 3 ] # abs(threshold) for finding a Region Of Interest
  MinWid:              4 # min width (time bins) for a ROI
  MinSep:             10 # min separation (time bins) between ROIs
@@ -21,7 +21,7 @@ microboone_calroi:
 microboone_calwire:
 {
  module_type:        "CalWireMicroBooNE"
- DigitModuleLabel:   "simwire"
+ DigitModuleLabel:   "daq"
  PostsampleBins:       0
  BaseSampleBins:      40  # set > 0 for baseline subtraction. Value should be
                           # modulo the data size (3200 for uB)
