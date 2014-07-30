@@ -7,14 +7,16 @@ import time
 import samweb_cli
 from samweb_client.utility import fileEnstoreChecksum
 import ast
+import uboone_utilities
 
 def getmetadata(inputfile):
 	# Set up the experiment name for samweb Python API	
 	samweb = samweb_cli.SAMWebClient(experiment='uboone')
 
 	# Extract metadata into a pipe.
-        proc = subprocess.Popen(["sam_metadata_dumper", inputfile], stdout=subprocess.PIPE)
-        lines = proc.stdout.readlines()
+	url = uboone_utilities.path_to_url(inputfile)
+	proc = subprocess.Popen(["sam_metadata_dumper", url], stdout=subprocess.PIPE)
+	lines = proc.stdout.readlines()
 
 	# Count the number of lines in the file (for later use!)
 	num_lines = len(lines)
@@ -86,7 +88,9 @@ def getmetadata(inputfile):
 	# Get the other meta data field parameters						
 	md['file_name'] =  inputfile.split("/")[-1]
 	md['file_size'] =  os.path.getsize(inputfile)
-	md['crc'] = fileEnstoreChecksum(inputfile)
+	# For now, skip the checksum for dCache files.
+	if inputfile == url:
+		md['crc'] = fileEnstoreChecksum(inputfile)
 	md['runs']      =  [[run, run_type]]
 	md['application'] = {'family': app_family, 'name': app_name, 'version': app_version}
 	md['parents'] = parents

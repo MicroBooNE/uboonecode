@@ -114,6 +114,7 @@
 #include "RecoBase/Vertex.h"
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "RecoObjects/BezierTrack.h"
+#include "RecoAlg/TrackMomentumCalculator.h"
 
 #include <cstring> // std::memcpy()
 #include <vector>
@@ -253,6 +254,7 @@ namespace microboone {
       TrackData_t<Float_t> trkthetayz;    // theta_yz.
       TrackData_t<Float_t> trkmom;        // momentum.
       TrackData_t<Float_t> trklen;        // length.
+      TrackData_t<Float_t> trkmomrange;    // track momentum from range using CSDA tables
       TrackData_t<Short_t> trksvtxid;     // Vertex ID associated with the track start
       TrackData_t<Short_t> trkevtxid;     // Vertex ID associated with the track end
       TrackData_t<Int_t> trkpidpdg;       // particle PID pdg code
@@ -681,6 +683,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkthetaxz.resize(MaxTracks);
   trkthetayz.resize(MaxTracks);
   trkmom.resize(MaxTracks);
+  trkmomrange.resize(MaxTracks);
   trklen.resize(MaxTracks);
   trksvtxid.resize(MaxTracks);
   trkevtxid.resize(MaxTracks);
@@ -736,6 +739,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkthetaxz   , -99999.);
   FillWith(trkthetayz   , -99999.);
   FillWith(trkmom       , -99999.);
+  FillWith(trkmomrange  , -99999.);  
   FillWith(trklen       , -99999.);
   FillWith(trksvtxid    , -1);
   FillWith(trkevtxid    , -1);
@@ -802,7 +806,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkrange_" + TrackLabel;
   CreateBranch(BranchName, trkrange, BranchName + NTracksIndexStr + "[3]/F");
-  
+   
   BranchName = "trkidtruth_" + TrackLabel;
   CreateBranch(BranchName, trkidtruth, BranchName + NTracksIndexStr + "[3]/I");
 
@@ -892,6 +896,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkmom_" + TrackLabel;
   CreateBranch(BranchName, trkmom, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkmomrange_" + TrackLabel;
+  CreateBranch(BranchName, trkmomrange, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trklen_" + TrackLabel;
   CreateBranch(BranchName, trklen, BranchName + NTracksIndexStr + "/F");
@@ -1534,6 +1541,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     double xyz[3] = {0.};
     TrackerData.nvtx = vtxlist.size();
     if(TrackerData.nvtx > kMaxVertices) TrackerData.nvtx = kMaxVertices;
+    
+    //call the track momentum algorithm that gives you momentum based on track range
+    trkf::TrackMomentumCalculator trkm;
+
     for(size_t ivx = 0; ivx < TrackerData.nvtx; ++ivx) {
       vtxlist[ivx]->XYZ(xyz);
       TrackerData.vtx[ivx][0] = xyz[0];
@@ -1616,6 +1627,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         TrackerData.trkthetayz[iTrk]            = theta_yz;
         TrackerData.trkmom[iTrk]                = mom;
         TrackerData.trklen[iTrk]                = tlen;
+	TrackerData.trkmomrange[iTrk]           = trkm.GetTrackMomentum(tlen,13);
       } // if we have trajectory
 
       // find vertices associated with this track
@@ -1663,6 +1675,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         TrackerData.trkpidchimu[iTrk] = pids[0]->Chi2Muon();
         TrackerData.trkpidpida[iTrk] = pids[0]->PIDA();
       } // fmpid.isValid()
+      
+      
 
       art::FindMany<anab::Calorimetry> fmcal(trackListHandle[iTracker], evt, fCalorimetryModuleLabel[iTracker]);
       if (fmcal.isValid()){
@@ -1678,6 +1692,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         for (size_t ipl = 0; ipl<calos.size(); ++ipl){
           TrackerData.trkke[iTrk][ipl]    = calos[ipl]->KineticEnergy();
           TrackerData.trkrange[iTrk][ipl] = calos[ipl]->Range();
+	  //For now make the second argument as 13 for muons. 
           TrackerData.trkpitchc[iTrk][ipl]= calos[ipl] -> TrkPitchC();
           const size_t NHits = calos[ipl] -> dEdx().size();
           TrackerData.ntrkhits[iTrk][ipl] = (int) NHits;
@@ -1735,7 +1750,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }//end if (isMC)
     }//end loop over track
   }//end loop over track module labels
-
+  
+  /*trkf::TrackMomentumCalculator trkm;  
+  std::cout<<"\t"<<trkm.GetTrackMomentum(200,2212)<<"\t"<<trkm.GetTrackMomentum(-10, 13)<<"\t"<<trkm.GetTrackMomentum(300,-19)<<"\n";
+*/
   //mc truth information
   if (isMC){
     //save neutrino interaction information
@@ -1788,7 +1806,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_Px[iPart]=part.Px();
           fData->genie_Py[iPart]=part.Py();
           fData->genie_Pz[iPart]=part.Pz();
-          fData->genie_P[iPart]=part.Px();
+          fData->genie_P[iPart]=part.Px();	
           fData->genie_status_code[iPart]=part.StatusCode();
           fData->genie_mass[iPart]=part.Mass();
           fData->genie_trackID[iPart]=part.TrackId();

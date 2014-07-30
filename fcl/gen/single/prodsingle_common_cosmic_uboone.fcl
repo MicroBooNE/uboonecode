@@ -1,43 +1,37 @@
 #include "services_microboone.fcl"
-#include "genie_microboone_numi_simple.fcl"
-#include "largeantmodules_microboone.fcl"
-#include "detsimmodules_microboone.fcl"
-#include "opticaldetectormodules_microboone.fcl"
+#include "singles_microboone.fcl"
+#include "cry.fcl"
 
-process_name: GenieGen
-# lar -c prodgenie_simple_numi_norm_dirt.fcl 
+process_name: SinglesGen
 
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "genie_hist.root" }
+  TFileService: { fileName: "single_hist_uboone.root" }
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_simulation_services
+  user:         @local::microboone_gen_services
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.12.17"
-
-# Turn off Box recombo in LArG4
-services.user.LArG4Parameters.UseModBoxRecomb:          false
+services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
 # This entry should be copied to derived fcl files to override fclName.
 services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
 services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
                                                     "fileFormat", "root",
                                                     "runType",    "physics",
-                                                    "fclName",    "prodgenie_common_uboone.fcl",
+                                                    "fclName",    "prodsingle_common_cosmic_uboone.fcl",
                                                     "fclVersion", "v1_5",
                                                     "ubProjectStage",   "gen",
                                                     "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "prodgenie_simple_numi_norm_dirt_${CLUSTER 0}_${PROCESS 0}_gen.root"
+
 
 #Start each new event with an empty event.
 source:
 {
   module_type: EmptyEvent
-  maxEvents:   5           # Number of events to create
+  maxEvents:   10          # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
 }
@@ -47,25 +41,28 @@ source:
 # Modules are grouped by type.
 physics:
 {
+
  producers:
  {
-   generator: @local::microboone_genie_simple_numi_norm_dirt
-   largeant:  @local::microboone_largeant
+   generator: @local::microboone_singlep
+   cry:       @local::microboone_cry
    rns:       { module_type: "RandomNumberSaver" }
  }
- simulate: [ generator, largeant, rns ]
- 
+
+ #define the producer and filter modules for this path, order matters, 
+ #filters reject all following items.  see lines starting physics.producers below
+ simulate: [ generator, cry, rns ]
+
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
 
  #trigger_paths is a keyword and contains the paths that modify the art::event, 
  #ie filters and producers
- trigger_paths: [ simulate ] 
+ trigger_paths: [simulate] 
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
- end_paths:     [ stream1 ]  
-
+ end_paths:     [stream1]  
 }
 
 #block to define where the output goes.  if you defined a filter in the physics
@@ -76,16 +73,10 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "norm_dirt_genie_gen.root"
+   fileName:    "single_gen_uboone.root"
    dataTier:    "generated"
  }
 }
 
-
-physics.producers.generator.GlobalTimeOffset: 0.
-physics.producers.generator.RandomTimeOffset: 0.
-physics.producers.generator.TopVolume: "volWorld"
-
-#physics.producers.generator:                @local::microboone_genie_numi
-#physics.producers.generator.FluxType:       "simple_flux"
-#physics.producers.generator.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/bottom_window/*.root"]
+physics.producers.cry.TimeOffset: -3.2e-3
+physics.producers.cry.SampleTime: 6.4e-3

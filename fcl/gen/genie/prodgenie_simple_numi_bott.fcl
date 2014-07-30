@@ -31,7 +31,7 @@ services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
                                                     "fclVersion", "v1_5",
                                                     "ubProjectStage",   "gen",
                                                     "ubProjectVersion", "v1_3" ]
-
+services.user.FileCatalogMetadataExtras.RenameTemplate: "prodgenie_simple_numi_bott_${CLUSTER 0}_${PROCESS 0}_gen.root"
 
 #Start each new event with an empty event.
 source:

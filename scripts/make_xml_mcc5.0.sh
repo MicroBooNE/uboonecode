@@ -11,12 +11,14 @@
 #
 # Usage:
 #
-# make_xml_mcc5.0.sh [-h|--help] [--user <user>] [--local <dir|tar>] [--nev <n>] [--njob <n>]
+# make_xml_mcc5.0.sh [-h|--help] [-r <release>] [-u|--user <user>] [--local <dir|tar>] [--nev <n>] [--njob <n>]
 #
 # Options:
 #
-# --user <user> - Use users/<user> as working and output directories
-#                 (default is to use uboonepro).
+# -h|--help     - Print help.
+# -r <release>  - Use the specified larsoft/uboonecode release.
+# -u|--user <user> - Use users/<user> as working and output directories
+#                    (default is to use uboonepro).
 # --local <dir|tar> - Specify larsoft local directory or tarball (xml 
 #                     tag <local>...</local>).
 # --nev <n>     - Specify number of events for all samples.  Otherwise
@@ -27,6 +29,7 @@
 
 # Parse arguments.
 
+rel=v02_04_00
 userdir=uboonepro
 userbase=$userdir
 nevarg=0
@@ -39,11 +42,20 @@ while [ $# -gt 0 ]; do
     # User directory.
 
     -h|--help )
-      echo "Usage: make_xml_mcc5.0.sh [-h|--help] [--user <user>] [--local <dir|tar>] [--nev <n>] [--njob <n>]"
+      echo "Usage: make_xml_mcc5.0.sh [-h|--help] [-r <release>] [-u|--user <user>] [--local <dir|tar>] [--nev <n>] [--njob <n>]"
       exit
     ;;
 
-    --user )
+    # Release.
+
+    -r )
+    if [ $# -gt 1 ]; then
+      rel=$2
+      shift
+    fi
+    ;;
+
+    -u|--user )
     if [ $# -gt 1 ]; then
       userdir=users/$2
       userbase=$2
@@ -169,7 +181,7 @@ do
 <!-- Production Project -->
 
 <!DOCTYPE project [
-<!ENTITY release "v02_02_00">
+<!ENTITY release "$rel">
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
 <!ENTITY name "$newprj">
@@ -186,6 +198,9 @@ do
 
   <!-- Operating System -->
   <os>SL5,SL6</os>
+
+  <!-- Batch resources -->
+  <resource>DEDICATED,OPPORTUNISTIC</resource>
 
   <!-- Larsoft information -->
   <larsoft>
@@ -283,7 +298,7 @@ EOF
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/reco/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/reco/&name;</workdir>
     <numjobs>$njob</numjobs>
-    <targetsize>2000000000</targetsize>
+    <targetsize>8000000000</targetsize>
     <datatier>reconstructed</datatier>
     <defname>&name;_&tag;</defname>
   </stage>

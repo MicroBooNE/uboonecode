@@ -3,7 +3,7 @@
 <!-- Production Project -->
 
 <!DOCTYPE project [
-<!ENTITY release "v02_01_01">
+<!ENTITY release "v02_04_00">
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
 <!ENTITY name "prod_eminus_0.1-2.0GeV_isotropic_uboone">
@@ -21,6 +21,9 @@
   <!-- Operating System -->
   <os>SL5,SL6</os>
 
+  <!-- Batch resources -->
+  <resource>DEDICATED,OPPORTUNISTIC</resource>
+
   <!-- Larsoft information -->
   <larsoft>
     <tag>&release;</tag>
@@ -31,7 +34,7 @@
 
   <stage name="gen">
     <fcl>prod_eminus_0.1-2.0GeV_isotropic_uboone.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/gen/&name;</outdir>
+    <outdir>/pnfs/uboone/scratch/uboonepro/&release;/gen/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/gen/&name;</workdir>
     <numjobs>100</numjobs>
     <datatier>generated</datatier>
@@ -40,7 +43,7 @@
 
   <stage name="g4">
     <fcl>standard_g4_uboone.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/g4/&name;</outdir>
+    <outdir>/pnfs/uboone/scratch/uboonepro/&release;/g4/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/g4/&name;</workdir>
     <numjobs>100</numjobs>
     <datatier>simulated</datatier>
@@ -49,7 +52,7 @@
 
   <stage name="detsim">
     <fcl>standard_detsim_uboone.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/detsim/&name;</outdir>
+    <outdir>/pnfs/uboone/scratch/uboonepro/&release;/detsim/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/detsim/&name;</workdir>
     <numjobs>100</numjobs>
     <datatier>optical-simulated</datatier>
@@ -58,7 +61,7 @@
 
   <stage name="reco2D">
     <fcl>standard_reco_uboone_2D.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/reco2D/&name;</outdir>
+    <outdir>/pnfs/uboone/scratch/uboonepro/&release;/reco2D/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/reco2D/&name;</workdir>
     <numjobs>100</numjobs>
     <datatier>reconstructed-2d</datatier>
@@ -67,7 +70,7 @@
 
   <stage name="reco3D">
     <fcl>standard_reco_uboone_3D.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/reco3D/&name;</outdir>
+    <outdir>/pnfs/uboone/scratch/uboonepro/&release;/reco3D/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/reco3D/&name;</workdir>
     <numjobs>100</numjobs>
     <datatier>reconstructed-3d</datatier>
@@ -76,10 +79,10 @@
 
   <stage name="merge">
     <fcl>copy.fcl</fcl>
-    <outdir>/uboone/data/uboonepro/&release;/reco/&name;</outdir>
+    <outdir>/pnfs/uboone/scratch/uboonepro/&release;/reco/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/reco/&name;</workdir>
     <numjobs>100</numjobs>
-    <targetsize>2000000000</targetsize>
+    <targetsize>8000000000</targetsize>
     <datatier>reconstructed</datatier>
     <defname>&name;_&tag;</defname>
   </stage>

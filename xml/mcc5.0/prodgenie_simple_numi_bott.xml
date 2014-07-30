@@ -6,7 +6,7 @@
 <!ENTITY release "v02_04_00">
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
-<!ENTITY name "prod_piminus_0.1-2.0GeV_isotropic_uboone">
+<!ENTITY name "prodgenie_simple_numi_bott">
 <!ENTITY tag "mcc4.0">
 ]>
 
@@ -33,7 +33,7 @@
   <!-- Project stages -->
 
   <stage name="gen">
-    <fcl>prod_piminus_0.1-2.0GeV_isotropic_uboone.fcl</fcl>
+    <fcl>prodgenie_simple_numi_bott.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/gen/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/gen/&name;</workdir>
     <numjobs>100</numjobs>

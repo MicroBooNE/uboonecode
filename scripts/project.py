@@ -153,6 +153,7 @@ ROOT = None
 samweb_cli = None
 samweb = None           # SAMWebClient object
 extractor_dict = None   # Metadata extractor
+proxy_ok = False
 
 # dCache-safe method to test whether path exists without opening file.
 
@@ -166,11 +167,14 @@ def safeexist(path):
 # Test whether user has a valid grid proxy.  Exit if no.
 
 def test_proxy():
-    try:
-        subprocess.check_call('voms-proxy-info', stdout=-1)
-    except:
-        print 'Please get a grid proxy.'
-        os._exit(1)
+    global proxy_ok
+    if not proxy_ok:
+        try:
+            subprocess.check_call(['voms-proxy-info', '-exists'], stdout=-1)
+            proxy_ok = True
+        except:
+            print 'Please get a grid proxy.'
+            os._exit(1)
     return
 
 # dCache-safe method to return contents (list of lines) of file.
@@ -184,6 +188,23 @@ def saferead(path):
     else:
         lines = open(path).readlines()
     return lines
+
+# Like os.path.isdir, but faster by avoiding unnecessary i/o.
+
+def fast_isdir(path):
+    result = False
+    if path[-5:] != '.list' and \
+            path[-5:] != '.root' and \
+            path[-4:] != '.txt' and \
+            path[-4:] != '.fcl' and \
+            path[-4:] != '.out' and \
+            path[-4:] != '.err' and \
+            path[-3:] != '.sh' and \
+            path[-5:] != '.stat' and \
+            os.path.isdir(path):
+        result = True
+    return result
+
 
 # XML exception class.
 
@@ -915,15 +936,6 @@ def parsedir(dirname):
     
     return result
 
-# Convert pnfs path to xrootd url.
-# Don't do anything to non-pnfs paths.
-
-def path_to_url(path):
-    url = path
-    if path[0:6] == '/pnfs/':
-        url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/' + path[6:]
-    return url
-
 # Check root files (*.root) in the specified directory.
 
 def check_root(dir):
@@ -952,7 +964,9 @@ def check_root(dir):
     for filename in filenames:
         if filename[-5:] == '.root':
             path = os.path.join(dir, filename)
-            url = path_to_url(path)
+            url = uboone_utilities.path_to_url(path)
+            if url != path:
+                test_proxy()
             file = ROOT.TFile.Open(url)
             if file and file.IsOpen() and not file.IsZombie():
                 obj = file.Get('Events')
@@ -1081,10 +1095,11 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     subdirs = os.listdir(dir)
     for subdir in subdirs:
         subpath = os.path.join(dir, subdir)
+        dirok = fast_isdir(subpath)
 
         # Update list of sam projects from start job.
 
-        if os.path.isdir(subpath) and subpath[-6:] == '_start':
+        if dirok and subpath[-6:] == '_start':
             filename = os.path.join(subpath, 'sam_project.txt')
             if safeexist(filename):
                 sam_project = saferead(filename)[0].strip()
@@ -1093,7 +1108,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
         # Regular worker jobs checked here.
 
-        if os.path.isdir(subpath) and not subpath[-6:] == '_start' and not subpath[-5:] == '_stop':
+        if dirok and not subpath[-6:] == '_start' and not subpath[-5:] == '_stop':
 
             # Found a subdirectory.
 
@@ -1262,7 +1277,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     for hist in hists:
         histlist.write('%s\n' % hist)
-        histurls.write('%s\n' % path_to_url(hist))
+        histurls.write('%s\n' % uboone_utilities.path_to_url(hist))
 
     # Print summary.
 
@@ -1408,7 +1423,10 @@ def dimensions(project, stage):
     dim = dim + ' and data_tier %s' % stage.data_tier
     dim = dim + ' and ub_project.name %s' % project.name
     dim = dim + ' and ub_project.stage %s' % stage.name
-    dim = dim + ' and ub_project.version %s' % project.ubxml
+    if project.ubxml != '': 
+        dim = dim + ' and ub_project.version %s' % project.ubxml
+    else:
+        dim = dim + ' and ub_project.version %s' % project.release_tag
     dim = dim + ' and availability: anylocation'
     return dim
 
@@ -1432,7 +1450,7 @@ def docheck_declarations(outdir, declare):
 
     single_subdir = ''
     sam_subdir = os.path.join(outdir, 'sam')
-    if os.path.isdir(sam_subdir):
+    if fast_isdir(sam_subdir):
         single_subdir = 'sam'
 
     # Loop over root files.
@@ -1440,7 +1458,7 @@ def docheck_declarations(outdir, declare):
     for subdir in os.listdir(outdir):
         if single_subdir == '' or single_subdir == subdir:
             subpath = os.path.join(outdir, subdir)
-            if os.path.isdir(subpath):
+            if fast_isdir(subpath):
                 nev, roots, subhists = check_root(subpath)
                 for root in roots:
                     fn = os.path.basename(root[0])
@@ -1588,7 +1606,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
         disk_locs = []
         for subdir in os.listdir(outdir):
             subpath = os.path.join(outdir, subdir)
-            if os.path.isdir(subpath):
+            if fast_isdir(subpath):
                 for fn in os.listdir(subpath):
                     if fn == filename:
                         filepath = os.path.join(subpath, fn)
@@ -1695,7 +1713,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
 
                     loc_filename = os.path.join(loc, filename)
                     print 'Copying %s to dropbox directory %s.' % (filename, dropbox)
-                    shutil.copy(loc_filename, dropbox_filename)
+                    subprocess.call(['ifdh', 'cp', loc_filename, dropbox_filename])
 
     return 0
 
@@ -2030,13 +2048,14 @@ def main(argv):
             # Add overrides for project (name, stage, version).
             # These are the main metadata attributes for identifying mc samples.
             
+            wrapper_fcl.write('%s "ubProjectName", "%s"\n  ' % (sep, project.name))
+            sep = ','
+            if stage.name:
+                wrapper_fcl.write('%s "ubProjectStage", "%s"\n  ' % (sep, stage.name))
             if project.ubxml:
-                wrapper_fcl.write('%s "ubProjectName", "%s"\n  ' % (sep, project.name))
-                sep = ','
-                if stage.name:
-                    wrapper_fcl.write('%s "ubProjectStage", "%s"\n  ' % (sep, stage.name))
-                if project.ubxml:
-                    wrapper_fcl.write('%s "ubProjectVersion", "%s"\n  ' % (sep, project.ubxml))
+                wrapper_fcl.write('%s "ubProjectVersion", "%s"\n  ' % (sep, project.ubxml))
+            elif project.release_tag:
+                wrapper_fcl.write('%s "ubProjectVersion", "%s"\n  ' % (sep, project.release_tag))
 
             # Run type.
 

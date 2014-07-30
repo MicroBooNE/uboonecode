@@ -45,4 +45,43 @@ microboone_genie_simple_dirt.FluxFiles: ["bnb_gsimple_fluxes_07.17.2012_470_dirt
 #microboone_genie_simple_dirt.FluxFiles:      ["bnb_gsimple_fluxes_07.17.2012_470/gsimple_microboone-470-onaxis_numintp_*.root"]
 microboone_genie_simple_dirt.EventsPerSpill: 0
 
+
+microboone_genie_numi:                   @local::standard_genie
+microboone_genie_numi.BeamName:          "numi"
+microboone_genie_numi.GlobalTimeOffset:  1.6e6
+microboone_genie_numi.POTPerSpill:       3e13
+microboone_genie_numi.EventsPerSpill:    0
+
+
+microboone_genie_simple_numi_long:                @local::microboone_genie_numi
+microboone_genie_simple_numi_long.FluxType:       "simple_flux"
+microboone_genie_simple_numi_long.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/length_window/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_norm:                @local::microboone_genie_numi
+microboone_genie_simple_numi_norm.FluxType:       "simple_flux"
+microboone_genie_simple_numi_norm.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/normal_window/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_bott:                @local::microboone_genie_numi
+microboone_genie_simple_numi_bott.FluxType:       "simple_flux"
+microboone_genie_simple_numi_bott.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/bottom_window/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_long_dirt:                @local::microboone_genie_numi
+microboone_genie_simple_numi_long_dirt.FluxType:       "simple_flux"
+microboone_genie_simple_numi_long_dirt.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/length_window_dirt/second_try/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_norm_dirt:                @local::microboone_genie_numi
+microboone_genie_simple_numi_norm_dirt.FluxType:       "simple_flux"
+microboone_genie_simple_numi_norm_dirt.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/normal_window_dirt/second_try/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_bott_dirt:                @local::microboone_genie_numi
+microboone_genie_simple_numi_bott_dirt.FluxType:       "simple_flux"
+microboone_genie_simple_numi_bott_dirt.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/bottom_window_dirt/second_try/*.root"]
+###############################################################
+
+
 END_PROLOG
