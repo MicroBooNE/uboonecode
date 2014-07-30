@@ -620,7 +620,7 @@ namespace microboone {
       {
         if (!fData) {
           fData = new AnalysisTreeDataStruct(GetNTrackers());
-          fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, fIfSaveAuxDetInfo);
+          fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fIfSaveAuxDetInfo);
         }
         else {
           fData->SetTrackers(GetNTrackers());
