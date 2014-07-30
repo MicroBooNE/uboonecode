@@ -1713,7 +1713,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
 
                     loc_filename = os.path.join(loc, filename)
                     print 'Copying %s to dropbox directory %s.' % (filename, dropbox)
-                    shutil.copy(loc_filename, dropbox_filename)
+                    subprocess.call(['ifdh', 'cp', loc_filename, dropbox_filename])
 
     return 0
 
