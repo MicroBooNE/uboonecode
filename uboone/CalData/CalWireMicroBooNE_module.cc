@@ -67,11 +67,13 @@ namespace caldata {
     int          fPostsample;        ///< number of postsample bins
     int          fBaseSampleBins;        ///< number of postsample bins
     float        fBaseVarCut;        ///< baseline variance cut
+    int          fSaveWireWF;        ///< Save recob::wire object waveforms
     std::string  fDigitModuleLabel;  ///< module that made digits
                                                        ///< constants
     std::string  fSpillName;  ///< nominal spill is an empty string
                               ///< it is set by the DigitModuleLabel
                               ///< ex.:  "daq:preSpill" for prespill data
+    size_t fEventCount; ///< count of event processed
 
     void SubtractBaseline(std::vector<float>& holder, int fBaseSampleBins);
 
@@ -89,6 +91,9 @@ namespace caldata {
 
     if(fSpillName.size()<1) produces< std::vector<recob::Wire> >();
     else produces< std::vector<recob::Wire> >(fSpillName);
+
+
+
   }
   
   //-------------------------------------------------
@@ -103,6 +108,7 @@ namespace caldata {
     fPostsample       = p.get< int >        ("PostsampleBins");
     fBaseSampleBins   = p.get< int >        ("BaseSampleBins");
     fBaseVarCut       = p.get< int >        ("BaseVarCut");
+    fSaveWireWF       = p.get< int >        ("SaveWireWF");
     
     fSpillName="";
     
@@ -117,6 +123,7 @@ namespace caldata {
   //-------------------------------------------------
   void CalWireMicroBooNE::beginJob()
   {  
+    fEventCount = 0;
   }
 
   //////////////////////////////////////////////////////
@@ -127,6 +134,7 @@ namespace caldata {
   //////////////////////////////////////////////////////
   void CalWireMicroBooNE::produce(art::Event& evt)
   {      
+
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
 
@@ -145,7 +153,10 @@ namespace caldata {
     if(fSpillName.size()>0) evt.getByLabel(fDigitModuleLabel, fSpillName, digitVecHandle);
     else evt.getByLabel(fDigitModuleLabel, digitVecHandle);
 
-    if (!digitVecHandle->size())  return;
+    if (!digitVecHandle->size()) {
+      std::cout << "digitVecHandle Size is: " << digitVecHandle->size() << std::endl;
+      return;
+    }
     mf::LogInfo("CalWireMicroBooNE") << "CalWireMicroBooNE:: digitVecHandle size is " << digitVecHandle->size();
 
     // Use the handle to get a particular (0th) element of collection.
@@ -198,10 +209,14 @@ namespace caldata {
 	
 	// loop over all adc values and subtract the pedestal
         float pdstl = digitVec->GetPedestal();
-	
-	for(bin = 0; bin < dataSize; ++bin) 
-	  holder[bin]=(rawadc[bin]-pdstl);
 
+	//David Caratelli
+	//subtract time-offset added in SImWireMicroBooNE_module
+	int time_offset = sss->FieldResponseTOffset(channel);
+	for(bin = 0; bin < dataSize; ++bin) {
+	  if ( (bin-time_offset >= 0) and (bin-time_offset < holder.size())  )
+	  holder[bin-time_offset]=(rawadc[bin]-pdstl);
+	}
 	// Do deconvolution.
 	sss->Deconvolute(channel, holder);
 
@@ -228,12 +243,31 @@ namespace caldata {
     if(wirecol->size() == 0)
       mf::LogWarning("CalWireMicroBooNE") << "No wires made for this event.";
 
+
+    //Make Histogram of recob::wire objects from Signal() vector
+    // get access to the TFile service
+    if ( fSaveWireWF ){
+      art::ServiceHandle<art::TFileService> tfs;
+      for (size_t wireN = 0; wireN < wirecol->size(); wireN++){
+	std::vector<float> sigTMP = wirecol->at(wireN).Signal();
+	TH1D* fWire = tfs->make<TH1D>(Form("Noise_Evt%04zu_N%04zu",fEventCount, wireN), ";Noise (ADC);",
+				      sigTMP.size(),-0.5,sigTMP.size()-0.5);
+	for (size_t tick = 0; tick < sigTMP.size(); tick++){
+	  fWire->SetBinContent(tick+1, sigTMP.at(tick) );
+	}
+      }
+    }
+
+
     if(fSpillName.size()>0)
       evt.put(std::move(wirecol), fSpillName);
     else evt.put(std::move(wirecol));
 
 
     delete chanFilt;
+    
+    fEventCount++;
+
     return;
   }
   

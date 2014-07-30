@@ -107,9 +107,9 @@ namespace detsim {
     std::vector<unsigned char> fSigType;          ///< signal type. For now gaussian or pulse
     bool                       fSigUnit;          ///< true = ADC, false = electrons
     unsigned int               fChannel;          ///< Channel number
-
+    bool                       fGenNoise;         ///< Boolean to generate noise
     size_t fEventCount; ///< count of event processed
-
+    std::map<double,int> fShapingTimeOrder;
   }; // class RawDigitSimulator
 
 }
@@ -144,7 +144,9 @@ namespace detsim{
   void RawDigitSimulator::reconfigure(fhicl::ParameterSet const& p) 
   {
    
-    fNoiseFact        = p.get< double                     >("NoiseFact");
+    //fNoiseFact        = p.get< double                     >("NoiseFact");
+    fNoiseFact        = 0;
+    fGenNoise         = p.get< bool                       >("GenNoise");
     fNTicks           = p.get< int                        >("NTicks");
     fPedestal         = p.get< unsigned int               >("Pedestal");
     fSigAmp           = p.get< std::vector<double>        >("SigAmp");
@@ -156,6 +158,7 @@ namespace detsim{
     art::ServiceHandle<util::DetectorProperties> detprop;
     fSampleRate       = detprop->SamplingRate();
     fNSamplesReadout  = detprop->NumberTimeSamples();
+    fShapingTimeOrder = { {0.5, 0}, {1.0, 1}, {2.0, 2}, {3.0, 3} };
 
     // Simple check:
     if( fSigAmp.size() != fSigWidth.size() ||
@@ -204,10 +207,14 @@ namespace detsim{
     std::vector<double>   sigvec(signalSize, 0);
     std::vector<float>    noisevec(signalSize, 0);
 
+    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    int electron_time_offset = sss->FieldResponseTOffset(fChannel);
+    std::cout<<"Offset: "<<electron_time_offset << std::endl;
+
     // make an unique_ptr of sim::SimDigits that allows ownership of the produced
     // digits to be transferred to the art::Event after the put statement below
     std::unique_ptr< std::vector<raw::RawDigit>   >  digcol(new std::vector<raw::RawDigit>);
-	  
+
     //fill all pulses according to their type and properties
     for (unsigned int n=0; n<fSigType.size(); n++){
     
@@ -219,6 +226,9 @@ namespace detsim{
       if ( fSigType.at(n) == kSquare ){//square pulse
 	for (int i=0; i<fSigWidth.at(n); i++){
 	  unsigned int timetmp = (int)( (fSigTime.at(n) - fSigWidth.at(n)/2.) + i );
+	  if(!fSigUnit) timetmp += electron_time_offset;
+	  if(timetmp > sigvec.size()) throw cet::exception(__FUNCTION__) << "Invalid timing: "<<timetmp<<std::endl;
+
 	  if ( (timetmp < signalSize) && (timetmp > 0) )
 	    sigvec.at(timetmp) += fSigAmp.at(n);
 	}
@@ -228,21 +238,58 @@ namespace detsim{
 
     // If the unit is # electrons, run convolution
     if(!fSigUnit) {
-      art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
       sss->Convolute(fChannel,sigvec);
     }
 
+
+    //
+    // Do noise
+    //
+    //get ASIC Gain and Noise in ADCatLowestGain:
+    double fASICGain      = sss->GetASICGain();
+    double fShapingTime   = sss->GetShapingTime();
+    //Check that shaping time is an allowed value
+    //If so, Pick out noise factor 
+    //If not, through exception
+    if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
+      geo::View_t view = geo->View(fChannel);
+      switch(view) {
+      case geo::kU:
+      case geo::kV:
+	fNoiseFact = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
+	break;
+      case geo::kZ:
+	fNoiseFact = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
+	break;
+      default:
+	throw cet::exception(__FUNCTION__) << "Not supported view: "<<view<<std::endl;
+      }
+    }
+    else{//Throw exception...
+      throw cet::exception("SimWireMicroBooNE")
+	<< "\033[93m"
+	<< "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
+	<< std::endl
+	<< "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
+	<< "\033[00m"
+	<< std::endl;
+    }
+    //Take into account ASIC Gain
+    fNoiseFact *= fASICGain/4.7;
     //generate noise
-    noisevec = GenNoiseInTime();
+    if(fGenNoise)
+      noisevec = GenNoiseInTime();
 
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
     TH1D* fNoiseDist = tfs->make<TH1D>(Form("Noise_%04zu",fEventCount), ";Noise (ADC);", fNTicks,-0.5,fNTicks-0.5);
+    TH1D* fSignalDist = tfs->make<TH1D>(Form("Signal_%04zu",fEventCount), ";Noise (ADC);", fNTicks,-0.5,fNTicks-0.5);
     TH1D* fWaveform  = tfs->make<TH1D>(Form("Waveform_%04zu",fEventCount), "; Pulse [ADC];", fNTicks, -0.5, fNTicks-0.5);
 
     for(unsigned int i = 0; i < signalSize; ++i){
       float adcval = fPedestal + noisevec.at(i) + sigvec.at(i);
       fWaveform->SetBinContent(i+1,(unsigned int)(adcval));
+      fSignalDist->Fill(sigvec.at(i));
       fNoiseDist->Fill(noisevec.at(i));
       adcvec.at(i) = (unsigned short)(adcval);
     }

@@ -91,7 +91,8 @@ namespace detsim {
     float                  fCollectionPed;    ///< ADC value of baseline for collection plane
     float                  fInductionPed;     ///< ADC value of baseline for induction plane
     float                  fBaselineRMS;      ///< ADC value of baseline RMS within each channel                    
-    TH1D*                  fNoiseDist;        ///< distribution of noise counts
+    TH1D*                  fNoiseDistColl;    ///< distribution of noise counts
+    TH1D*                  fNoiseDistInd;     ///< distribution of noise counts
     bool fGetNoiseFromHisto;                  ///< if True -> Noise from Histogram of Freq. spectrum
     bool fGenNoiseInTime;                     ///< if True -> Noise with Gaussian dsitribution in Time-domain 
     bool fGenNoise;                           ///< if True -> Gen Noise. if False -> Skip noise generation entierly
@@ -194,7 +195,8 @@ namespace detsim {
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
 
-    fNoiseDist  = tfs->make<TH1D>("Noise", ";Noise  (ADC);", 1000,   -30., 30.);
+    fNoiseDistColl  = tfs->make<TH1D>("NoiseCollection", ";Noise on Collection Wires (ADC);", 1000,   -30., 30.);
+    fNoiseDistInd  = tfs->make<TH1D>("NoiseInduction", ";Noise on Induction Wires (ADC);", 1000,   -30., 30.);
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fNTicks = fFFT->FFTSize();
@@ -252,7 +254,7 @@ namespace detsim {
     //If not, through exception
     if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
       fNoiseFactInd   = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
-      fNoiseFactColl  = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
+      fNoiseFactColl  = sss->GetNoiseFactColl().at( fShapingTimeOrder.find( fShapingTime )->second );
     }
     else{//Throw exception...
       throw cet::exception("SimWireMicroBooNE")
@@ -301,10 +303,11 @@ namespace detsim {
 
       if( sc ){
 
+	int time_offset = sss->FieldResponseTOffset(chan);
         // loop over the tdcs and grab the number of electrons for each
         for(int t = 0; t < (int)(chargeWork.size()); ++t) {
 
-          int tdc = ts->TPCTick2TDC(t);
+          int tdc = ts->TPCTick2TDC(t) + time_offset;
 
           // continue if tdc < 0
           if( tdc < 0 ) continue;
@@ -364,8 +367,12 @@ namespace detsim {
         float adcval = noisetmp[i] + chargeWork[i] + ped_mean;
         
         //Add Noise to NoiseDist Histogram
-        if (i%1000==0)
-          fNoiseDist->Fill(noisetmp[i]);
+        if (i%1000==0){
+	  if (sigtype == geo::kCollection)
+	    fNoiseDistColl->Fill(noisetmp[i]);
+	  if (sigtype == geo::kInduction)
+	    fNoiseDistInd->Fill(noisetmp[i]);
+	}
 
         //allow for ADC saturation
         if ( adcval > adcsaturation )

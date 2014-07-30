@@ -20,6 +20,8 @@
 #include "art/Persistency/Common/Ptr.h" 
 #include "art/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
+#include "art/Framework/Services/Optional/TFileService.h" 
+#include "art/Framework/Services/Optional/TFileDirectory.h" 
 #include "art/Utilities/Exception.h"
 
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
@@ -181,6 +183,8 @@ namespace caldata {
     std::vector<unsigned short> fPostROIPad; ///< ROI padding
     bool fDoBaselineSub;  ///< Do baseline subtraction after deconvolution?
     bool fuPlaneRamp;     ///< set true for correct U plane wire response
+    int  fSaveWireWF;     ///< Save recob::wire object waveforms
+    size_t fEventCount;  ///< count of event processed
 
     void doDecon(std::vector<float>& holder, 
       uint32_t channel, unsigned int thePlane,
@@ -228,6 +232,7 @@ namespace caldata {
     fDoBaselineSub    = p.get< bool >                 ("DoBaselineSub");
     fuPlaneRamp       = p.get< bool >                 ("uPlaneRamp");
     fFFTSize          = p.get< int  >                 ("FFTSize");
+    fSaveWireWF       = p.get< int >                  ("SaveWireWF");
     
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
       throw art::Exception(art::errors::Configuration)
@@ -264,6 +269,7 @@ namespace caldata {
   //-------------------------------------------------
   void CalWireROI::beginJob()
   {
+    fEventCount = 0;
   } // beginJob
 
   //////////////////////////////////////////////////////
@@ -341,6 +347,8 @@ namespace caldata {
         raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
         // loop over all adc values and subtract the pedestal
         float pdstl = digitVec->GetPedestal();
+	//subtract time-offset added in SimWireMicroBooNE_module
+	int time_offset = sss->FieldResponseTOffset(channel);
         unsigned int roiStart = 0;
         // search for ROIs
         for(bin = 1; bin < dataSize; ++bin) {
@@ -449,8 +457,10 @@ namespace caldata {
           // save the position of this ROI in the holder vector and the ROI index
           holderInfo.push_back(std::make_pair(hBin, ir));
           for(unsigned int bin = rois[ir].first; bin < rois[ir].second; ++bin) {
-            holder[hBin] = rawadc[bin]-pdstl;
-            ++hBin;
+	    if ( (hBin-time_offset > 0) and (hBin-time_offset < holder.size()) ){
+	      holder[hBin-time_offset] = rawadc[bin]-pdstl;
+	      ++hBin;
+	    }//if time-offset does not force to go out of holder bounds
           } // bin
         } // ir < rois.size
         // do the last deconvolution if needed
@@ -467,11 +477,28 @@ namespace caldata {
     if(wirecol->size() == 0)
       mf::LogWarning("CalWireROI") << "No wires made for this event.";
 
+    //Make Histogram of recob::wire objects from Signal() vector
+    // get access to the TFile service
+    if ( fSaveWireWF ){
+      art::ServiceHandle<art::TFileService> tfs;
+      for (size_t wireN = 0; wireN < wirecol->size(); wireN++){
+	std::vector<float> sigTMP = wirecol->at(wireN).Signal();
+	TH1D* fWire = tfs->make<TH1D>(Form("Noise_Evt%04zu_N%04zu",fEventCount,wireN), ";Noise (ADC);",
+				      sigTMP.size(),-0.5,sigTMP.size()-0.5);
+	for (size_t tick = 0; tick < sigTMP.size(); tick++){
+	  fWire->SetBinContent(tick+1, sigTMP.at(tick) );
+	}
+      }
+    }
+    
+
     if(fSpillName.size()>0)
       evt.put(std::move(wirecol), fSpillName);
     else evt.put(std::move(wirecol));
 
     delete chanFilt;
+
+    fEventCount++;
 
     return;
   } // produce
@@ -483,7 +510,7 @@ namespace caldata {
     recob::Wire::RegionsOfInterest_t& ROIVec,
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE>& sss)
   {
-      
+    
     sss->Deconvolute(channel,holder);
     // transfer the ROIs and start bins into the vector that will be
     // put into the event
