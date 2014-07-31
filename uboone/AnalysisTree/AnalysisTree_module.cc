@@ -257,13 +257,13 @@ namespace microboone {
       TrackData_t<Float_t> trkmomrange;    // track momentum from range using CSDA tables
       TrackData_t<Short_t> trksvtxid;     // Vertex ID associated with the track start
       TrackData_t<Short_t> trkevtxid;     // Vertex ID associated with the track end
-      TrackData_t<Int_t> trkpidpdg;       // particle PID pdg code
-      TrackData_t<Float_t> trkpidchi;
-      TrackData_t<Float_t> trkpidchipr;   // particle PID chisq for proton
-      TrackData_t<Float_t> trkpidchika;   // particle PID chisq for kaon
-      TrackData_t<Float_t> trkpidchipi;   // particle PID chisq for pion
-      TrackData_t<Float_t> trkpidchimu;   // particle PID chisq for muon
-      TrackData_t<Float_t> trkpidpida;    // particle PIDA
+      PlaneData_t<Int_t> trkpidpdg;       // particle PID pdg code
+      PlaneData_t<Float_t> trkpidchi;
+      PlaneData_t<Float_t> trkpidchipr;   // particle PID chisq for proton
+      PlaneData_t<Float_t> trkpidchika;   // particle PID chisq for kaon
+      PlaneData_t<Float_t> trkpidchipi;   // particle PID chisq for pion
+      PlaneData_t<Float_t> trkpidchimu;   // particle PID chisq for muon
+      PlaneData_t<Float_t> trkpidpida;    // particle PIDA
       
       // BB vertex info
       unsigned short nvtx;
@@ -743,13 +743,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trklen       , -99999.);
   FillWith(trksvtxid    , -1);
   FillWith(trkevtxid    , -1);
-  FillWith(trkpidpdg    , -1);
-  FillWith(trkpidchi    , -99999.);
-  FillWith(trkpidchipr  , -99999.);
-  FillWith(trkpidchika  , -99999.);
-  FillWith(trkpidchipi  , -99999.);
-  FillWith(trkpidchimu  , -99999.);
-  FillWith(trkpidpida   , -99999.);
   
   for (size_t iTrk = 0; iTrk < MaxTracks; ++iTrk){
     
@@ -770,7 +763,15 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkresrg[iTrk], 0.);
     
     FillWith(trkxyz[iTrk], 0.);
-    
+ 
+    FillWith(trkpidpdg[iTrk]    , -1);
+    FillWith(trkpidchi[iTrk]    , -99999.);
+    FillWith(trkpidchipr[iTrk]  , -99999.);
+    FillWith(trkpidchika[iTrk]  , -99999.);
+    FillWith(trkpidchipi[iTrk]  , -99999.);
+    FillWith(trkpidchimu[iTrk]  , -99999.);
+    FillWith(trkpidpida[iTrk]   , -99999.);
+   
   } // for track
 
   // BB vertices
@@ -916,28 +917,28 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   std::string MaxVerticesIndexStr("[" + sstr.str() + "]");
   
   BranchName = "vtx_" + TrackLabel;
-  CreateBranch(BranchName, vtx, BranchName + MaxVerticesIndexStr + "[3]" + "/F");
+  CreateBranch(BranchName, vtx, BranchName + MaxVerticesIndexStr + "[3]/F");
 
   BranchName = "trkpidpdg_" + TrackLabel;
-  CreateBranch(BranchName, trkpidpdg, BranchName + NTracksIndexStr + "/I");
+  CreateBranch(BranchName, trkpidpdg, BranchName + NTracksIndexStr + "[3]/I");
 
   BranchName = "trkpidchi_" + TrackLabel;
-  CreateBranch(BranchName, trkpidchi, BranchName + NTracksIndexStr + "/F");
+  CreateBranch(BranchName, trkpidchi, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidchipr_" + TrackLabel;
-  CreateBranch(BranchName, trkpidchipr, BranchName + NTracksIndexStr + "/F");
+  CreateBranch(BranchName, trkpidchipr, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidchika_" + TrackLabel;
-  CreateBranch(BranchName, trkpidchika, BranchName + NTracksIndexStr + "/F");
+  CreateBranch(BranchName, trkpidchika, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidchipi_" + TrackLabel;
-  CreateBranch(BranchName, trkpidchipi, BranchName + NTracksIndexStr + "/F");
+  CreateBranch(BranchName, trkpidchipi, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidchimu_" + TrackLabel;
-  CreateBranch(BranchName, trkpidchimu, BranchName + NTracksIndexStr + "/F");
+  CreateBranch(BranchName, trkpidchimu, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidpida_" + TrackLabel;
-  CreateBranch(BranchName, trkpidpida, BranchName + NTracksIndexStr + "/F");
+  CreateBranch(BranchName, trkpidpida, BranchName + NTracksIndexStr + "[3]/F");
 
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses()
 
@@ -1660,20 +1661,21 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       art::FindMany<anab::ParticleID> fmpid(trackListHandle[iTracker], evt, fParticleIDModuleLabel[iTracker]);
       if(fmpid.isValid()) {
         std::vector<const anab::ParticleID*> pids = fmpid.at(iTrk);
-        if(pids.size() > 1) {
-          mf::LogError("AnalysisTree:limits")
-            << "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
-            << " has " << pids.size() 
-            << " set of ParticleID variables. Only one stored in the tree";
+        //if(pids.size() > 1) {
+          //mf::LogError("AnalysisTree:limits")
+            //<< "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
+            //<< " has " << pids.size() 
+            //<< " set of ParticleID variables. Only one stored in the tree";
+        //}
+        for (size_t ipl = 0; ipl < pids.size(); ++ipl){
+          TrackerData.trkpidpdg[iTrk][ipl] = pids[ipl]->Pdg();
+          TrackerData.trkpidchi[iTrk][ipl] = pids[ipl]->MinChi2();
+          TrackerData.trkpidchipr[iTrk][ipl] = pids[ipl]->Chi2Proton();
+          TrackerData.trkpidchika[iTrk][ipl] = pids[ipl]->Chi2Kaon();
+          TrackerData.trkpidchipi[iTrk][ipl] = pids[ipl]->Chi2Pion();
+          TrackerData.trkpidchimu[iTrk][ipl] = pids[ipl]->Chi2Muon();
+          TrackerData.trkpidpida[iTrk][ipl] = pids[ipl]->PIDA();
         }
-        mf::LogError("AnalysisTree:limits") << pids[0] -> Pdg() << "\t" << pids[0] -> MinChi2() << "\t" << pids[0]->PIDA();
-        TrackerData.trkpidpdg[iTrk] = pids[0]->Pdg();
-        TrackerData.trkpidchi[iTrk] = pids[0]->MinChi2();
-        TrackerData.trkpidchipr[iTrk] = pids[0]->Chi2Proton();
-        TrackerData.trkpidchika[iTrk] = pids[0]->Chi2Kaon();
-        TrackerData.trkpidchipi[iTrk] = pids[0]->Chi2Pion();
-        TrackerData.trkpidchimu[iTrk] = pids[0]->Chi2Muon();
-        TrackerData.trkpidpida[iTrk] = pids[0]->PIDA();
       } // fmpid.isValid()
       
       
