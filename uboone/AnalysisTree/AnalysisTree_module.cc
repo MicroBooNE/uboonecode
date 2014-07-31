@@ -566,7 +566,7 @@ namespace microboone {
    * - <b>UseBuffers</b> (default: false): if enabled, memory is allocated for
    *   tree data for all the run; otherwise, it's allocated on each event, used
    *   and freed; use "true" for speed, "false" to save memory
-   * - <b>IfSaveAuxDetInfo</b> (default: false): if enabled, auxiliary detector
+   * - <b>SaveAuxDetInfo</b> (default: false): if enabled, auxiliary detector
    *   data will be extracted and included in the tree
    */
   class AnalysisTree : public art::EDAnalyzer {
@@ -609,7 +609,7 @@ namespace microboone {
     std::vector<std::string> fParticleIDModuleLabel;
     std::string fPOTModuleLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)
-    bool fIfSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
+    bool fSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
 
 
     /// Returns the number of trackers configured
@@ -620,7 +620,7 @@ namespace microboone {
       {
         if (!fData) {
           fData = new AnalysisTreeDataStruct(GetNTrackers());
-          fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fIfSaveAuxDetInfo);
+          fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fSaveAuxDetInfo);
         }
         else {
           fData->SetTrackers(GetNTrackers());
@@ -1404,7 +1404,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fUseBuffer                (pset.get< bool >("UseBuffers", false)),
-  fIfSaveAuxDetInfo         (pset.get< bool >("IfSaveAuxDetInfo", false))
+  fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false))
 {
   mf::LogInfo("AnalysisTree") << "Configuration:"
     << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
@@ -1564,7 +1564,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     art::fill_ptr_vector(fluxlist, mcfluxListHandle);
 
   std::vector<const sim::AuxDetSimChannel*> fAuxDetSimChannels;
-  if (fIfSaveAuxDetInfo){
+  if (fSaveAuxDetInfo){
     evt.getView(fLArG4ModuleLabel, fAuxDetSimChannels);
   }
 
@@ -1957,7 +1957,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->NumberDaughters[iPart]=pPart->NumberDaughters();
           
           //access auxiliary detector parameters
-          if (fIfSaveAuxDetInfo) {
+          if (fSaveAuxDetInfo) {
             unsigned short nAD = 0; // number of cells that particle hit
             
             // find deposit of this particle in each of the detector cells
