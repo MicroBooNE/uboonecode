@@ -264,7 +264,8 @@ namespace microboone {
       PlaneData_t<Float_t> trkpidchipi;   // particle PID chisq for pion
       PlaneData_t<Float_t> trkpidchimu;   // particle PID chisq for muon
       PlaneData_t<Float_t> trkpidpida;    // particle PIDA
-      
+      TrackData_t<Short_t> trkpidbestplane; // this is defined as the plane with most hits     
+ 
       // BB vertex info
       unsigned short nvtx;
       std::vector<std::array<Float_t, 3>> vtx;
@@ -695,6 +696,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkpidchipi.resize(MaxTracks);
   trkpidchimu.resize(MaxTracks);
   trkpidpida.resize(MaxTracks);
+  trkpidbestplane.resize(MaxTracks);
   
   trkke.resize(MaxTracks);
   trkrange.resize(MaxTracks);
@@ -743,7 +745,8 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trklen       , -99999.);
   FillWith(trksvtxid    , -1);
   FillWith(trkevtxid    , -1);
-  
+  FillWith(trkpidbestplane, -1); 
+ 
   for (size_t iTrk = 0; iTrk < MaxTracks; ++iTrk){
     
     // the following are BoxedArray's;
@@ -771,7 +774,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkpidchipi[iTrk]  , -99999.);
     FillWith(trkpidchimu[iTrk]  , -99999.);
     FillWith(trkpidpida[iTrk]   , -99999.);
-   
   } // for track
 
   // BB vertices
@@ -939,6 +941,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
 
   BranchName = "trkpidpida_" + TrackLabel;
   CreateBranch(BranchName, trkpidpida, BranchName + NTracksIndexStr + "[3]/F");
+
+  BranchName = "trkpidbestplane_" + TrackLabel;
+  CreateBranch(BranchName, trkpidbestplane, BranchName + NTracksIndexStr + "/S");
 
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses()
 
@@ -1717,6 +1722,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             TrkXYZ[2] = TrkPos.Z();
           } // for track hits
         } // for calorimetry info
+        if(TrackerData.ntrkhits[iTrk][0] >= TrackerData.ntrkhits[iTrk][1] && TrackerData.ntrkhits[iTrk][0] >= TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 0;
+        else if(TrackerData.ntrkhits[iTrk][1] >= TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][1] >= TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 1;
+        else if(TrackerData.ntrkhits[iTrk][2] >= TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][2] >= TrackerData.ntrkhits[iTrk][1]) TrackerData.trkpidbestplane[iTrk] = 2;
       } // if has calorimetry info
 
       //track truth information
