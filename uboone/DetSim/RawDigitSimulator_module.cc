@@ -182,6 +182,7 @@ namespace detsim{
     fEventCount = 0;
 
     art::ServiceHandle<util::LArFFT> fFFT;
+    fFFT->ReinitializeFFT(fNTicks,fFFT->FFTOptions(),fFFT->FFTFitBins());
     fNTicks = fFFT->FFTSize();
 
     return;

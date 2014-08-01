@@ -19,10 +19,13 @@
 #include "RecoBase/Wire.h"
 #include "RawData/RawDigit.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "TH1F.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TF1.h"
 
 #include <string>
 #include <sstream>
+#include <iostream>
 
 
 namespace cal{ class ShowWire; }
@@ -32,6 +35,9 @@ public:
   explicit ShowWire(fhicl::ParameterSet const & p);
   virtual ~ShowWire();
 
+  void beginJob();
+  void endJob();
+
   void analyze(art::Event const & e) override;
   void reconfigure(fhicl::ParameterSet const& p);
 
@@ -39,11 +45,33 @@ private:
 
   // Declare member data here.
   std::string fCalDataModuleLabel;
+  unsigned int fPeakFitWindow;
+  bool fDoSinglePulseChecks;
+  unsigned int fSinglePulseLocation;
+  unsigned int fSinglePulseBuffer;
 
   std::string MakeHistName(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
   std::string MakeHistTitle(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
   void SetHistogram(TH1F*, const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int, const size_t, const Color_t);
   void FillWaveforms(recob::Wire const&, raw::RawDigit const&, TH1F*, TH1F*);
+
+  float FindPeakTime(TH1F*);
+  float FindPeak(TH1F*);
+  float FindIntegral(TH1F*);
+
+  TH1F* h_integral_wire;
+  TH1F* h_integral_raw;
+  TH2F* h_integral_2D;
+
+  TH1F* h_peak_wire;
+  TH1F* h_peak_raw;
+  TH1F* h_peak_diff;
+  TH2F* h_peak_2D;
+
+  TH1F* h_peaktime_wire;
+  TH1F* h_peaktime_raw;
+  TH1F* h_peaktime_diff;
+  TH2F* h_peaktime_2D;
 
 };
 
@@ -61,7 +89,62 @@ cal::ShowWire::~ShowWire()
   // Clean up dynamic memory and other resources here.
 }
 void cal::ShowWire::reconfigure(fhicl::ParameterSet const& p){
-  fCalDataModuleLabel = p.get<std::string>("CalDataModuleLabel");
+  fCalDataModuleLabel  = p.get<std::string>("CalDataModuleLabel");
+  fPeakFitWindow       = p.get<unsigned int>("PeakFitWindow",3);
+  fDoSinglePulseChecks = p.get<bool>("DoSinglePulseChecks",true);
+  fSinglePulseLocation = p.get<unsigned int>("SinglePulseLocation",5000);
+  fSinglePulseBuffer   = p.get<unsigned int>("SinglePulseBuffer",25);
+}
+
+void cal::ShowWire::beginJob(){
+
+  if(!fDoSinglePulseChecks) return;
+
+  art::ServiceHandle<art::TFileService> tfs;
+
+  h_integral_wire = tfs->make<TH1F>("h_integral_wire","Integral of wire pulses",100,-1000,4000);
+  h_integral_raw = tfs->make<TH1F>("h_integral_raw","Integral of rawdigit pulses",100,-1000,4000);
+  h_integral_2D = tfs->make<TH2F>("h_integral_2D","Integral of wire and rawdigit pulses",100,-1000,4000,100,-1000,4000);
+  
+  h_peak_wire = tfs->make<TH1F>("h_peak_wire","Peak of wire pulses",100,-100,900);
+  h_peak_raw = tfs->make<TH1F>("h_peak_raw","Peak of rawdigit pulses",100,-100,900);
+  h_peak_diff = tfs->make<TH1F>("h_peak_diff","Difference in peak of wire and rawdigit pulses;Wire Peak Amplitude - Rawdigit Peak Amplitude",100,-10,10);
+  h_peak_2D = tfs->make<TH2F>("h_peak_2D","Peak of wire and rawdigit pulses",100,-100,900,100,-100,900);
+  
+  h_peaktime_wire = tfs->make<TH1F>("h_peaktime_wire","Peak time of wire pulses",
+				    100,fSinglePulseLocation-fSinglePulseBuffer,fSinglePulseLocation+fSinglePulseBuffer);
+  h_peaktime_raw = tfs->make<TH1F>("h_peaktime_raw","Peak time of rawdigit pulses",
+				   100,fSinglePulseLocation-fSinglePulseBuffer,fSinglePulseLocation+fSinglePulseBuffer);
+  h_peaktime_diff = tfs->make<TH1F>("h_peaktime_diff","Difference in peak times of wire and rawdigit pulses;Wire Peak Time - Rawdigit Peak Time",200,-10,10);
+  h_peaktime_2D = tfs->make<TH2F>("h_peaktime_2D","Peak time of wire and rawdigit pulses",
+				  100,fSinglePulseLocation-fSinglePulseBuffer,fSinglePulseLocation+fSinglePulseBuffer,
+				  100,fSinglePulseLocation-fSinglePulseBuffer,fSinglePulseLocation+fSinglePulseBuffer);
+  
+
+}
+
+void cal::ShowWire::endJob(){}
+
+float cal::ShowWire::FindPeakTime(TH1F* hist){
+  //hist->GetXaxis()->SetRange((int)(fSinglePulseLocation-fSinglePulseBuffer),(int)(fSinglePulseLocation+fSinglePulseBuffer));
+
+  int max_bin = hist->GetMaximumBin();
+  float min_fit = hist->GetBinLowEdge(max_bin-fPeakFitWindow);
+  float max_fit = hist->GetBinLowEdge(max_bin+fPeakFitWindow+1);
+  hist->Fit("gaus","Q","",min_fit,max_fit);
+
+  TF1 *thisfit = (TF1*) hist->GetFunction("gaus");
+  return thisfit->GetParameter(1);
+}
+
+float cal::ShowWire::FindPeak(TH1F* hist){
+  //hist->GetXaxis()->SetRange((int)(fSinglePulseLocation-fSinglePulseBuffer),(int)(fSinglePulseLocation+fSinglePulseBuffer));
+  return hist->GetMaximum();
+}
+
+float cal::ShowWire::FindIntegral(TH1F* hist){
+  //return hist->Integral((int)(fSinglePulseLocation-fSinglePulseBuffer),(int)(fSinglePulseLocation+fSinglePulseBuffer));
+  return hist->Integral();
 }
 
 std::string cal::ShowWire::MakeHistName(const char* label, const unsigned int run, const unsigned int subrun, const unsigned int event, const unsigned int channel){
@@ -84,16 +167,32 @@ void cal::ShowWire::SetHistogram(TH1F* hist,
   std::string hist_name = MakeHistName(label,run,subrun,event,channel);
   std::string hist_title = MakeHistTitle(label,run,subrun,event,channel);
   hist->SetNameTitle(hist_name.c_str(),hist_title.c_str());
-  hist->SetBins(nbins,0,nbins);
+
+  if(fDoSinglePulseChecks)
+    hist->SetBins(2*fSinglePulseBuffer,fSinglePulseLocation-fSinglePulseBuffer,fSinglePulseLocation+fSinglePulseBuffer);
+  else
+    hist->SetBins(nbins,0,nbins);
+
   hist->SetLineColor(color);
 }
 
 void cal::ShowWire::FillWaveforms(recob::Wire const& wire, raw::RawDigit const& rawdigit, TH1F* h_wire, TH1F* h_raw){
 
   const float pedestal = rawdigit.GetPedestal();
-  for(size_t i=0; i<rawdigit.Samples(); i++){
-    h_raw->SetBinContent(i,rawdigit.ADC(i) - pedestal);
-    h_wire->SetBinContent(i,wire.Signal().at(i));
+
+  size_t begin_iter=0;
+  size_t end_iter = rawdigit.Samples();
+  if(fDoSinglePulseChecks){
+    begin_iter = fSinglePulseLocation-fSinglePulseBuffer;
+    end_iter = fSinglePulseLocation+fSinglePulseBuffer;
+  }
+
+  for(size_t i=begin_iter; i<end_iter; i++){
+    h_raw->SetBinContent(i-begin_iter+1,rawdigit.ADC(i) - pedestal);
+    h_wire->SetBinContent(i-begin_iter+1,wire.Signal().at(i));
+
+    //std::cout << "bin " << i-begin_iter+1 << " bigbin " << i << ", Raw=" << rawdigit.ADC(i)-pedestal << ", Wire=" << wire.Signal().at(i) << std::endl;
+
   }
 
 }
@@ -118,12 +217,36 @@ void cal::ShowWire::analyze(art::Event const & e)
     unsigned int channel = wire.Channel();
     size_t n_samples = rawdigit.Samples();
 
-    TH1F* h_wire = tfs->make<TH1F>();
-    TH1F* h_raw = tfs->make<TH1F>();
+    //this is stupid I have to do this here and can't set it later...
+    TH1F* h_wire = tfs->make<TH1F>(MakeHistName("Wire",run,subrun,event,channel).c_str(),"",n_samples,0,n_samples);
+    TH1F* h_raw = tfs->make<TH1F>(MakeHistName("Raw",run,subrun,event,channel).c_str(),"",n_samples,0,n_samples);
 
     SetHistogram(h_wire,"Wire",run,subrun,event,channel,n_samples,kBlue);
     SetHistogram(h_raw,"Raw",run,subrun,event,channel,n_samples,kRed);
     FillWaveforms(wire,rawdigit,h_wire,h_raw);
+
+    if(!fDoSinglePulseChecks) continue;
+
+    float integral_wire = FindIntegral(h_wire);
+    float integral_raw = FindIntegral(h_raw);
+    h_integral_wire->Fill( integral_wire );
+    h_integral_raw->Fill( integral_raw );
+    h_integral_2D->Fill( integral_wire, integral_raw );
+
+    float peak_wire = FindPeak(h_wire);
+    float peak_raw = FindPeak(h_raw);
+    h_peak_wire->Fill( peak_wire );
+    h_peak_raw->Fill( peak_raw );
+    h_peak_diff->Fill( peak_wire - peak_raw );
+    h_peak_2D->Fill( peak_wire, peak_raw );
+
+    float peaktime_wire = FindPeakTime(h_wire);
+    float peaktime_raw = FindPeakTime(h_raw);
+    h_peaktime_wire->Fill( peaktime_wire );
+    h_peaktime_raw->Fill( peaktime_raw );
+    h_peaktime_diff->Fill( peaktime_wire - peaktime_raw );
+    h_peaktime_2D->Fill( peaktime_wire, peaktime_raw );
+
   }
     
 }
