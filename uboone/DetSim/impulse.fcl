@@ -9,19 +9,20 @@ standard_rawdigitsim:
  # Signal configuration
  #
  # Signal shape ... 0=gaus, 1=square
- SigType:            [1,    1,    1,       1,       1,       1,       1,       1,       1,       1      ] 
+ SigType:            [1]
  # Signal width (for shape) in time-ticks
- SigWidth:           [1,    1,    1,       1,       1,       1,       1,       1,       1,       1      ] 
+ SigWidth:           [1]
  # Signal amplitude in ADC OR #electrons (control unit by fSigUnit)
- SigAmp:             [600,  600,  1601.25, 1282.87, 3774.56, 2108.34, 4502.82, 4036.27, 2907.63, 567.65 ]
+ SigAmp:             [22000]
  # Signal timing in ticks
- SigTime:            [5310, 5311, 5312,    5313,    5314,    5315,    5316,    5317,    5318,    5319   ]
- SigUnit:            false
- Channel:            7775
+ SigTime:            [5000]
+ SigUnit:            false # true = ADC counts, false = electrons
+ Channel:            7775 # 7775 = collection wire, 33 = induction wire (U/V?), 3000 = ?
+# Channel:            33
  Pedestal:           400                      #in ADCs: signal pedestal value
  NTicks:             9600                     #in time-ticks: length of pulse
  CompressionType:    "none"                   #could also be none		
- GenNoise:           false                    #gen noise...if false function not called
+ GenNoise:           true                     #gen noise...if false function not called
  BaselineRMS:        0.3                     #ADC baseline fluctuation within channel        
 }
 
