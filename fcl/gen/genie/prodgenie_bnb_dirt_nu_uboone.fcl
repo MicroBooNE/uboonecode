@@ -1,0 +1,18 @@
+#include "prodgenie_common_uboone.fcl"
+
+process_name: GenieGen
+
+services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
+                                                    "fileFormat", "root",
+                                                    "runType",    "physics",
+                                                    "fclName",    "prodgenie_bnb_dirt_nu_uboone.fcl",
+                                                    "fclVersion", "v1_5",
+                                                    "ubProjectStage",   "gen",
+                                                    "ubProjectVersion", "v1_3" ]
+services.user.FileCatalogMetadataExtras.RenameTemplate: "prodgenie_bnb_dirt_nu_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
+
+
+physics.producers.generator: @local::microboone_genie_simple_dirt
+physics.producers.generator.GlobalTimeOffset: 0.
+physics.producers.generator.RandomTimeOffset: 1600.
+physics.producers.generator.TopVolume: "volWorld"
