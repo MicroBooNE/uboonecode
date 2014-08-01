@@ -114,6 +114,7 @@
 #include "RecoBase/Vertex.h"
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "RecoObjects/BezierTrack.h"
+#include "RecoAlg/TrackMomentumCalculator.h"
 
 #include <cstring> // std::memcpy()
 #include <vector>
@@ -253,16 +254,18 @@ namespace microboone {
       TrackData_t<Float_t> trkthetayz;    // theta_yz.
       TrackData_t<Float_t> trkmom;        // momentum.
       TrackData_t<Float_t> trklen;        // length.
+      TrackData_t<Float_t> trkmomrange;    // track momentum from range using CSDA tables
       TrackData_t<Short_t> trksvtxid;     // Vertex ID associated with the track start
       TrackData_t<Short_t> trkevtxid;     // Vertex ID associated with the track end
-      TrackData_t<Int_t> trkpidpdg;       // particle PID pdg code
-      TrackData_t<Float_t> trkpidchi;     // particle PID chisq
-      TrackData_t<Float_t> trkpidchipr;   // particle PID chisq for proton
-      TrackData_t<Float_t> trkpidchika;   // particle PID chisq for kaon
-      TrackData_t<Float_t> trkpidchipi;   // particle PID chisq for pion
-      TrackData_t<Float_t> trkpidchimu;   // particle PID chisq for muon
-      TrackData_t<Float_t> trkpidpida;    // particle PIDA
-      
+      PlaneData_t<Int_t> trkpidpdg;       // particle PID pdg code
+      PlaneData_t<Float_t> trkpidchi;
+      PlaneData_t<Float_t> trkpidchipr;   // particle PID chisq for proton
+      PlaneData_t<Float_t> trkpidchika;   // particle PID chisq for kaon
+      PlaneData_t<Float_t> trkpidchipi;   // particle PID chisq for pion
+      PlaneData_t<Float_t> trkpidchimu;   // particle PID chisq for muon
+      PlaneData_t<Float_t> trkpidpida;    // particle PIDA
+      TrackData_t<Short_t> trkpidbestplane; // this is defined as the plane with most hits     
+ 
       // BB vertex info
       unsigned short nvtx;
       std::vector<std::array<Float_t, 3>> vtx;
@@ -681,6 +684,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkthetaxz.resize(MaxTracks);
   trkthetayz.resize(MaxTracks);
   trkmom.resize(MaxTracks);
+  trkmomrange.resize(MaxTracks);
   trklen.resize(MaxTracks);
   trksvtxid.resize(MaxTracks);
   trkevtxid.resize(MaxTracks);
@@ -692,6 +696,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkpidchipi.resize(MaxTracks);
   trkpidchimu.resize(MaxTracks);
   trkpidpida.resize(MaxTracks);
+  trkpidbestplane.resize(MaxTracks);
   
   trkke.resize(MaxTracks);
   trkrange.resize(MaxTracks);
@@ -736,17 +741,12 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkthetaxz   , -99999.);
   FillWith(trkthetayz   , -99999.);
   FillWith(trkmom       , -99999.);
+  FillWith(trkmomrange  , -99999.);  
   FillWith(trklen       , -99999.);
   FillWith(trksvtxid    , -1);
   FillWith(trkevtxid    , -1);
-  FillWith(trkpidpdg    , -1);
-  FillWith(trkpidchi    , -99999.);
-  FillWith(trkpidchipr  , -99999.);
-  FillWith(trkpidchika  , -99999.);
-  FillWith(trkpidchipi  , -99999.);
-  FillWith(trkpidchimu  , -99999.);
-  FillWith(trkpidpida   , -99999.);
-  
+  FillWith(trkpidbestplane, -1); 
+ 
   for (size_t iTrk = 0; iTrk < MaxTracks; ++iTrk){
     
     // the following are BoxedArray's;
@@ -766,7 +766,14 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkresrg[iTrk], 0.);
     
     FillWith(trkxyz[iTrk], 0.);
-    
+ 
+    FillWith(trkpidpdg[iTrk]    , -1);
+    FillWith(trkpidchi[iTrk]    , -99999.);
+    FillWith(trkpidchipr[iTrk]  , -99999.);
+    FillWith(trkpidchika[iTrk]  , -99999.);
+    FillWith(trkpidchipi[iTrk]  , -99999.);
+    FillWith(trkpidchimu[iTrk]  , -99999.);
+    FillWith(trkpidpida[iTrk]   , -99999.);
   } // for track
 
   // BB vertices
@@ -802,7 +809,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkrange_" + TrackLabel;
   CreateBranch(BranchName, trkrange, BranchName + NTracksIndexStr + "[3]/F");
-  
+   
   BranchName = "trkidtruth_" + TrackLabel;
   CreateBranch(BranchName, trkidtruth, BranchName + NTracksIndexStr + "[3]/I");
 
@@ -893,6 +900,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   BranchName = "trkmom_" + TrackLabel;
   CreateBranch(BranchName, trkmom, BranchName + NTracksIndexStr + "/F");
   
+  BranchName = "trkmomrange_" + TrackLabel;
+  CreateBranch(BranchName, trkmomrange, BranchName + NTracksIndexStr + "/F");
+  
   BranchName = "trklen_" + TrackLabel;
   CreateBranch(BranchName, trklen, BranchName + NTracksIndexStr + "/F");
   
@@ -909,28 +919,31 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   std::string MaxVerticesIndexStr("[" + sstr.str() + "]");
   
   BranchName = "vtx_" + TrackLabel;
-  CreateBranch(BranchName, vtx, BranchName + MaxVerticesIndexStr + "[3]" + "/F");
+  CreateBranch(BranchName, vtx, BranchName + MaxVerticesIndexStr + "[3]/F");
 
   BranchName = "trkpidpdg_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidpdg, BranchName + "/I");
+  CreateBranch(BranchName, trkpidpdg, BranchName + NTracksIndexStr + "[3]/I");
 
   BranchName = "trkpidchi_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchi, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchi, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidchipr_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchipr, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchipr, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidchika_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchika, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchika, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidchipi_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchipi, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchipi, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidchimu_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidchimu, BranchName + "/F");
+  CreateBranch(BranchName, trkpidchimu, BranchName + NTracksIndexStr + "[3]/F");
 
   BranchName = "trkpidpida_" + TrackLabel;
-  CreateBranch(BranchName, &trkpidpida, BranchName + "/F");
+  CreateBranch(BranchName, trkpidpida, BranchName + NTracksIndexStr + "[3]/F");
+
+  BranchName = "trkpidbestplane_" + TrackLabel;
+  CreateBranch(BranchName, trkpidbestplane, BranchName + NTracksIndexStr + "/S");
 
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses()
 
@@ -1534,6 +1547,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     double xyz[3] = {0.};
     TrackerData.nvtx = vtxlist.size();
     if(TrackerData.nvtx > kMaxVertices) TrackerData.nvtx = kMaxVertices;
+    
+    //call the track momentum algorithm that gives you momentum based on track range
+    trkf::TrackMomentumCalculator trkm;
+
     for(size_t ivx = 0; ivx < TrackerData.nvtx; ++ivx) {
       vtxlist[ivx]->XYZ(xyz);
       TrackerData.vtx[ivx][0] = xyz[0];
@@ -1616,6 +1633,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         TrackerData.trkthetayz[iTrk]            = theta_yz;
         TrackerData.trkmom[iTrk]                = mom;
         TrackerData.trklen[iTrk]                = tlen;
+	TrackerData.trkmomrange[iTrk]           = trkm.GetTrackMomentum(tlen,13);
       } // if we have trajectory
 
       // find vertices associated with this track
@@ -1648,20 +1666,24 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       art::FindMany<anab::ParticleID> fmpid(trackListHandle[iTracker], evt, fParticleIDModuleLabel[iTracker]);
       if(fmpid.isValid()) {
         std::vector<const anab::ParticleID*> pids = fmpid.at(iTrk);
-        if(pids.size() > 1) {
-          mf::LogError("AnalysisTree:limits")
-            << "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
-            << " has " << pids.size() 
-            << " set of ParticleID variables. Only one stored in the tree";
+        //if(pids.size() > 1) {
+          //mf::LogError("AnalysisTree:limits")
+            //<< "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
+            //<< " has " << pids.size() 
+            //<< " set of ParticleID variables. Only one stored in the tree";
+        //}
+        for (size_t ipl = 0; ipl < pids.size(); ++ipl){
+          TrackerData.trkpidpdg[iTrk][ipl] = pids[ipl]->Pdg();
+          TrackerData.trkpidchi[iTrk][ipl] = pids[ipl]->MinChi2();
+          TrackerData.trkpidchipr[iTrk][ipl] = pids[ipl]->Chi2Proton();
+          TrackerData.trkpidchika[iTrk][ipl] = pids[ipl]->Chi2Kaon();
+          TrackerData.trkpidchipi[iTrk][ipl] = pids[ipl]->Chi2Pion();
+          TrackerData.trkpidchimu[iTrk][ipl] = pids[ipl]->Chi2Muon();
+          TrackerData.trkpidpida[iTrk][ipl] = pids[ipl]->PIDA();
         }
-        TrackerData.trkpidpdg[iTrk] = pids[0]->Pdg();
-        TrackerData.trkpidchi[iTrk] = pids[0]->MinChi2();
-        TrackerData.trkpidchipr[iTrk] = pids[0]->Chi2Proton();
-        TrackerData.trkpidchika[iTrk] = pids[0]->Chi2Kaon();
-        TrackerData.trkpidchipi[iTrk] = pids[0]->Chi2Pion();
-        TrackerData.trkpidchimu[iTrk] = pids[0]->Chi2Muon();
-        TrackerData.trkpidpida[iTrk] = pids[0]->PIDA();
       } // fmpid.isValid()
+      
+      
 
       art::FindMany<anab::Calorimetry> fmcal(trackListHandle[iTracker], evt, fCalorimetryModuleLabel[iTracker]);
       if (fmcal.isValid()){
@@ -1677,6 +1699,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         for (size_t ipl = 0; ipl<calos.size(); ++ipl){
           TrackerData.trkke[iTrk][ipl]    = calos[ipl]->KineticEnergy();
           TrackerData.trkrange[iTrk][ipl] = calos[ipl]->Range();
+	  //For now make the second argument as 13 for muons. 
           TrackerData.trkpitchc[iTrk][ipl]= calos[ipl] -> TrkPitchC();
           const size_t NHits = calos[ipl] -> dEdx().size();
           TrackerData.ntrkhits[iTrk][ipl] = (int) NHits;
@@ -1699,6 +1722,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             TrkXYZ[2] = TrkPos.Z();
           } // for track hits
         } // for calorimetry info
+        if(TrackerData.ntrkhits[iTrk][0] > TrackerData.ntrkhits[iTrk][1] && TrackerData.ntrkhits[iTrk][0] > TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 0;
+        else if(TrackerData.ntrkhits[iTrk][1] > TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][1] > TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 1;
+        else if(TrackerData.ntrkhits[iTrk][2] > TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][2] > TrackerData.ntrkhits[iTrk][1]) TrackerData.trkpidbestplane[iTrk] = 2;
+        else if(TrackerData.ntrkhits[iTrk][2] == TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][2] > TrackerData.ntrkhits[iTrk][1]) TrackerData.trkpidbestplane[iTrk] = 2;
+        else if(TrackerData.ntrkhits[iTrk][2] == TrackerData.ntrkhits[iTrk][1] && TrackerData.ntrkhits[iTrk][2] > TrackerData.ntrkhits[iTrk][0]) TrackerData.trkpidbestplane[iTrk] = 2;
+        else if(TrackerData.ntrkhits[iTrk][1] == TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][1] > TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 0;
+        else if(TrackerData.ntrkhits[iTrk][1] == TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][1] == TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 2;
       } // if has calorimetry info
 
       //track truth information
@@ -1734,7 +1764,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }//end if (isMC)
     }//end loop over track
   }//end loop over track module labels
-
+  
+  /*trkf::TrackMomentumCalculator trkm;  
+  std::cout<<"\t"<<trkm.GetTrackMomentum(200,2212)<<"\t"<<trkm.GetTrackMomentum(-10, 13)<<"\t"<<trkm.GetTrackMomentum(300,-19)<<"\n";
+*/
   //mc truth information
   if (isMC){
     //save neutrino interaction information
@@ -1787,7 +1820,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_Px[iPart]=part.Px();
           fData->genie_Py[iPart]=part.Py();
           fData->genie_Pz[iPart]=part.Pz();
-          fData->genie_P[iPart]=part.Px();
+          fData->genie_P[iPart]=part.Px();	
           fData->genie_status_code[iPart]=part.StatusCode();
           fData->genie_mass[iPart]=part.Mass();
           fData->genie_trackID[iPart]=part.TrackId();

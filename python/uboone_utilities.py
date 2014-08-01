@@ -49,7 +49,12 @@ def get_experiment():
 
 def get_bluearc_server():
     return get_experiment() + 'data:'
-    
+
+# Function to return the fictitious disk server node
+# name to use for dCache disks.
+
+def get_dcache_server():
+    return 'fnal-dcache:'
 
 # Function to determine dropbox directory based on sam metadata.
 # Raise an exception if the specified file doesn't have metadata.
@@ -86,3 +91,12 @@ def get_dropbox(filename):
 
     path = '/uboone/data/uboonepro/dropbox/%s/%s/%s' % (file_type, group, data_tier)
     return path
+
+# Function to optionally convert a filesystem path into an xrootd url.
+# Only affects paths in /pnfs space.
+
+def path_to_url(path):
+    url = path
+    if path[0:6] == '/pnfs/':
+        url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/' + path[6:]
+    return url

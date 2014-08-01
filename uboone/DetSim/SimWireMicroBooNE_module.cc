@@ -392,7 +392,7 @@ namespace detsim {
       // and used on the next loop.
       raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
       rd.SetPedestal(ped_mean);
-      digcol->push_back(rd);
+      digcol->push_back(std::move(rd)); // we do move the raw digit copy, though
 
     }// end loop over channels      
 
