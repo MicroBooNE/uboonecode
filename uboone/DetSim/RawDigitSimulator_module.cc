@@ -202,6 +202,8 @@ namespace detsim{
     // get the geometry to be able to figure out signal types and chan -> plane mappings
     art::ServiceHandle<geo::Geometry> geo;
     unsigned int signalSize = fNTicks;
+    std::cout << "Signal size is " << signalSize << std::endl;
+    
     // vectors for working
     std::vector<short>    adcvec(signalSize, 0);	
     std::vector<double>   sigvec(signalSize, 0);

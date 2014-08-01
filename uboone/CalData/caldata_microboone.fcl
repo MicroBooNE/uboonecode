@@ -37,4 +37,10 @@ microboone_calwirePostspill.DigitModuleLabel: "daq:postSpill"
 
 microboone_calwireana: @local::standard_calwireana
 
+microboone_showwire:
+{
+    module_type: "ShowWire"
+    CalDataModuleLabel: "caldata"
+}
+
 END_PROLOG
