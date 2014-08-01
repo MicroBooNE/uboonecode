@@ -41,6 +41,11 @@ microboone_showwire:
 {
     module_type: "ShowWire"
     CalDataModuleLabel: "caldata"
+    DoSinglePulseChecks: true
+    PeakFitWindow: 3
+    SinglePulseLocation: 5000
+    SinglePulseBuffer: 25
+    
 }
 
 END_PROLOG
