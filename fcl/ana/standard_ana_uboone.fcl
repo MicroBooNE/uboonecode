@@ -1,7 +1,7 @@
 #include "services_microboone.fcl"
 #include "analysistreemodule.fcl"
 
-process_name: Reco3D
+process_name: Ana
 
 services:
 {

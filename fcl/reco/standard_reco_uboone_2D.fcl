@@ -58,7 +58,7 @@ physics:
   opflash:             @local::microboone_opflash
 
   ### calwire producers
-  caldata:             @local::microboone_calwire
+  caldata:             @local::microboone_calroi
 
   ### hit-finder producers
   gaushit:             @local::microboone_gaushitfinder
