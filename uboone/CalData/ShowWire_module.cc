@@ -22,6 +22,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
+#include "SimpleTypesAndConstants/geo_types.h"
 
 #include <string>
 #include <sstream>
@@ -49,6 +50,8 @@ private:
   bool fDoSinglePulseChecks;
   unsigned int fSinglePulseLocation;
   unsigned int fSinglePulseBuffer;
+  unsigned int fChannel;
+  bool fSaveWaveforms;
 
   std::string MakeHistName(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
   std::string MakeHistTitle(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
@@ -73,6 +76,9 @@ private:
   TH1F* h_peaktime_diff;
   TH2F* h_peaktime_2D;
 
+  TH1F* h_wire;
+  TH1F* h_raw;
+
 };
 
 
@@ -94,6 +100,8 @@ void cal::ShowWire::reconfigure(fhicl::ParameterSet const& p){
   fDoSinglePulseChecks = p.get<bool>("DoSinglePulseChecks",true);
   fSinglePulseLocation = p.get<unsigned int>("SinglePulseLocation",5000);
   fSinglePulseBuffer   = p.get<unsigned int>("SinglePulseBuffer",25);
+  fChannel             = p.get<unsigned int>("Channel",7775);
+  fSaveWaveforms       = p.get<bool>("SaveWaveforms",true);
 }
 
 void cal::ShowWire::beginJob(){
@@ -213,20 +221,30 @@ void cal::ShowWire::analyze(art::Event const & e)
 
   for(auto const& wire : wireVector){
 
-    raw::RawDigit const& rawdigit( *(wire.RawDigit()) );
     unsigned int channel = wire.Channel();
+    if(channel!=fChannel && fSaveWaveforms) continue;
+    if(wire.SignalType()!=geo::kCollection) continue;
+
+    raw::RawDigit const& rawdigit( *(wire.RawDigit()) );
     size_t n_samples = rawdigit.Samples();
 
     //this is stupid I have to do this here and can't set it later...
-    TH1F* h_wire = tfs->make<TH1F>(MakeHistName("Wire",run,subrun,event,channel).c_str(),"",n_samples,0,n_samples);
-    TH1F* h_raw = tfs->make<TH1F>(MakeHistName("Raw",run,subrun,event,channel).c_str(),"",n_samples,0,n_samples);
-
+    if(fSaveWaveforms){
+      h_wire = tfs->make<TH1F>(MakeHistName("Wire",run,subrun,event,channel).c_str(),"",n_samples,0,n_samples);
+      h_raw = tfs->make<TH1F>(MakeHistName("Raw",run,subrun,event,channel).c_str(),"",n_samples,0,n_samples);
+    }
+    else{
+      h_wire = new TH1F(MakeHistName("Wire",run,subrun,event,channel).c_str(),"",n_samples,0,n_samples);
+      h_raw = new TH1F(MakeHistName("Raw",run,subrun,event,channel).c_str(),"",n_samples,0,n_samples);
+    }
     SetHistogram(h_wire,"Wire",run,subrun,event,channel,n_samples,kBlue);
     SetHistogram(h_raw,"Raw",run,subrun,event,channel,n_samples,kRed);
     FillWaveforms(wire,rawdigit,h_wire,h_raw);
 
-    if(!fDoSinglePulseChecks) continue;
-
+    if(!fDoSinglePulseChecks) {
+      if(!fSaveWaveforms) { delete h_wire; delete h_raw; }
+      continue;
+    }
     float integral_wire = FindIntegral(h_wire);
     float integral_raw = FindIntegral(h_raw);
     h_integral_wire->Fill( integral_wire );
@@ -246,6 +264,8 @@ void cal::ShowWire::analyze(art::Event const & e)
     h_peaktime_raw->Fill( peaktime_raw );
     h_peaktime_diff->Fill( peaktime_wire - peaktime_raw );
     h_peaktime_2D->Fill( peaktime_wire, peaktime_raw );
+
+    if(!fSaveWaveforms) { delete h_wire; delete h_raw; }
 
   }
     

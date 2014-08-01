@@ -45,7 +45,8 @@ microboone_showwire:
     PeakFitWindow: 3
     SinglePulseLocation: 5000
     SinglePulseBuffer: 25
-    
+    Channel: 7775
+    SaveWaveforms: true
 }
 
 END_PROLOG
