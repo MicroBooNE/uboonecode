@@ -10,7 +10,7 @@ microboone_analysistree:
  GenieGenModuleLabel:      "generator"
  G4ModuleLabel:            "largeant"
  TrackModuleLabel:         [ "track3d" ]
- VertexModuleLabel:        [ "vertex3d" ]
+ VertexModuleLabel:        "vertex3d"
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
  POTModuleLabel:           "generator"

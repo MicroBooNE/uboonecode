@@ -17,6 +17,7 @@ services:
   TFileService: { fileName: "reco3D_hist.root" }
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  MemoryPeakReporter:    {}
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
@@ -55,9 +56,6 @@ physics:
   ### random number saver
   rns:                 { module_type: RandomNumberSaver }
 
-  ### vertex finder
-  featurevtx:          @local::standard_featurevertexfinder
-
   ### track-finder producers
   trackkalmanhit:      @local::microboone_track3Dkalmanhit
   trackkalmanhitcc:    @local::microboone_track3Dkalmanhit
@@ -76,6 +74,7 @@ physics:
   ### shower-finder producers
 
   ### vertex-finder producers
+  featurevtx:          @local::standard_featurevertexfinder
 
   ### calorimetry producers
   trackkalmanhitcalo:  @local::microboone_calomc

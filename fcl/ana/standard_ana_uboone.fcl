@@ -77,7 +77,7 @@ outputs:
 physics.analyzers.analysistree:  @local::microboone_analysistree
 physics.analyzers.analysistree.HitsModuleLabel:                 "gaushit"
 physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit", "trackkalmanhitcc", "trackkalsps", "stitch", "trackkalspscc", "stitchcc", "beziertrackercc", "beziertracker", "costrk", "costrkcc"]
-physics.analyzers.analysistree.VertexModuleLabel:               ["trackkalmanhit", "trackkalmanhitcc", "trackkalsps", "stitch", "trackkalspscc", "stitchcc", "beziertrackercc", "beziertracker", "costrk", "costrkcc"]
+physics.analyzers.analysistree.VertexModuleLabel:               "featurevtx"
 physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo", "trackkalmanhitcccalo", "trackkalspscalo", "stitchcalo","trackkalspscccalo", "stitchcccalo", "beziertrackercccalo", "beziertrackercalo", "costrkcalo", "costrkcccalo"]
 physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid", "trackkalmanhitccpid", "trackkalspspid", "stitchpid","trackkalspsccpid", "stitchccpid", "beziertrackerccpid", "beziertrackerpid", "costrkpid", "costrkccpid"]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
