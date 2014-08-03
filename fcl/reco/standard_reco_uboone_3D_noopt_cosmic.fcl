@@ -1,6 +1,0 @@
-#include "standard_reco_uboone_3D_noopt.fcl"
-
-physics.producers.trackkalsps.SortDirection:                    "y"
-physics.producers.trackkalspscc.SortDirection:                  "y"
-
-
