@@ -11,7 +11,7 @@ services:
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_services
+  user:         @local::microboone_services_ana
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
