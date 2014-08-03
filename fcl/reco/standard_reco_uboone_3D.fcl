@@ -89,6 +89,19 @@ physics:
   costrkcalo:          @local::microboone_calomc
   costrkcccalo:        @local::microboone_calomc
 
+  ### calorimetry producers
+  trackkalmanhitpid:  @local::microboone_chi2pid
+  trackkalmanhitccpid:@local::microboone_chi2pid
+  trackkalspspid:     @local::microboone_chi2pid
+  stitchpid:          @local::microboone_chi2pid
+  stitchkalmanhitpid: @local::microboone_chi2pid
+  trackkalspsccpid:   @local::microboone_chi2pid
+  stitchccpid:	       @local::microboone_chi2pid
+  beziertrackerpid:   @local::microboone_chi2pid
+  beziertrackerccpid: @local::microboone_chi2pid
+  costrkpid:          @local::microboone_chi2pid
+  costrkccpid:        @local::microboone_chi2pid
+
   ### flash-track matching
   beamflashcompat:     @local::standard_beamflashcompat
  }
@@ -100,6 +113,8 @@ physics:
          spacepointfindercc, trackkalspscc, stitchcc, beziertrackercc, costrk, costrkcc,
          trackkalmanhitcalo, trackkalmanhitcccalo, trackkalspscalo, stitchcalo, stitchkalmanhitcalo,
          trackkalspscccalo, stitchcccalo, beziertrackercccalo, beziertrackercalo, costrkcalo, costrkcccalo,
+         trackkalmanhitpid, trackkalmanhitccpid, trackkalspspid, stitchpid, stitchkalmanhitpid,
+         trackkalspsccpid, stitchccpid, beziertrackerccpid, beziertrackerpid, costrkpid, costrkccpid,
          beamflashcompat ]
  
  #define the output stream, there could be more than one if using filters 
@@ -197,11 +212,22 @@ physics.producers.beziertrackercalo.BTrackModuleLabel:          "beziertracker"
 
 physics.producers.beziertrackercccalo.BTrackModuleLabel:        "beziertrackercc"
 
-physics.producers.costrkcalo.TrackModuleLabel:                   "costrk"
-physics.producers.costrkcalo.SpacePointModuleLabel:              "costrk"
+physics.producers.costrkcalo.TrackModuleLabel:                  "costrk"
+physics.producers.costrkcalo.SpacePointModuleLabel:             "costrk"
 
-physics.producers.costrkcccalo.TrackModuleLabel:                 "costrkcc"
-physics.producers.costrkcccalo.SpacePointModuleLabel:            "costrkcc"
+physics.producers.costrkcccalo.TrackModuleLabel:                "costrkcc"
+physics.producers.costrkcccalo.SpacePointModuleLabel:           "costrkcc"
+
+physics.producers.trackkalmanhitpid.CalorimetryModuleLabel:          "trackkalmanhitcalo"
+physics.producers.trackkalmanhitccpid.CalorimetryModuleLabel:        "trackkalmanhitcccalo"
+physics.producers.trackkalspspid.CalorimetryModuleLabel:             "trackkalspscalo"
+physics.producers.stitchpid.CalorimetryModuleLabel:                  "stitchcalo"
+physics.producers.stitchkalmanhitpid.CalorimetryModuleLabel:         "stitchkalmanhitcalo"
+physics.producers.trackkalspsccpid.CalorimetryModuleLabel:           "trackkalspscccalo"
+physics.producers.stitchccpid.CalorimetryModuleLabel:                "stitchcccalo"
+physics.producers.beziertrackerpid.BCalorimetryModuleLabel:          "beziertrackercalo"
+physics.producers.costrkpid.CalorimetryModuleLabel:                  "costrkcalo"
+physics.producers.costrkccpid.CalorimetryModuleLabel:                "costrkcccalo"
 
 physics.producers.beamflashcompat.TrackModuleLabel:             "beziertracker"
 physics.producers.beamflashcompat.FlashModuleLabel:             "opflash"
