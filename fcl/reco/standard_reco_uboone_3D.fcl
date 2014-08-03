@@ -130,11 +130,11 @@ outputs:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.featureVtx.CCrawlerEndPoint2dModuleLabel: "cccluster"
-physics.producers.featureVtx.ClusterModuleLabel: "fuzzycluster"
-physics.producers.featureVtx.RunningMode: 0
-physics.producers.featureVtx.CornerFinderModuleLabel: "corner"
-physics.producers.featureVtx.HitModuleLabel: "gaushit"
+physics.producers.featurevtx.CCrawlerEndPoint2dModuleLabel: "cccluster"
+physics.producers.featurevtx.ClusterModuleLabel: "fuzzycluster"
+physics.producers.featurevtx.RunningMode: 0
+physics.producers.featurevtx.CornerFinderModuleLabel: "corner"
+physics.producers.featurevtx.HitModuleLabel: "gaushit"
 
 physics.producers.trackkalmanhit.HitModuleLabel:                "gaushit"
 physics.producers.trackkalmanhit.ClusterModuleLabel:            "fuzzycluster"
