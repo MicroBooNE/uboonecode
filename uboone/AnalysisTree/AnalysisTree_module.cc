@@ -98,6 +98,7 @@
 #include "SimulationBase/MCTruth.h"
 #include "SimulationBase/MCFlux.h"
 #include "Simulation/SimChannel.h"
+#include "Simulation/AuxDetSimChannel.h"
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/ParticleID.h"
 #include "RawData/RawDigit.h"
@@ -132,6 +133,7 @@ constexpr int kMaxHits       = 20000; //maximum number of hits;
 constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackModuleLabel
 constexpr unsigned short kMaxVertices   = 100;    //max number of 3D vertices
+constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector cells per MC particle
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -284,6 +286,10 @@ namespace microboone {
       
     }; // class TrackDataStruct
     
+    enum DataBits_t: unsigned int {
+      tdAuxDet = 0x01,
+      tdDefault = 0
+    }; // DataBits_t
     
 /*    /// information from the run
     struct RunData_t {
@@ -358,7 +364,7 @@ namespace microboone {
     Int_t     tptype_flux;     //Type of parent particle leaving BNB target
 
     //genie information
-    size_t MaxGeniePrimaries;
+    size_t MaxGeniePrimaries = 0;
     Int_t     genie_no_primaries;
     std::vector<Int_t>     genie_primaries_pdg;
     std::vector<Double_t>  genie_Eng;
@@ -373,7 +379,7 @@ namespace microboone {
     std::vector<Int_t>     genie_mother;
     
     //geant information
-    size_t MaxGEANTparticles;
+    size_t MaxGEANTparticles = 0; ///! how many particles there is currently room for
     Int_t     no_primaries;      //number of primary geant particles
     Int_t     geant_list_size;  //number of all geant particles
     Int_t     geant_list_size_in_tpcFV;
@@ -395,7 +401,7 @@ namespace microboone {
     std::vector<Int_t>     MergedId; //geant track segments, which belong to the same particle, get the same
 
     // more geant information
-    size_t MaxGEANTparticlesInTPCFV;
+    size_t MaxGEANTparticlesInTPCFV = 0; ///! how many particles there is currently room for
     std::vector<Int_t>   geant_tpcFV_status;
     std::vector<Int_t>   geant_tpcFV_trackId;
     std::vector<Int_t>   geant_tpcFV_pdg;
@@ -428,9 +434,39 @@ namespace microboone {
     std::vector<Double_t>  geant_tpcFV_mom;         // momentum.
     std::vector<Double_t>  geant_tpcFV_len;         // length.
     
+    // Auxiliary detector variables saved for each geant track
+    // This data is saved as a vector (one item per GEANT particle) of C arrays
+    // (wrapped in a BoxedArray for technical reasons), one item for each
+    // affected detector cell (which one is saved in AuxDetID
+    template <typename T>
+    using AuxDetMCData_t = std::vector<BoxedArray<T[kMaxAuxDets]>>;
     
+    std::vector<UShort_t> NAuxDets;         ///< Number of AuxDets crossed by this particle
+    AuxDetMCData_t<Short_t> AuxDetID;       ///< Which AuxDet this particle went through
+    AuxDetMCData_t<Float_t> entryX;         ///< Entry X position of particle into AuxDet
+    AuxDetMCData_t<Float_t> entryY;         ///< Entry Y position of particle into AuxDet
+    AuxDetMCData_t<Float_t> entryZ;         ///< Entry Z position of particle into AuxDet
+    AuxDetMCData_t<Float_t> entryT;         ///< Entry T position of particle into AuxDet
+    AuxDetMCData_t<Float_t> exitX;          ///< Exit X position of particle out of AuxDet
+    AuxDetMCData_t<Float_t> exitY;          ///< Exit Y position of particle out of AuxDet
+    AuxDetMCData_t<Float_t> exitZ;          ///< Exit Z position of particle out of AuxDet
+    AuxDetMCData_t<Float_t> exitT;          ///< Exit T position of particle out of AuxDet
+    AuxDetMCData_t<Float_t> exitPx;         ///< Exit x momentum of particle out of AuxDet
+    AuxDetMCData_t<Float_t> exitPy;         ///< Exit y momentum of particle out of AuxDet
+    AuxDetMCData_t<Float_t> exitPz;         ///< Exit z momentum of particle out of AuxDet
+    AuxDetMCData_t<Float_t> CombinedEnergyDep; ///< Sum energy of all particles with this trackID (+ID or -ID) in AuxDet
+    
+    unsigned int bits; ///< complementary information
+
+    /// Returns whether we have auxiliary detector data
+    bool hasAuxDetector() const { return bits & tdAuxDet; }
+    
+    /// Sets the specified bits
+    void SetBits(unsigned int setbits, bool unset = false)
+      { if (unset) bits &= ~setbits; else bits |= setbits; }
+      
     /// Constructor; clears all fields
-    AnalysisTreeDataStruct(size_t nTrackers = 0)
+    AnalysisTreeDataStruct(size_t nTrackers = 0): bits(tdDefault) 
       { SetTrackers(nTrackers); Clear(); }
 
     TrackDataStruct& GetTrackerData(size_t iTracker)
@@ -531,6 +567,8 @@ namespace microboone {
    * - <b>UseBuffers</b> (default: false): if enabled, memory is allocated for
    *   tree data for all the run; otherwise, it's allocated on each event, used
    *   and freed; use "true" for speed, "false" to save memory
+   * - <b>SaveAuxDetInfo</b> (default: false): if enabled, auxiliary detector
+   *   data will be extracted and included in the tree
    */
   class AnalysisTree : public art::EDAnalyzer {
 
@@ -572,6 +610,8 @@ namespace microboone {
     std::vector<std::string> fParticleIDModuleLabel;
     std::string fPOTModuleLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)
+    bool fSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
+
 
     /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
@@ -579,7 +619,10 @@ namespace microboone {
     /// Creates the structure for the tree data; optionally initializes it
     void CreateData(bool bClearData = false)
       {
-        if (!fData) fData = new AnalysisTreeDataStruct(GetNTrackers());
+        if (!fData) {
+          fData = new AnalysisTreeDataStruct(GetNTrackers());
+          fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fSaveAuxDetInfo);
+        }
         else {
           fData->SetTrackers(GetNTrackers());
           if (bClearData) fData->Clear();
@@ -752,7 +795,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkke[iTrk]      , -99999.);
     FillWith(trkrange[iTrk]   , -99999.);
     FillWith(trkidtruth[iTrk] , -99999 );
-    FillWith(trkorigin[iTrk] , -1 );
+    FillWith(trkorigin[iTrk]  , -1 );
     FillWith(trkpdgtruth[iTrk], -99999 );
     FillWith(trkefftruth[iTrk], -99999.);
     FillWith(trkpurtruth[iTrk], -99999.);
@@ -1055,6 +1098,24 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(geant_tpcFV_theta_yz, -99999.);
   FillWith(geant_tpcFV_mom, -99999.);
   FillWith(geant_tpcFV_len, -99999.);
+  
+  // auxiliary detector information;
+  FillWith(NAuxDets, 0);
+  // - set to -9999 all the values of each of the arrays in AuxDetID;
+  //   this auto is BoxedArray<Short_t>
+  for (auto& partInfo: AuxDetID) FillWith(partInfo, -9999);
+  // - pythonish C++: as the previous line, for each one in a list of containers
+  //   of the same type (C++ is not python yet), using pointers to avoid copy;
+  for (AuxDetMCData_t<Float_t>* cont: {
+   &entryX, &entryY, &entryZ,
+   &exitX , &exitY , &exitZ, &exitT, &exitPx, &exitPy, &exitPz,
+   &CombinedEnergyDep
+   })
+  {
+    // this auto is BoxedArray<Float_t>
+    for (auto& partInfo: *cont) FillWith(partInfo, -99999.);
+  } // for container
+  
 } // microboone::AnalysisTreeDataStruct::ClearLocalData()
 
 
@@ -1086,6 +1147,22 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   TrackId.resize(MaxGEANTparticles);
   process_primary.resize(MaxGEANTparticles);
   MergedId.resize(MaxGEANTparticles);
+  
+  // auxiliary detector structure
+  NAuxDets.resize(MaxGEANTparticles);
+  AuxDetID.resize(MaxGEANTparticles);
+  entryX.resize(MaxGEANTparticles);
+  entryY.resize(MaxGEANTparticles);
+  entryZ.resize(MaxGEANTparticles);
+  entryT.resize(MaxGEANTparticles);
+  exitX.resize(MaxGEANTparticles);
+  exitY.resize(MaxGEANTparticles);
+  exitZ.resize(MaxGEANTparticles);
+  exitT.resize(MaxGEANTparticles);
+  exitPx.resize(MaxGEANTparticles);
+  exitPy.resize(MaxGEANTparticles);
+  exitPz.resize(MaxGEANTparticles);
+  CombinedEnergyDep.resize(MaxGEANTparticles);
   
 } // microboone::AnalysisTreeDataStruct::ResizeGEANT()
 
@@ -1282,6 +1359,28 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("geant_tpcFV_theta_yz", geant_tpcFV_theta_yz, "geant_tpcFV_theta_yz[geant_list_size_in_tpcFV]/D");
   CreateBranch("geant_tpcFV_mom", geant_tpcFV_mom, "geant_tpcFV_mom[geant_list_size_in_tpcFV]/D");
   CreateBranch("geant_tpcFV_len", geant_tpcFV_len, "geant_tpcFV_len[geant_list_size_in_tpcFV]/D");
+  
+  if (hasAuxDetector()) {
+    std::ostringstream sstr;
+    sstr << "[" << kMaxAuxDets << "]";
+    std::string MaxAuxDetIndexStr = sstr.str();
+    CreateBranch("NAuxDets",     NAuxDets, "NAuxDets[geant_list_size]/s");
+    CreateBranch("AuxDetID",     AuxDetID, "AuxDetID[geant_list_size]" + MaxAuxDetIndexStr + "/S");
+    CreateBranch("AuxDetEntryX", entryX,   "AuxDetEntryX[geant_list_size]" + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetEntryY", entryY,   "AuxDetEntryY[geant_list_size]" + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetEntryZ", entryZ,   "AuxDetEntryZ[geant_list_size]" + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetEntryT", entryT,   "AuxDetEntryT[geant_list_size]" + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetExitX",  exitX,    "AuxDetExitX[geant_list_size]"  + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetExitY",  exitY,    "AuxDetExitY[geant_list_size]"  + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetExitZ",  exitZ,    "AuxDetExitZ[geant_list_size]"  + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetExitT",  exitT,    "AuxDetExitT[geant_list_size]"  + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetExitPx", exitPx,   "AuxDetExitPx[geant_list_size]" + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetExitPy", exitPy,   "AuxDetExitPy[geant_list_size]" + MaxAuxDetIndexStr + "/F");
+    CreateBranch("AuxDetExitPz", exitPz,   "AuxDetExitPz[geant_list_size]" + MaxAuxDetIndexStr + "/F");
+    CreateBranch("CombinedEnergyDep", CombinedEnergyDep,
+      "CombinedEnergyDep[geant_list_size]" + MaxAuxDetIndexStr + "/F");
+  } // if hasAuxDetector
+  
 } // microboone::AnalysisTreeDataStruct::SetAddresses()
 
 
@@ -1303,7 +1402,8 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
-  fUseBuffer                (pset.get< bool >("UseBuffers", false)              )
+  fUseBuffer                (pset.get< bool >("UseBuffers", false)),
+  fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false))
 {
   mf::LogInfo("AnalysisTree") << "Configuration:"
     << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
@@ -1464,6 +1564,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (evt.getByLabel(fGenieGenModuleLabel,mcfluxListHandle))
     art::fill_ptr_vector(fluxlist, mcfluxListHandle);
 
+  std::vector<const sim::AuxDetSimChannel*> fAuxDetSimChannels;
+  if (fSaveAuxDetInfo){
+    evt.getView(fLArG4ModuleLabel, fAuxDetSimChannels);
+  }
 
   fData->run = evt.run();
   fData->subrun = evt.subRun();
@@ -1859,10 +1963,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         bool isPrimary = pPart->Process() == pri;
         if (isPrimary) ++primary;
         
+        int TrackID = pPart->TrackId();
+        
         if (iPart < fData->GetMaxGEANTparticles()) {
           fData->process_primary[iPart] = int(isPrimary);
           fData->Mother[iPart]=pPart->Mother();
-          fData->TrackId[iPart]=pPart->TrackId();
+          fData->TrackId[iPart]=TrackID;
           fData->pdg[iPart]=pPart->PdgCode();
           fData->Eng[iPart]=pPart->E();
           fData->Px[iPart]=pPart->Px();
@@ -1875,6 +1981,66 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->EndPointy[iPart]=pPart->EndPosition()[1];
           fData->EndPointz[iPart]=pPart->EndPosition()[2];
           fData->NumberDaughters[iPart]=pPart->NumberDaughters();
+          
+          //access auxiliary detector parameters
+          if (fSaveAuxDetInfo) {
+            unsigned short nAD = 0; // number of cells that particle hit
+            
+            // find deposit of this particle in each of the detector cells
+            for (const sim::AuxDetSimChannel* c: fAuxDetSimChannels) {
+              
+              // find if this cell has a contribution (IDE) from this particle,
+              // and which one
+              const std::vector<sim::AuxDetIDE>& setOfIDEs = c->AuxDetIDEs();
+              // using a C++ "lambda" function here; this one:
+              // - sees only TrackID from the current scope
+              // - takes one parameter: the AuxDetIDE to be tested
+              // - returns if that IDE belongs to the track we are looking for
+              std::vector<sim::AuxDetIDE>::const_iterator iIDE
+                = std::find_if(
+                  setOfIDEs.begin(), setOfIDEs.end(),
+                  [TrackID](const sim::AuxDetIDE& IDE){ return IDE.trackID == TrackID; }
+                );
+              if (iIDE == setOfIDEs.end()) continue;
+              
+              // now iIDE points to the energy released by the track #i (TrackID)
+              
+              // look for IDE with matching trackID
+              // find trackIDs stored in setOfIDEs with the same trackID, but negative,
+              // this is an untracked particle who's energy should be added as deposited by this original trackID
+              float totalE = 0.; // total energy deposited around by the GEANT particle in this cell
+              for(const auto& adtracks: setOfIDEs) {
+                 if( fabs(adtracks.trackID) == TrackID )
+                   totalE += adtracks.energyDeposited;
+              } // for
+              
+              // fill the structure
+              if (nAD < kMaxAuxDets) {
+                fData->AuxDetID[iPart][nAD] = c->AuxDetID();
+                fData->entryX[iPart][nAD]   = iIDE->entryX;
+                fData->entryY[iPart][nAD]   = iIDE->entryY;
+                fData->entryZ[iPart][nAD]   = iIDE->entryZ;
+                fData->entryT[iPart][nAD]   = iIDE->entryT;
+                fData->exitX[iPart][nAD]    = iIDE->exitX;
+                fData->exitY[iPart][nAD]    = iIDE->exitY;
+                fData->exitZ[iPart][nAD]    = iIDE->exitZ;
+                fData->exitT[iPart][nAD]    = iIDE->exitT;
+                fData->exitPx[iPart][nAD]   = iIDE->exitMomentumX;
+                fData->exitPy[iPart][nAD]   = iIDE->exitMomentumY;
+                fData->exitPz[iPart][nAD]   = iIDE->exitMomentumZ;
+                fData->CombinedEnergyDep[iPart][nAD] = totalE;
+              }
+              ++nAD;
+            } // for aux det sim channels
+            fData->NAuxDets[iPart] = nAD; 
+            
+            if (nAD > kMaxAuxDets) {
+              // got this error? consider increasing kMaxAuxDets
+              mf::LogError("AnalysisTree:limits") << "particle #" << iPart
+                << " touches " << nAD << " auxiliary detector cells, only "
+                << kMaxAuxDets << " of them are saved in the tree";
+            } // if too many detector cells
+          } // if save aux det 
         }
         else if (iPart == fData->GetMaxGEANTparticles()) {
           // got this error? it might be a bug,
