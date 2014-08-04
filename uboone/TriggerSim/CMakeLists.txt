@@ -1,5 +1,6 @@
 
 art_make( BASENAME_ONLY
+	  LIBRARY_NAME  uboonecode_uboone_TriggerSim
 	  LIB_LIBRARIES RawData
 			Utilities
                         ${ART_FRAMEWORK_CORE}

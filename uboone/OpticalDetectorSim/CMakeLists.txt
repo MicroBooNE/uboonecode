@@ -1,6 +1,7 @@
 art_make( EXCLUDE UBOpticalChConfig_service.cc
 	  #NO_PLUGINS
 	  BASENAME_ONLY
+	  LIBRARY_NAME  uboonecode_uboone_OpticalDetectorSim
           LIB_LIBRARIES UBOpticalChConfig_service
 			RawData
 			Utilities
