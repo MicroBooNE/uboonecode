@@ -83,8 +83,8 @@ physics:
          opflash,
          caldata, 
          gaushit, rffhit,
-         fuzzycluster, cccluster, 
-         pandora ]
+         fuzzycluster, cccluster ]
+#         pandora ]
 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
