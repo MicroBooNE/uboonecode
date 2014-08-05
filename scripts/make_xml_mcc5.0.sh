@@ -55,6 +55,8 @@ while [ $# -gt 0 ]; do
     fi
     ;;
 
+    # User.
+
     -u|--user )
     if [ $# -gt 1 ]; then
       userdir=users/$2
@@ -62,6 +64,8 @@ while [ $# -gt 0 ]; do
       shift
     fi
     ;;
+
+    # Local release.
 
     --local )
     if [ $# -gt 1 ]; then
@@ -137,22 +141,14 @@ do
     # Reco 2D
 
     reco2dfcl=standard_reco_uboone_2D.fcl
-    if echo $newprj | grep -q cosmic; then
-      reco2dfcl=standard_reco_uboone_2D_cosmic.fcl
-    fi
-    echo "Using ${reco2dfcl}."
 
     # Reco 3D
 
     reco3dfcl=standard_reco_uboone_3D.fcl
-    if echo $newprj | grep -q cosmic; then
-      reco3dfcl=standard_reco_uboone_3D_cosmic.fcl
-    fi
-    echo "Using ${reco3dfcl}."
 
-    # Merge
+    # Merge/Analysis
 
-    mergefcl=copy.fcl
+    mergefcl=standard_ana_uboone.fcl
 
     nev=$nevarg
     njob=$njobarg
@@ -185,7 +181,7 @@ do
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
 <!ENTITY name "$newprj">
-<!ENTITY tag "mcc4.0">
+<!ENTITY tag "mcc5.0">
 ]>
 
 <project name="&name;">
@@ -293,7 +289,7 @@ EOF
     <defname>&name;_&tag;_reco3D</defname>
   </stage>
 
-  <stage name="merge">
+  <stage name="mergeana">
     <fcl>$mergefcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/reco/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/reco/&name;</workdir>

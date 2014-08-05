@@ -1,7 +1,8 @@
 #include "services_microboone.fcl"
-#include "clustermodules.fcl"
+#include "cluster_microboone.fcl"
 #include "trackfindermodules_microboone.fcl"
 #include "calorimetry_microboone.fcl"
+#include "particleid_microboone.fcl"
 #include "showerfindermodules.fcl"
 #include "vertexfindermodules.fcl"
 #include "pandoramodules.fcl"
@@ -218,16 +219,38 @@ physics.producers.costrkcalo.SpacePointModuleLabel:             "costrk"
 physics.producers.costrkcccalo.TrackModuleLabel:                "costrkcc"
 physics.producers.costrkcccalo.SpacePointModuleLabel:           "costrkcc"
 
-physics.producers.trackkalmanhitpid.CalorimetryModuleLabel:          "trackkalmanhitcalo"
-physics.producers.trackkalmanhitccpid.CalorimetryModuleLabel:        "trackkalmanhitcccalo"
-physics.producers.trackkalspspid.CalorimetryModuleLabel:             "trackkalspscalo"
-physics.producers.stitchpid.CalorimetryModuleLabel:                  "stitchcalo"
-physics.producers.stitchkalmanhitpid.CalorimetryModuleLabel:         "stitchkalmanhitcalo"
-physics.producers.trackkalspsccpid.CalorimetryModuleLabel:           "trackkalspscccalo"
-physics.producers.stitchccpid.CalorimetryModuleLabel:                "stitchcccalo"
-physics.producers.beziertrackerpid.BCalorimetryModuleLabel:          "beziertrackercalo"
-physics.producers.costrkpid.CalorimetryModuleLabel:                  "costrkcalo"
-physics.producers.costrkccpid.CalorimetryModuleLabel:                "costrkcccalo"
+physics.producers.trackkalmanhitpid.CalorimetryModuleLabel:     "trackkalmanhitcalo"
+physics.producers.trackkalmanhitpid.TrackModuleLabel:           "trackkalmanhit"
+
+physics.producers.trackkalmanhitccpid.CalorimetryModuleLabel:   "trackkalmanhitcccalo"
+physics.producers.trackkalmanhitccpid.TrackModuleLabel:         "trackkalmanhitcc"
+
+physics.producers.trackkalspspid.CalorimetryModuleLabel:        "trackkalspscalo"
+physics.producers.trackkalspspid.TrackModuleLabel:              "trackkalsps"
+
+physics.producers.stitchpid.CalorimetryModuleLabel:             "stitchcalo"
+physics.producers.stitchpid.TrackModuleLabel:                   "stitch"
+
+physics.producers.stitchkalmanhitpid.CalorimetryModuleLabel:    "stitchkalmanhitcalo"
+physics.producers.stitchkalmanhitpid.TrackModuleLabel:          "stitchkalmanhit"
+
+physics.producers.trackkalspsccpid.CalorimetryModuleLabel:      "trackkalspscccalo"
+physics.producers.trackkalspsccpid.TrackModuleLabel:            "trackkalspscc"
+
+physics.producers.stitchccpid.CalorimetryModuleLabel:           "stitchcccalo"
+physics.producers.stitchccpid.TrackModuleLabel:                 "stitchcc"
+
+physics.producers.beziertrackerpid.CalorimetryModuleLabel:      "beziertrackercalo"
+physics.producers.beziertrackerpid.TrackModuleLabel:            "beziertracker"
+
+physics.producers.beziertrackerccpid.CalorimetryModuleLabel:      "beziertrackercccalo"
+physics.producers.beziertrackerccpid.TrackModuleLabel:            "beziertrackercc"
+
+physics.producers.costrkpid.CalorimetryModuleLabel:             "costrkcalo"
+physics.producers.costrkpid.TrackModuleLabel:                   "costrk"
+
+physics.producers.costrkccpid.CalorimetryModuleLabel:           "costrkcccalo"
+physics.producers.costrkccpid.TrackModuleLabel:                 "costrkcc"
 
 physics.producers.beamflashcompat.TrackModuleLabel:             "beziertracker"
 physics.producers.beamflashcompat.FlashModuleLabel:             "opflash"

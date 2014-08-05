@@ -1,9 +1,11 @@
 
+
 set( CalibrationTPC_Algs_sources CalibrationTPC_Algs.cc)
 add_library(CalibrationTPC_Algs SHARED ${CalibrationTPC_Algs_sources})
 install ( TARGETS CalibrationTPC_Algs DESTINATION ${flavorqual_dir}/lib )
 
 art_make( BASENAME_ONLY
+	  LIBRARY_NAME  uboonecode_uboone_Calibrations
           MODULE_LIBRARIES 
 	  		CalibrationTPC_Algs
 			RawData
