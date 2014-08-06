@@ -82,7 +82,7 @@ physics:
  reco: [ rns,
          opflash,
          caldata, 
-         gaushit, rffhit,
+         gaushit, #rffhit,
          fuzzycluster, cccluster ]
 #         pandora ]
 
