@@ -1729,7 +1729,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         TrackerData.trkthetayz[iTrk]            = theta_yz;
         TrackerData.trkmom[iTrk]                = mom;
         TrackerData.trklen[iTrk]                = tlen;
-	TrackerData.trkmomrange[iTrk]           = trkm.GetTrackMomentum(tlen,13);
+        TrackerData.trkmomrange[iTrk]           = trkm.GetTrackMomentum(tlen,13);
       } // if we have trajectory
 
       // find vertices associated with this track
@@ -1762,20 +1762,20 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       Float_t minsdist = 10000;
       Float_t minedist = 10000;
       for (int ivx = 0; ivx < fData->nvtx && ivx < kMaxVertices; ++ivx){
-	Float_t sdist = sqrt(pow(TrackerData.trkstartx[iTrk]-fData->vtx[ivx][0],2)+
-			     pow(TrackerData.trkstarty[iTrk]-fData->vtx[ivx][1],2)+
-			     pow(TrackerData.trkstartz[iTrk]-fData->vtx[ivx][2],2));
-	Float_t edist = sqrt(pow(TrackerData.trkendx[iTrk]-fData->vtx[ivx][0],2)+
-			     pow(TrackerData.trkendy[iTrk]-fData->vtx[ivx][1],2)+
-			     pow(TrackerData.trkendz[iTrk]-fData->vtx[ivx][2],2));
-	if (sdist<minsdist){
-	  minsdist = sdist;
-	  if (minsdist<10) TrackerData.trksvtxid[iTrk] = ivx;
-	}
-	if (edist<minedist){
-	  minedist = edist;
-	  if (minedist<10) TrackerData.trkevtxid[iTrk] = ivx;
-	}
+        Float_t sdist = sqrt(pow(TrackerData.trkstartx[iTrk]-fData->vtx[ivx][0],2)+
+                             pow(TrackerData.trkstarty[iTrk]-fData->vtx[ivx][1],2)+
+                             pow(TrackerData.trkstartz[iTrk]-fData->vtx[ivx][2],2));
+        Float_t edist = sqrt(pow(TrackerData.trkendx[iTrk]-fData->vtx[ivx][0],2)+
+                             pow(TrackerData.trkendy[iTrk]-fData->vtx[ivx][1],2)+
+                             pow(TrackerData.trkendz[iTrk]-fData->vtx[ivx][2],2));
+        if (sdist<minsdist){
+          minsdist = sdist;
+          if (minsdist<10) TrackerData.trksvtxid[iTrk] = ivx;
+        }
+        if (edist<minedist){
+          minedist = edist;
+          if (minedist<10) TrackerData.trkevtxid[iTrk] = ivx;
+        }
       }
       // find particle ID info
       art::FindMany<anab::ParticleID> fmpid(trackListHandle[iTracker], evt, fParticleIDModuleLabel[iTracker]);
@@ -1814,7 +1814,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         for (size_t ipl = 0; ipl<calos.size(); ++ipl){
           TrackerData.trkke[iTrk][ipl]    = calos[ipl]->KineticEnergy();
           TrackerData.trkrange[iTrk][ipl] = calos[ipl]->Range();
-	  //For now make the second argument as 13 for muons. 
+          //For now make the second argument as 13 for muons. 
           TrackerData.trkpitchc[iTrk][ipl]= calos[ipl] -> TrkPitchC();
           const size_t NHits = calos[ipl] -> dEdx().size();
           TrackerData.ntrkhits[iTrk][ipl] = (int) NHits;
@@ -1865,8 +1865,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           HitsPurity(hits[ipl],TrackerData.trkidtruth[iTrk][ipl],TrackerData.trkpurtruth[iTrk][ipl],maxe);
         //std::cout<<"\n"<<iTracker<<"\t"<<iTrk<<"\t"<<ipl<<"\t"<<trkidtruth[iTracker][iTrk][ipl]<<"\t"<<trkpurtruth[iTracker][iTrk][ipl]<<"\t"<<maxe;
           if (TrackerData.trkidtruth[iTrk][ipl]>0){
-	    const art::Ptr<simb::MCTruth> mc = bt->TrackIDToMCTruth(TrackerData.trkidtruth[iTrk][ipl]);
-	    TrackerData.trkorigin[iTrk][ipl] = mc->Origin();
+            const art::Ptr<simb::MCTruth> mc = bt->TrackIDToMCTruth(TrackerData.trkidtruth[iTrk][ipl]);
+            TrackerData.trkorigin[iTrk][ipl] = mc->Origin();
             const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[iTrk][ipl]);
             double tote = 0;
             std::vector<sim::IDE> vide(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]));
@@ -1935,7 +1935,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_Px[iPart]=part.Px();
           fData->genie_Py[iPart]=part.Py();
           fData->genie_Pz[iPart]=part.Pz();
-          fData->genie_P[iPart]=part.Px();	
+          fData->genie_P[iPart]=part.Px();        
           fData->genie_status_code[iPart]=part.StatusCode();
           fData->genie_mass[iPart]=part.Mass();
           fData->genie_trackID[iPart]=part.TrackId();
@@ -1951,9 +1951,11 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       int primary=0;
       int geant_particle=0;
       size_t iFVPart = 0;
-      for(size_t iPart = 0; iPart < plist.size(); ++iPart)
+      sim::ParticleList::const_iterator itPart = plist.begin(),
+        pend = plist.end(); // iterator to pairs (track id, particle)
+      for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart)
       {
-        const simb::MCParticle* pPart = plist.Particle(iPart);
+        const simb::MCParticle* pPart = (itPart++)->second;
         if (!pPart) {
           throw art::Exception(art::errors::LogicError)
             << "GEANT particle #" << iPart << " returned a null pointer";
@@ -2279,7 +2281,7 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
 
   for(int i = 0; i < n; ++i) {
     try{
-      // check if the particle is inside a TPC  											
+      // check if the particle is inside a TPC                                                                                          
       double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
       unsigned int tpc   = 0;
       unsigned int cstat = 0;
@@ -2294,17 +2296,17 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
     //double tDrift = xGen/vDrift;
     
     
-//std::cout<<"\n"<<xGen<<"\t"<<tGen<<"\t"<<(-xmax-tGen*vDrift)<<"\t"<<((2*xmax)-(tGen*vDrift));									
+//std::cout<<"\n"<<xGen<<"\t"<<tGen<<"\t"<<(-xmax-tGen*vDrift)<<"\t"<<((2*xmax)-(tGen*vDrift));                                                                        
        
     if (xGen < (-xmax-tGen*vDrift) || xGen > ((2*xmax)-tGen*vDrift) ) continue;
     if (part.Vy(i) < ymin || part.Vy(i) > ymax) continue;
     if (part.Vz(i) < zmin || part.Vz(i) > zmax) continue;
-    // Doing some manual shifting to account for											
-    // an interaction not occuring with the beam dump											
-    // we will reconstruct an x distance different from 										
-    // where the particle actually passed to to the time										
-    // being different from in-spill interactions	
-    double newX = xGen+tGen*vDrift;	
+    // Doing some manual shifting to account for                                                                                        
+    // an interaction not occuring with the beam dump                                                                                        
+    // we will reconstruct an x distance different from                                                                                 
+    // where the particle actually passed to to the time                                                                                
+    // being different from in-spill interactions        
+    double newX = xGen+tGen*vDrift;        
     
 
     TVector3 pos(newX,part.Vy(i),part.Vz(i));
