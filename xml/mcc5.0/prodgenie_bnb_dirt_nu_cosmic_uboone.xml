@@ -3,7 +3,7 @@
 <!-- Production Project -->
 
 <!DOCTYPE project [
-<!ENTITY release "v02_01_01">
+<!ENTITY release "v02_03_02">
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
 <!ENTITY name "prodgenie_bnb_dirt_nu_cosmic_uboone">
@@ -16,7 +16,7 @@
   <group>uboone</group>
 
   <!-- Project size -->
-  <numevents>10000</numevents>
+  <numevents>1000000</numevents>
 
   <!-- Operating System -->
   <os>SL5,SL6</os>
@@ -48,7 +48,7 @@
   </stage>
 
   <stage name="detsim">
-    <fcl>standard_detsim_uboone.fcl</fcl>
+    <fcl>standard_detsim_uboone_tpcfilt.fcl</fcl>
     <outdir>/uboone/data/uboonepro/&release;/detsim/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/detsim/&name;</workdir>
     <numjobs>100</numjobs>
