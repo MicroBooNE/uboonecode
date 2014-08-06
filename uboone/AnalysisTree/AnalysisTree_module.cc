@@ -2113,24 +2113,38 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       
       FillWith(fData->MergedId, 0);
 
+      // for each particle, consider all the direct ancestors with the same
+      // PDG ID, and mark them as belonging to the same "group"
+      // (having the same MergedId)
       int currentMergedId = 1;
       for(size_t iPart = fData->geant_list_size; iPart-- > 0; ) {
+        // if the particle already belongs to a group, don't bother
         if (fData->MergedId[iPart]) continue;
+        // the particle starts its own group
         fData->MergedId[iPart] = currentMergedId;
-        int currentMotherId = fData->Mother[iPart];
-        int currentMotherTrackId = -1;
-        while(currentMotherId > 0) {
+        
+        // look in the ancestry, one by one
+        int currentMotherTrackId = fData->Mother[iPart];
+        while(currentMotherTrackId > 0) {
           size_t iMother = fData->TrackId.size();
+          // find the mother (we have its track ID in currentMotherTrackId)
+          int currentMotherIndex = -1;
           while (iMother-- > 0) {
-            if (fData->TrackId[iMother] != currentMotherId) continue;
-            currentMotherTrackId = iMother;
+            if (fData->TrackId[iMother] != currentMotherTrackId) continue;
+            // record the track number of the mother
+            currentMotherIndex = (int) iMother;
             break;
           } // while
-          if (fData->pdg[iPart] != fData->pdg[currentMotherTrackId]) break;
+          if (currentMotherIndex == -1) break; // no mother found
+          // if the mother particle is of a different type,
+          // don't bother with iPart ancestry any further
+          if (fData->pdg[iPart] != fData->pdg[currentMotherIndex]) break;
           
-          fData->MergedId[currentMotherTrackId] = currentMergedId;
-          currentMotherId = fData->Mother[currentMotherTrackId];
-        }
+          // group the "current mother" (actually, ancestor) with iPart
+          fData->MergedId[currentMotherIndex] = currentMergedId;
+          // then consider the grandmother (one generation earlier)
+          currentMotherTrackId = fData->Mother[currentMotherIndex];
+        } // while ancestry exists
         ++currentMergedId;
       } // for merging check
       
