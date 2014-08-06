@@ -18,7 +18,7 @@ services:
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_services
+  user:         @local::microboone_services_reco
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
@@ -58,7 +58,7 @@ physics:
   #opflash:             @local::microboone_opflash
 
   ### calwire producers
-  caldata:             @local::microboone_calwire
+  caldata:             @local::microboone_calroi
 
   ### hit-finder producers
   gaushit:             @local::microboone_gaushitfinder
@@ -70,8 +70,6 @@ physics:
   ### cluster-finder producers
   fuzzycluster:        @local::microboone_fuzzycluster
   cccluster:           @local::microboone_clustercrawler
-  hough:               @local::standard_houghlinefinder
-  linemerger:          @local::standard_linemerger
 
   ### pandora
   pandora:             @local::standard_pandora
@@ -83,10 +81,9 @@ physics:
  reco: [ rns,
 #         opflash,
          caldata, 
-         gaushit, rffhit,
+         gaushit, #rffhit,
 #         corner,
          fuzzycluster, cccluster, 
-#         hough, linemerger,
          pandora ]
 
  #define the output stream, there could be more than one if using filters 
@@ -130,11 +127,6 @@ physics.producers.corner.CornerAlgParamSet.CalDataModuleLabel:  "caldata"
 
 physics.producers.fuzzycluster.HitsModuleLabel:                 "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:              "caldata"
-
-physics.producers.hough.DBScanModuleLabel:                      "fuzzycluster"
-physics.producers.hough.HitsPerCluster: 3
-
-physics.producers.linemerger.ClusterModuleLabel:                "hough"
 
 physics.producers.cccluster.CalDataModuleLabel:                 "caldata"
 physics.producers.cccluster.CCHitFinderAlg.CalDataModuleLabel:  "caldata"
