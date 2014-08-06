@@ -17,9 +17,7 @@ services:
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:  @local::art_file_catalog_mc
-#  BackTracker:          @local::microboone_backtracker
   user:         @local::microboone_detsim_services
-#  user:         @local::microboone_detsimbt_services
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
@@ -33,7 +31,6 @@ services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
                                                     "ubProjectVersion", "v1_3" ]
 
 services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_detsim.root"
-services.user.BackTracker:                    @local::microboone_backtracker  
 
 #source is now a root file
 source:
@@ -55,7 +52,6 @@ physics:
    triggersim:     @local::ubtrigger_standard
    optreadout:     @local::microboone_optical_dram_readout_sim
    daq:            @local::microboone_simwire
-##   backtrack:	   @local::standard_backtrackerloader
    rns:            { module_type: "RandomNumberSaver" }
  }
 
@@ -64,13 +60,14 @@ filters :
     filtDirtNus: {
      module_type: FilterNoDirtNeutrinos
      GenModuleLabel: "generator"
+     LArG4ModuleLabel: "largeant"
     }
 }
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
 
- simulate: [filtDirtNus, optdigitizer, optfem, triggersim, optreadout, daq, rns]
+ simulate: [rns, filtDirtNus, optdigitizer, optfem, triggersim, optreadout, daq]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
