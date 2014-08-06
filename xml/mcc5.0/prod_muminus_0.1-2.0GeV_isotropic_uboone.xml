@@ -7,7 +7,7 @@
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
 <!ENTITY name "prod_muminus_0.1-2.0GeV_isotropic_uboone">
-<!ENTITY tag "mcc4.0">
+<!ENTITY tag "mcc5.0">
 ]>
 
 <project name="&name;">
@@ -77,13 +77,13 @@
     <defname>&name;_&tag;_reco3D</defname>
   </stage>
 
-  <stage name="merge">
-    <fcl>copy.fcl</fcl>
-    <outdir>/pnfs/uboone/scratch/uboonepro/&release;/reco/&name;</outdir>
-    <workdir>/uboone/app/users/uboonepro/&release;/reco/&name;</workdir>
+  <stage name="mergeana">
+    <fcl>standard_ana_uboone.fcl</fcl>
+    <outdir>/pnfs/uboone/scratch/uboonepro/&release;/mergeana/&name;</outdir>
+    <workdir>/uboone/app/users/uboonepro/&release;/mergeana/&name;</workdir>
     <numjobs>100</numjobs>
     <targetsize>8000000000</targetsize>
-    <datatier>reconstructed</datatier>
+    <datatier>reconstructed-3d</datatier>
     <defname>&name;_&tag;</defname>
   </stage>
 
