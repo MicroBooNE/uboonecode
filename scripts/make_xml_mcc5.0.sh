@@ -291,11 +291,11 @@ EOF
 
   <stage name="mergeana">
     <fcl>$mergefcl</fcl>
-    <outdir>/pnfs/uboone/scratch/${userdir}/&release;/reco/&name;</outdir>
-    <workdir>/uboone/app/users/${userbase}/&release;/reco/&name;</workdir>
+    <outdir>/pnfs/uboone/scratch/${userdir}/&release;/mergeana/&name;</outdir>
+    <workdir>/uboone/app/users/${userbase}/&release;/mergeana/&name;</workdir>
     <numjobs>$njob</numjobs>
     <targetsize>8000000000</targetsize>
-    <datatier>reconstructed</datatier>
+    <datatier>reconstructed-3d</datatier>
     <defname>&name;_&tag;</defname>
   </stage>
 
