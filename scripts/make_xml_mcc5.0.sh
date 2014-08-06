@@ -121,22 +121,9 @@ do
     # Detsim (optical + tpc).
 
     detsimfcl=standard_detsim_uboone.fcl
-
-    # Detsim optical
-
-    #optsimfcl=''
-    #if echo $newprj | grep -q 3window; then
-    #  optsimfcl=standard_detsim_3window_uboone_optical.fcl
-    #fi
-    #echo "Using ${optsimfcl}."
-
-    # Detsim tpc
-
-    #tpcsimfcl=standard_detsim_uboone.fcl
-    #if echo $newprj | grep -q 3window; then
-    #  tpcsimfcl=standard_detsim_3window_uboone_tpc.fcl
-    #fi
-    #echo "Using ${tpcsimfcl}."
+    if echo $newprj | grep -q dirt; then
+      detsimfcl=standard_detsim_uboone_tpcfilt.fcl
+    fi
 
     # Reco 2D
 
@@ -156,19 +143,31 @@ do
     # Set default number of events.
 
     if [ $nev -eq 0 ]; then
-      if [ $newprj = prodgenie_bnb_nu_cosmic_3window_uboone ]; then
+      if [ $newprj = prodgenie_bnb_nu_cosmic_uboone ]; then
         nev=50000
-      elif [ $newprj = prodgenie_bnb_nu_3window_uboone ]; then
+      elif [ $newprj = prodgenie_bnb_nu_uboone ]; then
         nev=20000
+      elif [ $newprj = prodgenie_numi_dirt_nu_uboone ]; then
+        nev=1000000
+      elif [ $newprj = prodgenie_bnb_dirt_nu_cosmic_uboone ]; then
+        nev=1000000
+      elif [ $newprj = prodgenie_numi_dirt_nu_uboone ]; then
+        nev=1000000
+      elif [ $newprj = prodgenie_numi_dirt_nu_cosmic_uboone ]; then
+        nev=1000000
       else
         nev=10000
       fi
     fi
 
-    # Set default number of workers, assuming 100 events/worker.
+    # Set default number of workers, assuming 100 events/worker 
+    # (100000 events/worker for dirt samples)
 
     if [ $njob -eq 0 ]; then
       njob=$(( $nev / 100 ))
+      if echo $detsimfcl | grep -q tpcfilt; then
+        njob=$(( $nev / 10000 ))
+      fi
     fi
 
   cat <<EOF > $newxml
