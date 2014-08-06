@@ -1309,7 +1309,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
             histname_temp = histname
         if os.path.exists(histname_temp):
             os.remove(histname_temp)
-        rc = subprocess.call([histmerge, "-v", "0", "-f", "-k", "-T",
+        rc = subprocess.call([histmerge, "-v", "0", "-f", "-k",
                               histname_temp, '@' + histurlsname_temp])
         if rc != 0:
             print "%s exit status %d" % (histmerge, rc)
