@@ -23,7 +23,7 @@ services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
                                                     "fclVersion", "v1_5",
                                                     "ubProjectStage",   "merge",
                                                     "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_merged.root"
+services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_merged.root"
 
 #source is now a root file
 source:
