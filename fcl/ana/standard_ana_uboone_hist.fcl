@@ -14,6 +14,17 @@ services:
   user:         @local::microboone_services_ana
 }
 
+services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
+
+services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
+services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
+                                                    "fileFormat", "root",
+                                                    "fclName",    "standard_ana_uboone.fcl",
+                                                    "fclVersion", "v1_5",
+                                                    "ubProjectStage",   "merge",
+                                                    "ubProjectVersion", "v1_3" ]
+services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_merged.root"
+
 #source is now a root file
 source:
 {

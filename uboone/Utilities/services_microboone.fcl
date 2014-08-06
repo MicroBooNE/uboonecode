@@ -12,6 +12,10 @@ microboone_services.BackTracker:                    @local::microboone_backtrack
 microboone_services_ana:                            @local::microboone_basic_services
 microboone_services_ana.BackTracker:                @local::microboone_backtracker  
 
+microboone_services_reco:                           @local::microboone_basic_services
+microboone_services_reco.LArFFT:                         @local::microboone_larfft
+microboone_services_reco.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+
 # Define microboone_full_services ... this includes ALL services and we don't care about resource usage!
 microboone_full_services:                           @local::microboone_simulation_services
 microboone_full_services.BackTracker:               @local::microboone_backtracker
