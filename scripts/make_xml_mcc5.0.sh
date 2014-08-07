@@ -35,7 +35,7 @@ userdir=uboonepro
 userbase=$userdir
 nevarg=0
 nevjob=100
-nev4job=200
+nevgjob=200
 local=''
 
 while [ $# -gt 0 ]; do
