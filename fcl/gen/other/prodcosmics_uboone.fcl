@@ -73,6 +73,7 @@ outputs:
    module_type: RootOutput
    fileName:    "cosmics_gen.root" #default file name, can override from command line with -o or --output
    dataTier:    "generated"
+   compressionLevel: 1
  }
 }
 

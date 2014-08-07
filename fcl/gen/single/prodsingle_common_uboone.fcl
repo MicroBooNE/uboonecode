@@ -73,5 +73,6 @@ outputs:
    module_type: RootOutput
    fileName:    "single_gen_uboone.root"
    dataTier:    "generated"
+   compressionLevel: 1
  }
 }
