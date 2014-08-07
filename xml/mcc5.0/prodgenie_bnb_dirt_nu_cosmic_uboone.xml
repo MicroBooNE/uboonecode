@@ -16,7 +16,7 @@
   <group>uboone</group>
 
   <!-- Project size -->
-  <numevents>1000000</numevents>
+  <numevents>50000</numevents>
 
   <!-- Operating System -->
   <os>SL5,SL6</os>
@@ -36,7 +36,7 @@
     <fcl>prodgenie_bnb_dirt_nu_cosmic_uboone.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/gen/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/gen/&name;</workdir>
-    <numjobs>100</numjobs>
+    <numjobs>250</numjobs>
     <datatier>generated</datatier>
     <defname>&name;_&tag;_gen</defname>
   </stage>
@@ -45,7 +45,7 @@
     <fcl>standard_g4_uboone.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/g4/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/g4/&name;</workdir>
-    <numjobs>100</numjobs>
+    <numjobs>250</numjobs>
     <datatier>simulated</datatier>
     <defname>&name;_&tag;_g4</defname>
   </stage>
