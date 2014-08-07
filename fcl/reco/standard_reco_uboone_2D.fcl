@@ -19,7 +19,7 @@ services:
   MemoryPeakReporter:    {}
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_services_reco
+  user:         @local::microboone_services
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
@@ -108,6 +108,7 @@ outputs:
    module_type: RootOutput
    fileName:    "standard_reco_uboone_2D.root"
    dataTier:    "reconstructed-2d"
+   compressionLevel: 1
  }
 }
 
