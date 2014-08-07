@@ -11,7 +11,7 @@
 #
 # Usage:
 #
-# make_xml_mcc5.0.sh [-h|--help] [-r <release>] [-u|--user <user>] [--local <dir|tar>] [--nev <n>] [--njob <n>]
+# make_xml_mcc5.0.sh [-h|--help] [-r <release>] [-u|--user <user>] [--local <dir|tar>] [--nev <n>] [--nevjob <n>] [--nevgjob <n>]
 #
 # Options:
 #
@@ -23,7 +23,8 @@
 #                     tag <local>...</local>).
 # --nev <n>     - Specify number of events for all samples.  Otherwise
 #                 use hardwired defaults.
-# --njob <n>    - Specify the number of worker jobs.
+# --nevjob <n>  - Specify the default number of events per job.
+# --nevgjob <n> - Specify the maximum number of events per gen/g4 job.
 #
 #----------------------------------------------------------------------
 
@@ -33,7 +34,8 @@ rel=v02_04_00
 userdir=uboonepro
 userbase=$userdir
 nevarg=0
-njobarg=0
+nevjob=100
+nev4job=200
 local=''
 
 while [ $# -gt 0 ]; do
@@ -42,7 +44,7 @@ while [ $# -gt 0 ]; do
     # User directory.
 
     -h|--help )
-      echo "Usage: make_xml_mcc5.0.sh [-h|--help] [-r <release>] [-u|--user <user>] [--local <dir|tar>] [--nev <n>] [--njob <n>]"
+      echo "Usage: make_xml_mcc5.0.sh [-h|--help] [-r <release>] [-u|--user <user>] [--local <dir|tar>] [--nev <n>] [--nevjob <n>] [--nevgjob <n>]"
       exit
     ;;
 
@@ -74,7 +76,7 @@ while [ $# -gt 0 ]; do
     fi
     ;;
 
-    # Number of events.
+    # Total number of events.
 
     --nev )
     if [ $# -gt 1 ]; then
@@ -83,11 +85,20 @@ while [ $# -gt 0 ]; do
     fi
     ;;
 
-    # Number of worker jobs.
+    # Number of events per job.
 
-    --njob )
+    --nevjob )
     if [ $# -gt 1 ]; then
-      njobarg=$2
+      nevjob=$2
+      shift
+    fi
+    ;;
+
+    # Number of events per gen/g4 job.
+
+    --nevgjob )
+    if [ $# -gt 1 ]; then
+      nevgjob=$2
       shift
     fi
     ;;
@@ -105,6 +116,7 @@ do
   if ! echo $fcl | grep -q common; then
     newprj=`basename $fcl .fcl`
     newxml=${newprj}.xml
+    filt=1
 
     # Make xml file.
 
@@ -123,6 +135,11 @@ do
     detsimfcl=standard_detsim_uboone.fcl
     if echo $newprj | grep -q dirt; then
       detsimfcl=standard_detsim_uboone_tpcfilt.fcl
+      if echo $newprj | grep -q bnb; then
+        filt=5
+      else
+        filt=20
+      fi
     fi
 
     # Reco 2D
@@ -137,37 +154,26 @@ do
 
     mergefcl=standard_ana_uboone.fcl
 
-    nev=$nevarg
-    njob=$njobarg
-
     # Set default number of events.
 
+    nev=$nevarg
     if [ $nev -eq 0 ]; then
       if [ $newprj = prodgenie_bnb_nu_cosmic_uboone ]; then
         nev=50000
       elif [ $newprj = prodgenie_bnb_nu_uboone ]; then
         nev=20000
-      elif [ $newprj = prodgenie_numi_dirt_nu_uboone ]; then
-        nev=1000000
-      elif [ $newprj = prodgenie_bnb_dirt_nu_cosmic_uboone ]; then
-        nev=1000000
-      elif [ $newprj = prodgenie_numi_dirt_nu_uboone ]; then
-        nev=1000000
-      elif [ $newprj = prodgenie_numi_dirt_nu_cosmic_uboone ]; then
-        nev=1000000
       else
         nev=10000
       fi
     fi
+    nev=$(( $nev * $filt ))
 
-    # Set default number of workers, assuming 100 events/worker 
-    # (100000 events/worker for dirt samples)
+    # Calculate the number of worker jobs.
 
-    if [ $njob -eq 0 ]; then
-      njob=$(( $nev / 100 ))
-      if echo $detsimfcl | grep -q tpcfilt; then
-        njob=$(( $nev / 10000 ))
-      fi
+    njob1=$(( $nev / $nevgjob ))         # Pre-filter (gen, g4)
+    njob2=$(( $nev / $nevjob / $filt ))  # Post-filter (detsim and later)
+    if [ $njob1 -lt $njob2 ]; then
+      njob1=$njob2
     fi
 
   cat <<EOF > $newxml
@@ -215,7 +221,7 @@ EOF
     <fcl>$genfcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/gen/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/gen/&name;</workdir>
-    <numjobs>$njob</numjobs>
+    <numjobs>$njob1</numjobs>
     <datatier>generated</datatier>
     <defname>&name;_&tag;_gen</defname>
   </stage>
@@ -224,7 +230,7 @@ EOF
     <fcl>$g4fcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/g4/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/g4/&name;</workdir>
-    <numjobs>$njob</numjobs>
+    <numjobs>$njob1</numjobs>
     <datatier>simulated</datatier>
     <defname>&name;_&tag;_g4</defname>
   </stage>
@@ -236,7 +242,7 @@ EOF
     <fcl>$detsimfcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/detsim/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/detsim/&name;</workdir>
-    <numjobs>$njob</numjobs>
+    <numjobs>$njob2</numjobs>
     <datatier>optical-simulated</datatier>
     <defname>&name;_&tag;_detsim</defname>
   </stage>
@@ -249,7 +255,7 @@ EOF
     <fcl>$optsimfcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/optsim/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/optsim/&name;</workdir>
-    <numjobs>$njob</numjobs>
+    <numjobs>$njob2</numjobs>
     <datatier>optical-simulated</datatier>
     <defname>&name;_&tag;_optsim</defname>
   </stage>
@@ -262,7 +268,7 @@ EOF
     <fcl>$tpcsimfcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/tpcsim/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/tpcsim/&name;</workdir>
-    <numjobs>$njob</numjobs>
+    <numjobs>$njob2</numjobs>
     <datatier>tpc-simulated</datatier>
     <defname>&name;_&tag;_tpcsim</defname>
   </stage>
@@ -274,7 +280,7 @@ EOF
     <fcl>$reco2dfcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/reco2D/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/reco2D/&name;</workdir>
-    <numjobs>$njob</numjobs>
+    <numjobs>$njob2</numjobs>
     <datatier>reconstructed-2d</datatier>
     <defname>&name;_&tag;_reco2D</defname>
   </stage>
@@ -283,7 +289,7 @@ EOF
     <fcl>$reco3dfcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/reco3D/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/reco3D/&name;</workdir>
-    <numjobs>$njob</numjobs>
+    <numjobs>$njob2</numjobs>
     <datatier>reconstructed-3d</datatier>
     <defname>&name;_&tag;_reco3D</defname>
   </stage>
@@ -292,7 +298,7 @@ EOF
     <fcl>$mergefcl</fcl>
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/mergeana/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/mergeana/&name;</workdir>
-    <numjobs>$njob</numjobs>
+    <numjobs>$njob2</numjobs>
     <targetsize>8000000000</targetsize>
     <datatier>reconstructed-3d</datatier>
     <defname>&name;_&tag;</defname>
