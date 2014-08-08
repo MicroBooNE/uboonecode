@@ -140,6 +140,7 @@ outputs:
    module_type: RootOutput
    fileName:    "standard_reco_uboone_3D.root"
    dataTier:    "reconstructed-3d"
+   compressionLevel: 1
  }
 }
 
