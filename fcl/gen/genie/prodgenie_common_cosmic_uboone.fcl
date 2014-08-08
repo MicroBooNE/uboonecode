@@ -51,7 +51,7 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ generator, cry, rns ]
+ simulate: [ rns, generator, cry ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -75,6 +75,7 @@ outputs:
    module_type: RootOutput
    fileName:    "genie_gen.root" #default file name, can override from command line with -o or --output
    dataTier:    "generated"
+   compressionLevel: 1
  }
 }
 

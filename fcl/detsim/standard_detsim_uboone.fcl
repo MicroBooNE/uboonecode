@@ -54,7 +54,7 @@ physics:
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ optdigitizer, optfem, triggersim, optreadout, daq, rns]
+ simulate: [ rns, optdigitizer, optfem, triggersim, optreadout, daq ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -78,6 +78,7 @@ outputs:
    module_type: RootOutput
    fileName:    "standard_detsim_uboone.root"
    dataTier:    "detector-simulated"
+   compressionLevel: 1
  }
 }
 
