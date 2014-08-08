@@ -228,11 +228,11 @@ namespace detsim{
       }
       if ( fSigType.at(n) == kSquare ){//square pulse
 	for (int i=0; i<fSigWidth.at(n); i++){
-	  unsigned int timetmp = (int)( (fSigTime.at(n) - fSigWidth.at(n)/2.) + i );
+	  int timetmp = (int)( (fSigTime.at(n) - fSigWidth.at(n)/2.) + i );
 	  if(!fSigUnit) timetmp += electron_time_offset;
-	  if(timetmp > sigvec.size()) throw cet::exception(__FUNCTION__) << "Invalid timing: "<<timetmp<<std::endl;
-
-	  if ( (timetmp < signalSize) && (timetmp > 0) )
+	  //if(timetmp > sigvec.size()) throw cet::exception(__FUNCTION__) << "Invalid timing: "<<timetmp<<std::endl;
+	  if(timetmp < 0) timetmp += sigvec.size();
+	  if(timetmp < ((int)signalSize))
 	    sigvec.at(timetmp) += fSigAmp.at(n);
 	}
       }
