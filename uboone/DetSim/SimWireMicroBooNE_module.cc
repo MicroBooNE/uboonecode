@@ -307,12 +307,16 @@ namespace detsim {
         // loop over the tdcs and grab the number of electrons for each
         for(int t = 0; t < (int)(chargeWork.size()); ++t) {
 
-          int tdc = ts->TPCTick2TDC(t) + time_offset;
+          int tdc = ts->TPCTick2TDC(t);
 
           // continue if tdc < 0
           if( tdc < 0 ) continue;
+	  
+	  // Apply artificial time offset to take care of field response convolution
+	  int raw_digit_index = ( (t + time_offset) >= 0 ? t+time_offset : (chargeWork.size() + (t+time_offset)) );
 
-          chargeWork.at(t) = sc->Charge(tdc);
+	  if(raw_digit_index > 0 && raw_digit_index < (int)(chargeWork.size()))
+	    chargeWork.at(raw_digit_index) = sc->Charge(tdc);
 
         }
 

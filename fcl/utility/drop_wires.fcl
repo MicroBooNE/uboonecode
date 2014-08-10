@@ -31,5 +31,6 @@ outputs:
    module_type: RootOutput
    fileName:    "drop_wires.root" #default file name, can override from command line with -o or --output
    outputCommands: ["keep *_*_*_*",  "drop recob::Wires_*_*_*"]
+   compressionLevel: 1
  }
 }
