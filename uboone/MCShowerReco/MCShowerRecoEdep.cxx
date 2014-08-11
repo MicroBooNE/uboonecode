@@ -9,7 +9,7 @@
 
 #include "MCShowerRecoEdep.h"
 
-namespace larreco {
+namespace sim {
 
   //const unsigned short MCShowerHit::kINVALID_USHORT = std::numeric_limits<unsigned short>::max();
 
@@ -30,7 +30,7 @@ namespace larreco {
       track_list.at((*track_iter).second)=(*track_iter).first;
   }
 
-  const std::vector<larreco::MCShowerEdep>& MCShowerRecoEdep::GetEdepArrayAt(size_t edep_index)
+  const std::vector<sim::MCShowerEdep>& MCShowerRecoEdep::GetEdepArrayAt(size_t edep_index)
   {
     if(edep_index >= _mc_edeps.size()) 
       
@@ -39,13 +39,13 @@ namespace larreco {
     return _mc_edeps.at(edep_index);
   }
 
-  std::vector<larreco::MCShowerEdep>& MCShowerRecoEdep::__GetEdepArray__(unsigned int track_id)
+  std::vector<sim::MCShowerEdep>& MCShowerRecoEdep::__GetEdepArray__(unsigned int track_id)
   { 
     if(ExistTrack(track_id)) return _mc_edeps.at((*_track_index.find(track_id)).second);
 
     _track_index.insert(std::pair<unsigned int,size_t>(track_id,_mc_edeps.size()));
     
-    _mc_edeps.push_back(std::vector<larreco::MCShowerEdep>());
+    _mc_edeps.push_back(std::vector<sim::MCShowerEdep>());
     
     return (*(_mc_edeps.rbegin()));
   }
@@ -98,7 +98,7 @@ namespace larreco {
 	  if(hit_index_track_iter == hit_index_m.end()) {
 	    // create new entry here
 	    //_track_index.insert(std::pair<unsigned int,size_t>(real_track_id,_mc_edeps.size()));
-	    //_mc_edeps.push_back(std::vector<larreco::MCShowerEdep>());
+	    //_mc_edeps.push_back(std::vector<sim::MCShowerEdep>());
 	    int new_hit_index = this->__GetEdepArray__(real_track_id).size();
 	    std::map<double,int> tmp_z_index;
 	    std::map<double,std::map<double,int> > tmp_y_z_index;
@@ -181,7 +181,7 @@ namespace larreco {
 	      mchit.timeEnd = hit_time;
 	      mchit.qSum = charge;
 	      mchit.qMax = charge;
-	      edep.mchits.insert(std::pair<unsigned short,larreco::MCShowerHit>(ch,mchit));
+	      edep.mchits.insert(std::pair<unsigned short,sim::MCShowerHit>(ch,mchit));
 	    }
 
 	    this->__GetEdepArray__(real_track_id).push_back(edep);
@@ -214,7 +214,7 @@ namespace larreco {
 		mchit.timeEnd = hit_time;
 		mchit.qSum = charge;
 		mchit.qMax = charge;
-		edep.mchits.insert(std::pair<unsigned short,larreco::MCShowerHit>(ch,mchit));
+		edep.mchits.insert(std::pair<unsigned short,sim::MCShowerHit>(ch,mchit));
 
 	      }else{
 

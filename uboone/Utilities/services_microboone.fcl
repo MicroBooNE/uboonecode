@@ -75,6 +75,9 @@ microboone_message_services_prod_debug.destinations.LogDebugFile.categories:{
   AnaBaseDefaultCtor:  { limit: 0 }
   Track3DKalmanSPS_GenFit: { limit: 0 }
   GeometryBadInputPoint: { limit: 5 timespan: 1000}
+  SpacePointAlg: { limit: 0 }
+  KalmanFilterAlg: { limit: 0 }
+  Track3DKalmanHit: { limit: 0 }
 }
 
 

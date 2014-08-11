@@ -11,6 +11,9 @@
 #----------------------------------------------------------------------
 
 import sys, os
+import subprocess
+
+proxy_ok = False
 
 # Don't fail if samweb is not available.
 
@@ -100,3 +103,54 @@ def path_to_url(path):
     if path[0:6] == '/pnfs/':
         url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/' + path[6:]
     return url
+
+# dCache-safe method to test whether path exists without opening file.
+
+def safeexist(path):
+    try:
+        os.stat(path)
+        return True
+    except:
+        return False
+
+# Test whether user has a valid grid proxy.  Exit if no.
+
+def test_proxy():
+    global proxy_ok
+    if not proxy_ok:
+        try:
+            subprocess.check_call(['voms-proxy-info', '-exists'], stdout=-1)
+            proxy_ok = True
+        except:
+            print 'Please get a grid proxy.'
+            os._exit(1)
+    return proxy_ok
+
+# dCache-safe method to return contents (list of lines) of file.
+
+def saferead(path):
+    lines = []
+    if path[0:6] == '/pnfs/':
+        test_proxy()
+        proc = subprocess.Popen(['ifdh', 'cp', path, '/dev/fd/1'], stdout=subprocess.PIPE)
+        lines = proc.stdout.readlines()
+    else:
+        lines = open(path).readlines()
+    return lines
+
+# Like os.path.isdir, but faster by avoiding unnecessary i/o.
+
+def fast_isdir(path):
+    result = False
+    if path[-5:] != '.list' and \
+            path[-5:] != '.root' and \
+            path[-4:] != '.txt' and \
+            path[-4:] != '.fcl' and \
+            path[-4:] != '.out' and \
+            path[-4:] != '.err' and \
+            path[-3:] != '.sh' and \
+            path[-5:] != '.stat' and \
+            os.path.isdir(path):
+        result = True
+    return result
+

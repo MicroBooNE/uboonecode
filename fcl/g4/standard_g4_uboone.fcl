@@ -71,5 +71,6 @@ outputs:
    module_type: RootOutput
    fileName:    "standard_g4_uboone.root"
    dataTier:    "simulated"
+   compressionLevel: 1
  }
 }

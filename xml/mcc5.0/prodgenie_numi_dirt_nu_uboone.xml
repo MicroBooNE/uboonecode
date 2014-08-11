@@ -16,7 +16,7 @@
   <group>uboone</group>
 
   <!-- Project size -->
-  <numevents>1000000</numevents>
+  <numevents>200000</numevents>
 
   <!-- Operating System -->
   <os>SL5,SL6</os>

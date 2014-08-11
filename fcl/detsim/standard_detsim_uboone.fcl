@@ -78,6 +78,7 @@ outputs:
    module_type: RootOutput
    fileName:    "standard_detsim_uboone.root"
    dataTier:    "detector-simulated"
+   compressionLevel: 1
  }
 }
 

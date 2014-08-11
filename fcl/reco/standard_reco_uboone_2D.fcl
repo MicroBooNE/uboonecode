@@ -19,12 +19,12 @@ services:
   MemoryPeakReporter:    {}
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_services_reco
+  user:         @local::microboone_services
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
 services.user.PhotonVisibilityService: @local::microboone_photonvisibilityservice
-
+services.user.BackTracker:            @local::microboone_backtracker
 services.user.DatabaseUtil.ShouldConnect: false
 
 services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
@@ -108,6 +108,7 @@ outputs:
    module_type: RootOutput
    fileName:    "standard_reco_uboone_2D.root"
    dataTier:    "reconstructed-2d"
+   compressionLevel: 1
  }
 }
 

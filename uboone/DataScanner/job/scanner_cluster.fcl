@@ -1,0 +1,104 @@
+#include "scanner_base.fcl"
+
+process_name: ScanCluster
+
+# Modify parameters to read only tracks
+cluster_scanner: @local::standard_datascanner
+
+# Producer modules
+cluster_scanner.fModName_MCTruth:        "largeant:generator"
+cluster_scanner.fModName_MCParticle:     ""
+cluster_scanner.fModName_MCShower:       ""
+cluster_scanner.fModName_SimChannel:     ""
+cluster_scanner.fModName_RawDigit:       ""
+cluster_scanner.fModName_FIFOChannel:    ""
+cluster_scanner.fModName_CalData:        ""
+cluster_scanner.fModName_CrawlerHit:     ""
+cluster_scanner.fModName_GausHit:        "gaushit"
+cluster_scanner.fModName_APAHit:         ""
+cluster_scanner.fModName_FFTHit:         ""
+cluster_scanner.fModName_RFFHit:         ""
+cluster_scanner.fModName_CrawlerCluster: ""
+cluster_scanner.fModName_DBCluster:      "dbcluster"
+cluster_scanner.fModName_FuzzyCluster:   "fuzzycluster"
+cluster_scanner.fModName_HoughCluster:   ""
+cluster_scanner.fModName_ShowerAngleCluster: ""
+cluster_scanner.fModName_Bezier:         ""
+cluster_scanner.fModName_SpacePoint:     ""
+cluster_scanner.fModName_Kalman3DSPS:    ""
+cluster_scanner.fModName_Kalman3DHit:    ""
+cluster_scanner.fModName_FeatureVertex:  ""
+cluster_scanner.fModName_HarrisVertex:   ""
+cluster_scanner.fModName_FeatureEndPoint2D: ""
+cluster_scanner.fModName_HarrisEndPoint2D: ""
+cluster_scanner.fModName_Shower:         ""
+cluster_scanner.fModName_Calorimetry:    ""
+
+# Associations to look up
+cluster_scanner.fAssType_MCTruth:        ""
+cluster_scanner.fAssType_SimChannel:     ""
+cluster_scanner.fAssType_MCShower:       ""
+cluster_scanner.fAssType_RawDigit:       ""
+cluster_scanner.fAssType_FIFOChannel:    ""
+cluster_scanner.fAssType_CalData:        ""
+cluster_scanner.fAssType_CrawlerHit:     ""
+cluster_scanner.fAssType_GausHit:        ""
+cluster_scanner.fAssType_APAHit:         ""
+cluster_scanner.fAssType_FFTHit:         ""
+cluster_scanner.fAssType_RFFHit:         ""
+cluster_scanner.fAssType_CrawlerCluster: ""
+cluster_scanner.fAssType_DBCluster:      "GausHit"
+cluster_scanner.fAssType_FuzzyCluster:   "GausHit"
+cluster_scanner.fAssType_HoughCluster:   ""
+cluster_scanner.fAssType_ShowerAngleCluster: ""
+cluster_scanner.fAssType_Bezier:         ""
+cluster_scanner.fAssType_SpacePoint:     ""
+cluster_scanner.fAssType_Kalman3DSPS:    ""
+cluster_scanner.fAssType_Kalman3DHit:    ""
+cluster_scanner.fAssType_FeatureVertex:  ""
+cluster_scanner.fAssType_HarrisVertex:   ""
+cluster_scanner.fAssType_FeatureEndPoint2D: ""
+cluster_scanner.fAssType_HarrisEndPoint2D: ""
+cluster_scanner.fAssType_Shower:         ""
+cluster_scanner.fAssType_Calorimetry:    ""
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "larlight_cluster.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_warning
+  user:         @local::microboone_basic_services
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:   -1        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ analyzers:
+ {
+   scanner: @local::cluster_scanner
+ }
+
+ analyzeIt: [ scanner ]
+
+ end_paths:     [ analyzeIt ]
+}
+
+services.user.DetectorProperties.NumberTimeSamples: 3200
+services.user.DetectorProperties.ReadOutWindowSize: 3200
+
+services.user.TimeService.G4RefTime: 0
+services.user.TimeService.TriggerOffsetTPC: 0
+services.user.TimeService.DefaultTrigTime: 0
+services.user.TimeService.DefaultBeamTime: 0
+
