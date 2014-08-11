@@ -1,8 +1,16 @@
 
 include_directories( $ENV{POSTGRESQL_INC} )
+include_directories( $ENV{BOOST_INC} )
+include_directories( $ENV{UBOONEDAQ_DATATYPES_INC} )
 
 find_ups_product( postgresql v9_1_5 )
+find_ups_product( uboonedaq_datatypes v4_00_01 )
+find_ups_product( boost v1_55_0 )
+
 cet_find_library( PQ NAMES pq PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
+cet_find_library( UBDut NAMES udata_types PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
+cet_find_library( UBDuut NAMES udata_utilities PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
+cet_find_library( BOOSER NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
 
 #simple_plugin( LArRawInputSourceUBooNE
 #               "source"
@@ -20,8 +28,11 @@ art_make( BASENAME_ONLY
                         OpticalDetectorData
                         RawData
                         SummaryData
+			${UBDut}
+			${UBDuut}
                         ${PQ}
-                        daq_datatypes
+			${BOOSER}
+#                        daq_datatypes
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -38,6 +49,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
                         ${ROOT_BASIC_LIB_LIST}
+
 	  SOURCE_LIBRARIES Geometry
 	                OpticalDetectorData
 			RawData
@@ -60,27 +72,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
 			${ROOT_BASIC_LIB_LIST}
-#	  MODULE_LIBRARIES Geometry
-#	                OpticalDetectorData
-#			RawData
-#			uboone_RawData
-#			SummaryData
-#                        ${ART_FRAMEWORK_CORE}
-#			${ART_FRAMEWORK_PRINCIPAL}
-#			${ART_FRAMEWORK_SERVICES_REGISTRY}
-#			${ART_FRAMEWORK_SERVICES_OPTIONAL}
-#			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-#			${ART_PERSISTENCY_COMMON}
-#			${ART_PERSISTENCY_PROVENANCE}
-#			${ART_UTILITIES}
-#			${MF_MESSAGELOGGER}
-#			${MF_UTILITIES}
-#	                ${FHICLCPP}
-#			${CETLIB}
-#                        ${ROOT_GEOM}
-#                        ${ROOT_XMLIO}
-#                        ${ROOT_GDML}
-#			${ROOT_BASIC_LIB_LIST}
+
 	  SERVICE_LIBRARIES Geometry
 	  		lbne_Geometry
                         ${ART_FRAMEWORK_CORE}
