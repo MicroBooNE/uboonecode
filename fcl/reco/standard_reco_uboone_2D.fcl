@@ -24,7 +24,7 @@ services:
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
 services.user.PhotonVisibilityService: @local::microboone_photonvisibilityservice
-services.user..BackTracker:            @local::microboone_backtracker
+services.user.BackTracker:            @local::microboone_backtracker
 services.user.DatabaseUtil.ShouldConnect: false
 
 services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
