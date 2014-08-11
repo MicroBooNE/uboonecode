@@ -1499,7 +1499,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
       for (size_t i = 0; i<hitlist.size(); i++){
         //if (hitlist[i]->View() == geo::kV){//collection view
-        std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+        std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
         for (size_t e = 0; e<eveIDs.size(); e++){
           art::Ptr<simb::MCTruth> ev_mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
           mctruthemap[ev_mctruth]+=eveIDs[e].energy;
@@ -2209,7 +2209,7 @@ void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > co
     art::Ptr<recob::Hit> hit = hits[h];
     std::vector<sim::IDE> ides;
     //bt->HitToSimIDEs(hit,ides);
-    std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hit);
+    std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hit);
 
     for(size_t e = 0; e < eveIDs.size(); ++e){
       //std::cout<<h<<" "<<e<<" "<<eveIDs[e].trackID<<" "<<eveIDs[e].energy<<" "<<eveIDs[e].energyFrac<<std::endl;
