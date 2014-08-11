@@ -6,6 +6,7 @@
 #include "showerfindermodules.fcl"
 #include "vertexfindermodules.fcl"
 #include "pandoramodules.fcl"
+#include "cosmicremovalmodules.fcl"
 #include "triggeralgo_service.fcl"
 #include "opticaldetectormodules.fcl"
 #include "photpropservices_microboone.fcl"
@@ -105,6 +106,22 @@ physics:
 
   ### flash-track matching
   beamflashcompat:     @local::standard_beamflashcompat
+
+  ### track-tagging producers
+  trackkalmanhittag:      @local::microboone_cosmictracktagger
+  trackkalmanhitcctag:    @local::microboone_cosmictracktagger
+  spacepointfindertag:    @local::microboone_cosmictracktagger
+  trackkalspstag:         @local::microboone_cosmictracktagger
+  stitchtag:	          @local::microboone_cosmictracktagger
+  stitchkalmanhittag:     @local::microboone_cosmictracktagger
+  beziertrackertag:       @local::microboone_cosmictracktagger
+  spacepointfindercctag:  @local::microboone_cosmictracktagger
+  trackkalspscctag:       @local::microboone_cosmictracktagger
+  stitchcctag:	          @local::microboone_cosmictracktagger
+  beziertrackercctag:     @local::microboone_cosmictracktagger
+  costrktag:              @local::microboone_cosmictracktagger
+  costrkcctag:            @local::microboone_cosmictracktagger
+
  }
 
  #define the producer and filter modules for this path, order matters, 
@@ -116,6 +133,8 @@ physics:
          trackkalspscccalo, stitchcccalo, beziertrackercccalo, beziertrackercalo, costrkcalo, costrkcccalo,
          trackkalmanhitpid, trackkalmanhitccpid, trackkalspspid, stitchpid, stitchkalmanhitpid,
          trackkalspsccpid, stitchccpid, beziertrackerccpid, beziertrackerpid, costrkpid, costrkccpid,
+         trackkalmanhittag, trackkalmanhitcctag, trackkalspstag, stitchtag, stitchkalmanhittag,
+         trackkalspscctag, stitchcctag, beziertrackercctag, beziertrackertag, costrktag, costrkcctag,
          beamflashcompat ]
  
  #define the output stream, there could be more than one if using filters 
@@ -252,6 +271,39 @@ physics.producers.costrkpid.TrackModuleLabel:                   "costrk"
 
 physics.producers.costrkccpid.CalorimetryModuleLabel:           "costrkcccalo"
 physics.producers.costrkccpid.TrackModuleLabel:                 "costrkcc"
+
+physics.producers.trackkalmanhittag.ClusterModuleLabel:     "fuzzycluster"
+physics.producers.trackkalmanhittag.TrackModuleLabel:           "trackkalmanhit"
+
+physics.producers.trackkalmanhitcctag.ClusterModuleLabel:   "cccluster"
+physics.producers.trackkalmanhitcctag.TrackModuleLabel:         "trackkalmanhitcc"
+
+physics.producers.trackkalspstag.ClusterModuleLabel:        "fuzzycluster"
+physics.producers.trackkalspstag.TrackModuleLabel:              "trackkalsps"
+
+physics.producers.stitchtag.ClusterModuleLabel:             "fuzzycluster"
+physics.producers.stitchtag.TrackModuleLabel:                   "stitch"
+
+physics.producers.stitchkalmanhittag.ClusterModuleLabel:    "fuzzycluster"
+physics.producers.stitchkalmanhittag.TrackModuleLabel:          "stitchkalmanhit"
+
+physics.producers.trackkalspscctag.ClusterModuleLabel:      "cccluster"
+physics.producers.trackkalspscctag.TrackModuleLabel:            "trackkalspscc"
+
+physics.producers.stitchcctag.ClusterModuleLabel:           "cccluster"
+physics.producers.stitchcctag.TrackModuleLabel:                 "stitchcc"
+
+physics.producers.beziertrackertag.ClusterModuleLabel:      "fuzzycluster"
+physics.producers.beziertrackertag.TrackModuleLabel:            "beziertracker"
+
+physics.producers.beziertrackercctag.ClusterModuleLabel:      "cccluster"
+physics.producers.beziertrackercctag.TrackModuleLabel:            "beziertrackercc"
+
+physics.producers.costrktag.ClusterModuleLabel:             "fuzzycluster"
+physics.producers.costrktag.TrackModuleLabel:                   "costrk"
+
+physics.producers.costrkcctag.ClusterModuleLabel:           "cccluster"
+physics.producers.costrkcctag.TrackModuleLabel:                 "costrkcc"
 
 physics.producers.beamflashcompat.TrackModuleLabel:             "beziertracker"
 physics.producers.beamflashcompat.FlashModuleLabel:             "opflash"
