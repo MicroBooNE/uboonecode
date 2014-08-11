@@ -9,10 +9,7 @@
 
 #include "MCShowerRecoAlg.h"
 
-namespace larreco {
-
-  const int MCShowerProfile::kINVALID_INT = std::numeric_limits<int>::max();
-  const unsigned int MCShowerProfile::kINVALID_UINT = std::numeric_limits<unsigned int>::max();
+namespace sim {
 
   //##################################################################
   MCShowerRecoAlg::MCShowerRecoAlg(fhicl::ParameterSet const& pset) 
@@ -28,7 +25,7 @@ namespace larreco {
 
   void MCShowerRecoAlg::RecoMCShower(const art::Event &evt)
   {
-    fShowerProf.clear();
+    fMCShower.clear();
 
     // Reconstruct shower's particles
     art::Handle<std::vector<simb::MCParticle> > mcpArray;
@@ -42,12 +39,12 @@ namespace larreco {
     
     // Get shower info from grouped particles
     const std::vector<unsigned int> mother_index = fPartAlg.ShowerMothers();
-    fShowerProf.reserve(mother_index.size());
+    fMCShower.reserve(mother_index.size());
     for(size_t shower_index = 0; shower_index < mother_index.size(); ++shower_index) {
 
       unsigned int mother_candidate = mother_index.at(shower_index);
 
-      larreco::MCShowerProfile shower_prof;
+      ::sim::MCShower shower_prof;
       fPartAlg.Position(mother_candidate, shower_prof.vtxMother);
       fPartAlg.Momentum(mother_candidate, shower_prof.momMother);
       
@@ -56,7 +53,7 @@ namespace larreco {
 
       shower_prof.daughterTrackId = fPartAlg.ShowerDaughters(shower_index);
 
-      fShowerProf.push_back(shower_prof);
+      fMCShower.push_back(shower_prof);
 
     }
     
@@ -78,13 +75,13 @@ namespace larreco {
 	vtx.at(1) = edep.y;
 	vtx.at(2) = edep.z;
 	vtx.at(3) = edep.energy;
-	fShowerProf.at(shower_index).vtxEdep.push_back(vtx);
+	fMCShower.at(shower_index).vtxEdep.push_back(vtx);
 
 	// Compute unit vector to this energy deposition
 	std::vector<float> mom(4,0);
-	mom.at(0) = vtx.at(0) - fShowerProf.at(shower_index).vtxMother.at(0);
-	mom.at(1) = vtx.at(1) - fShowerProf.at(shower_index).vtxMother.at(1);
-	mom.at(2) = vtx.at(2) - fShowerProf.at(shower_index).vtxMother.at(2);
+	mom.at(0) = vtx.at(0) - fMCShower.at(shower_index).vtxMother.at(0);
+	mom.at(1) = vtx.at(1) - fMCShower.at(shower_index).vtxMother.at(1);
+	mom.at(2) = vtx.at(2) - fMCShower.at(shower_index).vtxMother.at(2);
 
 	float magnitude = sqrt(pow(mom.at(0),2) + pow(mom.at(1),2) + pow(mom.at(2),2));
 	mom.at(0) *= edep.energy/magnitude;
@@ -92,20 +89,21 @@ namespace larreco {
 	mom.at(2) *= edep.energy/magnitude;
 	mom.at(3) = edep.energy;
 
-	fShowerProf.at(shower_index).momDaughter.at(0) += mom.at(0);
-	fShowerProf.at(shower_index).momDaughter.at(1) += mom.at(1);
-	fShowerProf.at(shower_index).momDaughter.at(2) += mom.at(2);
-	fShowerProf.at(shower_index).momDaughter.at(3) += mom.at(3);
+	fMCShower.at(shower_index).momDaughter.at(0) += mom.at(0);
+	fMCShower.at(shower_index).momDaughter.at(1) += mom.at(1);
+	fMCShower.at(shower_index).momDaughter.at(2) += mom.at(2);
+	fMCShower.at(shower_index).momDaughter.at(3) += mom.at(3);
 	
-	fShowerProf.at(shower_index).qU   += edep.qU;
-	fShowerProf.at(shower_index).qV   += edep.qV;
-	fShowerProf.at(shower_index).qW   += edep.qW;
+	fMCShower.at(shower_index).qU   += edep.qU;
+	fMCShower.at(shower_index).qV   += edep.qV;
+	fMCShower.at(shower_index).qW   += edep.qW;
 
       }
     }
 
     if(fDebugMode) {
-      for(auto const prof : fShowerProf) {
+
+      for(auto const prof : fMCShower) {
 	
 	std::cout
 	  

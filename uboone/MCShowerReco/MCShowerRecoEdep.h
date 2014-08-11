@@ -30,7 +30,7 @@
 #include <TString.h>
 #include <TTree.h>
 
-namespace larreco
+namespace sim
 {
 
   class MCShowerHit {
@@ -77,7 +77,7 @@ namespace larreco
     float qU;
     float qV;
     float qW;
-    std::map<unsigned short,larreco::MCShowerHit> mchits;
+    std::map<unsigned short,sim::MCShowerHit> mchits;
     void Clear() {
       //x=y=z=kINVALID_SHORT;
       x=y=z=0;
@@ -112,7 +112,7 @@ namespace larreco
     }
 
     /// Returns a vector of MCShowerEdep object at the given index
-    const std::vector<larreco::MCShowerEdep>& GetEdepArrayAt(size_t edep_index);
+    const std::vector<sim::MCShowerEdep>& GetEdepArrayAt(size_t edep_index);
 
     /// Fill the input vector with track IDs for which energy deposit is recorded
     void FillTrackList(std::vector<unsigned int> &track_list) const;
@@ -123,12 +123,12 @@ namespace larreco
 
   protected:
 
-    std::vector<larreco::MCShowerEdep>& __GetEdepArray__(unsigned int track_id);
+    std::vector<sim::MCShowerEdep>& __GetEdepArray__(unsigned int track_id);
 
     bool _debug_mode;
     bool _save_mchit;
     std::map<unsigned int,size_t>      _track_index;
-    std::vector<std::vector<larreco::MCShowerEdep> > _mc_edeps;
+    std::vector<std::vector<sim::MCShowerEdep> > _mc_edeps;
     
   }; // class MCShowerHitRecoAlg
   
