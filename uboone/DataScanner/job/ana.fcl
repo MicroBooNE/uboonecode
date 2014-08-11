@@ -1,0 +1,54 @@
+# microboone_optical_sim.fcl
+# Prepared July-2013 by William Seligman <seligman@nevis.columbia.edu>
+
+# This is an example job for running the MicroBooNE PMT ADC and FEM simulation.
+# The input file can come from any standard detector-simulation job
+# that includes a LArG4 (largeant) step. The output will include digitized,
+# discriminated, and triggered PMT ADC counts; see the OpticalDetectorData
+# package for the data products added to the event. 
+
+#include "services_microboone.fcl"
+
+process_name: OpticalSimulation
+
+standard_ana:
+{
+  module_type:            "Empty"
+#    module_type:            "AnaShower"
+}
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "ana_hist.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_info
+#  message:      @local::standard_debug # If you turn this on, uncomment the debug lines below
+  user:         @local::microboone_services 	     
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  2        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ analyzers:
+ {
+   myana: @local::standard_ana
+ }
+
+ analyzeIt: [ myana ]
+
+ end_paths:     [ analyzeIt ]
+}
+
+
+#  LocalWords:  microboone

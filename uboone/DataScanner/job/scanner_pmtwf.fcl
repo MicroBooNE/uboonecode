@@ -1,0 +1,96 @@
+#include "scanner_base.fcl"
+
+process_name: ScanWaveformPMT
+
+# Modify parameters to read only tracks
+pmtwf_scanner: @local::standard_datascanner
+
+# Producer modules
+pmtwf_scanner.fModName_MCTruth:        ""
+pmtwf_scanner.fModName_MCParticle:     ""
+pmtwf_scanner.fModName_MCShower:       ""
+pmtwf_scanner.fModName_SimChannel:      ""
+pmtwf_scanner.fModName_RawDigit:       ""
+pmtwf_scanner.fModName_FIFOChannel:    "optreadout"
+pmtwf_scanner.fModName_CalData:        ""
+pmtwf_scanner.fModName_CrawlerHit:     ""
+pmtwf_scanner.fModName_GausHit:        ""
+pmtwf_scanner.fModName_APAHit:         ""
+pmtwf_scanner.fModName_FFTHit:         ""
+pmtwf_scanner.fModName_RFFHit:         ""
+pmtwf_scanner.fModName_CrawlerCluster: ""
+pmtwf_scanner.fModName_DBCluster:      ""
+pmtwf_scanner.fModName_FuzzyCluster:   ""
+pmtwf_scanner.fModName_HoughCluster:   ""
+pmtwf_scanner.fModName_ShowerAngleCluster: ""
+pmtwf_scanner.fModName_Bezier:         ""
+pmtwf_scanner.fModName_SpacePoint:     ""
+pmtwf_scanner.fModName_Kalman3DSPS:    ""
+pmtwf_scanner.fModName_Kalman3DHit:    ""
+pmtwf_scanner.fModName_Shower:         ""
+pmtwf_scanner.fModName_FeatureVertex:  ""
+pmtwf_scanner.fModName_HarrisVertex:   ""
+pmtwf_scanner.fModName_FeatureEndPoint2D: ""
+pmtwf_scanner.fModName_HarrisEndPoint2D: ""
+pmtwf_scanner.fModName_Calorimetry:    ""
+
+# Associations to look up
+pmtwf_scanner.fAssType_MCTruth:        ""
+pmtwf_scanner.fAssType_MCShower:       ""
+pmtwf_scanner.fAssType_SimChannel:     ""
+pmtwf_scanner.fAssType_RawDigit:       ""
+pmtwf_scanner.fAssType_FIFOChannel:    ""
+pmtwf_scanner.fAssType_CalData:        ""
+pmtwf_scanner.fAssType_CrawlerHit:     ""
+pmtwf_scanner.fAssType_GausHit:        ""
+pmtwf_scanner.fAssType_APAHit:         ""
+pmtwf_scanner.fAssType_FFTHit:         ""
+pmtwf_scanner.fAssType_RFFHit:         ""
+pmtwf_scanner.fAssType_CrawlerCluster: ""
+pmtwf_scanner.fAssType_DBCluster:      ""
+pmtwf_scanner.fAssType_FuzzyCluster:   ""
+pmtwf_scanner.fAssType_HoughCluster:   ""
+pmtwf_scanner.fAssType_ShowerAngleCluster: ""
+pmtwf_scanner.fAssType_Bezier:         ""
+pmtwf_scanner.fAssType_SpacePoint:     ""
+pmtwf_scanner.fAssType_Kalman3DSPS:    ""
+pmtwf_scanner.fAssType_Kalman3DHit:    ""
+pmtwf_scanner.fAssType_Shower:         ""
+pmtwf_scanner.fAssType_FeatureVertex:  ""
+pmtwf_scanner.fAssType_HarrisVertex:   ""
+pmtwf_scanner.fAssType_FeatureEndPoint2D: ""
+pmtwf_scanner.fAssType_HarrisEndPoint2D: ""
+pmtwf_scanner.fAssType_Calorimetry:    ""
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "larlight_pmtwf.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_warning
+  user:         @local::microboone_services 	     
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:   -1        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ analyzers:
+ {
+   scanner: @local::pmtwf_scanner
+ }
+
+ analyzeIt: [ scanner ]
+
+ end_paths:     [ analyzeIt ]
+}
+
