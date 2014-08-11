@@ -13,6 +13,9 @@ microboone_rawdrawingopt.TotalTicks: 3300
 
 microboone_recodrawingopt:        @local::standard_recodrawingopt
 microboone_recodrawingopt.CalorimetryAlgorithm: @local::microboone_calorimetryalgmc
+microboone_recodrawingopt.HitModuleLabels:        ["gaushit"]
+microboone_recodrawingopt.ClusterModuleLabels:    ["fuzzycluster"]
+microboone_recodrawingopt.TrackModuleLabels:      ["trackkalmanhit"]
 
 microboone_analysisdrawingopt:
 {

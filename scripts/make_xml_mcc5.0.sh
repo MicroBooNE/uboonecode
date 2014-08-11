@@ -35,7 +35,7 @@ userdir=uboonepro
 userbase=$userdir
 nevarg=0
 nevjob=100
-nevgjob=200
+nevgjobarg=0
 local=''
 
 while [ $# -gt 0 ]; do
@@ -98,7 +98,7 @@ while [ $# -gt 0 ]; do
 
     --nevgjob )
     if [ $# -gt 1 ]; then
-      nevgjob=$2
+      nevgjobarg=$2
       shift
     fi
     ;;
@@ -154,7 +154,22 @@ do
 
     mergefcl=standard_ana_uboone.fcl
 
-    # Set default number of events.
+    # Set number of gen/g4 events per job.
+
+    nevgjob=$nevgjobarg
+    if [ $nevgjob -eq 0 ]; then
+      if echo $newprj | grep -q dirt; then
+        if echo $newprj | grep -q cosmic; then
+          nevgjob=200
+        else
+          nevgjob=2000
+        fi
+      else
+        nevgjob=nevjob
+      fi
+    fi
+
+    # Set number of events.
 
     nev=$nevarg
     if [ $nev -eq 0 ]; then
