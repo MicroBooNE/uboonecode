@@ -171,7 +171,6 @@ class XMLError(Exception):
 # on close using ifdh.
 
 class SafeFile:
-    global proxy_ok
 
     # Constructor.
 
@@ -186,6 +185,7 @@ class SafeFile:
     # Open method.
     
     def open(self, destination):
+        global proxy_ok
         if not proxy_ok:
             proxy_ok = uboone_utilities.test_proxy()
         self.destination = destination
