@@ -6,15 +6,14 @@ you would ordinarily be on for LArSoft.
 
 This branch now uses includes and .so's that live in UBOONEDAQ_DATATYPES.
 
-UBOONEDAQ_DATATYPES itself is made from the uboonedaq repository. A new e5 version (gcc 2.8.2 and
+UBOONEDAQ_DATATYPES itself is made from the uboonedaq repository. (A new e5 version (gcc 2.8.2 and
 boost 1.55.0) of UBOONEDAQ_DATATYPES was made and installed for the sake of this exercise.
-(It lives on the e5 branch of uboonedaq, but as a LArSoft coder, you don't need to know that.) One 
+It lives on the e5 branch of uboonedaq_datatypes, but as a LArSoft coder, you don't need to know that.) One 
 must setup against UBOONEDAQ_DATATYPES in order to build, since LArSoft uses these more modern
 versions of gcc and boost.
 
 So, in addition to your usual LArSoft setup, please do the following 
 
 setup uboonedaq_datatypes v4_00_01 -qe5:prof
-setup boost v1_55_0 -qe5:prof
 
 Then, the usual cd build; mrbsetenv; mrb i;
