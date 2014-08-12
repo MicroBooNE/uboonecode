@@ -7,17 +7,10 @@ art_make( BASENAME_ONLY
 			   Geometry_service
 			   Simulation
 			   SimulationBase
-			   BackTracker_service
+			   SummaryData
 			   Utilities
-			   Filters
-			   RawData
 			   LArProperties_service
 			   DetectorProperties_service
-			   #SignalShapingServiceMicroBooNE_service
-			   ${UBOONECODE_LIB}
-			   ${SIMULATIONBASE}
-			   ${LARRECO_LIB}
-			   ${LARDATA_LIB}
 			   ${ART_FRAMEWORK_CORE}
 			   ${ART_FRAMEWORK_PRINCIPAL}
                            ${ART_FRAMEWORK_BASIC}
@@ -40,17 +33,10 @@ art_make( BASENAME_ONLY
 			   Geometry_service
 			   Simulation
 			   SimulationBase
-			   BackTracker_service
+			   SummaryData
 			   Utilities
-			   Filters
-			   RawData
 			   LArProperties_service
 			   DetectorProperties_service
-			   #SignalShapingServiceMicroBooNE_service
-			   ${UBOONECODE_LIB}
-			   ${SIMULATIONBASE}
-			   ${LARRECO_LIB}
-			   ${LARDATA_LIB}
 			   ${ART_FRAMEWORK_CORE}
 			   ${ART_FRAMEWORK_PRINCIPAL}
                            ${ART_FRAMEWORK_BASIC}
@@ -68,6 +54,8 @@ art_make( BASENAME_ONLY
 			   ${ROOT_XMLIO}
 			   ${ROOT_GDML}
 			   ${ROOT_BASIC_LIB_LIST}
+			   ${CLHEP}
+			   ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
 			)
 
 # install_headers()
