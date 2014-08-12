@@ -126,7 +126,7 @@
 # <stage><endscript>  - Worker end-of-job script (condor_lar.sh --end-script).
 #                       Initialization/end-of-job scripts can be specified using an
 #                       absolute or relative path relative to the current directory.
-# <stage><histmerge>  - Name of histogram merging program or script (default hadd).
+# <stage><histmerge>  - Name of histogram merging program or script (default "hadd -T").
 #
 #
 #
@@ -251,7 +251,7 @@ class StageDef:
         self.init_script = ''  # Worker initialization script.
         self.init_source = ''  # Worker initialization bash source script.
         self.end_script = ''   # Worker end-of-job script.
-        self.histmerge = 'hadd' # Histogram merging program
+        self.histmerge = 'hadd -T' # Histogram merging program
 
         # Extract values from xml.
 
