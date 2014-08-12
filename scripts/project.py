@@ -21,7 +21,8 @@
 #
 # Actions (specify one):
 #
-# [-h|--help]  - Print help.
+# [-h|--help]  - Print help (this message).
+# [-xh|--xmlhelp] - Print xml help.
 # --submit     - Submit all jobs for specified stage.
 # --check      - Check results for specified stage and print message.
 # --checkana   - Check analysis results for specified stage and print message.
@@ -1737,6 +1738,27 @@ def help():
                 print
 
 
+# Print xml help.
+
+def xmlhelp():
+
+    filename = sys.argv[0]
+    file = open(filename, 'r')
+
+    doprint=0
+    
+    for line in file.readlines():
+        if line[2:20] == 'XML file structure':
+            doprint = 1
+        elif line[0:6] == '######' and doprint:
+            doprint = 0
+        if doprint:
+            if len(line) > 2:
+                print line[2:],
+            else:
+                print
+
+
 # Main program.
 
 def main(argv):
@@ -1772,6 +1794,9 @@ def main(argv):
     while len(args) > 0:
         if args[0] == '-h' or args[0] == '--help' :
             help()
+            return 0
+        elif args[0] == '-xh' or args[0] == '--xmlhelp' :
+            xmlhelp()
             return 0
         elif args[0] == '--xml' and len(args) > 1:
             xmlfile = args[1]
@@ -1852,7 +1877,7 @@ def main(argv):
     # Make sure xmlfile was specified.
 
     if xmlfile == '':
-        print 'No xml file specified.'
+        print 'No xml file specified.  Type "project.py -h" for help.'
         return 1
     
     # Make sure that no more than one action was specified (except clean and info options).
