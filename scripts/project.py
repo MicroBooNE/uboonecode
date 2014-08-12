@@ -26,6 +26,7 @@
 # --submit     - Submit all jobs for specified stage.
 # --check      - Check results for specified stage and print message.
 # --checkana   - Check analysis results for specified stage and print message.
+# --status     - Print status of each stage.
 # --makeup     - Submit makeup jobs for specified stage.
 # --clean      - Delete output from specified project and stage.
 # --declare    - Declare files to sam.
@@ -801,6 +802,58 @@ def doclean(project, stagename):
                     sys.exit(1)
 
     # Done.
+
+    return
+
+# Stage status fuction.
+
+def dostatus(project):
+
+    print 'Project %s:' % project.name
+
+    # Loop over stages.
+
+    for stage in project.stages:
+
+        stagename = stage.name
+        outdir = stage.outdir
+
+        # Test whether output directory exists.
+
+        if uboone_utilities.safeexist(outdir):
+
+            # Output directory exists.
+
+            nfile = 0
+            nev = 0
+            nmiss = 0
+
+            # Count good files and events.
+
+            eventsfile = os.path.join(outdir, 'events.list')
+            if uboone_utilities.safeexist(eventsfile):
+                lines = uboone_utilities.saferead(eventsfile)
+                for line in lines:
+                    words = string.split(line)
+                    if len(words) >= 2:
+                        nfile = nfile + 1
+                        nev = nev + int(words[1])
+
+            # Count bad files.
+
+            missingfile = os.path.join(outdir, 'missing.txt')
+            if uboone_utilities.safeexist(missingfile):
+                lines = uboone_utilities.saferead(missingfile)
+                nmiss = nmiss + len(lines)
+
+            print 'Stage %s: %d good output files, %d events, %d bad or missing output files.' % (
+                stagename, nfile, nev, nmiss)
+
+        else:
+
+            # Output directory does not exist.
+
+            print 'Stage %s output directory does not exist.' % stagename
 
     return
 
@@ -1771,6 +1824,7 @@ def main(argv):
     submit = 0
     check = 0
     checkana = 0
+    stage_status = 0
     makeup = 0
     clean = 0
     outdir = 0
@@ -1815,6 +1869,9 @@ def main(argv):
             del args[0]
         elif args[0] == '--checkana':
             checkana = 1
+            del args[0]
+        elif args[0] == '--status':
+            stage_status = 1
             del args[0]
         elif args[0] == '--makeup':
             makeup = 1
@@ -1882,7 +1939,7 @@ def main(argv):
     
     # Make sure that no more than one action was specified (except clean and info options).
 
-    num_action = submit + check + checkana + makeup + define + undefine + declare
+    num_action = submit + check + checkana + stage_status + makeup + define + undefine + declare
     if num_action > 1:
         print 'More than one action was specified.'
         return 1
@@ -1913,6 +1970,12 @@ def main(argv):
 
     if clean:
         doclean(project, stagename)
+
+    # Do stage_status now.
+
+    if stage_status:
+        dostatus(project)
+        return 0
 
     # Get the current stage definition.
 
