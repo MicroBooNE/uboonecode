@@ -3,3 +3,4 @@
 
 #include "standard_ana_uboone.fcl"
 outputs: {}
+physics.stream1: []
