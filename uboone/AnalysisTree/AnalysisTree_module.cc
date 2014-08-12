@@ -263,6 +263,7 @@ namespace microboone {
       TrackData_t<Float_t> trkmom;        // momentum.
       TrackData_t<Float_t> trklen;        // length.
       TrackData_t<Float_t> trkmomrange;    // track momentum from range using CSDA tables
+      TrackData_t<Float_t> trkmommschi2;   // track momentum from multiple scattering
       TrackData_t<Short_t> trksvtxid;     // Vertex ID associated with the track start
       TrackData_t<Short_t> trkevtxid;     // Vertex ID associated with the track end
       PlaneData_t<Int_t> trkpidpdg;       // particle PID pdg code
@@ -739,6 +740,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkthetayz.resize(MaxTracks);
   trkmom.resize(MaxTracks);
   trkmomrange.resize(MaxTracks);
+  trkmommschi2.resize(MaxTracks);
   trklen.resize(MaxTracks);
   trksvtxid.resize(MaxTracks);
   trkevtxid.resize(MaxTracks);
@@ -797,6 +799,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkthetayz   , -99999.);
   FillWith(trkmom       , -99999.);
   FillWith(trkmomrange  , -99999.);  
+  FillWith(trkmommschi2 , -99999.);  
   FillWith(trklen       , -99999.);
   FillWith(trksvtxid    , -1);
   FillWith(trkevtxid    , -1);
@@ -962,6 +965,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkmomrange_" + TrackLabel;
   CreateBranch(BranchName, trkmomrange, BranchName + NTracksIndexStr + "/F");
+
+  BranchName = "trkmommschi2_" + TrackLabel;
+  CreateBranch(BranchName, trkmommschi2, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trklen_" + TrackLabel;
   CreateBranch(BranchName, trklen, BranchName + NTracksIndexStr + "/F");
@@ -1782,6 +1788,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         TrackerData.trkmom[iTrk]                = mom;
         TrackerData.trklen[iTrk]                = tlen;
         TrackerData.trkmomrange[iTrk]           = trkm.GetTrackMomentum(tlen,13);
+        TrackerData.trkmommschi2[iTrk]          = trkm.GetMomentumMultiScatterChi2(ptrack);
       } // if we have trajectory
 
       // find vertices associated with this track
@@ -1987,7 +1994,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_Px[iPart]=part.Px();
           fData->genie_Py[iPart]=part.Py();
           fData->genie_Pz[iPart]=part.Pz();
-          fData->genie_P[iPart]=part.Px();        
+          fData->genie_P[iPart]=part.P();
           fData->genie_status_code[iPart]=part.StatusCode();
           fData->genie_mass[iPart]=part.Mass();
           fData->genie_trackID[iPart]=part.TrackId();
