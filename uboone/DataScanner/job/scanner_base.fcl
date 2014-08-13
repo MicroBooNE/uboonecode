@@ -1,0 +1,101 @@
+#include "services_microboone.fcl"
+#include "clusteralgorithms.fcl"
+
+# DataScanner default parameter settings
+standard_datascanner:
+{
+    # Define input data's producer module name
+    module_type:             "DataScanner"    
+    fModName_MCTruth:        "largeant:generator"
+    fModName_MCParticle:     "largeant:generator"
+    fModName_SimChannel:     "largeant"
+    fModName_MCShower:       "largeant"
+    fModName_RawDigit:       "daq"
+    fModName_FIFOChannel:    "optreadout"
+    fModName_CalData:        "caldata"
+    fModName_CrawlerHit:     ""
+    fModName_GausHit:        "gaushit"
+    fModName_APAHit:         "apahit"
+    fModName_FFTHit:         "ffthit"
+    fModName_RFFHit:         "rffhit"
+    fModName_CrawlerCluster: ""
+    fModName_DBCluster:      "dbscan"
+    fModName_FuzzyCluster:   "fuzzycluster"
+    fModName_HoughCluster:   "hough"
+    fModName_RyanCluster:    ""
+    fModName_ShowerAngleCluster: "showeranglecluster"
+    fModName_Bezier:         "bezier"
+    fModName_SpacePoint:     "spacepointfinder"
+    fModName_Kalman3DSPS:    "trackkal"
+    fModName_Kalman3DHit:    ""
+    fModName_Shower:         "showerreco"
+    fModName_FeatureVertex:  "featureVtx"
+    fModName_HarrisVertex:   ""
+    fModName_FeatureEndPoint2D: "featureVtx"
+    fModName_HarrisEndPoint2D:  ""
+    fModName_Calorimetry:    "showerreco"
+
+    # Want to store association? Define the association type you wish to store
+    # By "LArSoft design principle", you have to know what type of objects are associated with apriori...
+    fAssType_MCTruth:        ""
+    fAssType_MCParticle:     ""
+    fAssType_SimChannel:     ""
+    fAssType_MCShower:       ""
+    fAssType_RawDigit:       ""
+    fAssType_FIFOChannel:    ""
+    fAssType_CalData:        ""
+    fAssType_CrawlerHit:     ""
+    fAssType_GausHit:        ""
+    fAssType_APAHit:         ""
+    fAssType_FFTHit:         ""
+    fAssType_RFFHit:         ""
+    fAssType_CrawlerCluster: ""
+    fAssType_DBCluster:      "FFTHit"
+    fAssType_FuzzyCluster:   "FFTHit"
+    fAssType_HoughCluster:   "FFTHit"
+    fAssType_ShowerAngleCluster: "FFTHit"
+    fAssType_RyanCluster:    ""
+    fAssType_Bezier:         "FFTHit,DBCluster"
+    fAssType_SpacePoint:     "FFTHit"
+    fAssType_Kalman3DSPS:    "SpacePoint,FFTHit"
+    fAssType_Kalman3DHit:    "DBCluster,FFTHit"
+    fAssType_Shower:         "ShowerAngleCluster"
+    fAssType_FeatureVertex:  "FFTHit,Hough"
+    fAssType_HarrisVertex:   ""
+    fAssType_FeatureEndPoint2D: "FFTHit"
+    fAssType_HarrisEndPoint2D:  ""
+    fAssType_Calorimetry:    "Shower"
+
+    ClusterParamsAlg:         @local::microboone_clusterparamsalg
+}
+
+# TIP: 
+#      (*) The largest data in size is Wire (caldata) ... expect roughly 12 MB / event!
+#      (*) The data that takes longest time for I/O is Hit ... expect roughly 1 s / event I/O time OMG!
+#
+# Disable reading for such data products AND those not in the input file will speed up the process.
+#
+# To disable reading of a product, manually set its module name to "" (I.E. uncomment the
+# appropriate line below)
+
+#standard_datascanner.fModName_MCTruth:        ""
+#standard_datascanner.fModName_RawDigit:       ""
+#standard_datascanner.fModName_FIFOChannel:    ""
+#standard_datascanner.fModName_CalData:        ""
+#standard_datascanner.fModName_CrawlerHit:     ""
+#standard_datascanner.fModName_GausHit:        ""
+#standard_datascanner.fModName_APAHit:         ""
+#standard_datascanner.fModName_FFTHit:         ""
+#standard_datascanner.fModName_CrawlerCluster: ""
+#standard_datascanner.fModName_DBCluster:      ""
+#standard_datascanner.fModName_FuzzyCluster:   ""
+#standard_datascanner.fModName_HoughCluster:   ""
+#standard_datascanner.fModName_ShowerAngleCluster: ""
+#standard_datascanner.fModName_Bezier:         ""
+#standard_datascanner.fModName_SpacePoint:     ""
+#standard_datascanner.fModName_Kalman3DSPS:    ""
+#standard_datascanner.fModName_Kalman3DHit:    ""
+#standard_datascanner.fModName_Shower:         ""
+#standard_datascanner.fModName_Calorimetry:    ""
+
+

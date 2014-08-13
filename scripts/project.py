@@ -21,10 +21,12 @@
 #
 # Actions (specify one):
 #
-# [-h|--help]  - Print help.
+# [-h|--help]  - Print help (this message).
+# [-xh|--xmlhelp] - Print xml help.
 # --submit     - Submit all jobs for specified stage.
 # --check      - Check results for specified stage and print message.
 # --checkana   - Check analysis results for specified stage and print message.
+# --status     - Print status of each stage.
 # --makeup     - Submit makeup jobs for specified stage.
 # --clean      - Delete output from specified project and stage.
 # --declare    - Declare files to sam.
@@ -124,7 +126,7 @@
 # <stage><endscript>  - Worker end-of-job script (condor_lar.sh --end-script).
 #                       Initialization/end-of-job scripts can be specified using an
 #                       absolute or relative path relative to the current directory.
-# <stage><histmerge>  - Name of histogram merging program or script (default hadd).
+# <stage><histmerge>  - Name of histogram merging program or script (default "hadd -T").
 #
 #
 #
@@ -154,57 +156,6 @@ samweb_cli = None
 samweb = None           # SAMWebClient object
 extractor_dict = None   # Metadata extractor
 proxy_ok = False
-
-# dCache-safe method to test whether path exists without opening file.
-
-def safeexist(path):
-    try:
-        os.stat(path)
-        return True
-    except:
-        return False
-
-# Test whether user has a valid grid proxy.  Exit if no.
-
-def test_proxy():
-    global proxy_ok
-    if not proxy_ok:
-        try:
-            subprocess.check_call(['voms-proxy-info', '-exists'], stdout=-1)
-            proxy_ok = True
-        except:
-            print 'Please get a grid proxy.'
-            os._exit(1)
-    return
-
-# dCache-safe method to return contents (list of lines) of file.
-
-def saferead(path):
-    lines = []
-    if path[0:6] == '/pnfs/':
-        test_proxy()
-        proc = subprocess.Popen(['ifdh', 'cp', path, '/dev/fd/1'], stdout=subprocess.PIPE)
-        lines = proc.stdout.readlines()
-    else:
-        lines = open(path).readlines()
-    return lines
-
-# Like os.path.isdir, but faster by avoiding unnecessary i/o.
-
-def fast_isdir(path):
-    result = False
-    if path[-5:] != '.list' and \
-            path[-5:] != '.root' and \
-            path[-4:] != '.txt' and \
-            path[-4:] != '.fcl' and \
-            path[-4:] != '.out' and \
-            path[-4:] != '.err' and \
-            path[-3:] != '.sh' and \
-            path[-5:] != '.stat' and \
-            os.path.isdir(path):
-        result = True
-    return result
-
 
 # XML exception class.
 
@@ -236,9 +187,11 @@ class SafeFile:
     # Open method.
     
     def open(self, destination):
-        test_proxy()
+        global proxy_ok
+        if not proxy_ok:
+            proxy_ok = uboone_utilities.test_proxy()
         self.destination = destination
-        if safeexist(self.destination):
+        if uboone_utilities.safeexist(self.destination):
             subprocess.call(['ifdh', 'rm', self.destination])
         self.filename = os.path.basename(destination)
         if os.path.exists(self.filename):
@@ -298,7 +251,7 @@ class StageDef:
         self.init_script = ''  # Worker initialization script.
         self.init_source = ''  # Worker initialization bash source script.
         self.end_script = ''   # Worker end-of-job script.
-        self.histmerge = 'hadd' # Histogram merging program
+        self.histmerge = 'hadd -T' # Histogram merging program
 
         # Extract values from xml.
 
@@ -444,9 +397,9 @@ class StageDef:
     # (We don't currently check sam input datasets).
 
     def checkinput(self):
-        if self.inputfile != '' and not safeexist(self.inputfile):
+        if self.inputfile != '' and not uboone_utilities.safeexist(self.inputfile):
             raise IOError, 'Input file %s does not exist.' % self.inputfile
-        if self.inputlist != '' and not safeexist(self.inputlist):
+        if self.inputlist != '' and not uboone_utilities.safeexist(self.inputlist):
             raise IOError, 'Input list %s does not exist.' % self.inputlist
 
         # If target size is nonzero, and input is from a file list, calculate
@@ -454,7 +407,7 @@ class StageDef:
         # of jobs.
 
         if self.target_size != 0 and self.inputlist != '':
-            input_filenames = saferead(self.inputlist)
+            input_filenames = uboone_utilities.saferead(self.inputlist)
             size_tot = 0
             for line in input_filenames:
                 filename = string.split(line)[0]
@@ -852,6 +805,58 @@ def doclean(project, stagename):
 
     return
 
+# Stage status fuction.
+
+def dostatus(project):
+
+    print 'Project %s:' % project.name
+
+    # Loop over stages.
+
+    for stage in project.stages:
+
+        stagename = stage.name
+        outdir = stage.outdir
+
+        # Test whether output directory exists.
+
+        if uboone_utilities.safeexist(outdir):
+
+            # Output directory exists.
+
+            nfile = 0
+            nev = 0
+            nmiss = 0
+
+            # Count good files and events.
+
+            eventsfile = os.path.join(outdir, 'events.list')
+            if uboone_utilities.safeexist(eventsfile):
+                lines = uboone_utilities.saferead(eventsfile)
+                for line in lines:
+                    words = string.split(line)
+                    if len(words) >= 2:
+                        nfile = nfile + 1
+                        nev = nev + int(words[1])
+
+            # Count bad files.
+
+            missingfile = os.path.join(outdir, 'missing.txt')
+            if uboone_utilities.safeexist(missingfile):
+                lines = uboone_utilities.saferead(missingfile)
+                nmiss = nmiss + len(lines)
+
+            print 'Stage %s: %d good output files, %d events, %d bad or missing output files.' % (
+                stagename, nfile, nev, nmiss)
+
+        else:
+
+            # Output directory does not exist.
+
+            print 'Stage %s output directory does not exist.' % stagename
+
+    return
+
 # This is a recursive function that looks for project
 # subelements within the input element.  It returns the
 # first matching element that it finds, or None.
@@ -940,6 +945,8 @@ def parsedir(dirname):
 
 def check_root(dir):
 
+    global proxy_ok
+
     # This method looks for files with names of the form *.root.
     # If such files are found, it also checks for the existence of
     # an Events TTree.
@@ -965,8 +972,8 @@ def check_root(dir):
         if filename[-5:] == '.root':
             path = os.path.join(dir, filename)
             url = uboone_utilities.path_to_url(path)
-            if url != path:
-                test_proxy()
+            if url != path and not proxy_ok:
+                proxy_ok = uboone_utilities.test_proxy()
             file = ROOT.TFile.Open(url)
             if file and file.IsOpen() and not file.IsZombie():
                 obj = file.Get('Events')
@@ -1011,7 +1018,7 @@ def get_input_files(stage):
 
     elif stage.inputlist != '':
         try:
-            input_filenames = saferead(stage.inputlist)
+            input_filenames = uboone_utilities.saferead(stage.inputlist)
             for line in input_filenames:
                 words = string.split(line)
                 result.append(words[0])
@@ -1095,14 +1102,14 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
     subdirs = os.listdir(dir)
     for subdir in subdirs:
         subpath = os.path.join(dir, subdir)
-        dirok = fast_isdir(subpath)
+        dirok = uboone_utilities.fast_isdir(subpath)
 
         # Update list of sam projects from start job.
 
         if dirok and subpath[-6:] == '_start':
             filename = os.path.join(subpath, 'sam_project.txt')
-            if safeexist(filename):
-                sam_project = saferead(filename)[0].strip()
+            if uboone_utilities.safeexist(filename):
+                sam_project = uboone_utilities.saferead(filename)[0].strip()
                 if sam_project != '' and not sam_project in sam_projects:
                     sam_projects.append(sam_project)
 
@@ -1136,10 +1143,10 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad:
                 stat_filename = os.path.join(subpath, 'lar.stat')
-                if safeexist(stat_filename):
+                if uboone_utilities.safeexist(stat_filename):
                     status = 0
                     try:
-                        status = int(saferead(stat_filename)[0].strip())
+                        status = int(uboone_utilities.saferead(stat_filename)[0].strip())
                         if status != 0:
                             print 'Job in subdirectory %s ended with non-zero exit status %d.' % (
                                 subdir, status)
@@ -1153,10 +1160,10 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad and input_def != '':
                 filename = os.path.join(subpath, 'sam_project.txt')
-                if not safeexist(filename):
+                if not uboone_utilities.safeexist(filename):
                     bad = 1
                 if not bad:
-                    sam_project = saferead(filename)[0].strip()
+                    sam_project = uboone_utilities.saferead(filename)[0].strip()
                     if not sam_project in sam_projects:
                         sam_projects.append(sam_project)
 
@@ -1165,10 +1172,10 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
             if not bad and input_def != '':
                 filename = os.path.join(subpath, 'cpid.txt')
-                if not safeexist(filename):
+                if not uboone_utilities.safeexist(filename):
                     bad = 1
                 if not bad:
-                    cpid = saferead(filename)[0].strip()
+                    cpid = uboone_utilities.saferead(filename)[0].strip()
                     if not cpid in cpids:
                         cpids.append(cpid)
 
@@ -1315,7 +1322,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         if rc != 0:
             print "%s exit status %d" % (histmerge, rc)
         if histname != histname_temp:
-            if safeexist(histname):
+            if uboone_utilities.safeexist(histname):
                 os.remove(histname)
             subprocess.call(['ifdh', 'cp', histname_temp, histname])
             os.remove(histname_temp)
@@ -1451,7 +1458,7 @@ def docheck_declarations(outdir, declare):
 
     single_subdir = ''
     sam_subdir = os.path.join(outdir, 'sam')
-    if fast_isdir(sam_subdir):
+    if uboone_utilities.fast_isdir(sam_subdir):
         single_subdir = 'sam'
 
     # Loop over root files.
@@ -1459,7 +1466,7 @@ def docheck_declarations(outdir, declare):
     for subdir in os.listdir(outdir):
         if single_subdir == '' or single_subdir == subdir:
             subpath = os.path.join(outdir, subdir)
-            if fast_isdir(subpath):
+            if uboone_utilities.fast_isdir(subpath):
                 nev, roots, subhists = check_root(subpath)
                 for root in roots:
                     fn = os.path.basename(root[0])
@@ -1607,7 +1614,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
         disk_locs = []
         for subdir in os.listdir(outdir):
             subpath = os.path.join(outdir, subdir)
-            if fast_isdir(subpath):
+            if uboone_utilities.fast_isdir(subpath):
                 for fn in os.listdir(subpath):
                     if fn == filename:
                         filepath = os.path.join(subpath, fn)
@@ -1656,7 +1663,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
                     # Split off the node, if any, from the location.
 
                     local_path = os.path.join(sam_loc['location'].split(':')[-1], filename)
-                    if not safeexist(local_path):
+                    if not uboone_utilities.safeexist(local_path):
                         locs_to_remove.append(sam_loc['location'])
 
         # Loop over sam locations and identify files that can be uploaded.
@@ -1708,7 +1715,7 @@ def docheck_locations(dim, outdir, add, clean, remove, upload):
                 # Test whether this file has already been copied to dropbox directory.
                 
                 dropbox_filename = os.path.join(dropbox, filename)
-                if safeexist(dropbox_filename):
+                if uboone_utilities.safeexist(dropbox_filename):
                     print 'File %s already exists in dropbox %s.' % (filename, dropbox)
                 else:
 
@@ -1784,6 +1791,27 @@ def help():
                 print
 
 
+# Print xml help.
+
+def xmlhelp():
+
+    filename = sys.argv[0]
+    file = open(filename, 'r')
+
+    doprint=0
+    
+    for line in file.readlines():
+        if line[2:20] == 'XML file structure':
+            doprint = 1
+        elif line[0:6] == '######' and doprint:
+            doprint = 0
+        if doprint:
+            if len(line) > 2:
+                print line[2:],
+            else:
+                print
+
+
 # Main program.
 
 def main(argv):
@@ -1796,6 +1824,7 @@ def main(argv):
     submit = 0
     check = 0
     checkana = 0
+    stage_status = 0
     makeup = 0
     clean = 0
     outdir = 0
@@ -1820,6 +1849,9 @@ def main(argv):
         if args[0] == '-h' or args[0] == '--help' :
             help()
             return 0
+        elif args[0] == '-xh' or args[0] == '--xmlhelp' :
+            xmlhelp()
+            return 0
         elif args[0] == '--xml' and len(args) > 1:
             xmlfile = args[1]
             del args[0:2]
@@ -1837,6 +1869,9 @@ def main(argv):
             del args[0]
         elif args[0] == '--checkana':
             checkana = 1
+            del args[0]
+        elif args[0] == '--status':
+            stage_status = 1
             del args[0]
         elif args[0] == '--makeup':
             makeup = 1
@@ -1899,12 +1934,12 @@ def main(argv):
     # Make sure xmlfile was specified.
 
     if xmlfile == '':
-        print 'No xml file specified.'
+        print 'No xml file specified.  Type "project.py -h" for help.'
         return 1
     
     # Make sure that no more than one action was specified (except clean and info options).
 
-    num_action = submit + check + checkana + makeup + define + undefine + declare
+    num_action = submit + check + checkana + stage_status + makeup + define + undefine + declare
     if num_action > 1:
         print 'More than one action was specified.'
         return 1
@@ -1935,6 +1970,12 @@ def main(argv):
 
     if clean:
         doclean(project, stagename)
+
+    # Do stage_status now.
+
+    if stage_status:
+        dostatus(project)
+        return 0
 
     # Get the current stage definition.
 
@@ -1998,7 +2039,7 @@ def main(argv):
             input_list_name = os.path.basename(stage.inputlist)
             work_list_name = os.path.join(stage.workdir, input_list_name)
             if stage.inputlist != work_list_name:
-                input_files = saferead(stage.inputlist)
+                input_files = uboone_utilities.saferead(stage.inputlist)
                 work_list = open(work_list_name, 'w')
                 for input_file in input_files:
                     work_list.write('%s\n' % input_file.strip())
@@ -2148,7 +2189,7 @@ def main(argv):
             missing_pairs = []
             missing_filename = os.path.join(stage.outdir, 'missing.txt')
             try:
-                missing_files = saferead(missing_filename)
+                missing_files = uboone_utilities.saferead(missing_filename)
             except:
                 print 'Cound not open %s.' % missing_filename
                 return 1
@@ -2172,7 +2213,7 @@ def main(argv):
             cpids = []
             cpids_filename = os.path.join(stage.outdir, 'cpids.list')
             try:
-                cpids_files = saferead(cpids_filename)
+                cpids_files = uboone_utilities.saferead(cpids_filename)
                 for line in cpids_files:
                     cpids.append(line.strip())
             except:

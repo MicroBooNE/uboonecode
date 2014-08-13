@@ -116,6 +116,9 @@
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "RecoObjects/BezierTrack.h"
 #include "RecoAlg/TrackMomentumCalculator.h"
+#include "AnalysisBase/CosmicTag.h"
+#include "AnalysisBase/FlashMatch.h"
+	
 
 #include <cstring> // std::memcpy()
 #include <vector>
@@ -236,6 +239,9 @@ namespace microboone {
 
       // more track info
       TrackData_t<Short_t> trkId;
+      TrackData_t<Short_t> trknCosmicTags;
+      TrackData_t<Float_t> trkCosmicScore;
+      TrackData_t<Short_t> trkCosmicType;
       TrackData_t<Float_t> trkstartx;     // starting x position.
       TrackData_t<Float_t> trkstarty;     // starting y position.
       TrackData_t<Float_t> trkstartz;     // starting z position.
@@ -257,6 +263,7 @@ namespace microboone {
       TrackData_t<Float_t> trkmom;        // momentum.
       TrackData_t<Float_t> trklen;        // length.
       TrackData_t<Float_t> trkmomrange;    // track momentum from range using CSDA tables
+      TrackData_t<Float_t> trkmommschi2;   // track momentum from multiple scattering
       TrackData_t<Short_t> trksvtxid;     // Vertex ID associated with the track start
       TrackData_t<Short_t> trkevtxid;     // Vertex ID associated with the track end
       PlaneData_t<Int_t> trkpidpdg;       // particle PID pdg code
@@ -611,6 +618,8 @@ namespace microboone {
     std::string fPOTModuleLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)
     bool fSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
+    std::vector<std::string> fCosmicTagAssocLabel;
+    std::vector <float> fCosmicScoreThresholds;
 
 
     /// Returns the number of trackers configured
@@ -708,6 +717,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   MaxTracks = nTracks;
   
   trkId.resize(MaxTracks);
+  trknCosmicTags.resize(MaxTracks);
+  trkCosmicScore.resize(MaxTracks);
+  trkCosmicType.resize(MaxTracks);
   trkstartx.resize(MaxTracks);
   trkstarty.resize(MaxTracks);
   trkstartz.resize(MaxTracks);
@@ -728,6 +740,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkthetayz.resize(MaxTracks);
   trkmom.resize(MaxTracks);
   trkmomrange.resize(MaxTracks);
+  trkmommschi2.resize(MaxTracks);
   trklen.resize(MaxTracks);
   trksvtxid.resize(MaxTracks);
   trkevtxid.resize(MaxTracks);
@@ -763,6 +776,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   ntracks = 0;
   
   FillWith(trkId        , -9999  );
+  FillWith(trknCosmicTags, -9999  );
+  FillWith(trkCosmicScore, -99999.);
+  FillWith(trkCosmicType, -9999  );
   FillWith(trkstartx    , -99999.);
   FillWith(trkstarty    , -99999.);
   FillWith(trkstartz    , -99999.);
@@ -783,6 +799,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkthetayz   , -99999.);
   FillWith(trkmom       , -99999.);
   FillWith(trkmomrange  , -99999.);  
+  FillWith(trkmommschi2 , -99999.);  
   FillWith(trklen       , -99999.);
   FillWith(trksvtxid    , -1);
   FillWith(trkevtxid    , -1);
@@ -840,6 +857,15 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkId_" + TrackLabel;
   CreateBranch(BranchName, trkId, BranchName + NTracksIndexStr + "/S");
+  
+  BranchName = "trknCosmicTags_" + TrackLabel;
+  CreateBranch(BranchName, trknCosmicTags, BranchName + NTracksIndexStr + "/S");
+  
+  BranchName = "trkCosmicScore_" + TrackLabel;
+  CreateBranch(BranchName, trkCosmicScore, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkCosmicType_" + TrackLabel;
+  CreateBranch(BranchName, trkCosmicType, BranchName + NTracksIndexStr + "/S");
   
   BranchName = "trkke_" + TrackLabel;
   CreateBranch(BranchName, trkke, BranchName + NTracksIndexStr + "[3]/F");
@@ -939,6 +965,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkmomrange_" + TrackLabel;
   CreateBranch(BranchName, trkmomrange, BranchName + NTracksIndexStr + "/F");
+
+  BranchName = "trkmommschi2_" + TrackLabel;
+  CreateBranch(BranchName, trkmommschi2, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trklen_" + TrackLabel;
   CreateBranch(BranchName, trklen, BranchName + NTracksIndexStr + "/F");
@@ -1403,7 +1432,9 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fUseBuffer                (pset.get< bool >("UseBuffers", false)),
-  fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false))
+  fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false)),
+  fCosmicTagAssocLabel      (pset.get<std::vector< std::string > >("CosmicTagAssocLabel") ),
+  fCosmicScoreThresholds    (pset.get<std::vector<float> > ("CosmicScoreThresholds") )  
 {
   mf::LogInfo("AnalysisTree") << "Configuration:"
     << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
@@ -1499,7 +1530,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
       for (size_t i = 0; i<hitlist.size(); i++){
         //if (hitlist[i]->View() == geo::kV){//collection view
-        std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+        std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
         for (size_t e = 0; e<eveIDs.size(); e++){
           art::Ptr<simb::MCTruth> ev_mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
           mctruthemap[ev_mctruth]+=eveIDs[e].energy;
@@ -1619,7 +1650,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   //vertex information
   fData->nvtx = NVertices;
   if (NVertices > kMaxVertices){
-    // got this error? consider increasing kMaxVertices
+    // got this error? consider increasing kMaxVerticestra
     // (or ask for a redesign using vectors)
     mf::LogError("AnalysisTree:limits") << "event has " << NVertices
       << " vertices, only kMaxVertices=" << kMaxVertices << " stored in tree";
@@ -1653,13 +1684,40 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     
     //call the track momentum algorithm that gives you momentum based on track range
     trkf::TrackMomentumCalculator trkm;
+    
+    art::Ptr<anab::CosmicTag> currentTag;
+    
+    //get cosmic tags associated with this tracker
+    art::FindManyP<anab::CosmicTag> cosmicTrackTag(trackListHandle[iTracker],evt,fCosmicTagAssocLabel[iTracker]);
+    //if (iTracker==1)
+     //art::FindManyP<anab::FlashMatch> cosmicFlashTag("beziertracker",evt,"beamflashcompat");
+   
+    //std::cout<<"\n"<<evt.event()<<"\t"<<NTracks<<"\n";
 
     for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
-
+      /*if (cosmicFlashTag.isValid()){ 
+        std::cout<<"\nflash="<<cosmicFlashTag.at(iTrk).size();
+	if (cosmicFlashTag.at(iTrk).size()>0)
+          std::cout<<"\t"<<cosmicFlashTag.at(iTrk).at(0)->CosmicScore()<<"\t"<<cosmicFlashTag.at(iTrk).at(0)->CosmicType()<<"\n";
+      }*/
+      if (cosmicTrackTag.isValid()){  
+        //associate each track with a cosmic tag. -START-
+        //std::cout<<cosmicTrackTag.at(iTrk).size()<<"\t";
+        TrackerData.trknCosmicTags[iTrk]     = cosmicTrackTag.at(iTrk).size();
+        if (cosmicTrackTag.at(iTrk).size()>0){
+          if(cosmicTrackTag.at(iTrk).size()>1) 
+             std::cerr << "Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fCosmicTagAssocLabel[iTracker];
+	  currentTag = cosmicTrackTag.at(iTrk).at(0);
+          TrackerData.trkCosmicScore[iTrk] = currentTag->CosmicScore();
+          TrackerData.trkCosmicType[iTrk] = currentTag->CosmicType();
+          //std::cout<<"\t"<<currentTag->CosmicScore()<<"\t"<<cosmicTrackTag.at(iTrk).at(0)->CosmicScore()<<"\t"<<cosmicTrackTag.at(iTrk).at(0)->CosmicType()<<"\n";
+        } 	  
+      }
       art::Ptr<recob::Track> ptrack(trackListHandle[iTracker], iTrk);
       const recob::Track& track = *ptrack;
       
-      TVector3 pos, dir_start, dir_end, end;
+      TVector3 pos, dir_start, dir_end, end;        
+
       double tlen = 0., mom = 0.;
       int TrackID = -1;
       
@@ -1730,6 +1788,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         TrackerData.trkmom[iTrk]                = mom;
         TrackerData.trklen[iTrk]                = tlen;
         TrackerData.trkmomrange[iTrk]           = trkm.GetTrackMomentum(tlen,13);
+        TrackerData.trkmommschi2[iTrk]          = trkm.GetMomentumMultiScatterChi2(ptrack);
       } // if we have trajectory
 
       // find vertices associated with this track
@@ -1935,7 +1994,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_Px[iPart]=part.Px();
           fData->genie_Py[iPart]=part.Py();
           fData->genie_Pz[iPart]=part.Pz();
-          fData->genie_P[iPart]=part.Px();        
+          fData->genie_P[iPart]=part.P();
           fData->genie_status_code[iPart]=part.StatusCode();
           fData->genie_mass[iPart]=part.Mass();
           fData->genie_trackID[iPart]=part.TrackId();
@@ -2209,7 +2268,7 @@ void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > co
     art::Ptr<recob::Hit> hit = hits[h];
     std::vector<sim::IDE> ides;
     //bt->HitToSimIDEs(hit,ides);
-    std::vector<cheat::TrackIDE> eveIDs = bt->HitToEveID(hit);
+    std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hit);
 
     for(size_t e = 0; e < eveIDs.size(); ++e){
       //std::cout<<h<<" "<<e<<" "<<eveIDs[e].trackID<<" "<<eveIDs[e].energy<<" "<<eveIDs[e].energyFrac<<std::endl;

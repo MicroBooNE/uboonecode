@@ -29,7 +29,7 @@
 #include <TString.h>
 #include <TTree.h>
 
-namespace larreco
+namespace sim
 {
 
   class MCShowerRecoPart {

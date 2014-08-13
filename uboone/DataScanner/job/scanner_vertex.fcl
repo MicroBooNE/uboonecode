@@ -1,0 +1,95 @@
+#include "scanner_base.fcl"
+
+process_name: ScanTrack
+
+# Modify parameters to read only tracks
+track_scanner: @local::standard_datascanner
+
+# Producer modules
+track_scanner.fModName_MCTruth:        "largeant:generator"
+track_scanner.fModName_MCParticle:     ""
+track_scanner.fModName_MCShower:       ""
+track_scanner.fModName_SimChannel:     ""
+track_scanner.fModName_RawDigit:       ""
+track_scanner.fModName_FIFOChannel:    ""
+track_scanner.fModName_CalData:        ""
+track_scanner.fModName_CrawlerHit:     ""
+track_scanner.fModName_GausHit:        ""
+track_scanner.fModName_APAHit:         ""
+track_scanner.fModName_FFTHit:         "ffthit"
+track_scanner.fModName_CrawlerCluster: ""
+track_scanner.fModName_DBCluster:      "dbscan"
+track_scanner.fModName_FuzzyCluster:   ""
+track_scanner.fModName_HoughCluster:   "hough"
+track_scanner.fModName_ShowerAngleCluster: ""
+track_scanner.fModName_Bezier:         ""
+track_scanner.fModName_SpacePoint:     ""
+track_scanner.fModName_Kalman3DSPS:    ""
+track_scanner.fModName_Kalman3DHit:    ""
+track_scanner.fModName_Shower:         ""
+track_scanner.fModName_FeatureVertex:  "featureVtx"
+track_scanner.fModName_HarrisVertex:   ""
+track_scanner.fModName_FeatureEndPoint2D: "featureVtx"
+track_scanner.fModName_HarrisEndPoint2D: ""
+track_scanner.fModName_Calorimetry:    ""
+
+# Associations to look up
+track_scanner.fAssType_MCTruth:        ""
+track_scanner.fAssType_MCShower:       ""
+track_scanner.fAssType_SimChannel:     ""
+track_scanner.fAssType_RawDigit:       ""
+track_scanner.fAssType_FIFOChannel:    ""
+track_scanner.fAssType_CalData:        ""
+track_scanner.fAssType_CrawlerHit:     ""
+track_scanner.fAssType_GausHit:        ""
+track_scanner.fAssType_APAHit:         ""
+track_scanner.fAssType_FFTHit:         ""
+track_scanner.fAssType_RFFHit:         ""
+track_scanner.fAssType_CrawlerCluster: ""
+track_scanner.fAssType_DBCluster:      "FFTHit"
+track_scanner.fAssType_FuzzyCluster:   ""
+track_scanner.fAssType_HoughCluster:   "FFTHit"
+track_scanner.fAssType_ShowerAngleCluster: ""
+track_scanner.fAssType_Bezier:         ""
+track_scanner.fAssType_SpacePoint:     ""
+track_scanner.fAssType_Kalman3DSPS:    ""
+track_scanner.fAssType_Kalman3DHit:    ""
+track_scanner.fAssType_Shower:         ""
+track_scanner.fAssType_FeatureVertex:  "FFTHit,Hough"
+track_scanner.fAssType_HarrisVertex:   ""
+track_scanner.fAssType_FeatureEndPoint2D: "FFTHit"
+track_scanner.fAssType_HarrisEndPoint2D: ""
+track_scanner.fAssType_Calorimetry:    ""
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "larlight_track.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_warning
+  user:         @local::microboone_services 	     
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:   -1        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ analyzers:
+ {
+   scanner: @local::track_scanner
+ }
+
+ analyzeIt: [ scanner ]
+
+ end_paths:     [ analyzeIt ]
+}
+

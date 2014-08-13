@@ -9,7 +9,7 @@
 
 #include "MCShowerRecoPart.h"
 
-namespace larreco {
+namespace sim {
 
   const unsigned int MCShowerRecoPart::kINVALID_UINT = std::numeric_limits<unsigned int>::max();
   const int MCShowerRecoPart::kINVALID_INT = std::numeric_limits<int>::max();

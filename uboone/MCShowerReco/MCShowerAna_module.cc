@@ -10,7 +10,7 @@
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
 
-namespace larreco {
+namespace sim {
  
   class MCShowerAna : public art::EDAnalyzer{
   public:
@@ -37,7 +37,7 @@ namespace larreco {
 // Framework includes
 #include "art/Framework/Core/ModuleMacros.h"
 
-namespace larreco {
+namespace sim {
   DEFINE_ART_MODULE(MCShowerAna)
 }
 
@@ -55,7 +55,7 @@ namespace larreco {
 
 #include "Simulation/SimListUtils.h"
 
-namespace larreco {
+namespace sim {
 
   //-----------------------------------------------------------------------
   // Constructor
