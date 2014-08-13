@@ -55,7 +55,7 @@
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/detsim/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/detsim/&name;</workdir>
     <numjobs>100</numjobs>
-    <datatier>optical-simulated</datatier>
+    <datatier>detector-simulated</datatier>
     <defname>&name;_&tag;_detsim</defname>
   </stage>
 

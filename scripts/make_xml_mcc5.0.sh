@@ -258,7 +258,7 @@ EOF
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/detsim/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/detsim/&name;</workdir>
     <numjobs>$njob2</numjobs>
-    <datatier>optical-simulated</datatier>
+    <datatier>detector-simulated</datatier>
     <defname>&name;_&tag;_detsim</defname>
   </stage>
 
