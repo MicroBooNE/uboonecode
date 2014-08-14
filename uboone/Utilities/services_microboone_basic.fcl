@@ -1,6 +1,6 @@
 #include "geometry_microboone.fcl"
 #include "detectorproperties_microboone.fcl"
-#include "larproperties.fcl"
+#include "larproperties_microboone.fcl"
 #include "larfft_microboone.fcl"
 #include "messageservice.fcl"
 #include "simulationservices_microboone.fcl"
