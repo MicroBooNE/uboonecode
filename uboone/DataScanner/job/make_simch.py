@@ -4,6 +4,7 @@ from subprocess import Popen, PIPE,STDOUT
 TMP_WORK_DIR="tmp_simch"
 if len(sys.argv) < 5:
     print 'Usage: %s $DATA_TOP_DIR $FILENAME $NUM_COMBINE $FCL'
+    sys.exit(1)
 INPUT_DIR=sys.argv[1]
 FILENAME=sys.argv[2]
 BATCH=int(sys.argv[3])
