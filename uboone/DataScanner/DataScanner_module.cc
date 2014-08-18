@@ -995,7 +995,7 @@ namespace datascanner {
 
       light_prof.SetPlaneCharge(mcs.qU, mcs.qV, mcs.qW);
 
-      light_prof.SetEdepVtx(mcs.vtxEdep);
+      //light_prof.SetEdepVtx(mcs.vtxEdep);
 
       data_ptr->push_back(light_prof);
     }
