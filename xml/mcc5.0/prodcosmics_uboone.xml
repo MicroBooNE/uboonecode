@@ -16,7 +16,7 @@
   <group>uboone</group>
 
   <!-- Project size -->
-  <numevents>10000</numevents>
+  <numevents>20000</numevents>
 
   <!-- Operating System -->
   <os>SL5,SL6</os>
@@ -36,7 +36,7 @@
     <fcl>prodcosmics_uboone.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/gen/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/gen/&name;</workdir>
-    <numjobs>100</numjobs>
+    <numjobs>200</numjobs>
     <datatier>generated</datatier>
     <defname>&name;_&tag;_gen</defname>
   </stage>
@@ -45,7 +45,7 @@
     <fcl>standard_g4_uboone.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/g4/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/g4/&name;</workdir>
-    <numjobs>100</numjobs>
+    <numjobs>200</numjobs>
     <datatier>simulated</datatier>
     <defname>&name;_&tag;_g4</defname>
   </stage>
@@ -54,7 +54,7 @@
     <fcl>standard_detsim_uboone.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/detsim/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/detsim/&name;</workdir>
-    <numjobs>100</numjobs>
+    <numjobs>200</numjobs>
     <datatier>detector-simulated</datatier>
     <defname>&name;_&tag;_detsim</defname>
   </stage>
@@ -63,7 +63,7 @@
     <fcl>standard_reco_uboone_2D.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/reco2D/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/reco2D/&name;</workdir>
-    <numjobs>100</numjobs>
+    <numjobs>200</numjobs>
     <datatier>reconstructed-2d</datatier>
     <defname>&name;_&tag;_reco2D</defname>
   </stage>
@@ -72,7 +72,7 @@
     <fcl>standard_reco_uboone_3D.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/reco3D/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/reco3D/&name;</workdir>
-    <numjobs>100</numjobs>
+    <numjobs>200</numjobs>
     <datatier>reconstructed-3d</datatier>
     <defname>&name;_&tag;_reco3D</defname>
   </stage>
@@ -81,7 +81,7 @@
     <fcl>standard_ana_uboone.fcl</fcl>
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/mergeana/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/mergeana/&name;</workdir>
-    <numjobs>100</numjobs>
+    <numjobs>200</numjobs>
     <targetsize>8000000000</targetsize>
     <datatier>reconstructed-3d</datatier>
     <defname>&name;_&tag;</defname>
