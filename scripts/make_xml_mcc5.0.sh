@@ -30,7 +30,7 @@
 
 # Parse arguments.
 
-rel=v02_04_00
+rel=v02_05_01
 userdir=uboonepro
 userbase=$userdir
 nevarg=0
@@ -177,6 +177,12 @@ do
         nev=50000
       elif [ $newprj = prodgenie_bnb_nu_uboone ]; then
         nev=20000
+      elif [ $newprj = prodgenie_bnb_nue_cosmic_uboone ]; then
+        nev=20000
+      elif [ $newprj = prodgenie_bnb_nue_uboone ]; then
+        nev=20000
+      elif [ $newprj = prodcosmics_uboone ]; then
+        nev=20000
       else
         nev=10000
       fi
@@ -258,7 +264,7 @@ EOF
     <outdir>/pnfs/uboone/scratch/${userdir}/&release;/detsim/&name;</outdir>
     <workdir>/uboone/app/users/${userbase}/&release;/detsim/&name;</workdir>
     <numjobs>$njob2</numjobs>
-    <datatier>optical-simulated</datatier>
+    <datatier>detector-simulated</datatier>
     <defname>&name;_&tag;_detsim</defname>
   </stage>
 

@@ -1,0 +1,104 @@
+#include "scanner_base.fcl"
+
+process_name: ScanSimCh
+
+# Modify parameters to read only tracks
+simch_scanner: @local::standard_datascanner
+
+# Producer modules
+simch_scanner.fModName_MCTruth:        ""
+simch_scanner.fModName_MCParticle:     ""
+simch_scanner.fModName_MCShower:       ""
+simch_scanner.fModName_SimChannel:     "largeant"
+simch_scanner.fModName_RawDigit:       ""
+simch_scanner.fModName_FIFOChannel:    ""
+simch_scanner.fModName_CalData:        ""
+simch_scanner.fModName_CrawlerHit:     ""
+simch_scanner.fModName_GausHit:        ""
+simch_scanner.fModName_APAHit:         ""
+simch_scanner.fModName_FFTHit:         ""
+simch_scanner.fModName_RFFHit:         ""
+simch_scanner.fModName_CrawlerCluster: ""
+simch_scanner.fModName_DBCluster:      ""
+simch_scanner.fModName_FuzzyCluster:   ""
+simch_scanner.fModName_HoughCluster:   ""
+simch_scanner.fModName_ShowerAngleCluster: ""
+simch_scanner.fModName_Bezier:         ""
+simch_scanner.fModName_SpacePoint:     ""
+simch_scanner.fModName_Kalman3DSPS:    ""
+simch_scanner.fModName_Kalman3DHit:    ""
+simch_scanner.fModName_FeatureVertex:  ""
+simch_scanner.fModName_HarrisVertex:   ""
+simch_scanner.fModName_FeatureEndPoint2D: ""
+simch_scanner.fModName_HarrisEndPoint2D: ""
+simch_scanner.fModName_Shower:         ""
+simch_scanner.fModName_Calorimetry:    ""
+
+# Associations to look up
+simch_scanner.fAssType_MCTruth:        ""
+simch_scanner.fAssType_SimChannel:     ""
+simch_scanner.fAssType_MCShower:       ""
+simch_scanner.fAssType_RawDigit:       ""
+simch_scanner.fAssType_FIFOChannel:    ""
+simch_scanner.fAssType_CalData:        ""
+simch_scanner.fAssType_CrawlerHit:     ""
+simch_scanner.fAssType_GausHit:        ""
+simch_scanner.fAssType_APAHit:         ""
+simch_scanner.fAssType_FFTHit:         ""
+simch_scanner.fAssType_RFFHit:         ""
+simch_scanner.fAssType_CrawlerCluster: ""
+simch_scanner.fAssType_DBCluster:      ""
+simch_scanner.fAssType_FuzzyCluster:   ""
+simch_scanner.fAssType_HoughCluster:   ""
+simch_scanner.fAssType_ShowerAngleCluster: ""
+simch_scanner.fAssType_Bezier:         ""
+simch_scanner.fAssType_SpacePoint:     ""
+simch_scanner.fAssType_Kalman3DSPS:    ""
+simch_scanner.fAssType_Kalman3DHit:    ""
+simch_scanner.fAssType_FeatureVertex:  ""
+simch_scanner.fAssType_HarrisVertex:   ""
+simch_scanner.fAssType_FeatureEndPoint2D: ""
+simch_scanner.fAssType_HarrisEndPoint2D: ""
+simch_scanner.fAssType_Shower:         ""
+simch_scanner.fAssType_Calorimetry:    ""
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "larlight_simch.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_warning
+  user:         @local::microboone_basic_services
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:   -1        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ analyzers:
+ {
+   scanner: @local::simch_scanner
+ }
+
+ analyzeIt: [ scanner ]
+
+ end_paths:     [ analyzeIt ]
+}
+
+services.user.DetectorProperties.NumberTimeSamples: 3200
+services.user.DetectorProperties.ReadOutWindowSize: 3200
+
+services.user.TimeService.G4RefTime: 0
+services.user.TimeService.TriggerOffsetTPC: 0
+services.user.TimeService.DefaultTrigTime: 0
+services.user.TimeService.DefaultBeamTime: 0
+

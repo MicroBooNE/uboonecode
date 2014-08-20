@@ -47,6 +47,7 @@ namespace sim {
       ::sim::MCShower shower_prof;
       fPartAlg.Position(mother_candidate, shower_prof.vtxMother);
       fPartAlg.Momentum(mother_candidate, shower_prof.momMother);
+      for(auto& v : shower_prof.momMother) v *= 1.e3;
       
       shower_prof.momPdgCode = fPartAlg.PdgCode(mother_candidate);
       shower_prof.momTrackId = fPartAlg.TrackId(mother_candidate);

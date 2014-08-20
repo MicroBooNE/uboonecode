@@ -3,7 +3,7 @@
 <!-- Production Project -->
 
 <!DOCTYPE project [
-<!ENTITY release "v02_04_00">
+<!ENTITY release "v02_05_01">
 <!ENTITY file_type "mc">
 <!ENTITY run_type "physics">
 <!ENTITY name "prod_nbar_0.0GeV_isotropic_uboone">
@@ -55,7 +55,7 @@
     <outdir>/pnfs/uboone/scratch/uboonepro/&release;/detsim/&name;</outdir>
     <workdir>/uboone/app/users/uboonepro/&release;/detsim/&name;</workdir>
     <numjobs>100</numjobs>
-    <datatier>optical-simulated</datatier>
+    <datatier>detector-simulated</datatier>
     <defname>&name;_&tag;_detsim</defname>
   </stage>
 
