@@ -177,6 +177,12 @@ do
         nev=50000
       elif [ $newprj = prodgenie_bnb_nu_uboone ]; then
         nev=20000
+      elif [ $newprj = prodgenie_bnb_nue_cosmic_uboone ]; then
+        nev=20000
+      elif [ $newprj = prodgenie_bnb_nue_uboone ]; then
+        nev=20000
+      elif [ $newprj = prodcosmics_uboone ]; then
+        nev=20000
       else
         nev=10000
       fi
