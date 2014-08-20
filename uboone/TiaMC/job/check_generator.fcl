@@ -1,0 +1,55 @@
+#include "services_microboone.fcl"
+#include "detsimmodules_microboone.fcl"
+#include "mccheatermodules.fcl"
+#include "caldata_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "trackfindermodules_microboone.fcl"
+#include "tiamcmodules.fcl"
+
+process_name: CheckGenerator
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "check_generator_hist.root" }
+  Timing:       {}
+  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  RandomNumberGenerator: {} #ART native random number generator
+  user:         @local::microboone_simulation_services
+  message:      @local::standard_warning
+}
+
+#Start each new event with an empty event.
+source:
+{
+  module_type: RootInput
+  maxEvents:   -1        # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  1           # number of first event in the file
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ producers:
+ {
+ }
+
+ analyzers:
+ {
+  check:    @local::checkgenerator
+ }
+
+ #define the producer and filter modules for this path, order matters, 
+ #filters reject all following items.  see lines starting physics.producers below
+ analyzeIt: [check]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+  end_paths:     [analyzeIt]
+}
+
