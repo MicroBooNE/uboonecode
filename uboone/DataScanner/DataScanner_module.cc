@@ -45,12 +45,11 @@
 #include "SimulationBase/MCParticle.h"
 #include "OpticalDetectorData/FIFOChannel.h"
 #include "OpticalDetectorData/OpticalTypes.h"
+#include "uboone/MCShowerReco/MCShower.h"
 //#include "RecoAlg/ClusterParamsAlg.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
 #include "Utilities/DetectorProperties.h"
-
-#include "uboone/MCShowerReco/MCShowerRecoAlg.h"
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -1119,7 +1118,7 @@ namespace datascanner {
 	}
 	
 	// Find them
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 	
 	ass_index.reserve(hit_v.size());
 	
@@ -1281,7 +1280,7 @@ namespace datascanner {
 	  continue;
 	}
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_CLUSTER) {
 
@@ -1509,7 +1508,7 @@ namespace datascanner {
 	}
 
 	// Find them
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	ass_index.reserve(cluster_v.size());
 
@@ -1576,7 +1575,7 @@ namespace datascanner {
 	  continue;
         }
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_TRACK) {
 
@@ -1660,7 +1659,7 @@ namespace datascanner {
 	  continue;
         }
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_HIT) {
 
@@ -1761,7 +1760,7 @@ namespace datascanner {
 	  continue;
         }
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_HIT) {
 
@@ -1855,7 +1854,7 @@ namespace datascanner {
 	  continue;
         }
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_HIT) {
 
