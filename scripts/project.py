@@ -18,6 +18,9 @@
 #                       more than one project description).
 # --stage <stage>     - Project stage (required if project contains
 #                       more than one stage).
+# --histmerge <program> - Override default histogram merging program
+#                         (no effect on histogram merging specified
+#                         at stage level).
 #
 # Actions (specify one):
 #
@@ -453,7 +456,7 @@ class ProjectDef:
     # Constructor.
     # project_element argument can be an xml element or None.
 
-    def __init__(self, project_element):
+    def __init__(self, project_element, override_histmerge):
 
         # Assign default values.
         
@@ -524,6 +527,8 @@ class ProjectDef:
                 self.histmerge = histmerge_elements[0].firstChild.data
             else:
                 self.histmerge = ''
+        if override_histmerge != '':
+            self.histmerge = override_histmerge
 
         # Larsoft (subelement).
 
@@ -1839,6 +1844,7 @@ def main(argv):
     xmlfile = ''
     projectname = ''
     stagename = ''
+    override_histmerge = ''
     submit = 0
     check = 0
     checkana = 0
@@ -1878,6 +1884,9 @@ def main(argv):
             del args[0:2]
         elif args[0] == '--stage' and len(args) > 1:
             stagename = args[1]
+            del args[0:2]
+        elif args[0] == '--histmerge' and len(args) > 1:
+            override_histmerge = args[1]
             del args[0:2]
         elif args[0] == '--submit':
             submit = 1
@@ -1974,7 +1983,7 @@ def main(argv):
 
     # Convert the project element into a ProjectDef object.
 
-    project = ProjectDef(project_element)
+    project = ProjectDef(project_element, override_histmerge)
 
     # Make sure that we have a kerberos ticket if we might need one to submit jobs.
 
