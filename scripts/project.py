@@ -85,6 +85,8 @@
 # <ubxml>   - Ubxml version (default none).
 # <filetype> - Sam file type ("data" or "mc", default none).
 # <runtype>  - Sam run type (normally "physics", default none).
+# <histmerge> - Default histogram merging program (default "hadd -T", 
+#               can be overridden at each stage).
 #
 # <stage name="stagename"> - Information about project stage.  There can
 #             be multiple instances of this tag with different name
@@ -126,7 +128,8 @@
 # <stage><endscript>  - Worker end-of-job script (condor_lar.sh --end-script).
 #                       Initialization/end-of-job scripts can be specified using an
 #                       absolute or relative path relative to the current directory.
-# <stage><histmerge>  - Name of histogram merging program or script (default "hadd -T").
+# <stage><histmerge>  - Name of histogram merging program or script (default specified
+#                       at project level, or global default "hadd -T").
 #
 #
 #
@@ -233,7 +236,7 @@ class StageDef:
 
     # Constructor.
 
-    def __init__(self, stage_element, default_input_list, default_num_jobs):
+    def __init__(self, stage_element, default_input_list, default_num_jobs, default_histmerge):
 
         # Assign default values.
         
@@ -251,7 +254,7 @@ class StageDef:
         self.init_script = ''  # Worker initialization script.
         self.init_source = ''  # Worker initialization bash source script.
         self.end_script = ''   # Worker end-of-job script.
-        self.histmerge = 'hadd -T' # Histogram merging program
+        self.histmerge = default_histmerge # Histogram merging program
 
         # Extract values from xml.
 
@@ -461,6 +464,7 @@ class ProjectDef:
         self.num_events = 0               # Total events (all jobs).
         self.num_jobs = 1                 # Number of jobs.
         self.os = ''                      # Batch OS.
+        self.histmerge = 'hadd -T'        # Default histogram merging program.
         self.release_tag = ''             # Larsoft release tag.
         self.release_qual = 'debug'       # Larsoft release qualifier.
         self.local_release_dir = ''       # Larsoft local release directory.
@@ -511,6 +515,15 @@ class ProjectDef:
         os_elements = project_element.getElementsByTagName('os')
         if os_elements:
             self.os = os_elements[0].firstChild.data
+
+        # Histmerge (subelement).
+
+        histmerge_elements = project_element.getElementsByTagName('histmerge')
+        if histmerge_elements:
+            if histmerge_elements[0].firstChild:
+                self.histmerge = histmerge_elements[0].firstChild.data
+            else:
+                self.histmerge = ''
 
         # Larsoft (subelement).
 
@@ -653,7 +666,10 @@ class ProjectDef:
         stage_elements = project_element.getElementsByTagName('stage')
         default_input_list = ''
         for stage_element in stage_elements:
-            self.stages.append(StageDef(stage_element, default_input_list, self.num_jobs))
+            self.stages.append(StageDef(stage_element, 
+                                        default_input_list, 
+                                        self.num_jobs, 
+                                        self.histmerge))
             default_input_list = os.path.join(self.stages[-1].outdir, 'files.list')
 
         # Done.
@@ -668,6 +684,7 @@ class ProjectDef:
         result += 'Total events = %d\n' % self.num_events
         result += 'Number of jobs = %d\n' % self.num_jobs
         result += 'OS = %s\n' % self.os
+        result += 'Histogram merging program = %s\n' % self.histmerge
         result += 'Larsoft release tag = %s\n' % self.release_tag
         result += 'Larsoft release qualifier = %s\n' % self.release_qual
         result += 'Local test release directory = %s\n' % self.local_release_dir
@@ -1306,7 +1323,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     # Make merged histogram file using histmerge.
 
-    if len(hists) > 0:
+    if len(hists) > 0 and histmerge != '':
         print "Merging %d histogram files using %s." % (len(hists), histmerge)
 
         histname = os.path.join(dir, 'hist.root')
@@ -1324,8 +1341,9 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         if histname != histname_temp:
             if uboone_utilities.safeexist(histname):
                 os.remove(histname)
-            subprocess.call(['ifdh', 'cp', histname_temp, histname])
-            os.remove(histname_temp)
+            if os.path.exists(histname_temp):
+                subprocess.call(['ifdh', 'cp', histname_temp, histname])
+                os.remove(histname_temp)
     os.remove(histurlsname_temp)
 
     # Make sam files.
