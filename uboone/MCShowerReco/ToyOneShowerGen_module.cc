@@ -20,6 +20,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 
+#include "TRandom.h"
 #include "TLorentzVector.h"
 #include "TF1.h"
 
@@ -56,7 +57,8 @@ private:
 ToyOneShowerGen::ToyOneShowerGen(fhicl::ParameterSet const & p)
   : fShapeEnergy(nullptr), fShapeTheta(nullptr), fFlatRandom(nullptr)
 {
-
+  gRandom->SetSeed(0);
+  TRandom3 r(0);
   produces< std::vector<simb::MCTruth>   >();
   produces< sumdata::RunData, art::InRun >();
 
@@ -196,7 +198,6 @@ std::vector<double> ToyOneShowerGen::GetXYZDirection(double uz) {
 void ToyOneShowerGen::produce(art::Event & e)
 {
   std::unique_ptr< std::vector<simb::MCTruth> > mctArray(new std::vector<simb::MCTruth>);
-
   double Evis = fShapeEnergy->GetRandom();
   double Uz   = TMath::Cos(fShapeTheta->GetRandom());
 
