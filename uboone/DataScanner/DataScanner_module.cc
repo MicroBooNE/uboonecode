@@ -978,8 +978,8 @@ namespace datascanner {
       larlight::mcshower light_prof;
       light_prof.SetMotherID(mcs.momPdgCode, mcs.momTrackId);
       
-      light_prof.SetMotherAngles(mcs.phiMother, mcs.thetaMother,
-				 mcs.uAngleMother, mcs.vAngleMother, mcs.wAngleMother);
+      light_prof.SetMotherAngles(mcs.phiMother, mcs.thetaMother);
+      //mcs.uAngleMother, mcs.vAngleMother, mcs.wAngleMother);
 
       light_prof.SetMotherPoint(mcs.vtxMother);
 
@@ -987,12 +987,16 @@ namespace datascanner {
 
       light_prof.SetDaughterTrackList(mcs.daughterTrackId);
 
-      light_prof.SetDaughterAngles(mcs.phiDaughter, mcs.thetaDaughter,
-				   mcs.uAngleDaughter, mcs.vAngleDaughter, mcs.wAngleDaughter);
+      light_prof.SetDaughterAngles(mcs.phiDaughter, mcs.thetaDaughter);
+      //mcs.uAngleDaughter, mcs.vAngleDaughter, mcs.wAngleDaughter);
 
       light_prof.SetDaughterMomentum(mcs.momDaughter);
 
-      light_prof.SetPlaneCharge(mcs.qU, mcs.qV, mcs.qW);
+      std::vector<float> plane_charge(_geo->Nplanes(),0);
+      plane_charge[0]=mcs.qU;
+      plane_charge[1]=mcs.qV;
+      plane_charge[2]=mcs.qW;
+      light_prof.SetPlaneCharge(plane_charge);
 
       //light_prof.SetEdepVtx(mcs.vtxEdep);
 
