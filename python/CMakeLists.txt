@@ -5,7 +5,7 @@
 
 # Executable python files.
 
-LIST(APPEND exes extractor_dict.py)
+LIST(APPEND exes extractor_dict.py root_metadata.py)
 
 # Non-executable python files.
 
