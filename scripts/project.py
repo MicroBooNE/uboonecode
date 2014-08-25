@@ -147,7 +147,7 @@
 #
 ######################################################################
 
-import sys, os, stat, string, subprocess, shutil, urllib, getpass
+import sys, os, stat, string, subprocess, shutil, urllib, getpass, json
 from xml.dom.minidom import parse
 import uboone_utilities
 
@@ -963,11 +963,92 @@ def parsedir(dirname):
     
     return result
 
+# Check a single root file by reading precalculted metadata information.
+
+def check_root_json(json_path):
+
+    # Default result
+
+    nevroot = -1
+
+    # Read contents of json file and convert to a single string.
+
+    lines = uboone_utilities.saferead(json_path)
+    s = ''
+    for line in lines:
+        s = s + line
+
+    # Convert json string to python dictionary.
+
+    md = json.loads(s)
+
+    # Extract number of events from metadata.
+
+    if len(md.keys()) > 0:
+        nevroot = 0
+        if md.has_key('events'):
+            nevroot = int(md['events'])
+
+    return nevroot
+
+
+# Check a single root file.
+# Returns an int containing following information.
+# 1.  Number of event (>0) in TTree named "Events."
+# 2.  Zero if root file does not contain an Events TTree, but is otherwise valid (openable).
+# 3.  -1 for error (root file is not openable).
+
+def check_root_file(path):
+
+    global proxy_ok
+    nevroot = -1
+
+    # See if we have precalculated metadata for this root file.
+
+    json_path = path + '.json'
+    if uboone_utilities.safeexist(json_path):
+        nevroot = check_root_json(json_path)
+        return nevroot
+
+    # Make sure ROOT module is imported.
+
+    import_root()
+
+    # Open root file.
+
+    url = uboone_utilities.path_to_url(path)
+    if url != path and not proxy_ok:
+        proxy_ok = uboone_utilities.test_proxy()
+    file = ROOT.TFile.Open(url)
+    if file and file.IsOpen() and not file.IsZombie():
+
+        # Root file is opened, look for Events TTree.
+
+        obj = file.Get('Events')
+        if obj and obj.InheritsFrom('TTree'):
+
+            # This is an art root file.
+
+            nevroot = obj.GetEntriesFast()
+
+        else:
+
+            # Openable, but not an art root file.
+
+            nevroot = 0
+
+    else:
+
+        # Not openable (invalid root file).
+
+        nevroot = -1
+
+    return nevroot
+
+
 # Check root files (*.root) in the specified directory.
 
 def check_root(dir):
-
-    global proxy_ok
 
     # This method looks for files with names of the form *.root.
     # If such files are found, it also checks for the existence of
@@ -981,10 +1062,6 @@ def check_root(dir):
     #     b) Filename.
     # 3.  A list of histogram root files.
 
-    # Make sure ROOT module is imported.
-
-    import_root()
-
     nev = -1
     roots = []
     hists = []
@@ -993,27 +1070,18 @@ def check_root(dir):
     for filename in filenames:
         if filename[-5:] == '.root':
             path = os.path.join(dir, filename)
-            url = uboone_utilities.path_to_url(path)
-            if url != path and not proxy_ok:
-                proxy_ok = uboone_utilities.test_proxy()
-            file = ROOT.TFile.Open(url)
-            if file and file.IsOpen() and not file.IsZombie():
-                obj = file.Get('Events')
-                if obj and obj.InheritsFrom('TTree'):
+            nevroot = check_root_file(path)
+            if nevroot > 0:
+                if nev < 0:
+                    nev = 0
+                nev = nev + nevroot
+                roots.append((os.path.join(dir, filename), nevroot))
 
-                    # This is an art root file.
+            elif nevroot == 0:
 
-                    if nev < 0:
-                        nev = 0
-                    nevroot = obj.GetEntriesFast()
-                    nev = nev + nevroot
-                    roots.append((os.path.join(dir, filename), nevroot))
+                # Valid root (histo/ntuple) file, not an art root file.
 
-                else:
-
-                    # This is not an art root file.  Assume it is a histogram/ntuple file.
-
-                    hists.append(os.path.join(dir, filename))
+                hists.append(os.path.join(dir, filename))
 
             else:
 
@@ -1023,7 +1091,7 @@ def check_root(dir):
                 print 'Warning: File %s in directory %s is not a valid root file.' % (filename, dir)
 
     # Done.
-                    
+
     return (nev, roots, hists)
     
 
