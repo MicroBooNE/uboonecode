@@ -54,7 +54,7 @@ def get_external_metadata(inputfile):
             return md
             
 	# Get the other meta data field parameters						
-	md['file_name'] =  inputfile.split("/")[-1]
+	md['file_name'] =  os.path.basename(inputfile)
 	md['file_size'] =  str(os.path.getsize(inputfile))
 	md['crc'] = fileEnstoreChecksum(inputfile)
 
