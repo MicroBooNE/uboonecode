@@ -48,11 +48,17 @@ namespace sim {
       fPartAlg.Position(mother_candidate, shower_prof.vtxMother);
       fPartAlg.Momentum(mother_candidate, shower_prof.momMother);
       for(auto& v : shower_prof.momMother) v *= 1.e3;
+
+      // Skip if mother energy is less than the enery threshold
+      if(shower_prof.momMother.at(3) < fMinShowerEnergy) continue;
       
       shower_prof.momPdgCode = fPartAlg.PdgCode(mother_candidate);
       shower_prof.momTrackId = fPartAlg.TrackId(mother_candidate);
 
-      shower_prof.daughterTrackId = fPartAlg.ShowerDaughters(shower_index);
+      shower_prof.daughterTrackId.reserve(fPartAlg.ShowerDaughters(shower_index).size());
+      for(auto const& index : fPartAlg.ShowerDaughters(shower_index))
+
+	shower_prof.daughterTrackId.push_back(fPartAlg.TrackId(index));
 
       fMCShower.push_back(shower_prof);
 
