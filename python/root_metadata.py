@@ -2,7 +2,7 @@
 
 # Import stuff.
 
-import sys, os, json
+import sys, os, subprocess, json, uboone_utilities
 
 # Import ROOT (hide command line arguments).
 
@@ -36,7 +36,14 @@ def enstoreChecksum(fileobj):
 def fileEnstoreChecksum(path):
     """Calculate enstore compatible CRC value"""
     try:
-        f =open(path,'rb')
+        url = uboone_utilities.path_to_url(path)
+        if url == path:
+            f = open(path,'rb')
+        else:
+            cmd = ['ifdh', 'cp', path, '/dev/fd/1']
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            f = p.stdout
+            
     except (IOError, OSError), ex:
         raise Error(str(ex))
     try:
@@ -60,7 +67,8 @@ def get_external_metadata(inputfile):
 
 	# Root checks.
 
-        file = ROOT.TFile.Open(inputfile)
+        url = uboone_utilities.path_to_url(inputfile)
+        file = ROOT.TFile.Open(url)
         if file and file.IsOpen() and not file.IsZombie():
 
             # Root file opened successfully.
