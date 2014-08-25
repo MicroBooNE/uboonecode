@@ -1043,6 +1043,20 @@ def check_root_file(path):
 
         nevroot = -1
 
+    # Save metadata
+
+    md = {}
+    if nevroot >= 0:
+        filename = os.path.basename(path)
+        print 'Generating root metadata for %s\n' % filename
+        md['file_name'] =  filename
+        md['file_size'] =  str(os.path.getsize(path))
+        md['events'] = str(nevroot)
+    mdtext = json.dumps(md, sys.stdout, indent=2, sort_keys=True)
+    json_file = safeopen(json_path)
+    json_file.write(mdtext)
+    json_file.close()
+
     return nevroot
 
 
