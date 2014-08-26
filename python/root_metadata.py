@@ -2,7 +2,7 @@
 
 # Import stuff.
 
-import sys, os, subprocess, json, uboone_utilities
+import sys, os, string, subprocess, json, uboone_utilities
 
 # Import ROOT (hide command line arguments).
 
@@ -13,6 +13,19 @@ os.environ['TERM'] = 'vt100'    # Prevent root from printing garbage on initiali
 import ROOT
 ROOT.gErrorIgnoreLevel = ROOT.kError
 sys.argv = myargv
+
+# Convert adler32-1 (used by dcache) to adler32-0 (used by sam).
+
+def convert_1_adler32_to_0_adler32(crc, filesize):
+    crc = long(crc)
+    filesize = long(filesize)
+    size = int(filesize % 65521)
+    s1 = (crc & 0xffff)
+    s2 = ((crc >> 16) &  0xffff)
+    s1 = (s1 + 65521 - 1) % 65521
+    s2 = (s2 + 65521 - size) % 65521
+    return (s2 << 16) + s1
+
 
 # Checksum utilities copied from sam_web_client
 
@@ -35,21 +48,52 @@ def enstoreChecksum(fileobj):
 
 def fileEnstoreChecksum(path):
     """Calculate enstore compatible CRC value"""
-    try:
-        url = uboone_utilities.path_to_url(path)
-        if url == path:
+
+    crc = {}
+    srm_url = uboone_utilities.path_to_srm_url(path)
+
+    if srm_url == path:
+        try:
             f = open(path,'rb')
-        else:
-            cmd = ['ifdh', 'cp', path, '/dev/fd/1']
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            f = p.stdout
+            crc = enstoreChecksum(f)
+        except (IOError, OSError), ex:
+            raise Error(str(ex))
+        finally:
+            f.close()
+    else:
+        try:
+            # Following commented commands are old way of calculating checksum by
+            # transferring entire file over network.
+            # Should work again if uncommented (if srm way breaks).
+
+            #cmd = ['ifdh', 'cp', path, '/dev/fd/1']
+            #p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            #f = p.stdout
+            #crc = enstoreChecksum(f)
+
+            # New (clever, efficient, obscure...) way of accessing dCache 
+            # stored checksum using srm.
+            cmd = ['srmls', '-2', '-l', srm_url]
+            srmout = subprocess.check_output(cmd)
+            first = True
+            crc0 = 0
+            for line in string.split(srmout, '\n'):
+                if first:
+                    size = long(line[2:line.find('/')-1])
+                    first = False
+                    continue
+                if line.find("Checksum value:") > 0:
+                    ssum = line[line.find(':') + 2:]
+                    crc1 = long( ssum , base = 16 )
+                    crc0 = convert_1_adler32_to_0_adler32(crc1, size)
+                    break
+
+            crc = {"crc_value": str(crc0), "crc_type": "adler 32 crc type"}
             
-    except (IOError, OSError), ex:
-        raise Error(str(ex))
-    try:
-        return enstoreChecksum(f)
-    finally:
-        f.close()
+        except (IOError, OSError), ex:
+            raise Error(str(ex))
+
+        return crc
 
 def get_external_metadata(inputfile):
 
