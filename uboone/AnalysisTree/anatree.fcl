@@ -1,4 +1,3 @@
-#include "cosmicremovalmodule.fcl"
 #include "services_microboone.fcl"
 #include "clustermodules.fcl"
 #include "particleid_microboone.fcl"

@@ -782,10 +782,10 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   
   FillWith(trkId        , -9999  );
   FillWith(trkncosmictags_tagger, -9999  );
-  FillWith(trkcosmicscore_tagger, -99999.);
+  FillWith(trkcosmicscore_tagger, -1.);
   FillWith(trkcosmictype_tagger, -9999  );
   FillWith(trkncosmictags_flashmatch, -9999  );
-  FillWith(trkcosmicscore_flashmatch, -99999.);
+  FillWith(trkcosmicscore_flashmatch, -1.);
   FillWith(trkcosmictype_flashmatch, -9999  );
   FillWith(trkstartx    , -99999.);
   FillWith(trkstarty    , -99999.);
@@ -1723,9 +1723,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         TrackerData.trkncosmictags_flashmatch[iTrk] = fmbfm.at(iTrk).size();
         if (fmbfm.at(iTrk).size()>0){
           if(fmbfm.at(iTrk).size()>1) 
-             std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fFlashMatchAssocLabel[iTracker];
-          TrackerData.trkcosmicscore_flashmatch[iTrk] = fmbfm.at(iTrk).at(0)->CosmicScore();
-          TrackerData.trkcosmictype_flashmatch[iTrk] = fmbfm.at(iTrk).at(0)->CosmicType();
+            std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fFlashMatchAssocLabel[iTracker];
+          if (fmbfm.at(iTrk).at(0)->CosmicScore() == 0 || fmbfm.at(iTrk).at(0)->CosmicScore()==1){
+  	    TrackerData.trkcosmicscore_flashmatch[iTrk] = fmbfm.at(iTrk).at(0)->CosmicScore();
+            TrackerData.trkcosmictype_flashmatch[iTrk] = fmbfm.at(iTrk).at(0)->CosmicType();
+	  }  
+	  //std::cout<<"\n"<<evt.event()<<"\t"<<iTrk<<"\t"<<fmbfm.at(iTrk).at(0)->CosmicScore()<<"\t"<<fmbfm.at(iTrk).at(0)->CosmicType();
         }
       }
      			 	   
