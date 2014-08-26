@@ -1,5 +1,3 @@
-#include "signalservices.fcl"
-
 BEGIN_PROLOG
 
 microboone_signalshapingservice:

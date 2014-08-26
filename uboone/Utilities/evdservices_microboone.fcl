@@ -17,14 +17,9 @@ microboone_recodrawingopt.HitModuleLabels:        ["gaushit"]
 microboone_recodrawingopt.ClusterModuleLabels:    ["fuzzycluster"]
 microboone_recodrawingopt.TrackModuleLabels:      ["trackkalmanhit"]
 
-microboone_analysisdrawingopt:
-{
- DrawCalorimetry:                  1           
- DrawParticleID:                   1
- CalorimetryModuleLabels:          ["calo"]               
- ParticleIDModuleLabels:           ["pid"] 
- CalorTemplateFileNames:           ["dEdxKinErestemplate.root"]
-}  
+microboone_analysisdrawingopt:               @local::standard_analysisdrawingopt
+microboone_analysisdrawingopt.CalorimetryModuleLabels: ["trackkalmanhitcalo"]
+microboone_analysisdrawingopt.ParticleIDModuleLabels:  ["trackkalmanhitpid"] 
 
 microboone_simdrawingopt:                         @local::standard_simdrawingopt
 microboone_simdrawingopt.ShowMCTruthText:         false
