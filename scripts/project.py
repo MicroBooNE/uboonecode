@@ -45,6 +45,7 @@
 # --outdir     - Print the name of the output directory for stage.
 # --fcl        - Print the fcl file name and version for stage.
 # --defname    - Print sam dataset definition name for stage.
+# --input_files        - Print all input files.
 # --check_declarations - Check whether data files are declared to sam.
 # --test_declarations  - Print a summary of files returned by sam query.
 # --check_locations    - Check sam locations and report the following:
@@ -1102,14 +1103,15 @@ def check_root(dir):
 
 def get_input_files(stage):
 
-    # This function only works for file (list) input.  It checks the input
-    # file and input list stage attributes.
+    # In case of single file or file list input, files are returned exactly 
+    # as specified, which would normallly be as the full path.
+    # In case of sam input, only the file names are returned (guaranteed unique).
 
     result = []
     if stage.inputfile != '':
         result.append(stage.inputfile)
 
-    elif stage.inputlist != '':
+    elif stage.inputlist != '' and uboone_utilities.safeexist(stage.inputlist):
         try:
             input_filenames = uboone_utilities.saferead(stage.inputlist)
             for line in input_filenames:
@@ -1117,6 +1119,10 @@ def get_input_files(stage):
                 result.append(words[0])
         except:
             pass
+
+    elif stage.inputdef != '':
+        import_samweb()
+        result = samweb.listFiles(defname=stage.inputdef)
 
     # Done.
 
@@ -1925,6 +1931,7 @@ def main(argv):
     outdir = 0
     fcl = 0
     defname = 0
+    do_input_files = 0
     declare = 0
     define = 0
     undefine = 0
@@ -1985,6 +1992,9 @@ def main(argv):
             del args[0]
         elif args[0] == '--defname':
             defname = 1
+            del args[0]
+        elif args[0] == '--input_files':
+            do_input_files = 1
             del args[0]
         elif args[0] == '--declare':
             declare = 1
@@ -2094,6 +2104,13 @@ def main(argv):
     if defname:
         if stage.defname != '':
             print stage.defname
+
+    # Do input_names action now.
+
+    if do_input_files:
+        input_files = get_input_files(stage)
+        for input_file in input_files:
+            print input_file
 
     # Maybe make output and work directories.
 
