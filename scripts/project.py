@@ -149,7 +149,7 @@
 
 import sys, os, stat, string, subprocess, shutil, urllib, getpass, json
 from xml.dom.minidom import parse
-import uboone_utilities
+import uboone_utilities, root_metadata
 
 # Initialize the global symbol ROOT to be None.
 # We will update this to point to the ROOT module later if we need to.
@@ -1007,55 +1007,43 @@ def check_root_file(path):
 
     json_path = path + '.json'
     if uboone_utilities.safeexist(json_path):
+
+        # Get number of events from precalculated metadata.
+
         nevroot = check_root_json(json_path)
-        return nevroot
-
-    # Make sure ROOT module is imported.
-
-    import_root()
-
-    # Open root file.
-
-    url = uboone_utilities.path_to_url(path)
-    if url != path and not proxy_ok:
-        proxy_ok = uboone_utilities.test_proxy()
-    file = ROOT.TFile.Open(url)
-    if file and file.IsOpen() and not file.IsZombie():
-
-        # Root file is opened, look for Events TTree.
-
-        obj = file.Get('Events')
-        if obj and obj.InheritsFrom('TTree'):
-
-            # This is an art root file.
-
-            nevroot = obj.GetEntriesFast()
-
-        else:
-
-            # Openable, but not an art root file.
-
-            nevroot = 0
 
     else:
 
-        # Not openable (invalid root file).
+        # Make root metadata.
 
-        nevroot = -1
+        url = uboone_utilities.path_to_url(path)
+        if url != path and not proxy_ok:
+            proxy_ok = uboone_utilities.test_proxy()
+        print 'Generating root metadata for file %s.' % os.path.basename(path)
+        md = root_metadata.get_external_metadata(path)
+        if md.has_key('events'):
 
-    # Save metadata
+            # Art root file if dictionary has events key.
 
-    md = {}
-    if nevroot >= 0:
-        filename = os.path.basename(path)
-        print 'Generating root metadata for %s\n' % filename
-        md['file_name'] =  filename
-        md['file_size'] =  str(os.path.getsize(path))
-        md['events'] = str(nevroot)
-    mdtext = json.dumps(md, sys.stdout, indent=2, sort_keys=True)
-    json_file = safeopen(json_path)
-    json_file.write(mdtext)
-    json_file.close()
+            nevroot = int(md['events'])
+
+        elif len(md.keys()) > 0:
+
+            # No events key, but non-empty dictionary, so histo/ntuple root file.
+
+            nevroot = 0
+        else:
+
+            # Empty dictionary is invalid root file.
+
+            nevroot = -1
+
+        # Save root metadata in .json file.
+
+        mdtext = json.dumps(md, sys.stdout, indent=2, sort_keys=True)
+        json_file = safeopen(json_path)
+        json_file.write(mdtext)
+        json_file.close()
 
     return nevroot
 
