@@ -1068,6 +1068,7 @@ def check_root(dir):
     roots = []
     hists = []
 
+    print 'Checking root files in directory %s.' % dir
     filenames = os.listdir(dir)
     for filename in filenames:
         if filename[-5:] == '.root':
