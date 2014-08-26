@@ -239,9 +239,12 @@ namespace microboone {
 
       // more track info
       TrackData_t<Short_t> trkId;
-      TrackData_t<Short_t> trknCosmicTags;
-      TrackData_t<Float_t> trkCosmicScore;
-      TrackData_t<Short_t> trkCosmicType;
+      TrackData_t<Short_t> trkncosmictags_tagger;
+      TrackData_t<Float_t> trkcosmicscore_tagger;
+      TrackData_t<Short_t> trkcosmictype_tagger;
+      TrackData_t<Short_t> trkncosmictags_flashmatch;
+      TrackData_t<Float_t> trkcosmicscore_flashmatch;
+      TrackData_t<Short_t> trkcosmictype_flashmatch;
       TrackData_t<Float_t> trkstartx;     // starting x position.
       TrackData_t<Float_t> trkstarty;     // starting y position.
       TrackData_t<Float_t> trkstartz;     // starting z position.
@@ -618,9 +621,8 @@ namespace microboone {
     std::string fPOTModuleLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)
     bool fSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
-    std::vector<std::string> fCosmicTagAssocLabel;
-    std::vector <float> fCosmicScoreThresholds;
-
+    std::vector<std::string> fCosmicTaggerAssocLabel;
+    std::vector<std::string> fFlashMatchAssocLabel;
 
     /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
@@ -717,9 +719,12 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   MaxTracks = nTracks;
   
   trkId.resize(MaxTracks);
-  trknCosmicTags.resize(MaxTracks);
-  trkCosmicScore.resize(MaxTracks);
-  trkCosmicType.resize(MaxTracks);
+  trkncosmictags_tagger.resize(MaxTracks);
+  trkcosmicscore_tagger.resize(MaxTracks);
+  trkcosmictype_tagger.resize(MaxTracks);
+  trkncosmictags_flashmatch.resize(MaxTracks);
+  trkcosmicscore_flashmatch.resize(MaxTracks);
+  trkcosmictype_flashmatch.resize(MaxTracks);
   trkstartx.resize(MaxTracks);
   trkstarty.resize(MaxTracks);
   trkstartz.resize(MaxTracks);
@@ -776,9 +781,12 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   ntracks = 0;
   
   FillWith(trkId        , -9999  );
-  FillWith(trknCosmicTags, -9999  );
-  FillWith(trkCosmicScore, -99999.);
-  FillWith(trkCosmicType, -9999  );
+  FillWith(trkncosmictags_tagger, -9999  );
+  FillWith(trkcosmicscore_tagger, -99999.);
+  FillWith(trkcosmictype_tagger, -9999  );
+  FillWith(trkncosmictags_flashmatch, -9999  );
+  FillWith(trkcosmicscore_flashmatch, -99999.);
+  FillWith(trkcosmictype_flashmatch, -9999  );
   FillWith(trkstartx    , -99999.);
   FillWith(trkstarty    , -99999.);
   FillWith(trkstartz    , -99999.);
@@ -858,14 +866,23 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   BranchName = "trkId_" + TrackLabel;
   CreateBranch(BranchName, trkId, BranchName + NTracksIndexStr + "/S");
   
-  BranchName = "trknCosmicTags_" + TrackLabel;
-  CreateBranch(BranchName, trknCosmicTags, BranchName + NTracksIndexStr + "/S");
+  BranchName = "trkncosmictags_tagger_" + TrackLabel;
+  CreateBranch(BranchName, trkncosmictags_tagger, BranchName + NTracksIndexStr + "/S");
   
-  BranchName = "trkCosmicScore_" + TrackLabel;
-  CreateBranch(BranchName, trkCosmicScore, BranchName + NTracksIndexStr + "/F");
+  BranchName = "trkcosmicscore_tagger_" + TrackLabel;
+  CreateBranch(BranchName, trkcosmicscore_tagger, BranchName + NTracksIndexStr + "/F");
   
-  BranchName = "trkCosmicType_" + TrackLabel;
-  CreateBranch(BranchName, trkCosmicType, BranchName + NTracksIndexStr + "/S");
+  BranchName = "trkcosmictype_tagger_" + TrackLabel;
+  CreateBranch(BranchName, trkcosmictype_tagger, BranchName + NTracksIndexStr + "/S");
+
+  BranchName = "trkncosmictags_flashmatch_" + TrackLabel;
+  CreateBranch(BranchName, trkncosmictags_flashmatch, BranchName + NTracksIndexStr + "/S");
+  
+  BranchName = "trkcosmicscore_flashmatch_" + TrackLabel;
+  CreateBranch(BranchName, trkcosmicscore_flashmatch, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkcosmictype_flashmatch_" + TrackLabel;
+  CreateBranch(BranchName, trkcosmictype_flashmatch, BranchName + NTracksIndexStr + "/S");
   
   BranchName = "trkke_" + TrackLabel;
   CreateBranch(BranchName, trkke, BranchName + NTracksIndexStr + "[3]/F");
@@ -1433,8 +1450,8 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fUseBuffer                (pset.get< bool >("UseBuffers", false)),
   fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false)),
-  fCosmicTagAssocLabel      (pset.get<std::vector< std::string > >("CosmicTagAssocLabel") ),
-  fCosmicScoreThresholds    (pset.get<std::vector<float> > ("CosmicScoreThresholds") )  
+  fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
+  fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ) 
 {
   mf::LogInfo("AnalysisTree") << "Configuration:"
     << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
@@ -1684,35 +1701,34 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     
     //call the track momentum algorithm that gives you momentum based on track range
     trkf::TrackMomentumCalculator trkm;
-    
-    art::Ptr<anab::CosmicTag> currentTag;
-    
-    //get cosmic tags associated with this tracker
-    art::FindManyP<anab::CosmicTag> cosmicTrackTag(trackListHandle[iTracker],evt,fCosmicTagAssocLabel[iTracker]);
-    //if (iTracker==1)
-     //art::FindManyP<anab::FlashMatch> cosmicFlashTag("beziertracker",evt,"beamflashcompat");
-   
-    //std::cout<<"\n"<<evt.event()<<"\t"<<NTracks<<"\n";
-
+       
     for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
-      /*if (cosmicFlashTag.isValid()){ 
-        std::cout<<"\nflash="<<cosmicFlashTag.at(iTrk).size();
-	if (cosmicFlashTag.at(iTrk).size()>0)
-          std::cout<<"\t"<<cosmicFlashTag.at(iTrk).at(0)->CosmicScore()<<"\t"<<cosmicFlashTag.at(iTrk).at(0)->CosmicType()<<"\n";
-      }*/
-      if (cosmicTrackTag.isValid()){  
-        //associate each track with a cosmic tag. -START-
-        //std::cout<<cosmicTrackTag.at(iTrk).size()<<"\t";
-        TrackerData.trknCosmicTags[iTrk]     = cosmicTrackTag.at(iTrk).size();
-        if (cosmicTrackTag.at(iTrk).size()>0){
-          if(cosmicTrackTag.at(iTrk).size()>1) 
-             std::cerr << "Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fCosmicTagAssocLabel[iTracker];
-	  currentTag = cosmicTrackTag.at(iTrk).at(0);
-          TrackerData.trkCosmicScore[iTrk] = currentTag->CosmicScore();
-          TrackerData.trkCosmicType[iTrk] = currentTag->CosmicType();
-          //std::cout<<"\t"<<currentTag->CosmicScore()<<"\t"<<cosmicTrackTag.at(iTrk).at(0)->CosmicScore()<<"\t"<<cosmicTrackTag.at(iTrk).at(0)->CosmicType()<<"\n";
-        } 	  
+      
+      //Cosmic Tagger information
+      art::FindManyP<anab::CosmicTag> fmct(trackListHandle[iTracker],evt,fCosmicTaggerAssocLabel[iTracker]);
+      if (fmct.isValid()){          
+        TrackerData.trkncosmictags_tagger[iTrk]     = fmct.at(iTrk).size();
+        if (fmct.at(iTrk).size()>0){
+          if(fmct.at(iTrk).size()>1)
+             std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fCosmicTaggerAssocLabel[iTracker];
+          TrackerData.trkcosmicscore_tagger[iTrk] = fmct.at(iTrk).at(0)->CosmicScore();
+          TrackerData.trkcosmictype_tagger[iTrk] = fmct.at(iTrk).at(0)->CosmicType();
+        }
       }
+
+      //Flash match compatibility information
+      //Unlike CosmicTagger, Flash match doesn't assign a cosmic tag for every track. For those tracks, AnalysisTree initializes them with -9999 or -99999
+      art::FindManyP<anab::CosmicTag> fmbfm(trackListHandle[iTracker],evt,fFlashMatchAssocLabel[iTracker]);
+      if (fmbfm.isValid()){  
+        TrackerData.trkncosmictags_flashmatch[iTrk] = fmbfm.at(iTrk).size();
+        if (fmbfm.at(iTrk).size()>0){
+          if(fmbfm.at(iTrk).size()>1) 
+             std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fFlashMatchAssocLabel[iTracker];
+          TrackerData.trkcosmicscore_flashmatch[iTrk] = fmbfm.at(iTrk).at(0)->CosmicScore();
+          TrackerData.trkcosmictype_flashmatch[iTrk] = fmbfm.at(iTrk).at(0)->CosmicType();
+        }
+      }
+     			 	   
       art::Ptr<recob::Track> ptrack(trackListHandle[iTracker], iTrk);
       const recob::Track& track = *ptrack;
       

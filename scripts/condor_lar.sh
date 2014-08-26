@@ -675,6 +675,11 @@ pwd
 ls
 echo
 
+# Save the hostname and condor job id.
+
+hostname > hostname.txt
+echo ${CLUSTER}.${PROCESS} > jobid.txt
+
 # Set default CLUSTER and PROCESS environment variables for interactive jobs.
 
 if [ $INTERACTIVE -ne 0 ]; then
@@ -714,6 +719,12 @@ echo "Process: $PROCESS"
 
 OUTPUT_SUBDIR=${CLUSTER}_${PROCESS}
 echo "Output subdirectory: $OUTPUT_SUBDIR"
+
+# Copy stuff back to output directory before we actually start running lar.
+
+#ifdh mkdir $IFDH_OPT ${OUTDIR}/${OUTPUT_SUBDIR}/hostname.txt
+#ifdh cp $IFDH_OPT hostname.txt ${OUTDIR}/${OUTPUT_SUBDIR}/hostname.txt
+#ifdh cp $IFDH_OPT jobid.txt ${OUTDIR}/${OUTPUT_SUBDIR}/jobid.txt
 
 # Make sure fcl file exists.
 
@@ -1227,6 +1238,12 @@ if [ x$ENDSCRIPT != x ]; then
     exit $?
   fi
 fi
+
+# Do root file checks.
+
+for root in *.root; do
+  root_metadata.py $root > ${root}.json
+done
 
 # Make local files group write, if appropriate.
 

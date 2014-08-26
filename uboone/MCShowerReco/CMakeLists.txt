@@ -1,6 +1,8 @@
 # define ROOTLIB
 set( ROOTLIB -L$ENV{ROOTSYS}/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic)
 
+add_subdirectory(job)
+
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME     uboonecode_uboone_MCShowerReco
           LIB_LIBRARIES    Geometry

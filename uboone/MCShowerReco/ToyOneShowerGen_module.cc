@@ -160,9 +160,13 @@ std::vector<double> ToyOneShowerGen::GetXYZPosition() {
 
   std::vector<double> pos(3,0);
 
-  pos.at(0) = fFlatRandom->fire(170.,2390.);
-  pos.at(1) = fFlatRandom->fire(-995.,995.);
-  pos.at(2) = fFlatRandom->fire(170.,10190.);
+  //pos.at(0) = fFlatRandom->fire(170.,2390.);
+  //pos.at(1) = fFlatRandom->fire(-995.,995.);
+  //pos.at(2) = fFlatRandom->fire(170.,10190.);
+
+  pos.at(0) = fFlatRandom->fire(17.,239.);
+  pos.at(1) = fFlatRandom->fire(-99.5,99.5);
+  pos.at(2) = fFlatRandom->fire(17.,1019.);
 
   return pos;
 }
@@ -201,7 +205,10 @@ void ToyOneShowerGen::produce(art::Event & e)
   simb::MCTruth truth;
 
   TLorentzVector pos_lorentz(pos.at(0), pos.at(1), pos.at(2), fTime);
-  TLorentzVector mom_lorentz(dir.at(0), dir.at(1), dir.at(2), Evis);
+  TLorentzVector mom_lorentz( dir.at(0) * sqrt(pow(Evis,2)-pow(fMass,2)), 
+			      dir.at(1) * sqrt(pow(Evis,2)-pow(fMass,2)),
+			      dir.at(2) * sqrt(pow(Evis,2)-pow(fMass,2)),
+			      Evis);
 
   simb::MCParticle part(0, fPDGCode, "primary", 0, sqrt(pow(fMass,2)+pow(Evis,2)), 1);
 

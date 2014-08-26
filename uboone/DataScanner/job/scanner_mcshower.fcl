@@ -1,0 +1,104 @@
+#include "scanner_base.fcl"
+
+process_name: ScanMCShower
+
+# Modify parameters to read only tracks
+mcshower_scanner: @local::standard_datascanner
+
+# Producer modules
+mcshower_scanner.fModName_MCTruth:        ""
+mcshower_scanner.fModName_MCParticle:     ""
+mcshower_scanner.fModName_MCShower:       "mcshower"
+mcshower_scanner.fModName_SimChannel:     ""
+mcshower_scanner.fModName_RawDigit:       ""
+mcshower_scanner.fModName_FIFOChannel:    ""
+mcshower_scanner.fModName_CalData:        ""
+mcshower_scanner.fModName_CrawlerHit:     ""
+mcshower_scanner.fModName_GausHit:        ""
+mcshower_scanner.fModName_APAHit:         ""
+mcshower_scanner.fModName_FFTHit:         ""
+mcshower_scanner.fModName_RFFHit:         ""
+mcshower_scanner.fModName_CrawlerCluster: ""
+mcshower_scanner.fModName_DBCluster:      ""
+mcshower_scanner.fModName_FuzzyCluster:   ""
+mcshower_scanner.fModName_HoughCluster:   ""
+mcshower_scanner.fModName_ShowerAngleCluster: ""
+mcshower_scanner.fModName_Bezier:         ""
+mcshower_scanner.fModName_SpacePoint:     ""
+mcshower_scanner.fModName_Kalman3DSPS:    ""
+mcshower_scanner.fModName_Kalman3DHit:    ""
+mcshower_scanner.fModName_FeatureVertex:  ""
+mcshower_scanner.fModName_HarrisVertex:   ""
+mcshower_scanner.fModName_FeatureEndPoint2D: ""
+mcshower_scanner.fModName_HarrisEndPoint2D: ""
+mcshower_scanner.fModName_Shower:         ""
+mcshower_scanner.fModName_Calorimetry:    ""
+
+# Associations to look up
+mcshower_scanner.fAssType_MCTruth:        ""
+mcshower_scanner.fAssType_SimChannel:     ""
+mcshower_scanner.fAssType_MCShower:       ""
+mcshower_scanner.fAssType_RawDigit:       ""
+mcshower_scanner.fAssType_FIFOChannel:    ""
+mcshower_scanner.fAssType_CalData:        ""
+mcshower_scanner.fAssType_CrawlerHit:     ""
+mcshower_scanner.fAssType_GausHit:        ""
+mcshower_scanner.fAssType_APAHit:         ""
+mcshower_scanner.fAssType_FFTHit:         ""
+mcshower_scanner.fAssType_RFFHit:         ""
+mcshower_scanner.fAssType_CrawlerCluster: ""
+mcshower_scanner.fAssType_DBCluster:      ""
+mcshower_scanner.fAssType_FuzzyCluster:   ""
+mcshower_scanner.fAssType_HoughCluster:   ""
+mcshower_scanner.fAssType_ShowerAngleCluster: ""
+mcshower_scanner.fAssType_Bezier:         ""
+mcshower_scanner.fAssType_SpacePoint:     ""
+mcshower_scanner.fAssType_Kalman3DSPS:    ""
+mcshower_scanner.fAssType_Kalman3DHit:    ""
+mcshower_scanner.fAssType_FeatureVertex:  ""
+mcshower_scanner.fAssType_HarrisVertex:   ""
+mcshower_scanner.fAssType_FeatureEndPoint2D: ""
+mcshower_scanner.fAssType_HarrisEndPoint2D: ""
+mcshower_scanner.fAssType_Shower:         ""
+mcshower_scanner.fAssType_Calorimetry:    ""
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "larlight_mcshower.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_warning
+  user:         @local::microboone_basic_services
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:   -1        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ analyzers:
+ {
+   scanner: @local::mcshower_scanner
+ }
+
+ analyzeIt: [ scanner ]
+
+ end_paths:     [ analyzeIt ]
+}
+
+services.user.DetectorProperties.NumberTimeSamples: 3200
+services.user.DetectorProperties.ReadOutWindowSize: 3200
+
+services.user.TimeService.G4RefTime: 0
+services.user.TimeService.TriggerOffsetTPC: 0
+services.user.TimeService.DefaultTrigTime: 0
+services.user.TimeService.DefaultBeamTime: 0
+

@@ -160,7 +160,8 @@ namespace sim {
 	    edep.x = x_mm;
 	    edep.y = y_mm;
 	    edep.z = z_mm;
-	    float charge = ide.numElectrons * detp->ElectronsToADC();
+	    //float charge = ide.numElectrons * detp->ElectronsToADC();
+	    float charge = ide.numElectrons;
 
 	    geo::View_t view = geom->View(ch);
 	    if(view == geo::kU){
@@ -188,7 +189,8 @@ namespace sim {
 	  }else{
 	    
 	    // Append charge to the relevant edep (@ hit_index)
-	    float charge = ide.numElectrons * detp->ElectronsToADC();
+	    //float charge = ide.numElectrons * detp->ElectronsToADC();
+	    float charge = ide.numElectrons;
 	    MCShowerEdep &edep = this->__GetEdepArray__(real_track_id).at(hit_index);
 
 	    geo::View_t view = geom->View(ch);

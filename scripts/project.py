@@ -18,6 +18,9 @@
 #                       more than one project description).
 # --stage <stage>     - Project stage (required if project contains
 #                       more than one stage).
+# --histmerge <program> - Override default histogram merging program
+#                         (no effect on histogram merging specified
+#                         at stage level).
 #
 # Actions (specify one):
 #
@@ -85,6 +88,8 @@
 # <ubxml>   - Ubxml version (default none).
 # <filetype> - Sam file type ("data" or "mc", default none).
 # <runtype>  - Sam run type (normally "physics", default none).
+# <histmerge> - Default histogram merging program (default "hadd -T", 
+#               can be overridden at each stage).
 #
 # <stage name="stagename"> - Information about project stage.  There can
 #             be multiple instances of this tag with different name
@@ -126,7 +131,8 @@
 # <stage><endscript>  - Worker end-of-job script (condor_lar.sh --end-script).
 #                       Initialization/end-of-job scripts can be specified using an
 #                       absolute or relative path relative to the current directory.
-# <stage><histmerge>  - Name of histogram merging program or script (default "hadd -T").
+# <stage><histmerge>  - Name of histogram merging program or script (default specified
+#                       at project level, or global default "hadd -T").
 #
 #
 #
@@ -141,9 +147,9 @@
 #
 ######################################################################
 
-import sys, os, stat, string, subprocess, shutil, urllib, getpass
+import sys, os, stat, string, subprocess, shutil, urllib, getpass, json
 from xml.dom.minidom import parse
-import uboone_utilities
+import uboone_utilities, root_metadata
 
 # Initialize the global symbol ROOT to be None.
 # We will update this to point to the ROOT module later if we need to.
@@ -233,7 +239,7 @@ class StageDef:
 
     # Constructor.
 
-    def __init__(self, stage_element, default_input_list, default_num_jobs):
+    def __init__(self, stage_element, default_input_list, default_num_jobs, default_histmerge):
 
         # Assign default values.
         
@@ -251,7 +257,7 @@ class StageDef:
         self.init_script = ''  # Worker initialization script.
         self.init_source = ''  # Worker initialization bash source script.
         self.end_script = ''   # Worker end-of-job script.
-        self.histmerge = 'hadd -T' # Histogram merging program
+        self.histmerge = default_histmerge # Histogram merging program
 
         # Extract values from xml.
 
@@ -450,7 +456,7 @@ class ProjectDef:
     # Constructor.
     # project_element argument can be an xml element or None.
 
-    def __init__(self, project_element):
+    def __init__(self, project_element, override_histmerge):
 
         # Assign default values.
         
@@ -461,6 +467,7 @@ class ProjectDef:
         self.num_events = 0               # Total events (all jobs).
         self.num_jobs = 1                 # Number of jobs.
         self.os = ''                      # Batch OS.
+        self.histmerge = 'hadd -T'        # Default histogram merging program.
         self.release_tag = ''             # Larsoft release tag.
         self.release_qual = 'debug'       # Larsoft release qualifier.
         self.local_release_dir = ''       # Larsoft local release directory.
@@ -511,6 +518,17 @@ class ProjectDef:
         os_elements = project_element.getElementsByTagName('os')
         if os_elements:
             self.os = os_elements[0].firstChild.data
+
+        # Histmerge (subelement).
+
+        histmerge_elements = project_element.getElementsByTagName('histmerge')
+        if histmerge_elements:
+            if histmerge_elements[0].firstChild:
+                self.histmerge = histmerge_elements[0].firstChild.data
+            else:
+                self.histmerge = ''
+        if override_histmerge != '':
+            self.histmerge = override_histmerge
 
         # Larsoft (subelement).
 
@@ -653,7 +671,10 @@ class ProjectDef:
         stage_elements = project_element.getElementsByTagName('stage')
         default_input_list = ''
         for stage_element in stage_elements:
-            self.stages.append(StageDef(stage_element, default_input_list, self.num_jobs))
+            self.stages.append(StageDef(stage_element, 
+                                        default_input_list, 
+                                        self.num_jobs, 
+                                        self.histmerge))
             default_input_list = os.path.join(self.stages[-1].outdir, 'files.list')
 
         # Done.
@@ -668,6 +689,7 @@ class ProjectDef:
         result += 'Total events = %d\n' % self.num_events
         result += 'Number of jobs = %d\n' % self.num_jobs
         result += 'OS = %s\n' % self.os
+        result += 'Histogram merging program = %s\n' % self.histmerge
         result += 'Larsoft release tag = %s\n' % self.release_tag
         result += 'Larsoft release qualifier = %s\n' % self.release_qual
         result += 'Local test release directory = %s\n' % self.local_release_dir
@@ -941,11 +963,94 @@ def parsedir(dirname):
     
     return result
 
+# Check a single root file by reading precalculted metadata information.
+
+def check_root_json(json_path):
+
+    # Default result
+
+    nevroot = -1
+
+    # Read contents of json file and convert to a single string.
+
+    lines = uboone_utilities.saferead(json_path)
+    s = ''
+    for line in lines:
+        s = s + line
+
+    # Convert json string to python dictionary.
+
+    md = json.loads(s)
+
+    # Extract number of events from metadata.
+
+    if len(md.keys()) > 0:
+        nevroot = 0
+        if md.has_key('events'):
+            nevroot = int(md['events'])
+
+    return nevroot
+
+
+# Check a single root file.
+# Returns an int containing following information.
+# 1.  Number of event (>0) in TTree named "Events."
+# 2.  Zero if root file does not contain an Events TTree, but is otherwise valid (openable).
+# 3.  -1 for error (root file is not openable).
+
+def check_root_file(path):
+
+    global proxy_ok
+    nevroot = -1
+
+    # See if we have precalculated metadata for this root file.
+
+    json_path = path + '.json'
+    if uboone_utilities.safeexist(json_path):
+
+        # Get number of events from precalculated metadata.
+
+        nevroot = check_root_json(json_path)
+
+    else:
+
+        # Make root metadata.
+
+        url = uboone_utilities.path_to_url(path)
+        if url != path and not proxy_ok:
+            proxy_ok = uboone_utilities.test_proxy()
+        print 'Generating root metadata for file %s.' % os.path.basename(path)
+        md = root_metadata.get_external_metadata(path)
+        if md.has_key('events'):
+
+            # Art root file if dictionary has events key.
+
+            nevroot = int(md['events'])
+
+        elif len(md.keys()) > 0:
+
+            # No events key, but non-empty dictionary, so histo/ntuple root file.
+
+            nevroot = 0
+        else:
+
+            # Empty dictionary is invalid root file.
+
+            nevroot = -1
+
+        # Save root metadata in .json file.
+
+        mdtext = json.dumps(md, sys.stdout, indent=2, sort_keys=True)
+        json_file = safeopen(json_path)
+        json_file.write(mdtext)
+        json_file.close()
+
+    return nevroot
+
+
 # Check root files (*.root) in the specified directory.
 
 def check_root(dir):
-
-    global proxy_ok
 
     # This method looks for files with names of the form *.root.
     # If such files are found, it also checks for the existence of
@@ -959,10 +1064,6 @@ def check_root(dir):
     #     b) Filename.
     # 3.  A list of histogram root files.
 
-    # Make sure ROOT module is imported.
-
-    import_root()
-
     nev = -1
     roots = []
     hists = []
@@ -971,27 +1072,18 @@ def check_root(dir):
     for filename in filenames:
         if filename[-5:] == '.root':
             path = os.path.join(dir, filename)
-            url = uboone_utilities.path_to_url(path)
-            if url != path and not proxy_ok:
-                proxy_ok = uboone_utilities.test_proxy()
-            file = ROOT.TFile.Open(url)
-            if file and file.IsOpen() and not file.IsZombie():
-                obj = file.Get('Events')
-                if obj and obj.InheritsFrom('TTree'):
+            nevroot = check_root_file(path)
+            if nevroot > 0:
+                if nev < 0:
+                    nev = 0
+                nev = nev + nevroot
+                roots.append((os.path.join(dir, filename), nevroot))
 
-                    # This is an art root file.
+            elif nevroot == 0:
 
-                    if nev < 0:
-                        nev = 0
-                    nevroot = obj.GetEntriesFast()
-                    nev = nev + nevroot
-                    roots.append((os.path.join(dir, filename), nevroot))
+                # Valid root (histo/ntuple) file, not an art root file.
 
-                else:
-
-                    # This is not an art root file.  Assume it is a histogram/ntuple file.
-
-                    hists.append(os.path.join(dir, filename))
+                hists.append(os.path.join(dir, filename))
 
             else:
 
@@ -1001,7 +1093,7 @@ def check_root(dir):
                 print 'Warning: File %s in directory %s is not a valid root file.' % (filename, dir)
 
     # Done.
-                    
+
     return (nev, roots, hists)
     
 
@@ -1306,7 +1398,7 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
 
     # Make merged histogram file using histmerge.
 
-    if len(hists) > 0:
+    if len(hists) > 0 and histmerge != '':
         print "Merging %d histogram files using %s." % (len(hists), histmerge)
 
         histname = os.path.join(dir, 'hist.root')
@@ -1324,8 +1416,9 @@ def docheck(dir, num_events, num_jobs, has_input_files, input_def, ana, has_meta
         if histname != histname_temp:
             if uboone_utilities.safeexist(histname):
                 os.remove(histname)
-            subprocess.call(['ifdh', 'cp', histname_temp, histname])
-            os.remove(histname_temp)
+            if os.path.exists(histname_temp):
+                subprocess.call(['ifdh', 'cp', histname_temp, histname])
+                os.remove(histname_temp)
     os.remove(histurlsname_temp)
 
     # Make sam files.
@@ -1821,6 +1914,7 @@ def main(argv):
     xmlfile = ''
     projectname = ''
     stagename = ''
+    override_histmerge = ''
     submit = 0
     check = 0
     checkana = 0
@@ -1860,6 +1954,9 @@ def main(argv):
             del args[0:2]
         elif args[0] == '--stage' and len(args) > 1:
             stagename = args[1]
+            del args[0:2]
+        elif args[0] == '--histmerge' and len(args) > 1:
+            override_histmerge = args[1]
             del args[0:2]
         elif args[0] == '--submit':
             submit = 1
@@ -1956,7 +2053,7 @@ def main(argv):
 
     # Convert the project element into a ProjectDef object.
 
-    project = ProjectDef(project_element)
+    project = ProjectDef(project_element, override_histmerge)
 
     # Make sure that we have a kerberos ticket if we might need one to submit jobs.
 

@@ -13,6 +13,8 @@ include_directories ( ${LARLIGHT_DIR}/DataFormat )
 
 link_libraries( ${LIB_NAME} ${ROOTLIB} ${LARLIGHT_LIB}) # All execs need this.
 
+add_subdirectory(job)
+
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES uboonecode_uboone_MCShowerReco
 			   Geometry
