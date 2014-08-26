@@ -25,3 +25,11 @@ cet_test(geometry_microboone HANDBUILT
   TEST_ARGS --rethrow-all --config ./test_geometry_uboone.fcl
   OPTIONAL_GROUPS BROKEN
 )
+
+# FCL files need to be copied to the test area (DATAFILES directive) since they
+# are not installed.
+cet_test(geometry_iterator_microboone HANDBUILT
+  DATAFILES test_geometry_iterators_uboone.fcl
+  TEST_EXEC lar
+  TEST_ARGS --rethrow-all --config ./test_geometry_iterators_uboone.fcl
+)
