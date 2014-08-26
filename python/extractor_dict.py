@@ -5,9 +5,9 @@ import subprocess
 from subprocess import Popen, PIPE
 import time
 import samweb_cli
-from samweb_client.utility import fileEnstoreChecksum
+#from samweb_client.utility import fileEnstoreChecksum
 import ast
-import uboone_utilities
+import uboone_utilities, root_metadata
 
 def getmetadata(inputfile):
 	# Set up the experiment name for samweb Python API	
@@ -89,8 +89,7 @@ def getmetadata(inputfile):
 	md['file_name'] =  inputfile.split("/")[-1]
 	md['file_size'] =  os.path.getsize(inputfile)
 	# For now, skip the checksum for dCache files.
-	if inputfile == url:
-		md['crc'] = fileEnstoreChecksum(inputfile)
+	md['crc'] = root_metadata.fileEnstoreChecksum(inputfile)
 	md['runs']      =  [[run, run_type]]
 	md['application'] = {'family': app_family, 'name': app_name, 'version': app_version}
 	md['parents'] = parents
