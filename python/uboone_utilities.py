@@ -104,6 +104,15 @@ def path_to_url(path):
         url = 'root://fndca1.fnal.gov:1094/pnfs/fnal.gov/usr/' + path[6:]
     return url
 
+# Function to optionally convert a filesystem path into an srm url.
+# Only affects paths in /pnfs space.
+
+def path_to_srm_url(path):
+    srm_url = path
+    if path[0:6] == '/pnfs/':
+        srm_url = 'srm://fndca1.fnal.gov:8443/srm/managerv2?SFN=/pnfs/fnal.gov/usr/' + path[6:]
+    return srm_url
+
 # dCache-safe method to test whether path exists without opening file.
 
 def safeexist(path):
