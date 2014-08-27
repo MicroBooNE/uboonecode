@@ -78,8 +78,8 @@ microboone_detsim_services.UBOpticalChConfig: @local::microboone_optical_ch_conf
 
 # Define microboone_simulation_services ... (all*) = (1*) + (2) + (2*)
 microboone_simulation_services:                                 @local::microboone_g4_services
-microboone_detsim_dark_services.LArFFT:                         @local::microboone_larfft
-microboone_detsim_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+microboone_simulation_services.LArFFT:                          @local::microboone_larfft
+microboone_simulation_services.SignalShapingServiceMicroBooNE:  @local::microboone_signalshapingservice
 microboone_simulation_services.UBOpticalChConfig:               @local::microboone_optical_ch_config
 
 END_PROLOG
