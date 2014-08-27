@@ -782,10 +782,10 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   
   FillWith(trkId        , -9999  );
   FillWith(trkncosmictags_tagger, -9999  );
-  FillWith(trkcosmicscore_tagger, -1.);
+  FillWith(trkcosmicscore_tagger, -99999.);
   FillWith(trkcosmictype_tagger, -9999  );
   FillWith(trkncosmictags_flashmatch, -9999  );
-  FillWith(trkcosmicscore_flashmatch, -1.);
+  FillWith(trkcosmicscore_flashmatch, -99999.);
   FillWith(trkcosmictype_flashmatch, -9999  );
   FillWith(trkstartx    , -99999.);
   FillWith(trkstarty    , -99999.);
