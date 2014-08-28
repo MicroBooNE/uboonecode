@@ -23,6 +23,7 @@ gdmldir product_dir gdml
 # to find gdml files:
 table_fragment_begin
     envSet(GROUP, uboone)
+    envSet(EXPERIMENT, uboone)
     envSet(SAM_EXPERIMENT, uboone)
     pathPrepend(FW_SEARCH_PATH, ${UBOONECODE_DIR}/gdml)
     pathPrepend(FHICL_FILE_PATH, .:./job)
