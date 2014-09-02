@@ -1546,51 +1546,40 @@ def docheck_declarations(outdir, declare):
 
     import_samweb()
 
-    # In order to remain compatible with the directory structore for
-    # fall 2012 and later projects, we look for root files in
-    # subdirectories of outdir in the following way:
-    #
-    # 1.  If outdir has a subdirectory called 'sam', only look for
-    #     root files in this subdirectory.
-    #
-    # 2.  If outdir does not have a subdirectory called 'sam', look
-    #     for root files in any subdirectory.
+    # Loop over root files listed in files.list.
 
-    single_subdir = ''
-    sam_subdir = os.path.join(outdir, 'sam')
-    if uboone_utilities.fast_isdir(sam_subdir):
-        single_subdir = 'sam'
+    roots = []
+    fnlist = os.path.join(outdir, 'files.list')
+    if uboone_utilities.safeexist(fnlist):
+        roots = uboone_utilities.saferead(fnlist)
+    else:
+        print 'No files.list file found, run project.py --check'
+        sys.exit(1)
 
-    # Loop over root files.
+    for root in roots:
+        path = string.strip(root)
+        fn = os.path.basename(path)
 
-    for subdir in os.listdir(outdir):
-        if single_subdir == '' or single_subdir == subdir:
-            subpath = os.path.join(outdir, subdir)
-            if uboone_utilities.fast_isdir(subpath):
-                nev, roots, subhists = check_root(subpath)
-                for root in roots:
-                    fn = os.path.basename(root[0])
+        # Check metadata
 
-                    # Check metadata
+        has_metadata = False
+        try:
+            md = samweb.getMetadata(filenameorid=fn)
+            has_metadata = True
+        except samweb_cli.exceptions.FileNotFound:
+            pass
 
-                    has_metadata = False
-                    try:
-                        md = samweb.getMetadata(filenameorid=fn)
-                        has_metadata = True
-                    except samweb_cli.exceptions.FileNotFound:
-                        pass
+        # Report or declare file.
 
-                    # Report or declare file.
-
-                    if has_metadata:
-                        print 'Metadata OK: %s' % fn
-                    else:
-                        if declare:
-                            print 'Declaring: %s' % fn
-                            md = extractor_dict.getmetadata(root[0])
-                            samweb.declareFile(md=md)
-                        else:
-                            print 'Not declared: %s' % fn
+        if has_metadata:
+            print 'Metadata OK: %s' % fn
+        else:
+            if declare:
+                print 'Declaring: %s' % fn
+                md = extractor_dict.getmetadata(path)
+                samweb.declareFile(md=md)
+            else:
+                print 'Not declared: %s' % fn
 
     return 0
 
