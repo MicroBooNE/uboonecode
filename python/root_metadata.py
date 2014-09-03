@@ -111,8 +111,7 @@ def get_external_metadata(inputfile):
 
 	# Root checks.
 
-        url = uboone_utilities.path_to_url(inputfile)
-        file = ROOT.TFile.Open(url)
+        file = uboone_utilities.SafeTFile.Open(inputfile)
         if file and file.IsOpen() and not file.IsZombie():
 
             # Root file opened successfully.
