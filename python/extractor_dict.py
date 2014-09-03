@@ -14,9 +14,15 @@ def getmetadata(inputfile):
 	samweb = samweb_cli.SAMWebClient(experiment='uboone')
 
 	# Extract metadata into a pipe.
-	url = uboone_utilities.path_to_url(inputfile)
-	proc = subprocess.Popen(["sam_metadata_dumper", url], stdout=subprocess.PIPE)
+	local = uboone_utilities.path_to_local(inputfile)
+	if local != '':
+		proc = subprocess.Popen(["sam_metadata_dumper", local], stdout=subprocess.PIPE)
+	else:
+		url = uboone_utilities.path_to_url(inputfile)
+		proc = subprocess.Popen(["sam_metadata_dumper", url], stdout=subprocess.PIPE)
 	lines = proc.stdout.readlines()
+	if local != '' and local != inputfile:
+		os.remove(local)
 
 	# Count the number of lines in the file (for later use!)
 	num_lines = len(lines)
