@@ -181,6 +181,75 @@ def wait_for_stat(path):
 
     return 1
 
+# Method to optionally make a copy of a pnfs file.
+
+def path_to_local(path):
+
+    # Depending on the input path and the environment, this method
+    # will do one of the following things.
+    #
+    # 1.  If the input path is a pnfs path (starts with "/pnfs/"), and
+    #     if $TMPDIR is defined and is accessible, the pnfs file will
+    #     be copied to $TMPDIR using ifdh, and the path of the local
+    #     copy will be returned.
+    #
+    # 2.  If the input path is a pnfs path, and if $TMPDIR is not
+    #     defined, is not accessible, or if the ifdh copy fails,
+    #     this method will return the empty string ("").
+    #
+    # 3.  If the input path is anything except a pnfs path, this
+    #     method will not do any copy and will return the input path.
+    #     
+
+    global proxy_ok
+    result = ''
+
+    # Is this a pnfs path?
+
+    if path[0:6] == '/pnfs/':
+
+        # Is there a temp directory?
+
+        local = ''
+        if os.environ.has_key('TMPDIR'):
+            tmpdir = os.environ['TMPDIR']
+            mode = os.stat(tmpdir).st_mode
+            if stat.S_ISDIR(mode) and os.access(tmpdir, os.W_OK):
+                local = os.path.join(tmpdir, os.path.basename(path))
+
+        if local != '':
+
+            # Do local copy.
+
+            if not proxy_ok:
+                proxy_ok = test_proxy()
+
+            # Make sure local path doesn't already exist (ifdh cp may fail).
+
+            if os.path.exists(local):
+                os.remove(local)
+
+            # Use ifdh to make local copy of file.
+
+            #print 'Copying %s to %s.' % (path, local)
+            rc = subprocess.call(['ifdh', 'cp', path, local])
+            if rc == 0:
+                rc = wait_for_stat(local)
+                if rc == 0:
+
+                    # Copy succeeded.
+
+                    result = local
+
+    else:
+
+        # Not a pnfs path.
+
+        result = path
+
+    return result
+
+
 # DCache-safe TFile-like class for opening files for reading.
 #
 # Class SafeTFile acts as follows.
@@ -203,7 +272,6 @@ def wait_for_stat(path):
 # This class has the following two data members.
 #
 # root_tfile - a ROOT.TFile object.
-# local      - Name of local file (for ifdh access).
 #
 # This class aggregates rather than inherits from ROOT.TFile because the owned
 # TFile can itself be polymorphic.
@@ -216,13 +284,10 @@ class SafeTFile:
 
     def __init__(self):
         self.root_tfile = None
-        self.local = ''
 
     # Initializing constructor.
 
     def __init__(self, path):
-        self.root_tfile = None
-        self.local = ''
         self.Open(path)
 
     # Destructor.
@@ -239,69 +304,33 @@ class SafeTFile:
 
     def Open(self, path):
 
-        global proxy_ok
         self.root_tfile = None
-        self.local = ''
 
         # Open file, with special handling for pnfs paths.
 
-        url = path_to_url(path)
-        if url != path:
-            if not proxy_ok:
-                proxy_ok = test_proxy()
+        local = path_to_local(path)
+        if local != '':
 
-            # Decide whether to use xrootd or ifdh.
-            # See if there is a writable directory $TMPDIR.  If there is,
-            # construct a path for a local copy of the pnfs file.
+            # Open file or local copy.
 
-            if os.environ.has_key('TMPDIR'):
-                tmpdir = os.environ['TMPDIR']
-                mode = os.stat(tmpdir).st_mode
-                if stat.S_ISDIR(mode) and os.access(tmpdir, os.W_OK):
-                    self.local = os.path.join(tmpdir, os.path.basename(path))
+            self.root_tfile = ROOT.TFile.Open(local)
 
-                    # Make sure local path doesn't already exist (ifdh cp may fail).
+            # Now that the local copy is open, we can safely delete it already.
 
-                    if os.path.exists(self.local):
-                        os.remove(self.local)
-
-
-            if self.local != '':
-
-                # Use ifdh to make local copy of file.
-
-                #print 'Copying %s to %s.' % (path, self.local)
-                rc = subprocess.call(['ifdh', 'cp', path, self.local])
-                if rc == 0:
-                    rc = wait_for_stat(self.local)
-                    if rc == 0:
-                        self.root_tfile = ROOT.TFile.Open(self.local)
-
-                        # Now that the local copy is open, we can safely delete it already.
-
-                        os.remove(self.local)
-                        self.local = ''
-
-                if rc != 0:
-
-                    # Ifdh copy did not succeed.
-
-                    self.root_tfile = None
-                    self.local = ''
-
-            else:
-
-                # No local path, use xrootd url.
-
-                #print 'Using url %s' % url
-                self.root_tfile = ROOT.TFile.Open(url)
+            if local != path:
+                os.remove(local)
 
         else:
 
-            # Not a pnfs-path.  Use regular TFile open.
+            # Input path is pnfs, but we could not get a local copy.
+            # Get xrootd url instead.a
 
-            self.root_tfile = ROOT.TFile.Open(path)
-            self.local = ''
+            global proxy_ok
+            if not proxy_ok:
+                proxy_ok = test_proxy()
+            url = path_to_url(path)
+            #print 'Using url %s' % url
+            self.root_tfile = ROOT.TFile.Open(url)
 
     # Close method.
 
@@ -312,9 +341,6 @@ class SafeTFile:
         if self.root_tfile != None and self.root_tfile.IsOpen():
             self.root_tfile.Close()
             self.root_tfile = None
-        if self.local != '':
-            os.remove(self.local)
-            self.local = ''
 
     # Copies of regular TFile methods used in project.py.
 
