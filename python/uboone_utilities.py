@@ -173,7 +173,11 @@ def wait_for_stat(path):
     while ntry > 0:
         if os.access(path, os.R_OK):
             return 0
-        #print 'Waiting ...'
+        print 'Waiting ...'
+
+        # Reading the parent directory seems to make files be visible faster.
+
+        os.listdir(os.path.dirname(path))
         time.sleep(1)
         ntry = ntry - 1
 
