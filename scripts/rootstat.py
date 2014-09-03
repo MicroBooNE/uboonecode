@@ -279,7 +279,7 @@ def main(argv):
             return 1
 
         print '\nOpening %s' % input_file
-        root = ROOT.TFile.Open(uboone_utilities.path_to_url(input_file))
+        root = uboone_utilities.SafeTFile(input_file)
         if not root.IsOpen() or root.IsZombie():
             print 'Failed to open %s' % input_file
             return 1

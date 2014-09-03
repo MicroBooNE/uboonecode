@@ -10,10 +10,12 @@
 #
 #----------------------------------------------------------------------
 
-import sys, os
+import sys, os, stat, time
 import subprocess
+import ROOT
 
 proxy_ok = False
+
 
 # Don't fail if samweb is not available.
 
@@ -163,3 +165,167 @@ def fast_isdir(path):
         result = True
     return result
 
+# Wait for file to appear on local filesystem.
+
+def wait_for_stat(path):
+
+    ntry = 60
+    while ntry > 0:
+        if os.access(path, os.R_OK):
+            return 0
+        #print 'Waiting ...'
+        time.sleep(1)
+        ntry = ntry - 1
+
+    # Timed out.
+
+    return 1
+
+# DCache-safe TFile-like class for opening files for reading.
+#
+# Class SafeTFile acts as follows.
+#
+# 1.  When initialized with a pnfs path (starts with "/pnfs/"), SafeTFile uses
+#     one of the following methods to open the file.
+#
+#     a) Open as a regular file (posix open).
+#
+#     b) Convert the path to an xrootd url (xrootd open).
+#
+#     c) Copy the file to a local temp disk using ifdh (copy to $TMPDIR or
+#        local directory) using ifdh, and open the local copy.
+#
+# 2.  When initialized with anything except a pnfs path (including regular
+#     filesystem paths and urls), SafeTFile acts exactly like TFile.
+#
+# Implementation notes.
+#
+# This class has the following two data members.
+#
+# root_tfile - a ROOT.TFile object.
+# local      - Name of local file (for ifdh access).
+#
+# This class aggregates rather than inherits from ROOT.TFile because the owned
+# TFile can itself be polymorphic.
+#
+#
+
+class SafeTFile:
+
+    # Default constructor.
+
+    def __init__(self):
+        self.root_tfile = None
+        self.local = ''
+
+    # Initializing constructor.
+
+    def __init__(self, path):
+        self.root_tfile = None
+        self.local = ''
+        self.Open(path)
+
+    # Destructor.
+
+    def __del__(self):
+        self.Close()
+
+    # Unbound (static) Open method.
+
+    def Open(path):
+        return SafeTFile(path)
+
+    # Bound Open method.
+
+    def Open(self, path):
+
+        global proxy_ok
+        self.root_tfile = None
+        self.local = ''
+
+        # Open file, with special handling for pnfs paths.
+
+        url = path_to_url(path)
+        if url != path:
+            if not proxy_ok:
+                proxy_ok = test_proxy()
+
+            # Decide whether to use xrootd or ifdh.
+            # See if there is a writable directory $TMPDIR.  If there is,
+            # construct a path for a local copy of the pnfs file.
+
+            if os.environ.has_key('TMPDIR'):
+                tmpdir = os.environ['TMPDIR']
+                mode = os.stat(tmpdir).st_mode
+                if stat.S_ISDIR(mode) and os.access(tmpdir, os.W_OK):
+                    self.local = os.path.join(tmpdir, os.path.basename(path))
+
+                    # Make sure local path doesn't already exist (ifdh cp may fail).
+
+                    if os.path.exists(self.local):
+                        os.remove(self.local)
+
+
+            if self.local != '':
+
+                # Use ifdh to make local copy of file.
+
+                #print 'Copying %s to %s.' % (path, self.local)
+                rc = subprocess.call(['ifdh', 'cp', path, self.local])
+                if rc == 0:
+                    rc = wait_for_stat(self.local)
+                    if rc == 0:
+                        self.root_tfile = ROOT.TFile.Open(self.local)
+
+                        # Now that the local copy is open, we can safely delete it already.
+
+                        os.remove(self.local)
+                        self.local = ''
+
+                if rc != 0:
+
+                    # Ifdh copy did not succeed.
+
+                    self.root_tfile = None
+                    self.local = ''
+
+            else:
+
+                # No local path, use xrootd url.
+
+                #print 'Using url %s' % url
+                self.root_tfile = ROOT.TFile.Open(url)
+
+        else:
+
+            # Not a pnfs-path.  Use regular TFile open.
+
+            self.root_tfile = ROOT.TFile.Open(path)
+            self.local = ''
+
+    # Close method.
+
+    def Close(self):
+
+        # Close file and delete temporary file (if any and not already deleted).
+
+        if self.root_tfile != None and self.root_tfile.IsOpen():
+            self.root_tfile.Close()
+            self.root_tfile = None
+        if self.local != '':
+            os.remove(self.local)
+            self.local = ''
+
+    # Copies of regular TFile methods used in project.py.
+
+    def IsOpen(self):
+        return self.root_tfile.IsOpen()
+
+    def IsZombie(self):
+        return self.root_tfile.IsZombie()
+
+    def GetListOfKeys(self):
+        return self.root_tfile.GetListOfKeys()
+
+    def Get(self, objname):
+        return self.root_tfile.Get(objname)
