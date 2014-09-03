@@ -21,6 +21,9 @@
 # --histmerge <program> - Override default histogram merging program
 #                         (no effect on histogram merging specified
 #                         at stage level).
+# --tmpdir <tempdir>  - Override TMPDIR internally.  If TMPDIR is set
+#                       use ifdh cp instead of xrootd for accessing
+#                       content of root files in dCache.
 #
 # Actions (specify one):
 #
@@ -1954,6 +1957,9 @@ def main(argv):
             del args[0:2]
         elif args[0] == '--histmerge' and len(args) > 1:
             override_histmerge = args[1]
+            del args[0:2]
+        elif args[0] == '--tmpdir' and len(args) > 1:
+            os.environ['TMPDIR'] = args[1]
             del args[0:2]
         elif args[0] == '--submit':
             submit = 1
