@@ -7,18 +7,18 @@ import time
 import samweb_cli
 #from samweb_client.utility import fileEnstoreChecksum
 import ast
-import uboone_utilities, root_metadata
+import project_utilities, root_metadata
 
 def getmetadata(inputfile):
 	# Set up the experiment name for samweb Python API	
-	samweb = samweb_cli.SAMWebClient(experiment='uboone')
+	samweb = samweb_cli.SAMWebClient(experiment=project_utilities.get_experiment())
 
 	# Extract metadata into a pipe.
-	local = uboone_utilities.path_to_local(inputfile)
+	local = project_utilities.path_to_local(inputfile)
 	if local != '':
 		proc = subprocess.Popen(["sam_metadata_dumper", local], stdout=subprocess.PIPE)
 	else:
-		url = uboone_utilities.path_to_url(inputfile)
+		url = project_utilities.path_to_url(inputfile)
 		proc = subprocess.Popen(["sam_metadata_dumper", url], stdout=subprocess.PIPE)
 	lines = proc.stdout.readlines()
 	if local != '' and local != inputfile:
