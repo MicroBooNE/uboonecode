@@ -367,34 +367,7 @@ class SafeTFile:
     def Get(self, objname):
         return self.root_tfile.Get(objname)
 
-# The following code block is essentially equivalent to the python statement
-#
-# from <experiment>_utilities import *
-#
-# where <experiment> is the string returned by function get_experiment().
-# The imported module, if any, can override any function or class defined
-# in this module, or add new ones.
-#
-# Note that for this procedure to work, function get_experiment() must return
-# the correct experiment name.
+# Import experiment-specific utilities.  In this imported module, one can 
+# override any function or symbol defined above, or add new ones.
 
-
-import imp
-module_name = '%s_utilities' % get_experiment()
-found_module = False
-try:
-    fp, path, desc = imp.find_module(module_name)
-    found_module = True
-except:
-    pass
-
-if found_module:
-    try:
-        mod = imp.load_module(module_name, fp, path, desc)
-        for key in mod.__dict__.keys():
-            obj = mod.__dict__[key]
-            if type(obj) == types.FunctionType or type(obj) == types.ClassType:
-                globals()[key] = obj
-    finally:
-        if fp:
-            fp.close()
+from experiment_utilities import *
