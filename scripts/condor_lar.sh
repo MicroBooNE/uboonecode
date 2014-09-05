@@ -527,18 +527,18 @@ fi
 
 # Initialize microboone ups products and mrb.
 
-OASIS_UBOONE_DIR="/cvmfs/oasis.opensciencegrid.org/microboone/products/"
-FERMIAPP_UBOONE_DIR="/grid/fermiapp/products/uboone/"
+OASIS_DIR="/cvmfs/oasis.opensciencegrid.org/microboone/products/"
+FERMIAPP_DIR="/grid/fermiapp/products/uboone/"
 
 echo "Initializing ups and mrb."
   
-if [[ -d "${FERMIAPP_UBOONE_DIR}" ]]; then
-  echo "Sourcing ${FERMIAPP_UBOONE_DIR}setup_uboone.sh file"
-  source ${FERMIAPP_UBOONE_DIR}/setup_uboone.sh
+if [[ -d "${FERMIAPP_DIR}" ]]; then
+  echo "Sourcing ${FERMIAPP_DIR}setup_uboone.sh file"
+  source ${FERMIAPP_DIR}/setup_uboone.sh
 
-elif [[ -d "${OASIS_UBOONE_DIR}" ]]; then
-  echo "Sourcing the ${OASIS_UBOONE_DIR}setup_uboone.sh file"
-  source ${OASIS_UBOONE_DIR}/setup_uboone.sh
+elif [[ -d "${OASIS_DIR}" ]]; then
+  echo "Sourcing the ${OASIS_DIR}setup_uboone.sh file"
+  source ${OASIS_DIR}/setup_uboone.sh
 
 else
   echo "Could not find MRB initialization script setup_uboone.sh"
