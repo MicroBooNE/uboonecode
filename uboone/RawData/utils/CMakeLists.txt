@@ -23,6 +23,7 @@ art_make( BASENAME_ONLY
                         ${PQ}
                         daq_datatypes
                         ${ART_FRAMEWORK_CORE}
+			${ART_FRAMEWORK_IO_SOURCES}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
