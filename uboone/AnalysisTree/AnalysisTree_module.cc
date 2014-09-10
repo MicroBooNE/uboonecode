@@ -298,6 +298,7 @@ namespace microboone {
     
     enum DataBits_t: unsigned int {
       tdAuxDet = 0x01,
+      tdCry = 0x01,
       tdDefault = 0
     }; // DataBits_t
     
@@ -388,6 +389,24 @@ namespace microboone {
     std::vector<Int_t>     genie_ND;
     std::vector<Int_t>     genie_mother;
     
+    //cosmic cry information
+    Int_t     mcevts_truthcry;    //number of neutrino Int_teractions in the spill
+    Int_t     cry_no_primaries;
+    std::vector<Int_t>     cry_primaries_pdg;
+    std::vector<Double_t>  cry_Eng;
+    std::vector<Double_t>  cry_Px;
+    std::vector<Double_t>  cry_Py;
+    std::vector<Double_t>  cry_Pz;
+    std::vector<Double_t>  cry_P;
+    std::vector<Double_t>  cry_StartPointx;
+    std::vector<Double_t>  cry_StartPointy;
+    std::vector<Double_t>  cry_StartPointz;
+    std::vector<Int_t>     cry_status_code;
+    std::vector<Double_t>  cry_mass;
+    std::vector<Int_t>     cry_trackID;
+    std::vector<Int_t>     cry_ND;
+    std::vector<Int_t>     cry_mother;
+    
     //geant information
     size_t MaxGEANTparticles = 0; ///! how many particles there is currently room for
     Int_t     no_primaries;      //number of primary geant particles
@@ -470,7 +489,8 @@ namespace microboone {
 
     /// Returns whether we have auxiliary detector data
     bool hasAuxDetector() const { return bits & tdAuxDet; }
-    
+    bool hasCryInfo() const { return bits & tdCry; }
+
     /// Sets the specified bits
     void SetBits(unsigned int setbits, bool unset = false)
       { if (unset) bits &= ~setbits; else bits |= setbits; }
@@ -504,6 +524,8 @@ namespace microboone {
     /// Resize the data strutcure for Genie primaries
     void ResizeGenie(int nPrimaries);
     
+    /// Resize the data strutcure for Cry primaries
+    void ResizeCry(int nPrimaries);
     
     /// Connect this object with a tree
     void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
@@ -613,6 +635,7 @@ namespace microboone {
     std::string fLArG4ModuleLabel;
     std::string fCalDataModuleLabel;
     std::string fGenieGenModuleLabel;
+    std::string fCryGenModuleLabel;
     std::string fG4ModuleLabel;
     std::string fVertexModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
@@ -621,6 +644,8 @@ namespace microboone {
     std::string fPOTModuleLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)
     bool fSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
+    bool fSaveCryInfo; ///whether to extract and save CRY particle data
+
     std::vector<std::string> fCosmicTaggerAssocLabel;
     std::vector<std::string> fFlashMatchAssocLabel;
 
@@ -633,6 +658,7 @@ namespace microboone {
         if (!fData) {
           fData = new AnalysisTreeDataStruct(GetNTrackers());
           fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fSaveAuxDetInfo);
+	  fData->SetBits(AnalysisTreeDataStruct::tdCry, !fSaveCryInfo);	  
         }
         else {
           fData->SetTrackers(GetNTrackers());
@@ -1058,6 +1084,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   }
 
   mcevts_truth = -99999;
+  mcevts_truthcry = -99999;
   nuPDG_truth = -99999;
   ccnc_truth = -99999;
   mode_truth = -99999;
@@ -1081,6 +1108,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   tptype_flux = -99999;
 
   genie_no_primaries = 0;
+  cry_no_primaries = 0;
   no_primaries = 0;
   geant_list_size=0;
   geant_list_size_in_tpcFV = 0;
@@ -1112,6 +1140,20 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(genie_trackID, -99999);
   FillWith(genie_ND, -99999);
   FillWith(genie_mother, -99999);
+  FillWith(cry_primaries_pdg, -99999);
+  FillWith(cry_Eng, -99999.);
+  FillWith(cry_Px, -99999.);
+  FillWith(cry_Py, -99999.);
+  FillWith(cry_Pz, -99999.);
+  FillWith(cry_P, -99999.);
+  FillWith(cry_StartPointx, -99999.);
+  FillWith(cry_StartPointy, -99999.);
+  FillWith(cry_StartPointz, -99999.);  
+  FillWith(cry_status_code, -99999);
+  FillWith(cry_mass, -99999.);
+  FillWith(cry_trackID, -99999);
+  FillWith(cry_ND, -99999);
+  FillWith(cry_mother, -99999);
   
   FillWith(geant_tpcFV_status, -99999);
   FillWith(geant_tpcFV_trackId, -99999);
@@ -1271,6 +1313,24 @@ void microboone::AnalysisTreeDataStruct::ResizeGenie(int nPrimaries) {
 
 } // microboone::AnalysisTreeDataStruct::ResizeGenie()
 
+void microboone::AnalysisTreeDataStruct::ResizeCry(int nPrimaries) {
+
+  cry_primaries_pdg.resize(nPrimaries);
+  cry_Eng.resize(nPrimaries);
+  cry_Px.resize(nPrimaries);
+  cry_Py.resize(nPrimaries);
+  cry_Pz.resize(nPrimaries);
+  cry_P.resize(nPrimaries);
+  cry_StartPointx.resize(nPrimaries);
+  cry_StartPointy.resize(nPrimaries);
+  cry_StartPointz.resize(nPrimaries);  
+  cry_status_code.resize(nPrimaries);
+  cry_mass.resize(nPrimaries);
+  cry_trackID.resize(nPrimaries);
+  cry_ND.resize(nPrimaries);
+  cry_mother.resize(nPrimaries);
+
+} // microboone::AnalysisTreeDataStruct::ResizeCry()
 
 void microboone::AnalysisTreeDataStruct::SetAddresses(
   TTree* pTree,
@@ -1354,6 +1414,25 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("genie_trackID",genie_trackID,"genie_trackID[genie_no_primaries]/I");
   CreateBranch("genie_ND",genie_ND,"genie_ND[genie_no_primaries]/I");
   CreateBranch("genie_mother",genie_mother,"genie_mother[genie_no_primaries]/I");
+
+   if (hasCryInfo()){
+    CreateBranch("mcevts_truthcry",&mcevts_truthcry,"mcevts_truthcry/I");  
+    CreateBranch("cry_no_primaries",&cry_no_primaries,"cry_no_primaries/I");
+    CreateBranch("cry_primaries_pdg",cry_primaries_pdg,"cry_primaries_pdg[cry_no_primaries]/I");
+    CreateBranch("cry_Eng",cry_Eng,"cry_Eng[cry_no_primaries]/D");
+    CreateBranch("cry_Px",cry_Px,"cry_Px[cry_no_primaries]/D");
+    CreateBranch("cry_Py",cry_Py,"cry_Py[cry_no_primaries]/D");
+    CreateBranch("cry_Pz",cry_Pz,"cry_Pz[cry_no_primaries]/D");
+    CreateBranch("cry_P",cry_P,"cry_P[cry_no_primaries]/D");
+    CreateBranch("cry_StartPointx",cry_StartPointx,"cry_StartPointx[cry_no_primaries]/D");
+    CreateBranch("cry_StartPointy",cry_StartPointy,"cry_StartPointy[cry_no_primaries]/D");
+    CreateBranch("cry_StartPointz",cry_StartPointz,"cry_StartPointz[cry_no_primaries]/D");   
+    CreateBranch("cry_status_code",cry_status_code,"cry_status_code[cry_no_primaries]/I");
+    CreateBranch("cry_mass",cry_mass,"cry_mass[cry_no_primaries]/D");
+    CreateBranch("cry_trackID",cry_trackID,"cry_trackID[cry_no_primaries]/I");
+    CreateBranch("cry_ND",cry_ND,"cry_ND[cry_no_primaries]/I");
+    CreateBranch("cry_mother",cry_mother,"cry_mother[cry_no_primaries]/I");
+  }  
 
   CreateBranch("no_primaries",&no_primaries,"no_primaries/I");
   CreateBranch("geant_list_size",&geant_list_size,"geant_list_size/I");
@@ -1442,6 +1521,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
   fCalDataModuleLabel       (pset.get< std::string >("CalDataModuleLabel")      ),
   fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
+  fCryGenModuleLabel        (pset.get< std::string >("CryGenModuleLabel")       ), 
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
   fVertexModuleLabel        (pset.get< std::string> ("VertexModuleLabel")       ),
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
@@ -1450,6 +1530,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fUseBuffer                (pset.get< bool >("UseBuffers", false)),
   fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false)),
+  fSaveCryInfo              (pset.get< bool >("SaveCryInfo", false)),  
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
   fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ) 
 {
@@ -1532,7 +1613,23 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   std::vector<art::Ptr<simb::MCTruth> > mclist;
   if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
     art::fill_ptr_vector(mclist, mctruthListHandle);
-
+    
+  // *MC truth cosmic generator information
+  art::Handle< std::vector<simb::MCTruth> > mctruthcryListHandle;
+  std::vector<art::Ptr<simb::MCTruth> > mclistcry;
+  if (fSaveCryInfo){
+    if (evt.getByLabel(fCryGenModuleLabel,mctruthcryListHandle))
+      art::fill_ptr_vector(mclistcry, mctruthcryListHandle);
+  }       
+    
+  art::Ptr<simb::MCTruth> mctruthcry;
+  int nCryPrimaries = 0;
+   
+  if (fSaveCryInfo){
+    mctruthcry = mclistcry[0];      
+    nCryPrimaries = mctruthcry->NParticles();  
+  } 
+  
   int nGeniePrimaries = 0, nGEANTparticles = 0, nGEANTparticlesInTPCFV = 0;
   
   art::Ptr<simb::MCTruth> mctruth;
@@ -1583,6 +1680,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   
   CreateData(); // tracker data is created with default constructor
   fData->ResizeGenie(nGeniePrimaries);
+  if (fSaveCryInfo)
+    fData->ResizeCry(nCryPrimaries);
   fData->ResizeGEANT(nGEANTparticles);
   fData->ResizeGEANTinTPCFV(nGEANTparticlesInTPCFV);
   fData->ClearLocalData(); // don't bother clearing tracker data yet
@@ -1963,6 +2062,29 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 */
   //mc truth information
   if (isMC){
+    if (fSaveCryInfo){ 
+      //store cry (cosmic generator information) 
+      fData->mcevts_truthcry = mclistcry.size();
+      fData->cry_no_primaries = nCryPrimaries;
+      //fData->cry_no_primaries;
+      for(Int_t iPartc = 0; iPartc < mctruthcry->NParticles(); ++iPartc){
+        const simb::MCParticle& partc(mctruthcry->GetParticle(iPartc));
+        fData->cry_primaries_pdg[iPartc]=partc.PdgCode();
+        fData->cry_Eng[iPartc]=partc.E();
+        fData->cry_Px[iPartc]=partc.Px();
+        fData->cry_Py[iPartc]=partc.Py();
+        fData->cry_Pz[iPartc]=partc.Pz();
+        fData->cry_P[iPartc]=partc.P();
+	fData->cry_StartPointx[iPartc] = partc.Vx();
+	fData->cry_StartPointy[iPartc] = partc.Vy();
+	fData->cry_StartPointz[iPartc] = partc.Vz();	
+        fData->cry_status_code[iPartc]=partc.StatusCode();
+        fData->cry_mass[iPartc]=partc.Mass();
+        fData->cry_trackID[iPartc]=partc.TrackId();
+        fData->cry_ND[iPartc]=partc.NumberDaughters();
+        fData->cry_mother[iPartc]=partc.Mother();
+      } // for cry particles  
+    }// end fSaveCryInfo   
     //save neutrino interaction information
     fData->mcevts_truth = mclist.size();
     if (fData->mcevts_truth > 0){//at least one mc record

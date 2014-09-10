@@ -2,7 +2,7 @@
 
 # Import stuff.
 
-import sys, os, string, subprocess, json, uboone_utilities
+import sys, os, string, subprocess, json, project_utilities
 
 # Import ROOT (hide command line arguments).
 
@@ -50,7 +50,7 @@ def fileEnstoreChecksum(path):
     """Calculate enstore compatible CRC value"""
 
     crc = {}
-    srm_url = uboone_utilities.path_to_srm_url(path)
+    srm_url = project_utilities.path_to_srm_url(path)
 
     if srm_url == path:
         try:
@@ -111,8 +111,7 @@ def get_external_metadata(inputfile):
 
 	# Root checks.
 
-        url = uboone_utilities.path_to_url(inputfile)
-        file = ROOT.TFile.Open(url)
+        file = project_utilities.SafeTFile(inputfile)
         if file and file.IsOpen() and not file.IsZombie():
 
             # Root file opened successfully.

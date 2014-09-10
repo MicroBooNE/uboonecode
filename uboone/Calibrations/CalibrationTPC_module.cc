@@ -107,6 +107,8 @@ namespace calibration {
     int               fAverages;
     int               fGetNoiseSpec;
     int               fFFTSize;
+    std::vector<int>  fEvtList;
+    std::vector<int>  fChanList;
     //******************************
 
     // these are containers for the calibration results
@@ -122,8 +124,9 @@ namespace calibration {
     std::vector< std::map< unsigned int, uint32_t> > fChanMap;
     std::vector< std::map< unsigned int, uint32_t> > fChanMapEndRun;
     
-    //Vector to hold ADCs to then make average Waveform Plot
+    //Vector to hold ADCs, freqSpec to then make average Waveform Plot
     std::vector< std::vector<double> > fWFADCHolder;
+    std::vector< std::vector<double> > fWFFreqHolder;
 
     //Vector for Noise Spectrum (a vector of floats) per event per channel
     std::vector< std::vector< std::vector<float> > > fNoiseSpectra;
@@ -214,7 +217,8 @@ namespace calibration {
     fAverages            = pset.get< int >("Averages");
     fGetNoiseSpec        = pset.get< int >("GetNoiseSpec");
     fFFTSize             = pset.get< int >("FFTSize");
-
+    fEvtList             = pset.get< std::vector <int> >("EvtList");
+    fChanList             = pset.get< std::vector <int> >("ChanList");
   }
 
 
@@ -459,8 +463,11 @@ namespace calibration {
     art::ServiceHandle<art::TFileService> tfs;
     gStyle->SetOptStat(0);
 
-    fWaveforms.clear();
-    fNoiseSpec.clear();
+    fWFADCHolder.clear();
+    fWFFreqHolder.clear();
+
+    //fWaveforms.clear();
+    //fNoiseSpec.clear();
 
     //First Make a channel map: number of events per channel
     fAllChan.push_back( tfs->make<TH1I>(Form("AllChan_SubRun_%d",fsubRunNum),
@@ -694,29 +701,20 @@ namespace calibration {
 				     std::vector<TH1I*> & Waveforms,
 				     std::map< unsigned int, uint32_t > chanmap ){
 
-    if ( (fAverages) and ( fEvtNum == 1) ){
 
-      for (unsigned int ich=0; ich < chanmap.size(); ich++){
-	//Make vectors to hold ADCs before averaging them
-	std::vector<double> vecTMP;
-	for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
-	  vecTMP.push_back(0.);
-
-	fWFADCHolder.push_back( vecTMP );
-
-      }
+    if (fAverages and (fEvtNum == 1) ){
+      std::vector<double> tmp(rawDigit.at(0).fADC.size(), 0.);
+      for (unsigned int ch=0; ch < chanmap.size(); ch++)
+	fWFADCHolder.push_back(tmp);
     }
-
+    
     if ( fAverages ){
-
       for (unsigned int ich=0; ich < chanmap.size(); ich++){
-	for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++){
-
-	  fWFADCHolder.at(ich).at(tick) += rawDigit.at(ich).fADC.at(tick);
-	}
+	for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
+	  fWFADCHolder.at(ich).at(tick) += float(rawDigit.at(ich).fADC.at(tick))/100.;
       }
     }
-
+    
 
     if ( (fAverages) and (fEvtNum == 100) ){
 
@@ -731,7 +729,7 @@ namespace calibration {
 					     0, rawDigit.at(ich).fADC.size() ) );
 
 	for ( unsigned int tick=0; tick < fWFADCHolder.at(ich).size() ; tick++)
-	  Waveforms.back()->SetBinContent( tick+1, fWFADCHolder.at(ich).at(tick)/100. );
+	  Waveforms.back()->SetBinContent( tick+1, fWFADCHolder.at(ich).at(tick) );
 	fWFOverlay.back()->Add(Waveforms.back(), "HIST P");
       }
       fWFOverlay.back()->Draw();
@@ -739,7 +737,7 @@ namespace calibration {
 
 
 
-    if ( (!fAverages) and (fEvtNum==1) ){
+    if ( !fAverages ){
       
       art::ServiceHandle<art::TFileService> tfs;
       //Make Histogram Stack
@@ -748,7 +746,8 @@ namespace calibration {
       
       for (unsigned int ich=0; ich < chanmap.size(); ich++){
 	//only certain channels to make things faster
-	if ( chanmap.at(ich) > 1100 ){      
+	if ( (std::find(fChanList.begin(), fChanList.end(), chanmap.at(ich)) != fChanList.end()) 
+	     or (fChanList.at(0) == -1) ){
 	  
 	  Waveforms.push_back( tfs->make<TH1I>(Form("WF_subRun_%d_ev_%d_chan_%d", fsubRunNum, fEvtNum, chanmap.at(ich) ), "Waveform", 
 					       rawDigit.at(ich).fADC.size(),
@@ -777,6 +776,15 @@ namespace calibration {
 				     std::map< unsigned int, uint32_t > chanmap ){
 
     art::ServiceHandle<util::LArFFT> fFFT;
+    std::string options = fFFT->FFTOptions();
+    int fitbins = fFFT->FFTFitBins();
+    fFFT->ReinitializeFFT(9600, options, fitbins);
+
+    if (fAverages and (fEvtNum == 1) ){
+      std::vector<double> tmp(rawDigit.at(0).fADC.size(), 0.);
+      for (unsigned int ch=0; ch < chanmap.size(); ch++)
+	fWFFreqHolder.push_back(tmp);
+    }
     
     if ( fAverages ){
       
@@ -786,17 +794,17 @@ namespace calibration {
 	std::vector<float> noiseTime(rawDigit.at(ich).fADC.size(), 0.);
 	std::vector<TComplex> noiseFrequency(rawDigit.at(ich).fADC.size(), 0.);
 	std::vector<double> noiseFrequencyMag(rawDigit.at(ich).fADC.size(), 0.);
-	
+
 	for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
-	  noiseTime.at(tick) += rawDigit.at(ich).fADC.at(tick);
+	  noiseTime.at(tick) += float(rawDigit.at(ich).fADC.at(tick));
 	
 	//do FFT
 	fFFT->DoFFT( noiseTime, noiseFrequency);
-	//get magnitude
-	for (unsigned int f=0; f < noiseFrequency.size(); f++)
-	  noiseFrequencyMag.at(f) += noiseFrequency.at(f).Rho();
 	
-	fWFADCHolder.push_back( noiseFrequencyMag );
+	//get magnitude
+	for (unsigned int f=0; f < noiseFrequency.size(); f++){
+	    fWFFreqHolder.at(ich).at(f) += float(noiseFrequency.at(f).Rho());
+	}
 	
       }
     }
@@ -810,12 +818,16 @@ namespace calibration {
 						       "Stack of Histograms" ) );
 
       for (unsigned int ich=0; ich < chanmap.size(); ich++){
-	NoiseSpec.push_back( tfs->make<TH1D>(Form("NoiseFreqSpec_subRun_%d_ev_%d_cntr_%d", fsubRunNum, fEvtNum, chanmap.at(ich) ),
+	std::cout << "Filling vector for chan: " << ich << std::endl;
+	NoiseSpec.push_back( tfs->make<TH1D>(Form("NoiseFreqSpec_subRun_%d_ev_%d_chan_%d", fsubRunNum, fEvtNum, chanmap.at(ich) ),
 					     "Avg Noise Frequency Spectrum over 100 Events; MHz; Amplitude", 
-					     rawDigit.at(ich).fADC.size(), 0, 1) );
+					     fFFT->FFTSize(), 0, 2) );
+	//rawDigit.at(ich).fADC.size(), 0, 1) );
 
-	for ( unsigned int tick=0; tick < fWFADCHolder.at(ich).size() ; tick++)
-	  NoiseSpec.back()->SetBinContent( tick+1, fWFADCHolder.at(ich).at(tick)/100. );
+	for (int tick=0; tick < fFFT->FFTSize()/2+1 ; tick++){
+	  if (tick == 100) { std::cout << "fWADCHolder at tick 100: " << fWFFreqHolder.at(ich).at(tick) << std::endl; }
+	  NoiseSpec.back()->SetBinContent( tick+1, fWFFreqHolder.at(ich).at(tick)/100. );
+	}
 
 	fNoiseSpecOverlay.back()->Add(NoiseSpec.back(), "HIST P");
 
@@ -825,47 +837,43 @@ namespace calibration {
     }
 
 
-    if ( (!fAverages) and (fEvtNum==1) ){
+    if ( !fAverages ){
       
       art::ServiceHandle<art::TFileService> tfs;
-      //Make Histogram Stack
-      fNoiseSpecOverlay.push_back( tfs->make<THStack>( Form("NoiseFreqSpec_subrun_%d_ev_%d", fsubRunNum, fEvtNum ),
-						       "Stack of Histograms" ) );
       
       for (unsigned int ich=0; ich < chanmap.size(); ich++){
-	//only certain channels to make things faster
-	if ( chanmap.at(ich)%100 == 0 ){
+	//only selected channels
+	if ( (std::find(fChanList.begin(), fChanList.end(), chanmap.at(ich)) != fChanList.end() )
+	     or (fChanList.at(0) == -1) ){
+
 	  NoiseSpec.push_back( tfs->make<TH1D>(Form("NoiseFreqSpec_subRun_%d_ev_%d_chan_%d", fsubRunNum, fEvtNum, chanmap.at(ich) ),
 					       "Noise Frequency Spectrum; MHz; Amplitude", 
-					       rawDigit.at(ich).fADC.size(), 0, 1) );
-	  
+					       fFFT->FFTSize(), 0, 2 ) );
+
 	  //make vectors for FFT analysis
 	  std::vector<float> noiseTime(rawDigit.at(ich).fADC.size(), 0.);
 	  std::vector<TComplex> noiseFrequency(rawDigit.at(ich).fADC.size(), 0.);
-	  std::vector<double> noiseFrequencyMag(rawDigit.at(ich).fADC.size(), 0.);
+	  std::vector<float> noiseFrequencyMag(rawDigit.at(ich).fADC.size(), 0.);
 	  
 	  for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
-	    noiseTime.at(tick) = sin(2*3.14*0.1*tick);//rawDigit.at(ich).fADC.at(tick);
+	    noiseTime.at(tick) = rawDigit.at(ich).fADC.at(tick);//sin(2*3.14*0.1*tick);//
+
 	  //do FFT
 	  fFFT->DoFFT( noiseTime, noiseFrequency);
+
 	  //get magnitude
 	  for (unsigned int f=0; f < noiseFrequency.size(); f++)
 	    noiseFrequencyMag.at(f) =  noiseFrequency.at(f).Rho();
 	  
-	  
-	  for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++){
+	  for (int tick=0; tick < fFFT->FFTSize()/2+1; tick++)
 	    NoiseSpec.back()->SetBinContent( tick+1, noiseFrequencyMag.at(tick) );
-	  }
-	  fNoiseSpecOverlay.back()->Add(NoiseSpec.back(), "HIST P");
 	}
       }//for all channels
-      
-      fNoiseSpecOverlay.back()->Draw();
       
     }
     return;
   }
-  
+    
 
 
   
@@ -913,8 +921,13 @@ namespace calibration {
       fChanMap.push_back( chanmap );
 
       if ( fGetNoiseSpec ){
-	GetNoiseSpec( rawDigitVector, fNoiseSpec, chanmap );
-	GetWaveforms( rawDigitVector, fWaveforms, chanmap );
+	//if not saving averages, make sure event number is in list of events one wants to save (fEvtNum)
+	if ( ( (!fAverages) and 
+	       ( (std::find(fEvtList.begin(), fEvtList.end(), fEvtNum) != fEvtList.end()) or (fEvtList.at(0) == -1) ) ) 
+	     or fAverages ) {
+	  GetNoiseSpec( rawDigitVector, fNoiseSpec, chanmap );
+	  GetWaveforms( rawDigitVector, fWaveforms, chanmap );
+	}
       }
 
     }//empty subrun
