@@ -69,6 +69,9 @@ add_subdirectory(test)
 # Top level fcl files.
 add_subdirectory(fcl)
 
+# Stand alone compiled executables.
+add_subdirectory(tools)
+
 # release database
 add_subdirectory(releaseDB)
 
