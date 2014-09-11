@@ -22,14 +22,8 @@ gdmldir product_dir gdml
 # table fragment to set FW_SEARCH_PATH needed 
 # to find gdml files:
 table_fragment_begin
-    envSet(GROUP, uboone)
-    envSet(EXPERIMENT, uboone)
-    envSet(SAM_EXPERIMENT, uboone)
     pathPrepend(FW_SEARCH_PATH, ${UBOONECODE_DIR}/gdml)
     pathPrepend(FHICL_FILE_PATH, .:./job)
-    pathPrepend(PYTHONPATH, ${UPS_PROD_DIR}/python)
-    setupOptional("sam_web_client")
-    setupOptional("jobsub_tools")
 table_fragment_end
 
 # With "product  version" table below, we now define depdendencies
@@ -38,6 +32,7 @@ table_fragment_end
 
 product          version
 larsoft         v02_06_01
+ubutil          v01_00_00
 postgresql      v9_1_12
 gcc		v4_8_2
 
@@ -48,13 +43,13 @@ only_for_build  cetbuildtools   v3_13_00
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
 # e5  - with gcc 4.8.1 and -std=c++11
-qualifier	larsoft		postgresql	gcc	notes
-e5:debug	e5:debug	-nq-		-nq-
-e5:opt		e5:opt		-nq-		-nq-
-e5:prof		e5:prof		-nq-		-nq-
-e5:noifdh:debug	e5:noifdh:debug	-nq-		-nq-
-e5:noifdh:opt	e5:noifdh:opt	-nq-		-nq-
-e5:noifdh:prof	e5:noifdh:prof	-nq-		-nq-
+qualifier	larsoft		ubutil		postgresql	gcc	notes
+e5:debug	e5:debug	e5:debug	-nq-		-nq-
+e5:opt		e5:opt		e5:opt		-nq-		-nq-
+e5:prof		e5:prof		e5:prof		-nq-		-nq-
+e5:noifdh:debug	e5:noifdh:debug	e5:debug	-nq-		-nq-
+e5:noifdh:opt	e5:noifdh:opt	e5:opt		-nq-		-nq-
+e5:noifdh:prof	e5:noifdh:prof	e5:prof		-nq-		-nq-
 
 # Preserve tabs and formatting in emacs and vi / vim:
 
