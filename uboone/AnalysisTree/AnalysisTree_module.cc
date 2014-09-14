@@ -122,11 +122,13 @@
 
 #include <cstring> // std::memcpy()
 #include <vector>
+#include <iterator> // std::begin(), std::end()
 #include <string>
 #include <sstream>
 #include <fstream>
 #include <algorithm>
 #include <functional> // std::mem_fun_ref
+#include <typeinfo>
 
 #include "TTree.h"
 #include "TTimeStamp.h"
@@ -443,7 +445,7 @@ namespace microboone {
     std::vector<Int_t>    TrackId;
     std::vector<Int_t>    Mother;
     std::vector<Int_t>    process_primary;
-    //std::vector<std::string> processname;
+    std::vector<std::string> processname;
     std::vector<Int_t>    MergedId; //geant track segments, which belong to the same particle, get the same
     
     // Auxiliary detector variables saved for each geant track
@@ -563,6 +565,28 @@ namespace microboone {
       void operator()
         (std::string name, std::vector<T>& data, std::string leaflist /*, int bufsize = 32000 */)
         { return this->operator() (name, (void*) data.data(), leaflist /*, int bufsize = 32000 */); }
+
+      template <typename T>
+      void operator() (std::string name, std::vector<T>& data)
+        {
+          if (!pTree) return;
+          void* address = static_cast<void*>(&data);
+          TBranch* pBranch = pTree->GetBranch(name.c_str());
+          if (!pBranch) {
+            pTree->Branch(name.c_str(), &data);
+            LOG_DEBUG("AnalysisTreeStructure")
+              << "Creating branch '" << name << " with " << typeid(T).name();
+          }
+          else if (pBranch->GetAddress() != address) {
+            pBranch->SetAddress(address);
+            LOG_DEBUG("AnalysisTreeStructure")
+              << "Reassigning address to branch '" << name << "'";
+          }
+          else {
+            LOG_DEBUG("AnalysisTreeStructure")
+              << "Branch '" << name << "' is fine";
+          }
+        } // operator()
       //@}
     }; // class BranchCreator
 
@@ -708,7 +732,7 @@ namespace { // local namespace
   /// Fills a container with begin()/end() interface
   template <typename CONT, typename V>
   inline void FillWith(CONT& data, const V& value)
-    { FillWith(data.begin(), data.end(), value); }
+    { FillWith(std::begin(data), std::end(data), value); }
 
 } // local namespace
 
@@ -1121,7 +1145,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(Mother, -99999);
   FillWith(TrackId, -99999);
   FillWith(process_primary, -99999);
-  //FillWith(processname, "noname");
+  FillWith(processname, "noname");
   FillWith(MergedId, -99999);
   FillWith(genie_primaries_pdg, -99999);
   FillWith(genie_Eng, -99999.);
@@ -1212,7 +1236,7 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   Mother.resize(MaxGEANTparticles);
   TrackId.resize(MaxGEANTparticles);
   process_primary.resize(MaxGEANTparticles);
-  //processname.resize(MaxGEANTparticles);
+  processname.resize(MaxGEANTparticles);
   MergedId.resize(MaxGEANTparticles);
   
   // auxiliary detector structure
@@ -1408,7 +1432,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("TrackId",TrackId,"TrackId[geant_list_size]/I");
   CreateBranch("MergedId", MergedId, "MergedId[geant_list_size]/I");
   CreateBranch("process_primary",process_primary,"process_primary[geant_list_size]/I");
-  //pTree->Branch("processname","std::vector<std::string>",&processname);
+  // CreateBranch("processname", processname);
 
   if (hasAuxDetector()) {
     std::ostringstream sstr;
@@ -2100,7 +2124,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	
         if (iPart < fData->GetMaxGEANTparticles()) {
           fData->process_primary[iPart] = int(isPrimary);
-	  //fData->processname[iPart]= pPart->Process();
+	  fData->processname[iPart]= pPart->Process();
           fData->Mother[iPart]=pPart->Mother();
           fData->TrackId[iPart]=TrackID;
           fData->pdg[iPart]=pPart->PdgCode();
