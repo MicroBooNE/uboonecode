@@ -353,38 +353,38 @@ namespace microboone {
     Int_t     nuPDG_truth;     //neutrino PDG code
     Int_t     ccnc_truth;      //0=CC 1=NC
     Int_t     mode_truth;      //0=QE/El, 1=RES, 2=DIS, 3=Coherent production
-    Double_t  enu_truth;       //true neutrino energy
-    Double_t  Q2_truth;        //Momentum transfer squared
-    Double_t  W_truth;         //hadronic invariant mass
+    Float_t  enu_truth;       //true neutrino energy
+    Float_t  Q2_truth;        //Momentum transfer squared
+    Float_t  W_truth;         //hadronic invariant mass
     Int_t     hitnuc_truth;    //hit nucleon
-    Double_t  nuvtxx_truth;    //neutrino vertex x
-    Double_t  nuvtxy_truth;    //neutrino vertex y
-    Double_t  nuvtxz_truth;    //neutrino vertex z
-    Double_t  nu_dcosx_truth;  //neutrino dcos x
-    Double_t  nu_dcosy_truth;  //neutrino dcos y
-    Double_t  nu_dcosz_truth;  //neutrino dcos z
-    Double_t  lep_mom_truth;   //lepton momentum
-    Double_t  lep_dcosx_truth; //lepton dcos x
-    Double_t  lep_dcosy_truth; //lepton dcos y
-    Double_t  lep_dcosz_truth; //lepton dcos z
+    Float_t  nuvtxx_truth;    //neutrino vertex x
+    Float_t  nuvtxy_truth;    //neutrino vertex y
+    Float_t  nuvtxz_truth;    //neutrino vertex z
+    Float_t  nu_dcosx_truth;  //neutrino dcos x
+    Float_t  nu_dcosy_truth;  //neutrino dcos y
+    Float_t  nu_dcosz_truth;  //neutrino dcos z
+    Float_t  lep_mom_truth;   //lepton momentum
+    Float_t  lep_dcosx_truth; //lepton dcos x
+    Float_t  lep_dcosy_truth; //lepton dcos y
+    Float_t  lep_dcosz_truth; //lepton dcos z
 
     //flux information
-    Double_t  tpx_flux;        //Px of parent particle leaving BNB target
-    Double_t  tpy_flux;        //Py of parent particle leaving BNB target
-    Double_t  tpz_flux;        //Pz of parent particle leaving BNB target
+    Float_t  tpx_flux;        //Px of parent particle leaving BNB target
+    Float_t  tpy_flux;        //Py of parent particle leaving BNB target
+    Float_t  tpz_flux;        //Pz of parent particle leaving BNB target
     Int_t     tptype_flux;     //Type of parent particle leaving BNB target
 
     //genie information
     size_t MaxGeniePrimaries = 0;
     Int_t     genie_no_primaries;
     std::vector<Int_t>     genie_primaries_pdg;
-    std::vector<Double_t>  genie_Eng;
-    std::vector<Double_t>  genie_Px;
-    std::vector<Double_t>  genie_Py;
-    std::vector<Double_t>  genie_Pz;
-    std::vector<Double_t>  genie_P;
+    std::vector<Float_t>  genie_Eng;
+    std::vector<Float_t>  genie_Px;
+    std::vector<Float_t>  genie_Py;
+    std::vector<Float_t>  genie_Pz;
+    std::vector<Float_t>  genie_P;
     std::vector<Int_t>     genie_status_code;
-    std::vector<Double_t>  genie_mass;
+    std::vector<Float_t>  genie_mass;
     std::vector<Int_t>     genie_trackID;
     std::vector<Int_t>     genie_ND;
     std::vector<Int_t>     genie_mother;
@@ -392,76 +392,59 @@ namespace microboone {
     //cosmic cry information
     Int_t     mcevts_truthcry;    //number of neutrino Int_teractions in the spill
     Int_t     cry_no_primaries;
-    std::vector<Int_t>     cry_primaries_pdg;
-    std::vector<Double_t>  cry_Eng;
-    std::vector<Double_t>  cry_Px;
-    std::vector<Double_t>  cry_Py;
-    std::vector<Double_t>  cry_Pz;
-    std::vector<Double_t>  cry_P;
-    std::vector<Double_t>  cry_StartPointx;
-    std::vector<Double_t>  cry_StartPointy;
-    std::vector<Double_t>  cry_StartPointz;
-    std::vector<Int_t>     cry_status_code;
-    std::vector<Double_t>  cry_mass;
-    std::vector<Int_t>     cry_trackID;
-    std::vector<Int_t>     cry_ND;
-    std::vector<Int_t>     cry_mother;
+    std::vector<Int_t>    cry_primaries_pdg;
+    std::vector<Float_t>  cry_Eng;
+    std::vector<Float_t>  cry_Px;
+    std::vector<Float_t>  cry_Py;
+    std::vector<Float_t>  cry_Pz;
+    std::vector<Float_t>  cry_P;
+    std::vector<Float_t>  cry_StartPointx;
+    std::vector<Float_t>  cry_StartPointy;
+    std::vector<Float_t>  cry_StartPointz;
+    std::vector<Int_t>    cry_status_code;
+    std::vector<Float_t>  cry_mass;
+    std::vector<Int_t>    cry_trackID;
+    std::vector<Int_t>    cry_ND;
+    std::vector<Int_t>    cry_mother;
     
     //geant information
     size_t MaxGEANTparticles = 0; ///! how many particles there is currently room for
     Int_t     no_primaries;      //number of primary geant particles
     Int_t     geant_list_size;  //number of all geant particles
     Int_t     geant_list_size_in_tpcFV;
-    std::vector<Int_t>     pdg;
-    std::vector<Double_t>  Eng;
-    std::vector<Double_t>  Px;
-    std::vector<Double_t>  Py;
-    std::vector<Double_t>  Pz;
-    std::vector<Double_t>  StartPointx;
-    std::vector<Double_t>  StartPointy;
-    std::vector<Double_t>  StartPointz;
-    std::vector<Double_t>  EndPointx;
-    std::vector<Double_t>  EndPointy;
-    std::vector<Double_t>  EndPointz;
-    std::vector<Int_t>     NumberDaughters;
-    std::vector<Int_t>     TrackId;
-    std::vector<Int_t>     Mother;
-    std::vector<Int_t>     process_primary;
-    std::vector<Int_t>     MergedId; //geant track segments, which belong to the same particle, get the same
-
-    // more geant information
-    size_t MaxGEANTparticlesInTPCFV = 0; ///! how many particles there is currently room for
-    std::vector<Int_t>   geant_tpcFV_status;
-    std::vector<Int_t>   geant_tpcFV_trackId;
-    std::vector<Int_t>   geant_tpcFV_pdg;
-    
-    std::vector<Double_t>  geant_tpcFV_orig_E;
-    std::vector<Double_t>  geant_tpcFV_orig_px;
-    std::vector<Double_t>  geant_tpcFV_orig_py;
-    std::vector<Double_t>  geant_tpcFV_orig_pz;
-    std::vector<Double_t>  geant_tpcFV_orig_startx;
-    std::vector<Double_t>  geant_tpcFV_orig_starty;
-    std::vector<Double_t>  geant_tpcFV_orig_startz;
-    std::vector<Double_t>  geant_tpcFV_orig_startt;
-    std::vector<Double_t>  geant_tpcFV_orig_endx;
-    std::vector<Double_t>  geant_tpcFV_orig_endy;
-    std::vector<Double_t>  geant_tpcFV_orig_endz;
-    std::vector<Double_t>  geant_tpcFV_orig_endt;
-
-    std::vector<Double_t>  geant_tpcFV_startx;      // starting x position.
-    std::vector<Double_t>  geant_tpcFV_starty;      // starting y position.
-    std::vector<Double_t>  geant_tpcFV_startz;      // starting z position.
-    std::vector<Double_t>  geant_tpcFV_startd;      // starting distance to boundary.
-    std::vector<Double_t>  geant_tpcFV_endx;        // ending x position.
-    std::vector<Double_t>  geant_tpcFV_endy;        // ending y position.
-    std::vector<Double_t>  geant_tpcFV_endz;        // ending z position.
-    std::vector<Double_t>  geant_tpcFV_endd;        // ending distance to boundary.
-    std::vector<Double_t>  geant_tpcFV_theta;       // theta.
-    std::vector<Double_t>  geant_tpcFV_phi;         // phi.
-    std::vector<Double_t>  geant_tpcFV_theta_xz;    // theta_xz.
-    std::vector<Double_t>  geant_tpcFV_theta_yz;    // theta_yz.
-    std::vector<Double_t>  geant_tpcFV_mom;         // momentum.
-    std::vector<Double_t>  geant_tpcFV_len;         // length.
+    std::vector<Int_t>    pdg;
+    std::vector<Int_t>    status;
+    std::vector<Float_t>  Eng;
+    std::vector<Float_t>  Px;
+    std::vector<Float_t>  Py;
+    std::vector<Float_t>  Pz;
+    std::vector<Float_t>  P;
+    std::vector<Float_t>  StartPointx;
+    std::vector<Float_t>  StartPointy;
+    std::vector<Float_t>  StartPointz;
+    std::vector<Float_t>  StartT;    
+    std::vector<Float_t>  EndPointx;
+    std::vector<Float_t>  EndPointy;
+    std::vector<Float_t>  EndPointz;
+    std::vector<Float_t>  EndT;    
+    std::vector<Float_t>  theta;    
+    std::vector<Float_t>  phi;    
+    std::vector<Float_t>  theta_xz;    
+    std::vector<Float_t>  theta_yz;    
+    std::vector<Float_t>  pathlen;    
+    std::vector<Int_t>    inTPCfiducial;    
+    std::vector<Float_t>  StartPointx_tpcFV;
+    std::vector<Float_t>  StartPointy_tpcFV;
+    std::vector<Float_t>  StartPointz_tpcFV;
+    std::vector<Float_t>  EndPointx_tpcFV;
+    std::vector<Float_t>  EndPointy_tpcFV;
+    std::vector<Float_t>  EndPointz_tpcFV;
+    std::vector<Int_t>    NumberDaughters;
+    std::vector<Int_t>    TrackId;
+    std::vector<Int_t>    Mother;
+    std::vector<Int_t>    process_primary;
+    std::vector<std::string> processname;
+    std::vector<Int_t>    MergedId; //geant track segments, which belong to the same particle, get the same
     
     // Auxiliary detector variables saved for each geant track
     // This data is saved as a vector (one item per GEANT particle) of C arrays
@@ -518,9 +501,6 @@ namespace microboone {
     /// Resize the data strutcure for GEANT particles
     void ResizeGEANT(int nParticles);
     
-    /// Resize the data strutcure for GEANT particles in fiducial volume
-    void ResizeGEANTinTPCFV(int nParticles);
-    
     /// Resize the data strutcure for Genie primaries
     void ResizeGenie(int nPrimaries);
     
@@ -542,10 +522,7 @@ namespace microboone {
     
     /// Returns the number of GEANT particles for which memory is allocated
     size_t GetMaxGEANTparticles() const { return MaxGEANTparticles; }
-    
-    /// Returns the number of GEANT particles in FV for which memory is allocated
-    size_t GetMaxGEANTparticlesInTPCFV() const { return MaxGEANTparticlesInTPCFV; }
-    
+        
     /// Returns the number of GENIE primaries for which memory is allocated
     size_t GetMaxGeniePrimaries() const { return MaxGeniePrimaries; }
     
@@ -1114,20 +1091,37 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   geant_list_size_in_tpcFV = 0;
   
   FillWith(pdg, -99999);
+  FillWith(status, -99999);
   FillWith(Eng, -99999.);
   FillWith(Px, -99999.);
   FillWith(Py, -99999.);
   FillWith(Pz, -99999.);
+  FillWith(P, -99999.);
   FillWith(StartPointx, -99999.);
   FillWith(StartPointy, -99999.);
   FillWith(StartPointz, -99999.);
+  FillWith(StartT, -99999.);  
   FillWith(EndPointx, -99999.);
   FillWith(EndPointy, -99999.);
   FillWith(EndPointz, -99999.);
+  FillWith(EndT, -99999.);
+  FillWith(theta, -99999.);
+  FillWith(phi, -99999.);
+  FillWith(theta_xz, -99999.);
+  FillWith(theta_yz, -99999.);
+  FillWith(pathlen, -99999.);
+  FillWith(inTPCfiducial, -99999);
+  FillWith(StartPointx_tpcFV, -99999.);
+  FillWith(StartPointy_tpcFV, -99999.);
+  FillWith(StartPointz_tpcFV, -99999.);
+  FillWith(EndPointx_tpcFV, -99999.);
+  FillWith(EndPointy_tpcFV, -99999.);
+  FillWith(EndPointz_tpcFV, -99999.);  
   FillWith(NumberDaughters, -99999);
   FillWith(Mother, -99999);
   FillWith(TrackId, -99999);
   FillWith(process_primary, -99999);
+  FillWith(processname, "noname");
   FillWith(MergedId, -99999);
   FillWith(genie_primaries_pdg, -99999);
   FillWith(genie_Eng, -99999.);
@@ -1154,38 +1148,6 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(cry_trackID, -99999);
   FillWith(cry_ND, -99999);
   FillWith(cry_mother, -99999);
-  
-  FillWith(geant_tpcFV_status, -99999);
-  FillWith(geant_tpcFV_trackId, -99999);
-  FillWith(geant_tpcFV_pdg, -99999);
-  
-  FillWith(geant_tpcFV_orig_E, -99999.);
-  FillWith(geant_tpcFV_orig_px, -99999.);
-  FillWith(geant_tpcFV_orig_py, -99999.);
-  FillWith(geant_tpcFV_orig_pz, -99999.);
-  FillWith(geant_tpcFV_orig_startx, -99999.);
-  FillWith(geant_tpcFV_orig_starty, -99999.);
-  FillWith(geant_tpcFV_orig_startz, -99999.);
-  FillWith(geant_tpcFV_orig_startt, -99999.);
-  FillWith(geant_tpcFV_orig_endx, -99999.);
-  FillWith(geant_tpcFV_orig_endy, -99999.);
-  FillWith(geant_tpcFV_orig_endz, -99999.);
-  FillWith(geant_tpcFV_orig_endt, -99999.);
-
-  FillWith(geant_tpcFV_startx, -99999.);
-  FillWith(geant_tpcFV_starty, -99999.);
-  FillWith(geant_tpcFV_startz, -99999.);
-  FillWith(geant_tpcFV_startd, -99999.);
-  FillWith(geant_tpcFV_endx, -99999.);
-  FillWith(geant_tpcFV_endy, -99999.);
-  FillWith(geant_tpcFV_endz, -99999.);
-  FillWith(geant_tpcFV_endd, -99999.);
-  FillWith(geant_tpcFV_theta, -99999.);
-  FillWith(geant_tpcFV_phi, -99999.);
-  FillWith(geant_tpcFV_theta_xz, -99999.);
-  FillWith(geant_tpcFV_theta_yz, -99999.);
-  FillWith(geant_tpcFV_mom, -99999.);
-  FillWith(geant_tpcFV_len, -99999.);
   
   // auxiliary detector information;
   FillWith(NAuxDets, 0);
@@ -1220,20 +1182,37 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   MaxGEANTparticles = (size_t) std::max(nParticles, 1);
   
   pdg.resize(MaxGEANTparticles);
+  status.resize(MaxGEANTparticles);  
   Eng.resize(MaxGEANTparticles);
   Px.resize(MaxGEANTparticles);
   Py.resize(MaxGEANTparticles);
   Pz.resize(MaxGEANTparticles);
+  P.resize(MaxGEANTparticles);
   StartPointx.resize(MaxGEANTparticles);
   StartPointy.resize(MaxGEANTparticles);
   StartPointz.resize(MaxGEANTparticles);
+  StartT.resize(MaxGEANTparticles); 
   EndPointx.resize(MaxGEANTparticles);
   EndPointy.resize(MaxGEANTparticles);
   EndPointz.resize(MaxGEANTparticles);
+  EndT.resize(MaxGEANTparticles);  
+  theta.resize(MaxGEANTparticles);
+  phi.resize(MaxGEANTparticles);
+  theta_xz.resize(MaxGEANTparticles);
+  theta_yz.resize(MaxGEANTparticles);
+  pathlen.resize(MaxGEANTparticles);
+  inTPCfiducial.resize(MaxGEANTparticles);
+  StartPointx_tpcFV.resize(MaxGEANTparticles);
+  StartPointy_tpcFV.resize(MaxGEANTparticles);
+  StartPointz_tpcFV.resize(MaxGEANTparticles);
+  EndPointx_tpcFV.resize(MaxGEANTparticles);
+  EndPointy_tpcFV.resize(MaxGEANTparticles);
+  EndPointz_tpcFV.resize(MaxGEANTparticles);    
   NumberDaughters.resize(MaxGEANTparticles);
   Mother.resize(MaxGEANTparticles);
   TrackId.resize(MaxGEANTparticles);
   process_primary.resize(MaxGEANTparticles);
+  processname.reserve(MaxGEANTparticles);
   MergedId.resize(MaxGEANTparticles);
   
   // auxiliary detector structure
@@ -1253,47 +1232,6 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   CombinedEnergyDep.resize(MaxGEANTparticles);
   
 } // microboone::AnalysisTreeDataStruct::ResizeGEANT()
-
-
-void microboone::AnalysisTreeDataStruct::ResizeGEANTinTPCFV(int nParticles) {
-
-  // minimum size is 1, so that we always have an address
-  MaxGEANTparticlesInTPCFV = (size_t) std::max(nParticles, 1);
-  
-  geant_tpcFV_status.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_trackId.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_pdg.resize(MaxGEANTparticlesInTPCFV);
-  
-  geant_tpcFV_orig_E.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_px.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_py.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_pz.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_startx.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_starty.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_startz.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_startt.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_endx.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_endy.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_endz.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_orig_endt.resize(MaxGEANTparticlesInTPCFV);
-
-  geant_tpcFV_startx.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_starty.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_startz.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_startd.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_endx.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_endy.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_endz.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_endd.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_theta.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_phi.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_theta_xz.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_theta_yz.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_mom.resize(MaxGEANTparticlesInTPCFV);
-  geant_tpcFV_len.resize(MaxGEANTparticlesInTPCFV);
-
-} // microboone::AnalysisTreeDataStruct::ResizeGEANTinTPCFV()
-
 
 void microboone::AnalysisTreeDataStruct::ResizeGenie(int nPrimaries) {
   
@@ -1436,55 +1374,42 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 
   CreateBranch("no_primaries",&no_primaries,"no_primaries/I");
   CreateBranch("geant_list_size",&geant_list_size,"geant_list_size/I");
-
+  CreateBranch("geant_list_size_in_tpcFV",&geant_list_size_in_tpcFV,"geant_list_size_in_tpcFV/I");
+  
   CreateBranch("pdg",pdg,"pdg[geant_list_size]/I");
-  CreateBranch("Eng",Eng,"Eng[geant_list_size]/D");
-  CreateBranch("Px",Px,"Px[geant_list_size]/D");
-  CreateBranch("Py",Py,"Py[geant_list_size]/D");
-  CreateBranch("Pz",Pz,"Pz[geant_list_size]/D");
-  CreateBranch("StartPointx",StartPointx,"StartPointx[geant_list_size]/D");
-  CreateBranch("StartPointy",StartPointy,"StartPointy[geant_list_size]/D");
-  CreateBranch("StartPointz",StartPointz,"StartPointz[geant_list_size]/D");
-  CreateBranch("EndPointx",EndPointx,"EndPointx[geant_list_size]/D");
-  CreateBranch("EndPointy",EndPointy,"EndPointy[geant_list_size]/D");
-  CreateBranch("EndPointz",EndPointz,"EndPointz[geant_list_size]/D");
+  CreateBranch("status",status,"status[geant_list_size]/I");
+  CreateBranch("Eng",Eng,"Eng[geant_list_size]/F");
+  CreateBranch("Px",Px,"Px[geant_list_size]/F");
+  CreateBranch("Py",Py,"Py[geant_list_size]/F");
+  CreateBranch("Pz",Pz,"Pz[geant_list_size]/F");
+  CreateBranch("P",P,"P[geant_list_size]/F");
+  CreateBranch("StartPointx",StartPointx,"StartPointx[geant_list_size]/F");
+  CreateBranch("StartPointy",StartPointy,"StartPointy[geant_list_size]/F");
+  CreateBranch("StartPointz",StartPointz,"StartPointz[geant_list_size]/F");
+  CreateBranch("StartT",StartT,"StartT[geant_list_size]/F");
+  CreateBranch("EndPointx",EndPointx,"EndPointx[geant_list_size]/F");
+  CreateBranch("EndPointy",EndPointy,"EndPointy[geant_list_size]/F");
+  CreateBranch("EndPointz",EndPointz,"EndPointz[geant_list_size]/F");
+  CreateBranch("EndT",EndT,"EndT[geant_list_size]/F");
+  CreateBranch("theta",theta,"theta[geant_list_size]/F");
+  CreateBranch("phi",phi,"phi[geant_list_size]/F");
+  CreateBranch("theta_xz",theta_xz,"theta_xz[geant_list_size]/F");
+  CreateBranch("theta_yz",theta_yz,"theta_yz[geant_list_size]/F");
+  CreateBranch("pathlen",pathlen,"pathlen[geant_list_size]/F");
+  CreateBranch("inTPCfiducial",inTPCfiducial,"inTPCfiducial[geant_list_size]/I");  
+  CreateBranch("StartPointx_tpcFV",StartPointx_tpcFV,"StartPointx_tpcFV[geant_list_size]/F");
+  CreateBranch("StartPointy_tpcFV",StartPointy_tpcFV,"StartPointy_tpcFV[geant_list_size]/F");
+  CreateBranch("StartPointz_tpcFV",StartPointz_tpcFV,"StartPointz_tpcFV[geant_list_size]/F");
+  CreateBranch("EndPointx_tpcFV",EndPointx_tpcFV,"EndPointx_tpcFV[geant_list_size]/F");
+  CreateBranch("EndPointy_tpcFV",EndPointy_tpcFV,"EndPointy_tpcFV[geant_list_size]/F");
+  CreateBranch("EndPointz_tpcFV",EndPointz_tpcFV,"EndPointz_tpcFV[geant_list_size]/F");
   CreateBranch("NumberDaughters",NumberDaughters,"NumberDaughters[geant_list_size]/I");
   CreateBranch("Mother",Mother,"Mother[geant_list_size]/I");
   CreateBranch("TrackId",TrackId,"TrackId[geant_list_size]/I");
   CreateBranch("MergedId", MergedId, "MergedId[geant_list_size]/I");
   CreateBranch("process_primary",process_primary,"process_primary[geant_list_size]/I");
+  pTree->Branch("processname",&processname);
 
-  CreateBranch("geant_list_size_in_tpcFV",&geant_list_size_in_tpcFV,"geant_list_size_in_tpcFV/I");
-  CreateBranch("geant_tpcFV_pdg", geant_tpcFV_pdg, "geant_tpcFV_pdg[geant_list_size_in_tpcFV]/I");
-  CreateBranch("geant_tpcFV_status", geant_tpcFV_status, "geant_tpcFV_status[geant_list_size_in_tpcFV]/I");
-  CreateBranch("geant_tpcFV_trackId", geant_tpcFV_trackId, "geant_tpcFV_trackId[geant_list_size_in_tpcFV]/I");
-  CreateBranch("geant_tpcFV_orig_E", geant_tpcFV_orig_E, "geant_tpcFV_orig_E[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_px", geant_tpcFV_orig_px, "geant_tpcFV_orig_px[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_py", geant_tpcFV_orig_py, "geant_tpcFV_orig_py[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_pz", geant_tpcFV_orig_pz, "geant_tpcFV_orig_pz[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_startx", geant_tpcFV_orig_startx, "geant_tpcFV_orig_startx[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_starty", geant_tpcFV_orig_starty, "geant_tpcFV_orig_starty[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_startz", geant_tpcFV_orig_startz, "geant_tpcFV_orig_startz[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_startt", geant_tpcFV_orig_startt, "geant_tpcFV_orig_startt[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_endx", geant_tpcFV_orig_endx, "geant_tpcFV_orig_endx[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_endy", geant_tpcFV_orig_endy, "geant_tpcFV_orig_endy[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_endz", geant_tpcFV_orig_endz, "geant_tpcFV_orig_endz[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_orig_endt", geant_tpcFV_orig_endt, "geant_tpcFV_orig_endt[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_startx", geant_tpcFV_startx, "geant_tpcFV_startx[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_starty", geant_tpcFV_starty, "geant_tpcFV_starty[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_startz", geant_tpcFV_startz, "geant_tpcFV_startz[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_startd", geant_tpcFV_startd, "geant_tpcFV_startd[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_endx", geant_tpcFV_endx, "geant_tpcFV_endx[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_endy", geant_tpcFV_endy, "geant_tpcFV_endy[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_endz", geant_tpcFV_endz, "geant_tpcFV_endz[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_endd", geant_tpcFV_endd, "geant_tpcFV_endd[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_theta", geant_tpcFV_theta, "geant_tpcFV_theta[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_phi", geant_tpcFV_phi, "geant_tpcFV_phi[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_theta_xz", geant_tpcFV_theta_xz, "geant_tpcFV_theta_xz[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_theta_yz", geant_tpcFV_theta_yz, "geant_tpcFV_theta_yz[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_mom", geant_tpcFV_mom, "geant_tpcFV_mom[geant_list_size_in_tpcFV]/D");
-  CreateBranch("geant_tpcFV_len", geant_tpcFV_len, "geant_tpcFV_len[geant_list_size_in_tpcFV]/D");
-  
   if (hasAuxDetector()) {
     std::ostringstream sstr;
     sstr << "[" << kMaxAuxDets << "]";
@@ -1630,7 +1555,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     nCryPrimaries = mctruthcry->NParticles();  
   } 
   
-  int nGeniePrimaries = 0, nGEANTparticles = 0, nGEANTparticlesInTPCFV = 0;
+  int nGeniePrimaries = 0, nGEANTparticles = 0;
   
   art::Ptr<simb::MCTruth> mctruth;
   int imc = 0;
@@ -1671,7 +1596,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       nGEANTparticles = plist.size();
       // to know the number of particles in FV would require
       // looking at all of them; so we waste some memory here
-      nGEANTparticlesInTPCFV = nGEANTparticles;
     } // if have MC truth
     LOG_DEBUG("AnalysisTree") << "Expected "
       << nGEANTparticles << " GEANT particles, "
@@ -1683,7 +1607,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (fSaveCryInfo)
     fData->ResizeCry(nCryPrimaries);
   fData->ResizeGEANT(nGEANTparticles);
-  fData->ResizeGEANTinTPCFV(nGEANTparticlesInTPCFV);
   fData->ClearLocalData(); // don't bother clearing tracker data yet
   
 //  const size_t Nplanes       = 3; // number of wire planes; pretty much constant...
@@ -2149,8 +2072,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       
       std::string pri("primary");
       int primary=0;
+      int fiducial = 0;
       int geant_particle=0;
-      size_t iFVPart = 0;
       sim::ParticleList::const_iterator itPart = plist.begin(),
         pend = plist.end(); // iterator to pairs (track id, particle)
       for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart)
@@ -2166,23 +2089,50 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         if (isPrimary) ++primary;
         
         int TrackID = pPart->TrackId();
-        
+	
+	TVector3 mcstart, mcend;
+	double plen = length(*pPart, mcstart, mcend);
+	
+        bool isFiducial = plen != 0;
+	if (plen) fiducial++;
+	
+	fData->processname.push_back(std::string());
+	
         if (iPart < fData->GetMaxGEANTparticles()) {
           fData->process_primary[iPart] = int(isPrimary);
+	  fData->processname[iPart] = pPart->Process();
           fData->Mother[iPart]=pPart->Mother();
           fData->TrackId[iPart]=TrackID;
           fData->pdg[iPart]=pPart->PdgCode();
+	  fData->status[iPart] = pPart->StatusCode();
           fData->Eng[iPart]=pPart->E();
           fData->Px[iPart]=pPart->Px();
           fData->Py[iPart]=pPart->Py();
           fData->Pz[iPart]=pPart->Pz();
+	  fData->P[iPart]=pPart->Momentum().Vect().Mag();
           fData->StartPointx[iPart]=pPart->Vx();
           fData->StartPointy[iPart]=pPart->Vy();
           fData->StartPointz[iPart]=pPart->Vz();
+	  fData->StartT[iPart] = pPart->T();
           fData->EndPointx[iPart]=pPart->EndPosition()[0];
           fData->EndPointy[iPart]=pPart->EndPosition()[1];
           fData->EndPointz[iPart]=pPart->EndPosition()[2];
+	  fData->EndT[iPart] = pPart->EndT();
+	  fData->theta[iPart] = pPart->Momentum().Theta();
+          fData->phi[iPart] = pPart->Momentum().Phi();
+          fData->theta_xz[iPart] = std::atan2(pPart->Px(), pPart->Pz());
+          fData->theta_yz[iPart] = std::atan2(pPart->Py(), pPart->Pz());
+          fData->pathlen[iPart]  = plen;
           fData->NumberDaughters[iPart]=pPart->NumberDaughters();
+	  fData->inTPCfiducial[iPart] = int(isFiducial);
+	  if (isFiducial){	
+	    fData->StartPointx_tpcFV[iPart] = mcstart.X();
+	    fData->StartPointy_tpcFV[iPart] = mcstart.Y();
+	    fData->StartPointz_tpcFV[iPart] = mcstart.Z();
+	    fData->EndPointx_tpcFV[iPart] = mcend.X();
+	    fData->EndPointy_tpcFV[iPart] = mcend.Y();
+	    fData->EndPointz_tpcFV[iPart] = mcend.Z();
+	  }	  	     
           
           //access auxiliary detector parameters
           if (fSaveAuxDetInfo) {
@@ -2250,58 +2200,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           mf::LogError("AnalysisTree:limits") << "event has "
             << plist.size() << " MC particles, only "
             << fData->GetMaxGEANTparticles() << " will be stored in tree";
-        }
-        
-        // is it fiducial?
-        TVector3 mcstart, mcend;
-        double plen = length(*pPart, mcstart, mcend);
-        if ( (plen==0) || pPart->PdgCode() > 10000) continue;
-        
-        if (iFVPart < fData->GetMaxGEANTparticlesInTPCFV()) {
-          double mctheta_xz = std::atan2(pPart->Px(), pPart->Pz());
-          double mctheta_yz = std::atan2(pPart->Py(), pPart->Pz());
-          
-          fData->geant_tpcFV_pdg[iFVPart]         = pPart->PdgCode();
-          fData->geant_tpcFV_trackId[iFVPart]     = pPart->TrackId();
-          fData->geant_tpcFV_status[iFVPart]      = pPart->StatusCode();
-          //
-          fData->geant_tpcFV_orig_E[iFVPart]      = pPart->E();
-          fData->geant_tpcFV_orig_px[iFVPart]     = pPart->Px();
-          fData->geant_tpcFV_orig_py[iFVPart]     = pPart->Py();
-          fData->geant_tpcFV_orig_pz[iFVPart]     = pPart->Pz();
-          fData->geant_tpcFV_orig_startx[iFVPart] = pPart->Vx();
-          fData->geant_tpcFV_orig_starty[iFVPart] = pPart->Vy();
-          fData->geant_tpcFV_orig_startz[iFVPart] = pPart->Vz();
-          fData->geant_tpcFV_orig_startt[iFVPart] = pPart->T();
-          fData->geant_tpcFV_orig_endx[iFVPart]   = pPart->EndX();
-          fData->geant_tpcFV_orig_endy[iFVPart]   = pPart->EndY();
-          fData->geant_tpcFV_orig_endz[iFVPart]   = pPart->EndZ();
-          fData->geant_tpcFV_orig_endt[iFVPart]   = pPart->EndT();
-          //
-          fData->geant_tpcFV_startx[iFVPart]      = mcstart.X();
-          fData->geant_tpcFV_starty[iFVPart]      = mcstart.Y();
-          fData->geant_tpcFV_startz[iFVPart]      = mcstart.Z();
-          fData->geant_tpcFV_endx[iFVPart]        = mcend.X();
-          fData->geant_tpcFV_endy[iFVPart]        = mcend.Y();
-          fData->geant_tpcFV_endz[iFVPart]        = mcend.Z();
-          fData->geant_tpcFV_theta[iFVPart]       = pPart->Momentum().Theta();
-          fData->geant_tpcFV_phi[iFVPart]         = pPart->Momentum().Phi();
-          fData->geant_tpcFV_theta_xz[iFVPart]    = mctheta_xz;
-          fData->geant_tpcFV_theta_yz[iFVPart]    = mctheta_yz;
-          fData->geant_tpcFV_mom[iFVPart]         = pPart->Momentum().Vect().Mag();
-          fData->geant_tpcFV_len[iFVPart]         = plen;
-        }
-        else if (iFVPart == fData->GetMaxGEANTparticlesInTPCFV()) {
-          // got this error? it might be a bug,
-          // since the structure should have enough room for everything
-          mf::LogError("AnalysisTree:limits") << "event has "
-            << plist.size() << " MC particles in fiducial volume, only "
-            << fData->GetMaxGEANTparticlesInTPCFV() << " will be stored in tree";
-        }
-        ++iFVPart;
+        }     
       } // for particles
       
-      fData->geant_list_size_in_tpcFV = iFVPart;
+      fData->geant_list_size_in_tpcFV = fiducial;
       fData->no_primaries = primary;
       fData->geant_list_size = geant_particle;
       
@@ -2363,7 +2265,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       << "\n - " << fData->genie_no_primaries << " genie primaries (" << fData->GetMaxGeniePrimaries() << ")"
       << "\n - " << fData->geant_list_size << " GEANT particles (" << fData->GetMaxGEANTparticles() << "), "
         << fData->no_primaries << " primaries"
-      << "\n - " << fData->geant_list_size_in_tpcFV << " GEANT particles in FV (" << fData->GetMaxGEANTparticlesInTPCFV() << ")"
+      << "\n - " << fData->geant_list_size_in_tpcFV << " GEANT particles in FV "
       << "\n - " << ((int) fData->kNTracker) << " trackers:"
       ;
     
