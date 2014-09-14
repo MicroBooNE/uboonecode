@@ -443,7 +443,7 @@ namespace microboone {
     std::vector<Int_t>    TrackId;
     std::vector<Int_t>    Mother;
     std::vector<Int_t>    process_primary;
-    std::vector<std::string> processname;
+    //std::vector<std::string> processname;
     std::vector<Int_t>    MergedId; //geant track segments, which belong to the same particle, get the same
     
     // Auxiliary detector variables saved for each geant track
@@ -1121,7 +1121,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(Mother, -99999);
   FillWith(TrackId, -99999);
   FillWith(process_primary, -99999);
-  FillWith(processname, "noname");
+  //FillWith(processname, "noname");
   FillWith(MergedId, -99999);
   FillWith(genie_primaries_pdg, -99999);
   FillWith(genie_Eng, -99999.);
@@ -1212,7 +1212,7 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   Mother.resize(MaxGEANTparticles);
   TrackId.resize(MaxGEANTparticles);
   process_primary.resize(MaxGEANTparticles);
-  processname.reserve(MaxGEANTparticles);
+  //processname.resize(MaxGEANTparticles);
   MergedId.resize(MaxGEANTparticles);
   
   // auxiliary detector structure
@@ -1408,7 +1408,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("TrackId",TrackId,"TrackId[geant_list_size]/I");
   CreateBranch("MergedId", MergedId, "MergedId[geant_list_size]/I");
   CreateBranch("process_primary",process_primary,"process_primary[geant_list_size]/I");
-  pTree->Branch("processname",&processname);
+  //pTree->Branch("processname","std::vector<std::string>",&processname);
 
   if (hasAuxDetector()) {
     std::ostringstream sstr;
@@ -1594,6 +1594,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       
       const sim::ParticleList& plist = bt->ParticleList();
       nGEANTparticles = plist.size();
+
       // to know the number of particles in FV would require
       // looking at all of them; so we waste some memory here
     } // if have MC truth
@@ -2076,6 +2077,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       int geant_particle=0;
       sim::ParticleList::const_iterator itPart = plist.begin(),
         pend = plist.end(); // iterator to pairs (track id, particle)
+	      	
       for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart)
       {
         const simb::MCParticle* pPart = (itPart++)->second;
@@ -2096,11 +2098,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         bool isFiducial = plen != 0;
 	if (plen) fiducial++;
 	
-	fData->processname.push_back(std::string());
-	
         if (iPart < fData->GetMaxGEANTparticles()) {
           fData->process_primary[iPart] = int(isPrimary);
-	  fData->processname[iPart] = pPart->Process();
+	  //fData->processname[iPart]= pPart->Process();
           fData->Mother[iPart]=pPart->Mother();
           fData->TrackId[iPart]=TrackID;
           fData->pdg[iPart]=pPart->PdgCode();
@@ -2202,7 +2202,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             << fData->GetMaxGEANTparticles() << " will be stored in tree";
         }     
       } // for particles
-      
+            
       fData->geant_list_size_in_tpcFV = fiducial;
       fData->no_primaries = primary;
       fData->geant_list_size = geant_particle;
