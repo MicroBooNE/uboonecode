@@ -569,18 +569,32 @@ namespace microboone {
       template <typename T>
       void operator() (std::string name, std::vector<T>& data)
         {
+          // overload for a generic object expressed directly by reference
+          // (as opposed to a generic object expressed by a pointer or
+          // to a simple leaf sequence specification);
+          // TTree::Branch(name, T* obj, Int_t bufsize, splitlevel) and
+          // TTree::SetObject() are used.
           if (!pTree) return;
-          void* address = static_cast<void*>(&data);
           TBranch* pBranch = pTree->GetBranch(name.c_str());
           if (!pBranch) {
             pTree->Branch(name.c_str(), &data);
+            // ROOT needs a TClass definition for T in order to create a branch,
+            // se we are sure that at this point the TClass exists
             LOG_DEBUG("AnalysisTreeStructure")
-              << "Creating branch '" << name << " with " << typeid(T).name();
+              << "Creating object branch '" << name
+              << " with " << TClass::GetClass(typeid(T))->ClassName();
           }
-          else if (pBranch->GetAddress() != address) {
-            pBranch->SetAddress(address);
+          else if
+            (*(reinterpret_cast<std::vector<T>**>(pBranch->GetAddress())) != &data)
+          {
+            // when an object is provided directly, the address of the object
+            // is assigned in TBranchElement::fObject (via TObject::SetObject())
+            // and the address itself is set to the address of the fObject
+            // member. Here we check that the address of the object in fObject
+            // is the same as the address of our current data type
+            pBranch->SetObject(&data);
             LOG_DEBUG("AnalysisTreeStructure")
-              << "Reassigning address to branch '" << name << "'";
+              << "Reassigning object to branch '" << name << "'";
           }
           else {
             LOG_DEBUG("AnalysisTreeStructure")
@@ -1432,7 +1446,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("TrackId",TrackId,"TrackId[geant_list_size]/I");
   CreateBranch("MergedId", MergedId, "MergedId[geant_list_size]/I");
   CreateBranch("process_primary",process_primary,"process_primary[geant_list_size]/I");
-  // CreateBranch("processname", processname);
+  CreateBranch("processname", processname);
 
   if (hasAuxDetector()) {
     std::ostringstream sstr;
@@ -2239,6 +2253,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       
       FillWith(fData->MergedId, 0);
 
+      // helper map track ID => index
+      std::map<int, size_t> TrackIDtoIndex;
+      const size_t nTrackIDs = fData->TrackId.size();
+      for (size_t index = 0; index < nTrackIDs; ++index)
+        TrackIDtoIndex.emplace(fData->TrackId[index], index);
+      
       // for each particle, consider all the direct ancestors with the same
       // PDG ID, and mark them as belonging to the same "group"
       // (having the same MergedId)
@@ -2261,6 +2281,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             currentMotherIndex = (int) iMother;
             break;
           } // while
+          assert(!TrackIDtoIndex.count(currentMotherTrackId)
+            || (currentMotherIndex == (int) TrackIDtoIndex[currentMotherTrackId]));
           if (currentMotherIndex == -1) break; // no mother found
           // if the mother particle is of a different type,
           // don't bother with iPart ancestry any further
@@ -2274,7 +2296,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         ++currentMergedId;
       } // for merging check
       
-    }//if (mcevts_truth){//at least one mc record
+    }//if (mcevts_truth)
   }//if (isMC){
   fData->taulife = LArProp->ElectronLifetime();
   fTree->Fill();
@@ -2420,33 +2442,26 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
   bool first = true;
 
   for(int i = 0; i < n; ++i) {
-    try{
-      // check if the particle is inside a TPC                                                                                          
-      double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
-      unsigned int tpc   = 0;
-      unsigned int cstat = 0;
-      geom->PositionToTPC(mypos, tpc, cstat);
-    }
-    catch(cet::exception &e){
-      continue;
-    }
+    // check if the particle is inside a TPC
+    double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
+    if (geom->FindTPCAtPosition(mypos)) continue;
     
     double xGen   = part.Vx(i);
     double tGen   = part.T(i);
     //double tDrift = xGen/vDrift;
     
     
-//std::cout<<"\n"<<xGen<<"\t"<<tGen<<"\t"<<(-xmax-tGen*vDrift)<<"\t"<<((2*xmax)-(tGen*vDrift));                                                                        
-       
+//std::cout<<"\n"<<xGen<<"\t"<<tGen<<"\t"<<(-xmax-tGen*vDrift)<<"\t"<<((2*xmax)-(tGen*vDrift));
+    
     if (xGen < (-xmax-tGen*vDrift) || xGen > ((2*xmax)-tGen*vDrift) ) continue;
     if (part.Vy(i) < ymin || part.Vy(i) > ymax) continue;
     if (part.Vz(i) < zmin || part.Vz(i) > zmax) continue;
-    // Doing some manual shifting to account for                                                                                        
-    // an interaction not occuring with the beam dump                                                                                        
-    // we will reconstruct an x distance different from                                                                                 
-    // where the particle actually passed to to the time                                                                                
-    // being different from in-spill interactions        
-    double newX = xGen+tGen*vDrift;        
+    // Doing some manual shifting to account for
+    // an interaction not occuring with the beam dump
+    // we will reconstruct an x distance different from
+    // where the particle actually passed to to the time
+    // being different from in-spill interactions
+    double newX = xGen+tGen*vDrift;
     
 
     TVector3 pos(newX,part.Vy(i),part.Vz(i));
