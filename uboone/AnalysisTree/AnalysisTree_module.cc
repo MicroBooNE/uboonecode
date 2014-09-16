@@ -1786,10 +1786,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         if (fmbfm.at(iTrk).size()>0){
           if(fmbfm.at(iTrk).size()>1) 
             std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fFlashMatchAssocLabel[iTracker];
-          if (fmbfm.at(iTrk).at(0)->CosmicScore() == 0 || fmbfm.at(iTrk).at(0)->CosmicScore()==1){
   	    TrackerData.trkcosmicscore_flashmatch[iTrk] = fmbfm.at(iTrk).at(0)->CosmicScore();
             TrackerData.trkcosmictype_flashmatch[iTrk] = fmbfm.at(iTrk).at(0)->CosmicType();
-	  }  
 	  //std::cout<<"\n"<<evt.event()<<"\t"<<iTrk<<"\t"<<fmbfm.at(iTrk).at(0)->CosmicScore()<<"\t"<<fmbfm.at(iTrk).at(0)->CosmicType();
         }
       }
