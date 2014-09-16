@@ -122,6 +122,7 @@
 
 #include <cstring> // std::memcpy()
 #include <vector>
+#include <map>
 #include <iterator> // std::begin(), std::end()
 #include <string>
 #include <sstream>
@@ -2272,18 +2273,11 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         // look in the ancestry, one by one
         int currentMotherTrackId = fData->Mother[iPart];
         while(currentMotherTrackId > 0) {
-          size_t iMother = fData->TrackId.size();
           // find the mother (we have its track ID in currentMotherTrackId)
-          int currentMotherIndex = -1;
-          while (iMother-- > 0) {
-            if (fData->TrackId[iMother] != currentMotherTrackId) continue;
-            // record the track number of the mother
-            currentMotherIndex = (int) iMother;
-            break;
-          } // while
-          assert(!TrackIDtoIndex.count(currentMotherTrackId)
-            || (currentMotherIndex == (int) TrackIDtoIndex[currentMotherTrackId]));
-          if (currentMotherIndex == -1) break; // no mother found
+          std::map<int, size_t>::const_iterator iMother
+            = TrackIDtoIndex.find(currentMotherTrackId);
+          if (iMother == TrackIDtoIndex.end()) break; // no mother found
+          size_t currentMotherIndex = iMother->second;
           // if the mother particle is of a different type,
           // don't bother with iPart ancestry any further
           if (fData->pdg[iPart] != fData->pdg[currentMotherIndex]) break;
