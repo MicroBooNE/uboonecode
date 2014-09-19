@@ -64,7 +64,7 @@ microboone_overburden_geo(TString volName="volWorld")
   //float m_tpc_argon = m_tpc - m_yplane;
   cout << "LAr weight in TPC = " << m_tpc_argon << " kg\n" <<endl;
 
-  TFile *tf = new TFile("microboone.root", "RECREATE");
+  TFile *tf = new TFile("microboone_overburden.root", "RECREATE");
  
   gGeoManager->Write();
 
