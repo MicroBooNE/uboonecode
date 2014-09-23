@@ -588,6 +588,7 @@ larreco : larreco : RecoAlg/DisambigAlg.h
 larreco : larreco : RecoAlg/EndPointAlg.h
 larreco : larreco : RecoAlg/HoughBaseAlg.h
 larreco : larreco : RecoAlg/KalmanFilterAlg.h
+larreco : larreco : RecoAlg/RootMathFunctor.h
 larreco : larreco : RecoAlg/SeedFinderAlgorithm.h
 larreco : larreco : RecoAlg/SmallClusterFinderAlg.h
 larreco : larreco : RecoAlg/SpacePointAlg.h
@@ -775,6 +776,7 @@ uboonecode : lardata : Utilities/TimeServiceException.h
 uboonecode : lardata : Utilities/VectorMap.h
 uboonecode : lardata : Utilities/sparse_vector.h
 uboonecode : larevt : Filters/ChannelFilter.h
+uboonecode : larreco : RecoAlg/RootMathFunctor.h
 uboonecode : larreco : RecoAlg/TrackMomentumCalculator.h
 uboonecode : larsim : MCCheater/BackTracker.h
 uboonecode : larsim : Simulation/AuxDetSimChannel.h
