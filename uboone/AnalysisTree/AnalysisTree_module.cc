@@ -135,7 +135,7 @@
 #include "TTimeStamp.h"
 
 constexpr int kNplanes       = 3;     //number of wire planes
-constexpr int kMaxHits       = 20000; //maximum number of hits;
+constexpr int kMaxHits       = 25000; //maximum number of hits;
 constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackModuleLabel
 constexpr unsigned short kMaxVertices   = 100;    //max number of 3D vertices
@@ -334,13 +334,15 @@ namespace microboone {
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
-    Char_t   hit_plane[kMaxHits];      //plane number
+    Short_t   hit_plane[kMaxHits];      //plane number
     Short_t  hit_wire[kMaxHits];       //wire number
     Short_t  hit_channel[kMaxHits];    //channel ID
     Double_t hit_peakT[kMaxHits];      //peak time
     Float_t  hit_charge[kMaxHits];     //charge (area)
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
+    Float_t  hit_endT[kMaxHits];       //hit end time
+    
     Short_t  hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
 
     // vertex information
@@ -425,11 +427,11 @@ namespace microboone {
     std::vector<Float_t>  StartPointx;
     std::vector<Float_t>  StartPointy;
     std::vector<Float_t>  StartPointz;
-    std::vector<Float_t>  StartT;    
+    std::vector<Float_t>  StartT;  
+    std::vector<Float_t>  EndT;          
     std::vector<Float_t>  EndPointx;
     std::vector<Float_t>  EndPointy;
     std::vector<Float_t>  EndPointz;
-    std::vector<Float_t>  EndT;    
     std::vector<Float_t>  theta;    
     std::vector<Float_t>  phi;    
     std::vector<Float_t>  theta_xz;    
@@ -1082,13 +1084,14 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
 
   no_hits = 0;
   
-  std::fill(hit_plane, hit_plane + sizeof(hit_plane)/sizeof(hit_plane[0]), -99);
+  std::fill(hit_plane, hit_plane + sizeof(hit_plane)/sizeof(hit_plane[0]), -9999);
   std::fill(hit_wire, hit_wire + sizeof(hit_wire)/sizeof(hit_wire[0]), -9999);
   std::fill(hit_channel, hit_channel + sizeof(hit_channel)/sizeof(hit_channel[0]), -9999);
   std::fill(hit_peakT, hit_peakT + sizeof(hit_peakT)/sizeof(hit_peakT[0]), -99999.);
   std::fill(hit_charge, hit_charge + sizeof(hit_charge)/sizeof(hit_charge[0]), -99999.);
   std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
   std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
+  std::fill(hit_endT, hit_endT + sizeof(hit_endT)/sizeof(hit_endT[0]), -99999.);
 
   for (size_t iTrk = 0; iTrk < kMaxTrackers; ++iTrk) {
     std::fill(hit_trkid[iTrk], hit_trkid[iTrk] + kMaxHits, -9999);
@@ -1139,7 +1142,8 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(StartPointx, -99999.);
   FillWith(StartPointy, -99999.);
   FillWith(StartPointz, -99999.);
-  FillWith(StartT, -99999.);  
+  FillWith(StartT, -99999.);
+  FillWith(EndT, -99999.);    
   FillWith(EndPointx, -99999.);
   FillWith(EndPointy, -99999.);
   FillWith(EndPointz, -99999.);
@@ -1231,6 +1235,7 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   StartPointy.resize(MaxGEANTparticles);
   StartPointz.resize(MaxGEANTparticles);
   StartT.resize(MaxGEANTparticles); 
+  EndT.resize(MaxGEANTparticles);    
   EndPointx.resize(MaxGEANTparticles);
   EndPointy.resize(MaxGEANTparticles);
   EndPointz.resize(MaxGEANTparticles);
@@ -1325,13 +1330,14 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("taulife",&taulife,"taulife/D");
 
   CreateBranch("no_hits",&no_hits,"no_hits/I");
-  CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits]/B");
+  CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits]/S");
   CreateBranch("hit_wire",hit_wire,"hit_wire[no_hits]/S");
   CreateBranch("hit_channel",hit_channel,"hit_channel[no_hits]/S");
   CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
   CreateBranch("hit_charge",hit_charge,"hit_charge[no_hits]/F");
   CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
   CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
+  CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits]/F");
 
   CreateBranch("nvtx",&nvtx,"nvtx/S");
   CreateBranch("vtx",vtx,"vtx[nvtx][3]/F");
@@ -1714,6 +1720,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     fData->hit_charge[i]  = hitlist[i]->Charge();
     fData->hit_ph[i]  = hitlist[i]->Charge(true);
     fData->hit_startT[i] = hitlist[i]->StartTime();
+    fData->hit_endT[i] = hitlist[i]->EndTime();
+    
     /*
     for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
       art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[it]);

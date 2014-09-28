@@ -111,3 +111,5 @@ physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit",
 physics.analyzers.analysistree.CryGenModuleLabel: "cry"
 physics.analyzers.analysistree.SaveCryInfo: false
 
+physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
+
