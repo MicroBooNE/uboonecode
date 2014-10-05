@@ -2444,14 +2444,14 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
   for(int i = 0; i < n; ++i) {
     // check if the particle is inside a TPC
     double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
-    if (geom->FindTPCAtPosition(mypos)) continue;
+    if (!(geom->FindTPCAtPosition(mypos))) continue;
     
     double xGen   = part.Vx(i);
     double tGen   = part.T(i);
     //double tDrift = xGen/vDrift;
     
     
-//std::cout<<"\n"<<xGen<<"\t"<<tGen<<"\t"<<(-xmax-tGen*vDrift)<<"\t"<<((2*xmax)-(tGen*vDrift));
+    //std::cout<<"\n"<<xGen<<"\t"<<tGen<<"\t"<<(-xmax-tGen*vDrift)<<"\t"<<((2*xmax)-(tGen*vDrift));
     
     if (xGen < (-xmax-tGen*vDrift) || xGen > ((2*xmax)-tGen*vDrift) ) continue;
     if (part.Vy(i) < ymin || part.Vy(i) > ymax) continue;
