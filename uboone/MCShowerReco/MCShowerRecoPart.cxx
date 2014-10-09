@@ -41,6 +41,7 @@ namespace sim {
   {
     _track_index.clear();
     _track_id.clear();
+    _process.clear();
     _mother.clear();
     _ancestor.clear();
     _pdgcode.clear();
@@ -50,6 +51,7 @@ namespace sim {
     _start_mom.clear();
 
     _track_id.reserve(n);
+    _process.reserve(n);
     _mother.reserve(n);
     _pdgcode.reserve(n);
     _start_vtx.reserve(n);
@@ -60,17 +62,19 @@ namespace sim {
 
   //----------------------------------------------------------------
   void MCShowerRecoPart::AddParticle(unsigned int track_id,
-				    unsigned int mother_track_id,
-				    int pdgcode,
-				    const TLorentzVector &start_vtx,
-				    const TLorentzVector &start_mom,
-				    const std::set<unsigned int> &daughters)
+				     unsigned int mother_track_id,
+				     const std::string &process,
+				     int pdgcode,
+				     const TLorentzVector &start_vtx,
+				     const TLorentzVector &start_mom,
+				     const std::set<unsigned int> &daughters)
   //----------------------------------------------------------------
   {
     unsigned int index = _track_index.size();
 
     _track_index.insert(std::pair<unsigned int, unsigned int>(track_id,index));
     _track_id.push_back(track_id);
+    _process.push_back(process);
     _mother.push_back(mother_track_id);
     _pdgcode.push_back(pdgcode);
     _start_vtx.push_back(std::vector<double>(4,0.));
@@ -108,8 +112,11 @@ namespace sim {
       for(size_t i=0; i<(size_t)(mcp_ptr->NumberDaughters()); ++i)
 	daughters.insert(mcp_ptr->Daughter(i));
 
+      if(mcp_ptr->TrackId() < 100) 
+	std::cout<<"Creation: "<<mcp_ptr->Process()<<" ... "<<mcp_ptr->TrackId()<<std::endl;
       this->AddParticle((unsigned int)(mcp_ptr->TrackId()),
 			(unsigned int)(mcp_ptr->Mother()),
+			mcp_ptr->Process(),
 			mcp_ptr->PdgCode(),
 			mcp_ptr->Position(),
 			mcp_ptr->Momentum(),

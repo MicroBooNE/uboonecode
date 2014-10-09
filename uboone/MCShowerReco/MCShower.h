@@ -18,6 +18,7 @@ namespace sim {
     //---- Mother info ----//
     int momPdgCode;                 ///< mother PDG code
     unsigned int momTrackId;        ///< mother G4 Track ID
+    std::string momProcess;         ///< mother's creation process
     std::vector<double> vtxMother;  ///< mother position 4-vector @ generation
     std::vector<double> momMother;  ///< mother momentum 4-vector @ generation
     /// mother 3D angle phi (along shower angle definition, not ordinary coord. system)
@@ -33,7 +34,10 @@ namespace sim {
 
     //---- Daughter info ----//
     std::vector<unsigned int> daughterTrackId; ///< Daughters' track ID
-    std::vector<float> momDaughter;            ///< Daughters' deposit sum momentum 4-vector
+    std::vector<double> vtxDaughter;           ///< Daughters' first energy deposition vtx
+    std::vector<double> momDaughter;           ///< Daughters' deposit sum momentum 4-vector
+    //std::vector<float> vtxDaughter;           ///< Daughters' first energy deposition vtx
+    //std::vector<float> momDaughter;           ///< Daughters' deposit sum momentum 4-vector
     /// daughter 3D angle phi (along shower angle definition, not ordinary coord. system)
     float phiDaughter;
     /// daughter 3D angle theta (along shower angle definition, not ordinary coord. system)
@@ -59,6 +63,7 @@ namespace sim {
 
       momPdgCode = ::sim::kINVALID_INT;
       momTrackId = ::sim::kINVALID_UINT;      
+      momProcess = "";
       vtxMother.clear();
       vtxMother.resize(4,0);
       momMother.clear();
@@ -69,6 +74,8 @@ namespace sim {
       uAngleMother = vAngleMother = wAngleMother = ::sim::kINVALID_FLOAT;
 
       daughterTrackId.clear();
+      vtxDaughter.clear();
+      vtxDaughter.resize(4,0);
       momDaughter.clear();
       momDaughter.resize(4,0);
       //phiDaughter = thetaDaughter = TMath::Pi()*4;

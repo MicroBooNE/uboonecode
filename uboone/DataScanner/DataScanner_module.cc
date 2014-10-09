@@ -993,6 +993,8 @@ namespace datascanner {
 
       light_prof.SetMotherPoint(mcs.vtxMother);
 
+      light_prof.SetMotherProcess(mcs.momProcess);
+
       light_prof.SetMotherMomentum(mcs.momMother);
 
       light_prof.SetDaughterTrackList(mcs.daughterTrackId);
@@ -1001,13 +1003,16 @@ namespace datascanner {
       //mcs.uAngleDaughter, mcs.vAngleDaughter, mcs.wAngleDaughter);
 
       light_prof.SetDaughterMomentum(mcs.momDaughter);
+      light_prof.SetDaughterPosition(mcs.vtxDaughter);
 
       std::vector<float> plane_charge(_geo->Nplanes(),0);
       plane_charge[0]=mcs.qU;
       plane_charge[1]=mcs.qV;
       plane_charge[2]=mcs.qW;
+      std::cout<<std::endl;
+      std::cout<<"PLANE CHARGE: "<< plane_charge.size()<<std::endl;
       light_prof.SetPlaneCharge(plane_charge);
-
+      std::cout<<std::endl;
       //light_prof.SetEdepVtx(mcs.vtxEdep);
 
       data_ptr->push_back(light_prof);

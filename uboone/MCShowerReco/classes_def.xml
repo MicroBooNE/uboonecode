@@ -4,7 +4,8 @@
  <class name="std::vector< std::vector<float> >"                                             />
 </lcgdict>
 
-<class name="sim::MCShower" ClassVersion="11" >
+<class name="sim::MCShower" ClassVersion="12" >
+ <version ClassVersion="12" checksum="1128306459"/>
  <version ClassVersion="11" checksum="2381371595"/>
  <version ClassVersion="10" checksum="2087633348"/>
 </class>

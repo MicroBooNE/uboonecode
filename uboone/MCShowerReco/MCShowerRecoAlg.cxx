@@ -54,14 +54,22 @@ namespace sim {
       
       shower_prof.momPdgCode = fPartAlg.PdgCode(mother_candidate);
       shower_prof.momTrackId = fPartAlg.TrackId(mother_candidate);
+      shower_prof.momProcess = fPartAlg.Process(mother_candidate);
 
       shower_prof.daughterTrackId.reserve(fPartAlg.ShowerDaughters(shower_index).size());
-      for(auto const& index : fPartAlg.ShowerDaughters(shower_index))
+
+      bool first = true;
+      for(auto const& index : fPartAlg.ShowerDaughters(shower_index)) {
 
 	shower_prof.daughterTrackId.push_back(fPartAlg.TrackId(index));
+	if(first) {
+	  fPartAlg.Position(index, shower_prof.vtxDaughter);
+	  first=false;
+	}
+
+      }
 
       fMCShower.push_back(shower_prof);
-
     }
     
     // Next, loop over deposited energy and group them into showers
@@ -82,6 +90,7 @@ namespace sim {
 	vtx.at(1) = edep.y;
 	vtx.at(2) = edep.z;
 	vtx.at(3) = edep.energy;
+
 	fMCShower.at(shower_index).vtxEdep.push_back(vtx);
 
 	// Compute unit vector to this energy deposition
