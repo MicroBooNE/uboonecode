@@ -28,7 +28,7 @@
 // Each of these structures is connected to a set of branches, one branch per
 // data member. Data members are vectors of numbers or vectors of fixed-size
 // C arrays. The vector index represents the tracks reconstructed by the
-// algorithm, and each has a fixed size pool for hits (do ROOT trees support
+// algorithm, and each has a fixed size pool for hits (do ROOT t3rees support
 // branches with more than one dimension with variable size?).
 // The data structures can assign default values to their data, connect to a
 // ROOT tree (creating the branches they need) and resize.
@@ -301,7 +301,7 @@ namespace microboone {
     
     enum DataBits_t: unsigned int {
       tdAuxDet = 0x01,
-      tdCry = 0x01,
+      tdCry = 0x02,
       tdDefault = 0
     }; // DataBits_t
     
@@ -2408,8 +2408,6 @@ double microboone::AnalysisTree::length(const recob::Track& track)
 
   for(int i = 1; i < n; ++i) {
     const TVector3& pos = track.LocationAtPoint(i);
-    //double momentum = track.MomentumAtPoint(i);
-    //std::cout<<"\n"<<i<<"\t"<<momentum<<"\n";
     disp -= pos;
     result += disp.Mag();
     disp = pos;
@@ -2425,16 +2423,13 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
   art::ServiceHandle<util::DetectorProperties> detprop;
 
   // Get fiducial volume boundary.
-  //double xmin = 0.;
+  double xmin = 0.;
   double xmax = 2.*geom->DetHalfWidth();
   double ymin = -geom->DetHalfHeight();
   double ymax = geom->DetHalfHeight();
   double zmin = 0.;
   double zmax = geom->DetLength();
-
-  //const double fSamplingRate = 500;
-  //const double fReadOutWindowSize = 3200;
-  double        vDrift = 160*pow(10,-6);
+  double vDrift = 160*pow(10,-6);
 
   double result = 0.;
   TVector3 disp;
@@ -2443,39 +2438,30 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
 
   for(int i = 0; i < n; ++i) {
     // check if the particle is inside a TPC
-    double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
-    if (!(geom->FindTPCAtPosition(mypos))) continue;
-    
-    double xGen   = part.Vx(i);
-    double tGen   = part.T(i);
-    //double tDrift = xGen/vDrift;
-    
-    
-    //std::cout<<"\n"<<xGen<<"\t"<<tGen<<"\t"<<(-xmax-tGen*vDrift)<<"\t"<<((2*xmax)-(tGen*vDrift));
-    
-    if (xGen < (-xmax-tGen*vDrift) || xGen > ((2*xmax)-tGen*vDrift) ) continue;
-    if (part.Vy(i) < ymin || part.Vy(i) > ymax) continue;
-    if (part.Vz(i) < zmin || part.Vz(i) > zmax) continue;
-    // Doing some manual shifting to account for
-    // an interaction not occuring with the beam dump
-    // we will reconstruct an x distance different from
-    // where the particle actually passed to to the time
-    // being different from in-spill interactions
-    double newX = xGen+tGen*vDrift;
-    
-
-    TVector3 pos(newX,part.Vy(i),part.Vz(i));
-    
-    if(first){
+   double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
+   if (mypos[0] >= xmin && mypos[0] <= xmax && mypos[1] >= ymin && mypos[1] <= ymax && mypos[2] >= zmin && mypos[2] <= zmax){
+     double xGen   = part.Vx(i);
+     double tGen   = part.T(i);
+     // Doing some manual shifting to account for
+     // an interaction not occuring with the beam dump
+     // we will reconstruct an x distance different from
+     // where the particle actually passed to to the time
+     // being different from in-spill interactions
+     double newX = xGen+(tGen*vDrift);
+     if (newX < -xmax || newX > (2*xmax)) continue;
+     
+     TVector3 pos(newX,part.Vy(i),part.Vz(i));
+     if(first){
       start = pos;
-    }
-    else {
+     }
+     else {
       disp -= pos;
       result += disp.Mag();
-    }
-    first = false;
-    disp = pos;
-    end = pos;
+     }
+     first = false;
+     disp = pos;
+     end = pos;
+   }
   }
   return result;
 }
