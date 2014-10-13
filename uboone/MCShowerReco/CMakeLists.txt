@@ -11,6 +11,7 @@ art_make( BASENAME_ONLY
 			   SimulationBase
 			   SummaryData
 			   Utilities
+			   MCBase
 			   LArProperties_service
 			   DetectorProperties_service
 			   ${ART_FRAMEWORK_CORE}
@@ -37,6 +38,7 @@ art_make( BASENAME_ONLY
 			   SimulationBase
 			   SummaryData
 			   Utilities
+			   MCBase
 			   LArProperties_service
 			   DetectorProperties_service
 			   ${ART_FRAMEWORK_CORE}

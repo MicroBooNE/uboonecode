@@ -3,7 +3,7 @@
 #include "largeantmodules_microboone.fcl"
 #include "detsimmodules_microboone.fcl"
 
-process_name: SinglesGen
+process_name: MCShowerSampleGen
 
 services:
 {
