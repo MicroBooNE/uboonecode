@@ -66,7 +66,12 @@ namespace sim {
 	if(fDebugMode)
 	  std::cout << " ... below energy threshold: skipping!"<<std::endl;
 	continue;
+      }else if(fPartAlg.ShowerDaughters(shower_index).size() < fMinNumDaughters) {
+	if(fDebugMode)
+	  std::cout << " ... below # daughter particle count threshold: skipping!"<<std::endl;
+	continue;
       }
+
       (*mcs_index_iter.first).second = fMCShower.size();
       if(fDebugMode)
 	
@@ -124,13 +129,13 @@ namespace sim {
 
       if((*mcs_index_iter).second < 0) continue;
 
-      if(fDebugMode) 
+      int edep_index = fEdepAlg.TrackToEdepIndex((*track_iter).first);
+      if(edep_index < 0) continue;
 
-	std::cout << "Daughter edep for MCShower: " << (*mcs_index_iter).second << " => " << shower_index << std::endl;
+      auto& daughter_mom = mcs_daughter_mom_v [(*mcs_index_iter).second];
+      auto& plane_charge = plane_charge_v     [(*mcs_index_iter).second];
 
-      auto daughter_mom = mcs_daughter_mom_v [(*mcs_index_iter).second];
-      auto plane_charge = plane_charge_v     [(*mcs_index_iter).second];
-      for(auto const edep : fEdepAlg.GetEdepArrayAt((*track_iter).second)) {
+      for(auto const& edep : fEdepAlg.GetEdepArrayAt(edep_index)) {
 	
 	std::vector<double> vtx(4,0);
 	vtx.at(0) = edep.x;
@@ -147,9 +152,9 @@ namespace sim {
 	mom.at(2) = vtx.at(2) - fMCShower.at((*mcs_index_iter).second).DaughterPosition().at(2);
 
 	double magnitude = sqrt(pow(mom.at(0),2) + pow(mom.at(1),2) + pow(mom.at(2),2));
-	mom.at(0) *= edep.energy/magnitude;
-	mom.at(1) *= edep.energy/magnitude;
-	mom.at(2) *= edep.energy/magnitude;
+	mom.at(0) *= (edep.energy/magnitude);
+	mom.at(1) *= (edep.energy/magnitude);
+	mom.at(2) *= (edep.energy/magnitude);
 	mom.at(3) = edep.energy;
 
 	daughter_mom[0] += mom.at(0);
@@ -160,13 +165,23 @@ namespace sim {
 	plane_charge.at(geo::kU) += edep.qU;
 	plane_charge.at(geo::kV) += edep.qV;
 	plane_charge.at(geo::kW) += edep.qW;
-
+	
       }
     }
 
     // Store plane charge & daughter momentum
     for(size_t mcs_index=0; mcs_index<fMCShower.size(); ++mcs_index) {
-      fMCShower.at(mcs_index).DaughterMomentum(mcs_daughter_mom_v[mcs_index]);
+
+      // Correct for energy deposition normalization
+      auto& daughter_mom = mcs_daughter_mom_v[mcs_index];
+
+      double magnitude = sqrt(pow(daughter_mom[0],2)+pow(daughter_mom[1],2)+pow(daughter_mom[2],2));
+
+      daughter_mom[0] *= (daughter_mom[3]/magnitude);
+      daughter_mom[1] *= (daughter_mom[3]/magnitude);
+      daughter_mom[2] *= (daughter_mom[3]/magnitude);
+
+      fMCShower.at(mcs_index).DaughterMomentum(daughter_mom);
       fMCShower.at(mcs_index).Charge(plane_charge_v[mcs_index]);
     }
 

@@ -186,6 +186,7 @@ namespace sim {
 	    }
 
 	    this->__GetEdepArray__(real_track_id).push_back(edep);
+
 	  }else{
 	    
 	    // Append charge to the relevant edep (@ hit_index)
@@ -238,7 +239,23 @@ namespace sim {
       } // end looping over ticks in this channel
     
     }// end looping over channels
+
+    if(_debug_mode) {
+
+      std::cout<< Form("  Collected %zu particles' energy depositions...",_mc_edeps.size()) << std::endl;
+      for(auto const& track_id_index : _track_index ) {
+
+	auto track_id   = track_id_index.first;
+	auto edep_index = track_id_index.second;
+
+	std::cout<< Form("    Track ID: %d ... %zu Edep!", track_id, edep_index) << std::endl;
+
+      }
+      std::cout<<std::endl;
+    }
     
+
+
   }
 
 
