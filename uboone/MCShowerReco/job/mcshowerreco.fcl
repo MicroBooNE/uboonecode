@@ -19,8 +19,8 @@ standard_mcshowerrecoalg:
 {
     DebugMode:  false
     G4ModName:        "largeant"
-    MinShowerEnergy:  100
-    MinNumDaughters:  1
+    MinShowerEnergy:  2 # Make MCShower only if mother's energy is > 2 MeV
+    MinNumDaughters:  2 # Make MCShower only if # daughter particles' count is < 2
     MCShowerRecoEdep: @local::standard_mcshowerrecoedep
     MCShowerRecoPart: @local::standard_mcshowerrecopart
 }
