@@ -92,8 +92,8 @@ namespace trkf
       // Propagate track to measurement surface.
 
       KETrack treprop(tre);
-      bool ok = prop.vec_prop(treprop, hit.getMeasSurface(), trkf::Propagator::UNKNOWN, false);
-      assert(ok);
+      boost::optional<double> ok = prop.vec_prop(treprop, hit.getMeasSurface(), trkf::Propagator::UNKNOWN, false);
+      assert(!!ok);
       double x = treprop.getVector()(0);
       phits.push_back(std::shared_ptr<const trkf::KHitBase>(new KHitWireX(channel, x, 0.1)));
     }

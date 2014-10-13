@@ -1,3 +1,5 @@
+larana : larana : CosmicRemoval/BeamFlashTrackMatchTaggerAlg.h
+larana : larana : CosmicRemoval/HitTagAssociatorAlg.h
 larana : larana : OpticalDetector/AlgoFixedWindow.h
 larana : larana : OpticalDetector/AlgoPedestal.h
 larana : larana : OpticalDetector/AlgoThreshold.h
@@ -25,6 +27,10 @@ larana : lardata : AnalysisBase/Calorimetry.h
 larana : lardata : AnalysisBase/CosmicTag.h
 larana : lardata : AnalysisBase/FlashMatch.h
 larana : lardata : AnalysisBase/ParticleID.h
+larana : lardata : MCBase/MCBaseException.h
+larana : lardata : MCBase/MCHit.h
+larana : lardata : MCBase/MCHitCollection.h
+larana : lardata : MCBase/MCLimits.h
 larana : lardata : OpticalDetectorData/ChannelData.h
 larana : lardata : OpticalDetectorData/ChannelDataGroup.h
 larana : lardata : OpticalDetectorData/FIFOChannel.h
@@ -182,7 +188,9 @@ lardata : lardata : RecoObjects/SurfXYZPlane.h
 lardata : lardata : RecoObjects/SurfYZPlane.h
 lardata : lardata : RecoObjects/Surface.h
 lardata : lardata : Utilities/AssociationUtil.h
+lardata : lardata : Utilities/BulkAllocator.h
 lardata : lardata : Utilities/ClockConstants.h
+lardata : lardata : Utilities/CountersMap.h
 lardata : lardata : Utilities/DatabaseUtil.h
 lardata : lardata : Utilities/DetectorProperties.h
 lardata : lardata : Utilities/ElecClock.h
@@ -190,6 +198,7 @@ lardata : lardata : Utilities/FileCatalogMetadataExtras.h
 lardata : lardata : Utilities/GeometryUtilities.h
 lardata : lardata : Utilities/LArFFT.h
 lardata : lardata : Utilities/LArProperties.h
+lardata : lardata : Utilities/NestedIterator.h
 lardata : lardata : Utilities/SignalShaping.h
 lardata : lardata : Utilities/SimpleTimeService.h
 lardata : lardata : Utilities/TimeService.h
@@ -482,6 +491,7 @@ larreco : lardata : RecoBase/Cluster.h
 larreco : lardata : RecoBase/EndPoint2D.h
 larreco : lardata : RecoBase/Event.h
 larreco : lardata : RecoBase/Hit.h
+larreco : lardata : RecoBase/PFParticle.h
 larreco : lardata : RecoBase/Seed.h
 larreco : lardata : RecoBase/Shower.h
 larreco : lardata : RecoBase/SpacePoint.h
@@ -511,7 +521,9 @@ larreco : lardata : RecoObjects/SurfXYZPlane.h
 larreco : lardata : RecoObjects/SurfYZPlane.h
 larreco : lardata : RecoObjects/Surface.h
 larreco : lardata : Utilities/AssociationUtil.h
+larreco : lardata : Utilities/BulkAllocator.h
 larreco : lardata : Utilities/ClockConstants.h
+larreco : lardata : Utilities/CountersMap.h
 larreco : lardata : Utilities/DatabaseUtil.h
 larreco : lardata : Utilities/DetectorProperties.h
 larreco : lardata : Utilities/ElecClock.h
@@ -578,6 +590,7 @@ larreco : larreco : RecoAlg/DisambigAlg.h
 larreco : larreco : RecoAlg/EndPointAlg.h
 larreco : larreco : RecoAlg/HoughBaseAlg.h
 larreco : larreco : RecoAlg/KalmanFilterAlg.h
+larreco : larreco : RecoAlg/RootMathFunctor.h
 larreco : larreco : RecoAlg/SeedFinderAlgorithm.h
 larreco : larreco : RecoAlg/SmallClusterFinderAlg.h
 larreco : larreco : RecoAlg/SpacePointAlg.h
@@ -641,7 +654,6 @@ larsim : lardata : Utilities/TimeService.h
 larsim : lardata : Utilities/TimeServiceException.h
 larsim : lardata : Utilities/VectorMap.h
 larsim : lardata : Utilities/sparse_vector.h
-larsim : larevt : Filters/ChannelFilter.h
 larsim : larsim : LArG4/AuxDetReadout.h
 larsim : larsim : LArG4/AuxDetReadoutGeometry.h
 larsim : larsim : LArG4/ConfigurablePhysicsList.hh
@@ -766,6 +778,7 @@ uboonecode : lardata : Utilities/TimeServiceException.h
 uboonecode : lardata : Utilities/VectorMap.h
 uboonecode : lardata : Utilities/sparse_vector.h
 uboonecode : larevt : Filters/ChannelFilter.h
+uboonecode : larreco : RecoAlg/RootMathFunctor.h
 uboonecode : larreco : RecoAlg/TrackMomentumCalculator.h
 uboonecode : larsim : MCCheater/BackTracker.h
 uboonecode : larsim : Simulation/AuxDetSimChannel.h

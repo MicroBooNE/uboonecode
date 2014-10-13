@@ -10,7 +10,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Core/ProductRegistryHelper.h"
-#include "art/Framework/Core/PrincipalMaker.h"
+#include "art/Framework/IO/Sources/SourceHelper.h"
 #include "art/Framework/Core/FileBlock.h"
 #include "art/Framework/Principal/RunPrincipal.h"
 #include "art/Framework/Principal/SubRunPrincipal.h"
@@ -73,7 +73,7 @@ namespace lris {
     // Required constructor
     LArRawInputDriverUBooNE(fhicl::ParameterSet const &pset,
 			    art::ProductRegistryHelper &helper,
-			    art::PrincipalMaker const &pm);
+			    art::SourceHelper const &pm);
     
     // Required by FileReaderSource:
     void closeCurrentFile();
@@ -101,7 +101,7 @@ namespace lris {
     void fillBeamData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
 		      raw::BeamInfo& beamInfo);
       
-    art::PrincipalMaker            fPrincipalMaker;
+    art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;
     std::ifstream                  fInputStream;
     std::vector<std::streampos>    fEventLocation;

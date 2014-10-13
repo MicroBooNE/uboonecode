@@ -1,0 +1,9 @@
+#include "cry.fcl"
+
+BEGIN_PROLOG
+
+microboone_cry:            @local::standard_cry
+microboone_cry.TimeOffset: -3.2e-3               
+microboone_cry.SampleTime: 6.4e-3                                                 
+
+END_PROLOG

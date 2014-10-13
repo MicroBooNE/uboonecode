@@ -2,8 +2,8 @@
 
 # The *parent* line must the first non-commented line and defines this product and version
 # The version must be of the form vxx_yy_zz (e.g. v01_02_03)
-parent uboonecode v02_05_01
-defaultqual e5
+parent uboonecode v03_02_00
+defaultqual e6
 
 # These optional lines define where headers, libraries, and executables go and should
 # be used only if your product does not conform to the defaults.
@@ -22,13 +22,8 @@ gdmldir product_dir gdml
 # table fragment to set FW_SEARCH_PATH needed 
 # to find gdml files:
 table_fragment_begin
-    envSet(GROUP, uboone)
-    envSet(SAM_EXPERIMENT, uboone)
     pathPrepend(FW_SEARCH_PATH, ${UBOONECODE_DIR}/gdml)
     pathPrepend(FHICL_FILE_PATH, .:./job)
-    pathPrepend(PYTHONPATH, ${UPS_PROD_DIR}/python)
-    setupOptional("sam_web_client")
-    setupOptional("jobsub_tools")
 table_fragment_end
 
 # With "product  version" table below, we now define depdendencies
@@ -36,24 +31,26 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
-larsoft         v02_05_01
-postgresql      v9_1_12
-gcc		v4_8_2
+larsoft         v03_02_00
+ubutil          v01_04_00
+postgresql      v9_1_14
+gcc		v4_9_1
 
-# list products required ONLY for the build
-# any products here must NOT have qualifiers
-only_for_build  cetbuildtools   v3_11_00
+cetbuildtools	v4_02_02	-	only_for_build
+end_product_list
+
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
-# e5  - with gcc 4.8.1 and -std=c++11
-qualifier	larsoft		postgresql	gcc	notes
-e5:debug	e5:debug	-nq-		-nq-
-e5:opt		e5:opt		-nq-		-nq-
-e5:prof		e5:prof		-nq-		-nq-
-e5:noifdh:debug	e5:noifdh:debug	-nq-		-nq-
-e5:noifdh:opt	e5:noifdh:opt	-nq-		-nq-
-e5:noifdh:prof	e5:noifdh:prof	-nq-		-nq-
+# e6  - with gcc 4.9.1 and -std=c++1y
+qualifier	larsoft		ubutil		postgresql	gcc	notes
+e6:debug	e6:debug	e6:debug	-nq-		-nq-
+e6:opt		e6:opt		e6:opt		-nq-		-nq-
+e6:prof		e6:prof		e6:prof		-nq-		-nq-
+e6:noifdh:debug	e6:noifdh:debug	e6:debug	-nq-		-nq-
+e6:noifdh:opt	e6:noifdh:opt	e6:opt		-nq-		-nq-
+e6:noifdh:prof	e6:noifdh:prof	e6:prof		-nq-		-nq-
+end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
 

@@ -1,4 +1,3 @@
-#include "cosmicremovalmodule.fcl"
 #include "services_microboone.fcl"
 #include "clustermodules.fcl"
 #include "particleid_microboone.fcl"
@@ -106,6 +105,11 @@ physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "generator"
 physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid","beziertrackerpid"]
 
-physics.analyzers.analysistree.CosmicTagAssocLabel: ["cosmictaggerKalmanHit", "cosmictaggerBezier"]
-physics.analyzers.analysistree.CosmicScoreThresholds:   [0.0]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["cosmictaggerKHit", "cosmictaggerBezier"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchBezier"]
+
+physics.analyzers.analysistree.CryGenModuleLabel: "generator"
+physics.analyzers.analysistree.SaveCryInfo: false
+
+physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
 

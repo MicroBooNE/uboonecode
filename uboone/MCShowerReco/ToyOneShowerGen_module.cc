@@ -144,9 +144,7 @@ void ToyOneShowerGen::beginRun(art::Run& run)
   // grab the geometry object to see what geometry we are using
   art::ServiceHandle<geo::Geometry> geo;
 
-  geo::DetId_t detid = geo->DetId();
-
-  std::unique_ptr<sumdata::RunData> runData(new sumdata::RunData(detid));
+  std::unique_ptr<sumdata::RunData> runData(new sumdata::RunData(geo->DetectorName()));
 
   run.put(std::move(runData));
 

@@ -33,63 +33,9 @@
 #include "Utilities/LArFFT.h"
 
 
+/* unused function
 namespace {
 
-/* // old recob::Wire version
-	void DumpWire(const recob::Wire& wire) {
-		
-		const size_t pagesize = 10;
-		mf::LogDebug log("DumpWire");
-		
-		const recob::Wire::RegionsOfInterest_t& wireSignalRoI = wire.SignalROI();
-		
-		log << "\nDumpWire: wire on view " << ((int) wire.View())
-			<< " channel " << wire.Channel()
-			<< " with " << wireSignalRoI.size() << " regions of interest:";
-		size_t iRoI = 0;
-		for (auto RoI: wireSignalRoI) {
-			log << "\nDumpWire: [RoI " << iRoI << "] starts at " << RoI.first
-				<< ", " << RoI.second.size() << " samples:";
-			++iRoI;
-			for (size_t i = 0; i < RoI.second.size(); ++i) {
-				if (i % pagesize == 0)
-					log << "\nDumpWire: [RoI " << iRoI << "/" << i << "]";
-				log << '\t' << RoI.second[i];
-			} // for sample
-		} // for RoI
-		
-		
-		const std::vector<float> wireSignal{wire.Signal()};
-		std::vector<float> buffer(pagesize), prev_buffer;
-		log << "\nDumpWire: wire on view " << ((int)wire.View())
-			<< " channel " << wire.Channel()
-			<< " with " << wireSignal.size() << " samples:";
-		size_t i = 0, nSame = 0;
-		auto iSample = wireSignal.begin(), send = wireSignal.end();
-		while (iSample != send) {
-			i += prev_buffer.size();
-			buffer.assign(iSample, iSample + pagesize);
-			iSample += buffer.size();
-			if (buffer == prev_buffer) {
-				++nSame;
-			}
-			else {
-				if (nSame > 0) {
-					log << "\nDumpWire: [" << i << "]  ... and " << nSame << " more";
-					nSame = 0;
-				}
-				
-				if (i % pagesize == 0) log << "\nDumpWire: [" << i << "]";
-				for (auto value: buffer) log << '\t' << value;
-				buffer.swap(prev_buffer);
-			}
-		} // while
-		if (nSame > 0) {
-			log << "\nDumpWire: [" << i << "]  ... and " << nSame << " more to the end";
-			nSame = 0;
-		}
-	} // DumpWire()
-*/
 	void DumpWire(const recob::Wire& wire) {
 		
 		const size_t pagesize = 10;
@@ -148,7 +94,7 @@ namespace {
 		}
 	} // DumpWire()
 }
-
+*/
 
 ///creation of calibrated signals on wires
 namespace caldata {

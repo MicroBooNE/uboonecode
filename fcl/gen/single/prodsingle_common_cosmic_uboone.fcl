@@ -1,6 +1,6 @@
 #include "services_microboone.fcl"
 #include "singles_microboone.fcl"
-#include "cry.fcl"
+#include "cry_microboone.fcl"
 
 process_name: SinglesGen
 
@@ -78,6 +78,3 @@ outputs:
    compressionLevel: 1
  }
 }
-
-physics.producers.cry.TimeOffset: -3.2e-3
-physics.producers.cry.SampleTime: 6.4e-3
