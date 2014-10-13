@@ -3,7 +3,7 @@
 #include "largeantmodules_microboone.fcl"
 #include "detsimmodules_microboone.fcl"
 
-process_name: SinglesGen
+process_name: MCShowerSampleGen
 
 services:
 {
@@ -19,7 +19,7 @@ services:
 source:
 {
   module_type: EmptyEvent
-  maxEvents:   10        # Number of events to create
+  maxEvents:   5        # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
 }
@@ -65,7 +65,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "gen_11.root" #default file name, can override from command line with -o or --output
+   fileName:    "gen_111.root" #default file name, can override from command line with -o or --output
  }
 }
 
@@ -91,7 +91,7 @@ services.user.LArProperties.EnableCerenkovLight: false
 services.user.LArG4Parameters.KeepEMShowerDaughters: true
 services.user.LArG4Parameters.StoreTrajectories: true
 
-physics.producers.generator.PDG: [ 11 ]
+physics.producers.generator.PDG: [ 111 ]
 
 physics.producers.generator.AngleDist:    0
 physics.producers.generator.Theta0YZ:     [ 0 ]
@@ -107,7 +107,7 @@ physics.producers.generator.SigmaX: [ 0.0 ]
 physics.producers.generator.SigmaY: [ 0.0 ]
 physics.producers.generator.SigmaZ: [ 0.0 ]
 physics.producers.generator.T0: [ 0.0 ]
-physics.producers.generator.P0: [ 2 ]
+physics.producers.generator.P0: [ 0.1 ]
 physics.producers.generator.SigmaP: [ 0. ]
 physics.producers.generator.PDist: 0
 

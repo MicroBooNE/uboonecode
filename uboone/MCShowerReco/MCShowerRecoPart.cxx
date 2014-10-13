@@ -112,8 +112,6 @@ namespace sim {
       for(size_t i=0; i<(size_t)(mcp_ptr->NumberDaughters()); ++i)
 	daughters.insert(mcp_ptr->Daughter(i));
 
-      if(mcp_ptr->TrackId() < 100) 
-	std::cout<<"Creation: "<<mcp_ptr->Process()<<" ... "<<mcp_ptr->TrackId()<<std::endl;
       this->AddParticle((unsigned int)(mcp_ptr->TrackId()),
 			(unsigned int)(mcp_ptr->Mother()),
 			mcp_ptr->Process(),

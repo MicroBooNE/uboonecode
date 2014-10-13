@@ -23,7 +23,7 @@
 
 #include "MCShowerRecoPart.h"
 #include "MCShowerRecoEdep.h"
-#include "MCShower.h"
+#include "MCBase/MCShower.h"
 
 // STL
 #include <set>
@@ -67,7 +67,7 @@ namespace sim
     const std::vector<unsigned int> &Daughters(const size_t shower_index) const
     {
       ValidateIndex(shower_index);
-      return fMCShower.at(shower_index).daughterTrackId;
+      return fMCShower.at(shower_index).DaughterTrackID();
     }
 
     int ShowerIndex(const unsigned int track_id) const
