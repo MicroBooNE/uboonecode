@@ -337,7 +337,7 @@ namespace microboone {
     Short_t   hit_plane[kMaxHits];      //plane number
     Short_t  hit_wire[kMaxHits];       //wire number
     Short_t  hit_channel[kMaxHits];    //channel ID
-    Double_t hit_peakT[kMaxHits];      //peak time
+    Float_t hit_peakT[kMaxHits];      //peak time
     Float_t  hit_charge[kMaxHits];     //charge (area)
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
@@ -1333,7 +1333,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits]/S");
   CreateBranch("hit_wire",hit_wire,"hit_wire[no_hits]/S");
   CreateBranch("hit_channel",hit_channel,"hit_channel[no_hits]/S");
-  CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/D");
+  CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/F");
   CreateBranch("hit_charge",hit_charge,"hit_charge[no_hits]/F");
   CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
   CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
@@ -1365,35 +1365,35 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("nuPDG_truth",&nuPDG_truth,"nuPDG_truth/I");
   CreateBranch("ccnc_truth",&ccnc_truth,"ccnc_truth/I");
   CreateBranch("mode_truth",&mode_truth,"mode_truth/I");
-  CreateBranch("enu_truth",&enu_truth,"enu_truth/D");
-  CreateBranch("Q2_truth",&Q2_truth,"Q2_truth/D");
-  CreateBranch("W_truth",&W_truth,"W_truth/D");
+  CreateBranch("enu_truth",&enu_truth,"enu_truth/F");
+  CreateBranch("Q2_truth",&Q2_truth,"Q2_truth/F");
+  CreateBranch("W_truth",&W_truth,"W_truth/F");
   CreateBranch("hitnuc_truth",&hitnuc_truth,"hitnuc_truth/I");
-  CreateBranch("nuvtxx_truth",&nuvtxx_truth,"nuvtxx_truth/D");
-  CreateBranch("nuvtxy_truth",&nuvtxy_truth,"nuvtxy_truth/D");
-  CreateBranch("nuvtxz_truth",&nuvtxz_truth,"nuvtxz_truth/D");
-  CreateBranch("nu_dcosx_truth",&nu_dcosx_truth,"nu_dcosx_truth/D");
-  CreateBranch("nu_dcosy_truth",&nu_dcosy_truth,"nu_dcosy_truth/D");
-  CreateBranch("nu_dcosz_truth",&nu_dcosz_truth,"nu_dcosz_truth/D");
-  CreateBranch("lep_mom_truth",&lep_mom_truth,"lep_mom_truth/D");
-  CreateBranch("lep_dcosx_truth",&lep_dcosx_truth,"lep_dcosx_truth/D");
-  CreateBranch("lep_dcosy_truth",&lep_dcosy_truth,"lep_dcosy_truth/D");
-  CreateBranch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/D");
+  CreateBranch("nuvtxx_truth",&nuvtxx_truth,"nuvtxx_truth/F");
+  CreateBranch("nuvtxy_truth",&nuvtxy_truth,"nuvtxy_truth/F");
+  CreateBranch("nuvtxz_truth",&nuvtxz_truth,"nuvtxz_truth/F");
+  CreateBranch("nu_dcosx_truth",&nu_dcosx_truth,"nu_dcosx_truth/F");
+  CreateBranch("nu_dcosy_truth",&nu_dcosy_truth,"nu_dcosy_truth/F");
+  CreateBranch("nu_dcosz_truth",&nu_dcosz_truth,"nu_dcosz_truth/F");
+  CreateBranch("lep_mom_truth",&lep_mom_truth,"lep_mom_truth/F");
+  CreateBranch("lep_dcosx_truth",&lep_dcosx_truth,"lep_dcosx_truth/F");
+  CreateBranch("lep_dcosy_truth",&lep_dcosy_truth,"lep_dcosy_truth/F");
+  CreateBranch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/F");
 
-  CreateBranch("tpx_flux",&tpx_flux,"tpx_flux/D");
-  CreateBranch("tpy_flux",&tpy_flux,"tpy_flux/D");
-  CreateBranch("tpz_flux",&tpz_flux,"tpz_flux/D");
+  CreateBranch("tpx_flux",&tpx_flux,"tpx_flux/F");
+  CreateBranch("tpy_flux",&tpy_flux,"tpy_flux/F");
+  CreateBranch("tpz_flux",&tpz_flux,"tpz_flux/F");
   CreateBranch("tptype_flux",&tptype_flux,"tptype_flux/I");
 
   CreateBranch("genie_no_primaries",&genie_no_primaries,"genie_no_primaries/I");
   CreateBranch("genie_primaries_pdg",genie_primaries_pdg,"genie_primaries_pdg[genie_no_primaries]/I");
-  CreateBranch("genie_Eng",genie_Eng,"genie_Eng[genie_no_primaries]/D");
-  CreateBranch("genie_Px",genie_Px,"genie_Px[genie_no_primaries]/D");
-  CreateBranch("genie_Py",genie_Py,"genie_Py[genie_no_primaries]/D");
-  CreateBranch("genie_Pz",genie_Pz,"genie_Pz[genie_no_primaries]/D");
-  CreateBranch("genie_P",genie_P,"genie_P[genie_no_primaries]/D");
+  CreateBranch("genie_Eng",genie_Eng,"genie_Eng[genie_no_primaries]/F");
+  CreateBranch("genie_Px",genie_Px,"genie_Px[genie_no_primaries]/F");
+  CreateBranch("genie_Py",genie_Py,"genie_Py[genie_no_primaries]/F");
+  CreateBranch("genie_Pz",genie_Pz,"genie_Pz[genie_no_primaries]/F");
+  CreateBranch("genie_P",genie_P,"genie_P[genie_no_primaries]/F");
   CreateBranch("genie_status_code",genie_status_code,"genie_status_code[genie_no_primaries]/I");
-  CreateBranch("genie_mass",genie_mass,"genie_mass[genie_no_primaries]/D");
+  CreateBranch("genie_mass",genie_mass,"genie_mass[genie_no_primaries]/F");
   CreateBranch("genie_trackID",genie_trackID,"genie_trackID[genie_no_primaries]/I");
   CreateBranch("genie_ND",genie_ND,"genie_ND[genie_no_primaries]/I");
   CreateBranch("genie_mother",genie_mother,"genie_mother[genie_no_primaries]/I");
@@ -1402,16 +1402,16 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("mcevts_truthcry",&mcevts_truthcry,"mcevts_truthcry/I");  
     CreateBranch("cry_no_primaries",&cry_no_primaries,"cry_no_primaries/I");
     CreateBranch("cry_primaries_pdg",cry_primaries_pdg,"cry_primaries_pdg[cry_no_primaries]/I");
-    CreateBranch("cry_Eng",cry_Eng,"cry_Eng[cry_no_primaries]/D");
-    CreateBranch("cry_Px",cry_Px,"cry_Px[cry_no_primaries]/D");
-    CreateBranch("cry_Py",cry_Py,"cry_Py[cry_no_primaries]/D");
-    CreateBranch("cry_Pz",cry_Pz,"cry_Pz[cry_no_primaries]/D");
-    CreateBranch("cry_P",cry_P,"cry_P[cry_no_primaries]/D");
-    CreateBranch("cry_StartPointx",cry_StartPointx,"cry_StartPointx[cry_no_primaries]/D");
-    CreateBranch("cry_StartPointy",cry_StartPointy,"cry_StartPointy[cry_no_primaries]/D");
-    CreateBranch("cry_StartPointz",cry_StartPointz,"cry_StartPointz[cry_no_primaries]/D");   
+    CreateBranch("cry_Eng",cry_Eng,"cry_Eng[cry_no_primaries]/F");
+    CreateBranch("cry_Px",cry_Px,"cry_Px[cry_no_primaries]/F");
+    CreateBranch("cry_Py",cry_Py,"cry_Py[cry_no_primaries]/F");
+    CreateBranch("cry_Pz",cry_Pz,"cry_Pz[cry_no_primaries]/F");
+    CreateBranch("cry_P",cry_P,"cry_P[cry_no_primaries]/F");
+    CreateBranch("cry_StartPointx",cry_StartPointx,"cry_StartPointx[cry_no_primaries]/F");
+    CreateBranch("cry_StartPointy",cry_StartPointy,"cry_StartPointy[cry_no_primaries]/F");
+    CreateBranch("cry_StartPointz",cry_StartPointz,"cry_StartPointz[cry_no_primaries]/F");   
     CreateBranch("cry_status_code",cry_status_code,"cry_status_code[cry_no_primaries]/I");
-    CreateBranch("cry_mass",cry_mass,"cry_mass[cry_no_primaries]/D");
+    CreateBranch("cry_mass",cry_mass,"cry_mass[cry_no_primaries]/F");
     CreateBranch("cry_trackID",cry_trackID,"cry_trackID[cry_no_primaries]/I");
     CreateBranch("cry_ND",cry_ND,"cry_ND[cry_no_primaries]/I");
     CreateBranch("cry_mother",cry_mother,"cry_mother[cry_no_primaries]/I");
