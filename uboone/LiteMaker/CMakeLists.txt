@@ -1,7 +1,7 @@
 # define ROOTLIB
 set( ROOTLIB -L$ENV{ROOTSYS}/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic)
 
-set( LARLITE_LIB -L$ENV{LARLITE_LIBDIR} -lBase -lDataFormat -lLArUtil)
+set( LARLITE_LIB -L$ENV{LARLITE_LIBDIR} -lLArLite_Base -lLArLite_DataFormat -lLArLite_LArUtil)
 
 set( UBOONECODE_LIB -L$ENV{UBOONECODE_LIB} )
 
