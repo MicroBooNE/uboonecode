@@ -12,12 +12,6 @@
 
 process_name: MCShowerFinder
 
-standard_mcshowerfinder:
-{
-  module_type:            "MCShowerFinder"
-  MCShowerRecoAlg:        @local::standard_mcshowerrecoalg
-}
-
 services:
 {
   # Load the service that manages root files for histograms.

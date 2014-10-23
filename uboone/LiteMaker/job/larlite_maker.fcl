@@ -1,0 +1,99 @@
+# microboone_optical_sim.fcl
+# Prepared July-2013 by William Seligman <seligman@nevis.columbia.edu>
+
+# This is an example job for running the MicroBooNE PMT ADC and FEM simulation.
+# The input file can come from any standard detector-simulation job
+# that includes a LArG4 (largeant) step. The output will include digitized,
+# discriminated, and triggered PMT ADC counts; see the OpticalDetectorData
+# package for the data products added to the event. 
+
+#include "services_microboone.fcl"
+
+process_name: Trial
+
+standard_scanner:
+{
+  module_type:            "LiteScanner"
+  store_association:      true
+  gtruth:     ["generator"]
+  mcflux:     ["generator"]
+  mctruth:    ["generator"]
+  mcpart:     ["largeant"]
+  simch:      ["largeant"]
+  mcshower:   []
+  wire:       []
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandora"]
+  endpoint2d: ["cccluster",
+               "featurevtx"]
+  spacepoint: ["pandora",
+               "costrk", "costrkcc",
+               "spacepointfinder","spacepointfindercc",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "baziertracker","baziertrackercc",
+               "featurevtx"]
+  track:      ["trackkalmanhit","trackkalmanhitcc",
+               "trackkalmansps","trackkalspscc",
+               "baziertracker","beziertrackercc",
+               "costrk","costrkcc",
+               "stitch","stitchcc",
+               "stitchkalmanhit"]
+  shower:     []
+  ophit:      ["opflash"]
+  opflash:    ["opflash"]
+  cosmictag:  ["trackkalmanhit","trackkalmanhitcc",
+               "trackkalmansps","trackkalspscc",
+               "baziertracker","beziertrackercc",
+               "costrk","costrkcc",
+               "stitch","stitchcc",
+               "stitchkalmanhit","beamflashcompat"]
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
+               "trackkalmanspscalo","trackkalspscccalo",
+               "baziertrackercalo","beziertrackercccalo",
+               "costrkcalo","costrkcccalo",
+               "stitchcalo","stitchcccalo",
+               "stitchkalmanhitcalo"]
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "trackkalmanspspid","trackkalspsccpid",
+               "baziertrackerpid","beziertrackerccpid",
+               "costrkpid","costrkccpid",
+               "stitchpid","stitchccpid",
+               "stitchkalmanhitpid"]
+  pfpart:     ["pandora"]
+}
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "ana_hist.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_warning
+#  message:      @local::standard_debug # If you turn this on, uncomment the debug lines below
+  user:         @local::microboone_services 	     
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  -1        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ analyzers:
+ {
+   scanner: @local::standard_scanner
+ }
+
+ analyzeIt: [ scanner ]
+
+ end_paths:     [ analyzeIt ]
+}
+
+#  LocalWords:  microboone
