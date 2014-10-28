@@ -2,15 +2,7 @@
 
 process_name: GenieGen
 
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "prodgenie_anumu_cc_uniform_flux_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "gen",
-                                                    "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "prodgenie_anumu_cc_uniform_flux_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
-
+outputs.out1.fileName: "prodgenie_anumu_cc_uniform_flux_uboone_%tc_gen.root"
 
 physics.producers.generator: @local::microboone_genie_uniform_flux_cc
 physics.producers.generator.GenFlavors: [-14]

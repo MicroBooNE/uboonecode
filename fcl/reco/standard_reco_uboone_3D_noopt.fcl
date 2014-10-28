@@ -23,21 +23,8 @@ services:
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_basic_services
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
-
 #services.user.PhotonVisibilityService: @local::microboone_photonvisibilityservice
 services.user.DatabaseUtil.ShouldConnect: false
-
-
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "fclName",    "standard_reco_uboone_3D.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "reco3D",
-                                                    "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_reco3D.root"
 
 #source is now a root file
 source:
@@ -124,7 +111,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "standard_reco_uboone_3D.root"
+   fileName:    "%ifb_$tc_reco3D.root"
    dataTier:    "reconstructed-3d"
    compressionLevel: 1
  }

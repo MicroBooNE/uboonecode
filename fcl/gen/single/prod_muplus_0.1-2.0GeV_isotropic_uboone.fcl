@@ -2,15 +2,7 @@
 
 process_name: SinglesGen
 
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "prod_muplus_0.1-2.0GeV_isotropic_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "gen",
-                                                    "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "prod_muplus_0.1-2.0GeV_isotropic_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
-
+outputs.out1.fileName: "prod_muplus_0.1-2.0GeV_isotropic_uboone_%tc_gen.root"
 
 physics.producers.generator.PDG: [ -13 ]           # mu+
 physics.producers.generator.PosDist: 0             # Flat position dist.

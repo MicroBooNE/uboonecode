@@ -9,7 +9,6 @@ art_file_catalog:
   applicationFamily:   "art"
   applicationVersion:  "development"
   group:               "uboone"
-  fileFormat:          "root"
   fileType:            "unknown"
 }
 

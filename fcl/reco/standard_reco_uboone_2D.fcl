@@ -21,19 +21,8 @@ services:
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_services_reco
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
 services.user.PhotonVisibilityService: @local::microboone_photonvisibilityservice
 services.user.DatabaseUtil.ShouldConnect: false
-
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "fclName",    "standard_reco_uboone_2D.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "reco2D",
-                                                    "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_reco2D.root"
 
 #source is now a root file
 source:
@@ -105,7 +94,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "standard_reco_uboone_2D.root"
+   fileName:    "%ifb_reco2D.root"
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
  }

@@ -4,15 +4,7 @@
 
 process_name: GenieGen
 
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "prodstopmu_cosmic_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "gen",
-                                                    "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "prodstopmu_cosmic_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
-
+outputs.out1.fileName: "prodstopmu_cosmic_uboone_%tc_gen.root"
 
 physics.producers.generator: @local::microboone_singlep
 physics.producers.generator.TopVolume: "volTPCActive"
