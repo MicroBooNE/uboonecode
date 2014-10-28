@@ -9,6 +9,7 @@ art_file_catalog:
   applicationFamily:   "art"
   applicationVersion:  "development"
   group:               "uboone"
+  runType:             "physics"
   fileType:            "unknown"
 }
 
