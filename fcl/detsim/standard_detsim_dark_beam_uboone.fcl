@@ -1,6 +1,6 @@
 #include "standard_detsim_uboone.fcl"
 
-outputs.out1.fileName: "%ifb_detsim_dark_beam.root"
+outputs.out1.fileName: "%ifb_%tc_detsim_dark_beam.root"
 
 physics.producers.triggersim: @local::ubtrigger_dark_beam
 

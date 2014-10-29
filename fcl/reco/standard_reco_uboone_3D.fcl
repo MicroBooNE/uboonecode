@@ -146,7 +146,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_reco3D.root"
+   fileName:    "%ifb_%tc_reco3D.root"
    dataTier:    "reconstructed-3d"
    compressionLevel: 1
  }

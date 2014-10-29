@@ -79,7 +79,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_detsim.root"
+   fileName:    "%ifb_%tc_detsim.root"
    SelectEvents: { SelectEvents: [ simulate ] }
    dataTier:    "detector-simulated"
    compressionLevel: 1

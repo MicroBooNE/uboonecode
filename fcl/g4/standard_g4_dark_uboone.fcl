@@ -2,4 +2,4 @@
 
 services.user: @local::microboone_g4_dark_services
 
-outputs.out1.fileName: "%ifb_g4_dark.root"
+outputs.out1.fileName: "%ifb_%tc_g4_dark.root"

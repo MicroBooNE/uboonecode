@@ -30,7 +30,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_merged.root"
+   fileName:    "%ifb_%tc_merged.root"
    dataTier:    "reconstructed"
    compressionLevel: 1
  }

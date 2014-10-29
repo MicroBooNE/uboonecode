@@ -93,7 +93,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_reco2D.root"
+   fileName:    "%ifb_%tc_reco2D.root"
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
  }
