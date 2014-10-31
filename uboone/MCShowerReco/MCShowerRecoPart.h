@@ -100,6 +100,12 @@ namespace sim
       return kINVALID_INT;
     }
 
+    const std::string Process(const unsigned int part_index) const
+    {
+      if(_process.size() > part_index) return _process.at(part_index);
+      return "";
+    }
+
     /// Returns particle's track id for a specified particle index. Returns kINVALID_INT for invalid part_index.
     unsigned int TrackId(const unsigned int part_index) const
     { if(_track_id.size() > part_index) return _track_id.at(part_index);
@@ -141,6 +147,9 @@ namespace sim
 
     /// Track ID
     std::vector<unsigned int> _track_id;
+
+    /// Process name
+    std::vector<std::string> _process;
 
     /// Mother track ID
     std::vector<unsigned int> _mother;
@@ -189,6 +198,7 @@ namespace sim
 
     void AddParticle(unsigned int track_id,
 		     unsigned int mother_track_id,
+		     const std::string& process,
 		     int pdgcode,
 		     const TLorentzVector &start_vtx,
 		     const TLorentzVector &end_vtx,

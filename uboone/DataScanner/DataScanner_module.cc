@@ -45,12 +45,11 @@
 #include "SimulationBase/MCParticle.h"
 #include "OpticalDetectorData/FIFOChannel.h"
 #include "OpticalDetectorData/OpticalTypes.h"
+#include "MCBase/MCShower.h"
 //#include "RecoAlg/ClusterParamsAlg.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
 #include "Utilities/DetectorProperties.h"
-
-#include "uboone/MCShowerReco/MCShowerRecoAlg.h"
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -398,6 +397,7 @@ namespace datascanner {
 	  _data_ptr[i]=(larlight::event_base*)(new larlight::event_pmtfifo(type));
 	  break;
 	case larlight::DATA::Hit:
+	case larlight::DATA::MCShowerHit:
 	case larlight::DATA::CrawlerHit:
 	case larlight::DATA::GausHit:
 	case larlight::DATA::APAHit:
@@ -408,8 +408,9 @@ namespace datascanner {
 	case larlight::DATA::Wire:
 	  _data_ptr[i]=(larlight::event_base*)(new larlight::event_wire(type));
 	  break;
-	case larlight::DATA::RyanCluster:
 	case larlight::DATA::Cluster:
+	case larlight::DATA::MCShowerCluster:
+	case larlight::DATA::RyanCluster:
 	case larlight::DATA::CrawlerCluster:
 	case larlight::DATA::DBCluster:
 	case larlight::DATA::FuzzyCluster:
@@ -500,6 +501,7 @@ namespace datascanner {
     case larlight::DATA::PMTFIFO:
       type=kLAR_PMTFIFO; break;
     case larlight::DATA::Hit:
+    case larlight::DATA::MCShowerHit:
     case larlight::DATA::CrawlerHit:
     case larlight::DATA::GausHit:
     case larlight::DATA::APAHit:
@@ -508,8 +510,9 @@ namespace datascanner {
       type=kLAR_HIT; break;
     case larlight::DATA::Wire:
       type=kLAR_WIRE; break;
-    case larlight::DATA::RyanCluster:
     case larlight::DATA::Cluster:
+    case larlight::DATA::MCShowerCluster:
+    case larlight::DATA::RyanCluster:
     case larlight::DATA::CrawlerCluster:
     case larlight::DATA::DBCluster:
     case larlight::DATA::FuzzyCluster:
@@ -664,6 +667,8 @@ namespace datascanner {
       type=larlight::DATA::Wire; 
     else if( name=="Hit" )
       type=larlight::DATA::Hit; 
+    else if( name=="MCShowerHit" )
+      type=larlight::DATA::MCShowerHit;
     else if( name=="CrawlerHit" )
       type=larlight::DATA::CrawlerHit; 
     else if( name=="GausHit" )
@@ -676,6 +681,8 @@ namespace datascanner {
       type=larlight::DATA::RFFHit; 
     else if( name=="Cluster" )
       type=larlight::DATA::Cluster; 
+    else if( name=="MCShowerCluster" )
+      type=larlight::DATA::MCShowerCluster;
     else if( name=="RyanCluster" )
       type=larlight::DATA::RyanCluster; 
     else if( name=="FuzzyCluster" )
@@ -847,6 +854,7 @@ namespace datascanner {
 	break;
 
       case larlight::DATA::Hit:
+      case larlight::DATA::MCShowerHit:
       case larlight::DATA::CrawlerHit:
       case larlight::DATA::GausHit:
       case larlight::DATA::APAHit:
@@ -857,8 +865,9 @@ namespace datascanner {
 	  ReadHit(evt,_mod_names[i][j],(larlight::event_hit*)(_data_ptr[i]));
 	break;
 
-      case larlight::DATA::RyanCluster:
       case larlight::DATA::Cluster:
+      case larlight::DATA::MCShowerCluster:
+      case larlight::DATA::RyanCluster:
       case larlight::DATA::DBCluster:
       case larlight::DATA::FuzzyCluster:
       case larlight::DATA::HoughCluster:
@@ -977,23 +986,26 @@ namespace datascanner {
     for(auto const& mcs : *mcsHandle) {
 
       larlight::mcshower light_prof;
-      light_prof.SetMotherID(mcs.momPdgCode, mcs.momTrackId);
+      light_prof.SetMotherID(mcs.MotherPDGID(), mcs.MotherTrackID());
       
-      light_prof.SetMotherAngles(mcs.phiMother, mcs.thetaMother,
-				 mcs.uAngleMother, mcs.vAngleMother, mcs.wAngleMother);
+      //light_prof.SetMotherAngles(mcs.phiMother, mcs.thetaMother);
+      //mcs.uAngleMother, mcs.vAngleMother, mcs.wAngleMother);
 
-      light_prof.SetMotherPoint(mcs.vtxMother);
+      light_prof.SetMotherPoint(mcs.MotherPosition());
 
-      light_prof.SetMotherMomentum(mcs.momMother);
+      light_prof.SetMotherProcess(mcs.MotherCreationProcess());
 
-      light_prof.SetDaughterTrackList(mcs.daughterTrackId);
+      light_prof.SetMotherMomentum(mcs.MotherMomentum());
 
-      light_prof.SetDaughterAngles(mcs.phiDaughter, mcs.thetaDaughter,
-				   mcs.uAngleDaughter, mcs.vAngleDaughter, mcs.wAngleDaughter);
+      light_prof.SetDaughterTrackList(mcs.DaughterTrackID());
 
-      light_prof.SetDaughterMomentum(mcs.momDaughter);
+      //light_prof.SetDaughterAngles(mcs.phiDaughter, mcs.thetaDaughter);
+      //mcs.uAngleDaughter, mcs.vAngleDaughter, mcs.wAngleDaughter);
 
-      light_prof.SetPlaneCharge(mcs.qU, mcs.qV, mcs.qW);
+      light_prof.SetDaughterMomentum(mcs.DaughterMomentum());
+      light_prof.SetDaughterPosition(mcs.DaughterPosition());
+
+      light_prof.SetPlaneCharge(mcs.Charge());
 
       //light_prof.SetEdepVtx(mcs.vtxEdep);
 
@@ -1119,7 +1131,7 @@ namespace datascanner {
 	}
 	
 	// Find them
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 	
 	ass_index.reserve(hit_v.size());
 	
@@ -1281,7 +1293,7 @@ namespace datascanner {
 	  continue;
 	}
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_CLUSTER) {
 
@@ -1509,7 +1521,7 @@ namespace datascanner {
 	}
 
 	// Find them
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	ass_index.reserve(cluster_v.size());
 
@@ -1576,7 +1588,7 @@ namespace datascanner {
 	  continue;
         }
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_TRACK) {
 
@@ -1660,7 +1672,7 @@ namespace datascanner {
 	  continue;
         }
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_HIT) {
 
@@ -1761,7 +1773,7 @@ namespace datascanner {
 	  continue;
         }
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_HIT) {
 
@@ -1855,7 +1867,7 @@ namespace datascanner {
 	  continue;
         }
 
-	std::vector<unsigned short> ass_index;
+	std::vector<unsigned int> ass_index;
 
 	if(lar_type == kLAR_HIT) {
 

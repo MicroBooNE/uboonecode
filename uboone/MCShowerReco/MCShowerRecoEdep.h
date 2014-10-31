@@ -74,9 +74,9 @@ namespace sim
     float y;
     float z;
     float energy;
-    float qU;
-    float qV;
-    float qW;
+    double qU;
+    double qV;
+    double qW;
     std::map<unsigned short,sim::MCShowerHit> mchits;
     void Clear() {
       //x=y=z=kINVALID_SHORT;

@@ -4,7 +4,7 @@ microboone_analysistree:
 { 
  module_type:              "AnalysisTree"
  DigitModuleLabel:         "daq"
- HitsModuleLabel:          "ffthit"
+ HitsModuleLabel:          "gaushit"
  LArGeantModuleLabel:      "largeant"
  CalDataModuleLabel:       "caldata"
  GenieGenModuleLabel:      "generator"

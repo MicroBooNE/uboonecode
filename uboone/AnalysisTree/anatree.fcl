@@ -108,6 +108,8 @@ physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid","be
 physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["cosmictaggerKHit", "cosmictaggerBezier"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchBezier"]
 
-physics.analyzers.analysistree.CryGenModuleLabel: "cry"
+physics.analyzers.analysistree.CryGenModuleLabel: "generator"
 physics.analyzers.analysistree.SaveCryInfo: false
+
+physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
 

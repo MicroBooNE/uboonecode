@@ -70,8 +70,10 @@ physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit
 physics.analyzers.analysistree.VertexModuleLabel:               "featurevtx"
 physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo", "trackkalmanhitcccalo", "trackkalspscalo", "stitchcalo","trackkalspscccalo", "stitchcccalo", "beziertrackercccalo", "beziertrackercalo", "costrkcalo", "costrkcccalo"]
 physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid", "trackkalmanhitccpid", "trackkalspspid", "stitchpid","trackkalspsccpid", "stitchccpid", "beziertrackerccpid", "beziertrackerpid", "costrkpid", "costrkccpid"]
-physics.analyzers.analysistree.CosmicTagAssocLabel:             ["trackkalmanhittag", "trackkalmanhitcctag", "trackkalspstag", "stitchtag","trackkalspscctag", "stitchcctag", "beziertrackercctag", "beziertrackertag", "costrktag", "costrkcctag"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag", "trackkalmanhitcctag", "trackkalspstag", "stitchtag","trackkalspscctag", "stitchcctag", "beziertrackercctag", "beziertrackertag", "costrktag", "costrkcctag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:            ["beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat"]
 physics.analyzers.analysistree.CosmicScoreThresholds:   [0.0]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
-
+physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
+physics.analyzers.analysistree.SaveCryInfo:                     false

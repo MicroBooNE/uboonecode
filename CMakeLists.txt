@@ -40,7 +40,6 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
   WERROR
   NO_UNDEFINED
   EXTRA_FLAGS -pedantic -Wno-unused-local-typedefs
-  EXTRA_CXX_FLAGS -std=c++11
 )
 
 cet_report_compiler_flags()
@@ -68,15 +67,6 @@ add_subdirectory(test)
 
 # Top level fcl files.
 add_subdirectory(fcl)
-
-# XML project files.
-add_subdirectory(xml)
-
-# Scripts and utilities.
-add_subdirectory(scripts)
-
-# Python modules.
-add_subdirectory(python)
 
 # Stand alone compiled executables.
 add_subdirectory(tools)
