@@ -1316,7 +1316,7 @@ sub gen_cryostat()
 <solids>
  <tube name="Cryostat" 
   rmax="$CryostatOuterRadius"
-  z="$CryostatLength+2*$CryostatEndcapThickness"
+  z="$CryostatLength+2*$CryostatEndcapThickness + 200"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
@@ -1349,7 +1349,7 @@ EOF
   <physvol>
    <volumeref ref="volSteelTube"/>
    <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
-  </physvol>
+  </physvol> 
 <physvol>
    <volumeref ref="volEndCap"/>
    <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
@@ -1358,7 +1358,7 @@ EOF
     <volumeref ref="volEndCap"/>
     <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
     <rotationref ref="rPlus180AboutY"/>
-  </physvol>
+  </physvol> 
   <physvol>
    <volumeref ref="volTPC"/>
    <position name="posTPC" unit="cm" x="0.0" y="0.97" z="0"/>
@@ -1457,9 +1457,21 @@ sub gen_enclosure()
 <?xml version='1.0'?>
 <gdml>
 <solids>
- <box name="DetEnclosure" lunit="cm"
-   x="$DetEnclosureWidth" y="$DetEnclosureHeight" z="$DetEnclosureLength"
- />
+ <box name="DetEnclosureOLDbig" lunit="cm" x="$DetEnclosureWidth+1" y="$DetEnclosureHeight+1" z="$DetEnclosureLength+1" />
+ <box name="DetEnclosureOLDsmall" lunit="cm" x="$DetEnclosureWidth" y="$DetEnclosureHeight" z="$DetEnclosureLength" />
+ <tube name="DetEnclosureNEW" lunit="cm" rmax="292*2.54-0.1" z="$DetEnclosureHeight+10" aunit="deg" deltaphi="360" /> 
+
+  <subtraction name="DetSub0">
+	<first ref="DetEnclosureOLDbig"/> <second ref="DetEnclosureNEW"/>
+	<position name="posDetUnion0" unit="cm" x="0" y="0" z="0"/>
+	<rotation name="rotDetUnion0" unit="deg" x="90" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="DetEnclosure">
+	<first ref="DetEnclosureOLDsmall"/> <second ref="DetSub0"/>
+	<position name="posDetEnclosure2" unit="cm" x="0" y="0" z="0"/>
+  </subtraction> 
+
 </solids>
 
 <structure>
@@ -1477,7 +1489,7 @@ EOF
      <physvol>
         <volumeref ref="volInsulation"/>
         <position name="posInsulation" unit="cm" x="0" y="0" z="0"/>
-      </physvol>
+      </physvol> 
       <physvol>
         <volumeref ref="volPlatform"/>
         <position name="posPlatform" unit="cm" x="0" y="292.74" z="0"/>
@@ -1766,11 +1778,6 @@ sub gen_world()
       <position name="posPolystyreneEnclosure" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>   
-<!--   <physvol>
-      <volumeref ref="volPolystyreneEnclosureBottom"/>
-      <position name="posPolystyreneEnclosureBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-(38*12 - 36)*2.54/2" z="0.5*$TPCWirePlaneLength"/>
-      <rotationref ref="rPlus90AboutX"/>  
-    </physvol> -->
     <physvol>
        <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
@@ -1780,7 +1787,7 @@ sub gen_world()
        <volumeref ref="volGroundBottom"/>
       <position name="posGroundBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol> 
+    </physvol>  
     <!--physvol>
       <volumeref ref="volOverburden"/>
       <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="(41-10)*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
