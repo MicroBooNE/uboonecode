@@ -39,7 +39,7 @@
         reasons.  
 	-->
 
-   <parameter name="DetEnclosureWidth" value="1000">
+   <parameter name="DetEnclosureWidth" value="1483.26">  <!--1000-->
    The size of the detector enclosure along the x-axis.
    </parameter>
 
@@ -47,7 +47,7 @@
    The size of the detector enclosure along the y-axis.
    </parameter>
 
-   <parameter name="DetEnclosureLength" value="2073">
+   <parameter name="DetEnclosureLength" value="1483.26"> <!--2073-->
    The size of the detector enclosure along the z-axis.
    </parameter>
 
@@ -79,7 +79,7 @@
    The size of the LAr TPC along the y-axis.
    </parameter>
 
-   <parameter name="TPCLength" value="1200">
+   <parameter name="TPCLength" value="1045">
    The size of the LAr TPC along the z-axis.
    </parameter>
 

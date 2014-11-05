@@ -1,9 +1,21 @@
 <?xml version='1.0'?>
 <gdml>
 <solids>
- <box name="DetEnclosure" lunit="cm"
-   x="1000" y="1060" z="2073"
- />
+ <box name="DetEnclosureOLDbig" lunit="cm" x="1483.26+1" y="1060+1" z="1483.26+1" />
+ <box name="DetEnclosureOLDsmall" lunit="cm" x="1483.26" y="1060" z="1483.26" />
+ <tube name="DetEnclosureNEW" lunit="cm" rmax="292*2.54-0.1" z="1060+10" aunit="deg" deltaphi="360" /> 
+
+  <subtraction name="DetSub0">
+	<first ref="DetEnclosureOLDbig"/> <second ref="DetEnclosureNEW"/>
+	<position name="posDetUnion0" unit="cm" x="0" y="0" z="0"/>
+	<rotation name="rotDetUnion0" unit="deg" x="90" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="DetEnclosure">
+	<first ref="DetEnclosureOLDsmall"/> <second ref="DetSub0"/>
+	<position name="posDetEnclosure2" unit="cm" x="0" y="0" z="0"/>
+  </subtraction> 
+
 </solids>
 
 <structure>
@@ -17,7 +29,7 @@
      <physvol>
         <volumeref ref="volInsulation"/>
         <position name="posInsulation" unit="cm" x="0" y="0" z="0"/>
-      </physvol>
+      </physvol> 
       <physvol>
         <volumeref ref="volPlatform"/>
         <position name="posPlatform" unit="cm" x="0" y="292.74" z="0"/>

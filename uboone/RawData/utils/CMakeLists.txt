@@ -1,9 +1,6 @@
 
 include_directories( $ENV{POSTGRESQL_INC} )
 
-find_ups_product( postgresql v9_1_5 )
-cet_find_library( PQ NAMES pq PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
-
 #simple_plugin( LArRawInputSourceUBooNE
 #               "source"
 #               Geometry

@@ -14,8 +14,6 @@ microboone_geo(TString volName="")
   drawopt optuboone[] = {
     {"volGround",       kOrange-7},
     {"volConcreteEnclosure", kGray},
-    {"volConcreteEnclosureBottom", kGray},
-    {"volOverburden",       kOrange-7}// taken out of above
     {0, 0}
   };
 
@@ -32,8 +30,7 @@ microboone_geo(TString volName="")
   }
 
   gGeoManager->GetTopNode();
-  //gGeoManager->CheckOverlaps(0.0000001);
-  gGeoManager->CheckOverlaps(10e-24);
+  gGeoManager->CheckOverlaps(10e-12);
   gGeoManager->PrintOverlaps();
   gGeoManager->SetMaxVisNodes(70000);
 
@@ -47,8 +44,9 @@ microboone_geo(TString volName="")
   float m_tpc = TPC->Weight();
   TGeoVolume *Cathode = gGeoManager->FindVolumeFast("volCathodePlate");
   float m_cathode = Cathode->Weight();
-  TGeoVolume *Ground = gGeoManager->FindVolumeFast("volGroundPlate");
-  float m_ground = Ground->Weight();
+ // TGeoVolume *Ground = gGeoManager->FindVolumeFast("volGroundPlate");
+ // float m_ground = Ground->Weight();
+  float m_ground = 0 ;
   TGeoVolume *UVPlane = gGeoManager->FindVolumeFast("volTPCPlane");
   float m_uvplane = UVPlane->Weight();
   TGeoVolume *YPlane = gGeoManager->FindVolumeFast("volTPCPlaneVert");
