@@ -6,8 +6,6 @@ project(datatypes)
 
 set( LIB_NAME daq_datatypes)
 
-find_ups_product( boost v1_53_0 )
-
 set(LIB_SOURCES
 evttypes.cpp
 globalHeader.cpp
