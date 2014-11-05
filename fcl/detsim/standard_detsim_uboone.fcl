@@ -15,19 +15,6 @@ services:
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_detsim_services
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "standard_detsim_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "detsim",
-                                                    "ubProjectVersion", "v1_3" ]
-
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_detsim.root"
-
 
 #source is now a root file
 source:
@@ -76,7 +63,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "standard_detsim_uboone.root"
+   fileName:    "%ifb_%tc_detsim.root"
    dataTier:    "detector-simulated"
    compressionLevel: 1
  }
