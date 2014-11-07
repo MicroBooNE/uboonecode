@@ -5,7 +5,9 @@
 
 
 cp  ${UBOONECODE_DIR}/job/standard_reco_uboone_2D.fcl .
-echo "services.user.FileCatalogMetadataExtras.RenameTemplate: '' " >> ./standard_reco_uboone_2D.fcl
+//echo "services.user.FileCatalogMetadataExtras.RenameTemplate: '' " >> ./standard_reco_uboone_2D.fcl
+echo "outputs.out1.fileName: 'hitana_uboone_reco2D.root'" >> ./standard_reco_uboone_2D.fcl
+
 # comment out below modules, as they are slow and we don't need them
 sed -e '/fuzzy/s/^/#/g' -i standard_reco_uboone_2D.fcl 
 sed -e '/ccluster/s/^/#/g' -i standard_reco_uboone_2D.fcl 
