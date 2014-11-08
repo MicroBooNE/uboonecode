@@ -17,4 +17,4 @@ sed -e '/pandora \]/a \]' -i  standard_reco_uboone_2D.fcl
 # Get rid of now-extraneous trailing comma
 sed -e '/gaushit,/s//gaushit/g' -i standard_reco_uboone_2D.fcl 
 
-lar -c ./standard_reco_uboone_2D.fcl -s ../lar_ci_hitana_detsim/hitana_uboone_detsim.root  -n -1 -T hitana_uboone_reco2D_hist.root -o hitana_uboone_reco2D.root 
+lar -c ./standard_reco_uboone_2D.fcl -s ../lar_ci_hitana_detsim_uboonecode/hitana_uboone_detsim.root  -n -1 -T hitana_uboone_reco2D_hist.root -o hitana_uboone_reco2D.root 
