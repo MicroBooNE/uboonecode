@@ -13,18 +13,6 @@ services:
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_gen_services
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
-# This entry should be copied to derived fcl files to override fclName.
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "prodgenie_common_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "gen",
-                                                    "ubProjectVersion", "v1_3" ]
-
 
 #Start each new event with an empty event.
 source:

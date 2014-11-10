@@ -315,7 +315,7 @@
   lunit="cm"
   x="260"
   y="256"
-  z="1200"/>
+  z="1045"/>
  <box name="TPCActive"
   lunit="cm"
   x="256.35"
@@ -490,7 +490,7 @@
 
  <tube name="Cryostat" 
   rmax="193"
-  z="424.75*2.54+3*2.54+2*2.5"
+  z="424.75*2.54+3*2.54+2*2.5 + 200"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
@@ -503,15 +503,27 @@
   lunit="cm"/>
 <sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
 
- <box name="DetEnclosure" lunit="cm"
-   x="1000" y="1060" z="2073"
- />
+ <box name="DetEnclosureOLDbig" lunit="cm" x="1483.26+1" y="1060+1" z="1483.26+1" />
+ <box name="DetEnclosureOLDsmall" lunit="cm" x="1483.26" y="1060" z="1483.26" />
+ <tube name="DetEnclosureNEW" lunit="cm" rmax="292*2.54-0.1" z="1060+10" aunit="deg" deltaphi="360" /> 
+
+  <subtraction name="DetSub0">
+	<first ref="DetEnclosureOLDbig"/> <second ref="DetEnclosureNEW"/>
+	<position name="posDetUnion0" unit="cm" x="0" y="0" z="0"/>
+	<rotation name="rotDetUnion0" unit="deg" x="90" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="DetEnclosure">
+	<first ref="DetEnclosureOLDsmall"/> <second ref="DetSub0"/>
+	<position name="posDetEnclosure2" unit="cm" x="0" y="0" z="0"/>
+  </subtraction> 
+
 
   <box name="World" 
     lunit="cm" 
-    x="100000" 
+    x="148326" 
     y="106000" 
-    z="207300"/>
+    z="148326"/>
   <tube name="Ground"
     rmin="312*2.54"
     rmax="((50*12)+310)*2.54"
@@ -2042,7 +2054,7 @@
   <physvol>
    <volumeref ref="volSteelTube"/>
    <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
-  </physvol>
+  </physvol> 
 <physvol>
    <volumeref ref="volEndCap"/>
    <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
@@ -2051,7 +2063,7 @@
     <volumeref ref="volEndCap"/>
     <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
     <rotationref ref="rPlus180AboutY"/>
-  </physvol>
+  </physvol> 
   <physvol>
    <volumeref ref="volTPC"/>
    <position name="posTPC" unit="cm" x="0.0" y="0.97" z="0"/>
@@ -2218,7 +2230,7 @@
      <physvol>
         <volumeref ref="volInsulation"/>
         <position name="posInsulation" unit="cm" x="0" y="0" z="0"/>
-      </physvol>
+      </physvol> 
       <physvol>
         <volumeref ref="volPlatform"/>
         <position name="posPlatform" unit="cm" x="0" y="292.74" z="0"/>
@@ -2384,11 +2396,6 @@
       <position name="posPolystyreneEnclosure" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>   
-<!--   <physvol>
-      <volumeref ref="volPolystyreneEnclosureBottom"/>
-      <position name="posPolystyreneEnclosureBottom" unit="cm" x="0.5*256.35" y="-(38*12 - 36)*2.54/2" z="0.5*1037"/>
-      <rotationref ref="rPlus90AboutX"/>  
-    </physvol> -->
     <physvol>
        <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
@@ -2398,7 +2405,7 @@
        <volumeref ref="volGroundBottom"/>
       <position name="posGroundBottom" unit="cm" x="0.5*256.35" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol> 
+    </physvol>  
     <!--physvol>
       <volumeref ref="volOverburden"/>
       <position name="posOverburden" unit="cm" x="0.5*256.35" y="(41-10)*12*2.54/2" z="0.5*1037"/>
