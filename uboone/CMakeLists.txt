@@ -17,7 +17,9 @@ add_subdirectory(TriggerSim)
 add_subdirectory(AnalysisTree)
 add_subdirectory(Calibrations)
 add_subdirectory(OpticalDetectorSim)
-#add_subdirectory(MCShowerReco)
+add_subdirectory(MCShowerReco)
+#add_subdirectory(DataScanner)
+#add_subdirectory(LiteMaker)
 
 # Respect the order specified in lar_build, which is:
 #

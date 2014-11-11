@@ -2,13 +2,4 @@
 
 services.user: @local::microboone_g4_dark_services
 
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "standard_g4_dark_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "g4",
-                                                    "ubProjectVersion", "v1_3" ]
-
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_g4_dark.root"
+outputs.out1.fileName: "%ifb_%tc_g4_dark.root"

@@ -66,9 +66,9 @@ namespace lris {
   // ======================================================================
   LArRawInputDriverUBooNE::LArRawInputDriverUBooNE(fhicl::ParameterSet const & ps, 
 						   art::ProductRegistryHelper &helper,
-						   art::PrincipalMaker const &pm)
+						   art::SourceHelper const &pm)
     :
-    fPrincipalMaker(pm),
+    fSourceHelper(pm),
     fCurrentSubRunID(),
     fNumberOfEvents(-1),
     fEventCounter(0),
@@ -241,16 +241,16 @@ namespace lris {
       art::SubRunID newID(rn, 1); //daq_header has no subrun information
       
       if (fCurrentSubRunID.runID() != newID.runID()) { // New Run
-	outR = fPrincipalMaker.makeRunPrincipal(rn, tstamp);
+	outR = fSourceHelper.makeRunPrincipal(rn, tstamp);
       }
       if (fCurrentSubRunID != newID) { // New SubRun
-	outSR = fPrincipalMaker.makeSubRunPrincipal(rn,
+	outSR = fSourceHelper.makeSubRunPrincipal(rn,
 						    1,
 						    tstamp);
 	fCurrentSubRunID = newID;	
       }
 
-      outE = fPrincipalMaker.makeEventPrincipal(fCurrentSubRunID.run(),
+      outE = fSourceHelper.makeEventPrincipal(fCurrentSubRunID.run(),
 						fCurrentSubRunID.subRun(),
 						daq_header->GetEvent(),
 						tstamp);

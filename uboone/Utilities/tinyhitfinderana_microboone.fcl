@@ -1,0 +1,10 @@
+BEGIN_PROLOG
+
+microboone_tinyhitfinderana:
+{
+ module_type:	"TinyHitFinderAna"
+ HitsModuleLabel: "gaushit"
+ LArGeantModuleLabel: "largeant"
+}
+
+END_PROLOG

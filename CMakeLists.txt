@@ -40,7 +40,6 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
   WERROR
   NO_UNDEFINED
   EXTRA_FLAGS -pedantic -Wno-unused-local-typedefs
-  EXTRA_CXX_FLAGS -std=c++11
 )
 
 cet_report_compiler_flags()
@@ -55,6 +54,9 @@ find_ups_product( nutools v1_00_00 )
 find_ups_product( art v1_09_00 )
 find_ups_product( cetbuildtools v3_10_00 )
 find_ups_product( postgresql v9_1_5 )
+find_ups_product( boost v1_53_0 )
+
+cet_find_library( PQ NAMES pq PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
 
 # macros for dictionary and simple_plugin
 include(ArtDictionary)
@@ -68,15 +70,6 @@ add_subdirectory(test)
 
 # Top level fcl files.
 add_subdirectory(fcl)
-
-# XML project files.
-add_subdirectory(xml)
-
-# Scripts and utilities.
-add_subdirectory(scripts)
-
-# Python modules.
-add_subdirectory(python)
 
 # Stand alone compiled executables.
 add_subdirectory(tools)

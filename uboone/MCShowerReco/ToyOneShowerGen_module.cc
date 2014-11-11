@@ -20,6 +20,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 
+#include "TRandom.h"
 #include "TLorentzVector.h"
 #include "TF1.h"
 
@@ -56,7 +57,8 @@ private:
 ToyOneShowerGen::ToyOneShowerGen(fhicl::ParameterSet const & p)
   : fShapeEnergy(nullptr), fShapeTheta(nullptr), fFlatRandom(nullptr)
 {
-
+  gRandom->SetSeed(0);
+  TRandom3 r(0);
   produces< std::vector<simb::MCTruth>   >();
   produces< sumdata::RunData, art::InRun >();
 
@@ -142,9 +144,7 @@ void ToyOneShowerGen::beginRun(art::Run& run)
   // grab the geometry object to see what geometry we are using
   art::ServiceHandle<geo::Geometry> geo;
 
-  geo::DetId_t detid = geo->DetId();
-
-  std::unique_ptr<sumdata::RunData> runData(new sumdata::RunData(detid));
+  std::unique_ptr<sumdata::RunData> runData(new sumdata::RunData(geo->DetectorName()));
 
   run.put(std::move(runData));
 
@@ -196,7 +196,6 @@ std::vector<double> ToyOneShowerGen::GetXYZDirection(double uz) {
 void ToyOneShowerGen::produce(art::Event & e)
 {
   std::unique_ptr< std::vector<simb::MCTruth> > mctArray(new std::vector<simb::MCTruth>);
-
   double Evis = fShapeEnergy->GetRandom();
   double Uz   = TMath::Cos(fShapeTheta->GetRandom());
 
@@ -207,12 +206,12 @@ void ToyOneShowerGen::produce(art::Event & e)
   simb::MCTruth truth;
 
   TLorentzVector pos_lorentz(pos.at(0), pos.at(1), pos.at(2), fTime);
-  TLorentzVector mom_lorentz( dir.at(0) * sqrt(pow(Evis,2)-pow(fMass,2)), 
-			      dir.at(1) * sqrt(pow(Evis,2)-pow(fMass,2)),
-			      dir.at(2) * sqrt(pow(Evis,2)-pow(fMass,2)),
-			      Evis);
+  TLorentzVector mom_lorentz( dir.at(0) * Evis,
+			      dir.at(1) * Evis,
+			      dir.at(2) * Evis,
+			      sqrt(pow(Evis,2)+pow(fMass,2)));
 
-  simb::MCParticle part(0, fPDGCode, "primary", 0, sqrt(pow(fMass,2)+pow(Evis,2)), 1);
+  simb::MCParticle part(0, fPDGCode, "primary", 0, fMass, 1);
 
   part.AddTrajectoryPoint(pos_lorentz, mom_lorentz);
 

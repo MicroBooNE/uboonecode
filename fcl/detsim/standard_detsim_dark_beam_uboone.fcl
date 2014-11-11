@@ -1,18 +1,6 @@
 #include "standard_detsim_uboone.fcl"
 
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "standard_detsim_dark_beam_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "detsim",
-                                                    "ubProjectVersion", "v1_3" ]
-
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_detsim_dark_beam.root"
-
+outputs.out1.fileName: "%ifb_%tc_detsim_dark_beam.root"
 
 physics.producers.triggersim: @local::ubtrigger_dark_beam
 

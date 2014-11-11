@@ -13,6 +13,12 @@ services:
   message:      @local::standard_error
 }
 
+#services.user.Geometry: @local::detector_geo
+services.user.LArFFT: @local::microboone_larfft
+services.user.LArFFT.FFTOption: ""
+services.user.DetectorProperties: @local::microboone_detproperties
+
+
 #source is now a root file
 source:
 {
@@ -48,6 +54,8 @@ physics:
     LinBegin: 2 #subrun (1 being first) where linearity tests start
     SubRunGain:   [ 0, 0, 1, 1, 2, 2, 3, 3 ]
     SubRunShape:  [ 1, 3, 1, 3, 1, 3, 1, 3 ]
+    SubRunGainVal:   [ 4.7, 4.7, 7.8, 7.8, 14, 14, 25, 25 ]
+    SubRunShapeVal:  [ 1, 3, 1, 3, 1, 3, 1, 3 ]
     Averages: 1
     }
     }

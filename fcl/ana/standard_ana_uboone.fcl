@@ -14,17 +14,6 @@ services:
   user:         @local::microboone_services_ana
 }
 
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "fclName",    "standard_ana_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "merge",
-                                                    "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_merged.root"
-
 #source is now a root file
 source:
 {
@@ -57,7 +46,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "copy.root" #default file name, can override from command line with -o or --output
+   fileName:    "%ifb_%tc_merged.root"
    dataTier:    "reconstructed"
    compressionLevel: 1
  }
@@ -70,8 +59,10 @@ physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit
 physics.analyzers.analysistree.VertexModuleLabel:               "featurevtx"
 physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo", "trackkalmanhitcccalo", "trackkalspscalo", "stitchcalo","trackkalspscccalo", "stitchcccalo", "beziertrackercccalo", "beziertrackercalo", "costrkcalo", "costrkcccalo"]
 physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid", "trackkalmanhitccpid", "trackkalspspid", "stitchpid","trackkalspsccpid", "stitchccpid", "beziertrackerccpid", "beziertrackerpid", "costrkpid", "costrkccpid"]
-physics.analyzers.analysistree.CosmicTagAssocLabel:             ["trackkalmanhittag", "trackkalmanhitcctag", "trackkalspstag", "stitchtag","trackkalspscctag", "stitchcctag", "beziertrackercctag", "beziertrackertag", "costrktag", "costrkcctag"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag", "trackkalmanhitcctag", "trackkalspstag", "stitchtag","trackkalspscctag", "stitchcctag", "beziertrackercctag", "beziertrackertag", "costrktag", "costrkcctag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:            ["beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat"]
 physics.analyzers.analysistree.CosmicScoreThresholds:   [0.0]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
-
+physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
+physics.analyzers.analysistree.SaveCryInfo:                     false

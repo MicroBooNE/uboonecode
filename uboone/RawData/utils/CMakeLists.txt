@@ -3,15 +3,18 @@ include_directories( $ENV{POSTGRESQL_INC} )
 include_directories( $ENV{BOOST_INC} )
 include_directories( $ENV{UBOONEDAQ_DATATYPES_INC} )
 
+##<<<<<<< HEAD
 find_ups_product( postgresql v9_1_5 )
-find_ups_product( uboonedaq_datatypes v4_00_01 )
-find_ups_product( boost v1_55_0 )
+find_ups_product( uboonedaq_datatypes v5_00_01 )
+find_ups_product( boost v1_56_0 )
 
 cet_find_library( PQ NAMES pq PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
 cet_find_library( UBDut NAMES udata_types PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
 cet_find_library( UBDuut NAMES udata_utilities PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
 cet_find_library( BOOSER NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
 
+##=======
+##>>>>>>> v03_04_00
 #simple_plugin( LArRawInputSourceUBooNE
 #               "source"
 #               Geometry
@@ -34,6 +37,7 @@ art_make( BASENAME_ONLY
 			${BOOSER}
 #                        daq_datatypes
                         ${ART_FRAMEWORK_CORE}
+			${ART_FRAMEWORK_IO_SOURCES}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
