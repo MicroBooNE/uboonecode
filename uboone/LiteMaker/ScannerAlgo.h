@@ -42,6 +42,7 @@
 #include "OpticalDetectorData/FIFOChannel.h"
 #include "OpticalDetectorData/OpticalTypes.h"
 #include "MCBase/MCShower.h"
+#include "MCBase/MCTrack.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
 #include "Utilities/DetectorProperties.h"
@@ -143,6 +144,7 @@ namespace larlite {
     std::map<art::Ptr<::simb::MCParticle>,  std::pair<size_t,size_t> > fPtrIndex_mcpart;
     std::map<art::Ptr<::sim::SimChannel>,   std::pair<size_t,size_t> > fPtrIndex_simch;
     std::map<art::Ptr<::sim::MCShower>,     std::pair<size_t,size_t> > fPtrIndex_mcshower;
+    std::map<art::Ptr<::sim::MCTrack>,      std::pair<size_t,size_t> > fPtrIndex_mctrack;
     std::map<art::Ptr<::raw::RawDigit>,     std::pair<size_t,size_t> > fPtrIndex_rawdigit;
     std::map<art::Ptr<::recob::Wire>,       std::pair<size_t,size_t> > fPtrIndex_wire;
     std::map<art::Ptr<::recob::Hit>,        std::pair<size_t,size_t> > fPtrIndex_hit;

@@ -339,24 +339,83 @@ namespace larlite {
       art::Ptr<sim::MCShower> mcs_ptr(dh,i);
       
       larlite::mcshower lite_mcs;
-      lite_mcs.SetMotherID(mcs_ptr->MotherPDGID(), mcs_ptr->MotherTrackID());
-      
-      lite_mcs.SetMotherPoint(mcs_ptr->MotherPosition());
-      
-      lite_mcs.SetMotherProcess(mcs_ptr->MotherCreationProcess());
-      
-      lite_mcs.SetMotherMomentum(mcs_ptr->MotherMomentum());
-      
-      lite_mcs.SetDaughterTrackList(mcs_ptr->DaughterTrackID());
-      
-      lite_mcs.SetDaughterMomentum(mcs_ptr->DaughterMomentum());
-      lite_mcs.SetDaughterPosition(mcs_ptr->DaughterPosition());
-      
-      lite_mcs.SetPlaneCharge(mcs_ptr->Charge());
-      
+
+      lite_mcs.Origin  ( (::larlite::simb::Origin_t)(mcs_ptr->Origin())  );
+
+      lite_mcs.PdgCode ( mcs_ptr->PdgCode() );
+      lite_mcs.TrackID ( mcs_ptr->TrackID() );
+      lite_mcs.Process ( mcs_ptr->Process() );
+      lite_mcs.Start   ( ::larlite::mcstep( mcs_ptr->Start().Position(), mcs_ptr->Start().Momentum() )  );
+      lite_mcs.End     ( ::larlite::mcstep( mcs_ptr->End().Position(),   mcs_ptr->End().Momentum()   )  );
+
+      lite_mcs.MotherPdgCode ( mcs_ptr->MotherPdgCode() );
+      lite_mcs.MotherTrackID ( mcs_ptr->MotherTrackID() );
+      lite_mcs.MotherProcess ( mcs_ptr->MotherProcess() );
+      lite_mcs.MotherStart   ( ::larlite::mcstep( mcs_ptr->MotherStart().Position(), mcs_ptr->MotherStart().Momentum() ) );
+      lite_mcs.MotherEnd     ( ::larlite::mcstep( mcs_ptr->MotherEnd().Position(),   mcs_ptr->MotherEnd().Momentum()   ) );
+
+      lite_mcs.AncestorPdgCode ( mcs_ptr->AncestorPdgCode() );
+      lite_mcs.AncestorTrackID ( mcs_ptr->AncestorTrackID() );
+      lite_mcs.AncestorProcess ( mcs_ptr->AncestorProcess() );
+      lite_mcs.AncestorStart   ( ::larlite::mcstep( mcs_ptr->AncestorStart().Position(), mcs_ptr->AncestorStart().Momentum() ) );
+      lite_mcs.AncestorEnd     ( ::larlite::mcstep( mcs_ptr->AncestorEnd().Position(),   mcs_ptr->AncestorEnd().Momentum()   ) );
+
+      lite_mcs.Charge( mcs_ptr->Charge() );
+
+      lite_mcs.DetProfile( ::larlite::mcstep( mcs_ptr->DetProfile().Position(), mcs_ptr->DetProfile().Momentum() ) );
+
+      lite_mcs.DaughterTrackID( mcs_ptr->DaughterTrackID() );
+
       fPtrIndex_mcshower[mcs_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_mcs);
+    }
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::sim::MCTrack> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    auto lite_data = (::larlite::event_mctrack*)lite_dh;
+    for(size_t i=0; i<dh->size(); ++i) {
+
+      art::Ptr<sim::MCTrack> mct_ptr(dh,i);
+      
+      larlite::mctrack lite_mct;
+
+      lite_mct.Origin  ( (::larlite::simb::Origin_t)(mct_ptr->Origin())  );
+     
+      lite_mct.PdgCode ( mct_ptr->PdgCode() );
+      lite_mct.TrackID ( mct_ptr->TrackID() );
+      lite_mct.Process ( mct_ptr->Process() );
+      lite_mct.Start   ( ::larlite::mcstep( mct_ptr->Start().Position(), mct_ptr->Start().Momentum() )  );
+      lite_mct.End     ( ::larlite::mcstep( mct_ptr->End().Position(),   mct_ptr->End().Momentum()   )  );
+
+      lite_mct.MotherPdgCode ( mct_ptr->MotherPdgCode() );
+      lite_mct.MotherTrackID ( mct_ptr->MotherTrackID() );
+      lite_mct.MotherProcess ( mct_ptr->MotherProcess() );
+      lite_mct.MotherStart   ( ::larlite::mcstep( mct_ptr->MotherStart().Position(), mct_ptr->MotherStart().Momentum() ) );
+      lite_mct.MotherEnd     ( ::larlite::mcstep( mct_ptr->MotherEnd().Position(),   mct_ptr->MotherEnd().Momentum()   ) );
+
+      lite_mct.AncestorPdgCode ( mct_ptr->AncestorPdgCode() );
+      lite_mct.AncestorTrackID ( mct_ptr->AncestorTrackID() );
+      lite_mct.AncestorProcess ( mct_ptr->AncestorProcess() );
+      lite_mct.AncestorStart   ( ::larlite::mcstep( mct_ptr->AncestorStart().Position(), mct_ptr->AncestorStart().Momentum() ) );
+      lite_mct.AncestorEnd     ( ::larlite::mcstep( mct_ptr->AncestorEnd().Position(),   mct_ptr->AncestorEnd().Momentum()   ) );
+
+      const ::sim::MCTrack& mct(*mct_ptr);
+ 
+      lite_mct.reserve(mct.size());
+
+      for(auto const& s : mct)
+      
+	lite_mct.push_back( ::larlite::mcstep(s.Position(), s.Momentum()) );
+
+      fPtrIndex_mctrack[mct_ptr] = std::make_pair(lite_data->size(),name_index);
+      
+      lite_data->push_back(lite_mct);
     }
   }
 
@@ -863,6 +922,9 @@ namespace larlite {
   template <> const std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
   { return fPtrIndex_mcshower; }
 
+  template <> const std::map<art::Ptr< ::sim::MCTrack>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  { return fPtrIndex_mctrack; }
+
   template <> const std::map<art::Ptr< ::recob::OpHit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
   { return fPtrIndex_ophit; }
 
@@ -930,6 +992,8 @@ namespace larlite {
   { return ::larlite::data::kSimChannel; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCShower> () const
   { return ::larlite::data::kMCShower; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCTrack> () const
+  { return ::larlite::data::kMCTrack; }
   // raw
   // recob
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::recob::Wire> () const
@@ -1076,8 +1140,8 @@ namespace larlite {
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Shower,::recob::Shower>(art::Event const& e,
-									      art::Handle<std::vector<::recob::Shower> > &dh,
-									      ::larlite::event_base* lite_dh) const
+										  art::Handle<std::vector<::recob::Shower> > &dh,
+										  ::larlite::event_base* lite_dh) const
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::Calorimetry,::anab::Calorimetry>(art::Event const& e,

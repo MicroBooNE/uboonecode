@@ -49,6 +49,7 @@
 #include "OpticalDetectorData/FIFOChannel.h"
 #include "OpticalDetectorData/OpticalTypes.h"
 #include "MCBase/MCShower.h"
+#include "MCBase/MCTrack.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
 #include "Utilities/DetectorProperties.h"
@@ -176,6 +177,8 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<sim::SimChannel>(e,j); break;
       case ::larlite::data::kMCShower:
 	ScanData<sim::MCShower>(e,j); break;
+      case ::larlite::data::kMCTrack:
+	ScanData<sim::MCTrack>(e,j); break;
 
       case ::larlite::data::kHit:
 	ScanData<recob::Hit>(e,j); break;
@@ -257,6 +260,7 @@ void LiteScanner::analyze(art::Event const & e)
       case ::larlite::data::kOpFlash:
       case ::larlite::data::kSimChannel:
       case ::larlite::data::kMCShower:
+      case ::larlite::data::kMCTrack:
       case ::larlite::data::kWire:
       case ::larlite::data::kHit:
       case ::larlite::data::kUndefined:
