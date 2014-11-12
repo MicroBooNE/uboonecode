@@ -118,14 +118,23 @@ namespace sim {
 	  det_path_index.insert(i);
 	}
 
-	if( (*det_path_index.begin()) ) 
-	  det_path_index.insert( (*det_path_index.begin())-1 );
-	if( ((*det_path_index.rbegin())+1) < mcp.NumberTrajectoryPoints() ) 
-	  det_path_index.insert( (*det_path_index.rbegin())+1 );
+	if(det_path_index.size()) {
+	  if( (*det_path_index.begin()) ) 
+	    det_path_index.insert( (*det_path_index.begin())-1 );
+	  if( det_path_index.size()>1 ) {
+	    if( ((*det_path_index.rbegin())+1) < mcp.NumberTrajectoryPoints() ) 
+	      det_path_index.insert( (*det_path_index.rbegin())+1 );
+	  }
+	  mini_mcp._det_path.reserve(det_path_index.size());
+	  for(auto const& index : det_path_index) {
 
-	mini_mcp._det_path.reserve(det_path_index.size());
-	for(auto const& index : det_path_index)
-	  mini_mcp._det_path.push_back(std::make_pair(mcp.Position(index),mcp.Momentum(index)));
+	    TLorentzVector vec(mcp.Momentum(index));
+	    for(size_t i=0; i<4; ++i) vec[i] *= 1.e3;
+
+	    mini_mcp._det_path.push_back(std::make_pair(mcp.Position(index),vec));
+
+	  }
+	}
       }
     }
   }

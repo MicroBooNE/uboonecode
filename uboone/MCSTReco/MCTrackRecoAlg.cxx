@@ -90,15 +90,19 @@ namespace sim {
 		  prof.AncestorStart().Px(),prof.AncestorStart().Py(),prof.AncestorStart().Pz(),prof.AncestorStart().E())
 	  << std::endl
 	  << Form("    ... with %zu trajectory points!",prof.size())
-	  << std::endl
-	  << Form("        Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  prof[0].X(), prof[0].Y(), prof[0].Z(), prof[0].T(),
-		  prof[0].Px(), prof[0].Py(), prof[0].Pz(), prof[0].E())
-	  << std::endl
-	  << Form("        End @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  (*prof.rbegin()).X(), (*prof.rbegin()).Y(), (*prof.rbegin()).Z(), (*prof.rbegin()).T(),
-		  (*prof.rbegin()).Px(), (*prof.rbegin()).Py(), (*prof.rbegin()).Pz(), (*prof.rbegin()).E())
 	  << std::endl;
+
+	if(prof.size()) {
+	  std::cout 
+	    << Form("        Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		    prof[0].X(), prof[0].Y(), prof[0].Z(), prof[0].T(),
+		    prof[0].Px(), prof[0].Py(), prof[0].Pz(), prof[0].E())
+	    << std::endl
+	    << Form("        End @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		    (*prof.rbegin()).X(), (*prof.rbegin()).Y(), (*prof.rbegin()).Z(), (*prof.rbegin()).T(),
+		    (*prof.rbegin()).Px(), (*prof.rbegin()).Py(), (*prof.rbegin()).Pz(), (*prof.rbegin()).E())
+	    << std::endl;
+	}
       }
 
       std::cout<<std::endl<<std::endl;
