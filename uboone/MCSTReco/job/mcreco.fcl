@@ -3,7 +3,7 @@ BEGIN_PROLOG
 
 mcrecopart:
 {
-    SavePathPDGList : [13,-13]
+    SavePathPDGList : [13,-13,211,-211,321,-321,2212]
 }
 
 mcrecoedep:

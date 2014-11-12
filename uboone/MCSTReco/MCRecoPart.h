@@ -53,11 +53,14 @@ namespace sim
     TLorentzVector _end_mom;
     std::vector<std::pair<TLorentzVector,TLorentzVector> > _det_path;
     std::set<unsigned int> _daughters;
+    ::simb::Origin_t _origin;
 
     void Reset(){
       _track_id = _mother = _ancestor = kINVALID_UINT;
       _pdgcode  = kINVALID_INT;
-      _process = "";
+      _process  = "";
+      _origin   = ::simb::kUnknown;
+
       TLorentzVector invalid(kINVALID_DOUBLE,
 			     kINVALID_DOUBLE,
 			     kINVALID_DOUBLE,
@@ -82,7 +85,8 @@ namespace sim
     /// Default destructor
     virtual ~MCRecoPart(){};
 
-    void AddParticles(const std::vector<simb::MCParticle>& mcp_v );
+    void AddParticles(const std::vector<simb::MCParticle>& mcp_v,
+		      const std::vector<simb::Origin_t>&   orig_v);
 
     unsigned int AncestorTrackID(const unsigned int part_index) const;
 

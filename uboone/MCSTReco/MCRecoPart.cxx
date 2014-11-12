@@ -51,9 +51,11 @@ namespace sim {
   }
 
   //--------------------------------------------------------------------------------------------
-  void MCRecoPart::AddParticles(const std::vector<simb::MCParticle>& mcpArray)
+  void MCRecoPart::AddParticles(const std::vector<simb::MCParticle>& mcp_v,
+				const std::vector<simb::Origin_t>&   orig_v)
   //--------------------------------------------------------------------------------------------
   {
+    if(orig_v.size() != mcp_v.size()) throw cet::exception(__FUNCTION__) << "MCParticle and Origin_t vector size not same!";
 
     art::ServiceHandle<geo::Geometry> geo;
     double y_max = geo->DetHalfHeight();
@@ -66,9 +68,9 @@ namespace sim {
     this->clear();
     _track_index.clear();
 
-    for(size_t i=0; i < mcpArray.size(); ++i) {
+    for(size_t i=0; i < mcp_v.size(); ++i) {
       
-      auto const& mcp = mcpArray[i];
+      auto const& mcp = mcp_v[i];
 
       _track_index.insert(std::make_pair((size_t)(mcp.TrackId()),(size_t)(this->size())));
 
@@ -87,6 +89,7 @@ namespace sim {
       mini_mcp._start_mom = mcp.Momentum();
       mini_mcp._end_vtx   = mcp.EndPosition();
       mini_mcp._end_mom   = mcp.EndMomentum();
+      mini_mcp._origin    = orig_v[i];
 
       // Change units to LArSoft (MeV, cm, us)
       for(size_t i=0; i<4; ++i) {

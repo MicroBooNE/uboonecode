@@ -29,12 +29,13 @@ namespace sim {
       if( part_v._pdg_list.find(mini_part._pdgcode) == part_v._pdg_list.end() ) continue;
 
       ::sim::MCTrack mini_track;
-      
-      mini_track.PdgCode   ( mini_part._pdgcode  );
-      mini_track.G4TrackID ( mini_part._track_id );
-      mini_track.Process   ( mini_part._process  );
-      mini_track.G4Start   ( MCStep( mini_part._start_vtx, mini_part._start_mom ) );
-      mini_track.G4End     ( MCStep( mini_part._end_vtx,   mini_part._end_mom   ) );
+
+      mini_track.Origin  ( mini_part._origin   );
+      mini_track.PdgCode ( mini_part._pdgcode  );
+      mini_track.TrackID ( mini_part._track_id );
+      mini_track.Process ( mini_part._process  );
+      mini_track.Start   ( MCStep( mini_part._start_vtx, mini_part._start_mom ) );
+      mini_track.End     ( MCStep( mini_part._end_vtx,   mini_part._end_mom   ) );
 
       unsigned int mother_index   = i;
       MCMiniPart   mother_part    = mini_part;
@@ -48,17 +49,17 @@ namespace sim {
 	ancestor_part  = part_v.at(ancestor_index);
       }
 
-      mini_track.MotherPdgCode   ( mother_part._pdgcode  );
-      mini_track.MotherG4TrackID ( mother_part._track_id );
-      mini_track.MotherProcess   ( mother_part._process  );
-      mini_track.MotherG4Start   ( MCStep( mother_part._start_vtx, mother_part._start_mom ) );
-      mini_track.MotherG4End     ( MCStep( mother_part._end_vtx,   mother_part._end_mom   ) );
+      mini_track.MotherPdgCode ( mother_part._pdgcode  );
+      mini_track.MotherTrackID ( mother_part._track_id );
+      mini_track.MotherProcess ( mother_part._process  );
+      mini_track.MotherStart   ( MCStep( mother_part._start_vtx, mother_part._start_mom ) );
+      mini_track.MotherEnd     ( MCStep( mother_part._end_vtx,   mother_part._end_mom   ) );
 
-      mini_track.AncestorPdgCode   ( ancestor_part._pdgcode  );
-      mini_track.AncestorG4TrackID ( ancestor_part._track_id );
-      mini_track.AncestorProcess   ( ancestor_part._process  );
-      mini_track.AncestorG4Start   ( MCStep( ancestor_part._start_vtx, ancestor_part._start_mom ) );
-      mini_track.AncestorG4End     ( MCStep( ancestor_part._end_vtx,   ancestor_part._end_mom   ) );
+      mini_track.AncestorPdgCode ( ancestor_part._pdgcode  );
+      mini_track.AncestorTrackID ( ancestor_part._track_id );
+      mini_track.AncestorProcess ( ancestor_part._process  );
+      mini_track.AncestorStart   ( MCStep( ancestor_part._start_vtx, ancestor_part._start_mom ) );
+      mini_track.AncestorEnd     ( MCStep( ancestor_part._end_vtx,   ancestor_part._end_mom   ) );
 
       for(auto const& vtx_mom : mini_part._det_path)
 
@@ -75,18 +76,18 @@ namespace sim {
 	  
 	  << Form("  Track particle:     PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.PdgCode(),
-		  prof.G4Start().X(),prof.G4Start().Y(),prof.G4Start().Z(),prof.G4Start().T(),
-		  prof.G4Start().Px(),prof.G4Start().Py(),prof.G4Start().Pz(),prof.G4Start().E())
+		  prof.Start().X(),prof.Start().Y(),prof.Start().Z(),prof.Start().T(),
+		  prof.Start().Px(),prof.Start().Py(),prof.Start().Pz(),prof.Start().E())
 	  << std::endl
 	  << Form("    Mother particle:   PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.MotherPdgCode(),
-		  prof.MotherG4Start().X(),prof.MotherG4Start().Y(),prof.MotherG4Start().Z(),prof.MotherG4Start().T(),
-		  prof.MotherG4Start().Px(),prof.MotherG4Start().Py(),prof.MotherG4Start().Pz(),prof.MotherG4Start().E())
+		  prof.MotherStart().X(),prof.MotherStart().Y(),prof.MotherStart().Z(),prof.MotherStart().T(),
+		  prof.MotherStart().Px(),prof.MotherStart().Py(),prof.MotherStart().Pz(),prof.MotherStart().E())
 	  << std::endl
 	  << Form("    Ancestor particle: PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.AncestorPdgCode(),
-		  prof.AncestorG4Start().X(),prof.AncestorG4Start().Y(),prof.AncestorG4Start().Z(),prof.AncestorG4Start().T(),
-		  prof.AncestorG4Start().Px(),prof.AncestorG4Start().Py(),prof.AncestorG4Start().Pz(),prof.AncestorG4Start().E())
+		  prof.AncestorStart().X(),prof.AncestorStart().Y(),prof.AncestorStart().Z(),prof.AncestorStart().T(),
+		  prof.AncestorStart().Px(),prof.AncestorStart().Py(),prof.AncestorStart().Pz(),prof.AncestorStart().E())
 	  << std::endl
 	  << Form("    ... with %zu trajectory points!",prof.size())
 	  << std::endl

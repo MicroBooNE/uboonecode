@@ -84,24 +84,25 @@ namespace sim {
 
       ::sim::MCShower shower_prof;
 
-      shower_prof.PdgCode   ( shower_part._pdgcode  );
-      shower_prof.G4TrackID ( shower_part._track_id );
-      shower_prof.Process   ( shower_part._process  );
+      shower_prof.Origin  ( shower_part._origin   );
+      shower_prof.PdgCode ( shower_part._pdgcode  );
+      shower_prof.TrackID ( shower_part._track_id );
+      shower_prof.Process ( shower_part._process  );
 
-      shower_prof.MotherPdgCode   ( mother_part._pdgcode  );
-      shower_prof.MotherG4TrackID ( mother_part._track_id );
-      shower_prof.MotherProcess   ( mother_part._process  );
+      shower_prof.MotherPdgCode ( mother_part._pdgcode  );
+      shower_prof.MotherTrackID ( mother_part._track_id );
+      shower_prof.MotherProcess ( mother_part._process  );
 
-      shower_prof.AncestorPdgCode   ( ancestor_part._pdgcode  );
-      shower_prof.AncestorG4TrackID ( ancestor_part._track_id );
-      shower_prof.AncestorProcess   ( ancestor_part._process  );
+      shower_prof.AncestorPdgCode ( ancestor_part._pdgcode  );
+      shower_prof.AncestorTrackID ( ancestor_part._track_id );
+      shower_prof.AncestorProcess ( ancestor_part._process  );
 
-      shower_prof.G4Start         ( MCStep ( shower_part._start_vtx, shower_part._start_mom ) );
-      shower_prof.G4End           ( MCStep ( shower_part._end_vtx,   shower_part._end_mom   ) );
-      shower_prof.MotherG4Start   ( MCStep ( mother_part._start_vtx, mother_part._start_mom ) );
-      shower_prof.MotherG4End     ( MCStep ( mother_part._end_vtx,   mother_part._end_mom   ) );
-      shower_prof.AncestorG4Start ( MCStep ( mother_part._start_vtx, mother_part._start_mom ) );
-      shower_prof.AncestorG4End   ( MCStep ( mother_part._end_vtx,   mother_part._end_mom   ) );
+      shower_prof.Start         ( MCStep ( shower_part._start_vtx, shower_part._start_mom ) );
+      shower_prof.End           ( MCStep ( shower_part._end_vtx,   shower_part._end_mom   ) );
+      shower_prof.MotherStart   ( MCStep ( mother_part._start_vtx, mother_part._start_mom ) );
+      shower_prof.MotherEnd     ( MCStep ( mother_part._end_vtx,   mother_part._end_mom   ) );
+      shower_prof.AncestorStart ( MCStep ( mother_part._start_vtx, mother_part._start_mom ) );
+      shower_prof.AncestorEnd   ( MCStep ( mother_part._end_vtx,   mother_part._end_mom   ) );
 
       std::vector<unsigned int> daughter_track_id;
       daughter_track_id.reserve( fPartAlg.ShowerDaughters(shower_index).size() );
@@ -123,7 +124,7 @@ namespace sim {
     for(size_t shower_index = 0; shower_index < fMCShower.size(); ++shower_index) {
     
       auto& g4_dir = shower_g4_dir[shower_index];
-      auto const& g4_mom = fMCShower[shower_index].G4Start().Momentum();
+      auto const& g4_mom = fMCShower[shower_index].Start().Momentum();
       double magnitude = 0;
       for(size_t i=0; i<3; ++i) {
 	g4_dir[i] = g4_mom[i];
@@ -157,7 +158,7 @@ namespace sim {
       int stored_mcs_index = (*mcs_index_iter).second;
       if((*mcs_index_iter).second < 0) continue;
 
-      auto const& shower_vtx = fMCShower[stored_mcs_index].G4Start().Position();
+      auto const& shower_vtx = fMCShower[stored_mcs_index].Start().Position();
       auto const& shower_dir = shower_g4_dir[stored_mcs_index];
       auto& daughter_vtx = mcs_daughter_vtx_v[stored_mcs_index];
 
@@ -280,18 +281,18 @@ namespace sim {
 	  
 	  << Form("  Shower particle:     PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.PdgCode(),
-		  prof.G4Start().X(),prof.G4Start().Y(),prof.G4Start().Z(),prof.G4Start().T(),
-		  prof.G4Start().Px(),prof.G4Start().Py(),prof.G4Start().Pz(),prof.G4Start().E())
+		  prof.Start().X(),prof.Start().Y(),prof.Start().Z(),prof.Start().T(),
+		  prof.Start().Px(),prof.Start().Py(),prof.Start().Pz(),prof.Start().E())
 	  << std::endl
 	  << Form("    Mother particle:   PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.MotherPdgCode(),
-		  prof.MotherG4Start().X(),prof.MotherG4Start().Y(),prof.MotherG4Start().Z(),prof.MotherG4Start().T(),
-		  prof.MotherG4Start().Px(),prof.MotherG4Start().Py(),prof.MotherG4Start().Pz(),prof.MotherG4Start().E())
+		  prof.MotherStart().X(),prof.MotherStart().Y(),prof.MotherStart().Z(),prof.MotherStart().T(),
+		  prof.MotherStart().Px(),prof.MotherStart().Py(),prof.MotherStart().Pz(),prof.MotherStart().E())
 	  << std::endl
 	  << Form("    Ancestor particle: PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.AncestorPdgCode(),
-		  prof.AncestorG4Start().X(),prof.AncestorG4Start().Y(),prof.AncestorG4Start().Z(),prof.AncestorG4Start().T(),
-		  prof.AncestorG4Start().Px(),prof.AncestorG4Start().Py(),prof.AncestorG4Start().Pz(),prof.AncestorG4Start().E())
+		  prof.AncestorStart().X(),prof.AncestorStart().Y(),prof.AncestorStart().Z(),prof.AncestorStart().T(),
+		  prof.AncestorStart().Px(),prof.AncestorStart().Py(),prof.AncestorStart().Pz(),prof.AncestorStart().E())
 	  << std::endl
 	  << Form("    ... with %zu daughters:   Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.DaughterTrackID().size(),

@@ -9,10 +9,12 @@
 
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Core/FindOneP.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
+
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 
@@ -62,16 +64,27 @@ void MCReco::produce(art::Event & evt)
   std::unique_ptr< std::vector<sim::MCShower> > outShowerArray(new std::vector<sim::MCShower>);
   std::unique_ptr< std::vector<sim::MCTrack> > outTrackArray(new std::vector<sim::MCTrack>);
 
+  // Retrieve mcparticles
   art::Handle<std::vector<simb::MCParticle> > mcpHandle;
   evt.getByLabel(fG4Module.c_str(),mcpHandle);
   if(!mcpHandle.isValid()) throw cet::exception(__FUNCTION__) << "Failed to retrieve simb::MCParticle";;
 
+  // Find associations
+  art::FindOneP<simb::MCTruth> ass(mcpHandle, evt, fG4Module.c_str());
+  std::vector<simb::Origin_t> orig_array;
+  orig_array.reserve(mcpHandle->size());
+  for(size_t i=0; i<mcpHandle->size(); ++i) {
+    const art::Ptr<simb::MCTruth> &mct = ass.at(i);
+    orig_array.push_back(mct->Origin());
+  }
+
+  // Retrieve SimChannel
   art::Handle<std::vector<sim::SimChannel> > schHandle;
   evt.getByLabel(fG4Module.c_str(),schHandle);
   if(!schHandle.isValid()) throw cet::exception(__FUNCTION__) << "Failed to retrieve sim::SimChannel";
 
   const std::vector<simb::MCParticle>& mcp_array(*mcpHandle);
-  fPart.AddParticles(mcp_array);
+  fPart.AddParticles(mcp_array,orig_array);
 
   const std::vector<sim::SimChannel>&  sch_array(*schHandle);
   fEdep.MakeMCEdep(sch_array);
