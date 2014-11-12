@@ -20,13 +20,14 @@ standard_scanner:
   mctruth:    ["generator"]
   mcpart:     ["largeant"]
   simch:      ["largeant"]
-  mcshower:   []
+  mcshower:   ["mcreco"]
+  mctrack:    ["mcreco"]
   wire:       []
   hit:        ["gaushit","ccluster"]
   cluster:    ["fuzzycluster","cccluster","pandora"]
   endpoint2d: ["cccluster",
                "featurevtx"]
-  spacepoint: ["pandora",
+  sps:        ["pandora",
                "costrk", "costrkcc",
                "spacepointfinder","spacepointfindercc",
                "trackkalmanhit","trackkalmanhitcc"]
