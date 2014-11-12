@@ -15,6 +15,7 @@ set( uboone_util_lib_list LArFFT_service
 			${ART_FRAMEWORK_SERVICES_BASIC}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
+			${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}
 			${ART_UTILITIES}
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
@@ -27,6 +28,10 @@ simple_plugin( SignalShapingServiceMicroBooNE  "service"
                ${uboone_util_lib_list}
 	       BASENAME_ONLY
         )
+simple_plugin( FileCatalogMetadataMicroBooNE "service"
+               ${uboone_util_lib_list}
+	       BASENAME_ONLY
+	)
 simple_plugin( TinyHitFinderAna "module"
                ${uboone_util_lib_list}
 	       BASENAME_ONLY
