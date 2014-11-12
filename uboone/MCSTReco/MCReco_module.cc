@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
-// Class:       MCShowerFinder
+// Class:       MCReco
 // Module Type: producer
-// File:        MCShowerFinder_module.cc
+// File:        MCReco_module.cc
 //
 // Generated at Mon Aug 11 05:40:00 2014 by Kazuhiro Terao using artmod
 // from cetpkgsupport v1_05_04.
@@ -17,49 +17,80 @@
 #include "fhiclcpp/ParameterSet.h"
 
 #include "MCShowerRecoAlg.h"
+#include "MCTrackRecoAlg.h"
 
 #include <memory>
 
-class MCShowerFinder;
+class MCReco;
 
-class MCShowerFinder : public art::EDProducer {
+class MCReco : public art::EDProducer {
 public:
-  explicit MCShowerFinder(fhicl::ParameterSet const & p);
-  virtual ~MCShowerFinder();
+  explicit MCReco(fhicl::ParameterSet const & p);
+  virtual ~MCReco();
 
   void produce(art::Event & e) override;
-
 
 private:
 
   // Declare member data here.
-  ::sim::MCShowerRecoAlg fMCShowerAlg;
+  std::string fG4Module;
+  ::sim::MCRecoPart fPart;
+  ::sim::MCRecoEdep fEdep;
+  ::sim::MCShowerRecoAlg fMCSAlg;
+  ::sim::MCTrackRecoAlg  fMCTAlg;
 };
 
-MCShowerFinder::MCShowerFinder(fhicl::ParameterSet const & pset)
-  : fMCShowerAlg(pset.get< fhicl::ParameterSet >("MCShowerRecoAlg"))
+MCReco::MCReco(fhicl::ParameterSet const & pset)
+  : fPart   (pset.get< fhicl::ParameterSet >("MCRecoPart"))
+  , fEdep   (pset.get< fhicl::ParameterSet >("MCRecoEdep"))
+  , fMCSAlg (pset.get< fhicl::ParameterSet >("MCShowerRecoAlg"))
+  , fMCTAlg (pset.get< fhicl::ParameterSet >("MCTrackRecoAlg"))
 {
+  fG4Module = pset.get<std::string>("G4ModName","largeant");
   produces< std::vector< sim::MCShower> >();
+  produces< std::vector< sim::MCTrack>  >();
   // Call appropriate produces<>() functions here.
 }
 
-MCShowerFinder::~MCShowerFinder()
+MCReco::~MCReco()
 {
   // Clean up dynamic memory and other resources here.
 }
 
-void MCShowerFinder::produce(art::Event & evt)
+void MCReco::produce(art::Event & evt)
 {
   std::unique_ptr< std::vector<sim::MCShower> > outShowerArray(new std::vector<sim::MCShower>);
+  std::unique_ptr< std::vector<sim::MCTrack> > outTrackArray(new std::vector<sim::MCTrack>);
 
-  fMCShowerAlg.RecoMCShower(evt);
+  art::Handle<std::vector<simb::MCParticle> > mcpHandle;
+  evt.getByLabel(fG4Module.c_str(),mcpHandle);
+  if(!mcpHandle.isValid()) throw cet::exception(__FUNCTION__) << "Failed to retrieve simb::MCParticle";;
 
-  for(size_t shower_index=0; shower_index < fMCShowerAlg.NumShowers(); ++shower_index)
+  art::Handle<std::vector<sim::SimChannel> > schHandle;
+  evt.getByLabel(fG4Module.c_str(),schHandle);
+  if(!schHandle.isValid()) throw cet::exception(__FUNCTION__) << "Failed to retrieve sim::SimChannel";
 
-    outShowerArray->push_back(fMCShowerAlg.ShowerProfile(shower_index));
+  const std::vector<simb::MCParticle>& mcp_array(*mcpHandle);
+  fPart.AddParticles(mcp_array);
+
+  const std::vector<sim::SimChannel>&  sch_array(*schHandle);
+  fEdep.MakeMCEdep(sch_array);
+
+  fMCSAlg.Reconstruct(fPart,fEdep);
+
+  fMCTAlg.Reconstruct(fPart);
+
+  for(auto const& mcs : fMCSAlg.MCShower())
+
+    outShowerArray->push_back(mcs);
+
+  for(auto const& mct : fMCTAlg.MCTrack())
+
+    outTrackArray->push_back(mct);
     
   evt.put(std::move(outShowerArray));
+  evt.put(std::move(outTrackArray));
 
 }
 
-DEFINE_ART_MODULE(MCShowerFinder)
+DEFINE_ART_MODULE(MCReco)
