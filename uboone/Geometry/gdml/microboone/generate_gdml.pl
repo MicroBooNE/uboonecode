@@ -1867,7 +1867,7 @@ sub gen_enclosureExtras()
 
   <subtraction name="Platform">
 	<first ref="PlatformOLDsmall"/> <second ref="PlatformSub0"/>
-	<position name="posPlatform" unit="cm" x="0" y="0" z="0"/>
+	<position name="posPlatformSub1" unit="cm" x="0" y="0" z="0"/>
   </subtraction> 
 
 
