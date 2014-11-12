@@ -4,8 +4,8 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef MCSHOWERRECOALG_CC
-#define MCSHOWERRECOALG_CC
+#ifndef MCSHOWERRECOALG_CXX
+#define MCSHOWERRECOALG_CXX
 
 #include "MCShowerRecoAlg.h"
 
@@ -13,113 +13,140 @@ namespace sim {
 
   //##################################################################
   MCShowerRecoAlg::MCShowerRecoAlg(fhicl::ParameterSet const& pset) 
-    : fEdepAlg(pset.get< fhicl::ParameterSet >("MCShowerRecoEdep")),
-      fPartAlg(pset.get< fhicl::ParameterSet >("MCShowerRecoPart"))
+    : fPartAlg(pset.get< fhicl::ParameterSet >("MCShowerRecoPart"))
   //##################################################################
   {
     fDebugMode = pset.get<bool>("DebugMode");
-    fG4ModName = pset.get<std::string>("G4ModName");
     fMinShowerEnergy = pset.get<double>("MinShowerEnergy");
     fMinNumDaughters = pset.get<unsigned int>("MinNumDaughters");
   }
 
-  void MCShowerRecoAlg::RecoMCShower(const art::Event &evt)
+  void MCShowerRecoAlg::Reconstruct(const MCRecoPart& part_v,
+				    const MCRecoEdep& edep_v)
   {
     
     art::ServiceHandle<geo::Geometry> geo;
 
+    fPartAlg.ConstructShower(part_v);
+
     fMCShower.clear();
 
-    // Reconstruct shower's particles
-    art::Handle<std::vector<simb::MCParticle> > mcpArray;
-    evt.getByLabel(fG4ModName, mcpArray);
-    fPartAlg.ConstructShower(mcpArray);    
-
-    // Reconstruct shower's energy deposition
-    art::Handle<std::vector<sim::SimChannel> > schArray;
-    evt.getByLabel(fG4ModName,schArray);
-    fEdepAlg.MakeMCShowerEdep(schArray);
-    
     // Get shower info from grouped particles
-    const std::vector<unsigned int> mother_index = fPartAlg.ShowerMothers();
-    fMCShower.reserve(mother_index.size());
+    const std::vector<unsigned int> shower_index_v = fPartAlg.ShowerMothers();
+    fMCShower.reserve(shower_index_v.size());
     std::map<size_t,int> stored_mcs_index;
-    for(size_t shower_index = 0; shower_index < mother_index.size(); ++shower_index) {
+    for(size_t shower_index = 0; shower_index < shower_index_v.size(); ++shower_index) {
 
-      unsigned int mother_candidate = mother_index.at(shower_index);
+      unsigned int shower_candidate = shower_index_v.at(shower_index);
+      auto const&  shower_part      = part_v.at(shower_candidate);
+
+      unsigned int mother_candidate = shower_candidate;
+      MCMiniPart   mother_part      = shower_part;
+      unsigned int ancestor_candidate = shower_candidate;
+      MCMiniPart   ancestor_part      = shower_part;
+
+      if(shower_part._mother) {
+	mother_candidate = part_v.TrackToParticleIndex(shower_part._mother);
+	mother_part      = part_v.at(mother_candidate);
+	ancestor_candidate = part_v.TrackToParticleIndex(part_v.AncestorTrackID(shower_candidate));
+	ancestor_part      = part_v.at(ancestor_candidate);
+      }
 
       auto mcs_index_iter = stored_mcs_index.insert(std::make_pair(shower_index,-1));
 
-      ::sim::MCShower shower_prof;
-      std::vector<double> mother_vtx;
-      std::vector<double> mother_mom;
-      fPartAlg.Position(mother_candidate, mother_vtx);
-      fPartAlg.Momentum(mother_candidate, mother_mom);
-      for(auto& v : mother_mom) v *= 1.e3;
+      double shower_g4_energy = shower_part._start_mom[3];
 
       if(fDebugMode)
 
-	std::cout << "Found MCShower with mother energy: " << mother_mom.at(3) << " MeV";
+	std::cout << "Found MCShower with mother energy: " << shower_g4_energy << " MeV";
 
       // Skip if mother energy is less than the enery threshold
-      if(mother_mom.at(3) < fMinShowerEnergy) {
+      if(shower_g4_energy < fMinShowerEnergy) {
 	if(fDebugMode)
 	  std::cout << " ... below energy threshold: skipping!"<<std::endl;
 	continue;
-      }else if(fPartAlg.ShowerDaughters(shower_index).size() < fMinNumDaughters) {
+      }else if(shower_part._daughters.size() < fMinNumDaughters) {
 	if(fDebugMode)
 	  std::cout << " ... below # daughter particle count threshold: skipping!"<<std::endl;
 	continue;
+      }else if(fDebugMode) {
+	std::cout << " ... condition matched. Storing this MCShower..."<<std::endl;
       }
 
+      // Record this MCShower
+
       (*mcs_index_iter.first).second = fMCShower.size();
+
       if(fDebugMode)
 	
 	std::cout << " index " << fMCShower.size() << " => " << shower_index
 		  << std::endl;
 
-      shower_prof.MotherPosition(mother_vtx);
-      shower_prof.MotherMomentum(mother_mom);
-      
-      shower_prof.MotherPDGID   ( fPartAlg.PdgCode(mother_candidate) );
-      shower_prof.MotherTrackID ( fPartAlg.TrackId(mother_candidate) );
-      shower_prof.MotherCreationProcess( fPartAlg.Process(mother_candidate) );
+      ::sim::MCShower shower_prof;
+
+      shower_prof.PdgCode   ( shower_part._pdgcode  );
+      shower_prof.G4TrackID ( shower_part._track_id );
+      shower_prof.Process   ( shower_part._process  );
+
+      shower_prof.MotherPdgCode   ( mother_part._pdgcode  );
+      shower_prof.MotherG4TrackID ( mother_part._track_id );
+      shower_prof.MotherProcess   ( mother_part._process  );
+
+      shower_prof.AncestorPdgCode   ( ancestor_part._pdgcode  );
+      shower_prof.AncestorG4TrackID ( ancestor_part._track_id );
+      shower_prof.AncestorProcess   ( ancestor_part._process  );
+
+      shower_prof.G4Start         ( MCStep ( shower_part._start_vtx, shower_part._start_mom ) );
+      shower_prof.G4End           ( MCStep ( shower_part._end_vtx,   shower_part._end_mom   ) );
+      shower_prof.MotherG4Start   ( MCStep ( mother_part._start_vtx, mother_part._start_mom ) );
+      shower_prof.MotherG4End     ( MCStep ( mother_part._end_vtx,   mother_part._end_mom   ) );
+      shower_prof.AncestorG4Start ( MCStep ( mother_part._start_vtx, mother_part._start_mom ) );
+      shower_prof.AncestorG4End   ( MCStep ( mother_part._end_vtx,   mother_part._end_mom   ) );
 
       std::vector<unsigned int> daughter_track_id;
       daughter_track_id.reserve( fPartAlg.ShowerDaughters(shower_index).size() );
-      std::vector<double>       daughter_vtx;
 
-      bool first = true;
-      for(auto const& index : fPartAlg.ShowerDaughters(shower_index)) {
+      for(auto const& index : fPartAlg.ShowerDaughters(shower_index))
 
-	daughter_track_id.push_back(fPartAlg.TrackId(index));
-	if(first) {
-	  fPartAlg.Position(index, daughter_vtx);
-	  first=false;
-	}
-
-      }
+	daughter_track_id.push_back( part_v.at(index)._track_id );
 
       shower_prof.DaughterTrackID(daughter_track_id);
-      shower_prof.DaughterPosition(daughter_vtx);
 
       fMCShower.push_back(shower_prof);
     }
+
+    // Next, loop over deposited energy and find the DetProfile vtx point
+    std::vector<TLorentzVector>   mcs_daughter_vtx_v (fMCShower.size(),TLorentzVector());
+    std::vector<double>           mcs_min_dist_v     (fMCShower.size(),kINVALID_DOUBLE);
+
+    std::vector<std::vector<double> > shower_g4_dir(fMCShower.size(),std::vector<double>(3,0));
+    for(size_t shower_index = 0; shower_index < fMCShower.size(); ++shower_index) {
     
-    // Next, loop over deposited energy and group them into showers
-    std::map<unsigned int,size_t> edep_index_map(fEdepAlg.TrackIndexMap());
+      auto& g4_dir = shower_g4_dir[shower_index];
+      auto const& g4_mom = fMCShower[shower_index].G4Start().Momentum();
+      double magnitude = 0;
+      for(size_t i=0; i<3; ++i) {
+	g4_dir[i] = g4_mom[i];
+	magnitude += pow(g4_mom[i],2);
+      }
+      magnitude = sqrt(magnitude);
+      for(auto& v : g4_dir) v /= magnitude;
+      
+    }
 
-    std::vector<std::vector<double> > mcs_daughter_mom_v(fMCShower.size(),std::vector<double>(4,0));
-    std::vector<std::vector<double> > plane_charge_v(fMCShower.size(),std::vector<double>(geo->Nplanes(),0));
-
+    std::map<unsigned int,size_t> edep_index_map     (edep_v.TrackIndexMap());
     for(auto track_iter = edep_index_map.begin();
 	track_iter != edep_index_map.end();
 	++track_iter) {
 
-      unsigned int part_index = fPartAlg.TrackToParticleIndex((*track_iter).first);
-      if(part_index == fPartAlg.kINVALID_UINT) continue;
-      unsigned int shower_index = fPartAlg.ShowerIndex(part_index);
-      if(shower_index < 0 || shower_index == fPartAlg.kINVALID_UINT) continue;
+      unsigned int part_track_id = (*track_iter).first;
+      unsigned int edep_index    = (*track_iter).second;
+
+      unsigned int part_index = part_v.TrackToParticleIndex(part_track_id);
+      if(part_index == kINVALID_UINT) continue;
+
+      int shower_index = fPartAlg.ShowerIndex(part_index);
+      if(shower_index < 0 || shower_index == kINVALID_INT) continue;
 
       auto mcs_index_iter = stored_mcs_index.find(shower_index);
       if(mcs_index_iter == stored_mcs_index.end()) {
@@ -127,61 +154,121 @@ namespace sim {
 	throw std::exception();
       }
 
+      int stored_mcs_index = (*mcs_index_iter).second;
       if((*mcs_index_iter).second < 0) continue;
 
-      int edep_index = fEdepAlg.TrackToEdepIndex((*track_iter).first);
-      if(edep_index < 0) continue;
+      auto const& shower_vtx = fMCShower[stored_mcs_index].G4Start().Position();
+      auto const& shower_dir = shower_g4_dir[stored_mcs_index];
+      auto& daughter_vtx = mcs_daughter_vtx_v[stored_mcs_index];
 
-      auto& daughter_mom = mcs_daughter_mom_v [(*mcs_index_iter).second];
-      auto& plane_charge = plane_charge_v     [(*mcs_index_iter).second];
+      for(auto const& edep : edep_v.GetEdepArrayAt((size_t)edep_index)) {
 
-      for(auto const& edep : fEdepAlg.GetEdepArrayAt(edep_index)) {
-	
-	std::vector<double> vtx(4,0);
+	std::vector<double> shower_dep_dir(3,0);
+	shower_dep_dir[0] = edep.x - shower_vtx[0];
+	shower_dep_dir[1] = edep.y - shower_vtx[1];
+	shower_dep_dir[2] = edep.z - shower_vtx[2];
+
+	double dist = sqrt( pow(shower_dep_dir[0],2) + pow(shower_dep_dir[1],2) + pow(shower_dep_dir[2],2) );
+	for(auto& v : shower_dep_dir) v /= dist;
+
+	double angle = acos( shower_dep_dir[0] * shower_dir[0] +
+			     shower_dep_dir[1] * shower_dir[1] +
+			     shower_dep_dir[2] * shower_dir[2] ) / TMath::Pi() * 180.;
+
+	if(dist < mcs_min_dist_v[stored_mcs_index] && angle < 5) {
+	  
+	  mcs_min_dist_v[stored_mcs_index] = dist;
+	  daughter_vtx[0] = edep.x;
+	  daughter_vtx[1] = edep.y;
+	  daughter_vtx[2] = edep.z;
+	  daughter_vtx[3] = (dist/100. / 2.998e8)*1.e9 + shower_vtx[3];
+	  
+	}
+      }
+    }
+
+    // Next, loop over deposited energy and group them into showers
+    //TLorentzVector mom_default(0,0,0,0);
+    std::vector<TLorentzVector> mcs_daughter_mom_v   ( fMCShower.size(), TLorentzVector() );
+    std::vector<std::vector<double> > plane_charge_v ( fMCShower.size(), std::vector<double>(geo->Nplanes(),0) );
+    for(auto track_iter = edep_index_map.begin();
+	track_iter != edep_index_map.end();
+	++track_iter) {
+
+      unsigned int part_track_id = (*track_iter).first;
+      unsigned int edep_index    = (*track_iter).second;
+
+      unsigned int part_index = part_v.TrackToParticleIndex(part_track_id);
+      if(part_index == kINVALID_UINT) continue;
+
+      int shower_index = fPartAlg.ShowerIndex(part_index);
+      if(shower_index < 0 || shower_index == kINVALID_INT) continue;
+
+      auto mcs_index_iter = stored_mcs_index.find(shower_index);
+      if(mcs_index_iter == stored_mcs_index.end()) {
+	std::cerr<<"Logic error: invalid index of stored MCShower!"<<std::endl;
+	throw std::exception();
+      }
+
+      int stored_mcs_index = (*mcs_index_iter).second;
+      if((*mcs_index_iter).second < 0) continue;
+
+      auto const& daughter_vtx = mcs_daughter_vtx_v.at(stored_mcs_index);
+      auto& daughter_mom       = mcs_daughter_mom_v.at(stored_mcs_index);
+      auto& plane_charge       = plane_charge_v.at(stored_mcs_index);
+
+      std::vector<double> vtx(3,0);
+      std::vector<double> mom(3,0);
+      std::cout<<"Edep array @ "<<edep_index << " ... " << edep_v.GetEdepArrayAt((size_t)edep_index).size()<<" entries..."<<std::endl;
+      for(auto const& edep : edep_v.GetEdepArrayAt((size_t)edep_index)) {
+
 	vtx.at(0) = edep.x;
 	vtx.at(1) = edep.y;
 	vtx.at(2) = edep.z;
-	vtx.at(3) = edep.energy;
-
-	//fMCShower.at(shower_index).vtxEdep.push_back(vtx);
 
 	// Compute unit vector to this energy deposition
-	std::vector<double> mom(4,0);
-	mom.at(0) = vtx.at(0) - fMCShower.at((*mcs_index_iter).second).DaughterPosition().at(0);
-	mom.at(1) = vtx.at(1) - fMCShower.at((*mcs_index_iter).second).DaughterPosition().at(1);
-	mom.at(2) = vtx.at(2) - fMCShower.at((*mcs_index_iter).second).DaughterPosition().at(2);
+	mom.at(0) = vtx.at(0) - daughter_vtx[0];
+	mom.at(1) = vtx.at(1) - daughter_vtx[1];
+	mom.at(2) = vtx.at(2) - daughter_vtx[2];
 
+	// Weight by energy (momentum)
 	double magnitude = sqrt(pow(mom.at(0),2) + pow(mom.at(1),2) + pow(mom.at(2),2));
-	mom.at(0) *= (edep.energy/magnitude);
-	mom.at(1) *= (edep.energy/magnitude);
-	mom.at(2) *= (edep.energy/magnitude);
-	mom.at(3) = edep.energy;
+	if(magnitude) {
+	  mom.at(0) = mom.at(0) * (edep.energy/magnitude);
+	  mom.at(1) = mom.at(1) * (edep.energy/magnitude);
+	  mom.at(2) = mom.at(2) * (edep.energy/magnitude);
+	  daughter_mom[0] += mom.at(0);
+	  daughter_mom[1] += mom.at(1);
+	  daughter_mom[2] += mom.at(2);
+	}
 
-	daughter_mom[0] += mom.at(0);
-	daughter_mom[1] += mom.at(1);
-	daughter_mom[2] += mom.at(2);
-	daughter_mom[3] += mom.at(3);
+	daughter_mom[3] += edep.energy;
 
+	// Charge
 	plane_charge.at(geo::kU) += edep.qU;
 	plane_charge.at(geo::kV) += edep.qV;
 	plane_charge.at(geo::kW) += edep.qW;
-	
+
       }
     }
 
     // Store plane charge & daughter momentum
     for(size_t mcs_index=0; mcs_index<fMCShower.size(); ++mcs_index) {
 
-      // Correct for energy deposition normalization
+      auto& daughter_vtx = mcs_daughter_vtx_v[mcs_index];
       auto& daughter_mom = mcs_daughter_mom_v[mcs_index];
 
+      // Correct for energy deposition normalization
       double magnitude = sqrt(pow(daughter_mom[0],2)+pow(daughter_mom[1],2)+pow(daughter_mom[2],2));
 
-      daughter_mom[0] *= (daughter_mom[3]/magnitude);
-      daughter_mom[1] *= (daughter_mom[3]/magnitude);
-      daughter_mom[2] *= (daughter_mom[3]/magnitude);
+      if(magnitude) {
+	daughter_mom[0] *= (daughter_mom[3]/magnitude);
+	daughter_mom[1] *= (daughter_mom[3]/magnitude);
+	daughter_mom[2] *= (daughter_mom[3]/magnitude);
+      }else
+	for(size_t i=0; i<4; ++i) daughter_mom[i]=0;
 
-      fMCShower.at(mcs_index).DaughterMomentum(daughter_mom);
+      fMCShower.at(mcs_index).DetProfile( MCStep( daughter_vtx, daughter_mom ) );
       fMCShower.at(mcs_index).Charge(plane_charge_v[mcs_index]);
     }
 
@@ -191,18 +278,29 @@ namespace sim {
 	
 	std::cout
 	  
-	  << Form("  Mother PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  prof.MotherPDGID(),
-		  prof.MotherPosition().at(0), prof.MotherPosition().at(1), prof.MotherPosition().at(2), prof.MotherPosition().at(3),
-		  prof.MotherMomentum().at(0), prof.MotherMomentum().at(1), prof.MotherMomentum().at(2), prof.MotherMomentum().at(3))
+	  << Form("  Shower particle:     PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.PdgCode(),
+		  prof.G4Start().X(),prof.G4Start().Y(),prof.G4Start().Z(),prof.G4Start().T(),
+		  prof.G4Start().Px(),prof.G4Start().Py(),prof.G4Start().Pz(),prof.G4Start().E())
 	  << std::endl
-	  << Form("    ... with %zu daughters with sum momentum (%g,%g,%g,%g)",
+	  << Form("    Mother particle:   PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.MotherPdgCode(),
+		  prof.MotherG4Start().X(),prof.MotherG4Start().Y(),prof.MotherG4Start().Z(),prof.MotherG4Start().T(),
+		  prof.MotherG4Start().Px(),prof.MotherG4Start().Py(),prof.MotherG4Start().Pz(),prof.MotherG4Start().E())
+	  << std::endl
+	  << Form("    Ancestor particle: PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.AncestorPdgCode(),
+		  prof.AncestorG4Start().X(),prof.AncestorG4Start().Y(),prof.AncestorG4Start().Z(),prof.AncestorG4Start().T(),
+		  prof.AncestorG4Start().Px(),prof.AncestorG4Start().Py(),prof.AncestorG4Start().Pz(),prof.AncestorG4Start().E())
+	  << std::endl
+	  << Form("    ... with %zu daughters:   Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.DaughterTrackID().size(),
-		  prof.DaughterMomentum().at(0),prof.DaughterMomentum().at(1),prof.DaughterMomentum().at(2),prof.DaughterMomentum().at(3))
-	  << std::endl
+		  prof.DetProfile().X(),prof.DetProfile().Y(),prof.DetProfile().Z(),prof.DetProfile().T(),
+		  prof.DetProfile().Px(),prof.DetProfile().Py(),prof.DetProfile().Pz(),prof.DetProfile().E())
+	  << std::endl		  
 	  << "    Charge per plane: ";
 
-	for(size_t i=0; i<prof.Charge().size(); ++i) {
+	for(size_t i=0; i<geo->Nplanes(); ++i) {
 
 	  std::cout << " | Plane " << i << std::flush;
 	  std::cout << " ... Q = " << prof.Charge(i) << std::flush;
@@ -212,21 +310,6 @@ namespace sim {
 	std::cout<<std::endl<<std::endl;
       }
     }
-  }
-
-  void MCShowerRecoAlg::Compute3DAngle(const double x, const double y, const double z,
-				       double &theta, double&phi) const
-  {
-    double magnitude = sqrt(pow(x,2)+pow(y,2)+pow(z,2));
-    phi = TMath::ATan(z/x);
-    theta = TMath::ACos( y / magnitude);
-  }
-  
-  void MCShowerRecoAlg::Compute2DAngle(const geo::View_t view,
-				       const double x, const double y, const double z,
-				       double angle)
-  {
-    
   }
 
 }

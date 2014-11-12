@@ -4,8 +4,8 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef MCSHOWERRECOPART_CC
-#define MCSHOWERRECOPART_CC
+#ifndef MCSHOWERRECOPART_CXX
+#define MCSHOWERRECOPART_CXX
 
 #include "MCShowerRecoPart.h"
 
@@ -22,156 +22,39 @@ namespace sim {
   }
 
   //----------------------------------------------------------------------------------------------- 
-  void MCShowerRecoPart::ConstructShower(const art::Handle<std::vector<simb::MCParticle> > mcpArray)
-  //-----------------------------------------------------------------------------------------------
+  void MCShowerRecoPart::ConstructShower(const MCRecoPart& part_v)
+  //----------------------------------------------------------------------------------------------- 
   {
-    if(!mcpArray.isValid()) 
-
-      throw cet::exception(__FUNCTION__) << "Invalid particle array provided. Nothing done!";
-    
-    AddParticles(mcpArray);
-
-    ConstructGranularShower();
-
-  }
-
-  //----------------------------------------------------------------
-  void MCShowerRecoPart::ClearAndReservePartArray(size_t n)
-  //----------------------------------------------------------------
-  {
-    _track_index.clear();
-    _track_id.clear();
-    _process.clear();
-    _mother.clear();
-    _ancestor.clear();
-    _pdgcode.clear();
-    _daughters.clear();
-    _shower_id.clear();
-    _start_vtx.clear();
-    _start_mom.clear();
-
-    _track_id.reserve(n);
-    _process.reserve(n);
-    _mother.reserve(n);
-    _pdgcode.reserve(n);
-    _start_vtx.reserve(n);
-    _start_mom.reserve(n);
-    _daughters.reserve(n);
-    _shower_id.reserve(n);
-  }
-
-  //----------------------------------------------------------------
-  void MCShowerRecoPart::AddParticle(unsigned int track_id,
-				     unsigned int mother_track_id,
-				     const std::string &process,
-				     int pdgcode,
-				     const TLorentzVector &start_vtx,
-				     const TLorentzVector &start_mom,
-				     const std::set<unsigned int> &daughters)
-  //----------------------------------------------------------------
-  {
-    unsigned int index = _track_index.size();
-
-    _track_index.insert(std::pair<unsigned int, unsigned int>(track_id,index));
-    _track_id.push_back(track_id);
-    _process.push_back(process);
-    _mother.push_back(mother_track_id);
-    _pdgcode.push_back(pdgcode);
-    _start_vtx.push_back(std::vector<double>(4,0.));
-    _start_mom.push_back(std::vector<double>(4,0.));
-    _daughters.push_back(std::set<unsigned int>(daughters));
-
-    _start_vtx.at(index).at(0)=start_vtx.X();
-    _start_vtx.at(index).at(1)=start_vtx.Y();
-    _start_vtx.at(index).at(2)=start_vtx.Z();
-    _start_vtx.at(index).at(3)=start_vtx.T();
-
-    _start_mom.at(index).at(0)=start_mom.X();
-    _start_mom.at(index).at(1)=start_mom.Y();
-    _start_mom.at(index).at(2)=start_mom.Z();
-    _start_mom.at(index).at(3)=start_mom.T();
-    
-  }
-  
-  //--------------------------------------------------------------------------------------------
-  void MCShowerRecoPart::AddParticles(const art::Handle<std::vector<simb::MCParticle> > mcpArray)
-  //--------------------------------------------------------------------------------------------
-  {
-
-    //art::Handle<std::vector<simb::MCParticle> > mcpArray;
-    //evt.getByLabel(fG4ModName,mcpArray);
-
-    // Read in all particles' information
-    ClearAndReservePartArray(mcpArray->size());
-    for(size_t i=0; i < mcpArray->size(); ++i) {
-
-      const art::Ptr<simb::MCParticle> mcp_ptr(mcpArray,i);
-
-
-      std::set<unsigned int> daughters;
-      for(size_t i=0; i<(size_t)(mcp_ptr->NumberDaughters()); ++i)
-	daughters.insert(mcp_ptr->Daughter(i));
-
-      this->AddParticle((unsigned int)(mcp_ptr->TrackId()),
-			(unsigned int)(mcp_ptr->Mother()),
-			mcp_ptr->Process(),
-			mcp_ptr->PdgCode(),
-			mcp_ptr->Position(),
-			mcp_ptr->Momentum(),
-			daughters);
-    }
-  }
-
-  void MCShowerRecoPart::GetTrackStartInfo(const unsigned int &index,
-					  double &start_x,
-					  double &start_y,
-					  double &start_z,
-					  double &start_time)
-  {
-    if(index > _track_id.size())
-
-      throw cet::exception(__FUNCTION__) << Form("Particle index %d not found!",index);
-
-    start_x = _start_vtx.at(index).at(0);
-    start_y = _start_vtx.at(index).at(1);
-    start_z = _start_vtx.at(index).at(2);
-    start_time = _start_vtx.at(index).at(3);
-
-  }
-
-  //----------------------------------------------------------------
-  void MCShowerRecoPart::ConstructGranularShower()
-  //----------------------------------------------------------------
-  {
-
-    if(!_mother.size()) return;
+    if(!part_v.size()) return;
 
     _shower_id.clear();
-    _shower_id.resize(_start_vtx.size(),-1);
+    _shower_id.resize(part_v.size(),-1);
     _shower_index.clear();
     _shower_daughters.clear();
 
     // Construct MCShower
     std::vector<std::multimap<double,unsigned int> > daughter_map;
-    for(size_t i=0; i<_track_id.size(); ++i) {
+    for(size_t i=0; i<part_v.size(); ++i) {
+
+      auto const& mcp = part_v[i];
 
       int candidate_mom_index=-1;
-      if( _pdgcode.at(i) == 22 ||
-          _pdgcode.at(i) == 11 ||
-          _pdgcode.at(i) == -11 )
+      if( mcp._pdgcode == 22 ||
+          mcp._pdgcode == 11 ||
+          mcp._pdgcode == -11 )
 	candidate_mom_index = i;
 
-      unsigned int mom_track = _mother.at(i);
-      auto mom_iter = _track_index.find(mom_track);
-      while(mom_iter != _track_index.end()) {
+      unsigned int mom_track = mcp._mother;
+      auto mom_iter = part_v._track_index.find(mom_track);
+      while(mom_iter != part_v._track_index.end()) {
 
         unsigned int mom_index = (*mom_iter).second;
 
-        if( _pdgcode.at(mom_index) == 22 || _pdgcode.at(mom_index) == 11 || _pdgcode.at(mom_index) == -11 )
+        if( part_v.at(mom_index)._pdgcode == 22 || part_v.at(mom_index)._pdgcode == 11 || part_v.at(mom_index)._pdgcode == -11 )
 
           candidate_mom_index = mom_index;
 	
-        mom_iter = _track_index.find(_mother.at(mom_index));
+        mom_iter = part_v._track_index.find(part_v.at(mom_index)._mother);
 
       }
 
@@ -179,11 +62,11 @@ namespace sim {
 	
 	auto candidate_mom_iter = _shower_index.find(candidate_mom_index);
 	if(candidate_mom_iter == _shower_index.end()) {
-	  _shower_index.insert(std::pair<unsigned int,unsigned int>(candidate_mom_index,_shower_index.size()));
+	  _shower_index.insert(std::make_pair((unsigned int)candidate_mom_index, (unsigned int)_shower_index.size()));
 	  daughter_map.push_back(std::multimap<double,unsigned int>());
 	}
 	unsigned int shower_index = (*_shower_index.find(candidate_mom_index)).second;
-	daughter_map.at(shower_index).insert(std::pair<double,unsigned int>(_start_vtx.at(i).at(3),i));
+	daughter_map.at(shower_index).insert(std::make_pair((double)(mcp._start_vtx[3]),(unsigned int)i));
 	_shower_id.at(i) = shower_index;
 	
       } else if(_debug_mode) {
@@ -191,16 +74,16 @@ namespace sim {
 	std::cout
 	  << "Found a particle that does not belong to a shower!" << std::endl
 	  << Form(" PDGID: %d ... Track %d @ (%g,%g,%g,%g) with (%g,%g,%g,%g)",
-		  _pdgcode.at(i),
-		  _track_id.at(i),
-		  _start_vtx.at(i).at(0),
-		  _start_vtx.at(i).at(1),
-		  _start_vtx.at(i).at(2),
-		  _start_vtx.at(i).at(3),
-		  _start_mom.at(i).at(0),
-		  _start_mom.at(i).at(1),
-		  _start_mom.at(i).at(2),
-		  _start_mom.at(i).at(3))
+		  mcp._pdgcode,
+		  mcp._track_id,
+		  mcp._start_vtx[0],
+		  mcp._start_vtx[1],
+		  mcp._start_vtx[2],
+		  mcp._start_vtx[3],
+		  mcp._start_mom[0],
+		  mcp._start_mom[1],
+		  mcp._start_mom[2],
+		  mcp._start_mom[3])
 	  << std::endl << std::endl;
 
       }
@@ -219,19 +102,20 @@ namespace sim {
 
 	_shower_daughters.at(mom.second).push_back(part_index.second);
 
+      auto const& mcp = part_v.at(mom.first);
       if(_debug_mode) 
 	std::cout 
 	  << Form("PDGID: %d ... Track %d @ (%g,%g,%g,%g) with (%g,%g,%g,%g) ... %zu daughters!",
-		  _pdgcode.at(mom.first),
-		  _track_id.at(mom.first),
-		  _start_vtx.at(mom.first).at(0),
-		  _start_vtx.at(mom.first).at(1),
-		  _start_vtx.at(mom.first).at(2),
-		  _start_vtx.at(mom.first).at(3),
-		  _start_mom.at(mom.first).at(0),
-		  _start_mom.at(mom.first).at(1),
-		  _start_mom.at(mom.first).at(2),
-		  _start_mom.at(mom.first).at(3),
+		  mcp._pdgcode,
+		  mcp._track_id,
+		  mcp._start_vtx[0],
+		  mcp._start_vtx[1],
+		  mcp._start_vtx[2],
+		  mcp._start_vtx[3],
+		  mcp._start_mom[0],
+		  mcp._start_mom[1],
+		  mcp._start_mom[2],
+		  mcp._start_mom[3],
 		  _shower_daughters.at(mom.second).size())
 	  << std::endl;
     }
