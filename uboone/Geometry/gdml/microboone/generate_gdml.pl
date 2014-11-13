@@ -1855,11 +1855,22 @@ sub gen_enclosureExtras()
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
-<box name="Platform"
-  x="550"
-  y="18"
-  z="1500"
-  lunit="cm"/>
+ <box name="PlatformOLDbig" lunit="cm" x="550+1" y="18+1" z="1500+1" />
+ <box name="PlatformOLDsmall" lunit="cm" x="550" y="18" z="1500" />
+ <tube name="PlatformNEW" lunit="cm" rmax="292*2.54-0.5" z="18+1.5" aunit="deg" deltaphi="360" /> 
+
+  <subtraction name="PlatformSub0">
+    <first ref="PlatformOLDbig"/> <second ref="PlatformNEW"/>
+	<position name="posPlatformSub0" unit="cm" x="0" y="0" z="0"/>
+	<rotation name="rotPlatformSub0" unit="deg" x="90" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="Platform">
+	<first ref="PlatformOLDsmall"/> <second ref="PlatformSub0"/>
+	<position name="posPlatformSub1" unit="cm" x="0" y="0" z="0"/>
+  </subtraction> 
+
+
 <box name="Column"
   x="16.79"
   y="798"
@@ -1925,6 +1936,12 @@ sub gen_enclosureExtras()
   x="$RackThickness"
   y="$RackThickness"
   z="$RackZ-2*$RackThickness-0.001"
+  lunit="cm"/>
+
+<box name="rackInnards"
+  x="33.0"
+  y="84.5"
+  z="20.5"
   lunit="cm"/>
 
 <box name="floorTankBox1"
@@ -2039,6 +2056,10 @@ sub gen_enclosureExtras()
       <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
       <solidref ref="rackZ"/>
     </volume>
+	<volume name="volRackInnards">
+	  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	  <solidref ref="rackInnards"/>
+	</volume>
 
     <volume name="volRack">
       <materialref ref="Air"/>
@@ -2091,6 +2112,10 @@ sub gen_enclosureExtras()
         <volumeref ref="volRackZ"/>
         <position name="posRackZ4" unit="cm" z="0" y="-($RackY-$RackThickness)/2" x="-($RackX-$RackThickness)/2"/>
       </physvol>  
+	  <physvol>
+		<volumeref ref="volRackInnards"/>
+		<position name="posRackInnards" unit="cm" x="0" y="0" z="0"/>
+	  </physvol>
     </volume>
 
   <volume name="volFloorTank1">
