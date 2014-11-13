@@ -22,6 +22,7 @@ art_make( BASENAME_ONLY
 		   RawData
 		   RecoBase
 		   MCBase
+		   SummaryData
 		   RecoObjects
 		   LArProperties_service
 		   DetectorProperties_service
@@ -54,6 +55,7 @@ art_make( BASENAME_ONLY
 		   SimulationBase
 		   Utilities
 		   MCBase
+		   SummaryData
 		   RawData
 		   RecoBase
 		   RecoObjects

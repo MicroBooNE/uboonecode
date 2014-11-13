@@ -8,27 +8,27 @@ mcrecopart:
 
 mcrecoedep:
 {
-    DebugMode : true
+    DebugMode : false
     SaveMCHit : false
 }
 
 mcshowerrecopart:
 {
-    DebugMode : true
+    DebugMode : false
 }
 
 mcshowerrecoalg:
 {
     MCShowerRecoPart: @local::mcshowerrecopart
     
-    DebugMode: true
+    DebugMode: false
     MinShowerEnergy: 10
     MinNumDaughters: 0
 }
 
 mctrackrecoalg:
 {
-    DebugMode: true
+    DebugMode: false
 }
 
 standard_mcreco:
