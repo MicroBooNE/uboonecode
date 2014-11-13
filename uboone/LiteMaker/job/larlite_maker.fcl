@@ -15,6 +15,7 @@ standard_scanner:
 {
   module_type:            "LiteScanner"
   store_association:      true
+  potsummary: ["generator"]
   gtruth:     ["generator"]
   mcflux:     ["generator"]
   mctruth:    ["generator"]
