@@ -50,6 +50,7 @@
 #include "OpticalDetectorData/OpticalTypes.h"
 #include "MCBase/MCShower.h"
 #include "MCBase/MCTrack.h"
+#include "SummaryData/POTSummary.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
 #include "Utilities/DetectorProperties.h"
@@ -80,6 +81,7 @@ public:
   void analyze(art::Event const & e) override;
   void beginJob();
   void endJob();
+  void beginSubRun(const art::SubRun& sr);
 
 private:
 
@@ -147,6 +149,38 @@ void LiteScanner::endJob() {
   _mgr.close();
 }
 
+void LiteScanner::beginSubRun(const art::SubRun& sr)
+{
+  // POTSummary
+  auto const& pot_labels = fAlg.ModuleLabels()[::larlite::data::kPOTSummary];
+  for(auto const& label : pot_labels) {
+
+    auto lite_data = _mgr.get_data<larlite::potsummary>(label);
+
+    art::Handle< sumdata::POTSummary > potHandle;
+    sr.getByLabel(label,potHandle);
+
+    if(potHandle.isValid()) {
+
+      lite_data->totpot     = potHandle->totpot;
+      lite_data->totgoodpot = potHandle->totgoodpot;
+      lite_data->totspills  = potHandle->totspills;
+      lite_data->goodspills = potHandle->goodspills;
+
+    }else{
+
+      lite_data->totpot     = 0;
+      lite_data->totgoodpot = 0;
+      lite_data->totspills  = 0;
+      lite_data->goodspills = 0;
+
+    }
+
+  }
+  
+}
+
+
 void LiteScanner::analyze(art::Event const & e)
 {
   fAlg.EventClear();
@@ -208,7 +242,8 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<anab::ParticleID>(e,j); break;
       case ::larlite::data::kPFParticle:
 	ScanData<recob::PFParticle>(e,j); break;
-
+      case ::larlite::data::kPOTSummary:
+	break;
       case ::larlite::data::kUndefined:
       case ::larlite::data::kEvent:
       default:
