@@ -21,6 +21,15 @@ namespace sim {
     for(auto const& id : pset.get<std::vector<int> >("SavePathPDGList"))
 
       _pdg_list.insert(id);
+
+    art::ServiceHandle<geo::Geometry> geo;
+    _y_max = geo->DetHalfHeight();
+    _y_min = (-1.) * _y_max;
+    _z_min = 0;
+    _z_max = geo->DetLength();
+    _x_min = 0;
+    _x_max = 2.*(geo->DetHalfWidth());
+
   }
 
   //--------------------------------------------------------------------------------------------
@@ -51,19 +60,22 @@ namespace sim {
   }
 
   //--------------------------------------------------------------------------------------------
+  bool MCRecoPart::InDetector(const double& x,
+			      const double& y,
+			      const double& z) const
+  //--------------------------------------------------------------------------------------------
+  {
+    return !( x > _x_max || x < _x_min || 
+	      z > _z_max || z < _z_min || 
+	      y > _y_max || y < _y_min );
+  }
+
+  //--------------------------------------------------------------------------------------------
   void MCRecoPart::AddParticles(const std::vector<simb::MCParticle>& mcp_v,
 				const std::vector<simb::Origin_t>&   orig_v)
   //--------------------------------------------------------------------------------------------
   {
     if(orig_v.size() != mcp_v.size()) throw cet::exception(__FUNCTION__) << "MCParticle and Origin_t vector size not same!";
-
-    art::ServiceHandle<geo::Geometry> geo;
-    double y_max = geo->DetHalfHeight();
-    double y_min = (-1.) * y_max;
-    double z_min = 0;
-    double z_max = geo->DetLength();
-    double x_min = 0;
-    double x_max = 2.*(geo->DetHalfWidth());
 
     this->clear();
     _track_index.clear();
@@ -111,11 +123,10 @@ namespace sim {
 
 	for(size_t i=0; i<mcp.NumberTrajectoryPoints(); ++i) {
 	  
-	  if( mcp.Vx(i) > x_max || mcp.Vx(i) < x_min || 
-	      mcp.Vz(i) > z_max || mcp.Vz(i) < z_min || 
-	      mcp.Vy(i) > y_max || mcp.Vy(i) < y_min ) continue;
+	  if(InDetector(mcp.Vx(i),mcp.Vy(i),mcp.Vz(i)))
 
-	  det_path_index.insert(i);
+	    det_path_index.insert(i);
+
 	}
 
 	if(det_path_index.size()) {

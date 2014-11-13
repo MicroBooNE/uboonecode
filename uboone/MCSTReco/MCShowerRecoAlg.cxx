@@ -176,7 +176,7 @@ namespace sim {
 			     shower_dep_dir[1] * shower_dir[1] +
 			     shower_dep_dir[2] * shower_dir[2] ) / TMath::Pi() * 180.;
 
-	if(dist < mcs_min_dist_v[stored_mcs_index] && angle < 5) {
+	if(dist < mcs_min_dist_v[stored_mcs_index] && angle < 10) {
 	  
 	  mcs_min_dist_v[stored_mcs_index] = dist;
 	  daughter_vtx[0] = edep.x;
@@ -220,7 +220,7 @@ namespace sim {
 
       std::vector<double> vtx(3,0);
       std::vector<double> mom(3,0);
-      std::cout<<"Edep array @ "<<edep_index << " ... " << edep_v.GetEdepArrayAt((size_t)edep_index).size()<<" entries..."<<std::endl;
+      //std::cout<<"Edep array @ "<<edep_index << " ... " << edep_v.GetEdepArrayAt((size_t)edep_index).size()<<" entries..."<<std::endl;
       for(auto const& edep : edep_v.GetEdepArrayAt((size_t)edep_index)) {
 
 	vtx.at(0) = edep.x;

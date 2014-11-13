@@ -91,7 +91,7 @@ void MCReco::produce(art::Event & evt)
 
   fMCSAlg.Reconstruct(fPart,fEdep);
 
-  fMCTAlg.Reconstruct(fPart);
+  fMCTAlg.Reconstruct(fPart,fEdep);
 
   for(auto const& mcs : fMCSAlg.MCShower())
 

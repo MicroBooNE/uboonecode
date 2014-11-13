@@ -101,6 +101,10 @@ namespace sim
       return (*iter).second;
     }
 
+    bool InDetector(const double& x,
+		    const double& y,
+		    const double& z) const;
+    
   public:
 
     /// Track ID => Index Map
@@ -108,6 +112,12 @@ namespace sim
 
     /// PDG code list for which particle's trajectory within the detector is saved
     std::set<int> _pdg_list;
+
+  protected:
+
+    double _x_max, _x_min;
+    double _y_max, _y_min;
+    double _z_max, _z_min;
 
   }; // class MCRecoPart
   
