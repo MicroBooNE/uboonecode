@@ -90,6 +90,9 @@ private:
 
   /// Templated data scanner function
   template<class T> void ScanData(const art::Event& evt, const size_t name_index);
+
+  /// Templated association scanner function
+  template<class T> void SaveAssociationSource(const art::Event& evt);
   
   /// Templated association scanner
   template<class T> void ScanAssociation(const art::Event& evt, const size_t name_index);
@@ -110,6 +113,9 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
 {
   //  fDataReadFlag.resize((size_t)(::larlite::data::kDATA_TYPE_MAX),std::map<std::string,
   fStoreAss = p.get<bool>("store_association",false);
+  _mgr.set_out_filename(p.get<std::string>("out_filename","annonymous.root"));
+  auto const data_pset = p.get<fhicl::ParameterSet>("DataLookUpMap");
+  auto const ass_pset = p.get<fhicl::ParameterSet>("AssociationLookUpMap");
   for(size_t i = 0; i<(size_t)(::larlite::data::kDATA_TYPE_MAX); ++i) {
 
     std::vector<std::string> labels;
@@ -118,11 +124,15 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
     case ::larlite::data::kEvent:
       break;
     default:
-      labels = p.get<std::vector<std::string> >(::larlite::data::kDATA_TREE_NAME[i].c_str(),labels);
+      labels = data_pset.get<std::vector<std::string> >(::larlite::data::kDATA_TREE_NAME[i].c_str(),labels);
       for(auto const& label : labels)
 	fAlg.Register(label,(::larlite::data::DataType_t)i);
+      labels.clear();
+      labels = ass_pset.get<std::vector<std::string> >(::larlite::data::kDATA_TREE_NAME[i].c_str(),labels);
+      for(auto const& label : labels)
+	fAlg.AssociationRegister(label,(::larlite::data::DataType_t)i);
     }
-  }  
+  }
 }
 /*
 template<> void LiteScanner::ScanAssociation<recob::Cluster>(const art::Event& evt, const size_t name_index);
@@ -140,7 +150,7 @@ template<> void LiteScanner::ScanAssociation<recob::MCParticle>(const art::Event
 */
 void LiteScanner::beginJob() {
   //_mgr.set_verbosity(larlite::msg::kDEBUG);
-  _mgr.set_out_filename("larlite.root");
+  //_mgr.set_out_filename("larlite.root");
   _mgr.set_io_mode(::larlite::storage_manager::kWRITE);
   _mgr.open();
 }
@@ -184,6 +194,22 @@ void LiteScanner::beginSubRun(const art::SubRun& sr)
 void LiteScanner::analyze(art::Event const & e)
 {
   fAlg.EventClear();
+
+  //
+  // Loop over data type to store association ptr map
+  //
+  SaveAssociationSource<recob::Hit>(e);
+  SaveAssociationSource<recob::Cluster>(e);
+  SaveAssociationSource<recob::EndPoint2D>(e);
+  SaveAssociationSource<recob::SpacePoint>(e);
+  SaveAssociationSource<recob::OpFlash>(e);
+  SaveAssociationSource<anab::CosmicTag>(e);
+  SaveAssociationSource<recob::Track>(e);
+  SaveAssociationSource<recob::Shower>(e);
+  SaveAssociationSource<recob::Vertex>(e);
+  SaveAssociationSource<recob::PFParticle>(e);
+  SaveAssociationSource<anab::Calorimetry>(e);
+  SaveAssociationSource<anab::ParticleID>(e);
 
   //
   // Loop over data type to store data & locally art::Ptr
@@ -322,6 +348,37 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
   
   fAlg.ScanData(dh,lite_data);
 }
+
+//-------------------------------------------------------------------------------------------------
+// SaveAssociationSource
+//-------------------------------------------------------------------------------------------------
+template<class T> void LiteScanner::SaveAssociationSource(const art::Event& evt)
+{
+
+  auto lite_type = fAlg.LiteDataType<T>();
+  auto const& ass_labels_v = fAlg.AssLabels();
+
+  for(size_t i=0; i<ass_labels_v[lite_type].size(); ++i) {
+
+    auto const& name = ass_labels_v[lite_type][i];
+
+    art::Handle<std::vector<T> > dh;
+    evt.getByLabel(name,dh);
+    if(!dh.isValid() || !(dh->size())) continue;
+
+    auto& ptr_map = fAlg.GetPtrMap<T>();
+
+    for(size_t j=0; j<dh->size(); ++j) {
+
+      const art::Ptr<T> ptr(dh,j);
+
+      ptr_map[ptr] = std::make_pair(j,i);
+
+    }
+
+  }
+
+} 
 
 //-------------------------------------------------------------------------------------------------
 // ScanAssociation
