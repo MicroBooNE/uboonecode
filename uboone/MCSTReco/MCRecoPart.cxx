@@ -33,6 +33,32 @@ namespace sim {
   }
 
   //--------------------------------------------------------------------------------------------
+  unsigned int MCRecoPart::MotherTrackID(const unsigned int part_index) const
+  //--------------------------------------------------------------------------------------------
+  {
+    if(this->size() <= part_index) return ::sim::kINVALID_UINT;
+    
+    unsigned int result = this->at(part_index)._mother;
+    
+    if(!result) return this->at(part_index)._track_id;
+
+    if(TrackToParticleIndex(result) != ::sim::kINVALID_UINT) return result;
+    
+    //std::cout<< "\033[95mWarning:\033[00m Mother particle not in the particle list!"<<std::endl;
+    // Do brute search 
+    unsigned int daughter_id = this->at(part_index)._track_id;
+    
+    for(auto const& part : *this) {
+
+      if(part._daughters.find(daughter_id) != part._daughters.end())
+
+	return part._track_id;
+
+    }
+    return result;
+  }
+
+  //--------------------------------------------------------------------------------------------
   unsigned int MCRecoPart::AncestorTrackID(const unsigned int part_index) const
   //--------------------------------------------------------------------------------------------
   {
@@ -40,17 +66,38 @@ namespace sim {
 
     if(part_index >= this->size()) return result;
 
-    result = this->at(part_index)._mother;
+    result = MotherTrackID(part_index);
+
+    if(result == this->at(part_index)._track_id) return result;
+
+    if(!result) return this->at(part_index)._track_id;
 
     auto mother_index = TrackToParticleIndex(result);
 
-    while(mother_index != kINVALID_UINT){
+    while(1) {
 
-      auto const& new_result = this->at(mother_index)._mother;
+      if(mother_index != kINVALID_UINT) {
 
-      if(!new_result) break;
+	auto const new_result = MotherTrackID(mother_index);
 
-      result = new_result;
+	if(new_result == this->at(mother_index)._track_id) break;
+
+	result = new_result;
+
+      }else{
+	
+	// Look for a particle that has a daughter = this mother
+	auto const old_result = result;
+	for(auto const& p : *this) {
+	  
+	  if(p._daughters.find(result) != p._daughters.end()) {
+	    result = p._track_id;
+	    break;
+	  }
+	}
+	if(result == old_result)
+	  break;
+      }
 
       mother_index = TrackToParticleIndex(result);
 
@@ -83,6 +130,8 @@ namespace sim {
     for(size_t i=0; i < mcp_v.size(); ++i) {
       
       auto const& mcp = mcp_v[i];
+
+      //std::cout<<" Track ID : "<<mcp.TrackId()<<" ... Index : " <<this->size()<<std::endl;
 
       _track_index.insert(std::make_pair((size_t)(mcp.TrackId()),(size_t)(this->size())));
 

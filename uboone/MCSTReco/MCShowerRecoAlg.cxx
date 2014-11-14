@@ -40,17 +40,24 @@ namespace sim {
       unsigned int shower_candidate = shower_index_v.at(shower_index);
       auto const&  shower_part      = part_v.at(shower_candidate);
 
-      unsigned int mother_candidate = shower_candidate;
-      MCMiniPart   mother_part      = shower_part;
-      unsigned int ancestor_candidate = shower_candidate;
-      MCMiniPart   ancestor_part      = shower_part;
+      unsigned int mother_track   = part_v.MotherTrackID(shower_candidate);
+      unsigned int ancestor_track = part_v.AncestorTrackID(shower_candidate);
 
-      if(shower_part._mother) {
-	mother_candidate = part_v.TrackToParticleIndex(shower_part._mother);
-	mother_part      = part_v.at(mother_candidate);
-	ancestor_candidate = part_v.TrackToParticleIndex(part_v.AncestorTrackID(shower_candidate));
-	ancestor_part      = part_v.at(ancestor_candidate);
-      }
+      if(mother_track == kINVALID_UINT || ancestor_track == kINVALID_UINT)
+
+	throw cet::exception(__FUNCTION__) << "LOGIC ERROR: mother/ancestor track ID is invalid!";
+
+      MCMiniPart mother_part;
+      MCMiniPart ancestor_part;
+
+      unsigned int mother_index   = part_v.TrackToParticleIndex(mother_track);
+      unsigned int ancestor_index = part_v.TrackToParticleIndex(ancestor_track);
+
+      if(mother_index != kINVALID_UINT)   mother_part   = part_v[mother_index];
+      else mother_part._track_id = mother_track;
+
+      if(ancestor_index != kINVALID_UINT) ancestor_part = part_v[ancestor_index];
+      else ancestor_part._track_id = ancestor_track;
 
       auto mcs_index_iter = stored_mcs_index.insert(std::make_pair(shower_index,-1));
 
@@ -79,7 +86,7 @@ namespace sim {
 
       if(fDebugMode)
 	
-	std::cout << " index " << fMCShower.size() << " => " << shower_index
+	std::cout << " Storage index " << fMCShower.size() << " => Shower index " << shower_index
 		  << std::endl;
 
       ::sim::MCShower shower_prof;
@@ -116,6 +123,9 @@ namespace sim {
       fMCShower.push_back(shower_prof);
     }
 
+    if(fDebugMode)
+      std::cout << " Found " << fMCShower.size() << " MCShowers. Now computing DetProfile position..." << std::endl;
+    
     // Next, loop over deposited energy and find the DetProfile vtx point
     std::vector<TLorentzVector>   mcs_daughter_vtx_v (fMCShower.size(),TLorentzVector());
     std::vector<double>           mcs_min_dist_v     (fMCShower.size(),kINVALID_DOUBLE);
@@ -188,6 +198,9 @@ namespace sim {
       }
     }
 
+    if(fDebugMode)
+      std::cout << " Found " << fMCShower.size() << " MCShowers. Now computing DetProfile momentum..." << std::endl;
+
     // Next, loop over deposited energy and group them into showers
     //TLorentzVector mom_default(0,0,0,0);
     std::vector<TLorentzVector> mcs_daughter_mom_v   ( fMCShower.size(), TLorentzVector() );
@@ -252,67 +265,68 @@ namespace sim {
 
       }
     }
-
+    
+    if(fDebugMode)
+      std::cout << " Found " << fMCShower.size() << " MCShowers. Now storing..." << std::endl;
+    
     // Store plane charge & daughter momentum
     for(size_t mcs_index=0; mcs_index<fMCShower.size(); ++mcs_index) {
-
+      
       auto& daughter_vtx = mcs_daughter_vtx_v[mcs_index];
       auto& daughter_mom = mcs_daughter_mom_v[mcs_index];
-
+      
       // Correct for energy deposition normalization
       double magnitude = sqrt(pow(daughter_mom[0],2)+pow(daughter_mom[1],2)+pow(daughter_mom[2],2));
-
+      
       if(magnitude) {
 	daughter_mom[0] *= (daughter_mom[3]/magnitude);
 	daughter_mom[1] *= (daughter_mom[3]/magnitude);
 	daughter_mom[2] *= (daughter_mom[3]/magnitude);
       }else
 	for(size_t i=0; i<4; ++i) daughter_mom[i]=0;
-
+      
       fMCShower.at(mcs_index).DetProfile( MCStep( daughter_vtx, daughter_mom ) );
       fMCShower.at(mcs_index).Charge(plane_charge_v[mcs_index]);
     }
-
+    
     if(fDebugMode) {
-
+      
       for(auto const& prof : fMCShower) {
 	
 	std::cout
 	  
-	  << Form("  Shower particle:     PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  prof.PdgCode(),
+	  << Form("  Shower particle:     PDG=%d : Track ID=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.PdgCode(), prof.TrackID(),
 		  prof.Start().X(),prof.Start().Y(),prof.Start().Z(),prof.Start().T(),
 		  prof.Start().Px(),prof.Start().Py(),prof.Start().Pz(),prof.Start().E())
 	  << std::endl
-	  << Form("    Mother particle:   PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  prof.MotherPdgCode(),
+	  << Form("    Mother particle:   PDG=%d : Track ID=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.MotherPdgCode(), prof.MotherTrackID(),
 		  prof.MotherStart().X(),prof.MotherStart().Y(),prof.MotherStart().Z(),prof.MotherStart().T(),
 		  prof.MotherStart().Px(),prof.MotherStart().Py(),prof.MotherStart().Pz(),prof.MotherStart().E())
 	  << std::endl
-	  << Form("    Ancestor particle: PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  prof.AncestorPdgCode(),
+	  << Form("    Ancestor particle: PDG=%d : Track ID=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.AncestorPdgCode(), prof.AncestorTrackID(),
 		  prof.AncestorStart().X(),prof.AncestorStart().Y(),prof.AncestorStart().Z(),prof.AncestorStart().T(),
 		  prof.AncestorStart().Px(),prof.AncestorStart().Py(),prof.AncestorStart().Pz(),prof.AncestorStart().E())
 	  << std::endl
-	  << Form("    ... with %zu daughters:   Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+	  << Form("    ... with %zu daughters: Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
 		  prof.DaughterTrackID().size(),
 		  prof.DetProfile().X(),prof.DetProfile().Y(),prof.DetProfile().Z(),prof.DetProfile().T(),
 		  prof.DetProfile().Px(),prof.DetProfile().Py(),prof.DetProfile().Pz(),prof.DetProfile().E())
 	  << std::endl		  
 	  << "    Charge per plane: ";
-
+	
 	for(size_t i=0; i<geo->Nplanes(); ++i) {
-
+	  
 	  std::cout << " | Plane " << i << std::flush;
 	  std::cout << " ... Q = " << prof.Charge(i) << std::flush;
-
+	  
 	}
-
 	std::cout<<std::endl<<std::endl;
       }
     }
   }
-
 }
 
 

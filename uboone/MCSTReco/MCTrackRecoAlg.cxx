@@ -38,17 +38,24 @@ namespace sim {
       mini_track.Start   ( MCStep( mini_part._start_vtx, mini_part._start_mom ) );
       mini_track.End     ( MCStep( mini_part._end_vtx,   mini_part._end_mom   ) );
 
-      unsigned int mother_index   = i;
-      MCMiniPart   mother_part    = mini_part;
-      unsigned int ancestor_index = i;
-      MCMiniPart   ancestor_part  = mini_part;
+      unsigned int mother_track   = part_v.MotherTrackID(i);
+      unsigned int ancestor_track = part_v.AncestorTrackID(i);
 
-      if(mini_part._mother) {
-	mother_index   = part_v.TrackToParticleIndex(mini_part._mother);
-	mother_part    = part_v.at(mother_index);
-	ancestor_index = part_v.TrackToParticleIndex(part_v.AncestorTrackID(i));
-	ancestor_part  = part_v.at(ancestor_index);
-      }
+      if(mother_track == kINVALID_UINT || ancestor_track == kINVALID_UINT)
+
+	throw cet::exception(__FUNCTION__) << "LOGIC ERROR: mother/ancestor track ID is invalid!";
+
+      MCMiniPart mother_part;
+      MCMiniPart ancestor_part;
+
+      unsigned int mother_index   = part_v.TrackToParticleIndex(mother_track);
+      unsigned int ancestor_index = part_v.TrackToParticleIndex(ancestor_track);
+
+      if(mother_index != kINVALID_UINT)   mother_part   = part_v[mother_index];
+      else mother_part._track_id = mother_track;
+
+      if(ancestor_index != kINVALID_UINT) ancestor_part = part_v[ancestor_index];
+      else ancestor_part._track_id = ancestor_track;
 
       mini_track.MotherPdgCode ( mother_part._pdgcode  );
       mini_track.MotherTrackID ( mother_part._track_id );
@@ -168,18 +175,18 @@ namespace sim {
 	
 	std::cout
 	  
-	  << Form("  Track particle:     PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  prof.PdgCode(),
+	  << Form("  Track particle:      PDG=%d : Track ID=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.PdgCode(),prof.TrackID(),
 		  prof.Start().X(),prof.Start().Y(),prof.Start().Z(),prof.Start().T(),
 		  prof.Start().Px(),prof.Start().Py(),prof.Start().Pz(),prof.Start().E())
 	  << std::endl
-	  << Form("    Mother particle:   PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  prof.MotherPdgCode(),
+	  << Form("    Mother particle:   PDG=%d : Track ID=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.MotherPdgCode(),prof.MotherTrackID(),
 		  prof.MotherStart().X(),prof.MotherStart().Y(),prof.MotherStart().Z(),prof.MotherStart().T(),
 		  prof.MotherStart().Px(),prof.MotherStart().Py(),prof.MotherStart().Pz(),prof.MotherStart().E())
 	  << std::endl
-	  << Form("    Ancestor particle: PDG=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
-		  prof.AncestorPdgCode(),
+	  << Form("    Ancestor particle: PDG=%d : Track ID=%d Start @ (%g,%g,%g,%g) with Momentum (%g,%g,%g,%g)",
+		  prof.AncestorPdgCode(),prof.AncestorTrackID(),
 		  prof.AncestorStart().X(),prof.AncestorStart().Y(),prof.AncestorStart().Z(),prof.AncestorStart().T(),
 		  prof.AncestorStart().Px(),prof.AncestorStart().Py(),prof.AncestorStart().Pz(),prof.AncestorStart().E())
 	  << std::endl

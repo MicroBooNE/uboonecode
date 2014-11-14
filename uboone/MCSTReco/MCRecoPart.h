@@ -90,6 +90,8 @@ namespace sim
 
     unsigned int AncestorTrackID(const unsigned int part_index) const;
 
+    unsigned int MotherTrackID(const unsigned int part_index) const;
+
     /*
       Take TrackID and returns the corresponding particle unique index number (MCParticle array index)
       Returns kINVALID_UINT if nothing found. 
@@ -109,6 +111,7 @@ namespace sim
 
     /// Track ID => Index Map
     std::map<unsigned int, unsigned int> _track_index;
+    //std::map<size_t,size_t> _track_index;
 
     /// PDG code list for which particle's trajectory within the detector is saved
     std::set<int> _pdg_list;
