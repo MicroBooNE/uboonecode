@@ -52,7 +52,7 @@ namespace sim {
     art::ServiceHandle<util::DetectorProperties> detp;
 
     // Key map to identify a unique particle energy deposition point
-    std::map<unsigned short, std::map<double, std::map<double, std::map<double, int> > > > hit_index_m;
+    std::map<unsigned int, std::map<double, std::map<double, std::map<double, int> > > > hit_index_m;
 
     if(_debug_mode) std::cout<<"Processing "<<schArray.size()<<" channels..."<<std::endl;
     // Loop over channels
@@ -85,6 +85,7 @@ namespace sim {
 
 	  int hit_index = -1;
 	  auto hit_index_track_iter = hit_index_m.find(real_track_id);
+	  //std::cout<<"Inspecting: hit-time="<<hit_time<<" : PartID="<<real_track_id<<std::endl;
 	  if(hit_index_track_iter == hit_index_m.end()) {
 	    // create new entry here
 	    //_track_index.insert(std::pair<unsigned int,size_t>(real_track_id,_mc_edeps.size()));
@@ -131,9 +132,11 @@ namespace sim {
 
 		if(hit_index_z_iter == (*hit_index_y_iter).second.end()) {
 		  // "y" exists but this "z" does not exist. Create.
-		  //int new_hit_index = _mc_edeps.at((*(_track_index.find(real_track_id))).second).size();
+		  //int new_hit_index = _mc_edeps.at((*(_track_index.find(real_track_id))).second).size();		    
 		  int new_hit_index = this->__GetEdepArray__(real_track_id).size();
 		  (*hit_index_y_iter).second.insert(std::pair<double,int>(z_mm,new_hit_index));
+		  //std::cout<<" ... inserted "<<new_hit_index<< " ... check: "<<this->__GetEdepArray__(real_track_id).size()<<std::endl;
+
 		}
 
 		else
@@ -143,7 +146,9 @@ namespace sim {
 	      }
 	    }
 	  }
+	  //std::cout<<"Finished checking: hit-time="<<hit_time<<" : PartID="<<real_track_id<<std::endl;
 	  if(hit_index < 0) {
+	    std::cout<<"New"<<std::endl;
 	    // This particle energy deposition is never recorded so far. Create a new Edep
 	    MCEdep edep;
 	    // Fill Edep
@@ -174,11 +179,11 @@ namespace sim {
 	      mchit.qMax = charge;
 	      edep.mchits.insert(std::pair<unsigned short,sim::MCEdepHit>(ch,mchit));
 	    }
-
+	    //std::cout<<"Inserting: "<<this->__GetEdepArray__(real_track_id).size()<<std::flush;
 	    this->__GetEdepArray__(real_track_id).push_back(edep);
-
+	    //std::cout<<" now became "<<this->__GetEdepArray__(real_track_id).size()<<std::endl;
 	  }else{
-	    
+	    //std::cout<<"Existing ... "<<hit_index<<" (size = "<<this->__GetEdepArray__(real_track_id).size()<<std::endl;
 	    // Append charge to the relevant edep (@ hit_index)
 	    //float charge = ide.numElectrons * detp->ElectronsToADC();
 	    double charge = ide.numElectrons;
@@ -225,9 +230,9 @@ namespace sim {
 	  }
 	  
 	} // end looping over ides in this tick
-	
+	//std::cout<<"End looping over ides in tick: "<<hit_time<<std::endl;
       } // end looping over ticks in this channel
-    
+      //std::cout<<"End looping over ticks in channel: "<<ch<<std::endl;    
     }// end looping over channels
 
     if(_debug_mode) {
