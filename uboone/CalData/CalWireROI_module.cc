@@ -290,7 +290,7 @@ namespace caldata {
       if(!chanFilt->BadChannel(channel)) {
         
         // uncompress the data
-        raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
+        raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
         // loop over all adc values and subtract the pedestal
         float pdstl = digitVec->GetPedestal();
 	//subtract time-offset added in SimWireMicroBooNE_module

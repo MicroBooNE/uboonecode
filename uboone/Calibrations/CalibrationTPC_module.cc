@@ -701,17 +701,17 @@ namespace calibration {
 				     std::vector<TH1I*> & Waveforms,
 				     std::map< unsigned int, uint32_t > chanmap ){
 
-
+    LOG_WARNING("CalibrationTPC") << "This code does not support compressed raw digits. Update it!!";
     if (fAverages and (fEvtNum == 1) ){
-      std::vector<double> tmp(rawDigit.at(0).fADC.size(), 0.);
+      std::vector<double> tmp(rawDigit.at(0).NADC(), 0.);
       for (unsigned int ch=0; ch < chanmap.size(); ch++)
 	fWFADCHolder.push_back(tmp);
     }
     
     if ( fAverages ){
       for (unsigned int ich=0; ich < chanmap.size(); ich++){
-	for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
-	  fWFADCHolder.at(ich).at(tick) += float(rawDigit.at(ich).fADC.at(tick))/100.;
+	for ( unsigned int tick=0; tick < rawDigit.at(ich).NADC(); tick++)
+	  fWFADCHolder.at(ich).at(tick) += float(rawDigit.at(ich).ADC(tick))/100.;
       }
     }
     
@@ -725,8 +725,8 @@ namespace calibration {
 
       for (unsigned int ich=0; ich < chanmap.size(); ich++){
 	Waveforms.push_back( tfs->make<TH1I>(Form("WF_subRun_%d_ev_%d_chan_%d", fsubRunNum, fEvtNum, chanmap.at(ich) ), "Waveform Overlay (100 events); Time-Ticks [2 MHz - 500 ns]; ADCs", 
-					     rawDigit.at(ich).fADC.size(),
-					     0, rawDigit.at(ich).fADC.size() ) );
+					     rawDigit.at(ich).NADC(),
+					     0, rawDigit.at(ich).NADC() ) );
 
 	for ( unsigned int tick=0; tick < fWFADCHolder.at(ich).size() ; tick++)
 	  Waveforms.back()->SetBinContent( tick+1, fWFADCHolder.at(ich).at(tick) );
@@ -750,11 +750,11 @@ namespace calibration {
 	     or (fChanList.at(0) == -1) ){
 	  
 	  Waveforms.push_back( tfs->make<TH1I>(Form("WF_subRun_%d_ev_%d_chan_%d", fsubRunNum, fEvtNum, chanmap.at(ich) ), "Waveform", 
-					       rawDigit.at(ich).fADC.size(),
-					       0, rawDigit.at(ich).fADC.size() ) );
+					       rawDigit.at(ich).NADC(),
+					       0, rawDigit.at(ich).NADC() ) );
 	  
-	  for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++){
-	    Waveforms.back()->SetBinContent( tick+1, rawDigit.at(ich).fADC.at(tick) );
+	  for ( unsigned int tick=0; tick < rawDigit.at(ich).NADC(); tick++){
+	    Waveforms.back()->SetBinContent( tick+1, rawDigit.at(ich).ADC(tick) );
 	  }
 	  fWFOverlay.back()->Add(Waveforms.back(), "HIST P");
 	}
@@ -775,13 +775,14 @@ namespace calibration {
 				     std::vector<TH1D*> & NoiseSpec,
 				     std::map< unsigned int, uint32_t > chanmap ){
 
+    LOG_WARNING("CalibrationTPC") << "This code does not support compressed raw digits. Update it!!";
     art::ServiceHandle<util::LArFFT> fFFT;
     std::string options = fFFT->FFTOptions();
     int fitbins = fFFT->FFTFitBins();
     fFFT->ReinitializeFFT(9600, options, fitbins);
 
     if (fAverages and (fEvtNum == 1) ){
-      std::vector<double> tmp(rawDigit.at(0).fADC.size(), 0.);
+      std::vector<double> tmp(rawDigit.at(0).NADC(), 0.);
       for (unsigned int ch=0; ch < chanmap.size(); ch++)
 	fWFFreqHolder.push_back(tmp);
     }
@@ -791,12 +792,12 @@ namespace calibration {
       for (unsigned int ich=0; ich < chanmap.size(); ich++){
 
 	//make vectors for FFT analysis
-	std::vector<float> noiseTime(rawDigit.at(ich).fADC.size(), 0.);
-	std::vector<TComplex> noiseFrequency(rawDigit.at(ich).fADC.size(), 0.);
-	std::vector<double> noiseFrequencyMag(rawDigit.at(ich).fADC.size(), 0.);
+	std::vector<float> noiseTime(rawDigit.at(ich).NADC(), 0.);
+	std::vector<TComplex> noiseFrequency(rawDigit.at(ich).NADC(), 0.);
+	std::vector<double> noiseFrequencyMag(rawDigit.at(ich).NADC(), 0.);
 
-	for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
-	  noiseTime.at(tick) += float(rawDigit.at(ich).fADC.at(tick));
+	for ( unsigned int tick=0; tick < rawDigit.at(ich).NADC(); tick++)
+	  noiseTime.at(tick) += float(rawDigit.at(ich).ADC(tick));
 	
 	//do FFT
 	fFFT->DoFFT( noiseTime, noiseFrequency);
@@ -822,7 +823,7 @@ namespace calibration {
 	NoiseSpec.push_back( tfs->make<TH1D>(Form("NoiseFreqSpec_subRun_%d_ev_%d_chan_%d", fsubRunNum, fEvtNum, chanmap.at(ich) ),
 					     "Avg Noise Frequency Spectrum over 100 Events; MHz; Amplitude", 
 					     fFFT->FFTSize(), 0, 2) );
-	//rawDigit.at(ich).fADC.size(), 0, 1) );
+	//rawDigit.at(ich).NADC(), 0, 1) );
 
 	for (int tick=0; tick < fFFT->FFTSize()/2+1 ; tick++){
 	  if (tick == 100) { std::cout << "fWADCHolder at tick 100: " << fWFFreqHolder.at(ich).at(tick) << std::endl; }
@@ -851,12 +852,12 @@ namespace calibration {
 					       fFFT->FFTSize(), 0, 2 ) );
 
 	  //make vectors for FFT analysis
-	  std::vector<float> noiseTime(rawDigit.at(ich).fADC.size(), 0.);
-	  std::vector<TComplex> noiseFrequency(rawDigit.at(ich).fADC.size(), 0.);
-	  std::vector<float> noiseFrequencyMag(rawDigit.at(ich).fADC.size(), 0.);
+	  std::vector<float> noiseTime(rawDigit.at(ich).NADC(), 0.);
+	  std::vector<TComplex> noiseFrequency(rawDigit.at(ich).NADC(), 0.);
+	  std::vector<float> noiseFrequencyMag(rawDigit.at(ich).NADC(), 0.);
 	  
-	  for ( unsigned int tick=0; tick < rawDigit.at(ich).fADC.size(); tick++)
-	    noiseTime.at(tick) = rawDigit.at(ich).fADC.at(tick);//sin(2*3.14*0.1*tick);//
+	  for ( unsigned int tick=0; tick < rawDigit.at(ich).NADC(); tick++)
+	    noiseTime.at(tick) = rawDigit.at(ich).ADC(tick);//sin(2*3.14*0.1*tick);//
 
 	  //do FFT
 	  fFFT->DoFFT( noiseTime, noiseFrequency);
