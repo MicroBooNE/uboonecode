@@ -166,9 +166,15 @@ std::vector<double> ToyOneShowerGen::GetXYZPosition() {
   //pos.at(1) = fFlatRandom->fire(-995.,995.);
   //pos.at(2) = fFlatRandom->fire(170.,10190.);
 
-  pos.at(0) = fFlatRandom->fire(17.,239.);
-  pos.at(1) = fFlatRandom->fire(-99.5,99.5);
-  pos.at(2) = fFlatRandom->fire(17.,1019.);
+  //pos.at(0) = fFlatRandom->fire(17.,239.);
+  //pos.at(1) = fFlatRandom->fire(-99.5,99.5);
+  //pos.at(2) = fFlatRandom->fire(17.,1019.);
+
+  art::ServiceHandle<geo::Geometry> geo;
+
+  pos.at(0) = fFlatRandom->fire(0.,2.*(geo->DetHalfWidth()));
+  pos.at(1) = fFlatRandom->fire(-1.*(geo->DetHalfHeight()), geo->DetHalfHeight());
+  pos.at(2) = fFlatRandom->fire(0.,geo->DetLength());
 
   return pos;
 }

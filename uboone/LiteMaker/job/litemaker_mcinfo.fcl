@@ -1,0 +1,25 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemaker_mcinfo: @local::litemaker_base
+
+litemaker_mcinfo.out_filename: "larlite_mcinfo.root"
+
+litemaker_mcinfo.AssociationLookUpMap: @local::litemaker_ass_mc
+
+litemaker_mcinfo.DataLookUpMap:
+{
+  # Producer names specified below would be looked up & stored in
+  # the output larlite file. The key represents the data product
+  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
+  # string array.
+  potsummary: ["generator"]
+  gtruth:     ["generator"]
+  mcflux:     ["generator"]
+  mctruth:    ["generator"]
+  mctrack:    ["mcreco"]
+  mcshower:   ["mcreco"]
+}
+
+END_PROLOG

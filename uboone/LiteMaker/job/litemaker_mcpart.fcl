@@ -1,0 +1,20 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemaker_mcpart: @local::litemaker_base
+
+litemaker_mcpart.out_filename: "larlite_mcpart.root"
+
+litemaker_mcpart.AssociationLookUpMap: @local::litemaker_ass_mc
+
+litemaker_mcpart.DataLookUpMap:
+{
+  # Producer names specified below would be looked up & stored in
+  # the output larlite file. The key represents the data product
+  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
+  # string array.
+  mcpart:     ["largeant"]
+}
+
+END_PROLOG

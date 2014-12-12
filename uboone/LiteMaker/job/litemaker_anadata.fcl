@@ -1,0 +1,37 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemaker_anadata: @local::litemaker_base
+
+litemaker_anadata.out_filename: "larlite_anadata.root"
+
+litemaker_anadata.DataLookUpMap:
+{
+  # Producer names specified below would be looked up & stored in
+  # the output larlite file. The key represents the data product
+  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
+  # string array.
+  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
+               "trackkalspstag","trackkalspscctag",
+               "beziertrackertag","beziertrackercctag",
+               "costrktag","costrkcctag",
+               "stitchtag","stitchcctag",
+               "stitchkalmanhittag","beamflashcompat"]
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
+               "trackkalspscalo","trackkalspscccalo",
+               "beziertrackercalo","beziertrackercccalo",
+               "costrkcalo","costrkcccalo",
+               "stitchcalo","stitchcccalo",
+               "stitchkalmanhitcalo"]
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "trackkalspspid","trackkalspsccpid",
+               "beziertrackerpid","beziertrackerccpid",
+               "costrkpid","costrkccpid",
+               "stitchpid","stitchccpid",
+               "stitchkalmanhitpid"]
+}
+
+litemaker_anadata.AssociationLookUpMap: @local::litemaker_ass_reco
+
+END_PROLOG
