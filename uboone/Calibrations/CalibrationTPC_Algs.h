@@ -20,6 +20,8 @@
 
 namespace calibration{
 
+  bool hasCompressedRawDigit( std::vector<raw::RawDigit> const& rawDigitVector);
+
   void analyzeEmptyEvent( std::vector<raw::RawDigit> const& rawDigit,
 			  std::vector<float> & pedestal,
 			  std::vector<float> & noise,
