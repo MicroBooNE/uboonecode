@@ -11,4 +11,10 @@ microboone_geo:
                                                   #  [GDMLFileName]_nowires.gdml
 }
 
+microboone_geometry_helper:
+{
+ service_provider : StandardGeometryHelper
+}
+
+
 END_PROLOG
