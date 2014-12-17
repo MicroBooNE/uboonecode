@@ -1,5 +1,5 @@
-#ifndef MCSHOWERRECOEDEP_H
-#define MCSHOWERRECOEDEP_H
+#ifndef MCRECOEDEP_H
+#define MCRECOEDEP_H
 
 // ART includes
 #include "fhiclcpp/ParameterSet.h"
@@ -33,7 +33,7 @@
 namespace sim
 {
 
-  class MCShowerHit {
+  class MCEdepHit {
     
   public:
 
@@ -41,8 +41,8 @@ namespace sim
 
   public:
 
-    MCShowerHit(){ Clear(); }
-    ~MCShowerHit(){}
+    MCEdepHit(){ Clear(); }
+    ~MCEdepHit(){}
     
     unsigned short timeStart;
     unsigned short timeEnd;
@@ -57,14 +57,14 @@ namespace sim
     }
   };
 
-  class MCShowerEdep {
+  class MCEdep {
 
   public:
     //static const short kINVALID_SHORT;
     
   public:
-    MCShowerEdep(){ Clear(); }
-    ~MCShowerEdep(){}
+    MCEdep(){ Clear(); }
+    ~MCEdep(){}
     /*
     short x;
     short y;
@@ -77,7 +77,7 @@ namespace sim
     double qU;
     double qV;
     double qW;
-    std::map<unsigned short,sim::MCShowerHit> mchits;
+    std::map<unsigned short,sim::MCEdepHit> mchits;
     void Clear() {
       //x=y=z=kINVALID_SHORT;
       x=y=z=0;
@@ -88,49 +88,46 @@ namespace sim
 
   };
 
-  class MCShowerRecoEdep {
+  class MCRecoEdep {
 
   public:
 
     /// Default constructor with fhicl parameters
-    MCShowerRecoEdep(fhicl::ParameterSet const& pset);
+    MCRecoEdep(fhicl::ParameterSet const& pset);
     //ClusterMergeAlg(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
 
     /// Default destructor
-    virtual ~MCShowerRecoEdep(){};
+    virtual ~MCRecoEdep(){};
 
-    void MakeMCShowerEdep(const art::Handle<std::vector<sim::SimChannel> > schArray);
+    void MakeMCEdep(const std::vector<sim::SimChannel>& schArray);
 
     bool ExistTrack(const unsigned int track_id) const 
     { return (_track_index.find(track_id) != _track_index.end()); } 
 
-    /// Converts a track ID to MCShowerEdep array index. Returns -1 if no corresponding array found .
+    /// Converts a track ID to MCEdep array index. Returns -1 if no corresponding array found .
     int TrackToEdepIndex(unsigned int track_id) const
     { 
       auto iter = _track_index.find(track_id);
       return (iter == _track_index.end() ? -1 : (int)((*iter).second));
     }
 
-    /// Returns a vector of MCShowerEdep object at the given index
-    const std::vector<sim::MCShowerEdep>& GetEdepArrayAt(size_t edep_index);
+    /// Returns a vector of MCEdep object at the given index
+    const std::vector<sim::MCEdep>& GetEdepArrayAt(size_t edep_index) const;
 
-    /// Fill the input vector with track IDs for which energy deposit is recorded
-    void FillTrackList(std::vector<unsigned int> &track_list) const;
-
-    /// Returns a map of track id <-> MCShowerEdep vector index
+    /// Returns a map of track id <-> MCEdep vector index
     const std::map<unsigned int,size_t> TrackIndexMap() const
     { return _track_index; }
 
   protected:
 
-    std::vector<sim::MCShowerEdep>& __GetEdepArray__(unsigned int track_id);
+    std::vector<sim::MCEdep>& __GetEdepArray__(unsigned int track_id);
 
     bool _debug_mode;
     bool _save_mchit;
     std::map<unsigned int,size_t>      _track_index;
-    std::vector<std::vector<sim::MCShowerEdep> > _mc_edeps;
+    std::vector<std::vector<sim::MCEdep> > _mc_edeps;
     
-  }; // class MCShowerHitRecoAlg
+  }; // class MCRecoEdep
   
 } //namespace cluster
 #endif

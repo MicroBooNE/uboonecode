@@ -1,0 +1,65 @@
+#include "litemaker_base.fcl"
+
+litemaker_all: @local::litemaker_base
+
+litemaker_all.out_filename: "larlite_all.root"
+
+litemaker_all.AssociationLookUpMap: @local::litemaker_ass_all
+
+litemaker_all.DataLookUpMap:
+{
+  # Producer names specified below would be looked up & stored in
+  # the output larlite file. The key represents the data product
+  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
+  # string array.
+  potsummary: ["generator"]
+  gtruth:     ["generator"]
+  mcflux:     ["generator"]
+  mctruth:    ["generator"]
+  mcpart:     ["largeant"]
+  simch:      ["largeant"]
+  mcshower:   ["mcreco"]
+  mctrack:    ["mcreco"]
+  wire:       ["caldata"]
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandora"]
+  endpoint2d: ["cccluster",
+               "featurevtx"]
+  sps:        ["pandora",
+               "costrk", "costrkcc",
+               "spacepointfinder","spacepointfindercc",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "beziertracker","beziertrackercc",
+               "featurevtx"]
+  track:      ["trackkalmanhit","trackkalmanhitcc",
+               "trackkalmansps","trackkalspscc",
+               "beziertracker","beziertrackercc",
+               "costrk","costrkcc",
+               "stitch","stitchcc",
+               "stitchkalmanhit"]
+  shower:     []
+  ophit:      ["opflash"]
+  opflash:    ["opflash"]
+  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
+               "trackkalmanspstag","trackkalspscctag",
+               "beziertrackertag","beziertrackercctag",
+               "costrktag","costrkcctag",
+               "stitchtag","stitchcctag",
+               "stitchkalmanhittag","beamflashcompat"]
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
+               "trackkalmanspscalo","trackkalspscccalo",
+               "beziertrackercalo","beziertrackercccalo",
+               "costrkcalo","costrkcccalo",
+               "stitchcalo","stitchcccalo",
+               "stitchkalmanhitcalo"]
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "trackkalmanspspid","trackkalspsccpid",
+               "beziertrackerpid","beziertrackerccpid",
+               "costrkpid","costrkccpid",
+               "stitchpid","stitchccpid",
+               "stitchkalmanhitpid"]
+  pfpart:     ["pandora"]
+}
+
+END_PROLOG

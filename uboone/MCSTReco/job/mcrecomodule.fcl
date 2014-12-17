@@ -8,9 +8,9 @@
 # package for the data products added to the event. 
 
 #include "services_microboone.fcl"
-#include "mcshowerreco.fcl"
+#include "mcreco.fcl"
 
-process_name: MCShowerFinder
+process_name: MCReco
 
 services:
 {
@@ -37,7 +37,7 @@ physics:
 
  producers:
  {
-    mcshowerfinder: @local::standard_mcshowerfinder
+  mcreco: @local::standard_mcreco
  }
 
  analyzers:
@@ -45,7 +45,7 @@ physics:
 
  }
 
- simulate: [ mcshowerfinder ]
+ simulate: [ mcreco ]
  analyzeIt: [ ]
 
  #define the output stream, there could be more than one if using filters 
@@ -65,7 +65,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "mcshower.root" #default file name, can override from command line with -o or --output
+   fileName:    "mcreco.root" #default file name, can override from command line with -o or --output
  }
 }
 
