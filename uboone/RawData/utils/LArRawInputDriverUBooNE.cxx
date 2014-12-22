@@ -182,7 +182,7 @@ namespace lris {
 
     PQclear(res);
     res = PQexec(conn,
-		 "SELECT crate_id, slot, wireplane, wirenum, channel_id "
+		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
 		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables NATURAL JOIN ADCreceivers NATURAL JOIN crates NATURAL JOIN fecards "
 		 );
 
@@ -197,14 +197,22 @@ namespace lris {
 
     int num_records=PQntuples(res);
     for (int i=0;i<num_records;i++) {
-      int crate_id = atoi(PQgetvalue(res, i, 0));
-      int slot     = atoi(PQgetvalue(res, i, 1));
-      //char wireplane = *PQgetvalue(res, i, 2);
-      int wirenum  = *PQgetvalue(res, i, 3);
-      int channel_id = atoi(PQgetvalue(res, i, 4));
+      int crate_id     = atoi(PQgetvalue(res, i, 0));
+      int slot         = atoi(PQgetvalue(res, i, 1));
+      //auto const wPl   =      PQgetvalue(res, i, 2);
+      int larsoft_chan = atoi(PQgetvalue(res, i, 3));
+      int channel_id   = atoi(PQgetvalue(res, i, 4));
 
-      daqid_t daq_id(crate_id,slot,wirenum);
-      std::pair<daqid_t, int> p(daq_id,channel_id);
+      int boardChan = channel_id%64;
+
+
+      //std::cout << "Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
+      //	<< slot << ", " << boardChan << "]";
+      //std::cout << "\tCh. Id (LArSoft): " << larsoft_chan 
+      //	<< "\tPlane: " << wPl << std::endl << std::endl;
+
+      daqid_t daq_id(crate_id,slot,boardChan);
+      std::pair<daqid_t, int> p(daq_id,larsoft_chan);
 
       if (fChannelMap.find(daq_id) != fChannelMap.end())
 	mf::LogWarning("")<<"Multiple DB entries for same (crate,card,channel). "<<std::endl
@@ -238,15 +246,14 @@ namespace lris {
       fEventCounter++;
       art::RunNumber_t rn = daq_header->GetRun();
       art::Timestamp tstamp = daq_header->GetTimeStamp();
-      art::SubRunID newID(rn, 1); //daq_header has no subrun information
-      
+      art::SubRunID newID(rn, daq_header->GetSubRun());
       if (fCurrentSubRunID.runID() != newID.runID()) { // New Run
 	outR = fSourceHelper.makeRunPrincipal(rn, tstamp);
       }
       if (fCurrentSubRunID != newID) { // New SubRun
 	outSR = fSourceHelper.makeSubRunPrincipal(rn,
-						    1,
-						    tstamp);
+						  daq_header->GetSubRun(),
+						  tstamp);
 	fCurrentSubRunID = newID;	
       }
 
@@ -320,11 +327,16 @@ namespace lris {
 	+ global_header->getMicroSeconds()*1000
 	+ global_header->getNanoSeconds();
       time_t mytime = ((time_t)seconds<<32) | nano_seconds;
+
+      //\/      uint32_t subrun_num = global_header->getSubrunNumber();
       
       daqHeader.SetStatus(1);
       daqHeader.SetFileFormat(global_header->getRecordType());
       daqHeader.SetSoftwareVersion(global_header->DAQ_version_number);
       daqHeader.SetRun(global_header->getRunNumber());
+      daqHeader.SetSubRun(global_header->getSubrunNumber());
+      
+      //\/ Add the subRun number too!
       daqHeader.SetEvent(global_header->getEventNumber());
       daqHeader.SetTimeStamp(mytime);
 
@@ -399,12 +411,27 @@ namespace lris {
 			  card_header.getModule(),
 			  channel_number);
 
+
 	    int ch=-1;
-	    if (fChannelMap.find(daqId)!=fChannelMap.end()) ch=fChannelMap[daqId];
+	    if (fChannelMap.find(daqId)!=fChannelMap.end()){
+	      ch=fChannelMap[daqId];
+	      //std::cout << "Found this channel: " << ch
+	      //	<< "\tChannel Info from header: [Crate, Slot, Chan]: ["
+	      //	<< int(crate_header.getCrateNumber()) << ", " 
+	      //	<< card_header.getModule() << ", "
+	      //	<< channel_number << "]" << std::endl;
+	    }
 	    //\todo fix this once there is a proper channel table
-	    else ch=10000*crate_header.getCrateNumber()
-	             +100*card_header.getModule()
-	                 +channel_number;
+	    else{
+	      ch=10000*crate_header.getCrateNumber()
+		+100*card_header.getModule()
+		+channel_number;
+	      //std::cout << "Channel Info from header: [Crate, Slot, Chan]: ["
+	      //	<< int(crate_header.getCrateNumber()) << ", " 
+	      //	<< card_header.getModule() << ", "
+	      //	<< channel_number << "]" << std::endl;
+	      //std::cout << "Channel not found: " << ch << std::endl;
+	    }
 	    raw::Compress_t compression=raw::kHuffman;
 	    if (fHuffmanDecode) compression=raw::kNone;
 
@@ -492,7 +519,6 @@ namespace lris {
   {
     ubdaq::beamHeader bh=event_record.getBeamHeader();
     std::vector<ubdaq::beamData> bdv=event_record.getBeamDataVector();
-    
     if (bdv.size()>0) {
       beamInfo.SetRecordType(bh.getRecordType());
       beamInfo.SetSeconds(bh.getSeconds());
