@@ -1702,8 +1702,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
 //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;
 //  std::cout<<geom->Nwires(0)<<" "<<geom->Nwires(1)<<" "<<geom->Nwires(2)<<std::endl;
-  //Find tracks associated with hits
-  art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[0]);
 
   //hit information
   fData->no_hits = (int) NHits;
@@ -1722,13 +1720,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     fData->hit_ph[i]  = hitlist[i]->Charge(true);
     fData->hit_startT[i] = hitlist[i]->StartTime();
     fData->hit_endT[i] = hitlist[i]->EndTime();
-    if (fmtk.isValid()){
-      if (fmtk.at(i).size()!=0){
-	fData->hit_trkid[i] = fmtk.at(i)[0]->ID();
-      }
-      else
-	fData->hit_trkid[i] = -1;
-    }
     /*
     for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
       art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[it]);
@@ -1739,6 +1730,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         hit_trkid[it][i] = 0;
     }
     */
+  }
+  if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
+    //Find tracks associated with hits
+    art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[0]);
+    for (size_t i = 0; i < NHits && i < kMaxHits ; ++i){//loop over hits
+      if (fmtk.isValid()){
+	if (fmtk.at(i).size()!=0){
+	  fData->hit_trkid[i] = fmtk.at(i)[0]->ID();
+	}
+	else
+	  fData->hit_trkid[i] = -1;
+      }
+    }
   }
 
   //vertex information
