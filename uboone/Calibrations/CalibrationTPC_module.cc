@@ -894,6 +894,8 @@ namespace calibration {
     evt.getByLabel(fRawDigitModuleLabel,rawDigitHandle);
     std::vector<raw::RawDigit> const& rawDigitVector(*rawDigitHandle);
 
+    if(hasCompressedRawDigit(rawDigitVector))
+      throw "ERORR! You can't run the CalibrationTPC analyzer with compressed rawDigits!";
 
     //initialize per-event vectors
     const size_t n_channels = rawDigitVector.size();
