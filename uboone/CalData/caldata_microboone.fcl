@@ -8,11 +8,11 @@ microboone_calroi:
  DigitModuleLabel:   "daq"
  Threshold: [ 3, 3, 3 ] # abs(threshold) for finding a Region Of Interest
  MinWid:              4 # min width (time bins) for a ROI
- MinSep:             10 # min separation (time bins) between ROIs
- uPlaneROIPad: [ 150, 10 ] # number of bins to pad both ends of the ROIs
- vPlaneROIPad: [  10, 10 ] # number of bins to pad both ends of the ROIs
- zPlaneROIPad: [  10, 10 ] # number of bins to pad both ends of the ROIs
- DoBaselineSub:    true # subtract baseline after deconvolution?
+ MinSep:             50 # min separation (time bins) between ROIs
+ uPlaneROIPad: [ 150, 50 ] # number of bins to pad both ends of the ROIs
+ vPlaneROIPad: [  50, 50 ] # number of bins to pad both ends of the ROIs
+ zPlaneROIPad: [  50, 50 ] # number of bins to pad both ends of the ROIs
+ DoBaselineSub:   false # subtract baseline after deconvolution?
  uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
  FFTSize:     2048      # re-initialize FFT service to this size
  SaveWireWF:  0
