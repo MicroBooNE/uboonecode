@@ -141,7 +141,8 @@ namespace sim {
 	magnitude += pow(g4_mom[i],2);
       }
       magnitude = sqrt(magnitude);
-      for(auto& v : g4_dir) v /= magnitude;
+      if(magnitude > 1.e-10)
+	for(auto& v : g4_dir) v /= magnitude;
       
     }
 
@@ -247,7 +248,7 @@ namespace sim {
 
 	// Weight by energy (momentum)
 	double magnitude = sqrt(pow(mom.at(0),2) + pow(mom.at(1),2) + pow(mom.at(2),2));
-	if(magnitude) {
+	if(magnitude>1.e-10) {
 	  mom.at(0) = mom.at(0) * (edep.energy/magnitude);
 	  mom.at(1) = mom.at(1) * (edep.energy/magnitude);
 	  mom.at(2) = mom.at(2) * (edep.energy/magnitude);
@@ -277,8 +278,10 @@ namespace sim {
       
       // Correct for energy deposition normalization
       double magnitude = sqrt(pow(daughter_mom[0],2)+pow(daughter_mom[1],2)+pow(daughter_mom[2],2));
+
+      std::cout<<daughter_mom[0]<<" : "<<daughter_mom[1]<<" : "<<daughter_mom[2]<<" : "<<daughter_mom[3]<<std::endl;
       
-      if(magnitude) {
+      if(magnitude>1.e-10) {
 	daughter_mom[0] *= (daughter_mom[3]/magnitude);
 	daughter_mom[1] *= (daughter_mom[3]/magnitude);
 	daughter_mom[2] *= (daughter_mom[3]/magnitude);
