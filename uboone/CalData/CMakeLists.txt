@@ -6,6 +6,7 @@ art_make( BASENAME_ONLY
 			Filters
 			RawData
 			RecoBase
+			RecoBaseArt
 			SignalShapingServiceMicroBooNE_service
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}

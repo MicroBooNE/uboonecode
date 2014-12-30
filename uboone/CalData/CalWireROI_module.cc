@@ -8,9 +8,17 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
+// C/C++ standard libraries
 #include <string>
 #include <vector>
+#include <utility> // std::pair<>
+#include <memory> // std::unique_ptr<>
 
+// ROOT libraries
+#include "TComplex.h"
+#include "TH1D.h"
+
+// framework libraries
 #include "fhiclcpp/ParameterSet.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 #include "art/Framework/Core/ModuleMacros.h" 
@@ -21,16 +29,19 @@
 #include "art/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h" 
-#include "art/Framework/Services/Optional/TFileDirectory.h" 
 #include "art/Utilities/Exception.h"
 
-#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
+// LArSoft libraries
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "Geometry/Geometry.h"
 #include "Filters/ChannelFilter.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
+#include "RecoBaseArt/WireCreator.h"
 #include "Utilities/LArFFT.h"
+#include "Utilities/AssociationUtil.h"
+#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 
 
 /* unused function
@@ -133,7 +144,7 @@ namespace caldata {
     size_t fEventCount;  ///< count of event processed
 
     void doDecon(std::vector<float>& holder, 
-      uint32_t channel, unsigned int thePlane,
+      raw::ChannelID_t channel, unsigned int thePlane,
       std::vector<std::pair<unsigned int, unsigned int>> rois,
       std::vector<std::pair<unsigned int, unsigned int>> holderInfo,
       recob::Wire::RegionsOfInterest_t& ROIVec,
@@ -148,11 +159,10 @@ namespace caldata {
   //-------------------------------------------------
   CalWireROI::CalWireROI(fhicl::ParameterSet const& pset)
   {
-    fSpillName="";
     this->reconfigure(pset);
 
-    if(fSpillName.size()<1) produces< std::vector<recob::Wire> >();
-    else produces< std::vector<recob::Wire> >(fSpillName);
+    produces< std::vector<recob::Wire> >(fSpillName);
+    produces<art::Assns<raw::RawDigit, recob::Wire>>(fSpillName);
   }
   
   //-------------------------------------------------
@@ -196,7 +206,7 @@ namespace caldata {
     fPreROIPad[2]  = zin[0];
     fPostROIPad[2] = zin[1];
     
-    fSpillName="";
+    fSpillName.clear();
     
     size_t pos = fDigitModuleLabel.find(":");
     if( pos!=std::string::npos ) {
@@ -235,6 +245,9 @@ namespace caldata {
     
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
+    // ... and an association set
+    std::unique_ptr<art::Assns<raw::RawDigit,recob::Wire> > WireDigitAssn
+      (new art::Assns<raw::RawDigit,recob::Wire>);
 
     // Get signal shaping service.
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
@@ -246,10 +259,10 @@ namespace caldata {
 
     if (!digitVecHandle->size())  return;
     
-    uint32_t     channel(0); // channel number
+    raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    filter::ChannelFilter *chanFilt = new filter::ChannelFilter();  
+    std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
     
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
@@ -415,8 +428,14 @@ namespace caldata {
       } // end if not a bad channel 
       
       // create the new wire directly in wirecol
-      wirecol->emplace_back(std::move(ROIVec), digitVec);
-      
+      wirecol->push_back(recob::WireCreator(std::move(ROIVec),*digitVec).move());
+      // add an association between the last object in wirecol
+      // (that we just inserted) and digitVec
+      if (!util::CreateAssn(*this, evt, *wirecol, digitVec, *WireDigitAssn, fSpillName)) {
+        throw art::Exception(art::errors::InsertFailure)
+          << "Can't associate wire #" << (wirecol->size() - 1)
+          << " with raw digit #" << digitVec.key();
+      } // if failed to add association
     //  DumpWire(wirecol->back()); // for debugging
     }
 
@@ -438,11 +457,8 @@ namespace caldata {
     }
     
 
-    if(fSpillName.size()>0)
-      evt.put(std::move(wirecol), fSpillName);
-    else evt.put(std::move(wirecol));
-
-    delete chanFilt;
+    evt.put(std::move(wirecol), fSpillName);
+    evt.put(std::move(WireDigitAssn), fSpillName);
 
     fEventCount++;
 
@@ -450,7 +466,7 @@ namespace caldata {
   } // produce
 
   void CalWireROI::doDecon(std::vector<float>& holder, 
-    uint32_t channel, unsigned int thePlane,
+    raw::ChannelID_t channel, unsigned int thePlane,
     std::vector<std::pair<unsigned int, unsigned int> > rois,
     std::vector<std::pair<unsigned int, unsigned int> > holderInfo,
     recob::Wire::RegionsOfInterest_t& ROIVec,
