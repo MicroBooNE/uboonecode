@@ -20,6 +20,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 
+#include "TDatabasePDG.h"
 #include "TRandom.h"
 #include "TLorentzVector.h"
 #include "TF1.h"
@@ -62,15 +63,16 @@ ToyOneShowerGen::ToyOneShowerGen(fhicl::ParameterSet const & p)
   produces< std::vector<simb::MCTruth>   >();
   produces< sumdata::RunData, art::InRun >();
 
-  // Mass
-  fMass = p.get<double>("Mass");
-  
   // Time
   fTime = p.get<double>("Time");
 
   // PDGCode
   fPDGCode = p.get<int>("PDGCode");
 
+  // Mass
+  fMass = TDatabasePDG().GetParticle(fPDGCode)->Mass();
+  if(fPDGCode != 22 && !fMass) throw std::exception();
+  
   //
   // Energy distribution
   //
@@ -183,18 +185,11 @@ std::vector<double> ToyOneShowerGen::GetXYZDirection(double uz) {
 
   std::vector<double> udir(3,0);
 
-  udir.at(2) = uz;
+  double phi = fFlatRandom->fire(0, 2 * 3.141592653589793238);
 
-  double leftover = 1. - pow(udir.at(2),2);
-  double frac = fFlatRandom->fire(0,leftover);
-  
-  udir.at(0) = sqrt(frac);
-  udir.at(1) = sqrt(leftover-frac);
-
-  double ux_sign = fFlatRandom->fire(0,1);
-  double uy_sign = fFlatRandom->fire(0,1);
-  if(ux_sign<0.5) udir.at(0) *= -1;
-  if(uy_sign<0.5) udir.at(1) *= -1;
+  udir[0] = TMath::Sin(TMath::ACos(uz)) * TMath::Cos(phi);
+  udir[1] = TMath::Sin(TMath::ACos(uz)) * TMath::Sin(phi);
+  udir[2] = uz;
 
   return udir;
 }
