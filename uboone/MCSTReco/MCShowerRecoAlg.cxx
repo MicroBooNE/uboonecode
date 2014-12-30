@@ -279,8 +279,6 @@ namespace sim {
       // Correct for energy deposition normalization
       double magnitude = sqrt(pow(daughter_mom[0],2)+pow(daughter_mom[1],2)+pow(daughter_mom[2],2));
 
-      std::cout<<daughter_mom[0]<<" : "<<daughter_mom[1]<<" : "<<daughter_mom[2]<<" : "<<daughter_mom[3]<<std::endl;
-      
       if(magnitude>1.e-10) {
 	daughter_mom[0] *= (daughter_mom[3]/magnitude);
 	daughter_mom[1] *= (daughter_mom[3]/magnitude);
