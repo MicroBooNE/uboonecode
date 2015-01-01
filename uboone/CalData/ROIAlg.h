@@ -16,44 +16,36 @@
 #include <exception>
 
 #include "fhiclcpp/ParameterSet.h"
+#include "Range.h"
 
 namespace util{
 
   class ROIALg{
-
-    struct setcomp{
-      bool operator() ( Region const& lhs, Region const& rhs) const
-	return (lhs.first.first < rhs.first.first);
-    };
     
   public: 
     typedef short                    Digit;
     typedef std::vector<Digit>       Waveform;
     typedef Waveform::const_iterator Tick;    
-    typedef std::pair<Tick,Tick>     Region;
-
-    typedef enum{
-      kBackground,
-      kSignal
-    } Region_t;
+    typedef Range<Tick>              Region;
+    
 
     static std::unique_ptr<ROIAlg> MakeROIAlg(fhicl::ParameterSet const&);
 
     std::string         GetName() { return fAlgName; }
     std::vector<Region> GetSignalRegions();
-    std::vector<Region> GetBackgroundRegions();
+    std::vector<Region> GetBaselineRegions();
     size_t              GetNSignalRegions();
-    size_t              GetNBackgroundRegions();
+    size_t              GetNBaselineRegions();
 
   protected: 
     virtual void AnalyzeWaveform(Waveform const&) = 0;
-    void         InsertRegion( Region region, Region_t type, Tick hint=fRegions.cend());
+    void         InsertRegion(Region region, Region_t type);
+    void         InsertSignalRegion(Region region);
+    void         InsertBaselineRegion(Region region);
     
   private:
-    std::string                                     fAlgName;
-    std::set< std::pair<Region,Region_t>, setcomp > fRegions;
-
-    
+    std::string           fAlgName;
+    UniqueRangeSet<Tick>  fRangeSet;
     
   };
 

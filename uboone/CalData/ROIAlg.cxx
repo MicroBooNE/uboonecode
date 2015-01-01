@@ -28,5 +28,10 @@ void util::ROIAlg::InsertRegion(Region region, Region_t type, Tick hint){
 
   auto const& it = fRegions.emplace_hint( hint, std::make_pair(region,type));
 
-  
+  auto const& next_it = std::next(it);
+  auto const& prev_it = std::prev(it);
+
+  if(CheckRegionOverlap(*it,*next_it) || CheckRegionOverlap(*it,*prev_it))
+    throw "ERROR in ROIAlg: Insterted an overlapping region into Region Set."
+
 }
