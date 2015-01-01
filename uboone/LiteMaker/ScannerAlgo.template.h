@@ -836,7 +836,9 @@ namespace larlite {
       lite_calo.set_kinetic_energy(calo_ptr->KineticEnergy());
       lite_calo.set_range(calo_ptr->Range());
       lite_calo.set_track_pitch(calo_ptr->TrkPitchVec());
-      
+      lite_calo.set_plane_id( larlite::geo::PlaneID( calo_ptr->PlaneID().Cryostat,
+						     calo_ptr->PlaneID().TPC,
+						     calo_ptr->PlaneID().Plane ) );
       //fPtrIndex_calo[calo_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_calo);
@@ -939,6 +941,9 @@ namespace larlite {
 
   template <> std::map<art::Ptr< ::recob::Cluster>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_cluster; }
+
+  template <> std::map<art::Ptr< ::recob::Seed>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  { return fPtrIndex_seed; }
 
   template <> std::map<art::Ptr< ::recob::Track>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_track; }

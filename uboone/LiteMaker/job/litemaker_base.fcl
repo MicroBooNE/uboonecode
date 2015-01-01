@@ -28,6 +28,7 @@ litemaker_base:
     hit:        []
     cluster:    []
     endpoint2d: []
+    seed:       []
     sps:        []
     vertex:     []
     track:      []
@@ -54,41 +55,48 @@ litemaker_ass_reco:
   cluster:    ["fuzzycluster","cccluster","pandora"]
   endpoint2d: ["cccluster",
                "featurevtx"]
-  sps:        ["pandora",
+  sps:        ["pandoraCosmic","pandoraNu",
                "costrk", "costrkcc",
                "spacepointfinder","spacepointfindercc",
                "trackkalmanhit","trackkalmanhitcc"]
   vertex:     ["cccluster",
-               "baziertracker","baziertrackercc",
+               "beziertracker","beziertrackercc",
                "featurevtx"]
   track:      ["trackkalmanhit","trackkalmanhitcc",
-               "trackkalmansps","trackkalspscc",
-               "baziertracker","beziertrackercc",
+               "trackkalsps","trackkalspscc",
+               "beziertracker","beziertrackercc",
                "costrk","costrkcc",
                "stitch","stitchcc",
-               "stitchkalmanhit"]
+               "stitchkalmanhit",
+               "pandoraCosmicKHit", "pandoraNuKHit"]
+  seed:       ["pandoraCosmicKHit", "pandoraNuKHit"]
   shower:     []
+  pfpart:     ["pandoraCosmic","pandoraNu"]
+
   ophit:      ["opflash"]
   opflash:    ["opflash"]
-  cosmictag:  ["trackkalmanhit","trackkalmanhitcc",
-               "trackkalmansps","trackkalspscc",
-               "baziertracker","beziertrackercc",
-               "costrk","costrkcc",
-               "stitch","stitchcc",
-               "stitchkalmanhit","beamflashcompat"]
+
+  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
+               "trackkalspstag","trackkalspscctag",
+               "beziertrackertag","beziertrackercctag",
+               "costrktag","costrkcctag",
+               "stitchtag","stitchcctag",
+               "stitchkalmanhittag","beamflashcompat",
+               "pandoraCosmicKHittag","pandoraNuKHittag"]
   calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
-               "trackkalmanspscalo","trackkalspscccalo",
-               "baziertrackercalo","beziertrackercccalo",
+               "trackkalspscalo","trackkalspscccalo",
+               "beziertrackercalo","beziertrackercccalo",
                "costrkcalo","costrkcccalo",
                "stitchcalo","stitchcccalo",
-               "stitchkalmanhitcalo"]
+               "stitchkalmanhitcalo",
+               "pandoraCosmicKHitcalo","pandoraNuKHitcalo"]
   partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
-               "trackkalmanspspid","trackkalspsccpid",
-               "baziertrackerpid","beziertrackerccpid",
+               "trackkalspspid","trackkalspsccpid",
+               "beziertrackerpid","beziertrackerccpid",
                "costrkpid","costrkccpid",
                "stitchpid","stitchccpid",
-               "stitchkalmanhitpid"]
-  pfpart:     ["pandora"]
+               "stitchkalmanhitpid",
+               "pandoraCosmicKHitpid","pandoraNuKHitpid"]
 }
 
 litemaker_ass_all: @local::litemaker_ass_reco
