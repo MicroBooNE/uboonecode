@@ -20,6 +20,7 @@
 
 #include "CLHEP/Random/RandFlat.h"
 
+#include "TDatabasePDG.h"
 #include "TRandom.h"
 #include "TLorentzVector.h"
 #include "TF1.h"
@@ -44,7 +45,7 @@ public:
 
 private:
 
-  TF1 *fShapeEnergy;
+  TF1 *fShapeMomentum;
   TF1 *fShapeTheta;
   CLHEP::RandFlat *fFlatRandom;
   size_t fNEvents;
@@ -55,50 +56,51 @@ private:
 
 
 ToyOneShowerGen::ToyOneShowerGen(fhicl::ParameterSet const & p)
-  : fShapeEnergy(nullptr), fShapeTheta(nullptr), fFlatRandom(nullptr)
+  : fShapeMomentum(nullptr), fShapeTheta(nullptr), fFlatRandom(nullptr)
 {
   gRandom->SetSeed(0);
   TRandom3 r(0);
   produces< std::vector<simb::MCTruth>   >();
   produces< sumdata::RunData, art::InRun >();
 
-  // Mass
-  fMass = p.get<double>("Mass");
-  
   // Time
   fTime = p.get<double>("Time");
 
   // PDGCode
   fPDGCode = p.get<int>("PDGCode");
 
+  // Mass
+  fMass = TDatabasePDG().GetParticle(fPDGCode)->Mass();
+  if(fPDGCode != 22 && !fMass) throw std::exception();
+  
   //
-  // Energy distribution
+  // Momentum distribution
   //
   
   // Read-in formula
-  fShapeEnergy = new TF1("fShapeEnergy",
-			 (p.get<std::string>("EnergyShapeFormula")).c_str(),
-			 p.get<double>("EnergyLowerBound"),
-			 p.get<double>("EnergyUpperBound"));
+  fShapeMomentum = new TF1("fShapeMomentum",
+			   (p.get<std::string>("MomentumShapeFormula")).c_str(),
+			   p.get<double>("MomentumLowerBound"),
+			   p.get<double>("MomentumUpperBound"));
   // Check formula
-  if(!fShapeEnergy)
+  if(!fShapeMomentum)
 
     throw cet::exception(__PRETTY_FUNCTION__) 
-      << "Failed making energy spectrum shape from provided formula!" << std::endl;
+      << "Failed making momentum spectrum shape from provided formula!" << std::endl;
 
   // Read-in parameter values
-  std::vector<double> shape_par_values = p.get<std::vector<double> >("EnergyShapeParameters");
+  std::vector<double> shape_par_values = p.get<std::vector<double> >("MomentumShapeParameters");
 
   // Check parameter values
-  if((int)(shape_par_values.size()) != fShapeEnergy->GetNpar())
+  if((int)(shape_par_values.size()) != fShapeMomentum->GetNpar())
 
     throw cet::exception(__PRETTY_FUNCTION__)
-      << "Number of parameters provided to EnergyShapeFormula does not match with the formula!" << std::endl;
+      << "Number of parameters provided to MomentumShapeFormula does not match with the formula!" << std::endl;
 
   // Set parameter values
   for(size_t i=0; i<shape_par_values.size(); ++i)
 
-    fShapeEnergy->SetParameter(i,shape_par_values.at(i));
+    fShapeMomentum->SetParameter(i,shape_par_values.at(i));
 
   //
   // Angular distribution
@@ -113,7 +115,7 @@ ToyOneShowerGen::ToyOneShowerGen(fhicl::ParameterSet const & p)
   if(!fShapeTheta)
 
     throw cet::exception(__PRETTY_FUNCTION__) 
-      << "Failed making energy spectrum shape from provided formula!" << std::endl;
+      << "Failed making momentum spectrum shape from provided formula!" << std::endl;
 
   // Read-in parameter values
   shape_par_values = p.get<std::vector<double> >("ThetaShapeParameters");
@@ -154,7 +156,7 @@ void ToyOneShowerGen::beginRun(art::Run& run)
 ToyOneShowerGen::~ToyOneShowerGen()
 {
   delete fShapeTheta;
-  delete fShapeEnergy;
+  delete fShapeMomentum;
   delete fFlatRandom;
 }
 
@@ -183,18 +185,11 @@ std::vector<double> ToyOneShowerGen::GetXYZDirection(double uz) {
 
   std::vector<double> udir(3,0);
 
-  udir.at(2) = uz;
+  double phi = fFlatRandom->fire(0, 2 * 3.141592653589793238);
 
-  double leftover = 1. - pow(udir.at(2),2);
-  double frac = fFlatRandom->fire(0,leftover);
-  
-  udir.at(0) = sqrt(frac);
-  udir.at(1) = sqrt(leftover-frac);
-
-  double ux_sign = fFlatRandom->fire(0,1);
-  double uy_sign = fFlatRandom->fire(0,1);
-  if(ux_sign<0.5) udir.at(0) *= -1;
-  if(uy_sign<0.5) udir.at(1) *= -1;
+  udir[0] = TMath::Sin(TMath::ACos(uz)) * TMath::Cos(phi);
+  udir[1] = TMath::Sin(TMath::ACos(uz)) * TMath::Sin(phi);
+  udir[2] = uz;
 
   return udir;
 }
@@ -202,7 +197,7 @@ std::vector<double> ToyOneShowerGen::GetXYZDirection(double uz) {
 void ToyOneShowerGen::produce(art::Event & e)
 {
   std::unique_ptr< std::vector<simb::MCTruth> > mctArray(new std::vector<simb::MCTruth>);
-  double Evis = fShapeEnergy->GetRandom();
+  double mom = fShapeMomentum->GetRandom();
   double Uz   = TMath::Cos(fShapeTheta->GetRandom());
 
   std::vector<double> pos = GetXYZPosition();
@@ -212,10 +207,10 @@ void ToyOneShowerGen::produce(art::Event & e)
   simb::MCTruth truth;
 
   TLorentzVector pos_lorentz(pos.at(0), pos.at(1), pos.at(2), fTime);
-  TLorentzVector mom_lorentz( dir.at(0) * Evis,
-			      dir.at(1) * Evis,
-			      dir.at(2) * Evis,
-			      sqrt(pow(Evis,2)+pow(fMass,2)));
+  TLorentzVector mom_lorentz( dir.at(0) * mom,
+			      dir.at(1) * mom,
+			      dir.at(2) * mom,
+			      sqrt(pow(mom,2)+pow(fMass,2)));
 
   simb::MCParticle part(0, fPDGCode, "primary", 0, fMass, 1);
 

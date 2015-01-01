@@ -148,7 +148,7 @@ namespace sim {
 	  }
 	  //std::cout<<"Finished checking: hit-time="<<hit_time<<" : PartID="<<real_track_id<<std::endl;
 	  if(hit_index < 0) {
-	    std::cout<<"New"<<std::endl;
+
 	    // This particle energy deposition is never recorded so far. Create a new Edep
 	    MCEdep edep;
 	    // Fill Edep
