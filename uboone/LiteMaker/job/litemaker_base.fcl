@@ -52,7 +52,7 @@ litemaker_ass_mc:
 litemaker_ass_reco:
 {
   hit:        ["gaushit","ccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandora"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
   endpoint2d: ["cccluster",
                "featurevtx"]
   sps:        ["pandoraCosmic","pandoraNu",
