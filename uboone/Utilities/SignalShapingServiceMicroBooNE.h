@@ -3,7 +3,7 @@
 /// \file   SignalShapingServiceMicroBooNE.h
 ///
 /// \brief  Service to provide microboone-specific signal shaping for
-///         simulation (convolution) and reconstruction (deconvolution).
+///         simulation (convolution) and reconstruction (deconvolution)./Users/Lsrea/newSim/SignalShapingServiceMicroBooNE.h
 ///
 /// \author H. Greenlee 
 ///
@@ -85,6 +85,7 @@
 #include "Geometry/PlaneGeo.h"
 #include "Utilities/TimeService.h"
 
+using DoubleVec = std::vector<double>;
 
 namespace util {
   class SignalShapingServiceMicroBooNE {
@@ -103,21 +104,28 @@ namespace util {
     // Accessors.
 
     double GetASICGain() { return fASICGainInMVPerFC; }
-    std::vector<double> GetNoiseFactInd() { return fNoiseFactInd; }
-    std::vector<double> GetNoiseFactColl() { return fNoiseFactColl; }
-    double GetShapingTime() { return fShapeTimeConst.at(1); }
+    DoubleVec GetNoiseFactInd() { return fNoiseFactInd; }
+    DoubleVec GetNoiseFactColl() { return fNoiseFactColl; }
+    std::vector<DoubleVec> GetNoiseFactVec() { return fNoiseFactVec; }
+    double GetShapingTime() { return fShapeTimeConst.at(1); };
+    std::vector<size_t> GetNResponses() { return fNResponses; }
+    std::vector<size_t> GetNActiveResponses() { return fNActiveResponses; }
 
-    const util::SignalShaping& SignalShaping(unsigned int channel) const;
+    std::vector<size_t> GetViewIndex()       { return fViewIndex; }
+
+    const util::SignalShaping& SignalShaping(unsigned int channel, unsigned wire = 0) const;
 
     int FieldResponseTOffset(unsigned int const channel) const;
 
     // Do convolution calcution (for simulation).
 
-    template <class T> void Convolute(unsigned int channel, std::vector<T>& func) const;
+    template <class T> void Convolute(size_t channel, std::vector<T>& func) const;
+    template <class T> void Convolute(size_t channel, size_t wire, std::vector<T>& func) const;
 
     // Do deconvolution calcution (for reconstruction).
 
-    template <class T> void Deconvolute(unsigned int channel, std::vector<T>& func) const;
+    template <class T> void Deconvolute(size_t channel, std::vector<T>& func) const;
+    template <class T> void Deconvolute(size_t channel, size_t wire, std::vector<T>& func) const;
 
   private:
 
@@ -147,62 +155,87 @@ namespace util {
 
     void SetResponseSampling();
 
+    size_t fNPlanes;
+    size_t fNViews;
+
     // Fcl parameters.
+    std::vector<size_t>      fViewIndex;
+    std::map<size_t, size_t> fViewMap;
+    size_t                   fViewForNormalization;
+
     double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
     double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
     std::vector<double> fNoiseFactColl;         ///< RMS Noise in ADCs for lowest Gain Setting
     std::vector<double> fNoiseFactInd;          ///< RMS Noise in ADCs for lowest Gain Setting
+    std::vector<DoubleVec> fNoiseFactVec;
+
+    std::vector<size_t> fNResponses;
+    std::vector<size_t> fNActiveResponses;
 
     std::vector<double> fDefaultDriftVelocity;  ///< Default drift velocity of electrons in cm/usec
     std::vector<double> fFieldResponseTOffset;  ///< Time offset for field response in ns
     int fNFieldBins;         			///< number of bins for field response
-    double fInputFieldRespSamplingPeriod;       ///< Sampling period in the input field response.
+    int fFieldLowEdge;            ///< low edge of the field response histo (for test output)
+    double fFieldBinWidth;        ///<  Bin with of the input field response.
     double fCol3DCorrection; 			///< correction factor to account for 3D path of 
 						///< electrons thru wires
     double fInd3DCorrection;  			///< correction factor to account for 3D path of 
 						///< electrons thru wires
-    double fColFieldRespAmp;  			///< amplitude of response to field 
-    double fIndUFieldRespAmp;  			///< amplitude of response to field in U plane
-    double fIndVFieldRespAmp;  			///< amplitude of response to field in V plane
+    //double fColFieldRespAmp;  			///< amplitude of response to field
+    //double fIndUFieldRespAmp;  			///< amplitude of response to field in U plane
+    //double fIndVFieldRespAmp;  			///< amplitude of response to field in V plane
+    DoubleVec fFieldRespAmpVec;
     std::vector<double> fShapeTimeConst;  	///< time constants for exponential shaping
     std::vector<int> fDeconvPol;                ///< switch for DeconvKernel normalization sign (+ -> max pos ADC, - -> max neg ADC). Entry 0,1,2 = U,V,Y plane settings
-    TF1* fColFilterFunc;      			///< Parameterized collection filter function.
-    TF1* fIndUFilterFunc;      			///< Parameterized induction filter function for U plane.
-    TF1* fIndVFilterFunc;      			///< Parameterized induction filter function for V plane
+    //TF1* fColFilterFunc;      			///< Parameterized collection filter function.
+    //TF1* fIndUFilterFunc;      			///< Parameterized induction filter function for U plane.
+    //TF1* fIndVFilterFunc;      			///< Parameterized induction filter function for V plane
+    std::vector<TF1*> fFilterTF1Vec;
+    std::vector<std::string> fFilterFuncVec;
+    std::vector<std::vector<TComplex> >fFilterVec;
 
     
-    bool fUseFunctionFieldShape;   		///< Flag that allows to use a parameterized field response instead of the hardcoded version
-    bool fUseHistogramFieldShape;               ///< Flag that turns on field response shapes from histograms
+    //bool fUseFunctionFieldShape;   		///< Flag that allows to use a parameterized field response instead of the hardcoded version
+    //bool fUseHistogramFieldShape;               ///< Flag that turns on field response shapes from histograms
+
     bool fGetFilterFromHisto;   		///< Flag that allows to use a filter function from a histogram instead of the functional dependency
-    TF1* fColFieldFunc;      			///< Parameterized collection field shape function.
-    TF1* fIndUFieldFunc;      			///< Parameterized induction field shape function for U plane.
-    TF1* fIndVFieldFunc;      			///< Parameterized induction field shape function for V plane.
+    //TF1* fColFieldFunc;      			///< Parameterized collection field shape function.
+    //TF1* fIndUFieldFunc;      			///< Parameterized induction field shape function for U plane.
+    //TF1* fIndVFieldFunc;      			///< Parameterized induction field shape function for V plane.
 
-    TH1F *fFieldResponseHist[3];                ///< Histogram used to hold the field response, hardcoded for the time being
+    std::vector<std::vector<TH1F*> > fFieldResponseHistVec;
+    //TH1F *fFieldResponseHist[3];                ///< Histogram used to hold the field response, hardcoded for the time being
 
-    TH1D *fFilterHist[3];    			///< Histogram used to hold the collection filter, hardcoded for the time being
+    //TH1D *fFilterHist[3];    			///< Histogram used to hold the collection filter, hardcoded for the time being
+    std::vector<TH1D*> fFilterHistVec;
     
     // Following attributes hold the convolution and deconvolution kernels
 
-    util::SignalShaping fIndUSignalShaping;
-    util::SignalShaping fIndVSignalShaping;
-    util::SignalShaping fColSignalShaping;
+    //util::SignalShaping fIndUSignalShaping;
+    //util::SignalShaping fIndVSignalShaping;
+    //util::SignalShaping fColSignalShaping;
+    std::vector<std::vector<util::SignalShaping> > fSignalShapingVec;
     // Field response.
 
-    std::vector<double> fIndUFieldResponse;
-    std::vector<double> fIndVFieldResponse;
-    std::vector<double> fColFieldResponse;
+    //std::vector<double> fIndUFieldResponse;
+    //std::vector<double> fIndVFieldResponse;
+    //std::vector<double> fColFieldResponse;
+    std::vector<std::vector<DoubleVec > > fFieldResponseVec;
 
     // Electronics response.
 
-    std::vector<double> fElectResponse;
+    DoubleVec fElectResponse;
 
     // Filters.
 
     std::vector<TComplex> fIndUFilter;
     std::vector<TComplex> fIndVFilter;
     std::vector<TComplex> fColFilter;
+    std::vector<std::vector<TComplex> > FilterVec;
+
+    bool fPrintResponses;
+    bool fManualInterpolation;
   };
 }
 
@@ -230,18 +263,32 @@ int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int cons
 
 //----------------------------------------------------------------------
 // Do convolution.
-template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(unsigned int channel, std::vector<T>& func) const
+template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(size_t channel, std::vector<T>& func) const
 {
-  SignalShaping(channel).Convolute(func);
+  SignalShaping(channel, 0).Convolute(func);
+}
+
+// Do convolution.
+template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(size_t channel, size_t wire, std::vector<T>& func) const
+{
+  SignalShaping(channel, wire).Convolute(func);
 }
 
 
 //----------------------------------------------------------------------
 // Do deconvolution.
-template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute(unsigned int channel, std::vector<T>& func) const
+template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute(size_t channel, std::vector<T>& func) const
 {
-  SignalShaping(channel).Deconvolute(func);
+  SignalShaping(channel, 0).Deconvolute(func);
 }
+
+//----------------------------------------------------------------------
+// Do deconvolution.
+template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute(size_t channel, size_t wire, std::vector<T>& func) const
+{
+  SignalShaping(channel, wire).Deconvolute(func);
+}
+
 
 DECLARE_ART_SERVICE(util::SignalShapingServiceMicroBooNE, LEGACY)
 #endif

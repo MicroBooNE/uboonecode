@@ -20,6 +20,12 @@ microboone_simwire:
  NoiseFileFname:      "uboone_noise_v0.1.root"
  NoiseHistoName:      "NoiseFreq"    
 
+# Expert settings:
+ Test:                false       #turns on special test case: parameters below
+ TestWire:            1200
+ TestIndex:           4000
+ TestCharge:          10000
+ Sample:              -1          #no histos... 0-3 sets up for 0, 30, 60, 75 degrees
 }
 #microboone_simwireana: @local::standard_simwireana
 microboone_simwireana:
