@@ -98,24 +98,6 @@ namespace util{
     Region fCurrentProcessedRegion;
     bool   RegionIsCurrent(Region const&);
 
-    typedef struct {
-      unsigned int channel;
-      size_t min_tick;
-      size_t max_tick;
-      float pedestal;
-      float noise;
-      Digit max;
-      Digit min;
-      Tick max_iterator;
-      Tick min_iterator;
-      std::vector<Region> signal_regions;
-      std::vector<Region> baseline_regions;
-    } ChannelProperties_t;
-    
-    std::vector<ChannelProperties_t> fChannelMemory;
-    
-    void ClearChannelMemory();
-    
   };
 
 }//end namespace util
