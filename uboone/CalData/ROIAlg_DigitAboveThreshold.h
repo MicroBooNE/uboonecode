@@ -19,9 +19,16 @@
 
 namespace util{
 
-  class ROIAlg_DigitAboveThreshold : public ROIAlg {
+  template <class Digit>
+  class ROIAlg_DigitAboveThreshold : public ROIAlg<Digit> {
     
   public:
+
+    //this should be copied from ROIAlg.h
+    typedef std::vector<Digit> Waveform;
+    typedef typename Waveform::const_iterator  Tick;
+    typedef Range<Tick> Region;
+
     ROIAlg_DigitAboveThreshold(fhicl::ParameterSet const& p){
       fThresholdVal  = p.get<Digit>("ThresholdVal");
       fNegativePulse = p.get<bool>("NegativePulse",false);
@@ -33,7 +40,7 @@ namespace util{
     ~ROIAlg_DigitAboveThreshold(){}
     
   protected: 
-    virtual void AnalyzeWaveform(Waveform const&);
+    void AnalyzeWaveform(Region const&);
 
   private:
     Digit         fThresholdVal;

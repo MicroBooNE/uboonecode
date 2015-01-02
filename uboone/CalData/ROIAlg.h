@@ -20,27 +20,28 @@
 
 namespace util{
 
-  typedef short                    Digit;
-  typedef std::vector<Digit>       Waveform;
-  typedef Waveform::const_iterator Tick;    
-  typedef Range<Tick>              Region;    
-
-  struct SignalBaselineTrio{
-    Region BaselineRegion_Pre;
-    Region SignalRegion;
-    Region BaselineRegion_Post;
-  };
-  
+  template <class Digit>
   class ROIAlg{
-    
+        
   public: 
+
+    typedef std::vector<Digit> Waveform;
+    typedef typename Waveform::const_iterator Tick;
+    typedef Range<Tick> Region;
     
-    std::unique_ptr<ROIAlg> MakeROIAlg(fhicl::ParameterSet const&);
+    struct SignalBaselineTrio{
+      Region BaselineRegion_Pre;
+      Region SignalRegion;
+      Region BaselineRegion_Post;
+    };
+
+    std::unique_ptr< ROIAlg<Digit> > MakeROIAlg(fhicl::ParameterSet const&);
     virtual ~ROIAlg(){}
 
     std::string         GetName() { return fAlgName; }
 
-    void                ProcessWaveform(Waveform const&);
+    void ProcessWaveform(Waveform const& w){ ProcessWaveform(Region(w.cbegin(),w.cend())); }
+    void ProcessWaveform(Region const&);
 
     const UniqueRangeSet<Tick> GetSignalRegions();
     const size_t               GetNSignalRegions();
@@ -52,19 +53,20 @@ namespace util{
     void GetAllSignalAndBaselineRegions( std::vector< SignalBaselineTrio >& );
     
   protected: 
-    virtual void AnalyzeWaveform(Waveform const&) = 0;
+    virtual void AnalyzeWaveform(Region const&) = 0;
     void         InsertSignalRegion(Tick const& start, Tick const& end)
     { fSignalRangeSet.emplace(start,end); }
     
   private:
-
-    
     std::string           fAlgName;
     Tick                  fWaveformStart;
     Tick                  fWaveformEnd;
     UniqueRangeSet<Tick>  fSignalRangeSet;
+    UniqueRangeSet<Tick>  fBaselineRangeSet;
 
-    UniqueRangeSet<Tick>  CreateBaselineRangeSet() const;
+    void CreateBaselineRangeSet();
+    void ThrowIfNoBaselineRegions();
+    void ClearRangeSets();
   };
 
 } //end namespace util
