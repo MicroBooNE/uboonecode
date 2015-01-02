@@ -14,6 +14,6 @@ echo "services.user.FileCatalogMetadataExtras.RenameTemplate: '' " >> ./prodgeni
 #ifdh cp /uboone/data/uboonebeam/bnb_gsimple_fluxes_02.28.2014_470/gsimple_microboone-470-onaxis_mc_nu_dummy_ntrd_4216_numintp_00004.root gsimple_microboone-470-onaxis_mc_nu_dummy_ntrd_4216_numintp_00004.root
 
 export FW_SEARCH_PATH=${FW_SEARCH_PATH}:.
-echo "physics.producers.generator.FluxFiles: ' $1 ' " >> ./prodgenie_bnb_nu_uboone.fcl 
+echo "physics.producers.generator.FluxFiles: [' $1 '] " >> ./prodgenie_bnb_nu_uboone.fcl 
 strace -o lar.strace lar -c ${UBOONECODE_DIR}/job/prodgenie_bnb_nu_uboone.fcl -n 1 -o genie_gen.root -T genie_hist.root
 
