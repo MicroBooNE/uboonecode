@@ -1,6 +1,12 @@
-
 art_make( BASENAME_ONLY
-          MODULE_LIBRARIES Geometry
+          LIBRARY_NAME CalData
+          LIB_LIBRARIES 
+			RawData
+                        RecoBase
+	                Utilities
+	                ${FHICLCPP}
+			${CETLIB}
+	  MODULE_LIBRARIES Geometry
 			Geometry_service
 	                Utilities
 			Filters
@@ -25,7 +31,7 @@ art_make( BASENAME_ONLY
 			${ROOT_BASIC_LIB_LIST}
         )
 
-# install_headers()
+install_headers()
 install_fhicl()
 install_source()
 

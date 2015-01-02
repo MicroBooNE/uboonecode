@@ -23,11 +23,6 @@ namespace util{
 
   class WaveformPropertiesAlg{
 
-    typedef short                    Digit;
-    typedef std::vector<Digit>       Waveform;
-    typedef Waveform::const_iterator Tick;    
-    typedef std::pair<Tick,Tick>     Region;
-    
   public:
     
     WaveformPropertiesAlg(fhicl::ParameterSet const& p)

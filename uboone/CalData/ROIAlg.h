@@ -16,37 +16,55 @@
 #include <exception>
 
 #include "fhiclcpp/ParameterSet.h"
-#include "Range.h"
+#include "Utilities/UniqueRangeSet.h"
 
 namespace util{
 
-  class ROIALg{
+  typedef short                    Digit;
+  typedef std::vector<Digit>       Waveform;
+  typedef Waveform::const_iterator Tick;    
+  typedef Range<Tick>              Region;    
+
+  struct SignalBaselineTrio{
+    Region BaselineRegion_Pre;
+    Region SignalRegion;
+    Region BaselineRegion_Post;
+  };
+  
+  class ROIAlg{
     
   public: 
-    typedef short                    Digit;
-    typedef std::vector<Digit>       Waveform;
-    typedef Waveform::const_iterator Tick;    
-    typedef Range<Tick>              Region;
     
-
-    static std::unique_ptr<ROIAlg> MakeROIAlg(fhicl::ParameterSet const&);
+    std::unique_ptr<ROIAlg> MakeROIAlg(fhicl::ParameterSet const&);
+    virtual ~ROIAlg(){}
 
     std::string         GetName() { return fAlgName; }
-    std::vector<Region> GetSignalRegions();
-    std::vector<Region> GetBaselineRegions();
-    size_t              GetNSignalRegions();
-    size_t              GetNBaselineRegions();
 
+    void                ProcessWaveform(Waveform const&);
+
+    const UniqueRangeSet<Tick> GetSignalRegions();
+    const size_t               GetNSignalRegions();
+    const UniqueRangeSet<Tick> GetBaselineRegions();
+    const size_t               GetNBaselineRegions();
+
+    void GetSignalAndBaselineRegions( size_t const i_roi,
+				      SignalBaselineTrio&);
+    void GetAllSignalAndBaselineRegions( std::vector< SignalBaselineTrio >& );
+    
   protected: 
     virtual void AnalyzeWaveform(Waveform const&) = 0;
-    void         InsertRegion(Region region, Region_t type);
-    void         InsertSignalRegion(Region region);
-    void         InsertBaselineRegion(Region region);
+    void         InsertSignalRegion(Tick const& start, Tick const& end)
+    { fSignalRangeSet.emplace(start,end); }
     
   private:
-    std::string           fAlgName;
-    UniqueRangeSet<Tick>  fRangeSet;
+
     
+    std::string           fAlgName;
+    Tick                  fWaveformStart;
+    Tick                  fWaveformEnd;
+    UniqueRangeSet<Tick>  fSignalRangeSet;
+
+    UniqueRangeSet<Tick>  CreateBaselineRangeSet() const;
   };
 
 } //end namespace util
