@@ -17,19 +17,22 @@ litemaker_anadata.DataLookUpMap:
                "beziertrackertag","beziertrackercctag",
                "costrktag","costrkcctag",
                "stitchtag","stitchcctag",
-               "stitchkalmanhittag","beamflashcompat"]
+               "stitchkalmanhittag","beamflashcompat",
+               "pandoraCosmicKHittag","pandoraNuKHittag"]
   calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
                "trackkalspscalo","trackkalspscccalo",
                "beziertrackercalo","beziertrackercccalo",
                "costrkcalo","costrkcccalo",
                "stitchcalo","stitchcccalo",
-               "stitchkalmanhitcalo"]
+               "stitchkalmanhitcalo",
+               "pandoraCosmicKHitcalo","pandoraNuKHitcalo"]
   partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
                "trackkalspspid","trackkalspsccpid",
                "beziertrackerpid","beziertrackerccpid",
                "costrkpid","costrkccpid",
                "stitchpid","stitchccpid",
-               "stitchkalmanhitpid"]
+               "stitchkalmanhitpid",
+               "pandoraCosmicKHitpid","pandoraNuKHitpid"]
 }
 
 litemaker_anadata.AssociationLookUpMap: @local::litemaker_ass_reco

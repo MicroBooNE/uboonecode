@@ -205,6 +205,7 @@ void LiteScanner::analyze(art::Event const & e)
   SaveAssociationSource<recob::OpFlash>(e);
   SaveAssociationSource<anab::CosmicTag>(e);
   SaveAssociationSource<recob::Track>(e);
+  SaveAssociationSource<recob::Seed>(e);
   SaveAssociationSource<recob::Shower>(e);
   SaveAssociationSource<recob::Vertex>(e);
   SaveAssociationSource<recob::PFParticle>(e);
@@ -256,6 +257,8 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<recob::EndPoint2D>(e,j); break;
       case ::larlite::data::kSpacePoint:
 	ScanData<recob::SpacePoint>(e,j); break;
+      case ::larlite::data::kSeed:
+	ScanData<recob::Seed>(e,j); break;
       case ::larlite::data::kTrack:
 	ScanData<recob::Track>(e,j); break;
       case ::larlite::data::kShower:
@@ -453,7 +456,8 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     //fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_data);
     fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_data);
     fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_data);
-    //fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_data);
+    fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_data);
+    fAlg.ScanAssociation<T, recob::Seed       > (evt,dh,lite_data);
     //fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_data);
     break;
   default:

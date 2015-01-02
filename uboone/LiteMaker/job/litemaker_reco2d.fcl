@@ -13,7 +13,7 @@ litemaker_reco2d.DataLookUpMap:
   # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
   # string array.
   hit:        ["gaushit","cccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandora"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
   endpoint2d: ["cccluster",
                "featurevtx"]
 }
@@ -21,7 +21,7 @@ litemaker_reco2d.DataLookUpMap:
 litemaker_reco2d.AssociationLookUpMap:
 {
   hit:        ["gaushit","cccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandora"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
   endpoint2d: ["cccluster",
                "featurevtx"]
 }
