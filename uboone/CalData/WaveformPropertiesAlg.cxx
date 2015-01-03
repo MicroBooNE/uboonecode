@@ -19,6 +19,10 @@ bool util::WaveformPropertiesAlg<Digit>::RegionIsCurrent(Region const& region){
 
 template <class Digit>
 void util::WaveformPropertiesAlg<Digit>::ProcessWaveform(Region const& r){
+
+  if(!fROIAlgPtr)
+    throw std::runtime_error("ERROR in WaveformPropertiesAlg: ROIAlg called but no params given.");
+
   fCurrentProcessedRegion = r;
   fROIAlgPtr->ProcessWaveform(r);
 }
@@ -245,4 +249,20 @@ util::WaveformPropertiesAlg<Digit>::GetBaselineRegions(Region const& r){
     ProcessWaveform(r);
 
   return fROIAlgPtr->GetBaselineRegions();
+}
+
+template <class Digit>
+const size_t util::WaveformPropertiesAlg<Digit>::GetNSignalRegions(Region const& r){
+  if(!RegionIsCurrent(r))
+    ProcessWaveform(r);
+
+  return fROIAlgPtr->GetNSignalRegions();
+}
+
+template <class Digit>
+const size_t util::WaveformPropertiesAlg<Digit>::GetNBaselineRegions(Region const& r){
+  if(!RegionIsCurrent(r))
+    ProcessWaveform(r);
+
+  return fROIAlgPtr->GetNBaselineRegions();
 }

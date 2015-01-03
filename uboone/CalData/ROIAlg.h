@@ -35,7 +35,8 @@ namespace util{
       Region BaselineRegion_Post;
     };
 
-    std::unique_ptr< ROIAlg<Digit> > MakeROIAlg(fhicl::ParameterSet const&);
+    static std::unique_ptr< ROIAlg<Digit> > MakeROIAlg(fhicl::ParameterSet const&);
+    ROIAlg(){}
     virtual ~ROIAlg(){}
 
     std::string         GetName() { return fAlgName; }
@@ -43,10 +44,10 @@ namespace util{
     void ProcessWaveform(Waveform const& w){ ProcessWaveform(Region(w.cbegin(),w.cend())); }
     void ProcessWaveform(Region const&);
 
-    const UniqueRangeSet<Tick> GetSignalRegions();
-    const size_t               GetNSignalRegions();
-    const UniqueRangeSet<Tick> GetBaselineRegions();
-    const size_t               GetNBaselineRegions();
+    UniqueRangeSet<Tick> const& GetSignalRegions();
+    const size_t                GetNSignalRegions();
+    UniqueRangeSet<Tick> const& GetBaselineRegions();
+    const size_t                GetNBaselineRegions();
 
     void GetSignalAndBaselineRegions( size_t const i_roi,
 				      SignalBaselineTrio&);

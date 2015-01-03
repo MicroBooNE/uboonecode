@@ -6,6 +6,7 @@ art_make( BASENAME_ONLY
 	                Utilities
 	                ${FHICLCPP}
 			${CETLIB}
+			${ROOT_BASIC_LIB_LIST}
 	  MODULE_LIBRARIES Geometry
 			Geometry_service
 	                Utilities

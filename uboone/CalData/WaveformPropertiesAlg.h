@@ -16,7 +16,6 @@
 #include <exception>
 
 #include "fhiclcpp/ParameterSet.h"
-#include "RawData/RawDigit.h"
 #include "ROIAlg.h"
 
 namespace util{
@@ -30,12 +29,19 @@ namespace util{
     typedef typename Waveform::const_iterator Tick;
     typedef Range<Tick> Region;
     
-    WaveformPropertiesAlg(fhicl::ParameterSet const& p)
-      { fROIAlgPtr.swap(ROIAlg<Digit>::MakeROIAlg(p.get<fhicl::ParameterSet>("ROIAlgParams"))); }
+    WaveformPropertiesAlg(fhicl::ParameterSet const& p):
+      fCurrentProcessedRegion(Tick(),Tick())
+      { 
+	fhicl::ParameterSet pset_ROIAlg;
+	if( p.get_if_present<fhicl::ParameterSet>("ROIAlgParams",pset_ROIAlg)){
+	  std::unique_ptr< ROIAlg<Digit> > new_ptr(ROIAlg<Digit>::MakeROIAlg(pset_ROIAlg));
+	  fROIAlgPtr.swap(new_ptr);
+	}
+      }
     
     //these methods work regardless of whether waveform has been processed or not
-    Digit GetSum(Waveform const& waveform) { return GetSum(Region(waveform.cbegin(),waveform.cend())); }
     Digit GetSum(Region const&);
+    Digit GetSum(Waveform const& waveform) { return GetSum(Region(waveform.cbegin(),waveform.cend())); }
 
     float GetAverage(Waveform const& waveform) { return GetAverage(Region(waveform.cbegin(),waveform.cend())); }
     float GetAverage(Region const&);
@@ -90,6 +96,11 @@ namespace util{
     UniqueRangeSet<Tick> const& GetSignalRegions(Region const&);
     UniqueRangeSet<Tick> const& GetBaselineRegions(Waveform const& w) { return GetBaselineRegions(Region(w.cbegin(),w.cend())); }
     UniqueRangeSet<Tick> const& GetBaselineRegions(Region const&);
+
+    const size_t GetNSignalRegions(Waveform const& w) { return GetNSignalRegions(Region(w.cbegin(),w.cend())); }
+    const size_t GetNSignalRegions(Region const&);
+    const size_t GetNBaselineRegions(Waveform const& w) { return GetNSignalRegions(Region(w.cbegin(),w.cend())); }
+    const size_t GetNBaselineRegions(Region const&);
 
   private:
     

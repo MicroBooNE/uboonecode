@@ -14,10 +14,11 @@
 template <class Digit>
 std::unique_ptr< util::ROIAlg<Digit> > util::ROIAlg<Digit>::MakeROIAlg(fhicl::ParameterSet const& p){
 
-  fAlgName = p.get<std::string>("AlgName");
+  //fAlgName = p.get<std::string>("AlgName");
+  std::string algName = p.get<std::string>("AlgName");
 
   std::unique_ptr< ROIAlg<Digit> > ptr;
-  if(fAlgName.compare("DigitAboveThreshold")){
+  if(algName.compare("DigitAboveThreshold")){
     std::unique_ptr< ROIAlg<Digit> > new_ptr(new ROIAlg_DigitAboveThreshold<Digit>(p));
     ptr.swap(new_ptr);
   }
@@ -94,7 +95,7 @@ void util::ROIAlg<Digit>::GetAllSignalAndBaselineRegions( std::vector< SignalBas
 }
 
 template <class Digit>
-const util::UniqueRangeSet<typename util::ROIAlg<Digit>::Tick> util::ROIAlg<Digit>::GetSignalRegions(){ 
+util::UniqueRangeSet<typename util::ROIAlg<Digit>::Tick> const& util::ROIAlg<Digit>::GetSignalRegions(){ 
   ThrowIfNoBaselineRegions();
   return fSignalRangeSet; 
 }
@@ -106,7 +107,7 @@ const size_t util::ROIAlg<Digit>::GetNSignalRegions(){
 }
 
 template <class Digit>
-const util::UniqueRangeSet<typename util::ROIAlg<Digit>::Tick> util::ROIAlg<Digit>::GetBaselineRegions(){ 
+util::UniqueRangeSet<typename util::ROIAlg<Digit>::Tick> const& util::ROIAlg<Digit>::GetBaselineRegions(){ 
   ThrowIfNoBaselineRegions();
   return fBaselineRangeSet;
 }
