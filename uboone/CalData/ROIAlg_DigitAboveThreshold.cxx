@@ -8,8 +8,8 @@
  * Very simple digit above threshold ROI finder
  */
 
-#include "ROIAlg_DigitAboveThreshold.h"
-
+//#include "ROIAlg_DigitAboveThreshold.h"
+/*
 template <class Digit>
 void util::ROIAlg_DigitAboveThreshold<Digit>::AnalyzeWaveform(Region const& region){
   
@@ -39,3 +39,4 @@ void util::ROIAlg_DigitAboveThreshold<Digit>::AnalyzeWaveform(Region const& regi
     InsertSignalRegion(start_tick,region.End());
   
 }
+*/

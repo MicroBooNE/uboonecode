@@ -15,7 +15,7 @@
 #include <string>
 #include <exception>
 
-#include "ROIAlg.h"
+//#include "ROIAlg.h"
 
 namespace util{
 
@@ -40,7 +40,35 @@ namespace util{
     ~ROIAlg_DigitAboveThreshold(){}
     
   protected: 
-    void AnalyzeWaveform(Region const&);
+    void AnalyzeWaveform(Region const& region){
+  
+      unsigned int above_threshold_counter=0;
+      Tick start_tick,end_tick;
+      
+      for( Tick tick=region.Start(); tick!=region.End(); tick++){
+    
+	//first, if we were above threshold, and now we're below
+	if( above_threshold_counter>=fMinWidth && !(PassesThreshold(*tick)) ){
+	  end_tick = tick;
+	  this->InsertSignalRegion(start_tick,end_tick);
+	  above_threshold_counter=0;
+	  continue;
+	}
+	
+	if( PassesThreshold(*tick) ){
+	  if(above_threshold_counter==0) start_tick = tick;
+	  above_threshold_counter++;
+	}
+    
+	
+      }//end loop over waveform
+      
+      //handle case where we end in signal region
+      if(above_threshold_counter>fMinWidth)
+	this->InsertSignalRegion(start_tick,region.End());
+      
+    }
+
 
   private:
     Digit         fThresholdVal;
