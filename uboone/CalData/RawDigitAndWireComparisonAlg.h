@@ -65,6 +65,7 @@ namespace caldata{
       short        digit_regionMax;
       short        digit_regionMin;
       double       digit_regionSum;
+      size_t       digit_regionSize;
       bool         digit_isSignal;      
     };
     

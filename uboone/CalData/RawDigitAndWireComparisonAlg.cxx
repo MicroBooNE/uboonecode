@@ -37,6 +37,7 @@ void caldata::RawDigitAndWireComparisonAlg::SetupROIOutputTree(){
   fROICompareTree->Branch("digit_regionMax",&fROICompare.digit_regionMax,"digit_regionMax/S");
   fROICompareTree->Branch("digit_regionMin",&fROICompare.digit_regionMin,"digit_regionMin/S");
   fROICompareTree->Branch("digit_regionSum",&fROICompare.digit_regionSum,"digit_regionSum/D");
+  fROICompareTree->Branch("digit_regionSize",&fROICompare.digit_regionSize,"digit_regionSize/i");
   fROICompareTree->Branch("digit_isSignal",&fROICompare.digit_isSignal,"digit_isSignal/O");
 }
 
@@ -103,6 +104,8 @@ void caldata::RawDigitAndWireComparisonAlg::RunROICompare(recob::Wire   const& w
     auto digit_min_loc = fRawDigitPropertiesAlg.GetMinLocation(digit_region);
     fROICompare.digit_regionMinTime = std::distance(digit.fADC.cbegin(),digit_min_loc);
 
+    fROICompare.digit_regionSize = std::distance(digit_region.Start(),digit_region.End());
+    
     //now fill the tree
     fROICompareTree->Fill();
 
