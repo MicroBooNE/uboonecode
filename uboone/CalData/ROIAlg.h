@@ -168,20 +168,6 @@ namespace util{
       //now need to do last baseline region: last signal end to waveform end
       end = fWaveformEnd;
       fBaselineRangeSet.emplace(start,end);
-
-      if(fBaselineRangeSet.size()==1 &&
-	 fBaselineRangeSet.begin()->Start()==fBaselineRangeSet.begin()->End())
-	throw std::runtime_error("ERROR in ROIAlg: BaselineRangeSet created incorrectly!");
-
-      if(fSignalRangeSet.size()==0){
-	for(auto const& range : fBaselineRangeSet)
-	  std::cout << "\tBaseline range: ("
-		    << std::distance(fWaveformStart,range.Start())
-		    << ","
-		    << std::distance(fWaveformStart,range.End())
-		    << ")" << std::endl;
-      }
-      
     }
     
     void ThrowIfNoBaselineRegions(){

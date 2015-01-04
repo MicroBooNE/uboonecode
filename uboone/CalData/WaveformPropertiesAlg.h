@@ -151,15 +151,12 @@ namespace util{
       }
       //else it's a signal region!
       else{
-	//std::cout << "Is signal region!" << std::endl;
 	typename ROIAlg<Digit>::SignalBaselineTrio sbt = GetSignalBaselineTrio(t,r);
 	double sum1 = GetSum(sbt.BaselineRegion_Pre);
 	size_t n1 = std::distance(sbt.BaselineRegion_Pre.Start(),sbt.BaselineRegion_Pre.End());
 	double sum2 = GetSum(sbt.BaselineRegion_Post);
 	size_t n2 = std::distance(sbt.BaselineRegion_Post.Start(),sbt.BaselineRegion_Post.End());
-	double average = (double)(sum1+sum2)/(n1+n2);
-	//std::cout << sum1 << "/" << n1 << " " << sum2 << "/" << n2 << " " << average << std::endl;;
-	return average;
+	return (double)(sum1+sum2)/(n1+n2);
       }
       
     }

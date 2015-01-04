@@ -54,7 +54,7 @@ namespace caldata{
       unsigned int wireROI_index;
       unsigned int wireROI_start;
       size_t       wireROI_size;
-      float        wireROI_integral;
+      double       wireROI_integral;
       float        wireROI_peak;
       unsigned int wireROI_peaktime;
 
@@ -64,12 +64,8 @@ namespace caldata{
       float        digit_localNoise;
       short        digit_regionMax;
       short        digit_regionMin;
-      short        digit_regionSum;
-      bool         digit_isSignal;
-      
-      std::string  leaflist;
-      ROITreeComp():
-      leaflist("event/i:run/i:channel/i:plane/i:wireROI_index/i:wireROI_start/i:wireROI_size/i:wireROI_integral/F:wireROI_peak/F:wireROI_peaktime/i:digit_isSignal/O:digit_regionMax/S:digit_regionMaxTime/i:digit_regionMin:S:digit_regionMinTime/i:digit_regionSum/S:digit_localPed/F:digit_localNoise/F") {}
+      double       digit_regionSum;
+      bool         digit_isSignal;      
     };
     
     ROITreeComp fROICompare;
