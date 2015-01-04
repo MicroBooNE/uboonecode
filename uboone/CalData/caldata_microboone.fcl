@@ -1,4 +1,5 @@
 #include "caldata.fcl"
+#include "roialg.fcl"
 
 BEGIN_PROLOG
 
@@ -47,6 +48,23 @@ microboone_showwire:
     SinglePulseBuffer: 25
     Channel: 7775
     SaveWaveforms: true
+}
+
+microboone_rawdigitandwirecomparisonana:
+{
+    RawDigitModuleLabel: "daq"
+    WireModuleLabel:     "caldata"
+    RawDigitAndWireComparisonAlg:
+    {
+        RawDigitPropertiesAlg:
+        {
+            ROIAlgParams: @local::roiAlg_DigitAboveThresholdParams
+        }
+        RecoWirePropertiesAlg:
+        {
+            ROIAlgParams: @local::roiAlg_DigitAboveThresholdParams
+        }
+    }
 }
 
 END_PROLOG
