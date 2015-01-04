@@ -15,8 +15,6 @@
 #include <string>
 #include <exception>
 
-//#include "ROIAlg.h"
-
 namespace util{
 
   template <class Digit>
