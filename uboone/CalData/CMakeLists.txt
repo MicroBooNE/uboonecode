@@ -8,7 +8,8 @@ art_make( BASENAME_ONLY
 			${CETLIB}
 			${ROOT_BASIC_LIB_LIST}
 	  MODULE_LIBRARIES Geometry
-			Geometry_service
+  	  		CalData
+	  		Geometry_service
 	                Utilities
 			Filters
 			RawData
