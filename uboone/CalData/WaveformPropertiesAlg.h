@@ -41,30 +41,30 @@ namespace util{
       }
     
     //these methods work regardless of whether waveform has been processed or not
-    Digit GetSum(Waveform const& waveform) { return GetSum(Region(waveform.cbegin(),waveform.cend())); }
-    Digit GetSum(Region const& r){
-      Digit sum=0;
+    double GetSum(Waveform const& waveform) { return GetSum(Region(waveform.cbegin(),waveform.cend())); }
+    double GetSum(Region const& r){
+      double sum=0;
       for(Tick t=r.Start(); t!=r.End(); t++)
-	sum += (float)*t;
+	sum += (double)*t;
       
       return sum;
     }
 
-    float GetAverage(Waveform const& waveform) { return GetAverage(Region(waveform.cbegin(),waveform.cend())); }
-    float GetAverage(Region const& r){
+    double GetAverage(Waveform const& waveform) { return GetAverage(Region(waveform.cbegin(),waveform.cend())); }
+    double GetAverage(Region const& r){
       if(r.Start()==r.End()) return 0;
-      float sum=(float)GetSum(r);
+      double sum=GetSum(r);
       return sum/std::distance(r.Start(),r.End());
     }
     
-    float GetRMS(Waveform const& waveform) { return GetRMS(Region(waveform.cbegin(),waveform.cend())); }
-    float GetRMS(Region const& r){
+    double GetRMS(Waveform const& waveform) { return GetRMS(Region(waveform.cbegin(),waveform.cend())); }
+    double GetRMS(Region const& r){
       if(r.Start()==r.End()) return 0;
-      float sum2=0;
-      const float average = GetAverage(r);
+      double sum2=0;
+      const double average = GetAverage(r);
       
       for(Tick t=r.Start(); t!=r.End(); t++)
-	sum2 += ((float)*t - average)*((float)*t - average);
+	sum2 += ((double)*t - average)*((double)*t - average);
       
       return std::sqrt(sum2/std::distance(r.Start(),r.End()));
     }
@@ -93,12 +93,12 @@ namespace util{
 
     //these return pedestal and noise from all baseline regions
     //requires that waveform be processed
-    float GetWaveformPedestal(Waveform const& w) { return GetWaveformPedestal(Region(w.cbegin(),w.cend())); }
-    float GetWaveformPedestal(Region const& r){
+    double GetWaveformPedestal(Waveform const& w) { return GetWaveformPedestal(Region(w.cbegin(),w.cend())); }
+    double GetWaveformPedestal(Region const& r){
       if(!RegionIsCurrent(r))
 	ProcessWaveform(r);
       
-      float  sum = 0;
+      double  sum = 0;
       size_t total_entries=0;
       for( auto const& range : fROIAlgPtr->GetBaselineRegions()){
 	sum += GetSum(range);
@@ -110,19 +110,19 @@ namespace util{
       return sum;
     }
     
-    float GetWaveformNoise(Waveform const& w) { return GetWaveformNoise(Region(w.cbegin(),w.cend())); }
-    float GetWaveformNoise(Region const& r){
+    double GetWaveformNoise(Waveform const& w) { return GetWaveformNoise(Region(w.cbegin(),w.cend())); }
+    double GetWaveformNoise(Region const& r){
       if(!RegionIsCurrent(r))
 	ProcessWaveform(r);
       
-      float  sum2 = 0;
-      const float pedestal = GetWaveformPedestal(r);
+      double  sum2 = 0;
+      const double pedestal = GetWaveformPedestal(r);
       size_t total_entries=0;
       for( auto const& range : fROIAlgPtr->GetBaselineRegions()){
 	
 	total_entries += std::distance(range.Start(),range.End());
 	for(Tick t=range.Start(); t!=range.End(); t++)
-	  sum2 += ((float)*t - pedestal)*((float)*t - pedestal);
+	  sum2 += ((double)*t - pedestal)*((double)*t - pedestal);
 	
       }
       
@@ -136,8 +136,8 @@ namespace util{
     //these return pedestal from region based on iterator
     //if iterator in baseline region, then return noise/pedestal for that region
     //if iterator in signal region, return average noise/pedestal in surrounding baseline regions
-    float GetLocalPedestal(Waveform const& w, Tick const& t) { return GetLocalPedestal(t,Region(w.cbegin(),w.cend())); }
-    float GetLocalPedestal(Tick const& t, Region const& r){
+    double GetLocalPedestal(Waveform const& w, Tick const& t) { return GetLocalPedestal(t,Region(w.cbegin(),w.cend())); }
+    double GetLocalPedestal(Tick const& t, Region const& r){
 
       if(t<r.Start() || t>r.End())
 	throw std::runtime_error("Error in WaveformPropertiesAlg: Tick outside given range.");
@@ -151,18 +151,21 @@ namespace util{
       }
       //else it's a signal region!
       else{
+	//std::cout << "Is signal region!" << std::endl;
 	typename ROIAlg<Digit>::SignalBaselineTrio sbt = GetSignalBaselineTrio(t,r);
-	float sum1 = GetSum(sbt.BaselineRegion_Pre);
+	double sum1 = GetSum(sbt.BaselineRegion_Pre);
 	size_t n1 = std::distance(sbt.BaselineRegion_Pre.Start(),sbt.BaselineRegion_Pre.End());
-	float sum2 = GetSum(sbt.BaselineRegion_Post);
+	double sum2 = GetSum(sbt.BaselineRegion_Post);
 	size_t n2 = std::distance(sbt.BaselineRegion_Post.Start(),sbt.BaselineRegion_Post.End());
-	return (sum1+sum2)/(n1+n2);
+	double average = (double)(sum1+sum2)/(n1+n2);
+	//std::cout << sum1 << "/" << n1 << " " << sum2 << "/" << n2 << " " << average << std::endl;;
+	return average;
       }
       
     }
 
-    float GetLocalNoise(Waveform const& w, Tick const& t) { return GetLocalNoise(t,Region(w.cbegin(),w.cend())); }
-    float GetLocalNoise(Tick const& t, Region const& r){
+    double GetLocalNoise(Waveform const& w, Tick const& t) { return GetLocalNoise(t,Region(w.cbegin(),w.cend())); }
+    double GetLocalNoise(Tick const& t, Region const& r){
 
       if(t<r.Start() || t>r.End())
 	throw std::runtime_error("Error in WaveformPropertiesAlg: Tick outside given range.");
@@ -177,17 +180,17 @@ namespace util{
       //else it's a signal region!
       else{
 	typename ROIAlg<Digit>::SignalBaselineTrio sbt = GetSignalBaselineTrio(t,r);
-	float sum1 = GetSum(sbt.BaselineRegion_Pre);
+	double sum1 = GetSum(sbt.BaselineRegion_Pre);
 	size_t n1 = std::distance(sbt.BaselineRegion_Pre.Start(),sbt.BaselineRegion_Pre.End());
-	float sum2 = GetSum(sbt.BaselineRegion_Post);
+	double sum2 = GetSum(sbt.BaselineRegion_Post);
 	size_t n2 = std::distance(sbt.BaselineRegion_Post.Start(),sbt.BaselineRegion_Post.End());
-	float pedestal = (sum1+sum2)/(n1+n2);
+	double pedestal = (double)(sum1+sum2)/(n1+n2);
 	
-	float sum_sq=0;
+	double sum_sq=0;
 	for(Tick t=sbt.BaselineRegion_Pre.Start(); t!=sbt.BaselineRegion_Pre.End(); t++)
-	  sum_sq += ((float)*t - pedestal)*((float)*t - pedestal);
+	  sum_sq += ((double)*t - pedestal)*((double)*t - pedestal);
 	for(Tick t=sbt.BaselineRegion_Post.Start(); t!=sbt.BaselineRegion_Post.End(); t++)
-	  sum_sq += ((float)*t - pedestal)*((float)*t - pedestal);
+	  sum_sq += ((double)*t - pedestal)*((double)*t - pedestal);
 	
 	return std::sqrt(sum_sq/(n1+n2));
 	
@@ -255,7 +258,7 @@ namespace util{
       
     }
 
-    typename ROIAlg<Digit>::SignalBaselineTrio GetSignalBaselineTrio(Waveform const& w, Tick const& t) { return GetRegion(t,Region(w.cbegin(),w.cend())); }
+    typename ROIAlg<Digit>::SignalBaselineTrio GetSignalBaselineTrio(Waveform const& w, Tick const& t) { return GetSignalBaselineTrio(t,Region(w.cbegin(),w.cend())); }
     typename ROIAlg<Digit>::SignalBaselineTrio GetSignalBaselineTrio(Tick const& t, Region const& r){
       
       if(t<r.Start() || t>r.End())

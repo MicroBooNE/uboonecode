@@ -43,13 +43,26 @@ namespace util{
       unsigned int above_threshold_counter=0;
       Tick start_tick,end_tick;
       
+      //std::cout << "We are going to go through the region now." << std::endl;
+      //std::cout << "Region size is " << std::distance(region.Start(),region.End()) << std::endl;
+      
       for( Tick tick=region.Start(); tick!=region.End(); tick++){
-    
+
+	//std::cout << *tick << " " << above_threshold_counter << " " << PassesThreshold(*tick) << std::endl;
+	
 	//first, if we were above threshold, and now we're below
 	if( above_threshold_counter>=fMinWidth && !(PassesThreshold(*tick)) ){
 	  end_tick = tick;
 	  this->InsertSignalRegion(start_tick,end_tick);
 	  above_threshold_counter=0;
+	  /*
+	  std::cout << "Found and inserted region "
+		    << "("
+		    << std::distance(region.Start(),start_tick)
+		    << ","
+		    << std::distance(region.End(),end_tick)
+		    << ")" << std::endl;
+	  */
 	  continue;
 	}
 	

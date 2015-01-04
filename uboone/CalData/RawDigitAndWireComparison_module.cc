@@ -85,13 +85,11 @@ namespace caldata{
     std::vector<recob::Wire> const& wireVector(*wireHandle);
 
     //we need to create a wire-->digit association vector
-    //for now, I'm going to assume that the wire and raw digit
-    //are filled in the same way
-    if( wireVector.size() != digitVector.size() )
-      throw std::runtime_error("ERROR! Digits and wires definitely not 1-to-1.");
     std::vector<unsigned int> assocVector(wireVector.size());
-    std::iota(assocVector.begin(),assocVector.end(),0);
-
+    for(size_t i_wire=0; i_wire<wireVector.size(); i_wire++)
+      assocVector[i_wire] = wireVector[i_wire].Channel();
+    
+    
     fAlg.RunROICompare(wireVector,digitVector,assocVector,runNumber,eventNumber);
     
   }

@@ -24,6 +24,11 @@
  * (2) Define your ROIAlg in its own header file. Keep everything in that one 
  *     header file (don't split into a cxx file).
  * (3) INCLUDE THAT HEADER FILE AT THE BOTTOM OF THIS FILE!
+ * (4) Add the fcl parameters for your alg to the roialg.fcl file.
+ *     Make sure there is a parameter "AlgName" defined.
+ * (5) Add a declaration of your alg in MakeROIAlg below, using your alg
+ *     name to pick your particular alg. Needless to say, your alg name 
+ *     must be unique then.
  * 
  * Luv ya,
  * Wes
@@ -59,13 +64,14 @@ namespace util{
       std::string algName = p.get<std::string>("AlgName");
       
       std::unique_ptr< ROIAlg<Digit> > ptr;
-      if(algName.compare("DigitAboveThreshold")){
+      if(algName.compare("DigitAboveThreshold")==0){
 	std::unique_ptr< ROIAlg<Digit> > new_ptr(new ROIAlg_DigitAboveThreshold<Digit>(p));
 	ptr.swap(new_ptr);
       }
-      else
+      else{
+	std::cout << "Algname is ... " << algName << std::endl;
 	throw std::runtime_error("ERROR in ROIAlg: No registered ROIAlg with that name.");
-      
+      }
       ptr->ClearRangeSets();
       
       return std::move(ptr);
@@ -162,8 +168,22 @@ namespace util{
       //now need to do last baseline region: last signal end to waveform end
       end = fWaveformEnd;
       fBaselineRangeSet.emplace(start,end);
+
+      if(fBaselineRangeSet.size()==1 &&
+	 fBaselineRangeSet.begin()->Start()==fBaselineRangeSet.begin()->End())
+	throw std::runtime_error("ERROR in ROIAlg: BaselineRangeSet created incorrectly!");
+
+      if(fSignalRangeSet.size()==0){
+	for(auto const& range : fBaselineRangeSet)
+	  std::cout << "\tBaseline range: ("
+		    << std::distance(fWaveformStart,range.Start())
+		    << ","
+		    << std::distance(fWaveformStart,range.End())
+		    << ")" << std::endl;
+      }
       
     }
+    
     void ThrowIfNoBaselineRegions(){
       if(fBaselineRangeSet.size()==0)
 	throw std::runtime_error("ERROR in ROIAlg: ProcessWaveform not yet called, but trying to access results!");

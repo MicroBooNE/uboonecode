@@ -52,6 +52,7 @@ microboone_showwire:
 
 microboone_rawdigitandwirecomparisonana:
 {
+    module_type: "RawDigitAndWireComparison"
     RawDigitModuleLabel: "daq"
     WireModuleLabel:     "caldata"
     RawDigitAndWireComparisonAlg:
