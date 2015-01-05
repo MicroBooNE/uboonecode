@@ -277,7 +277,6 @@ namespace caldata {
       std::vector<geo::WireID> wids = geom->ChannelToWire(channel);
       unsigned int thePlane = wids[0].Plane;
       unsigned int theWire = wids[0].Wire;
-//  if(thePlane == 1 && theWire == 1200) std::cout<<"Channel "<<channel<<"\n";
       
       // use short pedestal for testing the 1st induction plane
       unsigned short sPed = abs(fThreshold[thePlane]);
@@ -463,46 +462,9 @@ namespace caldata {
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE>& sss)
   {
     
-/*
-// print out stuff
-  if(channel == 3599) {
-    for(unsigned int jr = 0; jr < holderInfo.size(); ++jr) {
-      unsigned int bBegin = holderInfo[jr].first;
-      unsigned int theROI = holderInfo[jr].second;
-      unsigned int roiLen = rois[theROI].second - rois[theROI].first;
-      if(rois[theROI].first > 1350) continue;
-//      std::cout<<"Chan 3599 start "<<rois[theROI].first<<"\n";
-      unsigned int bEnd = bBegin + roiLen;
-      unsigned int hbin;
-      for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
-        hbin = rois[theROI].first + jj - bBegin;
-        std::cout<<hbin<<" "<<std::setprecision(3)<<holder[jj]<<"\n";
-      } // jj
-    } // jr
-    for(unsigned int jj = 0; jj < holder.size(); ++jj)
-      std::cout<<"holder "<<jj<<" "<<std::setprecision(3)<<holder[jj]<<"\n";
-  } // channel == 3599
-*/
     sss->Deconvolute(channel,holder);
 
-/*
-// print out stuff
-  if(channel == 3599) {
-    std::cout<<"doDecon holderInfo size "<<holderInfo.size()<<"\n";
-    for(unsigned int jr = 0; jr < holderInfo.size(); ++jr) {
-      unsigned int bBegin = holderInfo[jr].first;
-      unsigned int theROI = holderInfo[jr].second;
-      unsigned int roiLen = rois[theROI].second - rois[theROI].first;
-//      if(rois[theROI].first > 1350) continue;
-      unsigned int bEnd = bBegin + roiLen;
-      unsigned int hbin;
-      for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
-        hbin = rois[theROI].first + jj - bBegin;
-        std::cout<<"decon "<<hbin<<" "<<std::setprecision(3)<<holder[jj]<<"\n";
-      } // jj
-    } // jr
-  } // channel ==
-*/
+
     // transfer the ROIs and start bins into the vector that will be
     // put into the event
     for(unsigned int jr = 0; jr < holderInfo.size(); ++jr) {
@@ -528,8 +490,6 @@ namespace caldata {
         basePost /= (float)bbins;
         float slp = (basePost - basePre) / (float)(roiLen - bbins);
         float base;
-//  if(channel == 3599) 
-//    std::cout<<"base pre/post "<<basePre<<" "<<basePost<<"\n";
         for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
           base = basePre + slp * (jj - bBegin);
           sigTemp.push_back(holder[jj] - base);
