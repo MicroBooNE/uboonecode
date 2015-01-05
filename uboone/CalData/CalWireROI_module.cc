@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-// CalWireROI class - variant of CalWire that deconvolues in 
+// CalWireROI class - variant of CalWire that deconvolves in 
 // Regions Of Interest
 //
 // baller@fnal.gov
@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <iomanip>
 
 #include "fhiclcpp/ParameterSet.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h" 
@@ -232,6 +233,9 @@ namespace caldata {
     // get the FFT service to have access to the FFT size
     art::ServiceHandle<util::LArFFT> fFFT;
     unsigned int transformSize = fFFT->FFTSize();
+
+    // temporary vector of signals
+    std::vector<float> holder(transformSize);
     
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
@@ -262,9 +266,6 @@ namespace caldata {
       std::vector<std::pair<unsigned int, unsigned int>> holderInfo;
       // vector of ROI begin and end bins
       std::vector<std::pair<unsigned int, unsigned int>> rois;
-
-      // temporary vector of signals
-      std::vector<float> holder(transformSize, 0.);
       
       // get the reference to the current raw::RawDigit
       art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
@@ -327,6 +328,9 @@ namespace caldata {
 
         // skip deconvolution if there are no ROIs
         if(rois.size() == 0) continue;
+
+        holderInfo.clear();
+        for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
         
         // merge the ROIs?
         if(rois.size() > 1) {
@@ -399,6 +403,7 @@ namespace caldata {
             doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
             holderInfo.clear();
             hBin = 0;
+            for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
           } // hBin + roiLen > packLen
           // save the position of this ROI in the holder vector and the ROI index
           holderInfo.push_back(std::make_pair(hBin, ir));
@@ -458,6 +463,8 @@ namespace caldata {
   {
     
     sss->Deconvolute(channel,holder);
+
+
     // transfer the ROIs and start bins into the vector that will be
     // put into the event
     for(unsigned int jr = 0; jr < holderInfo.size(); ++jr) {
@@ -466,21 +473,31 @@ namespace caldata {
       unsigned int theROI = holderInfo[jr].second;
       unsigned int roiLen = rois[theROI].second - rois[theROI].first;
       unsigned int bEnd = bBegin + roiLen;
-      float baseLine = 0.;
+      float basePre = 0., basePost = 0.;
       // Baseline subtraction if requested and the ROIs are padded.
       // Can't baseline subtract signals when the ROI start is close to 0 either
       if(fDoBaselineSub && fPreROIPad[thePlane] > 0 && 
           rois[theROI].first > fPreROIPad[thePlane]) {
         // find the baseline from the first few bins in the leading Pad region
         unsigned short bbins = fPreROIPad[thePlane];
+        unsigned int bin;
         if(bbins > 5) bbins = 5;
-        for(unsigned int bin = 0; bin < bbins; ++bin) 
-          baseLine += holder[bBegin + bin];
-        baseLine /= (float)bbins;
-      }
-      for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
-        sigTemp.push_back(holder[jj] - baseLine);
-      } // jj
+        for(bin = 0; bin < bbins; ++bin) {
+          basePre  += holder[bBegin + bin];
+          basePost += holder[bEnd - bin];
+        }
+        basePre /= (float)bbins;
+        basePost /= (float)bbins;
+        float slp = (basePost - basePre) / (float)(roiLen - bbins);
+        float base;
+        for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
+          base = basePre + slp * (jj - bBegin);
+          sigTemp.push_back(holder[jj] - base);
+        } // jj
+      } // fDoBaselineSub ...
+      else {
+        for(unsigned int jj = bBegin; jj < bEnd; ++jj) sigTemp.push_back(holder[jj]);
+      } // !fDoBaselineSub ...
       
       // add the range into ROIVec 
       ROIVec.add_range(rois[theROI].first, std::move(sigTemp));
