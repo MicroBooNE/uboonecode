@@ -303,7 +303,8 @@ namespace detsim {
 
       if( sc ){
 
-	int time_offset = sss->FieldResponseTOffset(chan);
+	// remove the time offset
+	int time_offset = 0;//sss->FieldResponseTOffset(chan);
         // loop over the tdcs and grab the number of electrons for each
         for(int t = 0; t < (int)(chargeWork.size()); ++t) {
 
@@ -314,6 +315,7 @@ namespace detsim {
 	  
 	  // Apply artificial time offset to take care of field response convolution
 	  int raw_digit_index = ( (t + time_offset) >= 0 ? t+time_offset : (chargeWork.size() + (t+time_offset)) );
+	  
 
 	  if(raw_digit_index > 0 && raw_digit_index < (int)(chargeWork.size()))
 	    chargeWork.at(raw_digit_index) = sc->Charge(tdc);

@@ -211,7 +211,8 @@ namespace detsim{
     std::vector<float>    noisevec(signalSize, 0);
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
-    int electron_time_offset = sss->FieldResponseTOffset(fChannel);
+    //Xin remove the time offset, now doing it in the SignalShapingService
+    int electron_time_offset = 0.;//sss->FieldResponseTOffset(fChannel);
     std::cout<<"Offset: "<<electron_time_offset << std::endl;
 
     // make an unique_ptr of sim::SimDigits that allows ownership of the produced
