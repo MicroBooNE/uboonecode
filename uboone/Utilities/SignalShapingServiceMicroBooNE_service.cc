@@ -2,6 +2,9 @@
 ////////////////////////////////////////////////////////////////////////
 /// \file   SignalShapingServiceMicroBooNE_service.cc
 /// \author H. Greenlee 
+/// Modified by X. Qian 1/6/2015
+/// if histogram is used, inialize 
+/// Response_Offset, Response_Sampling, FieldBins from histogram
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
@@ -198,6 +201,14 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 
       fFieldResponseHist[i] = new TH1F( iHistoName, iHistoName, temp->GetNbinsX(), temp->GetBinLowEdge(1), temp->GetBinLowEdge( temp->GetNbinsX() + 1) );
       temp->Copy(*fFieldResponseHist[i]);
+      
+      // modified by Xin 2015/01/06
+      fNFieldBins = temp->GetNbinsX();
+      fInputFieldRespSamplingPeriod = temp->GetBinWidth(1)*1000.;
+      fFieldResponseTOffset.at(i) = temp->GetBinCenter(1)*1000.;
+      //std::cout << "Xin: " << fNFieldBins << " " << fInputFieldRespSamplingPeriod << " " << fFieldResponseTOffset.at(0) << std::endl;
+      // Xin  
+    
     }
 
     fin->Close();
