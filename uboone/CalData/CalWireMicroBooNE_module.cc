@@ -219,6 +219,12 @@ namespace caldata {
 	  if ( (bin-time_offset >= 0) and (bin-time_offset < holder.size())  )
 	  holder[bin-time_offset]=(rawadc[bin]-pdstl);
 	}
+	//Xin fill the remaining bin with data
+	for (bin = dataSize;bin<holder.size();bin++){
+	  holder[bin] = (rawadc[bin-dataSize]-pdstl);
+	}
+      
+
 	// Do deconvolution.
 	sss->Deconvolute(channel, holder);
 
