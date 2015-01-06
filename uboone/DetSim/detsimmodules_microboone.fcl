@@ -11,7 +11,8 @@ microboone_simwire:
  NoiseRand:          0.1          #frac of randomness of noise freq-spec
  LowCutoff:          7.5          #Low frequency filter cutoff (kHz)
  CompressionType:    "none"       #could also be none		
- GenNoise:            true        #gen noise...if false function not called
+# GenNoise:            true        #gen noise...if false function not called
+ GenNoise:           false        #gen noise...if false function not called
  GetNoiseFromHisto:   false       #generate noise from histogram of freq-distribution
  GenNoiseInTime:      true        #generate noise in time-domain. Flat freq. distribution. If false then generate in freq. domani
  CollectionPed:       400         #ADC baseline for coll plane
