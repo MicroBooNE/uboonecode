@@ -233,8 +233,20 @@ int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int cons
 template <class T> void util::SignalShapingServiceMicroBooNE::Convolute(unsigned int channel, std::vector<T>& func) const
 {
   SignalShaping(channel).Convolute(func);
+  //negative number
   int time_offset = FieldResponseTOffset(channel);
-  std::cout << time_offset << std::endl;
+  
+  std::vector<T> temp;
+  if (time_offset <=0){
+    temp.assign(func.begin(),func.begin()-time_offset);
+    func.erase(func.begin(),func.begin()-time_offset);
+    func.insert(func.end(),temp.begin(),temp.end());
+  }else{
+    temp.assign(func.end()-time_offset,func.end());
+    func.erase(func.end()-time_offset,func.end());
+    func.insert(func.begin(),temp.begin(),temp.end());
+  }
+  
 }
 
 
@@ -244,7 +256,20 @@ template <class T> void util::SignalShapingServiceMicroBooNE::Deconvolute(unsign
 {
   SignalShaping(channel).Deconvolute(func);
   int time_offset = FieldResponseTOffset(channel);
-  std::cout << time_offset << std::endl;
+  
+  std::vector<T> temp;
+  if (time_offset <=0){
+    temp.assign(func.end()+time_offset,func.end());
+    func.erase(func.end()+time_offset,func.end());
+    func.insert(func.begin(),temp.begin(),temp.end());
+  }else{
+    temp.assign(func.begin(),func.begin()+time_offset);
+    func.erase(func.begin(),func.begin()+time_offset);
+    func.insert(func.end(),temp.begin(),temp.end());
+
+    
+  }
+
 }
 
 DECLARE_ART_SERVICE(util::SignalShapingServiceMicroBooNE, LEGACY)
