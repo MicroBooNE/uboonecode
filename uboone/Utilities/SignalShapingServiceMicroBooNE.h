@@ -230,17 +230,21 @@ int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int cons
 
 //----------------------------------------------------------------------
 // Do convolution.
-template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(unsigned int channel, std::vector<T>& func) const
+template <class T> void util::SignalShapingServiceMicroBooNE::Convolute(unsigned int channel, std::vector<T>& func) const
 {
   SignalShaping(channel).Convolute(func);
+  int time_offset = FieldResponseTOffset(channel);
+  std::cout << time_offset << std::endl;
 }
 
 
 //----------------------------------------------------------------------
 // Do deconvolution.
-template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute(unsigned int channel, std::vector<T>& func) const
+template <class T> void util::SignalShapingServiceMicroBooNE::Deconvolute(unsigned int channel, std::vector<T>& func) const
 {
   SignalShaping(channel).Deconvolute(func);
+  int time_offset = FieldResponseTOffset(channel);
+  std::cout << time_offset << std::endl;
 }
 
 DECLARE_ART_SERVICE(util::SignalShapingServiceMicroBooNE, LEGACY)
