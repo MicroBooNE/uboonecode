@@ -275,18 +275,24 @@ void util::SignalShapingServiceMicroBooNE::init()
     SetFieldResponse();
     SetElectResponse();
 
+    auto tpc_clock = art::ServiceHandle<util::TimeService>()->TPCClock();
+
     // Configure convolution kernels.
 
     fColSignalShaping.AddResponseFunction(fColFieldResponse);
     fColSignalShaping.AddResponseFunction(fElectResponse);
+    fColSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(2)/1.e3));
     // fColSignalShaping.SetPeakResponseTime(0.);
 
     fIndUSignalShaping.AddResponseFunction(fIndUFieldResponse);
     fIndUSignalShaping.AddResponseFunction(fElectResponse);
+    fIndUSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(0)/1.e3));
     // fIndUSignalShaping.SetPeakResponseTime(0.);
 
     fIndVSignalShaping.AddResponseFunction(fIndVFieldResponse);
     fIndVSignalShaping.AddResponseFunction(fElectResponse);
+    fIndVSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(1)/1.e3));
+    //std::cout << "Xin: " << fNFieldBins << " " << fInputFieldRespSamplingPeriod << " " << fFieldResponseTOffset.at(0) << std::endl;
     // fIndVSignalShaping.SetPeakResponseTime(0.);
 
     // Currently we only have fine binning "fInputFieldRespSamplingPeriod"
