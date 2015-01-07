@@ -298,58 +298,95 @@ void util::SignalShapingServiceMicroBooNE::init()
 
     fColSignalShaping.AddResponseFunction(fColFieldResponse);
     fColSignalShaping.AddResponseFunction(fElectResponse);
+    fColSignalShaping.save_response();
     //fColSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(2)/1.e3));
     // fColSignalShaping.SetPeakResponseTime(0.);
 
     fIndUSignalShaping.AddResponseFunction(fIndUFieldResponse);
     fIndUSignalShaping.AddResponseFunction(fElectResponse);
+    fIndUSignalShaping.save_response();
     //fIndUSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(0)/1.e3));
     // fIndUSignalShaping.SetPeakResponseTime(0.);
 
     fIndVSignalShaping.AddResponseFunction(fIndVFieldResponse);
     fIndVSignalShaping.AddResponseFunction(fElectResponse);
+    fIndVSignalShaping.save_response();
     //fIndVSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(1)/1.e3));
     //std::cout << "Xin: " << fNFieldBins << " " << fInputFieldRespSamplingPeriod << " " << fFieldResponseTOffset.at(0) << std::endl;
     // fIndVSignalShaping.SetPeakResponseTime(0.);
 
-    SetDecon(fftsize);
-   
+    // SetDecon(fftsize);
+    if (fftsize!=fFFT->FFTSize()){
+      std::string options = fFFT->FFTOptions();
+      int fitbins = fFFT->FFTFitBins();
+      fFFT->ReinitializeFFT( fftsize, options, fitbins);
+    }
+    SetResponseSampling();
+    
+    // Calculate filter functions.
+    
+    SetFilters();
+    
+    // Configure deconvolution kernels.
+    
+    fColSignalShaping.AddFilterFunction(fColFilter);
+    fColSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(2) );
+    fColSignalShaping.CalculateDeconvKernel();
+    
+    
+    fIndUSignalShaping.AddFilterFunction(fIndUFilter);
+    fIndUSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(0) );
+    fIndUSignalShaping.CalculateDeconvKernel();
+    
+    
+    fIndVSignalShaping.AddFilterFunction(fIndVFilter);
+    fIndVSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(1) );
+    fIndVSignalShaping.CalculateDeconvKernel();
   }
 }
 
 void util::SignalShapingServiceMicroBooNE::SetDecon(int fftsize)
 {
+  init();
   art::ServiceHandle<util::LArFFT> fFFT;
-  std::string options = fFFT->FFTOptions();
-  int fitbins = fFFT->FFTFitBins();
-  fFFT->ReinitializeFFT( fftsize, options, fitbins);
+  if (fftsize>fFFT->FFTSize()||fftsize<=fFFT->FFTSize()/2){
+    std::string options = fFFT->FFTOptions();
+    int fitbins = fFFT->FFTFitBins();
+    fFFT->ReinitializeFFT( fftsize, options, fitbins);
   
   // Currently we only have fine binning "fInputFieldRespSamplingPeriod"
   // for the field and electronic responses.
   // Now we are sampling the convoluted field-electronic response
   // with the nominal sampling rate.
   // We may consider to do the same for the filters as well.
-  SetResponseSampling();
   
-  // Calculate filter functions.
   
-  SetFilters();
-  
-  // Configure deconvolution kernels.
-  fColSignalShaping.ResetDecon();
-  fColSignalShaping.AddFilterFunction(fColFilter);
-  fColSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(2) );
-  fColSignalShaping.CalculateDeconvKernel();
-  
-  fIndUSignalShaping.ResetDecon();
-  fIndUSignalShaping.AddFilterFunction(fIndUFilter);
-  fIndUSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(0) );
-  fIndUSignalShaping.CalculateDeconvKernel();
-  
-  fIndVSignalShaping.ResetDecon();
-  fIndVSignalShaping.AddFilterFunction(fIndVFilter);
-  fIndVSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(1) );
-  fIndVSignalShaping.CalculateDeconvKernel();
+    fColSignalShaping.ResetDecon();
+    fIndUSignalShaping.ResetDecon();
+    fIndVSignalShaping.ResetDecon();
+    
+    SetResponseSampling();
+    
+    // Calculate filter functions.
+    
+    SetFilters();
+    
+    // Configure deconvolution kernels.
+    
+    fColSignalShaping.AddFilterFunction(fColFilter);
+    fColSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(2) );
+    fColSignalShaping.CalculateDeconvKernel();
+    
+    
+    fIndUSignalShaping.AddFilterFunction(fIndUFilter);
+    fIndUSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(0) );
+    fIndUSignalShaping.CalculateDeconvKernel();
+    
+    
+    fIndVSignalShaping.AddFilterFunction(fIndVFilter);
+    fIndVSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(1) );
+    fIndVSignalShaping.CalculateDeconvKernel();
+  }
 }
 
 //----------------------------------------------------------------------
@@ -646,10 +683,8 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
 				       << "\033[00m" << std::endl;
 
   int nticks = fft->FFTSize();
-  std::vector<double> InputTime( nticks, 0. );
   std::vector<double> SamplingTime( nticks, 0. );
   for ( int itime = 0; itime < nticks; itime++ ) {
-    InputTime[itime] = (1.*itime) * fInputFieldRespSamplingPeriod;
     SamplingTime[itime] = (1.*itime) * detprop->SamplingRate();
     /// VELOCITY-OUT ... comment out kDVel usage here
     //SamplingTime[itime] = (1.*itime) * detprop->SamplingRate() / kDVel;
@@ -660,11 +695,21 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
   for ( int iplane = 0; iplane < fNPlanes; iplane++ ) {
     const std::vector<double>* pResp;
     switch ( iplane ) {
-      case 0: pResp = &(fIndUSignalShaping.Response()); break;
-      case 1: pResp = &(fIndVSignalShaping.Response()); break;
-      default: pResp = &(fColSignalShaping.Response()); break;
+      case 0: pResp = &(fIndUSignalShaping.Response_save()); break;
+      case 1: pResp = &(fIndVSignalShaping.Response_save()); break;
+      default: pResp = &(fColSignalShaping.Response_save()); break;
     }
-    std::vector<double> SamplingResp( pResp->size(), 0. );
+
+    std::vector<double> SamplingResp(nticks , 0. );
+    
+    
+    int nticks_input = pResp->size();
+    std::vector<double> InputTime(nticks_input, 0. );
+    for ( int itime = 0; itime < nticks_input; itime++ ) {
+      InputTime[itime] = (1.*itime) * fInputFieldRespSamplingPeriod;
+    }
+    
+    //    std::cout << nticks << " " << nticks_input << std::endl;
 
     /*
     if(iplane==2) {
@@ -741,7 +786,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
     int SamplingCount = 0;    
     for ( int itime = 0; itime < nticks; itime++ ) {
       int low = -1, up = -1;
-      for ( int jtime = 0; jtime < nticks; jtime++ ) {
+      for ( int jtime = 0; jtime < nticks_input; jtime++ ) {
         if ( InputTime[jtime] == SamplingTime[itime] ) {
           SamplingResp[itime] = (*pResp)[jtime];
 	  /// VELOCITY-OUT ... comment out kDVel usage here

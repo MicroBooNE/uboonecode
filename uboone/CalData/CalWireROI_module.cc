@@ -113,7 +113,8 @@ namespace caldata {
     void beginJob(); 
     void endJob();                 
     void reconfigure(fhicl::ParameterSet const& p);
- 
+    
+    void reconfFFT(int temp_fftsize);
   private:
     
     std::string  fDigitModuleLabel;  ///< module that made digits
@@ -165,8 +166,7 @@ namespace caldata {
   void CalWireROI::reconfigure(fhicl::ParameterSet const& p)
   {
   
-    std::vector<unsigned short> uin;
-    std::vector<unsigned short> vin;
+    std::vector<unsigned short> uin;    std::vector<unsigned short> vin;
     std::vector<unsigned short> zin;
     
     fDigitModuleLabel = p.get< std::string >          ("DigitModuleLabel", "daq");
@@ -206,11 +206,21 @@ namespace caldata {
     }
     
     // re-initialize the FFT service for the request size
+    // art::ServiceHandle<util::LArFFT> fFFT;
+    // std::string options = fFFT->FFTOptions();
+    // int fitbins = fFFT->FFTFitBins();
+    // fFFT->ReinitializeFFT(fFFTSize, options, fitbins);
+    reconfFFT(fFFTSize);
+    
+  }
+
+
+  void CalWireROI::reconfFFT(int temp_fftsize){
+    // re-initialize the FFT service for the request size
     art::ServiceHandle<util::LArFFT> fFFT;
     std::string options = fFFT->FFTOptions();
     int fitbins = fFFT->FFTFitBins();
-    fFFT->ReinitializeFFT(fFFTSize, options, fitbins);
-    
+    fFFT->ReinitializeFFT(temp_fftsize, options, fitbins);
   }
 
   //-------------------------------------------------
@@ -232,16 +242,12 @@ namespace caldata {
 
     // get the FFT service to have access to the FFT size
     art::ServiceHandle<util::LArFFT> fFFT;
-    unsigned int transformSize = fFFT->FFTSize();
-
-    // temporary vector of signals
-    std::vector<float> holder(transformSize);
+  
     
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
 
-    // Get signal shaping service.
-    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+   
     
     // Read in the digit List object(s). 
     art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
@@ -276,7 +282,7 @@ namespace caldata {
       
       std::vector<geo::WireID> wids = geom->ChannelToWire(channel);
       unsigned int thePlane = wids[0].Plane;
-      unsigned int theWire = wids[0].Wire;
+      //unsigned int theWire = wids[0].Wire;
       
       // use short pedestal for testing the 1st induction plane
       unsigned short sPed = abs(fThreshold[thePlane]);
@@ -295,7 +301,8 @@ namespace caldata {
         // loop over all adc values and subtract the pedestal
         float pdstl = digitVec->GetPedestal();
 	//subtract time-offset added in SimWireMicroBooNE_module
-	int time_offset = 0.;//sss->FieldResponseTOffset(channel);
+	// Xin, remove the time offset
+	//int time_offset = 0.;//sss->FieldResponseTOffset(channel);
         unsigned int roiStart = 0;
         // search for ROIs
         for(bin = 1; bin < dataSize; ++bin) {
@@ -314,12 +321,13 @@ namespace caldata {
             if(SigVal < fThreshold[thePlane]) {
               // is the ROI wide enough?
               unsigned int roiLen = bin - roiStart;
-              if(roiLen > transformSize) {
-                mf::LogError("CalWireROI")<<"ROI too long "
-                  <<roiLen<<" on plane:wire "<<thePlane<<":"<<theWire;
-                break;
-              }
-              if(roiLen > fMinWid && roiLen < transformSize) 
+              // if(roiLen > transformSize) {
+              //   mf::LogError("CalWireROI")<<"ROI too long "
+              //     <<roiLen<<" on plane:wire "<<thePlane<<":"<<theWire;
+              //   break;
+              // }
+              //if(roiLen > fMinWid && roiLen < transformSize) 
+	      if(roiLen > fMinWid) 
                 rois.push_back(std::make_pair(roiStart, bin));
               roiStart = 0;
             }
@@ -330,7 +338,7 @@ namespace caldata {
         if(rois.size() == 0) continue;
 
         holderInfo.clear();
-        for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
+	//        for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
         
         // merge the ROIs?
         if(rois.size() > 1) {
@@ -382,46 +390,116 @@ namespace caldata {
           rois[ii].second = high;
         }
 
-       unsigned int hBin = 0;
-        // max number of holder bins that should be packed. This is the
-        // FFT size - width of the response function. Do this crudely for
-        // now since the response functions are < 20 time bins in length
-        unsigned int packLen = transformSize - 20;
-        for(unsigned int ir = 0; ir < rois.size(); ++ir) {
-          // enough room to continue packing?
-          unsigned int roiLen = rois[ir].second - rois[ir].first;
-          if(roiLen > transformSize) {
-            mf::LogWarning("CalWireROI")<<"ROI length "<<roiLen
-              <<" > FFT size "<<transformSize<<" on plane:wire "
-              <<thePlane<<":"<<theWire;
-            continue;
-          }
-          // not enough room to continue packing. Deconvolute this batch, stuff it
-          // into ROIVec and continue
-          if(hBin + roiLen > packLen) {
-            // need to de-convolute holder and continue packing
-            doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
-            holderInfo.clear();
-            hBin = 0;
-            for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
-          } // hBin + roiLen > packLen
-          // save the position of this ROI in the holder vector and the ROI index
-          holderInfo.push_back(std::make_pair(hBin, ir));
-          
-	  for(unsigned int bin = rois[ir].first; bin < rois[ir].second; ++bin) {
-	    if ( (hBin-time_offset >= 0) and (hBin-time_offset < holder.size()) ){
-	      holder[hBin-time_offset] = rawadc[bin]-pdstl;
-	      ++hBin;
-	    }//if time-offset does not force to go out of holder bounds
-          } // bin
+	for (unsigned int ir = 0; ir < rois.size(); ++ir) {
+	  unsigned int roiLen = rois[ir].second - rois[ir].first;
+	  //treat FFT Size
 	  
 
-        } // ir < rois.size
-        // do the last deconvolution if needed
-        if(holderInfo.size() > 0)
-          doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
-      } // end if not a bad channel 
+	  unsigned int transformSize = fFFTSize; //current transformsize
+	  //if ROI length is longer, take ROI length
+	  if (roiLen > transformSize) transformSize = roiLen;
+	  // if needed FFT length is different from the current FFTSize
+	  // reinitialize FFT
+	   // Get signal shaping service.
+	  art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+	  //deconvolute
+	  //std::cout << transformSize << std::endl;
+	  sss->SetDecon(transformSize);
+	  transformSize = fFFT->FFTSize();
+	  // temporary vector of signals
+	  std::vector<float> holder(transformSize);
+	  
+	  
+	  unsigned int hBin = 0;
+	  for(unsigned int bin = rois[ir].first; bin < rois[ir].first+holder.size(); ++bin) {
+	    if (bin < dataSize){
+	      holder[hBin] = rawadc[bin]-pdstl;
+	    }else{
+	      holder[hBin] = rawadc[bin-dataSize]-pdstl;
+	    }
+	    ++hBin;
+	  } // bin
+	  
+	  sss->Deconvolute(channel,holder);
+
+	  // transfer the ROI and start bins into the vector that will be
+	  // put into the event
+	  std::vector<float> sigTemp;
+	  unsigned int bBegin = 0;
+	  unsigned int theROI =ir;
+	  unsigned int bEnd = bBegin + roiLen;
+	  float basePre = 0., basePost = 0.;
+
+	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 && 
+	     rois[theROI].first > fPreROIPad[thePlane]) {
+	    // find the baseline from the first few bins in the leading Pad region
+	    unsigned short bbins = fPreROIPad[thePlane];
+	    unsigned int bin;
+	    if(bbins > 5) bbins = 5;
+	    for(bin = 0; bin < bbins; ++bin) {
+	      basePre  += holder[bBegin + bin];
+	      basePost += holder[bEnd - bin];
+	    }
+	    basePre /= (float)bbins;
+	    basePost /= (float)bbins;
+	    float slp = (basePost - basePre) / (float)(roiLen - bbins);
+	    float base;
+	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
+	      base = basePre + slp * (jj - bBegin);
+	      sigTemp.push_back(holder[jj] - base);
+	    } // jj
+	  } // fDoBaselineSub ...
+	  else {
+	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) sigTemp.push_back(holder[jj]);
+	  } // !fDoBaselineSub ...
+	        
+	  // add the range into ROIVec 
+	  ROIVec.add_range(rois[theROI].first, std::move(sigTemp));
+	  
+	}
+	
+
+       // unsigned int hBin = 0;
+       //  // max number of holder bins that should be packed. This is the
+       //  // FFT size - width of the response function. Do this crudely for
+       //  // now since the response functions are < 20 time bins in length
+       //  unsigned int packLen = transformSize - 20;
+       //  for(unsigned int ir = 0; ir < rois.size(); ++ir) {
+       //    // enough room to continue packing?
+       //    unsigned int roiLen = rois[ir].second - rois[ir].first;
+       //    if(roiLen > transformSize) {
+       //      mf::LogWarning("CalWireROI")<<"ROI length "<<roiLen
+       //        <<" > FFT size "<<transformSize<<" on plane:wire "
+       //        <<thePlane<<":"<<theWire;
+       //      continue;
+       //    }
+       //    // not enough room to continue packing. Deconvolute this batch, stuff it
+       //    // into ROIVec and continue
+       //    if(hBin + roiLen > packLen) {
+       //      // need to de-convolute holder and continue packing
+       //      doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
+       //      holderInfo.clear();
+       //      hBin = 0;
+       //      for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
+       //    } // hBin + roiLen > packLen
+       //    // save the position of this ROI in the holder vector and the ROI index
+       //    holderInfo.push_back(std::make_pair(hBin, ir));
+       //    for(unsigned int bin = rois[ir].first; bin < rois[ir].second; ++bin) {
+       // 	    if ( (hBin-time_offset >= 0) and (hBin-time_offset < holder.size()) ){
+       // 	      holder[hBin-time_offset] = rawadc[bin]-pdstl;
+       // 	      ++hBin;
+       // 	    }//if time-offset does not force to go out of holder bounds
+       //    } // bin
+       //  } // ir < rois.size
+       //  // do the last deconvolution if needed
+       //  if(holderInfo.size() > 0)
+       //    doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
       
+
+
+
+      } // end if not a bad channel 
+
       // create the new wire directly in wirecol
       wirecol->emplace_back(std::move(ROIVec), digitVec);
       
@@ -465,9 +543,10 @@ namespace caldata {
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE>& sss)
   {
     
+
     sss->Deconvolute(channel,holder);
 
-
+   
     // transfer the ROIs and start bins into the vector that will be
     // put into the event
     for(unsigned int jr = 0; jr < holderInfo.size(); ++jr) {

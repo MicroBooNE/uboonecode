@@ -118,7 +118,8 @@ namespace util {
     // Do deconvolution calcution (for reconstruction).
 
     template <class T> void Deconvolute(unsigned int channel, std::vector<T>& func) const;
-
+    
+    void SetDecon(int fftsize);
   private:
 
     // Private configuration methods.
@@ -147,7 +148,7 @@ namespace util {
 
     void SetResponseSampling();
 
-    void SetDecon(int fftsize);
+    
 
     // Fcl parameters.
     double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
