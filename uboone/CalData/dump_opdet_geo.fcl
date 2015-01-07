@@ -16,7 +16,7 @@
 
 #include "services_microboone.fcl"
 
-process_name: DumpOpDetGeo
+process_name: DumpOpDetGeoMicroBooNE
 
 services:
 {
@@ -41,7 +41,7 @@ physics: {
     dumpopdetgeo: {
 
       module_label: dumpopdetgeo
-      module_type:  DumpOpDetGeo
+      module_type:  DumpOpDetGeoMicroBooNE
       
    } # dumpopdetgeo
   } # analyzers
