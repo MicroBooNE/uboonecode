@@ -181,6 +181,9 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
     mf::LogInfo("SignalShapingServiceMicroBooNE") << " using the field response provided from a .root file " ;
     int fNPlanes = 3;
 
+    art::ServiceHandle<util::LArFFT> fft;
+    int fftsize = fft->FFTSize();
+
     // constructor decides if initialized value is a path or an environment variable
     std::string fname;
     cet::search_path sp("FW_SEARCH_PATH");
@@ -198,6 +201,8 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
       if ( !temp ) throw art::Exception( art::errors::NotFound ) << "Could not find the field response histogram " << iHistoName << std::endl;
 
       if ( temp->GetNbinsX() > fNFieldBins ) throw art::Exception( art::errors::InvalidNumber ) << "FieldBins should always be larger than or equal to the number of the bins in the input histogram!" << std::endl;
+
+      if ( temp->GetNbinsX() > fftsize ) throw art::Exception( art::errors::InvalidNumber ) << "FFTSize should always be larger that or equal to the number of bins in the input histogram. Check!" << std::endl;  //New excpetion 
 
       fFieldResponseHist[i] = new TH1F( iHistoName, iHistoName, temp->GetNbinsX(), temp->GetBinLowEdge(1), temp->GetBinLowEdge( temp->GetNbinsX() + 1) );
       temp->Copy(*fFieldResponseHist[i]);
