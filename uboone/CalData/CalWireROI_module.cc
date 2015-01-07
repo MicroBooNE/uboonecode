@@ -295,7 +295,7 @@ namespace caldata {
         // loop over all adc values and subtract the pedestal
         float pdstl = digitVec->GetPedestal();
 	//subtract time-offset added in SimWireMicroBooNE_module
-	int time_offset = sss->FieldResponseTOffset(channel);
+	int time_offset = 0.;//sss->FieldResponseTOffset(channel);
         unsigned int roiStart = 0;
         // search for ROIs
         for(bin = 1; bin < dataSize; ++bin) {
@@ -407,12 +407,15 @@ namespace caldata {
           } // hBin + roiLen > packLen
           // save the position of this ROI in the holder vector and the ROI index
           holderInfo.push_back(std::make_pair(hBin, ir));
-          for(unsigned int bin = rois[ir].first; bin < rois[ir].second; ++bin) {
-	    if ( (hBin-time_offset > 0) and (hBin-time_offset < holder.size()) ){
+          
+	  for(unsigned int bin = rois[ir].first; bin < rois[ir].second; ++bin) {
+	    if ( (hBin-time_offset >= 0) and (hBin-time_offset < holder.size()) ){
 	      holder[hBin-time_offset] = rawadc[bin]-pdstl;
 	      ++hBin;
 	    }//if time-offset does not force to go out of holder bounds
           } // bin
+	  
+
         } // ir < rois.size
         // do the last deconvolution if needed
         if(holderInfo.size() > 0)

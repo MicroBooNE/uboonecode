@@ -541,6 +541,8 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
   double ts = detprop->SamplingRate();
   int n = fft->FFTSize() / 2;
 
+  
+
   // Calculate collection filter.
 
   fColFilter.resize(n+1);
