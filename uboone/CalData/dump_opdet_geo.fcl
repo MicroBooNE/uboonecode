@@ -1,0 +1,54 @@
+# File:     dump_opdet_geo.fcl
+# Purpose:  Dump OpDet locations on screen
+# Author:   Matt Toups (toups@fnal.gov)
+# Date:     January 7th, 2015
+# Version:  1.0
+#
+# Notes:    Modified from dump_wires.fcl
+#
+# Service dependencies:
+# - message facility
+# - geometry (used by filters in DumpOpDetGeo module)
+# 
+# Changes:
+# 20150107 (toups@fnal.gov) [v1.0]
+#   initial version
+
+#include "services_microboone.fcl"
+
+process_name: DumpOpDetGeo
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "single_hist_uboone.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  user:         @local::microboone_simulation_services
+}
+
+source: {
+  module_type: EmptyEvent
+  maxEvents:  -1            # number of events to read
+} # source
+
+
+physics: {
+  producers:{}
+  filters:  {}
+  analyzers: {
+
+    dumpopdetgeo: {
+
+      module_label: dumpopdetgeo
+      module_type:  DumpOpDetGeo
+      
+   } # dumpopdetgeo
+  } # analyzers
+  
+  ana:  [ dumpopdetgeo ]
+  
+  trigger_paths: []
+  end_paths:     [  ana ]
+} # physics
+
