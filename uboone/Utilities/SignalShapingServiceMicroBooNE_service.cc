@@ -181,8 +181,10 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
     mf::LogInfo("SignalShapingServiceMicroBooNE") << " using the field response provided from a .root file " ;
     int fNPlanes = 3;
 
-    art::ServiceHandle<util::LArFFT> fft;
-    int fftsize = fft->FFTSize();
+    //art::ServiceHandle<util::LArFFT> fft;
+    // int fftsize = fft->FFTSize();
+
+   
 
     // constructor decides if initialized value is a path or an environment variable
     std::string fname;
@@ -200,9 +202,9 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
       TH1F *temp = (TH1F*) fin->Get( iHistoName );
       if ( !temp ) throw art::Exception( art::errors::NotFound ) << "Could not find the field response histogram " << iHistoName << std::endl;
 
-      if ( temp->GetNbinsX() > fNFieldBins ) throw art::Exception( art::errors::InvalidNumber ) << "FieldBins should always be larger than or equal to the number of the bins in the input histogram!" << std::endl;
+      //if ( temp->GetNbinsX() > fNFieldBins ) throw art::Exception( art::errors::InvalidNumber ) << "FieldBins should always be larger than or equal to the number of the bins in the input histogram!" << std::endl;
 
-      if ( temp->GetNbinsX() > fftsize ) throw art::Exception( art::errors::InvalidNumber ) << "FFTSize should always be larger that or equal to the number of bins in the input histogram. Check!" << std::endl;  //New excpetion 
+      // if ( temp->GetNbinsX() > fftsize ) throw art::Exception( art::errors::InvalidNumber ) << "FFTSize should always be larger that or equal to the number of bins in the input histogram. Check!" << std::endl;  //New excpetion 
 
       fFieldResponseHist[i] = new TH1F( iHistoName, iHistoName, temp->GetNbinsX(), temp->GetBinLowEdge(1), temp->GetBinLowEdge( temp->GetNbinsX() + 1) );
       temp->Copy(*fFieldResponseHist[i]);
@@ -274,6 +276,16 @@ void util::SignalShapingServiceMicroBooNE::init()
 
     // Do microboone-specific configuration of SignalShaping by providing
     // microboone response and filter functions.
+    
+
+    
+     // re-initialize the FFT service for the request size
+    art::ServiceHandle<util::LArFFT> fFFT;
+    std::string options = fFFT->FFTOptions();
+    int fitbins = fFFT->FFTFitBins();
+    int fftsize = fFFT->FFTSize();
+    if (fNFieldBins>fftsize)
+      fFFT->ReinitializeFFT( fNFieldBins, options, fitbins);
 
     // Calculate field and electronics response functions.
 
@@ -300,33 +312,45 @@ void util::SignalShapingServiceMicroBooNE::init()
     //std::cout << "Xin: " << fNFieldBins << " " << fInputFieldRespSamplingPeriod << " " << fFieldResponseTOffset.at(0) << std::endl;
     // fIndVSignalShaping.SetPeakResponseTime(0.);
 
-    // Currently we only have fine binning "fInputFieldRespSamplingPeriod"
-    // for the field and electronic responses.
-    // Now we are sampling the convoluted field-electronic response
-    // with the nominal sampling rate.
-    // We may consider to do the same for the filters as well.
-    SetResponseSampling();
-
-    // Calculate filter functions.
-
-    SetFilters();
-
-    // Configure deconvolution kernels.
-
-    fColSignalShaping.AddFilterFunction(fColFilter);
-    fColSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(2) );
-    fColSignalShaping.CalculateDeconvKernel();
-
-    fIndUSignalShaping.AddFilterFunction(fIndUFilter);
-    fIndUSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(0) );
-    fIndUSignalShaping.CalculateDeconvKernel();
-
-    fIndVSignalShaping.AddFilterFunction(fIndVFilter);
-    fIndVSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(1) );
-    fIndVSignalShaping.CalculateDeconvKernel();
+    SetDecon(fftsize);
+   
   }
 }
 
+void util::SignalShapingServiceMicroBooNE::SetDecon(int fftsize)
+{
+  art::ServiceHandle<util::LArFFT> fFFT;
+  std::string options = fFFT->FFTOptions();
+  int fitbins = fFFT->FFTFitBins();
+  fFFT->ReinitializeFFT( fftsize, options, fitbins);
+  
+  // Currently we only have fine binning "fInputFieldRespSamplingPeriod"
+  // for the field and electronic responses.
+  // Now we are sampling the convoluted field-electronic response
+  // with the nominal sampling rate.
+  // We may consider to do the same for the filters as well.
+  SetResponseSampling();
+  
+  // Calculate filter functions.
+  
+  SetFilters();
+  
+  // Configure deconvolution kernels.
+  fColSignalShaping.ResetDecon();
+  fColSignalShaping.AddFilterFunction(fColFilter);
+  fColSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(2) );
+  fColSignalShaping.CalculateDeconvKernel();
+  
+  fIndUSignalShaping.ResetDecon();
+  fIndUSignalShaping.AddFilterFunction(fIndUFilter);
+  fIndUSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(0) );
+  fIndUSignalShaping.CalculateDeconvKernel();
+  
+  fIndVSignalShaping.ResetDecon();
+  fIndVSignalShaping.AddFilterFunction(fIndVFilter);
+  fIndVSignalShaping.SetDeconvKernelPolarity( fDeconvPol.at(1) );
+  fIndVSignalShaping.CalculateDeconvKernel();
+}
 
 //----------------------------------------------------------------------
 // Calculate microboone field response.
