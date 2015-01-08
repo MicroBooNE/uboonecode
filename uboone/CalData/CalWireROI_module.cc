@@ -304,6 +304,7 @@ namespace caldata {
 	// Xin, remove the time offset
 	//int time_offset = 0.;//sss->FieldResponseTOffset(channel);
         unsigned int roiStart = 0;
+       
         // search for ROIs
         for(bin = 1; bin < dataSize; ++bin) {
           float SigVal = fabs(rawadc[bin] - pdstl);
@@ -316,7 +317,7 @@ namespace caldata {
             } else {
               if(SigVal > fThreshold[thePlane]) roiStart = bin;
             }
-          } else {
+	  } else {
             // leaving a ROI?
             if(SigVal < fThreshold[thePlane]) {
               // is the ROI wide enough?
@@ -333,6 +334,13 @@ namespace caldata {
             }
           } // roiStart test
         } // bin
+	// add the last ROI if existed
+	if (roiStart!=0){
+	   unsigned int roiLen = dataSize -1 - roiStart;
+	   if(roiLen > fMinWid) 
+	     rois.push_back(std::make_pair(roiStart, dataSize-1));
+	   roiStart = 0;
+	}
 
         // skip deconvolution if there are no ROIs
         if(rois.size() == 0) continue;
@@ -386,66 +394,82 @@ namespace caldata {
           rois[ii].first = low;
           // high ROI end
           unsigned int high = rois[ii].second + fPostROIPad[thePlane];
-          if(high > dataSize) high = dataSize;
+          if(high >= dataSize) high = dataSize-1;
           rois[ii].second = high;
         }
 
 	for (unsigned int ir = 0; ir < rois.size(); ++ir) {
 	  unsigned int roiLen = rois[ir].second - rois[ir].first;
+	  unsigned int roiStart = rois[ir].first;
 	  //treat FFT Size
+
+	  int flag =1;
+	  float tempPre=0,tempPost=0;
+	  std::vector<float> holder;
+	  while(flag){
+	    unsigned int transformSize = fFFTSize; //current transformsize
+	    //if ROI length is longer, take ROI length
+	    if (roiLen > transformSize) transformSize = roiLen;
+	    // Get signal shaping service.
+	    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+	    sss->SetDecon(transformSize);
+	    transformSize = fFFT->FFTSize();
+	    // temporary vector of signals
+	    holder.resize(transformSize,0);	  	  
+	    unsigned int hBin = 0;
+	    for(unsigned int bin = roiStart; bin < roiStart + holder.size(); ++bin) {
+	      if (bin < dataSize){
+		holder[hBin] = rawadc[bin]-pdstl;
+	      }else{
+		holder[hBin] = rawadc[bin-dataSize]-pdstl;
+		flag = 0;
+	      }
+	      ++hBin;
+	    } // bin
+	    sss->Deconvolute(channel,holder);
+	    
+	    //1. Check Baseline match?
+	    // If not, include next ROI(if none, go to the end of signal)
+	    // If yes, proceed
+	    tempPre=0,tempPost=0;
+	    for(unsigned int bin = 0; bin < 5; ++bin) {
+	      tempPre  += holder[bin];
+	      tempPost += holder[roiLen - bin];
+	    }
+	    tempPre = tempPre/5.;
+	    tempPost = tempPost/5.;
+	    if (fabs(tempPost-tempPre)<2){
+	      flag = 0;
+	    }else{
+	      ir++;
+	      if (ir<rois.size()){
+		roiLen = rois[ir].second - roiStart;
+	      }else{
+		roiLen = dataSize -1 - roiStart;
+	      }
+	    }
+	  }
 	  
 
-	  unsigned int transformSize = fFFTSize; //current transformsize
-	  //if ROI length is longer, take ROI length
-	  if (roiLen > transformSize) transformSize = roiLen;
-	  // if needed FFT length is different from the current FFTSize
-	  // reinitialize FFT
-	   // Get signal shaping service.
-	  art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
-	  //deconvolute
-	  //std::cout << transformSize << std::endl;
-	  sss->SetDecon(transformSize);
-	  transformSize = fFFT->FFTSize();
-	  // temporary vector of signals
-	  std::vector<float> holder(transformSize);
-	  
-	  
-	  unsigned int hBin = 0;
-	  for(unsigned int bin = rois[ir].first; bin < rois[ir].first+holder.size(); ++bin) {
-	    if (bin < dataSize){
-	      holder[hBin] = rawadc[bin]-pdstl;
-	    }else{
-	      holder[hBin] = rawadc[bin-dataSize]-pdstl;
-	    }
-	    ++hBin;
-	  } // bin
-	  
-	  sss->Deconvolute(channel,holder);
 
 	  // transfer the ROI and start bins into the vector that will be
 	  // put into the event
 	  std::vector<float> sigTemp;
 	  unsigned int bBegin = 0;
-	  unsigned int theROI =ir;
+	  //unsigned int theROI =ir;
 	  unsigned int bEnd = bBegin + roiLen;
 	  float basePre = 0., basePost = 0.;
 
-	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 && 
-	     rois[theROI].first > fPreROIPad[thePlane]) {
-	    // find the baseline from the first few bins in the leading Pad region
-	    unsigned short bbins = fPreROIPad[thePlane];
-	    unsigned int bin;
-	    if(bbins > 5) bbins = 5;
-	    for(bin = 0; bin < bbins; ++bin) {
-	      basePre  += holder[bBegin + bin];
-	      basePost += holder[bEnd - bin];
-	    }
-	    basePre /= (float)bbins;
-	    basePost /= (float)bbins;
-	    float slp = (basePost - basePre) / (float)(roiLen - bbins);
+	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 ) {
+	    basePre =tempPre;
+	    basePost=tempPost;
 	    float base;
+	    if (fabs(basePre-basePost)<3){
+	      base = (basePre+basePost)/2.;
+	    }else{
+	      base = basePre;
+	    }
 	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
-	      base = basePre + slp * (jj - bBegin);
 	      sigTemp.push_back(holder[jj] - base);
 	    } // jj
 	  } // fDoBaselineSub ...
@@ -454,7 +478,7 @@ namespace caldata {
 	  } // !fDoBaselineSub ...
 	        
 	  // add the range into ROIVec 
-	  ROIVec.add_range(rois[theROI].first, std::move(sigTemp));
+	  ROIVec.add_range(roiStart, std::move(sigTemp));
 	  
 	}
 	
