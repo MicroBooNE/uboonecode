@@ -12,7 +12,7 @@ litemaker_reco3d.DataLookUpMap:
   # the output larlite file. The key represents the data product
   # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
   # string array.
-  sps:        ["pandora",
+  sps:        ["pandoraCosmic","pandoraNu",
                "costrk", "costrkcc",
                "spacepointfinder","spacepointfindercc",
                "trackkalmanhit","trackkalmanhitcc"]
@@ -24,9 +24,11 @@ litemaker_reco3d.DataLookUpMap:
                "beziertracker","beziertrackercc",
                "costrk","costrkcc",
                "stitch","stitchcc",
-               "stitchkalmanhit"]
+               "stitchkalmanhit",
+               "pandoraCosmicKHit", "pandoraNuKHit"]
+  seed:       ["pandoraCosmic", "pandoraNu"]
   shower:     []
-  pfpart:     ["pandora"]
+  pfpart:     ["pandoraCosmic","pandoraNu"]
 }
 
 litemaker_reco3d.AssociationLookUpMap: @local::litemaker_ass_reco

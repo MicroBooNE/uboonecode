@@ -1199,7 +1199,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   // - pythonish C++: as the previous line, for each one in a list of containers
   //   of the same type (C++ is not python yet), using pointers to avoid copy;
   for (AuxDetMCData_t<Float_t>* cont: {
-   &entryX, &entryY, &entryZ,
+   &entryX, &entryY, &entryZ, &entryT,
    &exitX , &exitY , &exitZ, &exitT, &exitPx, &exitPy, &exitPz,
    &CombinedEnergyDep
    })

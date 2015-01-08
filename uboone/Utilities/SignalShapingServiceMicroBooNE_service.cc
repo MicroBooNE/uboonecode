@@ -764,6 +764,28 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling()
   return;
 }
 
+int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int const channel) const
+{
+  art::ServiceHandle<geo::Geometry> geom;
+  geo::View_t view = geom->View(channel);
+  double time_offset = 0;
+  switch(view){
+  case geo::kU: 
+    time_offset = fFieldResponseTOffset.at(0); 
+    break;
+  case geo::kV: 
+    time_offset = fFieldResponseTOffset.at(1); 
+    break;
+  case geo::kZ: 
+    time_offset = fFieldResponseTOffset.at(2); 
+    break;
+  default:
+    throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
+  }
+  auto tpc_clock = art::ServiceHandle<util::TimeService>()->TPCClock();
+  return tpc_clock.Ticks(time_offset/1.e3);
+}
+
 namespace util {
 
   DEFINE_ART_SERVICE(SignalShapingServiceMicroBooNE)
