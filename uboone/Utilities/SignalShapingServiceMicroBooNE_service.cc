@@ -368,9 +368,9 @@ void util::SignalShapingServiceMicroBooNE::SetDecon(int fftsize)
   // We may consider to do the same for the filters as well.
   
   
-    fColSignalShaping.ResetDecon();
-    fIndUSignalShaping.ResetDecon();
-    fIndVSignalShaping.ResetDecon();
+    fColSignalShaping.Reset();
+    fIndUSignalShaping.Reset();
+    fIndVSignalShaping.Reset();
     
     SetResponseSampling();
     
