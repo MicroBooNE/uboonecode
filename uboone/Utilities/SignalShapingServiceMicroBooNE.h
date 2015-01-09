@@ -105,7 +105,11 @@ namespace util {
     double GetASICGain() { return fASICGainInMVPerFC; }
     std::vector<double> GetNoiseFactInd() { return fNoiseFactInd; }
     std::vector<double> GetNoiseFactColl() { return fNoiseFactColl; }
-    double GetShapingTime() { return fShapeTimeConst.at(1); }
+    
+
+    //double GetShapingTime() { return fShapeTimeConst.at(1); }
+
+    double GetShapingTime(unsigned int const channel) const; 
 
     const util::SignalShaping& SignalShaping(unsigned int channel) const;
 
@@ -133,7 +137,8 @@ namespace util {
     // Copied from SimWireMicroBooNE.
 
     void SetFieldResponse();
-    void SetElectResponse();
+
+    void SetElectResponse(double shapingtime);  //changed to read different peaking time for different planes
 
     // Calculate filter functions.
 
@@ -208,6 +213,29 @@ namespace util {
     std::vector<TComplex> fColFilter;
   };
 }
+
+//-----Give Shaping time to SimWire-----
+double util::SignalShapingServiceMicroBooNE::GetShapingTime(unsigned int const channel) const;
+{
+     art::ServiceHandle<geo::Geometry> geom;
+     geo::View_t view = geom->View(channel);
+     double shaping_time = 0;
+     switch(view){
+     case geo::kU:
+       shaping_time = fShapeTimeConst.at(1); 
+       break;
+     case geo::kV:
+       shaping_time = fShapeTimeConst.at(2);
+       break;
+     case geo::kZ:
+       shaping_time = fShapeTimeConst.at(3);
+       break;
+     defualt: 
+       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
+     }
+     return shaping_time;
+}     
+
 
 int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int const channel) const
 {

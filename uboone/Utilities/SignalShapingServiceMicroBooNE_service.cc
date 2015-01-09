@@ -293,7 +293,7 @@ void util::SignalShapingServiceMicroBooNE::init()
     // Calculate field and electronics response functions.
 
     SetFieldResponse();
-    SetElectResponse();
+    SetElectResponse(fShapeTimeConst.at(3));
 
     //auto tpc_clock = art::ServiceHandle<util::TimeService>()->TPCClock();
 
@@ -304,13 +304,17 @@ void util::SignalShapingServiceMicroBooNE::init()
     fColSignalShaping.save_response();
     //fColSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(2)/1.e3));
     // fColSignalShaping.SetPeakResponseTime(0.);
+    
+    SetElectResponse(fShapeTimeConst.at(1));
 
     fIndUSignalShaping.AddResponseFunction(fIndUFieldResponse);
     fIndUSignalShaping.AddResponseFunction(fElectResponse);
     fIndUSignalShaping.save_response();
     //fIndUSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(0)/1.e3));
     // fIndUSignalShaping.SetPeakResponseTime(0.);
-
+ 
+    SetElectResponse(fShapeTimeConst.at(2));
+  
     fIndVSignalShaping.AddResponseFunction(fIndVFieldResponse);
     fIndVSignalShaping.AddResponseFunction(fElectResponse);
     fIndVSignalShaping.save_response();
@@ -517,7 +521,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
 
 //----------------------------------------------------------------------
 // Calculate microboone field response.
-void util::SignalShapingServiceMicroBooNE::SetElectResponse()
+void util::SignalShapingServiceMicroBooNE::SetElectResponse(double shapingtime)
 {
   // Get services.
 
@@ -533,7 +537,7 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse()
 
   //Gain and shaping time variables from fcl file:    
   double Ao = fShapeTimeConst[0];  //gain
-  double To = fShapeTimeConst[1];  //peaking time
+  double To = shapingtime;  //peaking time
     
   // this is actually sampling time, in ns
   // mf::LogInfo("SignalShapingMicroBooNE") << "Check sampling intervals: " 
