@@ -24,7 +24,7 @@ microboone_signalshapingservice:
   IndUFieldRespAmp:  1.0
   #IndVFieldRespAmp:  0.018
   IndVFieldRespAmp:  1.0
-  ShapeTimeConst:  [ 1.4, 2.0 ] #Gain and Peaking time (microseconds)
+  ShapeTimeConst:  [ 1.4, 2.0] #Gain and Peaking time (microseconds)
   DeconvPol:       [ -1, 1, 1 ]#Switch for RawDigit-RecobWire normalization. Entry 0,1,2 are U,V,Y respectively
                                #-1 means normalizes to min ADC count, +1 to max
 
