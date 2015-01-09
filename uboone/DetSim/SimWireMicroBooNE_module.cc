@@ -247,27 +247,27 @@ namespace detsim {
     //Get fIndShape and fColShape from SignalShapingService, on the fly
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     //get ASIC Gain and Noise in ADCatLowestGain:
-    fASICGain      = sss->GetASICGain();
-    fShapingTime   = sss->GetShapingTime();
+    //fASICGain      = sss->GetASICGain();
+    //fShapingTime   = sss->GetShapingTime();
     //Check that shaping time is an allowed value
     //If so, Pick out noise factor 
     //If not, through exception
-    if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
-      fNoiseFactInd   = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
-      fNoiseFactColl  = sss->GetNoiseFactColl().at( fShapingTimeOrder.find( fShapingTime )->second );
-    }
-    else{//Throw exception...
-      throw cet::exception("SimWireMicroBooNE")
-        << "\033[93m"
-        << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
-	<< std::endl
-        << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
-        << "\033[00m"
-        << std::endl;
-    }
+    //if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
+    //  fNoiseFactInd   = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
+     // fNoiseFactColl  = sss->GetNoiseFactColl().at( fShapingTimeOrder.find( fShapingTime )->second );
+   // }
+    //else{//Throw exception...
+      //throw cet::exception("SimWireMicroBooNE")
+       // << "\033[93m"
+       // << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
+       //	<< std::endl
+       // << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
+       // << "\033[00m"
+       // << std::endl;
+    //}
     //Take into account ASIC Gain
-    fNoiseFactInd *= fASICGain/4.7;
-    fNoiseFactColl *= fASICGain/4.7;
+    //fNoiseFactInd *= fASICGain/4.7;
+    //fNoiseFactColl *= fASICGain/4.7;
 
     // make a vector of const sim::SimChannel* that has same number
     // of entries as the number of channels in the detector
@@ -297,9 +297,29 @@ namespace detsim {
     for(chan = 0; chan < geo->Nchannels(); chan++) {
 
       std::fill(chargeWork.begin(), chargeWork.end(), 0.);
-
-      // get the sim::SimChannel for this channel
       const sim::SimChannel* sc = channels.at(chan);
+      
+      fASICGain      = sss->GetASICGain();
+      fShapingTime   = sss->GetShapingTime(chan);
+
+      if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
+      fNoiseFactInd   = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
+      fNoiseFactColl  = sss->GetNoiseFactColl().at( fShapingTimeOrder.find( fShapingTime )->second );
+      }
+
+      else{//Throw exception...
+      throw cet::exception("SimWireMicroBooNE")
+        << "\033[93m"
+        << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
+        << std::endl
+        << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
+        << "\033[00m"
+        << std::endl;
+      }
+      //Take into account ASIC Gain
+      //    fNoiseFactInd *= fASICGain/4.7;
+      //        fNoiseFactColl *= fASICGain/4.7;
+      // get the sim::SimChannel for this channel
 
       if( sc ){
 

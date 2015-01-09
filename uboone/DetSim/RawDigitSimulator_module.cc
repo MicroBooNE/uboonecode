@@ -251,7 +251,7 @@ namespace detsim{
     //
     //get ASIC Gain and Noise in ADCatLowestGain:
     double fASICGain      = sss->GetASICGain();
-    double fShapingTime   = sss->GetShapingTime();
+    double fShapingTime   = sss->GetShapingTime(fChannel);
     //Check that shaping time is an allowed value
     //If so, Pick out noise factor 
     //If not, through exception

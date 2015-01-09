@@ -215,7 +215,7 @@ namespace util {
 }
 
 //-----Give Shaping time to SimWire-----
-double util::SignalShapingServiceMicroBooNE::GetShapingTime(unsigned int const channel) const;
+double util::SignalShapingServiceMicroBooNE::GetShapingTime(unsigned int const channel) const
 {
      art::ServiceHandle<geo::Geometry> geom;
      geo::View_t view = geom->View(channel);
@@ -230,7 +230,7 @@ double util::SignalShapingServiceMicroBooNE::GetShapingTime(unsigned int const c
      case geo::kZ:
        shaping_time = fShapeTimeConst.at(3);
        break;
-     defualt: 
+     default: 
        throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
      }
      return shaping_time;
