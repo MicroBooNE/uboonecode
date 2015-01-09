@@ -4,7 +4,8 @@ microboone_signalshapingservice:
 {
   ADCPerPCAtLowestASICGain: 9390 #ADC/pC
   #ASICGain: Options: (4.7, 7.8, 14, 25). Default: 7.8
-  ASICGainInMVPerFC:                    7.8     #mV/fC
+  #ASICGainInMVPerFC:                    7.8     #mV/fC
+  ASICGainInMVPerFC:  [4.7, 4.7, 4.7] #mV/fC
 
   #Noise Factor - rms ADCs @ lowest ASIC Gain (4.7 mV/fC)
   #Entries listed per shaping time, in increasing order

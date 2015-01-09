@@ -299,7 +299,7 @@ namespace detsim {
       std::fill(chargeWork.begin(), chargeWork.end(), 0.);
       const sim::SimChannel* sc = channels.at(chan);
       
-      fASICGain      = sss->GetASICGain();
+      fASICGain      = sss->GetASICGain(chan);
       fShapingTime   = sss->GetShapingTime(chan);
 
       if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){

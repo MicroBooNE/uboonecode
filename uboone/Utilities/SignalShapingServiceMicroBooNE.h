@@ -102,13 +102,15 @@ namespace util {
 
     // Accessors.
 
-    double GetASICGain() { return fASICGainInMVPerFC; }
+    //double GetASICGain() { return fASICGainInMVPerFC; }
+    
     std::vector<double> GetNoiseFactInd() { return fNoiseFactInd; }
     std::vector<double> GetNoiseFactColl() { return fNoiseFactColl; }
     
 
     //double GetShapingTime() { return fShapeTimeConst.at(1); }
 
+    double GetASICGain(unsigned int const channel) const;
     double GetShapingTime(unsigned int const channel) const; 
 
     const util::SignalShaping& SignalShaping(unsigned int channel) const;
@@ -138,7 +140,7 @@ namespace util {
 
     void SetFieldResponse();
 
-    void SetElectResponse(double shapingtime);  //changed to read different peaking time for different planes
+    void SetElectResponse(double shapingtime, double gain);  //changed to read different peaking time for different planes
 
     // Calculate filter functions.
 
@@ -158,7 +160,8 @@ namespace util {
     // Fcl parameters.
     double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
-    double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
+    //double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
+    std::vector<double> fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
     std::vector<double> fNoiseFactColl;         ///< RMS Noise in ADCs for lowest Gain Setting
     std::vector<double> fNoiseFactInd;          ///< RMS Noise in ADCs for lowest Gain Setting
 
@@ -212,6 +215,28 @@ namespace util {
     std::vector<TComplex> fIndVFilter;
     std::vector<TComplex> fColFilter;
   };
+}
+
+//-----Give Gain Settings to SimWire-----
+double util::SignalShapingServiceMicroBooNE::GetASICGain(unsigned int const channel) const
+{
+    art::ServiceHandle<geo::Geometry> geom;
+     geo::View_t view = geom->View(channel);
+     double gain = 0;
+     switch(view){
+     case geo::kU:
+       gain = fASICGainInMVPerFC.at(0);
+       break;
+     case geo::kV:
+       gain = fASICGainInMVPerFC.at(1);
+       break;
+     case geo::kZ:
+       gain = fASICGainInMVPerFC.at(2);
+       break;
+     default:
+       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
+     }
+     return gain;  
 }
 
 //-----Give Shaping time to SimWire-----

@@ -52,7 +52,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   // Fetch fcl parameters.
 
   fADCPerPCAtLowestASICGain = pset.get<double>("ADCPerPCAtLowestASICGain");
-  fASICGainInMVPerFC = pset.get<double>("ASICGainInMVPerFC");
+  fASICGainInMVPerFC = pset.get<std::vector<double> >("ASICGainInMVPerFC");
   fDefaultDriftVelocity = pset.get<std::vector<double> >("DefaultDriftVelocity");
   fFieldResponseTOffset = pset.get<std::vector<double> >("FieldResponseTOffset");
   if(fDefaultDriftVelocity.size() != geo->Nplanes() ||
@@ -293,7 +293,7 @@ void util::SignalShapingServiceMicroBooNE::init()
     // Calculate field and electronics response functions.
 
     SetFieldResponse();
-    SetElectResponse(fShapeTimeConst.at(3));
+    SetElectResponse(fShapeTimeConst.at(3),fASICGainInMVPerFC.at(2));
 
     //auto tpc_clock = art::ServiceHandle<util::TimeService>()->TPCClock();
 
@@ -305,7 +305,7 @@ void util::SignalShapingServiceMicroBooNE::init()
     //fColSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(2)/1.e3));
     // fColSignalShaping.SetPeakResponseTime(0.);
     
-    SetElectResponse(fShapeTimeConst.at(1));
+    SetElectResponse(fShapeTimeConst.at(1),fASICGainInMVPerFC.at(0));
 
     fIndUSignalShaping.AddResponseFunction(fIndUFieldResponse);
     fIndUSignalShaping.AddResponseFunction(fElectResponse);
@@ -313,7 +313,7 @@ void util::SignalShapingServiceMicroBooNE::init()
     //fIndUSignalShaping.SetTimeOffset(tpc_clock.Ticks(fFieldResponseTOffset.at(0)/1.e3));
     // fIndUSignalShaping.SetPeakResponseTime(0.);
  
-    SetElectResponse(fShapeTimeConst.at(2));
+    SetElectResponse(fShapeTimeConst.at(2),fASICGainInMVPerFC.at(1));
   
     fIndVSignalShaping.AddResponseFunction(fIndVFieldResponse);
     fIndVSignalShaping.AddResponseFunction(fElectResponse);
@@ -521,7 +521,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse()
 
 //----------------------------------------------------------------------
 // Calculate microboone field response.
-void util::SignalShapingServiceMicroBooNE::SetElectResponse(double shapingtime)
+void util::SignalShapingServiceMicroBooNE::SetElectResponse(double shapingtime, double gain)
 {
   // Get services.
 
@@ -538,7 +538,8 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(double shapingtime)
   //Gain and shaping time variables from fcl file:    
   double Ao = fShapeTimeConst[0];  //gain
   double To = shapingtime;  //peaking time
-    
+   
+  //std::cout << "Checking Shaping time" << To << std::endl; 
   // this is actually sampling time, in ns
   // mf::LogInfo("SignalShapingMicroBooNE") << "Check sampling intervals: " 
   //                                  << fSampleRate << " ns" 
@@ -591,7 +592,9 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(double shapingtime)
     fElectResponse.at(i) /= max;
     fElectResponse.at(i) *= fADCPerPCAtLowestASICGain * 1.60217657e-7;
     //fElectResponse.at(i) *= fInputFieldRespSamplingPeriod / detprop->SamplingRate();
-    fElectResponse.at(i) *= fASICGainInMVPerFC / 4.7;
+    
+    //fElectResponse.at(i) *= fASICGainInMVPerFC / 4.7;
+    fElectResponse.at(i) *= gain / 4.7;
 
     if(fElectResponse.at(i) > last_max) last_max = fElectResponse.at(i);
     last_integral += fElectResponse.at(i) * fInputFieldRespSamplingPeriod / detprop->SamplingRate();
