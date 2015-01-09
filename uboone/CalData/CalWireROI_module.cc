@@ -289,9 +289,9 @@ namespace caldata {
     
       // Find minimum separation between ROIs including the padding.
       // Use the longer pad
-      unsigned int minSepPad = fMinSep + fPreROIPad[thePlane];
-      if(fPostROIPad[thePlane] > fPreROIPad[thePlane]) 
-        minSepPad = fMinSep + fPostROIPad[thePlane];
+      // unsigned int minSepPad = fMinSep + fPreROIPad[thePlane];
+      //if(fPostROIPad[thePlane] > fPreROIPad[thePlane]) 
+      //  minSepPad = fMinSep + fPostROIPad[thePlane];
       
       // skip bad channels
       if(!chanFilt->BadChannel(channel)) {
@@ -348,45 +348,7 @@ namespace caldata {
         holderInfo.clear();
 	//        for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
         
-        // merge the ROIs?
-        if(rois.size() > 1) {
-          // temporary vector for merged ROIs
-          std::vector<std::pair<unsigned int, unsigned int>> trois;
-          unsigned int ii = 0;
-          unsigned int roiStart = rois[0].first;
-          unsigned int roiEnd = rois[0].second;
-          bool inMerge = false;
-          while(ii < rois.size() - 1) {
-            for(unsigned int jj = ii + 1; jj < rois.size(); ++jj) {
-              if(rois[jj].first - rois[jj-1].second < minSepPad) {
-                // merge them
-                ii = jj;
-                roiEnd = rois[jj].second;
-                inMerge = true;
-              } else {
-                // don't merge them
-                trois.push_back(std::make_pair(roiStart,roiEnd));
-                ii = jj;
-                roiStart = rois[ii].first;
-                roiEnd = rois[ii].second;
-                inMerge = false;
-                break;
-              }
-            } // jj
-          } // ii
-          // finish an unfinished merge
-          if(inMerge) trois.push_back(std::make_pair(roiStart,roiEnd));
-          // make the last one if necessary
-          if(trois.size() > 0) {
-            if(trois[trois.size()-1].second != rois[rois.size()-1].second) {
-              roiStart = rois[rois.size() - 1].first;
-              trois.push_back(std::make_pair(roiStart,roiEnd));
-            } // fix up
-          } // trois.size() > 0
-          rois = trois;
-        } // merge ROIs
-
-        // pad the ROIs
+	 // pad the ROIs
         for(unsigned int ii = 0; ii < rois.size(); ++ii) {
           // low ROI end
           int low = rois[ii].first - fPreROIPad[thePlane];
@@ -398,6 +360,47 @@ namespace caldata {
           rois[ii].second = high;
         }
 
+	// if (channel==3218){
+	//   std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
+	//   for(unsigned int ii = 0; ii < rois.size(); ++ii) {
+	//     std::cout << rois[ii].first << " " << rois[ii].second << std::endl;
+	//   }
+	// }
+
+        // merge the ROIs?
+        if(rois.size() > 1) {
+          // temporary vector for merged ROIs
+          std::vector<std::pair<unsigned int, unsigned int>> trois;
+          
+	  for (unsigned int ii = 0; ii<rois.size();ii++){
+	    unsigned int roiStart = rois[ii].first;
+	    unsigned int roiEnd = rois[ii].second;
+          
+	    int flag1 = 1;
+	    unsigned int jj=ii+1;
+	    while(flag1){	
+	      if (jj<rois.size()){
+		if(rois[jj].first - roiEnd >=0 ) {
+		  roiEnd = rois[jj].second;
+		  ii = jj;
+		  jj = ii+1;
+		}else{
+		  flag1 = 0;
+		}
+	      }else{
+		flag1 = 0;
+	      }
+	    }
+	    
+
+	    trois.push_back(std::make_pair(roiStart,roiEnd));	    
+	  }
+	  
+	  rois = trois;
+	}
+	  
+	
+
 	for (unsigned int ir = 0; ir < rois.size(); ++ir) {
 	  unsigned int roiLen = rois[ir].second - rois[ir].first;
 	  unsigned int roiStart = rois[ir].first;
@@ -407,15 +410,20 @@ namespace caldata {
 	  float tempPre=0,tempPost=0;
 	  std::vector<float> holder;
 	  while(flag){
+	    
 	    unsigned int transformSize = fFFTSize; //current transformsize
 	    //if ROI length is longer, take ROI length
 	    if (roiLen > transformSize) transformSize = roiLen;
+	    
+	    // if (transformSize < 8192) transformSize=8192;
+
 	    // Get signal shaping service.
 	    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
 	    sss->SetDecon(transformSize);
 	    transformSize = fFFT->FFTSize();
 	    // temporary vector of signals
-	    holder.resize(transformSize,0);	  	  
+	    holder.resize(transformSize,0);
+	    
 	    unsigned int hBin = 0;
 	    for(unsigned int bin = roiStart; bin < roiStart + holder.size(); ++bin) {
 	      if (bin < dataSize){
@@ -426,8 +434,15 @@ namespace caldata {
 	      }
 	      ++hBin;
 	    } // bin
-	    sss->Deconvolute(channel,holder);
+
 	    
+
+	    sss->Deconvolute(channel,holder);
+	    if (channel==3218){
+	      for(unsigned int bin = 0; bin <holder.size(); ++bin) {
+		std::cout << bin << " " <<  holder[bin] << std::endl;
+	      }
+	    }
 	    //1. Check Baseline match?
 	    // If not, include next ROI(if none, go to the end of signal)
 	    // If yes, proceed
@@ -438,6 +453,11 @@ namespace caldata {
 	    }
 	    tempPre = tempPre/5.;
 	    tempPost = tempPost/5.;
+
+	    // if (channel==3218){
+	    //   std::cout << flag << " " << tempPre << " " << tempPost << std::endl;
+	    // }
+
 	    if (fabs(tempPost-tempPre)<2){
 	      flag = 0;
 	    }else{

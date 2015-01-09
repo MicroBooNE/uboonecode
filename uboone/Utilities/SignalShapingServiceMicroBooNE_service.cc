@@ -284,8 +284,11 @@ void util::SignalShapingServiceMicroBooNE::init()
     std::string options = fFFT->FFTOptions();
     int fitbins = fFFT->FFTFitBins();
     int fftsize = fFFT->FFTSize();
-    if (fNFieldBins>fftsize)
-      fFFT->ReinitializeFFT( fNFieldBins, options, fitbins);
+    if (fNFieldBins*4>fftsize)
+      fFFT->ReinitializeFFT( fNFieldBins*4, options, fitbins);
+
+    // if (fNFieldBins>fftsize)
+    //   fFFT->ReinitializeFFT( 9600, options, fitbins);
 
     // Calculate field and electronics response functions.
 
