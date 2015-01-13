@@ -212,7 +212,7 @@ namespace caldata {
 
 	//David Caratelli
 	//subtract time-offset added in SImWireMicroBooNE_module
-	int time_offset = sss->FieldResponseTOffset(channel);
+	int time_offset = sss->FieldResponseTOffset(channel,1);
 	for(bin = 0; bin < dataSize; ++bin) {
 	  if ( (bin-time_offset >= 0) and (bin-time_offset < holder.size())  )
 	  holder[bin-time_offset]=(rawadc[bin]-pdstl);

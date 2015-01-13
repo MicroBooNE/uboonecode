@@ -294,7 +294,7 @@ namespace caldata {
         // loop over all adc values and subtract the pedestal
         float pdstl = digitVec->GetPedestal();
 	//subtract time-offset added in SimWireMicroBooNE_module
-	int time_offset = sss->FieldResponseTOffset(channel);
+	int time_offset = sss->FieldResponseTOffset(channel, 1);
         unsigned int roiStart = 0;
         // search for ROIs
         for(bin = 1; bin < dataSize; ++bin) {
