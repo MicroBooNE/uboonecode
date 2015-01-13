@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 #include <algorithm> // std::fill()
+#include <functional>
 
 // CLHEP libraries
 #include "CLHEP/Random/RandFlat.h"
@@ -52,8 +53,6 @@
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
 
-#include <algorithm>
-#include <functional>
 
 
 ///Detector simulation of raw signals on wires
@@ -80,7 +79,7 @@ namespace detsim {
 
     size_t fNChannels;
     size_t fNViews;
-    std::vector<size_t>    fNResponses;       ///< this is the number of *active* responses, <= number of responses
+    std::vector<std::vector<size_t> > fNResponses;       ///< this is the number of *active* responses, <= number of responses
     std::string            fDriftEModuleLabel;///< module making the ionization electrons
     raw::Compress_t        fCompression;      ///< compression type to use
 
@@ -95,9 +94,9 @@ namespace detsim {
     size_t                 fNTicks;           ///< number of ticks of the clock
     double                 fSampleRate;       ///< sampling rate in ns
     unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)
-    std::vector<float>     fPedVec;           ///< generaization of collection/Induction ped
-    float                  fCollectionPed;    ///< ADC value of baseline for collection plane
-    float                  fInductionPed;     ///< ADC value of baseline for induction plane
+    std::vector<float>     fPedestalVec;           ///< one pedestal for each view
+    //float                  fCollectionPed;    ///< ADC value of baseline for collection plane
+    //float                  fInductionPed;     ///< ADC value of baseline for induction plane
     float                  fBaselineRMS;      ///< ADC value of baseline RMS within each channel
     TH1D*                  fNoiseDistColl;    ///< distribution of noise counts
     TH1D*                  fNoiseDistInd;     ///< distribution of noise counts
@@ -117,7 +116,7 @@ namespace detsim {
     double      fTestCharge;
 
     int         fSample; // for histograms, -1 means no histos
-    
+
     //define max ADC value - if one wishes this can
     //be made a fcl parameter but not likely to ever change
     const float adcsaturation = 4095;
@@ -182,8 +181,7 @@ namespace detsim {
     fGetNoiseFromHisto= p.get< bool                >("GetNoiseFromHisto");
     fGenNoiseInTime   = p.get< bool                >("GenNoiseInTime");
     fGenNoise         = p.get< bool                >("GenNoise");
-    fCollectionPed    = p.get< float               >("CollectionPed");
-    fInductionPed     = p.get< float               >("InductionPed");
+    fPedestalVec      = p.get< std::vector<float>  >("PedestalVec");
     fBaselineRMS      = p.get< float               >("BaselineRMS");
     fTrigModName      = p.get< std::string         >("TrigModName");
     fTest             = p.get<bool                 >("Test");
@@ -304,12 +302,7 @@ namespace detsim {
     fASICGain      = sss->GetASICGain();
     fShapingTime   = sss->GetShapingTime();
     fNResponses = sss->GetNActiveResponses();
-    fNViews     = fNResponses.size();
-
-    // for now:
-    fPedVec.resize(fNViews);
-    fPedVec[0] = fPedVec[1] = fInductionPed;
-    fPedVec[2] = fCollectionPed;
+    fNViews     = fNResponses[0].size();
 
     //Check that shaping time is an allowed value
     //If so, Pick out noise factor
@@ -325,10 +318,6 @@ namespace detsim {
         fNoiseFactVec[i] *= fASICGain/4.7;
         ++i;
       }
-      //    if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
-      //      fNoiseFactVec   = sss->GetNoiseFactVec().at( fShapingTimeOrder.find( fShapingTime )->second );
-      //      fNoiseFactInd   = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
-      //      fNoiseFactColl  = sss->GetNoiseFactColl().at( fShapingTimeOrder.find( fShapingTime )->second );
     }
     else {//Throw exception...
       throw cet::exception("SimWireMicroBooNE")
@@ -339,9 +328,6 @@ namespace detsim {
       << "\033[00m"
       << std::endl;
     }
-    //Take into account ASIC Gain
-    //fNoiseFactInd *= fASICGain/4.7;
-    //fNoiseFactColl *= fASICGain/4.7;
 
     fNChannels = geo->Nchannels();
 
@@ -376,20 +362,10 @@ namespace detsim {
     _ch = 0;
     for (auto& channel : responseParamsVec) {
       size_t view = (size_t)geo->View(_ch);
-      channel.resize(2*fNResponses[view]-1);
+      channel.resize(2*fNResponses[0][view]-1);
     }
 
-    //std::cout << "Responses " << fNChannels << " channels" << std::endl;
-    //for( int i = 0; i<3; ++i) {
-      //std::cout << "view " << i <<  fNResponses[i] << " responses" << std::endl;
-    //}
-
     size_t view = 0;
-
-    // parameters for test
-    size_t wireWanted = 1200;
-    size_t indexWanted = 4000;
-    double chargeWanted = 100000;
 
     //LOOP OVER ALL CHANNELS
     // In this version we assume that adjacent channels <-> adjacent wires, in the same plane/view
@@ -404,21 +380,19 @@ namespace detsim {
       // for a test, one hit on one wire in each view!
 
       if(fTest) {
-        if(wireNum != wireWanted) continue;
-        std::cout << "got to wire " << wireWanted << std::endl;
+        if(wireNum != fTestWire) continue;
+        std::cout << "got to wire " << fTestWire << std::endl;
         int time_offset = sss->FieldResponseTOffset(chan);
-        int raw_digit_index = indexWanted + time_offset;
-        double charge       = chargeWanted;
+        int raw_digit_index = fTestIndex + time_offset;
+        double charge       = fTestCharge;
 
         // here fill ResponseParams... all the wires!
-        for(int wire = -(fNResponses[view]-1); wire<(int)fNResponses[view]; ++wire) {
-          auto wireIndex = wire+(int)fNResponses[view] - 1;
+        for(int wire = -(fNResponses[0][view]-1); wire<(int)fNResponses[0][view]; ++wire) {
+          auto wireIndex = wire+(int)fNResponses[0][view] - 1;
           int wireChan = (int)chan + wire;
           if(wireChan<0 || (size_t)geo->View((size_t)wireChan)!=view) continue;
 
           responseParamsVec[wireChan][wireIndex].emplace_back(new ResponseParams(charge, raw_digit_index));
-//          if(fTest) std::cout << "Test: Channel " << chan << ", wire " << wire << ", index "
-//          << raw_digit_index << ", charge " << charge << std::endl;
         }
       } else {
 
@@ -442,14 +416,14 @@ namespace detsim {
           // wrap the negative times to the end of the buffer
           // The offset should be taken care of in the shaping service, by shifting the response.
 
-         int raw_digit_index =
-            ( (t + time_offset) >= 0 ? t+time_offset : (chargeWork.size() + (t+time_offset)) );
+          int raw_digit_index =
+          ( (t + time_offset) >= 0 ? t+time_offset : (chargeWork.size() + (t+time_offset)) );
 
           if(raw_digit_index <= 0 || raw_digit_index >= (int)(chargeWork.size())) continue;
 
           // here fill ResponseParams... all the wires!
-          for(int wire = -(fNResponses[view]-1); wire<(int)fNResponses[view]; ++wire) {
-            auto wireIndex = (size_t)wire+fNResponses[view] - 1;
+          for(int wire = -(fNResponses[0][view]-1); wire<(int)fNResponses[0][view]; ++wire) {
+            auto wireIndex = (size_t)wire+fNResponses[0][view] - 1;
             int wireChan = (int)chan + wire;
             if(wireChan<0 || (size_t)geo->View((size_t)wireChan)!=view) continue;
             responseParamsVec[wireChan][wireIndex].emplace_back(new ResponseParams(charge, raw_digit_index));
@@ -475,14 +449,13 @@ namespace detsim {
       auto& thisChan = responseParamsVec[chan];
       view = (size_t)geo->View(chan);
 
-      //std::cout << "channel/wire/view " << chan << " " << wireNum << " " << view << std::endl;
       int tick0 = 0;
       if(fSample>=0) tick0 = t0[fSample] - factor[view]*slope0[fSample]*(wireNum-wire0[view]) + 0.5;
 
-      for(int wire=-(fNResponses[view]-1); wire<(int)fNResponses[view];++wire) {
+      for(int wire=-(fNResponses[0][view]-1); wire<(int)fNResponses[0][view];++wire) {
         int wireChan = chan + wire;
         if(wireChan<0 || (size_t)geo->View(wireChan)!=view) continue;
-        size_t wireIndex = (size_t)(wire + (int)fNResponses[view] - 1);
+        size_t wireIndex = (size_t)(wire + (int)fNResponses[0][view] - 1);
         auto & thisWire = thisChan[wireIndex];
         if(thisWire.empty()) continue;
         std::fill(tempWork.begin(), tempWork.end(), 0.);
@@ -498,19 +471,10 @@ namespace detsim {
         // now we have the tempWork for the adjacent wire of interest
         // i	size_t		convolve it with the appropriate response function
         sss->Convolute(chan, fabs(wire), tempWork);
-        if(wire>=0&&fTest) {
-          //std::cout << "final signal (ticks): channel " << chan << " wire " << wire << std::endl;
-          //size_t tickOffset = indexWanted - 50;
-          for(int i = 0; i< 100; ++i) {
-            //std::cout << tempWork[i+tickOffset] << " " ;
-            //if((i+1)%10==0) std::cout << std::endl;
-          }
-          //std::cout << std::endl;
-        }
 
         // this is to generate some plots
 
-         if(view==1 && wireNum==360 && fSample>=0) {
+        if(view==1 && wireNum==360 && fSample>=0) {
           if(abs(wire)>2) continue;
           size_t index = wire + 2;
 
@@ -525,7 +489,7 @@ namespace detsim {
             hTest[index]->Fill(i*1.-tick0, val);
           }
           if(printWF) std::cout << std::endl;
-          
+
         }
 
         // now add the result into the "charge" vector
@@ -536,29 +500,11 @@ namespace detsim {
         //std::transform(chargeWork.begin(), chargeWork.end(), tempWork.begin(),
         //               chargeWork.begin(), std::plus<double>());
 
-
-//        std::cout << "Convolved response (ticks) for channel " << chan << " wire " << wire << std::endl;
-//        for(int i = 0; i< 100; ++i) {
-//          std::cout << charge[i] << " " ;
-//          if((i+1)%10==0) std::cout << std::endl;
-//        }
-//        std::cout << std::endl;
-}
+      }
 
       double ped_mean;
-      switch(view) {
-        case geo::kU:
-          ped_mean = fPedVec[0];
-          fNoiseFact = fNoiseFactVec[0];
-          break;
-        case geo::kV:
-          ped_mean = fPedVec[1];
-          fNoiseFact = fNoiseFactVec[1];
-          break;
-        case geo::kZ:
-          ped_mean = fPedVec[2];
-        fNoiseFact = fNoiseFactVec[2];
-      }
+      ped_mean = fPedestalVec[view];
+      fNoiseFact = fNoiseFactVec[view];
 
       //Generate Noise:
       std::vector<float> noisetmp(fNTicks,0.);
@@ -568,7 +514,6 @@ namespace detsim {
         else
           GenNoiseInFreq(noisetmp);
       }
-
 
       //slight variation on ped on order of RMS of baselien variation
       art::ServiceHandle<art::RandomNumberGenerator> rng;
@@ -702,16 +647,16 @@ namespace detsim {
       TComplex tc(pval*cos(phase),pval*sin(phase));
       noiseFrequency.at(i) += tc;
     }
-
-
+    
+    
     // mf::LogInfo("SimWireMicroBooNE") << "filled noise freq";
-
+    
     // inverse FFT MCSignal
     art::ServiceHandle<util::LArFFT> fFFT;
     fFFT->DoInvFFT(noiseFrequency, noise);
-
+    
     noiseFrequency.clear();
-
+    
     // multiply each noise value by fNTicks as the InvFFT
     // divides each bin by fNTicks assuming that a forward FFT
     // has already been done.

@@ -254,22 +254,15 @@ namespace detsim{
     //Check that shaping time is an allowed value
     //If so, Pick out noise factor 
     //If not, through exception
+
     if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
       geo::View_t view = geo->View(fChannel);
-      switch(view) {
-      case geo::kU:
-      case geo::kV:
-	fNoiseFact = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
-	break;
-      case geo::kZ:
-	fNoiseFact = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );
-	break;
-      default:
-	throw cet::exception(__FUNCTION__) << "Not supported view: "<<view<<std::endl;
-      }
+      auto noiseFactVec = sss->GetNoiseFactVec();
+
+      fNoiseFact = noiseFactVec[(int)view].at( fShapingTimeOrder.find( fShapingTime )->second );
     }
     else{//Throw exception...
-      throw cet::exception("SimWireMicroBooNE")
+      throw cet::exception("RawDigitSimulator_module")
 	<< "\033[93m"
 	<< "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
 	<< std::endl
