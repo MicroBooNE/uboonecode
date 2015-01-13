@@ -299,8 +299,11 @@ namespace detsim {
       std::fill(chargeWork.begin(), chargeWork.end(), 0.);
       const sim::SimChannel* sc = channels.at(chan);
       
-      fASICGain      = sss->GetASICGain(chan);
-      fShapingTime   = sss->GetShapingTime(chan);
+      fASICGain      = sss->GetASICGain(chan);     //Jyoti - to read different gain for U,V & Y planes 
+      fShapingTime   = sss->GetShapingTime(chan);  //Jyoti - to read different shaping time for U,V & Y planes
+
+      //std::cout << "Checking again Shaping time in SimWire..." << fShapingTime << std::endl;
+      //std::cout << "Checking again Gain in SimWire..." << fASICGain << std::endl; 
 
       if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
       fNoiseFactInd   = sss->GetNoiseFactInd().at( fShapingTimeOrder.find( fShapingTime )->second );

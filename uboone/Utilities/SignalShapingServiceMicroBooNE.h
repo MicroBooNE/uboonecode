@@ -65,7 +65,11 @@
 /// FieldResponseHistoName     - Name of the field response histograms,
 ///                              the format in the code will be 
 ///                              FieldResponseHistoName_U(V,Y)
-///
+///update notes: Jyoti Joshi (jjoshi@bnl.gov), Jan 13, 2015 
+//               1. Modification to GetShapingTime function to read in different
+//                  shaping time for different planes
+//               2. Modification to GetASICGain fucntion to read in different gain 
+//                  settings for different planes    
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef SIGNALSHAPINGSERVICEMICROBOONE_H
@@ -217,7 +221,7 @@ namespace util {
   };
 }
 
-//-----Give Gain Settings to SimWire-----
+//-----Give Gain Settings to SimWire-----//jyoti
 double util::SignalShapingServiceMicroBooNE::GetASICGain(unsigned int const channel) const
 {
     art::ServiceHandle<geo::Geometry> geom;
@@ -239,7 +243,7 @@ double util::SignalShapingServiceMicroBooNE::GetASICGain(unsigned int const chan
      return gain;  
 }
 
-//-----Give Shaping time to SimWire-----
+//-----Give Shaping time to SimWire-----//jyoti
 double util::SignalShapingServiceMicroBooNE::GetShapingTime(unsigned int const channel) const
 {
      art::ServiceHandle<geo::Geometry> geom;

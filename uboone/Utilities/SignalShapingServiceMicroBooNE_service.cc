@@ -293,7 +293,7 @@ void util::SignalShapingServiceMicroBooNE::init()
     // Calculate field and electronics response functions.
 
     SetFieldResponse();
-    SetElectResponse(fShapeTimeConst.at(3),fASICGainInMVPerFC.at(2));
+    SetElectResponse(fShapeTimeConst.at(3),fASICGainInMVPerFC.at(2));  //Jyoti
 
     //auto tpc_clock = art::ServiceHandle<util::TimeService>()->TPCClock();
 
@@ -539,7 +539,6 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(double shapingtime, 
   double Ao = fShapeTimeConst[0];  //gain
   double To = shapingtime;  //peaking time
    
-  //std::cout << "Checking Shaping time" << To << std::endl; 
   // this is actually sampling time, in ns
   // mf::LogInfo("SignalShapingMicroBooNE") << "Check sampling intervals: " 
   //                                  << fSampleRate << " ns" 
