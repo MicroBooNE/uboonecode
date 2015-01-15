@@ -376,7 +376,9 @@ namespace detsim {
         for(int wire = -(fNResponses[0][view]-1); wire<(int)fNResponses[0][view]; ++wire) {
           auto wireIndex = wire+(int)fNResponses[0][view] - 1;
           int wireChan = (int)chan + wire;
-          if(wireChan<0 || (size_t)geo->View((size_t)wireChan)!=view) continue;
+	  if(wireChan<0 || wireChan>= (int)fNChannels) continue;
+	  if ((size_t)geo->View(wireChan)!=view) continue;
+          
 
           responseParamsVec[wireChan][wireIndex].emplace_back(new ResponseParams(charge, raw_digit_index));
         }
@@ -413,7 +415,9 @@ namespace detsim {
           for(int wire = -(fNResponses[0][view]-1); wire<(int)fNResponses[0][view]; ++wire) {
             auto wireIndex = (size_t)wire+fNResponses[0][view] - 1;
             int wireChan = (int)chan + wire;
-            if(wireChan<0 || (size_t)geo->View((size_t)wireChan)!=view) continue;
+            if(wireChan<0 || wireChan>= (int)fNChannels) continue;
+	    if ((size_t)geo->View(wireChan)!=view) continue;
+	    
             responseParamsVec[wireChan][wireIndex].emplace_back(new ResponseParams(charge, raw_digit_index));
           } // loop over wires
         } // loop over tdcs
