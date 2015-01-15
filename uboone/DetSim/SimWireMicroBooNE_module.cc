@@ -372,11 +372,11 @@ namespace detsim {
     // Is this always true?
     //std::map<int,double>::iterator mapIter;
 
+    
     for(chan = 0; chan < fNChannels; chan++) {
       auto wid = geo->ChannelToWire(chan);
       size_t wireNum = wid[0].Wire;
       view = (size_t)geo->View(chan);
-
       // for a test, one hit on one wire in each view!
 
       if(fTest) {
@@ -438,7 +438,7 @@ namespace detsim {
     double factor[3] = { 2.0, 2.0, 1.0 };
 
     int tickCut = 250;
-
+    
     // loop over the collected responses
     //   this is needed because hits generate responses on adjacent wires!
     for(chan = 0; chan < fNChannels; chan++) {
@@ -451,10 +451,11 @@ namespace detsim {
 
       int tick0 = 0;
       if(fSample>=0) tick0 = t0[fSample] - factor[view]*slope0[fSample]*(wireNum-wire0[view]) + 0.5;
-
+     
       for(int wire=-(fNResponses[0][view]-1); wire<(int)fNResponses[0][view];++wire) {
         int wireChan = chan + wire;
-        if(wireChan<0 || (size_t)geo->View(wireChan)!=view) continue;
+        if(wireChan<0 || wireChan>= (int)fNChannels) continue;
+	if ((size_t)geo->View(wireChan)!=view) continue;
         size_t wireIndex = (size_t)(wire + (int)fNResponses[0][view] - 1);
         auto & thisWire = thisChan[wireIndex];
         if(thisWire.empty()) continue;
@@ -470,6 +471,7 @@ namespace detsim {
 
         // now we have the tempWork for the adjacent wire of interest
         // i	size_t		convolve it with the appropriate response function
+	
         sss->Convolute(chan, fabs(wire), tempWork);
 
         // this is to generate some plots
@@ -501,6 +503,7 @@ namespace detsim {
         //               chargeWork.begin(), std::plus<double>());
 
       }
+      
 
       double ped_mean;
       ped_mean = fPedestalVec[view];
@@ -573,8 +576,10 @@ namespace detsim {
       raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
       rd.SetPedestal(ped_mean);
       digcol->push_back(std::move(rd)); // we do move the raw digit copy, though
-
+      // std::cout<< "Xin2 " << chan << " " << fNChannels << std::endl;
     }// end loop over channels
+
+   
 
     evt.put(std::move(digcol));
     return;

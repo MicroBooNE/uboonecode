@@ -329,6 +329,7 @@ void util::SignalShapingServiceMicroBooNE::init()
 
       SetResponseSampling(ktype);
 
+            
       // Calculate filter functions.
 
       // Configure deconvolution kernels.
