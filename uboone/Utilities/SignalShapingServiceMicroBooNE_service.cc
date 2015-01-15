@@ -350,6 +350,7 @@ void util::SignalShapingServiceMicroBooNE::init()
 	int fitbins = fFFT->FFTFitBins();
 	fFFT->ReinitializeFFT( fftsize, options, fitbins);
       }
+      
       SetResponseSampling(ktype);
             
       // Calculate filter functions.
@@ -358,7 +359,7 @@ void util::SignalShapingServiceMicroBooNE::init()
       // Configure deconvolution kernels.
 
       for(_vw=0;_vw<fNViews; ++_vw) {
-        //std::cout << "filtervec size" << fFilterVec[_vw].size() << std::endl;
+	// std::cout << "filtervec size" << fFilterVec[_vw].size() << std::endl;
         for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
           (fSignalShapingVec[ktype][_vw][_wr]).AddFilterFunction(fFilterVec[_vw]);
           (fSignalShapingVec[ktype][_vw][_wr]).SetDeconvKernelPolarity( fDeconvPol.at(_vw));
@@ -383,21 +384,30 @@ void util::SignalShapingServiceMicroBooNE::SetDecon(int fftsize)
   // Now we are sampling the convoluted field-electronic response
   // with the nominal sampling rate.
   // We may consider to do the same for the filters as well.
+    
+    std::cout << "Xin1 " << std::endl;
     size_t ktype = 1;
-        
-    SetResponseSampling(ktype);
-    
-    // Calculate filter functions.
-    SetFilters();
-    // Configure deconvolution kernels.
-    
     for(_vw=0;_vw<fNViews; ++_vw) {
       //std::cout << "filtervec size" << fFilterVec[_vw].size() << std::endl;
       for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
 	(fSignalShapingVec[ktype][_vw][_wr]).Reset();
+      }
+    }
+
+    SetResponseSampling(ktype);
+    std::cout << "Xin2 " << std::endl;
+    // Calculate filter functions.
+    SetFilters();
+    // Configure deconvolution kernels.
+    std::cout << "Xin3 " << std::endl;
+    for(_vw=0;_vw<fNViews; ++_vw) {
+      //std::cout << "filtervec size" << fFilterVec[_vw].size() << std::endl;
+      for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
+	
 	(fSignalShapingVec[ktype][_vw][_wr]).AddFilterFunction(fFilterVec[_vw]);
 	(fSignalShapingVec[ktype][_vw][_wr]).SetDeconvKernelPolarity( fDeconvPol.at(_vw));
 	(fSignalShapingVec[ktype][_vw][_wr]).CalculateDeconvKernel();
+	std::cout << "Xin4 " << std::endl;
       }
     }
   }
@@ -635,7 +645,6 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
   std::vector<double> SamplingTime( nticks, 0. );
   double deltaInputTime = fFieldBinWidth[ktype];
   for ( int itime = 0; itime < nticks; itime++ ) {
-    //    InputTime[itime] = (1.*itime) * deltaInputTime;
     SamplingTime[itime] = (1.*itime) * detprop->SamplingRate();
   }
 
@@ -688,7 +697,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
       int startJ = 0;
       for ( int itime = 0; itime < nticks; itime++ ) {
         int low = -1, up = -1;
-        for ( int jtime = startJ; jtime < nticks; jtime++ ) {
+        for ( int jtime = startJ; jtime < nticks_input; jtime++ ) {
           if ( InputTime[jtime] >= SamplingTime[itime] ) {
             low = jtime - 1;
             up = jtime;

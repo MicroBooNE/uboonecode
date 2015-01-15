@@ -415,8 +415,6 @@ namespace caldata {
 	    //if ROI length is longer, take ROI length
 	    if (roiLen > transformSize) transformSize = roiLen;
 	    
-	    // if (transformSize < 8192) transformSize=8192;
-
 	    // Get signal shaping service.
 	    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
 	    sss->SetDecon(transformSize);
@@ -438,11 +436,11 @@ namespace caldata {
 	    
 
 	    sss->Deconvolute(channel,holder);
-	    if (channel==3218){
-	      for(unsigned int bin = 0; bin <holder.size(); ++bin) {
-		std::cout << bin << " " <<  holder[bin] << std::endl;
-	      }
-	    }
+	    // if (channel==3218){
+	    //   for(unsigned int bin = 0; bin <holder.size(); ++bin) {
+	    // 	std::cout << bin << " " <<  holder[bin] << std::endl;
+	    //   }
+	    // }
 	    //1. Check Baseline match?
 	    // If not, include next ROI(if none, go to the end of signal)
 	    // If yes, proceed

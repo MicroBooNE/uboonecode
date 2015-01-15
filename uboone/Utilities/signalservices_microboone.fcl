@@ -25,17 +25,17 @@ microboone_signalshapingservice:
 #---------------------------------------------------------------
 # Settings for old-style responses (no dynamic induced charge)
 
-  #NResponses:           [ [1, 1, 1], [1,1,1] ]  # number of responses per view, including primary. 1 is current number
-  #NActiveResponses:     [ [1, 1, 1], [1,1,1] ]  # number of active responses per view, including primary. 1 is current number
-  #FieldResponseTOffset: [ [-26.6e3, -26.3e3, -26e3], [-26.6e3, -26.3e3, -26e3] ]  # in us, time offset of field response shape
-  #FieldResponseFVersion:  [ "v0.1", "v0.1" ]
+  NResponses:           [ [1, 1, 1], [1,1,1] ]  # number of responses per view, including primary. 1 is current number
+  NActiveResponses:     [ [1, 1, 1], [1,1,1] ]  # number of active responses per view, including primary. 1 is current number
+  FieldResponseTOffset: [ [-26.6e3, -26.3e3, -26e3], [-26.6e3, -26.3e3, -26e3] ]  # in us, time offset of field response shape
+  FieldResponseFVersion:  [ "v0.1", "v0.1" ]
 
 # Settings for synthesized response, including adjacent wires
 
-  NResponses:           [ [5, 5, 5], [1,1,1] ]  # number of responses per view, including primary.
-  NActiveResponses:     [ [5, 3, 4], [1,1,1] ]  # number of active responses per view, including primary.
-  FieldResponseTOffset: [ [-46.6e3, -46.3e3, -46.0e3], [-26.6e3, -26.3e3, -26e3] ] # in us, time offset of field response shape
-  FieldResponseFVersion:   [ "v2.1", "v0.1" ]
+  #NResponses:           [ [5, 5, 5], [1,1,1] ]  # number of responses per view, including primary.
+  #NActiveResponses:     [ [5, 3, 4], [1,1,1] ]  # number of active responses per view, including primary.
+  #FieldResponseTOffset: [ [-46.6e3, -46.3e3, -46.0e3], [-26.6e3, -26.3e3, -26e3] ] # in us, time offset of field response shape
+  #FieldResponseFVersion:   [ "v2.1", "v0.1" ]
 
 #----------------------------------------------------------------
 
