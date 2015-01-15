@@ -38,6 +38,7 @@ extern "C" {
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
 #include "Utilities/LArFFT.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 
 #include "TComplex.h"
 #include "TFile.h"
@@ -75,6 +76,8 @@ namespace caldata {
                               ///< ex.:  "daq:preSpill" for prespill data
     size_t fEventCount; ///< count of event processed
 
+    dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
+
     void SubtractBaseline(std::vector<float>& holder, int fBaseSampleBins);
 
   protected: 
@@ -84,7 +87,8 @@ namespace caldata {
   DEFINE_ART_MODULE(CalWireMicroBooNE)
   
   //-------------------------------------------------
-  CalWireMicroBooNE::CalWireMicroBooNE(fhicl::ParameterSet const& pset)
+  CalWireMicroBooNE::CalWireMicroBooNE(fhicl::ParameterSet const& pset) :
+    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
   {
     fSpillName="";
     this->reconfigure(pset);
@@ -111,6 +115,8 @@ namespace caldata {
     fSaveWireWF       = p.get< int >        ("SaveWireWF");
     
     fSpillName="";
+    
+    fPedestalRetrievalAlg.reconfigure(p);
     
     size_t pos = fDigitModuleLabel.find(":");
     if( pos!=std::string::npos ) {
@@ -208,7 +214,9 @@ namespace caldata {
 	raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
 	
 	// loop over all adc values and subtract the pedestal
-        float pdstl = digitVec->GetPedestal();
+	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
+        float pdstl = 0.0;
+	fPedestalRetrievalAlg.GetPedestalMean(channel, pdstl);
 
 	//David Caratelli
 	//subtract time-offset added in SImWireMicroBooNE_module

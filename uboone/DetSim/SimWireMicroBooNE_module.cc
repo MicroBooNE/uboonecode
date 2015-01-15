@@ -51,6 +51,7 @@
 #include "Utilities/TimeService.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 
 
 ///Detector simulation of raw signals on wires
@@ -87,10 +88,7 @@ namespace detsim {
     double                 fLowCutoff;        ///< low frequency filter cutoff (kHz)
     size_t                 fNTicks;           ///< number of ticks of the clock
     double                 fSampleRate;       ///< sampling rate in ns
-    unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)
-    float                  fCollectionPed;    ///< ADC value of baseline for collection plane
-    float                  fInductionPed;     ///< ADC value of baseline for induction plane
-    float                  fBaselineRMS;      ///< ADC value of baseline RMS within each channel                    
+    unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)                 
     TH1D*                  fNoiseDistColl;    ///< distribution of noise counts
     TH1D*                  fNoiseDistInd;     ///< distribution of noise counts
     bool fGetNoiseFromHisto;                  ///< if True -> Noise from Histogram of Freq. spectrum
@@ -100,6 +98,8 @@ namespace detsim {
     std::string fNoiseHistoName; 
     TH1D*             fNoiseHist;             ///< distribution of noise counts
     float                  fASICGain;
+    
+    dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
 
     
     std::map< double, int > fShapingTimeOrder;
@@ -116,7 +116,8 @@ namespace detsim {
 
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)
-  : fNoiseHist(0)
+  : fNoiseHist(0),
+    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
   {
     this->reconfigure(pset);
 
@@ -149,10 +150,9 @@ namespace detsim {
     fGetNoiseFromHisto= p.get< bool                >("GetNoiseFromHisto");
     fGenNoiseInTime   = p.get< bool                >("GenNoiseInTime");
     fGenNoise         = p.get< bool                >("GenNoise");
-    fCollectionPed    = p.get< float               >("CollectionPed");
-    fInductionPed     = p.get< float               >("InductionPed");
-    fBaselineRMS      = p.get< float               >("BaselineRMS");
     fTrigModName      = p.get< std::string         >("TrigModName");
+    
+    fPedestalRetrievalAlg.reconfigure(p.get<fhicl::ParameterSet>("PedestalRetrievalAlg"));
 
     //Map the Shaping Times to the entry position for the noise ADC
     //level in fNoiseFactInd and fNoiseFactColl
@@ -325,19 +325,23 @@ namespace detsim {
 
       }
 
-      //Pedestal determination
-      float ped_mean = fCollectionPed;
+      //Pedestal determination and random gaussian variation
+      float ped_mean = 0.0, ped_rms = 0.0; 
+      fPedestalRetrievalAlg.GetPedestal(chan, ped_mean, ped_rms);
+      art::ServiceHandle<art::RandomNumberGenerator> rng;
+      CLHEP::HepRandomEngine &engine = rng->getEngine();
+      CLHEP::RandGaussQ rGaussPed(engine, 0.0, ped_rms);
+      ped_mean += rGaussPed.fire();
+      
+
+      //Generate Noise
       geo::SigType_t sigtype = geo->SignalType(chan);
       if (sigtype == geo::kInduction){
-        ped_mean = fInductionPed;
 	fNoiseFact = fNoiseFactInd;
       }
       else if (sigtype == geo::kCollection){
-        ped_mean = fCollectionPed;
 	fNoiseFact = fNoiseFactColl;
       }
-      
-      //Generate Noise:
       std::vector<float> noisetmp(fNTicks,0.);
       if (fGenNoise){
         if (fGenNoiseInTime)
@@ -345,13 +349,6 @@ namespace detsim {
         else
           GenNoiseInFreq(noisetmp);
       }
-
-
-      //slight variation on ped on order of RMS of baselien variation
-      art::ServiceHandle<art::RandomNumberGenerator> rng;
-      CLHEP::HepRandomEngine &engine = rng->getEngine();
-      CLHEP::RandGaussQ rGaussPed(engine, 0.0, fBaselineRMS);
-      ped_mean += rGaussPed.fire();
       
       // resize the adcvec to be the correct number of time samples
       // (the compression from the previous loop might have changed size)

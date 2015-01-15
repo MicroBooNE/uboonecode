@@ -1,5 +1,6 @@
 #include "caldata.fcl"
 #include "roialg.fcl"
+#include "database_microboone.fcl"
 
 BEGIN_PROLOG
 
@@ -17,6 +18,8 @@ microboone_calroi:
  uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
  FFTSize:     2048      # re-initialize FFT service to this size
  SaveWireWF:  0
+ 
+ PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
 }
 
 microboone_calwire:
@@ -28,6 +31,8 @@ microboone_calwire:
                           # modulo the data size (3200 for uB)
  BaseVarCut:         25.  # Variance cut for selecting baseline points
  SaveWireWF:          0
+ 
+ PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
 }
 
 microboone_calwirePrespill:  @local::microboone_calwire
@@ -48,6 +53,8 @@ microboone_showwire:
     SinglePulseBuffer: 25
     Channel: 7775
     SaveWaveforms: true
+    
+    PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
 }
 
 microboone_rawdigitandwirecomparisonana:
@@ -67,5 +74,6 @@ microboone_rawdigitandwirecomparisonana:
         }
     }
 }
+    
 
 END_PROLOG

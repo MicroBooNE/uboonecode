@@ -32,6 +32,7 @@
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
 #include "Utilities/LArFFT.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 
 
 /* unused function
@@ -132,6 +133,8 @@ namespace caldata {
     bool fuPlaneRamp;     ///< set true for correct U plane wire response
     int  fSaveWireWF;     ///< Save recob::wire object waveforms
     size_t fEventCount;  ///< count of event processed
+    
+    dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
 
     void doDecon(std::vector<float>& holder, 
       uint32_t channel, unsigned int thePlane,
@@ -147,7 +150,8 @@ namespace caldata {
   DEFINE_ART_MODULE(CalWireROI)
   
   //-------------------------------------------------
-  CalWireROI::CalWireROI(fhicl::ParameterSet const& pset)
+  CalWireROI::CalWireROI(fhicl::ParameterSet const& pset):
+    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
   {
     fSpillName="";
     this->reconfigure(pset);
@@ -180,6 +184,8 @@ namespace caldata {
     fuPlaneRamp       = p.get< bool >                 ("uPlaneRamp");
     fFFTSize          = p.get< int  >                 ("FFTSize");
     fSaveWireWF       = p.get< int >                  ("SaveWireWF");
+    
+    fPedestalRetrievalAlg.reconfigure(p);
     
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
       throw art::Exception(art::errors::Configuration)
@@ -293,7 +299,9 @@ namespace caldata {
         // uncompress the data
         raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
         // loop over all adc values and subtract the pedestal
-        float pdstl = digitVec->GetPedestal();
+	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
+        float pdstl = 0.0;
+	fPedestalRetrievalAlg.GetPedestalMean(channel, pdstl);
 	//subtract time-offset added in SimWireMicroBooNE_module
 	int time_offset = sss->FieldResponseTOffset(channel);
         unsigned int roiStart = 0;
