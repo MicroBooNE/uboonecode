@@ -229,9 +229,12 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 
         auto Xaxis = resp->GetXaxis();
         fNFieldBins[ktype] = Xaxis->GetNbins();
+
         // internal time is in nsec
         fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
-	fFieldResponseTOffset[ktype].at(_wr) = resp->GetBinCenter(1)*1000.;
+
+	fFieldResponseTOffset[ktype].at(_vw) = resp->GetBinCenter(1)*1000.;
+
         _wr++;
       }
       fin->Close();
