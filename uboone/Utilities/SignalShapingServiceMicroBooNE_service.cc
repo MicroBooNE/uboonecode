@@ -231,7 +231,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
         fNFieldBins[ktype] = Xaxis->GetNbins();
         // internal time is in nsec
         fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
-	fFieldResponseTOffset[ktype].at(_wr) temp->GetBinCenter(1)*1000.;
+	fFieldResponseTOffset[ktype].at(_wr) = resp->GetBinCenter(1)*1000.;
         _wr++;
       }
       fin->Close();
@@ -287,13 +287,7 @@ void util::SignalShapingServiceMicroBooNE::init()
     std::string options = fFFT->FFTOptions();
     int fitbins = fFFT->FFTFitBins();
     int fftsize = fFFT->FFTSize();
-    if (fNFieldBins*4>fftsize)
-      fFFT->ReinitializeFFT( fNFieldBins*4, options, fitbins);
-
-    // if (fNFieldBins>fftsize)
-    //   fFFT->ReinitializeFFT( 9600, options, fitbins);
-
-    //SetFilters();
+    
 
     // Calculate field and electronics response functions.
 
@@ -302,7 +296,8 @@ void util::SignalShapingServiceMicroBooNE::init()
 
 
     for(size_t ktype=0;ktype<2;++ktype) {
-
+      if (fNFieldBins[ktype]*4>fftsize)
+	fFFT->ReinitializeFFT( fNFieldBins[ktype]*4, options, fitbins);
       std::cout << std::endl << kset[ktype] << "functions:" << std::endl;
 
       // call this first, so that the binning will be known to SetElectResponse
@@ -550,7 +545,7 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(size_t ktype,double 
   for(auto& element : fElectResponse[ktype]){
     element /= max;
     element *= fADCPerPCAtLowestASICGain * 1.60217657e-7;
-    element *= fASICGainInMVPerFC / 4.7;
+    element *= gain / 4.7;
 
     if(element > last_max) last_max = element;
     last_integral += element * fFieldBinWidth[ktype] / detprop->SamplingRate();
@@ -621,7 +616,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
   art::ServiceHandle<util::DetectorProperties> detprop;
   art::ServiceHandle<util::LArFFT> fft;
 
-  int samplingRate = detprop->SamplingRate();
+  //  int samplingRate = detprop->SamplingRate();
 
   /* This could be a warning, but in principle, there's no reason to restrict the binning
 
@@ -652,7 +647,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
       int nticks_input = pResp->size();
       std::vector<double> InputTime(nticks_input, 0. );
       for ( int itime = 0; itime < nticks_input; itime++ ) {
-	InputTime[itime] = (1.*itime) * fInputFieldRespSamplingPeriod;
+	InputTime[itime] = (1.*itime) * deltaInputTime;
       }
     
       std::vector<double> SamplingResp(nticks, 0. );
