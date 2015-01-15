@@ -12,6 +12,7 @@ microboone_simwire:
  LowCutoff:          7.5          #Low frequency filter cutoff (kHz)
  CompressionType:    "none"       #could also be none		
  GenNoise:            true        #gen noise...if false function not called
+ #GenNoise:           false        #gen noise...if false function not called
  GetNoiseFromHisto:   false       #generate noise from histogram of freq-distribution
  GenNoiseInTime:      true        #generate noise in time-domain. Flat freq. distribution. If false then generate in freq. domani
  PedestalVec:         [ 2048, 2048, 400 ]

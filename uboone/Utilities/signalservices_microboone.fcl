@@ -3,8 +3,9 @@ BEGIN_PROLOG
 microboone_signalshapingservice:
 {
   ADCPerPCAtLowestASICGain: 9390 #ADC/pC
-  ASICGains:           [4.7, 7.8, 14, 25] #Default: 7.8
-  ASICGainInMVPerFC:     7.8     #mV/fC
+  # ASICGains:           [4.7, 7.8, 14, 25] #Default: 7.8
+  ASICGainInMVPerFC:  [7.8, 7.8, 7.8] #mV/fC for U, Y & Y planes
+
   #Noise Factor - rms ADCs @ lowest ASIC Gain (4.7 mV/fC)
   #Entries listed per shaping time, in increasing order
 
@@ -18,7 +19,7 @@ microboone_signalshapingservice:
 # to turn off noise
   NoiseFactVec:         [[ .0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ]]
 
-  ShapeTimeConst:  [ 1.4, 2.0 ] #Gain and Peaking time (microseconds)
+  # ShapeTimeConst:  [ 1.4, 2.0 ] #Gain and Peaking time (microseconds)
   FieldRespAmpVec:  [1.0, 1.0, 1.0]
 
 #---------------------------------------------------------------
@@ -50,6 +51,10 @@ microboone_signalshapingservice:
   FieldResponseHNameBase: "FieldResponse"
 
   DeconvPol:       [ -1, 1, 1 ] #Switch for RawDigit-RecobWire normalization. Entry 0,1,2 are U,V,Y respectively
+
+ 
+  ShapeTimeConst:  [ 1.4, 2.0, 2.0, 2.0] #Gain[0] and Peaking time (microseconds) for U, V & Y planes
+
                                #-1 means normalizes to min ADC count, +1 to max
 
   # For IndFilter and ColFilter, frequency (x) is measured in

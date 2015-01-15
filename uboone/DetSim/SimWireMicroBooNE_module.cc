@@ -299,37 +299,17 @@ namespace detsim {
     //Get fIndShape and fColShape from SignalShapingService, on the fly
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     //get ASIC Gain and Noise in ADCatLowestGain:
-    fASICGain      = sss->GetASICGain();
-    fShapingTime   = sss->GetShapingTime();
+
+    //fASICGain      = sss->GetASICGain();
+    //fShapingTime   = sss->GetShapingTime();
+    
     fNResponses = sss->GetNActiveResponses();
     fNViews     = fNResponses[0].size();
 
-    //Check that shaping time is an allowed value
-    //If so, Pick out noise factor
-    //If not, through exception
-
-    fNoiseFactVec.resize(fNViews);
-    auto tempNoiseVec = sss->GetNoiseFactVec();
-    if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
-
-      size_t i = 0;
-      for (auto& item : tempNoiseVec) {
-        fNoiseFactVec[i]   = item.at( fShapingTimeOrder.find( fShapingTime )->second );
-        fNoiseFactVec[i] *= fASICGain/4.7;
-        ++i;
-      }
-    }
-    else {//Throw exception...
-      throw cet::exception("SimWireMicroBooNE")
-      << "\033[93m"
-      << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
-      << std::endl
-      << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
-      << "\033[00m"
-      << std::endl;
-    }
+    
 
     fNChannels = geo->Nchannels();
+
 
     // make a vector of const sim::SimChannel* that has same number
     // of entries as the number of channels in the detector
@@ -359,6 +339,7 @@ namespace detsim {
     //std::vector<std::vector<std::vector<ResponseParams* > > > responseParamsVec(fNChannels);
     std::vector<std::vector<std::vector<std::unique_ptr<ResponseParams> > > > responseParamsVec(fNChannels);
 
+
     _ch = 0;
     for (auto& channel : responseParamsVec) {
       size_t view = (size_t)geo->View(_ch);
@@ -366,6 +347,7 @@ namespace detsim {
     }
 
     size_t view = 0;
+
 
     //LOOP OVER ALL CHANNELS
     // In this version we assume that adjacent channels <-> adjacent wires, in the same plane/view
@@ -378,6 +360,10 @@ namespace detsim {
       size_t wireNum = wid[0].Wire;
       view = (size_t)geo->View(chan);
       // for a test, one hit on one wire in each view!
+
+
+
+
 
       if(fTest) {
         if(wireNum != fTestWire) continue;
@@ -400,7 +386,9 @@ namespace detsim {
         const sim::SimChannel* sc = channels.at(chan);
         if( !sc ) continue;
 
-        int time_offset = sss->FieldResponseTOffset(chan);
+	// remove the time offset
+	int time_offset = 0;//sss->FieldResponseTOffset(chan);
+
         // loop over the tdcs and grab the number of electrons for each
 
         for(int t = 0; t < (int)(chargeWork.size()); ++t) {
@@ -446,6 +434,44 @@ namespace detsim {
       size_t wireNum = wid[0].Wire;
 
       std::fill(chargeWork.begin(), chargeWork.end(), 0.);
+
+
+     
+	//const sim::SimChannel* sc = channels.at(chan);
+      
+      fASICGain      = sss->GetASICGain(chan);     //Jyoti - to read different gain for U,V & Y planes 
+      fShapingTime   = sss->GetShapingTime(chan);  //Jyoti - to read different shaping time for U,V & Y planes
+
+      fNoiseFactVec.resize(fNViews);
+      auto tempNoiseVec = sss->GetNoiseFactVec();
+      if ( fShapingTimeOrder.find( fShapingTime ) != fShapingTimeOrder.end() ){
+	
+	size_t i = 0;
+	for (auto& item : tempNoiseVec) {
+	  fNoiseFactVec[i]   = item.at( fShapingTimeOrder.find( fShapingTime )->second );
+	  fNoiseFactVec[i] *= fASICGain/4.7;
+	  ++i;
+	}
+      }
+      else {//Throw exception...
+	throw cet::exception("SimWireMicroBooNE")
+	  << "\033[93m"
+	  << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
+	  << std::endl
+	  << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
+	  << "\033[00m"
+	  << std::endl;
+      }
+      //to be moved
+
+      //Take into account ASIC Gain
+      //    fNoiseFactInd *= fASICGain/4.7;
+      //        fNoiseFactColl *= fASICGain/4.7;
+      // get the sim::SimChannel for this channel
+
+
+
+
       auto& thisChan = responseParamsVec[chan];
       view = (size_t)geo->View(chan);
 

@@ -211,7 +211,8 @@ namespace detsim{
     std::vector<float>    noisevec(signalSize, 0);
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
-    int electron_time_offset = sss->FieldResponseTOffset(fChannel);
+    //Xin remove the time offset, now doing it in the SignalShapingService
+    int electron_time_offset = 0.;//sss->FieldResponseTOffset(fChannel);
     std::cout<<"Offset: "<<electron_time_offset << std::endl;
 
     // make an unique_ptr of sim::SimDigits that allows ownership of the produced
@@ -249,8 +250,8 @@ namespace detsim{
     // Do noise
     //
     //get ASIC Gain and Noise in ADCatLowestGain:
-    double fASICGain      = sss->GetASICGain();
-    double fShapingTime   = sss->GetShapingTime();
+    double fASICGain      = sss->GetASICGain(fChannel);    //Jyoti - to read different gain for U,V & Y planes 
+    double fShapingTime   = sss->GetShapingTime(fChannel); //Jyoti - to read different shaping time for U,V & Y planes 
     //Check that shaping time is an allowed value
     //If so, Pick out noise factor 
     //If not, through exception

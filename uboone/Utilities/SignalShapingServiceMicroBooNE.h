@@ -68,7 +68,11 @@
 /// FieldResponseHistoName     - Name of the field response histograms,
 ///                              the format in the code will be 
 ///                              FieldResponseHistoName_U(V,Y)
-///
+///update notes: Jyoti Joshi (jjoshi@bnl.gov), Jan 13, 2015 
+//               1. Modification to GetShapingTime function to read in different
+//                  shaping time for different planes
+//               2. Modification to GetASICGain fucntion to read in different gain 
+//                  settings for different planes    
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef SIGNALSHAPINGSERVICEMICROBOONE_H
@@ -106,13 +110,23 @@ namespace util {
 
     // Accessors.
 
-    double GetASICGain()                                    { return fASICGainInMVPerFC; }
+    //  double GetASICGain()                                    { return fASICGainInMVPerFC; }
     std::vector<DoubleVec> GetNoiseFactVec()                { return fNoiseFactVec; }
-    double GetShapingTime()                                 { return fShapeTimeConst.at(1); };
+    //double GetShapingTime()                                 { return fShapeTimeConst.at(1); };
     std::vector<std::vector<size_t> > GetNResponses()                    { return fNResponses; }
     std::vector<std::vector<size_t> > GetNActiveResponses()     { return fNActiveResponses; }
 
     std::vector<size_t> GetViewIndex()       { return fViewIndex; }
+    //double GetASICGain() { return fASICGainInMVPerFC; }
+    
+      //    std::vector<double> GetNoiseFactInd() { return fNoiseFactInd; }
+      //std::vector<double> GetNoiseFactColl() { return fNoiseFactColl; }
+    
+
+    //double GetShapingTime() { return fShapeTimeConst.at(1); }
+
+    double GetASICGain(unsigned int const channel) const;
+    double GetShapingTime(unsigned int const channel) const; 
 
     const util::SignalShaping& SignalShaping(unsigned int channel, unsigned wire = 0, size_t ktype=0) const;
 
@@ -127,6 +141,8 @@ namespace util {
 
     template <class T> void Deconvolute(size_t channel, std::vector<T>& func) const;
     template <class T> void Deconvolute(size_t channel, size_t wire, std::vector<T>& func) const;
+    
+    void SetDecon(int fftsize);
 
   private:
 
@@ -140,8 +156,11 @@ namespace util {
     // Calculate response functions.
     // Copied from SimWireMicroBooNE.
 
+
     void SetFieldResponse(size_t ktype);
-    void SetElectResponse(size_t ktype);
+    // void SetElectResponse(size_t ktype);
+   
+    void SetElectResponse(size_t ktype, double shapingtime, double gain);  //changed to read different peaking time for different planes
 
     // Calculate filter functions.
 
@@ -159,6 +178,8 @@ namespace util {
     size_t fNPlanes;
     size_t fNViews;
 
+    
+
     // Fcl parameters.
     std::vector<size_t>      fViewIndex;
     std::map<size_t, size_t> fViewMap;
@@ -166,11 +187,15 @@ namespace util {
 
     double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
-    double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
+	  //double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
     std::vector<DoubleVec> fNoiseFactVec;       ///< RMS noise in ADCs for lowest gain setting
 
     std::vector<std::vector<size_t> > fNResponses;
     std::vector<std::vector<size_t> > fNActiveResponses;
+    //double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
+    std::vector<double> fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
+    //std::vector<double> fNoiseFactColl;         ///< RMS Noise in ADCs for lowest Gain Setting
+    //std::vector<double> fNoiseFactInd;          ///< RMS Noise in ADCs for lowest Gain Setting
 
     DoubleVec fDefaultDriftVelocity;  ///< Default drift velocity of electrons in cm/usec
     std::vector<DoubleVec>  fFieldResponseTOffset;  ///< Time offset for field response in ns
@@ -215,40 +240,50 @@ namespace util {
   };
 }
 
-int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int const channel, size_t ktype=0) const
-{
-  art::ServiceHandle<geo::Geometry> geom;
-  geo::View_t view = geom->View(channel);
 
-  double time_offset = 0;
-  switch(view){
-  case geo::kU: 
-    time_offset = fFieldResponseTOffset[ktype].at(0); 
-    break;
-  case geo::kV: 
-    time_offset = fFieldResponseTOffset[ktype].at(1); 
-    break;
-  case geo::kZ: 
-    time_offset = fFieldResponseTOffset[ktype].at(2); 
-    break;
-  default:
-    throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
-  }
-  auto tpc_clock = art::ServiceHandle<util::TimeService>()->TPCClock();
-  return tpc_clock.Ticks(time_offset/1.e3);
-}
+
 
 //----------------------------------------------------------------------
 // Do convolution.
 template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(size_t channel, std::vector<T>& func) const
 {
   SignalShaping(channel, 0).Convolute(func);
+
+  //negative number
+  int time_offset = FieldResponseTOffset(channel,0);
+  
+  std::vector<T> temp;
+  if (time_offset <=0){
+    temp.assign(func.begin(),func.begin()-time_offset);
+    func.erase(func.begin(),func.begin()-time_offset);
+    func.insert(func.end(),temp.begin(),temp.end());
+  }else{
+    temp.assign(func.end()-time_offset,func.end());
+    func.erase(func.end()-time_offset,func.end());
+    func.insert(func.begin(),temp.begin(),temp.end());
+  }
+  
 }
 
 // Do convolution.
 template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(size_t channel, size_t wire, std::vector<T>& func) const
 {
   SignalShaping(channel, wire).Convolute(func);
+
+  //negative number
+  int time_offset = FieldResponseTOffset(channel,0);
+  
+  std::vector<T> temp;
+  if (time_offset <=0){
+    temp.assign(func.begin(),func.begin()-time_offset);
+    func.erase(func.begin(),func.begin()-time_offset);
+    func.insert(func.end(),temp.begin(),temp.end());
+  }else{
+    temp.assign(func.end()-time_offset,func.end());
+    func.erase(func.end()-time_offset,func.end());
+    func.insert(func.begin(),temp.begin(),temp.end());
+  }
+  
 }
 
 
@@ -258,14 +293,46 @@ template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute
 {
   size_t ktype = 1;
   SignalShaping(channel, 0, ktype).Deconvolute(func);
+
+  int time_offset = FieldResponseTOffset(channel,ktype);
+  
+  std::vector<T> temp;
+  if (time_offset <=0){
+    temp.assign(func.end()+time_offset,func.end());
+    func.erase(func.end()+time_offset,func.end());
+    func.insert(func.begin(),temp.begin(),temp.end());
+  }else{
+    temp.assign(func.begin(),func.begin()+time_offset);
+    func.erase(func.begin(),func.begin()+time_offset);
+    func.insert(func.end(),temp.begin(),temp.end());
+
+    
+  }
 }
 
 //----------------------------------------------------------------------
 // Do deconvolution.
+
 template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute(size_t channel, size_t wire, std::vector<T>& func) const
 {
   size_t ktype = 1;
   SignalShaping(channel, wire, ktype).Deconvolute(func);
+
+  int time_offset = FieldResponseTOffset(channel,ktype);
+  
+  std::vector<T> temp;
+  if (time_offset <=0){
+    temp.assign(func.end()+time_offset,func.end());
+    func.erase(func.end()+time_offset,func.end());
+    func.insert(func.begin(),temp.begin(),temp.end());
+  }else{
+    temp.assign(func.begin(),func.begin()+time_offset);
+    func.erase(func.begin(),func.begin()+time_offset);
+    func.insert(func.end(),temp.begin(),temp.end());
+
+    
+  }
+
 }
 
 DECLARE_ART_SERVICE(util::SignalShapingServiceMicroBooNE, LEGACY)
