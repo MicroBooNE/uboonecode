@@ -187,8 +187,8 @@ namespace detsim {
     fGenNoiseInTime   = p.get< bool                >("GenNoiseInTime");
     fGenNoise         = p.get< bool                >("GenNoise");
 
-    fPedestalVec      = p.get< std::vector<float>  >("PedestalVec");
-    fBaselineRMS      = p.get< float               >("BaselineRMS");
+    //    fPedestalVec      = p.get< std::vector<float>  >("PedestalVec");
+    //    fBaselineRMS      = p.get< float               >("BaselineRMS");
     fTrigModName      = p.get< std::string         >("TrigModName");
     fTest             = p.get<bool                 >("Test");
     fTestWire         = p.get<size_t               >("TestWire");
@@ -557,13 +557,9 @@ namespace detsim {
       
 
       //Generate Noise
-      geo::SigType_t sigtype = geo->SignalType(chan);
-      if (sigtype == geo::kInduction){
-	fNoiseFact = fNoiseFactInd;
-      }
-      else if (sigtype == geo::kCollection){
-	fNoiseFact = fNoiseFactColl;
-      }
+      //geo::SigType_t sigtype = geo->SignalType(chan);
+      fNoiseFact = fNoiseFactVec[view];
+      
       std::vector<float> noisetmp(fNTicks,0.);
       if (fGenNoise){
         if (fGenNoiseInTime)
