@@ -368,7 +368,7 @@ namespace detsim {
       if(fTest) {
         if(wireNum != fTestWire) continue;
         std::cout << "got to wire " << fTestWire << std::endl;
-        int time_offset = sss->FieldResponseTOffset(chan);
+        int time_offset = 0;
         int raw_digit_index = fTestIndex + time_offset;
         double charge       = fTestCharge;
 
