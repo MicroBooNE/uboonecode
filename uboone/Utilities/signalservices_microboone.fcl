@@ -28,6 +28,7 @@ microboone_signalshapingservice:
   NResponses:           [ [1, 1, 1], [1,1,1] ]  # number of responses per view, including primary. 1 is current number
   NActiveResponses:     [ [1, 1, 1], [1,1,1] ]  # number of active responses per view, including primary. 1 is current number
   FieldResponseTOffset: [ [-26.6e3, -26.3e3, -26e3], [-26.6e3, -26.3e3, -26e3] ]  # in us, time offset of field response shape
+  CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
   FieldResponseFVersion:  [ "v0.1", "v0.1" ]
 
 # Settings for synthesized response, including adjacent wires

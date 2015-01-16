@@ -124,6 +124,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   fASICGainInMVPerFC = pset.get<std::vector<double> >("ASICGainInMVPerFC");
   fDefaultDriftVelocity = pset.get< DoubleVec >("DefaultDriftVelocity");
   fFieldResponseTOffset = pset.get< std::vector<DoubleVec> >("FieldResponseTOffset");
+  fCalibResponseTOffset = pset.get< std::vector<double> >("CalibResponseTOffset");
 
   for(size_t ktype=0;ktype<2;++ktype) {
     if(fDefaultDriftVelocity.size() != geo->Nplanes() ||
@@ -233,7 +234,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
         // internal time is in nsec
         fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
 
-	fFieldResponseTOffset[ktype].at(_vw) = resp->GetBinCenter(1)*1000.;
+	fFieldResponseTOffset[ktype].at(_vw) = (resp->GetBinCenter(1) + fCalibResponseTOffset[_vw])*1000.;
 
         _wr++;
       }

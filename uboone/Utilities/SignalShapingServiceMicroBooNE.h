@@ -199,6 +199,9 @@ namespace util {
 
     DoubleVec fDefaultDriftVelocity;  ///< Default drift velocity of electrons in cm/usec
     std::vector<DoubleVec>  fFieldResponseTOffset;  ///< Time offset for field response in ns
+
+    std::vector<double> fCalibResponseTOffset; // calibrated time offset to align U/V/Y Signals 
+
     int fNFieldBins[2];         			///< number of bins for field response
     int fFieldLowEdge[2];            ///< low edge of the field response histo (for test output)
     double fFieldBinWidth[2];        ///<  Bin with of the input field response.
