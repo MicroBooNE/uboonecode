@@ -1,7 +1,7 @@
 #include "calorimetry_microboone.fcl"
 #include "evdservices_base.fcl"
 #include "services_microboone.fcl"
-#include "trackfinderalgorithms_microboone.fcl"
+#include "trackfinderalgorithms.fcl"
 
 BEGIN_PROLOG
 
