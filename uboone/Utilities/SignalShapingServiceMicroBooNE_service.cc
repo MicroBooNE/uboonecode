@@ -123,7 +123,11 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   //fASICGainInMVPerFC = pset.get<double>("ASICGainInMVPerFC");
   fASICGainInMVPerFC = pset.get<std::vector<double> >("ASICGainInMVPerFC");
   fDefaultDriftVelocity = pset.get< DoubleVec >("DefaultDriftVelocity");
-  fFieldResponseTOffset = pset.get< std::vector<DoubleVec> >("FieldResponseTOffset");
+  //fFieldResponseTOffset = pset.get< std::vector<DoubleVec> >("FieldResponseTOffset");
+  fFieldResponseTOffset.resize(2);
+  for(size_t ktype=0;ktype<2;++ktype) {
+    fFieldResponseTOffset[ktype].resize(fNViews);
+  }
   fCalibResponseTOffset = pset.get< std::vector<double> >("CalibResponseTOffset");
 
   for(size_t ktype=0;ktype<2;++ktype) {
