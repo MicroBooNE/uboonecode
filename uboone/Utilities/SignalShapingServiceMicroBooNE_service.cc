@@ -658,7 +658,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
   // Sampling
   //int fNPlanes = geo->Nplanes();
   //
-  std::cout << "Calculating sampled field responses\n";
+  //std::cout << "Calculating sampled field responses\n";
   for(_vw=0; _vw<fNViews; ++_vw) {
     for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
       const std::vector<double>* pResp = &((fSignalShapingVec[ktype][_vw][_wr]).Response_save());
@@ -739,7 +739,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
     }  //  loop over wires
   } // loop over views
 
-  std::cout << "Done with field responses" << std::endl;
+  //std::cout << "Done with field responses" << std::endl;
   return;
 }
 
