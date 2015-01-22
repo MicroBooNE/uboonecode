@@ -401,6 +401,8 @@ larpandora : larpandora : LArPandoraAlgorithms/LArObjects/LArTwoDSlidingFitResul
 larpandora : larpandora : LArPandoraAlgorithms/LArObjects/LArTwoDSlidingShowerFitResult.h
 larpandora : larpandora : LArPandoraAlgorithms/LArObjects/LArXOverlap.h
 larpandora : larpandora : LArPandoraAlgorithms/LArPlugins/LArParticleIdPlugins.h
+larpandora : larpandora : LArPandoraAlgorithms/LArPlugins/LArPseudoLayerPlugin.h
+larpandora : larpandora : LArPandoraAlgorithms/LArPlugins/LArRotationalTransformationPlugin.h
 larpandora : larpandora : LArPandoraAlgorithms/LArPlugins/LArTransformationPlugin.h
 larpandora : larpandora : LArPandoraAlgorithms/LArThreeDReco/LArCosmicRay/CosmicRayIdentificationAlgorithm.h
 larpandora : larpandora : LArPandoraAlgorithms/LArThreeDReco/LArCosmicRay/CosmicRayTrackMatchingAlgorithm.h
@@ -497,11 +499,12 @@ larpandora : larpandora : LArPandoraInterface/LArPandoraBase.h
 larpandora : larpandora : LArPandoraInterface/LArPandoraCollector.h
 larpandora : larpandora : LArPandoraInterface/LArPandoraHelper.h
 larpandora : larpandora : LArPandoraInterface/LArPandoraParticleCreator.h
-larpandora : larpandora : LArPandoraInterface/LArPandoraPseudoLayerPlugin.h
-larpandora : larpandora : LArPandoraInterface/LArPandoraTransformationPlugin.h
 larpandora : larpandora : LArPandoraInterface/LBNE35tGeometryHelper.h
 larpandora : larpandora : LArPandoraInterface/LBNE35tPseudoLayerPlugin.h
 larpandora : larpandora : LArPandoraInterface/LBNE35tTransformationPlugin.h
+larpandora : larpandora : LArPandoraInterface/LBNE4APAGeometryHelper.h
+larpandora : larpandora : LArPandoraInterface/LBNE4APAPseudoLayerPlugin.h
+larpandora : larpandora : LArPandoraInterface/LBNE4APATransformationPlugin.h
 larpandora : larpandora : LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h
 larpandora : larpandora : LArPandoraInterface/MicroBooNETransformationPlugin.h
 larpandora : larpandora : LArPandoraInterface/PFParticleSeed.h
@@ -702,6 +705,7 @@ larsim : lardata : Utilities/TimeService.h
 larsim : lardata : Utilities/TimeServiceException.h
 larsim : lardata : Utilities/VectorMap.h
 larsim : lardata : Utilities/sparse_vector.h
+larsim : larevt : Filters/ChannelFilter.h
 larsim : larsim : LArG4/AuxDetReadout.h
 larsim : larsim : LArG4/AuxDetReadoutGeometry.h
 larsim : larsim : LArG4/ConfigurablePhysicsList.hh
@@ -854,6 +858,7 @@ uboonecode : uboonecode : uboone/CalData/ROIAlg_DigitAboveThreshold.h
 uboonecode : uboonecode : uboone/CalData/RawDigitAndWireComparisonAlg.h
 uboonecode : uboonecode : uboone/CalData/WaveformPropertiesAlg.h
 uboonecode : uboonecode : uboone/Calibrations/CalibrationTPC_Algs.h
+uboonecode : uboonecode : uboone/Database/PedestalRetrievalAlg.h
 uboonecode : uboonecode : uboone/MCSTReco/MCRecoEdep.h
 uboonecode : uboonecode : uboone/MCSTReco/MCRecoPart.h
 uboonecode : uboonecode : uboone/MCSTReco/MCShowerRecoAlg.h
@@ -901,4 +906,5 @@ uboonecode : uboonecode : uboone/RawData/utils/LArRawInputDriverUBooNE.h
 uboonecode : uboonecode : uboone/TriggerSim/UBTrigException.h
 uboonecode : uboonecode : uboone/TriggerSim/UBTriggerAlgo.h
 uboonecode : uboonecode : uboone/TriggerSim/UBTriggerTypes.h
+uboonecode : uboonecode : uboone/Utilities/FileCatalogMetadataMicroBooNE.h
 uboonecode : uboonecode : uboone/Utilities/SignalShapingServiceMicroBooNE.h
