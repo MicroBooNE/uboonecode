@@ -396,7 +396,6 @@ void util::SignalShapingServiceMicroBooNE::SetDecon(int fftsize)
     // with the nominal sampling rate.
     // We may consider to do the same for the filters as well.
 
-    std::cout << "Xin1 " << std::endl;
     size_t ktype = 1;
     for(_vw=0;_vw<fNViews; ++_vw) {
       //std::cout << "filtervec size" << fFilterVec[_vw].size() << std::endl;
@@ -406,11 +405,9 @@ void util::SignalShapingServiceMicroBooNE::SetDecon(int fftsize)
     }
 
     SetResponseSampling(ktype);
-    std::cout << "Xin2 " << std::endl;
     // Calculate filter functions.
     SetFilters();
     // Configure deconvolution kernels.
-    std::cout << "Xin3 " << std::endl;
     for(_vw=0;_vw<fNViews; ++_vw) {
       //std::cout << "filtervec size" << fFilterVec[_vw].size() << std::endl;
       for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
@@ -418,7 +415,6 @@ void util::SignalShapingServiceMicroBooNE::SetDecon(int fftsize)
         (fSignalShapingVec[ktype][_vw][_wr]).AddFilterFunction(fFilterVec[_vw]);
         (fSignalShapingVec[ktype][_vw][_wr]).SetDeconvKernelPolarity( fDeconvPol.at(_vw));
         (fSignalShapingVec[ktype][_vw][_wr]).CalculateDeconvKernel();
-        std::cout << "Xin4 " << std::endl;
       }
     }
   }

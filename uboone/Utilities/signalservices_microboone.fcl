@@ -6,20 +6,20 @@ microboone_signalshapingservice:
   # ASICGains:           [4.7, 7.8, 14, 25] #Default: 7.8
   ASICGainInMVPerFC:  [7.8, 7.8, 7.8] #mV/fC for U, Y & Y planes
 
+  ShapeTimeConst:  [ 1.4, 1.0, 1.0, 2.0] #Gain[0] and Peaking time (microseconds) for U, V & Y planes
+  
   #Noise Factor - rms ADCs @ lowest ASIC Gain (4.7 mV/fC)
-  #Entries listed per shaping time, in increasing order
+  #Entries listed per shaping time, in increasing order(for 0.5, 1.0, 2.0, 3.0 us)
+  NoiseFactVec:         [[ 1.12, 0.86, 0.60, 0.55 ], [ 1.12, 0.86, 0.60, 0.55 ], [ 0.89, 0.66, 0.48, 0.43 ]]
+
+  # to turn off noise
+  #NoiseFactVec:         [[ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ]]
 
 
   NViews:                  3
   ViewIndex:             [0, 1, 2]  # gives the larsoft plane number corresponding to each local plane number
   ViewForNormalization:   2         # lets say this is the local plane number, may need to rethink
 
-  #NoiseFactVec:         [[ 1.12, 0.86, 0.60, 0.55 ], [ 1.12, 0.86, 0.60, 0.55 ], [ 0.89, 0.66, 0.48, 0.43 ]]
-
-# to turn off noise
-  NoiseFactVec:         [[ .0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ]]
-
-  # ShapeTimeConst:  [ 1.4, 2.0 ] #Gain and Peaking time (microseconds)
   FieldRespAmpVec:  [1.0, 1.0, 1.0]
 
 #---------------------------------------------------------------
@@ -39,9 +39,6 @@ microboone_signalshapingservice:
 
 #----------------------------------------------------------------
 
-  #NoiseFactColl:        [ 0.89, 0.66, 0.48, 0.43 ] 
-  #NoiseFactInd:         [ 1.12, 0.86, 0.60, 0.55 ]
-
   DefaultDriftVelocity: [-1,-1,-1] # in cm/usec per drift region ... if negative value, use LArSoft derived drift velocity
 
   Col3DCorrection:  2.5
@@ -51,11 +48,7 @@ microboone_signalshapingservice:
   FieldResponseHNameBase: "FieldResponse"
 
   DeconvPol:       [ -1, 1, 1 ] #Switch for RawDigit-RecobWire normalization. Entry 0,1,2 are U,V,Y respectively
-
- 
-  ShapeTimeConst:  [ 1.4, 2.0, 2.0, 2.0] #Gain[0] and Peaking time (microseconds) for U, V & Y planes
-
-                               #-1 means normalizes to min ADC count, +1 to max
+                             #-1 means normalizes to min ADC count, +1 to max
 
   # For IndFilter and ColFilter, frequency (x) is measured in
   # cycles/microsecond.  The conversion to frequency bin depends on FFT size
