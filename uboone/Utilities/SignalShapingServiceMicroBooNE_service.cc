@@ -236,20 +236,29 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
         fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
 
         //fFieldResponseTOffset[ktype].at(_vw) = (resp->GetBinCenter(1) + fCalibResponseTOffset[_vw])*1000.;
-        if(_wr==0 && _vw==fViewForNormalization) {
-          int binmax = resp->GetMaximumBin();
-          tOffset = (resp->GetXaxis()->GetBinCenter(binmax) - resp->GetXaxis()->GetBinCenter(1));
-          double maxVal = resp->GetBinContent(binmax);
-          std::cout << "response set " << ktype<< ", peak bin " << binmax << ", x value " << tOffset << ", y value " << maxVal << std::endl;
+        if(_wr==0) {
+          int binmax = 0;
+          // get the "zero" from the peak in the Y response
+          if(_vw==fViewForNormalization) {
+            binmax = resp->GetMaximumBin();
+            tOffset = resp->GetXaxis()->GetBinCenter(binmax);
+            double maxVal = resp->GetBinContent(binmax);
+            std::cout << "response set " << ktype<< ", peak bin " << binmax << ", x value " << tOffset << ", value at peak " << maxVal << std::endl;
+          }
+          fFieldResponseTOffset[ktype].at(_vw) = resp->GetXaxis()->GetBinCenter(1);
         }
-
         _wr++;
       }
       fin->Close();
       _vw++;
     }
+
+    std::cout << "TOffsets for ktype " << ktype << std::endl;
     for(_vw=0;_vw<fNViews;++_vw) {
-      fFieldResponseTOffset[ktype].at(_vw) = (-tOffset + fCalibResponseTOffset[_vw])*1000.;
+      // we want to end up with -(BinCenter(binmax) - BinCenter(1));
+      fFieldResponseTOffset[ktype].at(_vw) += -tOffset + fCalibResponseTOffset[_vw];
+      std::cout << "  view " << _vw << ": " << fFieldResponseTOffset[ktype].at(_vw) << std::endl;
+      fFieldResponseTOffset[ktype].at(_vw) *= 1000.0;  // convert to nsec
     }
   }
 }
@@ -324,7 +333,7 @@ void util::SignalShapingServiceMicroBooNE::init()
         SetElectResponse(ktype,fShapeTimeConst.at(1+_vw),fASICGainInMVPerFC.at(_vw));
 
         //Electronic response
-        std::cout << "Electonic response " << fElectResponse[ktype].size() << " bins" << std::endl;
+        std::cout << "Electronic response " << fElectResponse[ktype].size() << " bins" << std::endl;
 
         if(fPrintResponses) {
           for(size_t i = 0; i<100; ++i) {
