@@ -10,11 +10,11 @@ microboone_services.BackTracker:                    @local::microboone_backtrack
 microboone_services.MemoryPeakReporter: {}
 #microboone_services.OpDigiProperties:               @local::microboone_opdigiproperties
 
-microboone_services_ana:                            @local::microboone_basic_services
+microboone_services_ana:                            @local::microboone_simulation_services
 microboone_services_ana.BackTracker:                @local::microboone_backtracker  
 microboone_services_ana.MemoryPeakReporter: {}
 
-microboone_services_reco:                           @local::microboone_basic_services
+microboone_services_reco:                                @local::microboone_basic_services
 microboone_services_reco.LArFFT:                         @local::microboone_larfft
 microboone_services_reco.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
 microboone_services_reco.MemoryPeakReporter: {}

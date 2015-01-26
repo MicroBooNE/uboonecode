@@ -1,36 +1,29 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//  MCShowerRecoEdep source
+//  MCRecoEdep source
 //
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef MCSHOWERRECOEDEP_CC
-#define MCSHOWERRECOEDEP_CC
+#ifndef MCRECOEDEP_CC
+#define MCRECOEDEP_CC
 
-#include "MCShowerRecoEdep.h"
+#include "MCRecoEdep.h"
 
 namespace sim {
 
-  //const unsigned short MCShowerHit::kINVALID_USHORT = std::numeric_limits<unsigned short>::max();
+  //const unsigned short MCEdepHit::kINVALID_USHORT = std::numeric_limits<unsigned short>::max();
 
-  //const short MCShowerEdep::kINVALID_SHORT = std::numeric_limits<short>::max();
+  //const short MCEdep::kINVALID_SHORT = std::numeric_limits<short>::max();
 
   //##################################################################
-  MCShowerRecoEdep::MCShowerRecoEdep(fhicl::ParameterSet const& pset)
+  MCRecoEdep::MCRecoEdep(fhicl::ParameterSet const& pset)
   //##################################################################
   {
     _debug_mode = pset.get<bool>("DebugMode");
     _save_mchit = pset.get<bool>("SaveMCHit");
   }
 
-  void MCShowerRecoEdep::FillTrackList(std::vector<unsigned int> &track_list) const
-  {
-    track_list.resize(_track_index.size(),0);
-    for(auto track_iter = _track_index.begin(); track_iter != _track_index.end(); ++track_iter)
-      track_list.at((*track_iter).second)=(*track_iter).first;
-  }
-
-  const std::vector<sim::MCShowerEdep>& MCShowerRecoEdep::GetEdepArrayAt(size_t edep_index)
+  const std::vector<sim::MCEdep>& MCRecoEdep::GetEdepArrayAt(size_t edep_index) const
   {
     if(edep_index >= _mc_edeps.size()) 
       
@@ -39,22 +32,19 @@ namespace sim {
     return _mc_edeps.at(edep_index);
   }
 
-  std::vector<sim::MCShowerEdep>& MCShowerRecoEdep::__GetEdepArray__(unsigned int track_id)
+  std::vector<sim::MCEdep>& MCRecoEdep::__GetEdepArray__(unsigned int track_id)
   { 
     if(ExistTrack(track_id)) return _mc_edeps.at((*_track_index.find(track_id)).second);
 
     _track_index.insert(std::pair<unsigned int,size_t>(track_id,_mc_edeps.size()));
     
-    _mc_edeps.push_back(std::vector<sim::MCShowerEdep>());
+    _mc_edeps.push_back(std::vector<sim::MCEdep>());
     
     return (*(_mc_edeps.rbegin()));
   }
 
-
-  void MCShowerRecoEdep::MakeMCShowerEdep(const art::Handle<std::vector<sim::SimChannel> > schArray)
+  void MCRecoEdep::MakeMCEdep(const std::vector<sim::SimChannel>& schArray)
   {
-    if(!schArray.isValid()) throw cet::exception(__FUNCTION__) << "Invalid handle given...";
-
     _mc_edeps.clear();
     _track_index.clear();
 
@@ -62,17 +52,17 @@ namespace sim {
     art::ServiceHandle<util::DetectorProperties> detp;
 
     // Key map to identify a unique particle energy deposition point
-    std::map<unsigned short, std::map<double, std::map<double, std::map<double, int> > > > hit_index_m;
+    std::map<unsigned int, std::map<double, std::map<double, std::map<double, int> > > > hit_index_m;
 
-    if(_debug_mode) std::cout<<"Processing "<<schArray->size()<<" channels..."<<std::endl;
+    if(_debug_mode) std::cout<<"Processing "<<schArray.size()<<" channels..."<<std::endl;
     // Loop over channels
-    for(size_t i=0; i<schArray->size(); ++i) {
+    for(size_t i=0; i<schArray.size(); ++i) {
 
       // Get data to loop over
-      const art::Ptr<sim::SimChannel> sch_ptr(schArray,i);
-      const std::map<unsigned short,std::vector<sim::IDE> > sch_map(sch_ptr->TDCIDEMap());
+      auto const& sch = schArray[i];
+      const std::map<unsigned short,std::vector<sim::IDE> > sch_map(sch.TDCIDEMap());
       // Channel
-      UInt_t ch = sch_ptr->Channel();
+      UInt_t ch = sch.Channel();
 
       // Loop over ticks
       for(auto tdc_iter = sch_map.begin(); tdc_iter!=sch_map.end(); ++tdc_iter) {
@@ -95,10 +85,11 @@ namespace sim {
 
 	  int hit_index = -1;
 	  auto hit_index_track_iter = hit_index_m.find(real_track_id);
+	  //std::cout<<"Inspecting: hit-time="<<hit_time<<" : PartID="<<real_track_id<<std::endl;
 	  if(hit_index_track_iter == hit_index_m.end()) {
 	    // create new entry here
 	    //_track_index.insert(std::pair<unsigned int,size_t>(real_track_id,_mc_edeps.size()));
-	    //_mc_edeps.push_back(std::vector<sim::MCShowerEdep>());
+	    //_mc_edeps.push_back(std::vector<sim::MCEdep>());
 	    int new_hit_index = this->__GetEdepArray__(real_track_id).size();
 	    std::map<double,int> tmp_z_index;
 	    std::map<double,std::map<double,int> > tmp_y_z_index;
@@ -141,9 +132,11 @@ namespace sim {
 
 		if(hit_index_z_iter == (*hit_index_y_iter).second.end()) {
 		  // "y" exists but this "z" does not exist. Create.
-		  //int new_hit_index = _mc_edeps.at((*(_track_index.find(real_track_id))).second).size();
+		  //int new_hit_index = _mc_edeps.at((*(_track_index.find(real_track_id))).second).size();		    
 		  int new_hit_index = this->__GetEdepArray__(real_track_id).size();
 		  (*hit_index_y_iter).second.insert(std::pair<double,int>(z_mm,new_hit_index));
+		  //std::cout<<" ... inserted "<<new_hit_index<< " ... check: "<<this->__GetEdepArray__(real_track_id).size()<<std::endl;
+
 		}
 
 		else
@@ -153,9 +146,11 @@ namespace sim {
 	      }
 	    }
 	  }
+	  //std::cout<<"Finished checking: hit-time="<<hit_time<<" : PartID="<<real_track_id<<std::endl;
 	  if(hit_index < 0) {
+
 	    // This particle energy deposition is never recorded so far. Create a new Edep
-	    MCShowerEdep edep;
+	    MCEdep edep;
 	    // Fill Edep
 	    edep.x = x_mm;
 	    edep.y = y_mm;
@@ -176,23 +171,23 @@ namespace sim {
 
 	    // If configured to save MC hits, do so
 	    if(_save_mchit) {
-	      MCShowerHit mchit;
+	      MCEdepHit mchit;
 	      mchit.timeStart = hit_time;
 	      mchit.timeMax = hit_time;
 	      mchit.timeEnd = hit_time;
 	      mchit.qSum = charge;
 	      mchit.qMax = charge;
-	      edep.mchits.insert(std::pair<unsigned short,sim::MCShowerHit>(ch,mchit));
+	      edep.mchits.insert(std::pair<unsigned short,sim::MCEdepHit>(ch,mchit));
 	    }
-
+	    //std::cout<<"Inserting: "<<this->__GetEdepArray__(real_track_id).size()<<std::flush;
 	    this->__GetEdepArray__(real_track_id).push_back(edep);
-
+	    //std::cout<<" now became "<<this->__GetEdepArray__(real_track_id).size()<<std::endl;
 	  }else{
-	    
+	    //std::cout<<"Existing ... "<<hit_index<<" (size = "<<this->__GetEdepArray__(real_track_id).size()<<std::endl;
 	    // Append charge to the relevant edep (@ hit_index)
 	    //float charge = ide.numElectrons * detp->ElectronsToADC();
 	    double charge = ide.numElectrons;
-	    MCShowerEdep &edep = this->__GetEdepArray__(real_track_id).at(hit_index);
+	    MCEdep &edep = this->__GetEdepArray__(real_track_id).at(hit_index);
 
 	    geo::View_t view = geom->View(ch);
 	    if(view == geo::kU) {
@@ -211,13 +206,13 @@ namespace sim {
 	      // Check if channel is already stored. If so, append. Else store new.
 	      auto hit_iter = edep.mchits.find(ch);
 	      if( hit_iter == edep.mchits.end() ) {
-		MCShowerHit mchit;
+		MCEdepHit mchit;
 		mchit.timeStart = hit_time;
 		mchit.timeMax = hit_time;
 		mchit.timeEnd = hit_time;
 		mchit.qSum = charge;
 		mchit.qMax = charge;
-		edep.mchits.insert(std::pair<unsigned short,sim::MCShowerHit>(ch,mchit));
+		edep.mchits.insert(std::pair<unsigned short,sim::MCEdepHit>(ch,mchit));
 
 	      }else{
 
@@ -235,9 +230,9 @@ namespace sim {
 	  }
 	  
 	} // end looping over ides in this tick
-	
+	//std::cout<<"End looping over ides in tick: "<<hit_time<<std::endl;
       } // end looping over ticks in this channel
-    
+      //std::cout<<"End looping over ticks in channel: "<<ch<<std::endl;    
     }// end looping over channels
 
     if(_debug_mode) {

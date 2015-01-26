@@ -8,3 +8,5 @@ physics.producers.generator: @local::microboone_genie_simple_numi_dirt
 physics.producers.generator.GlobalTimeOffset: 0.
 physics.producers.generator.RandomTimeOffset: 1600.
 physics.producers.generator.TopVolume: "volWorld"
+services.user.Geometry.GDML: "microboone_AuxDet.gdml"
+services.user.Geometry.ROOT: "microboone_AuxDet.gdml"

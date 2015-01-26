@@ -11,58 +11,6 @@
 
 process_name: Trial 
 
-standard_scanner:
-{
-  module_type:            "LiteScanner"
-  store_association:      true
-  gtruth:     ["generator"]
-  mcflux:     ["generator"]
-  mctruth:    ["generator"]
-  mcpart:     ["largeant"]
-  simch:      ["largeant"]
-  mcshower:   []
-  wire:       []
-  hit:        ["gaushit","ccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandora"]
-  endpoint2d: ["cccluster",
-               "featurevtx"]
-  spacepoint: ["pandora",
-               "costrk", "costrkcc",
-               "spacepointfinder","spacepointfindercc",
-               "trackkalmanhit","trackkalmanhitcc"]
-  vertex:     ["cccluster",
-               "baziertracker","baziertrackercc",
-               "featurevtx"]
-  track:      ["trackkalmanhit","trackkalmanhitcc",
-               "trackkalmansps","trackkalspscc",
-               "baziertracker","beziertrackercc",
-               "costrk","costrkcc",
-               "stitch","stitchcc",
-               "stitchkalmanhit"]
-  shower:     []
-  ophit:      ["opflash"]
-  opflash:    ["opflash"]
-  cosmictag:  ["trackkalmanhit","trackkalmanhitcc",
-               "trackkalmansps","trackkalspscc",
-               "baziertracker","beziertrackercc",
-               "costrk","costrkcc",
-               "stitch","stitchcc",
-               "stitchkalmanhit","beamflashcompat"]
-  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
-               "trackkalmanspscalo","trackkalspscccalo",
-               "baziertrackercalo","beziertrackercccalo",
-               "costrkcalo","costrkcccalo",
-               "stitchcalo","stitchcccalo",
-               "stitchkalmanhitcalo"]
-  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
-               "trackkalmanspspid","trackkalspsccpid",
-               "baziertrackerpid","beziertrackerccpid",
-               "costrkpid","costrkccpid",
-               "stitchpid","stitchccpid",
-               "stitchkalmanhitpid"]
-  pfpart:     ["pandora"]
-}
-
 services:
 {
   # Load the service that manages root files for histograms.
@@ -88,10 +36,15 @@ physics:
 
  analyzers:
  {
-   scanner: @local::standard_scanner
+   mcinfo:  @local::litemaker_mcinfo
+   mcpart:  @local::litemaker_mcpart
+   simch:   @local::litemaker_simch
+   reco2d:  @local::litemaker_reco2d
+   reco3d:  @local::litemaker_reco3d
+   anadata: @local::litemaker_anadata
  }
 
- analyzeIt: [ scanner ]
+ analyzeIt: [ mcinfo, mcpart, simch, reco2d, reco3d, anadata ]
 
  end_paths:     [ analyzeIt ]
 }

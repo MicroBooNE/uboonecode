@@ -1,10 +1,12 @@
 # define ROOTLIB
-set( ROOTLIB -L$ENV{ROOTSYS}/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic)
+set( ROOTLIB -L$ENV{ROOTSYS}/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lEG -lThread -pthread -lm -ldl -rdynamic)
+
+link_libraries( ${LIB_NAME} ${ROOTLIB} )
 
 add_subdirectory(job)
 
 art_make( BASENAME_ONLY
-	  LIBRARY_NAME     uboonecode_uboone_MCShowerReco
+	  LIBRARY_NAME     uboonecode_uboone_MCSTReco
           LIB_LIBRARIES    Geometry
 			   Geometry_service
 			   Simulation
@@ -31,7 +33,7 @@ art_make( BASENAME_ONLY
 			   ${ROOT_XMLIO}
 			   ${ROOT_GDML}
 			   ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES uboonecode_uboone_MCShowerReco
+          MODULE_LIBRARIES uboonecode_uboone_MCSTReco
 			   Geometry
 			   Geometry_service
 			   Simulation

@@ -23,7 +23,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_mctruth*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -98,7 +98,7 @@ namespace larlite {
 			    lar_nu.QSqr() );
 
       // Store address map for downstream association
-      fPtrIndex_mctruth[mct_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_mctruth[mct_ptr] = std::make_pair(lite_data->size(),name_index);
 
       // Save
       lite_data->push_back(lite_mct);
@@ -110,7 +110,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_gtruth*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -144,7 +144,7 @@ namespace larlite {
       lite_gtruth.ftgtA        = gtruth_ptr->ftgtA;
       lite_gtruth.ftgtPDG      = gtruth_ptr->ftgtPDG;
 
-      fPtrIndex_gtruth[gtruth_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_gtruth[gtruth_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_gtruth);
       
@@ -157,7 +157,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_mcpart*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -205,7 +205,7 @@ namespace larlite {
       mcpart_lite.SetTrajectory(lite_track);
       
       // Store address map for downstream association
-      fPtrIndex_mcpart[mcparticle_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_mcpart[mcparticle_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(mcpart_lite);
     }
@@ -216,7 +216,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_mcflux*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -321,7 +321,7 @@ namespace larlite {
 			      mcflux_ptr->Flux(-16,::simb::kHistMinusFocus) );
 
       // Register pointer to association look-up map
-      fPtrIndex_mcflux[mcflux_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_mcflux[mcflux_ptr] = std::make_pair(lite_data->size(),name_index);
 
       lite_data->push_back(lite_mcflux);
     }
@@ -332,31 +332,90 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_mcshower*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
 
       art::Ptr<sim::MCShower> mcs_ptr(dh,i);
       
       larlite::mcshower lite_mcs;
-      lite_mcs.SetMotherID(mcs_ptr->MotherPDGID(), mcs_ptr->MotherTrackID());
-      
-      lite_mcs.SetMotherPoint(mcs_ptr->MotherPosition());
-      
-      lite_mcs.SetMotherProcess(mcs_ptr->MotherCreationProcess());
-      
-      lite_mcs.SetMotherMomentum(mcs_ptr->MotherMomentum());
-      
-      lite_mcs.SetDaughterTrackList(mcs_ptr->DaughterTrackID());
-      
-      lite_mcs.SetDaughterMomentum(mcs_ptr->DaughterMomentum());
-      lite_mcs.SetDaughterPosition(mcs_ptr->DaughterPosition());
-      
-      lite_mcs.SetPlaneCharge(mcs_ptr->Charge());
-      
-      fPtrIndex_mcshower[mcs_ptr] = std::make_pair(lite_data->size(),name_index);
+
+      lite_mcs.Origin  ( (::larlite::simb::Origin_t)(mcs_ptr->Origin())  );
+
+      lite_mcs.PdgCode ( mcs_ptr->PdgCode() );
+      lite_mcs.TrackID ( mcs_ptr->TrackID() );
+      lite_mcs.Process ( mcs_ptr->Process() );
+      lite_mcs.Start   ( ::larlite::mcstep( mcs_ptr->Start().Position(), mcs_ptr->Start().Momentum() )  );
+      lite_mcs.End     ( ::larlite::mcstep( mcs_ptr->End().Position(),   mcs_ptr->End().Momentum()   )  );
+
+      lite_mcs.MotherPdgCode ( mcs_ptr->MotherPdgCode() );
+      lite_mcs.MotherTrackID ( mcs_ptr->MotherTrackID() );
+      lite_mcs.MotherProcess ( mcs_ptr->MotherProcess() );
+      lite_mcs.MotherStart   ( ::larlite::mcstep( mcs_ptr->MotherStart().Position(), mcs_ptr->MotherStart().Momentum() ) );
+      lite_mcs.MotherEnd     ( ::larlite::mcstep( mcs_ptr->MotherEnd().Position(),   mcs_ptr->MotherEnd().Momentum()   ) );
+
+      lite_mcs.AncestorPdgCode ( mcs_ptr->AncestorPdgCode() );
+      lite_mcs.AncestorTrackID ( mcs_ptr->AncestorTrackID() );
+      lite_mcs.AncestorProcess ( mcs_ptr->AncestorProcess() );
+      lite_mcs.AncestorStart   ( ::larlite::mcstep( mcs_ptr->AncestorStart().Position(), mcs_ptr->AncestorStart().Momentum() ) );
+      lite_mcs.AncestorEnd     ( ::larlite::mcstep( mcs_ptr->AncestorEnd().Position(),   mcs_ptr->AncestorEnd().Momentum()   ) );
+
+      lite_mcs.Charge( mcs_ptr->Charge() );
+
+      lite_mcs.DetProfile( ::larlite::mcstep( mcs_ptr->DetProfile().Position(), mcs_ptr->DetProfile().Momentum() ) );
+
+      lite_mcs.DaughterTrackID( mcs_ptr->DaughterTrackID() );
+
+      //fPtrIndex_mcshower[mcs_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_mcs);
+    }
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::sim::MCTrack> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    auto lite_data = (::larlite::event_mctrack*)lite_dh;
+    for(size_t i=0; i<dh->size(); ++i) {
+
+      art::Ptr<sim::MCTrack> mct_ptr(dh,i);
+      
+      larlite::mctrack lite_mct;
+
+      lite_mct.Origin  ( (::larlite::simb::Origin_t)(mct_ptr->Origin())  );
+     
+      lite_mct.PdgCode ( mct_ptr->PdgCode() );
+      lite_mct.TrackID ( mct_ptr->TrackID() );
+      lite_mct.Process ( mct_ptr->Process() );
+      lite_mct.Start   ( ::larlite::mcstep( mct_ptr->Start().Position(), mct_ptr->Start().Momentum() )  );
+      lite_mct.End     ( ::larlite::mcstep( mct_ptr->End().Position(),   mct_ptr->End().Momentum()   )  );
+
+      lite_mct.MotherPdgCode ( mct_ptr->MotherPdgCode() );
+      lite_mct.MotherTrackID ( mct_ptr->MotherTrackID() );
+      lite_mct.MotherProcess ( mct_ptr->MotherProcess() );
+      lite_mct.MotherStart   ( ::larlite::mcstep( mct_ptr->MotherStart().Position(), mct_ptr->MotherStart().Momentum() ) );
+      lite_mct.MotherEnd     ( ::larlite::mcstep( mct_ptr->MotherEnd().Position(),   mct_ptr->MotherEnd().Momentum()   ) );
+
+      lite_mct.AncestorPdgCode ( mct_ptr->AncestorPdgCode() );
+      lite_mct.AncestorTrackID ( mct_ptr->AncestorTrackID() );
+      lite_mct.AncestorProcess ( mct_ptr->AncestorProcess() );
+      lite_mct.AncestorStart   ( ::larlite::mcstep( mct_ptr->AncestorStart().Position(), mct_ptr->AncestorStart().Momentum() ) );
+      lite_mct.AncestorEnd     ( ::larlite::mcstep( mct_ptr->AncestorEnd().Position(),   mct_ptr->AncestorEnd().Momentum()   ) );
+
+      const ::sim::MCTrack& mct(*mct_ptr);
+ 
+      lite_mct.reserve(mct.size());
+
+      for(auto const& s : mct)
+      
+	lite_mct.push_back( ::larlite::mcstep(s.Position(), s.Momentum()) );
+
+      //fPtrIndex_mctrack[mct_ptr] = std::make_pair(lite_data->size(),name_index);
+      
+      lite_data->push_back(lite_mct);
     }
   }
 
@@ -365,7 +424,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_simch*)lite_dh;
 
     for(size_t i=0; i<dh->size(); ++i ) {
@@ -395,7 +454,7 @@ namespace larlite {
 	}
       }
 
-      fPtrIndex_simch[sch_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_simch[sch_ptr] = std::make_pair(lite_data->size(),name_index);
 
       lite_data->push_back(lite_sch);
     }
@@ -407,7 +466,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_wire*)lite_dh;
 
     for(size_t i=0; i<dh->size(); i++){
@@ -419,7 +478,7 @@ namespace larlite {
 			      (larlite::geo::View_t)(wire_ptr->View()),
 			      (larlite::geo::SigType_t)(wire_ptr->SignalType()));
 
-      fPtrIndex_wire[wire_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_wire[wire_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(wire_lite);
     }  
@@ -430,7 +489,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());    
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());    
     auto lite_data = (::larlite::event_hit*)lite_dh;
     art::ServiceHandle<::geo::Geometry> geo;
 
@@ -458,7 +517,7 @@ namespace larlite {
       lite_hit.set_sigtype((larlite::geo::SigType_t)(hit_ptr->SignalType()));
       
       // Store address map for downstream association
-      fPtrIndex_hit[hit_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_hit[hit_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_hit);
     }
@@ -469,7 +528,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_ophit*)lite_dh;
 
     for(size_t i=0; i<dh->size(); ++i) {
@@ -486,7 +545,7 @@ namespace larlite {
 				 hit_ptr->PE(),
 				 hit_ptr->FastToTotal() );
 
-      fPtrIndex_ophit[hit_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_ophit[hit_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_hit);
     }
@@ -498,7 +557,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_opflash*)lite_dh;
     art::ServiceHandle<::geo::Geometry> geo;
 
@@ -526,7 +585,7 @@ namespace larlite {
 				     flash_ptr->WireCenters(),
 				     flash_ptr->WireWidths());
       
-      fPtrIndex_opflash[flash_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_opflash[flash_ptr] = std::make_pair(lite_data->size(),name_index);
 
       lite_data->push_back(lite_flash);
     }
@@ -537,7 +596,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_cosmictag*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -549,7 +608,7 @@ namespace larlite {
 				  (::larlite::anab::CosmicTagID_t)(tag_ptr->fCosmicType));
       
       // store product ptr for association
-      fPtrIndex_cosmictag[tag_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_cosmictag[tag_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_tag);
       
@@ -561,7 +620,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_cluster*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -581,7 +640,7 @@ namespace larlite {
       lite_cluster.set_end_vtx_err(cluster_ptr->SigmaEndPos());
       
       // Store address map for downstream association
-      fPtrIndex_cluster[cluster_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_cluster[cluster_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_cluster);
     }
@@ -592,7 +651,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_seed*)lite_dh;
 
     double fSeedPoint[3];
@@ -613,7 +672,7 @@ namespace larlite {
       lite_seed.SetValidity(seed_ptr->IsValid());
       
       // Store address map for downstream association
-      fPtrIndex_seed[seed_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_seed[seed_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_seed);
     }
@@ -624,7 +683,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_endpoint2d*)lite_dh;
     for(size_t i=0; i < dh->size(); ++i) {
       
@@ -638,7 +697,7 @@ namespace larlite {
 				     (larlite::geo::View_t)(end2d_ptr->View()),
 				     end2d_ptr->Charge());
       
-      fPtrIndex_end2d[end2d_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_end2d[end2d_ptr] = std::make_pair(lite_data->size(),name_index);
       
       // Store data
       lite_data->push_back(lite_end2d);
@@ -650,7 +709,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_spacepoint*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -666,7 +725,7 @@ namespace larlite {
 					  spacepoint_ptr->Chisq() );
       
       // Store address map for downstream association
-      fPtrIndex_sps[spacepoint_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_sps[spacepoint_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_spacepoint);
     }
@@ -677,7 +736,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_track*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -698,7 +757,7 @@ namespace larlite {
 	track_lite.add_momentum   (track_ptr->MomentumAtPoint(i));
       
       // Store address map for downstream association
-      fPtrIndex_track[track_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_track[track_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(track_lite);
     }
@@ -709,7 +768,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_shower*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -724,7 +783,7 @@ namespace larlite {
       //light_shower.set_max_width(shower_ptr->MaxWidthX(),shower_ptr->MaxWidthY());
       //light_shower.set_distance_max_width(shower_ptr->DistanceMaxWidth());
       
-      fPtrIndex_shower[shower_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_shower[shower_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_shower);
     }
@@ -735,7 +794,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_vertex*)lite_dh;
     Double_t xyz[3]={0};
     
@@ -749,7 +808,7 @@ namespace larlite {
       larlite::vertex lite_vtx(xyz,
 			       vtx_ptr->ID());
       
-      fPtrIndex_vertex[vtx_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_vertex[vtx_ptr] = std::make_pair(lite_data->size(),name_index);
       
       // Store data
       lite_data->push_back(lite_vtx);
@@ -762,7 +821,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_calorimetry*)lite_dh;
     for(size_t i=0; i < dh->size(); ++i) {
       
@@ -777,8 +836,10 @@ namespace larlite {
       lite_calo.set_kinetic_energy(calo_ptr->KineticEnergy());
       lite_calo.set_range(calo_ptr->Range());
       lite_calo.set_track_pitch(calo_ptr->TrkPitchVec());
-      
-      fPtrIndex_calo[calo_ptr] = std::make_pair(lite_data->size(),name_index);
+      lite_calo.set_plane_id( larlite::geo::PlaneID( calo_ptr->PlaneID().Cryostat,
+						     calo_ptr->PlaneID().TPC,
+						     calo_ptr->PlaneID().Plane ) );
+      //fPtrIndex_calo[calo_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_calo);
       
@@ -790,7 +851,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_partid*)lite_dh;
     
     for(size_t i=0; i<dh->size(); ++i) {
@@ -809,7 +870,7 @@ namespace larlite {
 				   partid_ptr->MissingEavg(),
 				   partid_ptr->PIDA() );
       
-      fPtrIndex_partid[partid_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_partid[partid_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_partid);
     }
@@ -820,7 +881,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
     auto lite_data = (::larlite::event_pfpart*)lite_dh;
     for(size_t i=0; i<dh->size(); ++i) {
       
@@ -831,7 +892,7 @@ namespace larlite {
 				  pfpart_ptr->Parent(),
 				  pfpart_ptr->Daughters());
       
-      fPtrIndex_pfpart[pfpart_ptr] = std::make_pair(lite_data->size(),name_index);
+      //fPtrIndex_pfpart[pfpart_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_pfpart);
     }
@@ -845,68 +906,74 @@ namespace larlite {
   //
   // Getter for associated data product pointer 
   //
-  template <> const std::map<art::Ptr< ::simb::MCTruth>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::simb::MCTruth>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mctruth; }
 
-  template <> const std::map<art::Ptr< ::simb::GTruth>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::simb::GTruth>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_gtruth; }
 
-  template <> const std::map<art::Ptr< ::simb::MCFlux>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::simb::MCFlux>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mcflux; }
 
-  template <> const std::map<art::Ptr< ::simb::MCParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::simb::MCParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mcpart; }
 
-  template <> const std::map<art::Ptr< ::sim::SimChannel>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::sim::SimChannel>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_simch; }
 
-  template <> const std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mcshower; }
 
-  template <> const std::map<art::Ptr< ::recob::OpHit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::sim::MCTrack>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  { return fPtrIndex_mctrack; }
+
+  template <> std::map<art::Ptr< ::recob::OpHit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_ophit; }
 
-  template <> const std::map<art::Ptr< ::recob::OpFlash>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::OpFlash>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_opflash; }
 
-  template <> const std::map<art::Ptr< ::recob::Hit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::Hit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_hit; }
 
-  template <> const std::map<art::Ptr< ::recob::Wire>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::Wire>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_wire; }
 
-  template <> const std::map<art::Ptr< ::recob::Cluster>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::Cluster>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_cluster; }
 
-  template <> const std::map<art::Ptr< ::recob::Track>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::Seed>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  { return fPtrIndex_seed; }
+
+  template <> std::map<art::Ptr< ::recob::Track>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_track; }
 
-  template <> const std::map<art::Ptr< ::recob::Shower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::Shower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_shower; }
 
-  template <> const std::map<art::Ptr< ::recob::Vertex>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::Vertex>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_vertex; }
 
-  template <> const std::map<art::Ptr< ::recob::SpacePoint>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::SpacePoint>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_sps; }
 
-  template <> const std::map<art::Ptr< ::recob::EndPoint2D>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::EndPoint2D>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_end2d; }
 
-  template <> const std::map<art::Ptr< ::anab::CosmicTag>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::anab::CosmicTag>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_cosmictag; }
 
-  template <> const std::map<art::Ptr< ::anab::Calorimetry>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::anab::Calorimetry>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_calo; }
 
-  template <> const std::map<art::Ptr< ::anab::ParticleID>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::anab::ParticleID>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_partid; }
 
-  template <> const std::map<art::Ptr< ::recob::PFParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  template <> std::map<art::Ptr< ::recob::PFParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_pfpart; }
 
   template <class T>
-  const std::map<art::Ptr<T>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap() const
+  std::map<art::Ptr<T>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { throw cet::exception(__PRETTY_FUNCTION__)<<"Not implemented for a specified data product type..."; }
 
   //
@@ -930,6 +997,8 @@ namespace larlite {
   { return ::larlite::data::kSimChannel; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCShower> () const
   { return ::larlite::data::kMCShower; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCTrack> () const
+  { return ::larlite::data::kMCTrack; }
   // raw
   // recob
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::recob::Wire> () const
@@ -969,7 +1038,7 @@ namespace larlite {
   //
   template <class T>
   bool ScannerAlgo::LocateLiteProduct(art::Ptr<T> const ptr,
-				      std::pair<size_t,size_t> &loc) const
+				      std::pair<size_t,size_t> &loc)
   { 
     auto ptr_map = GetPtrMap<T>();
     auto id_iter = ptr_map.find(ptr);
@@ -986,7 +1055,7 @@ namespace larlite {
   template <class T,class U>
   void ScannerAlgo::ScanAssociation(art::Event const& e,
 				    art::Handle<std::vector<T> > &dh,
-				    ::larlite::event_base* lite_dh) const
+				    ::larlite::event_base* lite_dh)
   { 
     art::FindManyP<U> ptr_coll_v(dh, e, lite_dh->name());
     auto ass_type = LiteDataType<U>();
@@ -998,7 +1067,7 @@ namespace larlite {
       return;
     }
     // Instantiate association container. length = # of producers for associated data type
-    std::vector< ::larlite::AssSet_t > ass_set_v(fModuleLabel_v[(size_t)(ass_type)].size());
+    std::vector< ::larlite::AssSet_t> ass_set_v(fAssModuleLabel_v[ass_type].size(),::larlite::AssSet_t());
 
     // Return if there's no data products stored for associated data type
     if(!(ass_set_v.size())) return;
@@ -1011,7 +1080,7 @@ namespace larlite {
       const std::vector<art::Ptr<U> > ptr_coll = ptr_coll_v.at(i);
 
       // Association vector: one per associated data product producers
-      std::vector<larlite::AssUnit_t> ass_unit_v(ass_set_v.size(),::larlite::AssUnit_t());
+      std::vector< ::larlite::AssUnit_t> ass_unit_v(ass_set_v.size(),::larlite::AssUnit_t());
 
       for(auto& art_ptr : ptr_coll) {
 
@@ -1033,7 +1102,7 @@ namespace larlite {
 
 	if(ass_unit.size()) {
 
-	  auto ass_name = fModuleLabel_v[(size_t)ass_type][i];
+	  auto ass_name = fAssModuleLabel_v[(size_t)ass_type][i];
 
 	  larlite::product_id ass_id(ass_type,ass_name);
 	  
@@ -1047,62 +1116,62 @@ namespace larlite {
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Cluster,::recob::Cluster>(art::Event const& e,
 										art::Handle<std::vector<::recob::Cluster> > &dh,
-										::larlite::event_base* lite_dh) const
+										::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::EndPoint2D,::recob::EndPoint2D>(art::Event const& e,
 										      art::Handle<std::vector<::recob::EndPoint2D> > &dh,
-										      ::larlite::event_base* lite_dh) const
+										      ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Vertex,::recob::Vertex>(art::Event const& e,
 										      art::Handle<std::vector<::recob::Vertex> > &dh,
-										      ::larlite::event_base* lite_dh) const
+										      ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::CosmicTag,::anab::CosmicTag>(art::Event const& e,
 										      art::Handle<std::vector<::anab::CosmicTag> > &dh,
-										      ::larlite::event_base* lite_dh) const
+										      ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::SpacePoint,::recob::SpacePoint>(art::Event const& e,
 										      art::Handle<std::vector<::recob::SpacePoint> > &dh,
-										      ::larlite::event_base* lite_dh) const
+										      ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Track,::recob::Track>(art::Event const& e,
 									    art::Handle<std::vector<::recob::Track> > &dh,
-									    ::larlite::event_base* lite_dh) const
+									    ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Shower,::recob::Shower>(art::Event const& e,
-									      art::Handle<std::vector<::recob::Shower> > &dh,
-									      ::larlite::event_base* lite_dh) const
+										  art::Handle<std::vector<::recob::Shower> > &dh,
+										  ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::Calorimetry,::anab::Calorimetry>(art::Event const& e,
 										      art::Handle<std::vector<::anab::Calorimetry> > &dh,
-										      ::larlite::event_base* lite_dh) const
+										      ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::ParticleID,::anab::ParticleID>(art::Event const& e,
 										    art::Handle<std::vector<::anab::ParticleID> > &dh,
-										    ::larlite::event_base* lite_dh) const
+										    ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::simb::MCTruth,::simb::MCTruth>(art::Event const& e,
 									      art::Handle<std::vector<::simb::MCTruth> > &dh,
-									      ::larlite::event_base* lite_dh) const
+									      ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::simb::MCParticle,::simb::MCParticle>(art::Event const& e,
 										    art::Handle<std::vector<::simb::MCParticle> > &dh,
-										    ::larlite::event_base* lite_dh) const
+										    ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::PFParticle,::recob::PFParticle>(art::Event const& e,
 										      art::Handle<std::vector<::recob::PFParticle> > &dh,
-										      ::larlite::event_base* lite_dh) const
+										      ::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   //

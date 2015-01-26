@@ -343,7 +343,7 @@ namespace microboone {
     Float_t  hit_startT[kMaxHits];     //hit start time
     Float_t  hit_endT[kMaxHits];       //hit end time
     
-    Short_t  hit_trkid[kMaxTrackers][kMaxHits];      //is this hit associated with a reco track?
+    Short_t  hit_trkid[kMaxHits];      //is this hit associated with a reco track?
 
     // vertex information
     Short_t  nvtx;                     //number of vertices
@@ -418,8 +418,9 @@ namespace microboone {
     Int_t     geant_list_size;  //number of all geant particles
     Int_t     geant_list_size_in_tpcFV;
     std::vector<Int_t>    pdg;
-    std::vector<Int_t>    status;
+    std::vector<Int_t>    status;    
     std::vector<Float_t>  Eng;
+    std::vector<Float_t>  Mass;
     std::vector<Float_t>  Px;
     std::vector<Float_t>  Py;
     std::vector<Float_t>  Pz;
@@ -1092,10 +1093,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
   std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
   std::fill(hit_endT, hit_endT + sizeof(hit_endT)/sizeof(hit_endT[0]), -99999.);
-
-  for (size_t iTrk = 0; iTrk < kMaxTrackers; ++iTrk) {
-    std::fill(hit_trkid[iTrk], hit_trkid[iTrk] + kMaxHits, -9999);
-  }
+  std::fill(hit_trkid, hit_trkid + sizeof(hit_trkid)/sizeof(hit_trkid[0]), -99999.);
 
   nvtx = 0;
   for (size_t ivtx = 0; ivtx < kMaxVertices; ++ivtx) {
@@ -1134,6 +1132,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   
   FillWith(pdg, -99999);
   FillWith(status, -99999);
+  FillWith(Mass, -99999.);
   FillWith(Eng, -99999.);
   FillWith(Px, -99999.);
   FillWith(Py, -99999.);
@@ -1200,7 +1199,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   // - pythonish C++: as the previous line, for each one in a list of containers
   //   of the same type (C++ is not python yet), using pointers to avoid copy;
   for (AuxDetMCData_t<Float_t>* cont: {
-   &entryX, &entryY, &entryZ,
+   &entryX, &entryY, &entryZ, &entryT,
    &exitX , &exitY , &exitZ, &exitT, &exitPx, &exitPy, &exitPz,
    &CombinedEnergyDep
    })
@@ -1225,7 +1224,8 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   MaxGEANTparticles = (size_t) std::max(nParticles, 1);
   
   pdg.resize(MaxGEANTparticles);
-  status.resize(MaxGEANTparticles);  
+  status.resize(MaxGEANTparticles);
+  Mass.resize(MaxGEANTparticles);  
   Eng.resize(MaxGEANTparticles);
   Px.resize(MaxGEANTparticles);
   Py.resize(MaxGEANTparticles);
@@ -1338,6 +1338,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
   CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
   CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits]/F");
+  CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/F");
 
   CreateBranch("nvtx",&nvtx,"nvtx/S");
   CreateBranch("vtx",vtx,"vtx[nvtx][3]/F");
@@ -1351,9 +1352,6 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   for(int i=0; i<kNTracker; i++){
     std::string TrackLabel = trackers[i];
     std::string BranchName;
-
-    BranchName = "hit_trkid_" + TrackLabel;
-    CreateBranch(BranchName, hit_trkid[i], BranchName + "[no_hits]/S");
 
     // note that if the tracker data has maximum number of tracks 0,
     // nothing is initialized (branches are not even created)
@@ -1423,6 +1421,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   
   CreateBranch("pdg",pdg,"pdg[geant_list_size]/I");
   CreateBranch("status",status,"status[geant_list_size]/I");
+  CreateBranch("Mass",Mass,"Mass[geant_list_size]/F");
   CreateBranch("Eng",Eng,"Eng[geant_list_size]/F");
   CreateBranch("Px",Px,"Px[geant_list_size]/F");
   CreateBranch("Py",Py,"Py[geant_list_size]/F");
@@ -1721,7 +1720,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     fData->hit_ph[i]  = hitlist[i]->Charge(true);
     fData->hit_startT[i] = hitlist[i]->StartTime();
     fData->hit_endT[i] = hitlist[i]->EndTime();
-    
     /*
     for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
       art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[it]);
@@ -1732,6 +1730,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         hit_trkid[it][i] = 0;
     }
     */
+  }
+  if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
+    //Find tracks associated with hits
+    art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[0]);
+    for (size_t i = 0; i < NHits && i < kMaxHits ; ++i){//loop over hits
+      if (fmtk.isValid()){
+	if (fmtk.at(i).size()!=0){
+	  fData->hit_trkid[i] = fmtk.at(i)[0]->ID();
+	}
+	else
+	  fData->hit_trkid[i] = -1;
+      }
+    }
   }
 
   //vertex information
@@ -2151,6 +2162,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->pdg[iPart]=pPart->PdgCode();
 	  fData->status[iPart] = pPart->StatusCode();
           fData->Eng[iPart]=pPart->E();
+	  fData->Mass[iPart]=pPart->Mass();
           fData->Px[iPart]=pPart->Px();
           fData->Py[iPart]=pPart->Py();
           fData->Pz[iPart]=pPart->Pz();
