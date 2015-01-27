@@ -18,7 +18,6 @@ add_subdirectory(TriggerSim)
 add_subdirectory(AnalysisTree)
 add_subdirectory(Calibrations)
 add_subdirectory(OpticalDetectorSim)
-add_subdirectory(MCSTReco)
 #add_subdirectory(DataScanner)
 #add_subdirectory(LiteMaker)
 
