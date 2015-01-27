@@ -1,0 +1,105 @@
+BEGIN_PROLOG
+
+litemaker_base:
+{
+  # module name
+  module_type:       "LiteScanner"
+  # boolean to decide whether or not to store association
+  store_association: true
+  # output file name
+  out_filename:      "larlite_empty.root"
+
+  # Producer names specified below would be looked up & stored in
+  # the output larlite file. The key represents the data product
+  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
+  # string array.
+  DataLookUpMap: 
+  {
+    potsummary: []
+    gtruth:     []
+    mcflux:     []
+    mctruth:    []
+    mcpart:     []
+    simch:      []
+    mcshower:   []
+    mctrack:    []
+    rawdigit:   []
+    wire:       []
+    hit:        []
+    cluster:    []
+    endpoint2d: []
+    seed:       []
+    sps:        []
+    vertex:     []
+    track:      []
+    shower:     []
+    ophit:      []
+    opflash:    []
+    cosmictag:  []
+    calo:       []
+    partid:     []
+    pfpart:     []
+  }
+
+  AssociationLookUpMap: {}
+}
+
+litemaker_ass_mc:
+{
+  mctruth:    ["generator"]
+}
+
+litemaker_ass_reco:
+{
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  endpoint2d: ["cccluster",
+               "featurevtx"]
+  sps:        ["pandoraCosmic","pandoraNu",
+               "costrk", "costrkcc",
+               "spacepointfinder","spacepointfindercc",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "beziertracker","beziertrackercc",
+               "featurevtx"]
+  track:      ["trackkalmanhit","trackkalmanhitcc",
+               "trackkalsps","trackkalspscc",
+               "beziertracker","beziertrackercc",
+               "costrk","costrkcc",
+               "stitch","stitchcc",
+               "stitchkalmanhit",
+               "pandoraCosmicKHit", "pandoraNuKHit"]
+  seed:       ["pandoraCosmicKHit", "pandoraNuKHit"]
+  shower:     []
+  pfpart:     ["pandoraCosmic","pandoraNu"]
+
+  ophit:      ["opflash"]
+  opflash:    ["opflash"]
+
+  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
+               "trackkalspstag","trackkalspscctag",
+               "beziertrackertag","beziertrackercctag",
+               "costrktag","costrkcctag",
+               "stitchtag","stitchcctag",
+               "stitchkalmanhittag","beamflashcompat",
+               "pandoraCosmicKHittag","pandoraNuKHittag"]
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
+               "trackkalspscalo","trackkalspscccalo",
+               "beziertrackercalo","beziertrackercccalo",
+               "costrkcalo","costrkcccalo",
+               "stitchcalo","stitchcccalo",
+               "stitchkalmanhitcalo",
+               "pandoraCosmicKHitcalo","pandoraNuKHitcalo"]
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "trackkalspspid","trackkalspsccpid",
+               "beziertrackerpid","beziertrackerccpid",
+               "costrkpid","costrkccpid",
+               "stitchpid","stitchccpid",
+               "stitchkalmanhitpid",
+               "pandoraCosmicKHitpid","pandoraNuKHitpid"]
+}
+
+litemaker_ass_all: @local::litemaker_ass_reco
+litemaker_ass_all.mctruth: ["generator"]
+
+END_PROLOG

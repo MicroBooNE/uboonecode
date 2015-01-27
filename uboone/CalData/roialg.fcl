@@ -1,0 +1,11 @@
+BEGIN_PROLOG
+
+roiAlg_DigitAboveThresholdParams:
+{
+    AlgName:        "DigitAboveThreshold"
+    ThresholdVal:   3
+    NegativePulse:  false
+    MinWidth:       1
+}
+
+END_PROLOG

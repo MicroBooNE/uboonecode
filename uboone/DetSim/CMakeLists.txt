@@ -7,6 +7,7 @@ art_make( BASENAME_ONLY
 			TimeService_service
 			Filters
 			RawData
+			Database
 			SignalShapingServiceMicroBooNE_service
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
