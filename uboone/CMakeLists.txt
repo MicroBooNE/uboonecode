@@ -20,7 +20,7 @@ add_subdirectory(Calibrations)
 add_subdirectory(OpticalDetectorSim)
 add_subdirectory(MCSTReco)
 #add_subdirectory(DataScanner)
-add_subdirectory(LiteMaker)
+#add_subdirectory(LiteMaker)
 
 # Respect the order specified in lar_build, which is:
 #
