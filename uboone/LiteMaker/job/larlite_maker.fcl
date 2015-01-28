@@ -9,7 +9,7 @@
 
 #include "services_microboone.fcl"
 
-process_name: Trial 
+process_name: Trial
 
 services:
 {
