@@ -1968,27 +1968,30 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             << " has " << calos.size() << " planes for calorimetry , only "
             << TrackerData.GetMaxPlanesPerTrack(iTrk) << " stored in tree";
         }
-        for (size_t ipl = 0; ipl<calos.size(); ++ipl){
-          TrackerData.trkke[iTrk][ipl]    = calos[ipl]->KineticEnergy();
-          TrackerData.trkrange[iTrk][ipl] = calos[ipl]->Range();
+        for (size_t ical = 0; ical<calos.size(); ++ical){
+	  if (!calos[ical]->PlaneID().isValid) continue;
+	  int planenum = calos[ical]->PlaneID().Plane;
+	  if (planenum<0||planenum>2) continue;
+          TrackerData.trkke[iTrk][planenum]    = calos[ical]->KineticEnergy();
+          TrackerData.trkrange[iTrk][planenum] = calos[ical]->Range();
           //For now make the second argument as 13 for muons. 
-          TrackerData.trkpitchc[iTrk][ipl]= calos[ipl] -> TrkPitchC();
-          const size_t NHits = calos[ipl] -> dEdx().size();
-          TrackerData.ntrkhits[iTrk][ipl] = (int) NHits;
-          if (NHits > TrackerData.GetMaxHitsPerTrack(iTrk, ipl)) {
+          TrackerData.trkpitchc[iTrk][planenum]= calos[ical] -> TrkPitchC();
+          const size_t NHits = calos[planenum] -> dEdx().size();
+          TrackerData.ntrkhits[iTrk][planenum] = (int) NHits;
+          if (NHits > TrackerData.GetMaxHitsPerTrack(iTrk, planenum)) {
             // if you get this error, you'll have to increase kMaxTrackHits
             mf::LogError("AnalysisTree:limits")
               << "the " << fTrackModuleLabel[iTracker] << " track #" << iTrk
-              << " has " << NHits << " hits on calorimetry plane #" << ipl
+              << " has " << NHits << " hits on calorimetry plane #" << planenum
               <<", only "
-              << TrackerData.GetMaxHitsPerTrack(iTrk, ipl) << " stored in tree";
+              << TrackerData.GetMaxHitsPerTrack(iTrk, planenum) << " stored in tree";
           }
-          for(size_t iTrkHit = 0; iTrkHit < NHits && iTrkHit < TrackerData.GetMaxHitsPerTrack(iTrk, ipl); ++iTrkHit) {
-            TrackerData.trkdedx[iTrk][ipl][iTrkHit]  = (calos[ipl] -> dEdx())[iTrkHit];
-            TrackerData.trkdqdx[iTrk][ipl][iTrkHit]  = (calos[ipl] -> dQdx())[iTrkHit];
-            TrackerData.trkresrg[iTrk][ipl][iTrkHit] = (calos[ipl] -> ResidualRange())[iTrkHit];
-            const auto& TrkPos = (calos[ipl] -> XYZ())[iTrkHit];
-            auto& TrkXYZ = TrackerData.trkxyz[iTrk][ipl][iTrkHit];
+          for(size_t iTrkHit = 0; iTrkHit < NHits && iTrkHit < TrackerData.GetMaxHitsPerTrack(iTrk, planenum); ++iTrkHit) {
+            TrackerData.trkdedx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dEdx())[iTrkHit];
+            TrackerData.trkdqdx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dQdx())[iTrkHit];
+            TrackerData.trkresrg[iTrk][planenum][iTrkHit] = (calos[ical] -> ResidualRange())[iTrkHit];
+            const auto& TrkPos = (calos[ical] -> XYZ())[iTrkHit];
+            auto& TrkXYZ = TrackerData.trkxyz[iTrk][planenum][iTrkHit];
             TrkXYZ[0] = TrkPos.X();
             TrkXYZ[1] = TrkPos.Y();
             TrkXYZ[2] = TrkPos.Z();
