@@ -2022,6 +2022,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             << TrackerData.GetMaxPlanesPerTrack(iTrk) << " stored in tree";
         }
         for (size_t ical = 0; ical<calos.size(); ++ical){
+	  if (!calos[ical]) continue;
 	  if (!calos[ical]->PlaneID().isValid) continue;
 	  int planenum = calos[ical]->PlaneID().Plane;
 	  if (planenum<0||planenum>2) continue;
@@ -2029,7 +2030,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           TrackerData.trkrange[iTrk][planenum] = calos[ical]->Range();
           //For now make the second argument as 13 for muons. 
           TrackerData.trkpitchc[iTrk][planenum]= calos[ical] -> TrkPitchC();
-          const size_t NHits = calos[planenum] -> dEdx().size();
+          const size_t NHits = calos[ical] -> dEdx().size();
           TrackerData.ntrkhits[iTrk][planenum] = (int) NHits;
           if (NHits > TrackerData.GetMaxHitsPerTrack(iTrk, planenum)) {
             // if you get this error, you'll have to increase kMaxTrackHits
