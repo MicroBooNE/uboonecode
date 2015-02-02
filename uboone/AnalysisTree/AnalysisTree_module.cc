@@ -232,6 +232,10 @@ namespace microboone {
       PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles
       PlaneData_t<Int_t>      trkpdgtruth; //true pdg code
       PlaneData_t<Float_t>    trkefftruth; //completeness
+      PlaneData_t<Float_t>    trksimIDEenergytruth;
+      PlaneData_t<Float_t>    trksimIDExtruth;
+      PlaneData_t<Float_t>    trksimIDEytruth;
+      PlaneData_t<Float_t>    trksimIDEztruth;
       PlaneData_t<Float_t>    trkpurtruth; //purity of track
       PlaneData_t<Float_t>    trkpitchc;
       PlaneData_t<Short_t>    ntrkhits;
@@ -334,15 +338,16 @@ namespace microboone {
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
-    Short_t   hit_plane[kMaxHits];      //plane number
+    Short_t  hit_plane[kMaxHits];      //plane number
     Short_t  hit_wire[kMaxHits];       //wire number
     Short_t  hit_channel[kMaxHits];    //channel ID
-    Float_t hit_peakT[kMaxHits];      //peak time
+    Float_t  hit_peakT[kMaxHits];      //peak time
     Float_t  hit_charge[kMaxHits];     //charge (area)
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
     Float_t  hit_endT[kMaxHits];       //hit end time
-    
+    Float_t  hit_nelec[kMaxHits];     //hit number of electrons
+    Float_t  hit_energy[kMaxHits];       //hit energy
     Short_t  hit_trkid[kMaxHits];      //is this hit associated with a reco track?
 
     // vertex information
@@ -810,6 +815,10 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkorigin.resize(MaxTracks);
   trkpdgtruth.resize(MaxTracks);
   trkefftruth.resize(MaxTracks);
+  trksimIDEenergytruth.resize(MaxTracks);
+  trksimIDExtruth.resize(MaxTracks);
+  trksimIDEytruth.resize(MaxTracks);
+  trksimIDEztruth.resize(MaxTracks);
   trkpurtruth.resize(MaxTracks);
   trkpitchc.resize(MaxTracks);
   ntrkhits.resize(MaxTracks);
@@ -868,6 +877,10 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkorigin[iTrk]  , -1 );
     FillWith(trkpdgtruth[iTrk], -99999 );
     FillWith(trkefftruth[iTrk], -99999.);
+    FillWith(trksimIDEenergytruth[iTrk], -99999.);
+    FillWith(trksimIDExtruth[iTrk], -99999.);
+    FillWith(trksimIDEytruth[iTrk], -99999.);
+    FillWith(trksimIDEztruth[iTrk], -99999.);
     FillWith(trkpurtruth[iTrk], -99999.);
     FillWith(trkpitchc[iTrk]  , -99999.);
     FillWith(ntrkhits[iTrk]   ,  -9999 );
@@ -946,7 +959,19 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkefftruth_" + TrackLabel;
   CreateBranch(BranchName, trkefftruth, BranchName + NTracksIndexStr + "[3]/F");
-  
+ 
+  BranchName = "trksimIDEenergytruth_" + TrackLabel;
+  CreateBranch(BranchName, trksimIDEenergytruth, BranchName + NTracksIndexStr + "[3]/F");
+
+  BranchName = "trksimIDExtruth_" + TrackLabel;
+  CreateBranch(BranchName, trksimIDExtruth, BranchName + NTracksIndexStr + "[3]/F");
+
+  BranchName = "trksimIDEytruth_" + TrackLabel;
+  CreateBranch(BranchName, trksimIDEytruth, BranchName + NTracksIndexStr + "[3]/F");
+
+  BranchName = "trksimIDEztruth_" + TrackLabel;
+  CreateBranch(BranchName, trksimIDEztruth, BranchName + NTracksIndexStr + "[3]/F");
+ 
   BranchName = "trkpurtruth_" + TrackLabel;
   CreateBranch(BranchName, trkpurtruth, BranchName + NTracksIndexStr + "[3]/F");
   
@@ -1094,6 +1119,8 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
   std::fill(hit_endT, hit_endT + sizeof(hit_endT)/sizeof(hit_endT[0]), -99999.);
   std::fill(hit_trkid, hit_trkid + sizeof(hit_trkid)/sizeof(hit_trkid[0]), -99999.);
+  std::fill(hit_nelec, hit_nelec + sizeof(hit_nelec)/sizeof(hit_nelec[0]), -99999.);
+  std::fill(hit_energy, hit_energy + sizeof(hit_energy)/sizeof(hit_energy[0]), -99999.);
 
   nvtx = 0;
   for (size_t ivtx = 0; ivtx < kMaxVertices; ++ivtx) {
@@ -1339,6 +1366,8 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
   CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits]/F");
   CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/F");
+  CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
+  CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
 
   CreateBranch("nvtx",&nvtx,"nvtx/S");
   CreateBranch("vtx",vtx,"vtx[nvtx][3]/F");
@@ -1560,7 +1589,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   art::ServiceHandle<cheat::BackTracker> bt;
   art::ServiceHandle<util::DetectorProperties> detprop;
   art::ServiceHandle<util::LArProperties> LArProp;
-  
+
   // collect the sizes which might me needed to resize the tree data structure:
   bool isMC = !evt.isRealData();
   
@@ -1684,6 +1713,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     evt.getView(fLArG4ModuleLabel, fAuxDetSimChannels);
   }
 
+  std::vector<const sim::SimChannel*> fSimChannels;
+  evt.getView(fLArG4ModuleLabel, fSimChannels);
+
   fData->run = evt.run();
   fData->subrun = evt.subRun();
   fData->event = evt.id().event();
@@ -1730,7 +1762,28 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         hit_trkid[it][i] = 0;
     }
     */
+
+    if (!evt.isRealData()){
+       fData -> hit_nelec[i] = 0;
+       fData -> hit_energy[i] = 0;
+       const sim::SimChannel* chan = 0;
+       for(size_t sc = 0; sc < fSimChannels.size(); ++sc){
+          if(fSimChannels[sc]->Channel() == hitlist[i]->Channel()) chan = fSimChannels[sc];
+       }
+       if (chan){
+          const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = chan->TDCIDEMap();
+          for(auto mapitr = tdcidemap.begin(); mapitr != tdcidemap.end(); mapitr++){
+             // loop over the vector of IDE objects.
+             const std::vector<sim::IDE> idevec = (*mapitr).second;
+             for(size_t iv = 0; iv < idevec.size(); ++iv){
+                fData -> hit_nelec[i] += idevec[iv].numElectrons;
+                fData -> hit_energy[i] += idevec[iv].energy;
+             }
+          }
+       }
+     }
   }
+
   if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
     //Find tracks associated with hits
     art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[0]);
@@ -2027,7 +2080,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             const simb::MCParticle *particle = bt->TrackIDToParticle(TrackerData.trkidtruth[iTrk][ipl]);
             double tote = 0;
             std::vector<sim::IDE> vide(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]));
-            for (const sim::IDE& ide: vide) tote += ide.energy;
+            for (const sim::IDE& ide: vide) {
+               tote += ide.energy;
+               TrackerData.trksimIDEenergytruth[iTrk][ipl] = ide.energy;
+               TrackerData.trksimIDExtruth[iTrk][ipl] = ide.x;
+               TrackerData.trksimIDEytruth[iTrk][ipl] = ide.y;
+               TrackerData.trksimIDEztruth[iTrk][ipl] = ide.z;
+            }
             TrackerData.trkpdgtruth[iTrk][ipl] = particle->PdgCode();
             TrackerData.trkefftruth[iTrk][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
           //std::cout<<"\n"<<trkpdgtruth[iTracker][iTrk][ipl]<<"\t"<<trkefftruth[iTracker][iTrk][ipl];
