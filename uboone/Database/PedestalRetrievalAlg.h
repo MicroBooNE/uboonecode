@@ -22,13 +22,13 @@ namespace dtbse{
 
       void reconfigure(fhicl::ParameterSet const& p);
 
-      void GetPedestalMean(unsigned int channel, float& pedmean, ulong timestamp=0 ) const;
-      void GetPedestalRMS(unsigned int channel,  float& pedrms,  ulong timestamp=0 ) const;
-      void GetPedestal(unsigned int channel, float& pedmean, float& pedrms, ulong timestamp=0 ) const;
+      void GetPedestalMean(unsigned int channel, float& pedmean, unsigned long timestamp=0 ) const;
+      void GetPedestalRMS(unsigned int channel,  float& pedrms,  unsigned long timestamp=0 ) const;
+      void GetPedestal(unsigned int channel, float& pedmean, float& pedrms, unsigned long timestamp=0 ) const;
 
     private:
 
-      bool  RetrieveFromDB(unsigned int channel, float& pedmean, float& pedrms, ulong timestamp) const;
+      bool  RetrieveFromDB(unsigned int channel, float& pedmean, float& pedrms, unsigned long timestamp) const;
 
       float fDefaultCollectionPedMean;
       float fDefaultCollectionPedRMS;

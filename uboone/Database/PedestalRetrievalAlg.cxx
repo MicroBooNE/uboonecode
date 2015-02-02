@@ -26,7 +26,7 @@ namespace dtbse{
   //==============================================================
   //Get pedestal information
   //==============================================================
-  void PedestalRetrievalAlg::GetPedestal(unsigned int channel, float& pedmean, float& pedrms, ulong timestamp /*=0*/) const {
+  void PedestalRetrievalAlg::GetPedestal(unsigned int channel, float& pedmean, float& pedrms, unsigned long timestamp /*=0*/) const {
 
     //If the timestamp is default, use the default pedestal values
     if (timestamp==0) {
@@ -61,14 +61,14 @@ namespace dtbse{
     }
   }//end GetPedestal
 
-  void PedestalRetrievalAlg::GetPedestalMean(unsigned int channel, float& pedmean, ulong timestamp /*=0*/) const {
+  void PedestalRetrievalAlg::GetPedestalMean(unsigned int channel, float& pedmean, unsigned long timestamp /*=0*/) const {
 
     float dummy_rms = 0.0;
     GetPedestal(channel, pedmean, dummy_rms, timestamp);
     return;
   }
 
-  void PedestalRetrievalAlg::GetPedestalRMS(unsigned int channel, float& pedrms, ulong timestamp /*=0*/) const {
+  void PedestalRetrievalAlg::GetPedestalRMS(unsigned int channel, float& pedrms, unsigned long timestamp /*=0*/) const {
 
     float dummy_mean = 0.0;
     GetPedestal(channel, dummy_mean, pedrms, timestamp);
@@ -82,7 +82,7 @@ namespace dtbse{
   //Return value is true if successful.  Right now we don't have a 
   //database, so return false
   //==============================================================
-  bool PedestalRetrievalAlg::RetrieveFromDB(unsigned int channel, float& pedmean, float& pedrms, ulong timestamp) const {
+  bool PedestalRetrievalAlg::RetrieveFromDB(unsigned int channel, float& pedmean, float& pedrms, unsigned long timestamp) const {
 
     pedmean = 0.0;
     pedrms  = 0.0;
