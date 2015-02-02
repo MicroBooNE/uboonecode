@@ -1,5 +1,6 @@
 #include "caldata.fcl"
 #include "roialg.fcl"
+#include "database_microboone.fcl"
 
 BEGIN_PROLOG
 
@@ -11,12 +12,14 @@ microboone_calroi:
  MinWid:              4 # min width (time bins) for a ROI
  MinSep:             50 # min separation (time bins) between ROIs
  uPlaneROIPad: [ 150, 50 ] # number of bins to pad both ends of the ROIs
- vPlaneROIPad: [  50, 50 ] # number of bins to pad both ends of the ROIs
- zPlaneROIPad: [  50, 50 ] # number of bins to pad both ends of the ROIs
- DoBaselineSub:   false # subtract baseline after deconvolution?
+ vPlaneROIPad: [ 50, 50 ] # number of bins to pad both ends of the ROIs
+ zPlaneROIPad: [ 50, 50 ] # number of bins to pad both ends of the ROIs
+ DoBaselineSub:   true # subtract baseline after deconvolution?
  uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
- FFTSize:     2048      # re-initialize FFT service to this size
+ FFTSize:     256      # re-initialize FFT service to this size
  SaveWireWF:  0
+ 
+ PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
 }
 
 microboone_calwire:
@@ -24,10 +27,12 @@ microboone_calwire:
  module_type:        "CalWireMicroBooNE"
  DigitModuleLabel:   "daq"
  PostsampleBins:       0
- BaseSampleBins:      40  # set > 0 for baseline subtraction. Value should be
+ DoBaselineSub:   true # subtract baseline after deconvolution?
                           # modulo the data size (3200 for uB)
  BaseVarCut:         25.  # Variance cut for selecting baseline points
  SaveWireWF:          0
+ 
+ PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
 }
 
 microboone_calwirePrespill:  @local::microboone_calwire
@@ -48,6 +53,8 @@ microboone_showwire:
     SinglePulseBuffer: 25
     Channel: 7775
     SaveWaveforms: true
+    
+    PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
 }
 
 microboone_rawdigitandwirecomparisonana:
@@ -67,5 +74,6 @@ microboone_rawdigitandwirecomparisonana:
         }
     }
 }
+    
 
 END_PROLOG

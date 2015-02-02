@@ -1,0 +1,13 @@
+BEGIN_PROLOG
+
+microboone_pedestalretrievalalg:
+{
+    AlgName:            "PedestalRetrievalAlg"
+    CollectionPedMean:  400
+    InductionPedMean:   2048
+    
+    CollectionPedRMS:   0.3
+    InductionPedRMS:    0.3
+}
+
+END_PROLOG

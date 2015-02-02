@@ -4,6 +4,9 @@ BEGIN_PROLOG
 
 microboone_properties:                  @local::standard_properties
 microboone_properties.Temperature:      87
+
+# use commented version to make lifetime ~ infinite
+#microboone_properties.Electronlifetime: 3.0e6 
 microboone_properties.Electronlifetime: 3.0e3 
 microboone_properties.Efield:           [0.5,0.666,0.8]  #(predicted for microBooNE)
 

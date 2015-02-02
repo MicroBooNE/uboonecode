@@ -13,6 +13,7 @@ art_make( BASENAME_ONLY
 	                Utilities
 			Filters
 			RawData
+			Database
 			RecoBase
 			RecoBaseArt
 			SignalShapingServiceMicroBooNE_service

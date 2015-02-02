@@ -27,6 +27,8 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
+#include "SimpleTypesAndConstants/geo_types.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 
 #include <string>
 #include <sstream>
@@ -56,6 +58,8 @@ private:
   unsigned int fSinglePulseBuffer;
   raw::ChannelID_t fChannel;
   bool fSaveWaveforms;
+  
+  dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
 
   std::string MakeHistName(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
   std::string MakeHistTitle(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
@@ -86,9 +90,10 @@ private:
 };
 
 
-cal::ShowWire::ShowWire(fhicl::ParameterSet const & p)
+cal::ShowWire::ShowWire(fhicl::ParameterSet const & p) 
   :
-  EDAnalyzer(p)  // ,
+  EDAnalyzer(p),
+  fPedestalRetrievalAlg(p.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
  // More initializers here.
 {
   this->reconfigure(p);
@@ -106,6 +111,8 @@ void cal::ShowWire::reconfigure(fhicl::ParameterSet const& p){
   fSinglePulseBuffer   = p.get<unsigned int>("SinglePulseBuffer",25);
   fChannel             = p.get<unsigned int>("Channel",7775);
   fSaveWaveforms       = p.get<bool>("SaveWaveforms",true);
+  
+  fPedestalRetrievalAlg.reconfigure(p);
 }
 
 void cal::ShowWire::beginJob(){
@@ -190,7 +197,8 @@ void cal::ShowWire::SetHistogram(TH1F* hist,
 
 void cal::ShowWire::FillWaveforms(recob::Wire const& wire, raw::RawDigit const& rawdigit, TH1F* h_wire, TH1F* h_raw){
 
-  const float pedestal = rawdigit.GetPedestal();
+  float pedestal = 0.0;
+  fPedestalRetrievalAlg.GetPedestalMean(rawdigit.Channel(),pedestal);
 
   size_t begin_iter=0;
   size_t end_iter = rawdigit.Samples();
