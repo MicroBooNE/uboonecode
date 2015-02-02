@@ -54,7 +54,6 @@ extern "C" {
 #include "TH2D.h"
 #include "TH1F.h"
 #include "TF1.h"
->>>>>>> origin/develop
 
 ///creation of calibrated signals on wires
 namespace caldata {
