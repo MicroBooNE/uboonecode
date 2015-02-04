@@ -18,11 +18,7 @@
 // ROOT libraries
 #include "TComplex.h"
 #include "TH1D.h"
-
-extern "C" {
-#include <sys/types.h>
-#include <sys/stat.h>
-}
+#include "TH1F.h"
 
 // framework libraries
 #include "fhiclcpp/ParameterSet.h" 
@@ -48,12 +44,6 @@ extern "C" {
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "uboone/Database/PedestalRetrievalAlg.h"
-
-#include "TComplex.h"
-#include "TFile.h"
-#include "TH2D.h"
-#include "TH1F.h"
-#include "TF1.h"
 
 ///creation of calibrated signals on wires
 namespace caldata {

@@ -24,12 +24,10 @@
 #include "Geometry/Geometry.h"
 #include "RecoBase/Wire.h"
 #include "RawData/RawDigit.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "uboone/Database/PedestalRetrievalAlg.h"
-
 #include <string>
 #include <sstream>
 #include <iostream>
