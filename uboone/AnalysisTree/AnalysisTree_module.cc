@@ -1748,10 +1748,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     fData->hit_plane[i]   = hitlist[i]->WireID().Plane;
     fData->hit_wire[i]    = hitlist[i]->WireID().Wire;
     fData->hit_peakT[i]   = hitlist[i]->PeakTime();
-    fData->hit_charge[i]  = hitlist[i]->Charge();
-    fData->hit_ph[i]  = hitlist[i]->Charge(true);
-    fData->hit_startT[i] = hitlist[i]->StartTime();
-    fData->hit_endT[i] = hitlist[i]->EndTime();
+    fData->hit_charge[i]  = hitlist[i]->Integral();
+    fData->hit_ph[i]  = hitlist[i]->PeakAmplitude();
+    fData->hit_startT[i] = hitlist[i]->PeakTimeMinusRMS();
+    fData->hit_endT[i] = hitlist[i]->PeakTimePlusRMS();
     /*
     for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
       art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[it]);
