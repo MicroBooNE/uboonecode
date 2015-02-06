@@ -56,7 +56,10 @@ microboone_signalshapingservice:
 
   FilterFuncVec:  [ "(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))", "(x>0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])" ]   
   #FilterParamsVec:  [ [ 0.05, 0.0, 0.1875, 0.25, 8.0 ], [ .454, 0.0, 0.1875, 0.25, 8.0 ], [ 79258.0, 0.0, 0.1875, 1.5 ] ]  # what is this?
-  FilterParamsVec:   [ [ 0.05, 0.0, 0.1875, 0.25, 8.0 ], [ 0.05, 0.0, 0.1875, 0.25, 8.0 ], [ 0.0792580, 0.0, 0.1875, 1.5 ] ]
+  
+  #FilterParamsVec:   [ [ 0.05, 0.0, 0.1875, 0.25, 8.0 ], [ 0.05, 0.0, 0.1875, 0.25, 8.0 ], [ 0.0792580, 0.0, 0.1875, 1.5 ] ] #Used for MCC5
+  #New parameters optimized for different shaping time for U(1us), V(1us) & Y(2us)-Planes
+  FilterParamsVec:   [ [ 1.67, 1.69, 1.55, 0.19, 3.75 ], [ 1.62, 1.46, 1.33, 0.23, 4.89 ], [ 1.00, 0.08, 0.15, 2.17 ] ]
 
   GetFilterFromHisto:   false  
 
