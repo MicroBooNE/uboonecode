@@ -443,7 +443,7 @@ namespace caldata {
 	      ++hBin;
 	    } // bin
 
-	    
+	    //std::cout << channel << " " << flag << std::endl;
 
 	    sss->Deconvolute(channel,holder);
 	    // if (channel==3218){
@@ -469,7 +469,7 @@ namespace caldata {
 	      if (ir<rois.size()){
 		roiLen = rois[ir].second - roiStart;
 	      }else{
-		roiLen = dataSize -1 - roiStart;
+		roiLen = dataSize - roiStart;
 	      }
 	    }
 	  }
