@@ -153,7 +153,10 @@ namespace caldata {
       std::vector<std::pair<unsigned int, unsigned int>> holderInfo,
       recob::Wire::RegionsOfInterest_t& ROIVec,
       art::ServiceHandle<util::SignalShapingServiceMicroBooNE>& sss);
-    
+    float SubtractBaseline(std::vector<float>& holder, float basePre,
+			   float basePost,unsigned int roiStart,unsigned int roiLen,
+			   unsigned int dataSize);
+      
   protected: 
     
   }; // class CalWireROI
@@ -453,7 +456,7 @@ namespace caldata {
 	      ++hBin;
 	    } // bin
 
-	    
+	    //std::cout << channel << " " << flag << std::endl;
 
 	    sss->Deconvolute(channel,holder);
 	    // if (channel==3218){
@@ -465,25 +468,21 @@ namespace caldata {
 	    // If not, include next ROI(if none, go to the end of signal)
 	    // If yes, proceed
 	    tempPre=0,tempPost=0;
-	    for(unsigned int bin = 0; bin < 5; ++bin) {
+	    for(unsigned int bin = 0; bin < 20; ++bin) {
 	      tempPre  += holder[bin];
 	      tempPost += holder[roiLen - bin];
 	    }
-	    tempPre = tempPre/5.;
-	    tempPost = tempPost/5.;
-
-	    // if (channel==3218){
-	    //   std::cout << flag << " " << tempPre << " " << tempPost << std::endl;
-	    // }
-
-	    if (fabs(tempPost-tempPre)<2){
+	    tempPre = tempPre/20.;
+	    tempPost = tempPost/20.;
+	    
+	    if (fabs(tempPost-tempPre)<3){
 	      flag = 0;
 	    }else{
 	      ir++;
 	      if (ir<rois.size()){
 		roiLen = rois[ir].second - roiStart;
 	      }else{
-		roiLen = dataSize -1 - roiStart;
+		roiLen = dataSize - roiStart;
 	      }
 	    }
 	  }
@@ -501,14 +500,9 @@ namespace caldata {
 	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 ) {
 	    basePre =tempPre;
 	    basePost=tempPost;
-	    float base;
-	    if (fabs(basePre-basePost)<3){
-	      base = (basePre+basePost)/2.;
-	    }else{
-	      base = basePre;
-	    }
+	    float base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
 	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
-	      sigTemp.push_back(holder[jj] - base);
+	      sigTemp.push_back(holder[jj]-base);
 	    } // jj
 	  } // fDoBaselineSub ...
 	  else {
@@ -521,42 +515,6 @@ namespace caldata {
 	}
 	
 
-       // unsigned int hBin = 0;
-       //  // max number of holder bins that should be packed. This is the
-       //  // FFT size - width of the response function. Do this crudely for
-       //  // now since the response functions are < 20 time bins in length
-       //  unsigned int packLen = transformSize - 20;
-       //  for(unsigned int ir = 0; ir < rois.size(); ++ir) {
-       //    // enough room to continue packing?
-       //    unsigned int roiLen = rois[ir].second - rois[ir].first;
-       //    if(roiLen > transformSize) {
-       //      mf::LogWarning("CalWireROI")<<"ROI length "<<roiLen
-       //        <<" > FFT size "<<transformSize<<" on plane:wire "
-       //        <<thePlane<<":"<<theWire;
-       //      continue;
-       //    }
-       //    // not enough room to continue packing. Deconvolute this batch, stuff it
-       //    // into ROIVec and continue
-       //    if(hBin + roiLen > packLen) {
-       //      // need to de-convolute holder and continue packing
-       //      doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
-       //      holderInfo.clear();
-       //      hBin = 0;
-       //      for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
-       //    } // hBin + roiLen > packLen
-       //    // save the position of this ROI in the holder vector and the ROI index
-       //    holderInfo.push_back(std::make_pair(hBin, ir));
-       //    for(unsigned int bin = rois[ir].first; bin < rois[ir].second; ++bin) {
-       // 	    if ( (hBin-time_offset >= 0) and (hBin-time_offset < holder.size()) ){
-       // 	      holder[hBin-time_offset] = rawadc[bin]-pdstl;
-       // 	      ++hBin;
-       // 	    }//if time-offset does not force to go out of holder bounds
-       //    } // bin
-       //  } // ir < rois.size
-       //  // do the last deconvolution if needed
-       //  if(holderInfo.size() > 0)
-       //    doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
-      
 
 
 
@@ -599,6 +557,63 @@ namespace caldata {
 
     return;
   } // produce
+
+
+  float CalWireROI::SubtractBaseline(std::vector<float>& holder, float basePre,
+				     float basePost,unsigned int roiStart,
+				     unsigned int roiLen,unsigned int dataSize)
+  {
+    float base=0;
+
+    //can not trust the early part
+    if (roiStart < 20 && roiStart + roiLen < dataSize - 20){
+      base = basePost;
+      // can not trust the later part
+    }else if (roiStart >= 20 && roiStart + roiLen >= dataSize - 20){
+      base = basePre;
+      // can trust both
+    }else if (roiStart >= 20 && roiStart + roiLen < dataSize - 20){
+      if (fabs(basePre-basePost)<3){
+	base = (basePre+basePost)/2.;
+      }else{
+	if (basePre < basePost){
+	  base = basePre;
+	}else{
+	  base = basePost;
+	}
+      }
+      // can not use both
+    }else{
+      float min = 0,max=0;
+      for (unsigned int bin = 0; bin < roiLen; bin++){
+	if (holder[bin] > max) max = holder[bin];
+	if (holder[bin] < min) min = holder[bin];
+      }
+      int nbin = max - min;
+      if (nbin!=0){
+	TH1F *h1 = new TH1F("h1","h1",nbin,min,max);
+	for (unsigned int bin = 0; bin < roiLen; bin++){
+	  h1->Fill(holder[bin]);
+	}
+	float ped = h1->GetMaximum();
+	float ave=0,ncount = 0;
+	for (unsigned int bin = 0; bin < roiLen; bin++){
+	  if (fabs(holder[bin]-ped)<2){
+	    ave +=holder[bin];
+	    ncount ++;
+	  }
+	}
+	if (ncount==0) ncount=1;
+	ave = ave/ncount;
+	h1->Delete();
+	base = ave;
+      }
+    }
+    
+   
+    return base;
+  }
+
 
   void CalWireROI::doDecon(std::vector<float>& holder, 
     raw::ChannelID_t channel, unsigned int thePlane,
