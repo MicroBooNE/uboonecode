@@ -144,7 +144,8 @@ namespace caldata {
       recob::Wire::RegionsOfInterest_t& ROIVec,
       art::ServiceHandle<util::SignalShapingServiceMicroBooNE>& sss);
     float SubtractBaseline(std::vector<float>& holder, float basePre,
-			  float basePost,unsigned int roiLen);
+			   float basePost,unsigned int roiStart,unsigned int roiLen,
+			   unsigned int dataSize);
       
   protected: 
     
@@ -487,7 +488,7 @@ namespace caldata {
 	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 ) {
 	    basePre =tempPre;
 	    basePost=tempPost;
-	    float base = SubtractBaseline(holder, basePre,basePost,roiLen);
+	    float base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
 	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
 	      sigTemp.push_back(holder[jj]-base);
 	    } // jj
@@ -544,11 +545,19 @@ namespace caldata {
 
 
   float CalWireROI::SubtractBaseline(std::vector<float>& holder, float basePre,
-				    float basePost,unsigned int roiLen)
+				     float basePost,unsigned int roiStart,
+				     unsigned int roiLen,unsigned int dataSize)
   {
     float base=0;
 
-    if (roiLen < 1024){
+    //can not trust the early part
+    if (roiStart < 20 && roiStart + roiLen < dataSize - 20){
+      base = basePost;
+      // can not trust the later part
+    }else if (roiStart >= 20 && roiStart + roiLen >= dataSize - 20){
+      base = basePre;
+      // can trust both
+    }else if (roiStart >= 20 && roiStart + roiLen < dataSize - 20){
       if (fabs(basePre-basePost)<3){
 	base = (basePre+basePost)/2.;
       }else{
@@ -558,8 +567,8 @@ namespace caldata {
 	  base = basePost;
 	}
       }
+      // can not use both
     }else{
-      
       float min = 0,max=0;
       for (unsigned int bin = 0; bin < roiLen; bin++){
 	if (holder[bin] > max) max = holder[bin];
@@ -582,20 +591,10 @@ namespace caldata {
 	if (ncount==0) ncount=1;
 	ave = ave/ncount;
 	h1->Delete();
-
-	if (basePre < basePost){
-	  base = basePre;
-	}else{
-	  base = basePost;
-	}
-
-	if (ave < base){
-	  base = ave;
-	}
+	base = ave;
       }
     }
-
-
+    
    
     return base;
   }
