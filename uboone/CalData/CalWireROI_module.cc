@@ -351,6 +351,7 @@ namespace caldata {
               //   break;
               // }
               //if(roiLen > fMinWid && roiLen < transformSize) 
+	      //std::cout << roiStart << " " << roiLen << std::endl;
 	      if(roiLen > fMinWid) 
                 rois.push_back(std::make_pair(roiStart, bin));
               roiStart = 0;
@@ -364,6 +365,8 @@ namespace caldata {
 	     rois.push_back(std::make_pair(roiStart, dataSize-1));
 	   roiStart = 0;
 	}
+
+	
 
         // skip deconvolution if there are no ROIs
         if(rois.size() == 0) continue;
@@ -381,6 +384,7 @@ namespace caldata {
           unsigned int high = rois[ii].second + fPostROIPad[thePlane];
           if(high >= dataSize) high = dataSize-1;
           rois[ii].second = high;
+	  
         }
 
 	// if (channel==3218){
@@ -398,12 +402,15 @@ namespace caldata {
 	  for (unsigned int ii = 0; ii<rois.size();ii++){
 	    unsigned int roiStart = rois[ii].first;
 	    unsigned int roiEnd = rois[ii].second;
-          
+
+	    // if (channel==806)
+	    //   std::cout << "a" << " " << roiStart << " " << roiEnd << std::endl;
+
 	    int flag1 = 1;
 	    unsigned int jj=ii+1;
 	    while(flag1){	
 	      if (jj<rois.size()){
-		if(rois[jj].first - roiEnd >=0 ) {
+		if(rois[jj].first <= roiEnd  ) {
 		  roiEnd = rois[jj].second;
 		  ii = jj;
 		  jj = ii+1;
@@ -415,7 +422,9 @@ namespace caldata {
 	      }
 	    }
 	    
-
+	   // if (channel==806)
+	   //   std::cout << "b" << " " << roiStart << " " << roiEnd << std::endl;
+	 
 	    trois.push_back(std::make_pair(roiStart,roiEnd));	    
 	  }
 	  
@@ -428,6 +437,9 @@ namespace caldata {
 	  unsigned int roiLen = rois[ir].second - rois[ir].first;
 	  unsigned int roiStart = rois[ir].first;
 	  //treat FFT Size
+	  if (channel==806)
+	    std::cout << roiStart << " " << roiLen << std::endl;
+	   
 
 	  int flag =1;
 	  float tempPre=0,tempPost=0;
@@ -475,7 +487,8 @@ namespace caldata {
 	    tempPre = tempPre/20.;
 	    tempPost = tempPost/20.;
 	    
-	    if (fabs(tempPost-tempPre)<3){
+	    
+	    if (fabs(tempPost-tempPre)<2){
 	      flag = 0;
 	    }else{
 	      ir++;
