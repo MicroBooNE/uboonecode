@@ -269,6 +269,15 @@ namespace caldata {
     unsigned int bin(0);     // time bin loop variable
     
     filter::ChannelFilter *chanFilt = new filter::ChannelFilter();  
+
+    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    
+    // std::cout << "xin1: " << sss->GetRawNoise(0) << " " << sss->GetRawNoise(4000) << " " << sss->GetRawNoise(8000) << std::endl;
+    // std::cout << "xin2: " << sss->GetDeconNoise(0) << " " << sss->GetDeconNoise(4000) << " " << sss->GetDeconNoise(8000) << std::endl;
+
+    //calculated expected deconvoluted noise level at all three planes
+    //calculated expected raw noise level at all three planes
+
     
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
@@ -294,7 +303,7 @@ namespace caldata {
       //unsigned int theWire = wids[0].Wire;
       
       // use short pedestal for testing the 1st induction plane
-      unsigned short sPed = abs(fThreshold[thePlane]);
+      // unsigned short sPed = abs(fThreshold[thePlane]);
     
       // Find minimum separation between ROIs including the padding.
       // Use the longer pad
@@ -315,7 +324,9 @@ namespace caldata {
 	// Xin, remove the time offset
 	//int time_offset = 0.;//sss->FieldResponseTOffset(channel);
         unsigned int roiStart = 0;
-       
+
+	double raw_noise = sss->GetRawNoise(channel);
+
         // search for ROIs
         for(bin = 1; bin < dataSize; ++bin) {
           float SigVal = fabs(rawadc[bin] - pdstl);
@@ -323,16 +334,46 @@ namespace caldata {
             // not in a ROI
             // Handle the onset of a ROI differently for the 1st induction plane
             // if it has been modeled correctly
-            if(fuPlaneRamp && thePlane == 0) {
-              if(rawadc[bin] - rawadc[bin - 1] < sPed) roiStart = bin;
-            } else {
-              if(SigVal > fThreshold[thePlane]) roiStart = bin;
-            }
+            // if(fuPlaneRamp && thePlane == 0) {
+            //   if(rawadc[bin] - rawadc[bin - 1] < sPed) roiStart = bin;
+            // } else {
+            //   if(SigVal > fThreshold[thePlane]) roiStart = bin;
+            // }
+	    unsigned int sbin[7];
+	    if (bin>=4) {
+	      sbin[0] = bin -3;
+	      sbin[1] = bin -2;
+	      sbin[2] = bin -1;
+	    }else if (bin>=3){
+	      sbin[0] = 1;
+	      sbin[1] = bin-2;
+	      sbin[2] = bin-1;
+	    }else if (bin>=2){
+	      sbin[0] =1;
+	      sbin[1] =1;
+	      sbin[2] = bin-1;
+	    }else{
+	      sbin[0] =1;
+	      sbin[1] =1;
+	      sbin[2] =1;
+	    }
+	    sbin[3] = bin ; 
+	    sbin[4] = bin + 1; if (sbin[4]>dataSize-1) sbin[4] =dataSize-1;
+	    sbin[5] = bin + 2; if (sbin[5]>dataSize-1) sbin[5] =dataSize-1;
+	    sbin[6] = bin + 3; if (sbin[6]>dataSize-1) sbin[6] =dataSize-1;
+	    float sum = 0;
+	    for (int qx = 0; qx!=7;qx++){
+	      sum += rawadc[sbin[qx]]-pdstl;
+	    }
+	    sum = fabs(sum);
+	    //std::cout << bin << " " << sum << " " << raw_noise/sqrt(7.)*3. << std::endl;
+	    if (sum > raw_noise*sqrt(7.)*5.) roiStart = bin;
+
 	  } else {
             // leaving a ROI?
             if(SigVal < fThreshold[thePlane]) {
               // is the ROI wide enough?
-              unsigned int roiLen = bin - roiStart;
+              //unsigned int roiLen = bin - roiStart;
               // if(roiLen > transformSize) {
               //   mf::LogError("CalWireROI")<<"ROI too long "
               //     <<roiLen<<" on plane:wire "<<thePlane<<":"<<theWire;
@@ -340,17 +381,17 @@ namespace caldata {
               // }
               //if(roiLen > fMinWid && roiLen < transformSize) 
 	      //std::cout << roiStart << " " << roiLen << std::endl;
-	      if(roiLen > fMinWid) 
-                rois.push_back(std::make_pair(roiStart, bin));
+	      // if(roiLen > fMinWid) 
+	      rois.push_back(std::make_pair(roiStart, bin));
               roiStart = 0;
             }
           } // roiStart test
         } // bin
 	// add the last ROI if existed
 	if (roiStart!=0){
-	   unsigned int roiLen = dataSize -1 - roiStart;
-	   if(roiLen > fMinWid) 
-	     rois.push_back(std::make_pair(roiStart, dataSize-1));
+	  //unsigned int roiLen = dataSize -1 - roiStart;
+	   // if(roiLen > fMinWid) 
+	   rois.push_back(std::make_pair(roiStart, dataSize-1));
 	   roiStart = 0;
 	}
 
@@ -439,7 +480,7 @@ namespace caldata {
 	    if (roiLen > transformSize) transformSize = roiLen;
 	    
 	    // Get signal shaping service.
-	    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+	    
 	    sss->SetDecon(transformSize);
 	    transformSize = fFFT->FFTSize();
 	    // temporary vector of signals
@@ -475,8 +516,9 @@ namespace caldata {
 	    tempPre = tempPre/20.;
 	    tempPost = tempPost/20.;
 	    
+	    double deconNoise = sss->GetDeconNoise(channel)/sqrt(10.)*4;
 	    
-	    if (fabs(tempPost-tempPre)<2){
+	    if (fabs(tempPost-tempPre)<deconNoise){
 	      flag = 0;
 	    }else{
 	      ir++;

@@ -805,6 +805,83 @@ double util::SignalShapingServiceMicroBooNE::GetShapingTime(unsigned int const c
      return shaping_time;
 }     
 
+double util::SignalShapingServiceMicroBooNE::GetRawNoise(unsigned int const channel) const
+{
+  unsigned int plane;
+  art::ServiceHandle<geo::Geometry> geom;
+     geo::View_t view = geom->View(channel);
+     switch(view){
+     case geo::kU:
+       plane = 0;
+       break;
+     case geo::kV:
+       plane = 1;
+       break;
+     case geo::kZ:
+       plane = 2;
+       break;
+     default: 
+       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
+     }
+
+  double shapingtime = fShapeTimeConst.at(plane+1);
+  double gain = fASICGainInMVPerFC.at(plane);
+  int temp;
+  if (shapingtime == 0.5){
+    temp = 0;
+  }else if (shapingtime == 1.0){
+    temp = 1;
+  }else if (shapingtime == 2.0){
+    temp = 2;
+  }else{
+    temp = 3;
+  }
+  double rawNoise;
+
+  auto tempNoise = fNoiseFactVec.at(plane);
+  rawNoise = tempNoise.at(temp);
+
+  rawNoise *= gain/4.7;
+  return rawNoise;
+}
+
+double util::SignalShapingServiceMicroBooNE::GetDeconNoise(unsigned int const channel) const
+{
+  unsigned int plane;
+  art::ServiceHandle<geo::Geometry> geom;
+     geo::View_t view = geom->View(channel);
+     switch(view){
+     case geo::kU:
+       plane = 0;
+       break;
+     case geo::kV:
+       plane = 1;
+       break;
+     case geo::kZ:
+       plane = 2;
+       break;
+     default: 
+       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
+     }
+
+  double shapingtime = fShapeTimeConst.at(plane+1);
+  int temp;
+  if (shapingtime == 0.5){
+    temp = 0;
+  }else if (shapingtime == 1.0){
+    temp = 1;
+  }else if (shapingtime == 2.0){
+    temp = 2;
+  }else{
+    temp = 3;
+  }
+  auto tempNoise = fNoiseFactVec.at(plane);
+  double deconNoise = tempNoise.at(temp);
+  
+  deconNoise = deconNoise /4096.*2000./4.7 *6.241*1000/fDeconNorm;
+  return deconNoise;
+}
+
 int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int const channel, size_t ktype=0) const
 {
   art::ServiceHandle<geo::Geometry> geom;
