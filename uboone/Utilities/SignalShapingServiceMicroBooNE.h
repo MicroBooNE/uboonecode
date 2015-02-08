@@ -112,7 +112,7 @@ namespace util {
 
     //  double GetASICGain()                                    { return fASICGainInMVPerFC; }
     std::vector<DoubleVec> GetNoiseFactVec()                { return fNoiseFactVec; }
-    //double GetShapingTime()                                 { return fShapeTimeConst.at(1); };
+    //double GetShapingTime()                                 { return fShapeTimeConst.at(1); }; 
     std::vector<std::vector<size_t> > GetNResponses()                    { return fNResponses; }
     std::vector<std::vector<size_t> > GetNActiveResponses()     { return fNActiveResponses; }
 
@@ -128,7 +128,7 @@ namespace util {
     double GetASICGain(unsigned int const channel) const;
     double GetShapingTime(unsigned int const channel) const; 
 
-    double GetRawNoise(unsigned int const channel)const ;
+    double GetRawNoise(unsigned int const channel) const ;
     double GetDeconNoise(unsigned int const channel) const;
 
     const util::SignalShaping& SignalShaping(unsigned int channel, unsigned wire = 0, size_t ktype=0) const;
