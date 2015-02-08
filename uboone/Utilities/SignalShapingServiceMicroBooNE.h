@@ -128,6 +128,9 @@ namespace util {
     double GetASICGain(unsigned int const channel) const;
     double GetShapingTime(unsigned int const channel) const; 
 
+    double GetRawNoise(unsigned int const channel)const ;
+    double GetDeconNoise(unsigned int const channel) const;
+
     const util::SignalShaping& SignalShaping(unsigned int channel, unsigned wire = 0, size_t ktype=0) const;
 
     int FieldResponseTOffset(unsigned int const channel, size_t ktype) const;
