@@ -119,6 +119,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   }
 
   // Fetch fcl parameters.
+  fDeconNorm = pset.get<double>("DeconNorm");
 
   fADCPerPCAtLowestASICGain = pset.get<double>("ADCPerPCAtLowestASICGain");
   //fASICGainInMVPerFC = pset.get<double>("ASICGainInMVPerFC");
@@ -352,6 +353,7 @@ void util::SignalShapingServiceMicroBooNE::init()
           (fSignalShapingVec[ktype][_vw][_wr]).AddResponseFunction(fFieldResponseVec[ktype][_vw][_wr]);
           (fSignalShapingVec[ktype][_vw][_wr]).AddResponseFunction(fElectResponse[ktype]);
 	  (fSignalShapingVec[ktype][_vw][_wr]).save_response();
+	  (fSignalShapingVec[ktype][_vw][_wr]).set_normflag(false);
         }
       }
 
@@ -711,7 +713,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
 
       //      if(fManualInterpolation) {
       size_t startJ = 1;
-      SamplingResp[0] = (*pResp)[0];
+      SamplingResp[0] = (*pResp)[0]*fDeconNorm;
       for ( size_t itime = 1; itime < nticks; itime++ ) {
         size_t low, high;
         for ( size_t jtime = startJ; jtime < nticks_input; jtime++ ) {
@@ -720,7 +722,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
             high = jtime;
 //            if(jtime<2&&itime<2) std::cout << itime << " " << jtime << " " << low << " " << up << std::endl;
             double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
-            SamplingResp[itime] = (*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor;
+            SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor)*fDeconNorm;
             /// VELOCITY-OUT ... comment out kDVel usage here
             //SamplingResp[itime] *= kDVel;
             SamplingCount++;

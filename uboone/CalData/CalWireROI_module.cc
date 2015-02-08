@@ -425,8 +425,8 @@ namespace caldata {
 	  unsigned int roiLen = rois[ir].second - rois[ir].first;
 	  unsigned int roiStart = rois[ir].first;
 	  //treat FFT Size
-	  if (channel==806)
-	    std::cout << roiStart << " " << roiLen << std::endl;
+	  // if (channel==806)
+	  //   std::cout << roiStart << " " << roiLen << std::endl;
 	   
 
 	  int flag =1;

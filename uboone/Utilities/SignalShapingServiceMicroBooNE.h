@@ -184,7 +184,7 @@ namespace util {
     std::vector<size_t>      fViewIndex;
     std::map<size_t, size_t> fViewMap;
     size_t                   fViewForNormalization;
-
+    double fDeconNorm;
     double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
 	  //double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
