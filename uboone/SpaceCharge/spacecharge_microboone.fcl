@@ -1,0 +1,7 @@
+#include "spacecharge.fcl"
+
+BEGIN_PROLOG
+
+microboone_spacecharge: @local::standard_spacecharge
+
+END_PROLOG
