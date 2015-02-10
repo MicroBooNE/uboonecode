@@ -2184,10 +2184,10 @@
  <volume name="volCryostat">
   <materialref ref="LAr"/>
   <solidref ref="Cryostat"/>
-<!--  <physvol>
+  <physvol>
    <volumeref ref="volSteelTube"/>
    <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
-  </physvol> -->
+  </physvol>
 <physvol>
    <volumeref ref="volEndCap"/>
    <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
