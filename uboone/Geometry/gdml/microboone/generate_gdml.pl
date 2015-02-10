@@ -149,6 +149,7 @@ sub gen_defs()
     #TPCWirePlaneLength is the size in the z direction
     $TPCWirePlaneWidth	=	233;
     $TPCWirePlaneLength	=	1037;
+    $PMTOffset          =       424.75*2.54/224.75*2.54/224.75*2.54/224.75*2.54/224.75*2.54/224.75*2.54/224.75*2.54/2 ;
 
     $pi   = pi;
     $inch = 2.54;
@@ -534,6 +535,23 @@ sub gen_fieldcage() {
   deltaphi="360" 
   aunit="deg" 
   lunit="cm"/> 
+
+ <box name="TPCFrameA" x="11" y="254" z="1070.19" lunit="cm"/> 
+ <box name="TPCFrameB" x="11.1" y="230.29" z="1036.32" lunit="cm"/>
+ <box name="TPCVertBar" x="1" y="1" z="1" lunit="cm"/>
+ <box name="TPCCrossA" lunit="cm" x="9" y="304.8" z="7"/>
+
+<subtraction name="TPCFrame">
+<first ref="TPCFrameA"/> <second ref="TPCFrameB"/>
+<position name="posTPCSubtraction" x="0" y="0" z="0"/>
+</subtraction> 
+
+<union name="TPCCross">
+<first ref="TPCCrossA"/> <second ref="TPCCrossA"/>
+<position name="posTPCCross" x="0" y="0" z="0"/>
+<rotation name="rPlus83AboutX" unit="deg" x="83.16" y="0" z="0"/>
+</union> 
+
 </solids> 
 EOF
 
@@ -556,6 +574,14 @@ EOF
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
   <solidref ref="FieldCageTubeY"/> 
  </volume> 
+ <volume name="volTPCFrame">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="TPCFrame"/>
+ </volume>
+ <volume name="volTPCCross">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="TPCCross"/>
+ </volume>
 </structure>
 EOF
 
@@ -682,6 +708,17 @@ EOF
    <volumeref ref="volGroundPlate"/>
    <position name="posGroundPlate" unit="cm" x="$ground_plate_X+0.25" y="$ground_plate_Y" z="0"/>
   </physvol>-->
+
+   <physvol>
+    <volumeref ref="volTPCFrame"/>
+    <position name="posTPCFrame2" unit="cm" x="-256/2-11/2" y="0" z="0"/>
+   </physvol>
+<!--  <physvol>
+    <volumeref ref="volTPCCross"/>
+    <position name="posTPCCross" unit="cm" x="-256/2" y="-100" z="0"/>
+    <rotation ref="rMinus41AboutX" unit="deg" x="-41.58" y="0" z="0"/> 
+  </physvol>  -->
+
 EOF
 
 
@@ -828,6 +865,12 @@ sub gen_pmt {
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
+ <box name="Paddle_PMT"
+  lunit="cm"
+  x="1/8*2.54"
+  y="20*2.54"
+  z="(7+1/3)*2.54"/> 
+
 EOF
 	print PMT <<EOF;
  <tube name="PMT_Lens"
@@ -840,6 +883,7 @@ EOF
 
 	print PMT <<EOF;
 </solids>
+
 <structure>
  <volume name="volOpDetSensitive">
   <materialref ref="LAr"/>
@@ -860,6 +904,10 @@ EOF
  <volume name="vol_PMT_Underside">
   <materialref ref="Glass"/>
   <solidref ref="PMT_Underside"/>
+ </volume>
+ <volume name="volPaddle_PMT">
+  <materialref ref="Acrylic"/>
+  <solidref ref="Paddle_PMT"/>
  </volume>
 EOF
 	print PMT <<EOF;
@@ -1366,44 +1414,58 @@ EOF
 EOF
 
 
-  @pmt_pos = ( ' x="-147.8"  y="3.21654"  z="-472"',
-               ' x="-147.76" y="-52.6635" z="-420"',
-               ' x="-147.8"  y="59.0965"  z="-420"',
-               ' x="-147.76" y="-52.6635" z="-380"',
-               ' x="-147.8"  y="59.0965"  z="-380"',
-               ' x="-147.8"  y="3.21654"  z="-328"',
-               ' x="-147.8"  y="3.21654"  z="-272"',
-               ' x="-147.76" y="-52.6635" z="-220"',
-               ' x="-147.8"  y="59.0965"  z="-220"',
-               ' x="-147.76" y="-52.6635" z="-180"',
-               ' x="-147.8"  y="59.0965"  z="-180"',
-               ' x="-147.8"  y="3.21654"  z="-128"',
-               ' x="-147.8"  y="3.21654"  z="-72"',
-               ' x="-147.76" y="-52.6635" z="-20"',
-               ' x="-147.8"  y="59.0965"  z="-20"',
-               ' x="-147.76" y="-52.6635" z="20"',
-               ' x="-147.8"  y="59.0965"  z="20"',
-               ' x="-147.8"  y="3.21654"  z="72"',
-               ' x="-147.8"  y="3.21654"  z="128"',
-               ' x="-147.76" y="-52.6635" z="180"',
-               ' x="-147.8"  y="59.0965"  z="180"',
-               ' x="-147.76" y="-52.6635" z="220"',
-               ' x="-147.8"  y="59.0965"  z="220"',
-               ' x="-147.8"  y="3.21654"  z="272"',
-               ' x="-147.8"  y="3.21654"  z="328"',
-               ' x="-147.76" y="-52.6635" z="380"',
-               ' x="-147.8"  y="59.0965"  z="380"',
-               ' x="-147.76" y="-52.6635" z="420"',
-               ' x="-147.8"  y="59.0965"  z="420"',
-               ' x="-147.8"  y="3.21654"  z="472"' );
+  @pmt_pos = ( ' x="-141.487" y="55.249" z="108.693 - 424.75*2.54*.5"',
+               ' x="-141.342" y="55.249" z="149.287-424.75*2.54*.5"',
+               ' x="-141.380" y="27.431"  z="72.034 - 424.75*2.54*.5"',
+               ' x="-141.387" y="-0.303" z="194.676 - 424.75*2.54*.5"',
+               ' x="-141.098"  y="-28.576"  z="71.407 - 424.75*2.54*.5"',
+               ' x="-141.183"  y="-56.615"  z="108.802 - 424.75*2.54*.5"',
+               ' x="-141.2239"  y="-56.203"  z="149.112- 424.75*2.54*.5"',
+               ' x="-141.363" y="54.646" z="308.909 - 424.75*2.54*.5"',
+               ' x="-141.132"  y="54.693"  z="349.145 - 424.75*2.54*.5"',
+               ' x="-141.096" y="-0.829" z="262.947 - 424.75*2.54*.5"',
+               ' x="-141.031"  y="-0.706"  z="394.771 - 424.75*2.54*.5"',
+               ' x="-140.953"  y="-56.261"  z="308.572 - 424.75*2.54*.5"',
+               ' x="-140.594"  y="-57.022"  z="349.273 - 424.75*2.54*.5"',
+               ' x="-140.929" y="55.771" z="521.066 - 424.75*2.54*.5"',
+               ' x="-140.819"  y="55.822"  z="561.862 - 424.75*2.54*.5"',
+               ' x="-140.564" y="-0.875" z="474.028 - 424.75*2.54*.5"',
+               ' x="-140.597"  y="-0.549"  z="606.217 - 424.75*2.54*.5"',
+               ' x="-140.540"  y="-56.323"  z="521.153 - 424.75*2.54*.5"',
+               ' x="-140.566"  y="-56.205"  z="561.549 - 424.75*2.54*.5"',
+               ' x="-140.607" y="55.800" z="732.006 - 424.75*2.54*.5"',
+               ' x="-140.486"  y="55.625"  z="772.816 - 424.75*2.54*.5"',
+               ' x="-140.570" y="-0.051" z="685.136 - 424.75*2.54*.5"',
+               ' x="-140.250"  y="-0.502"  z="817.141 - 424.75*2.54*.5"',
+               ' x="-140.558"  y="-56.408"  z="732.207 - 424.75*2.54*.5"',
+               ' x="-140.550"  y="-56.284"  z="772.838 - 424.75*2.54*.5"',
+               ' x="-139.780" y="55.822" z="931.998 - 424.75*2.54*.5"',
+               ' x="-139.587"  y="55.313"  z="972.794 - 424.75*2.54*.5"',
+               ' x="-139.363" y="27.607" z="1010.644 - 424.75*2.54*.5"',
+               ' x="-140.122"  y="-0.722"  z="886.531 - 424.75*2.54*.5"',
+               ' x="-139.400"  y="-28.625"  z="1011.288 - 424.75*2.54*.5"', 
+	       ' x="-140.004" y="-56.309" z="932.872 - 424.75*2.54*.5"',
+	       ' x="-139.721" y="-56.514" z="972.797 - 424.75*2.54*.5"',
+  	       ' x="-161.341" y="-28.201 + 20/2*2.54" z="287.161 - 424.75*2.54*.5"',
+	       ' x="-160.858" y="-27.994 + 20/2*2.54" z="498.501 - 424.75*2.54*.5"',
+	       ' x="-160.882" y="-28.100 + 20/2*2.54" z="583.333 - 424.75*2.54*.5"',
+	       ' x="-160.654" y="-27.755 + 20/2*2.54" z="794.575 - 424.75*2.54*.5"' );
 
   if ( $pmt_switch eq "on" ) {
-    for ( $i=0; $i<30; ++$i ){
+    for ( $i=0; $i<32; ++$i ){
       print CRYOSTAT <<EOF;
   <physvol>
    <volumeref ref="volPMT"/>
    <position name="posPMT$i" unit="cm" @pmt_pos[$i]/>
    <rotationref ref="rPMTRotation1"/>
+  </physvol>
+EOF
+    }
+    for ( $i=32; $i<36; ++$i ){
+      print CRYOSTAT <<EOF;
+  <physvol>
+   <volumeref ref="volPaddle_PMT"/>
+   <position name="posPMT$i" unit="cm" @pmt_pos[$i]/>
   </physvol>
 EOF
     }

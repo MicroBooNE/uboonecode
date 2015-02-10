@@ -24,6 +24,17 @@
    <volumeref ref="volGroundPlate"/>
    <position name="posGroundPlate" unit="cm" x="9+0.25" y="124" z="0"/>
   </physvol>-->
+
+   <physvol>
+    <volumeref ref="volTPCFrame"/>
+    <position name="posTPCFrame2" unit="cm" x="-256/2-11/2" y="0" z="0"/>
+   </physvol>
+<!--  <physvol>
+    <volumeref ref="volTPCCross"/>
+    <position name="posTPCCross" unit="cm" x="-256/2" y="-100" z="0"/>
+    <rotation ref="rMinus41AboutX" unit="deg" x="-41.58" y="0" z="0"/> 
+  </physvol>  -->
+
   <physvol>
    <volumeref ref="volCathodePlate"/>
    <position name="posCathodePlate" unit="cm" x="127.45" y="0" z="0"/>
