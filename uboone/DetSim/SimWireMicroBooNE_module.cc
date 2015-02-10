@@ -601,7 +601,7 @@ namespace detsim {
         if ( adcval < 0 )
           adcval = 0;
 
-        adcvec[i] = (unsigned short)(adcval);
+        adcvec[i] = (unsigned short)TMath::Nint(adcval);
 
       }// end loop over signal size
 

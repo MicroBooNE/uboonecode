@@ -570,6 +570,13 @@
     x="148326" 
     y="106000" 
     z="148326"/>
+<tube name="ConcreteWallAboveGrade"
+   rmin="292*2.54"
+   rmax="(310)*2.54"
+   z="28*12*2.54"
+   deltaphi="360"
+   lunit="cm"
+   aunit="deg"/>
   <tube name="Ground"
     rmin="312*2.54"
     rmax="((50*12)+310)*2.54"
@@ -2470,6 +2477,11 @@
       </physvol> 
  </volume>
 
+
+<volume name="volConcreteWallAboveGrade" >
+    <materialref ref="Concrete" />
+    <solidref ref="ConcreteWallAboveGrade" />
+  </volume>
   <volume name="volGround" >
     <materialref ref="Dirt" />
     <solidref ref="Ground" />
@@ -2505,7 +2517,12 @@
   <volume name="volWorld" >
     <materialref ref="Air"/> 
     <solidref ref="World"/>
-   <physvol>
+<!--	<physvol>
+      <volumeref ref="volConcreteWallAboveGrade"/>
+      <position name="posConcreteWallAboveGrade" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54" z="0.5*1037"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> -->
+    <physvol>
       <volumeref ref="volConcreteEnclosure"/>
       <position name="posConcreteEnclosure" unit="cm" x="0.5*256.35" y="36*2.54/2" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
