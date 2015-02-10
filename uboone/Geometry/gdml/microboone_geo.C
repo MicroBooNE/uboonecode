@@ -9,7 +9,7 @@ microboone_geo(TString volName="")
   gSystem->Load("libGeom");
   gSystem->Load("libGdml");
 
-  TGeoManager::Import("microboonev2_nowires.gdml");
+  TGeoManager::Import("microboonev4_nowires.gdml");
 
   drawopt optuboone[] = {
     {"volGround",       kOrange-7},

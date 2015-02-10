@@ -12,7 +12,7 @@
   z="238.08-2*(6.35+1.27)"  
   deltaphi="360" 
   aunit="deg" 
-  lunit="cm"/>
+  lunit="cm"/> 
 
  <box name="TPCFrameA" x="11" y="254" z="1070.19" lunit="cm"/> 
  <box name="TPCFrameB" x="11.1" y="230.29" z="1036.32" lunit="cm"/>
@@ -47,7 +47,7 @@
  <volume name="volFieldCageTubeBack"> 
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
   <solidref ref="FieldCageTubeY"/> 
- </volume>
+ </volume> 
  <volume name="volTPCFrame">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="TPCFrame"/>

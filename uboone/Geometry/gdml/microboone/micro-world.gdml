@@ -112,12 +112,6 @@
    deltaphi="360"
    lunit="cm"
    aunit="deg"/>
-  <tube name="Roof"
-   rmax="310*2.54"
-   z="6*2.54"
-   deltaphi="360"
-   lunit="cm"
-   aunit="deg"/>
   <tube name="Overburden"
     rmin="0"
     rmax="584*2.54"
@@ -336,11 +330,6 @@
       <position name="posPolystyreneEnclosure" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>   
-  <!--  <physvol>
-      <volumeref ref="volRoof"/>
-      <position name="posRoof" unit="cm" x="0.5*256.35" y="38*12*2.54/2 + 36*2.54/2 " z="0.5*1037"/>
-      <rotationref ref="rPlus90AboutX" />
-    </physvol>  -->
     <physvol>
        <volumeref ref="volGround"/>
       <position name="posGround" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
