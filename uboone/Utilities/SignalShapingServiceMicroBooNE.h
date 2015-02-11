@@ -146,6 +146,7 @@ namespace util {
     template <class T> void Deconvolute(size_t channel, size_t wire, std::vector<T>& func) const;
     
     void SetDecon(int fftsize);
+    double GetDeconNorm(){return fDeconNorm;};
 
   private:
 
@@ -181,6 +182,7 @@ namespace util {
     size_t fNPlanes;
     size_t fNViews;
 
+    
     
 
     // Fcl parameters.
