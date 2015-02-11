@@ -283,7 +283,8 @@ namespace caldata {
     std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
-    
+    double DeconNorm = sss->GetDeconNorm();
+
     // std::cout << "xin1: " << sss->GetRawNoise(0) << " " << sss->GetRawNoise(4000) << " " << sss->GetRawNoise(8000) << std::endl;
     // std::cout << "xin2: " << sss->GetDeconNoise(0) << " " << sss->GetDeconNoise(4000) << " " << sss->GetDeconNoise(8000) << std::endl;
 
@@ -512,6 +513,8 @@ namespace caldata {
 	    //std::cout << channel << " " << flag << std::endl;
 
 	    sss->Deconvolute(channel,holder);
+	    for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
+
 	    // if (channel==3218){
 	    //   for(unsigned int bin = 0; bin <holder.size(); ++bin) {
 	    // 	std::cout << bin << " " <<  holder[bin] << std::endl;

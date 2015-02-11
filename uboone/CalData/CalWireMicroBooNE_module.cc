@@ -148,6 +148,7 @@ namespace caldata {
 
     // Get signal shaping service.
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    double DeconNorm = sss->GetDeconNorm();
 
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
@@ -235,10 +236,13 @@ namespace caldata {
 
 	// Do deconvolution.
 	sss->Deconvolute(channel, holder);
-
+	for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
       } // end if not a bad channel 
       
       holder.resize(dataSize,1e-5);
+
+      //normalize the holder (Xin Qian)
+      
 
       //This restores the DC component to signal removed by the deconvolution.
       if(fPostsample) {
