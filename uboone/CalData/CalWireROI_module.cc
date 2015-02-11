@@ -280,6 +280,7 @@ namespace caldata {
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
+    std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     
