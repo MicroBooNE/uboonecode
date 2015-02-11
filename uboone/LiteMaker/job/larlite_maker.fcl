@@ -8,12 +8,7 @@
 # package for the data products added to the event. 
 
 #include "services_microboone.fcl"
-#include "litemaker_mcpart.fcl"
-#include "litemaker_simch.fcl"
-#include "litemaker_mcinfo.fcl"
-#include "litemaker_reco2d.fcl"
-#include "litemaker_reco3d.fcl"
-#include "litemaker_anadata.fcl"
+
 process_name: Trial
 
 services:
