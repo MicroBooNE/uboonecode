@@ -242,8 +242,6 @@ void cal::ShowWire::analyze(art::Event const & e)
 
     raw::ChannelID_t channel = wire.Channel();
     if(channel!=fChannel && fSaveWaveforms) continue;
-    geo::SigType_t signalType = geom->SignalType(channel);
-    if (signalType != geo::kCollection) continue;
 
     raw::RawDigit const& rawdigit(*(RawDigitsFromWire.at(iWire++)));
     size_t n_samples = rawdigit.Samples();
