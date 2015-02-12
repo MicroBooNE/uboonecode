@@ -80,8 +80,7 @@ namespace calibration{
     const unsigned int n_channels = rawDigit.size();
     
     for(unsigned int ich=0; ich<n_channels; ich++)
-      calcPedestal_SingleChannel(rawDigit.at(ich).fADC,
-				 pedestal.at(ich)  );
+      calcPedestal_SingleChannel(rawDigit.at(ich).ADCs(), pedestal.at(ich));
 
  
   }
@@ -115,7 +114,7 @@ namespace calibration{
     const unsigned int n_channels = rawDigit.size();
     
     for(unsigned int ich=0; ich<n_channels; ich++)
-      calcGain_SingleChannel(rawDigit.at(ich).fADC,
+      calcGain_SingleChannel(rawDigit.at(ich).ADCs(),
 			     pedestal.at(ich),
 			     noise.at(ich),
 			     maxADC.at(ich),
@@ -179,7 +178,7 @@ namespace calibration{
     const unsigned int n_channels = rawDigit.size();
     
     for(unsigned int ich=0; ich<n_channels; ich++)
-      calcNoise_SingleChannel(rawDigit.at(ich).fADC,
+      calcNoise_SingleChannel(rawDigit.at(ich).ADCs(),
 			      pedestal.at(ich),
 			      noise.at(ich),
 			      noise_spectrum.at(ich));

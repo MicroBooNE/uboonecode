@@ -8,10 +8,18 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
+// C/C++ standard libraries
 #include <string>
 #include <vector>
+#include <utility> // std::pair<>
+#include <memory> // std::unique_ptr<>
 #include <iomanip>
 
+// ROOT libraries
+#include "TComplex.h"
+#include "TH1D.h"
+
+// framework libraries
 #include "fhiclcpp/ParameterSet.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 #include "art/Framework/Core/ModuleMacros.h" 
@@ -22,18 +30,20 @@
 #include "art/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h" 
-#include "art/Framework/Services/Optional/TFileDirectory.h" 
 #include "art/Utilities/Exception.h"
 
-#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
+// LArSoft libraries
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "Geometry/Geometry.h"
 #include "Filters/ChannelFilter.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
+#include "RecoBaseArt/WireCreator.h"
 #include "Utilities/LArFFT.h"
+#include "Utilities/AssociationUtil.h"
+#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "uboone/Database/PedestalRetrievalAlg.h"
-
 
 /* unused function
 namespace {
@@ -138,12 +148,15 @@ namespace caldata {
     dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
 
     void doDecon(std::vector<float>& holder, 
-      uint32_t channel, unsigned int thePlane,
+      raw::ChannelID_t channel, unsigned int thePlane,
       std::vector<std::pair<unsigned int, unsigned int>> rois,
       std::vector<std::pair<unsigned int, unsigned int>> holderInfo,
       recob::Wire::RegionsOfInterest_t& ROIVec,
       art::ServiceHandle<util::SignalShapingServiceMicroBooNE>& sss);
-    
+    float SubtractBaseline(std::vector<float>& holder, float basePre,
+			   float basePost,unsigned int roiStart,unsigned int roiLen,
+			   unsigned int dataSize);
+      
   protected: 
     
   }; // class CalWireROI
@@ -154,11 +167,10 @@ namespace caldata {
   CalWireROI::CalWireROI(fhicl::ParameterSet const& pset):
     fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
   {
-    fSpillName="";
     this->reconfigure(pset);
 
-    if(fSpillName.size()<1) produces< std::vector<recob::Wire> >();
-    else produces< std::vector<recob::Wire> >(fSpillName);
+    produces< std::vector<recob::Wire> >(fSpillName);
+    produces<art::Assns<raw::RawDigit, recob::Wire>>(fSpillName);
   }
   
   //-------------------------------------------------
@@ -203,7 +215,7 @@ namespace caldata {
     fPreROIPad[2]  = zin[0];
     fPostROIPad[2] = zin[1];
     
-    fSpillName="";
+    fSpillName.clear();
     
     size_t pos = fDigitModuleLabel.find(":");
     if( pos!=std::string::npos ) {
@@ -252,6 +264,9 @@ namespace caldata {
     
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
+    // ... and an association set
+    std::unique_ptr<art::Assns<raw::RawDigit,recob::Wire> > WireDigitAssn
+      (new art::Assns<raw::RawDigit,recob::Wire>);
 
    
     
@@ -262,10 +277,20 @@ namespace caldata {
 
     if (!digitVecHandle->size())  return;
     
-    uint32_t     channel(0); // channel number
+    raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    filter::ChannelFilter *chanFilt = new filter::ChannelFilter();  
+    std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
+
+    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    double DeconNorm = sss->GetDeconNorm();
+
+    // std::cout << "xin1: " << sss->GetRawNoise(0) << " " << sss->GetRawNoise(4000) << " " << sss->GetRawNoise(8000) << std::endl;
+    // std::cout << "xin2: " << sss->GetDeconNoise(0) << " " << sss->GetDeconNoise(4000) << " " << sss->GetDeconNoise(8000) << std::endl;
+
+    //calculated expected deconvoluted noise level at all three planes
+    //calculated expected raw noise level at all three planes
+
     
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
@@ -291,7 +316,7 @@ namespace caldata {
       //unsigned int theWire = wids[0].Wire;
       
       // use short pedestal for testing the 1st induction plane
-      unsigned short sPed = abs(fThreshold[thePlane]);
+      // unsigned short sPed = abs(fThreshold[thePlane]);
     
       // Find minimum separation between ROIs including the padding.
       // Use the longer pad
@@ -303,7 +328,7 @@ namespace caldata {
       if(!chanFilt->BadChannel(channel)) {
         
         // uncompress the data
-        raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
+        raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
         // loop over all adc values and subtract the pedestal
 	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
         float pdstl = 0.0;
@@ -312,7 +337,9 @@ namespace caldata {
 	// Xin, remove the time offset
 	//int time_offset = 0.;//sss->FieldResponseTOffset(channel);
         unsigned int roiStart = 0;
-       
+
+	double raw_noise = sss->GetRawNoise(channel);
+
         // search for ROIs
         for(bin = 1; bin < dataSize; ++bin) {
           float SigVal = fabs(rawadc[bin] - pdstl);
@@ -320,35 +347,68 @@ namespace caldata {
             // not in a ROI
             // Handle the onset of a ROI differently for the 1st induction plane
             // if it has been modeled correctly
-            if(fuPlaneRamp && thePlane == 0) {
-              if(rawadc[bin] - rawadc[bin - 1] < sPed) roiStart = bin;
-            } else {
-              if(SigVal > fThreshold[thePlane]) roiStart = bin;
-            }
+            // if(fuPlaneRamp && thePlane == 0) {
+            //   if(rawadc[bin] - rawadc[bin - 1] < sPed) roiStart = bin;
+            // } else {
+            //   if(SigVal > fThreshold[thePlane]) roiStart = bin;
+            // }
+	    unsigned int sbin[7];
+	    if (bin>=4) {
+	      sbin[0] = bin -3;
+	      sbin[1] = bin -2;
+	      sbin[2] = bin -1;
+	    }else if (bin>=3){
+	      sbin[0] = 1;
+	      sbin[1] = bin-2;
+	      sbin[2] = bin-1;
+	    }else if (bin>=2){
+	      sbin[0] =1;
+	      sbin[1] =1;
+	      sbin[2] = bin-1;
+	    }else{
+	      sbin[0] =1;
+	      sbin[1] =1;
+	      sbin[2] =1;
+	    }
+	    sbin[3] = bin ; 
+	    sbin[4] = bin + 1; if (sbin[4]>dataSize-1) sbin[4] =dataSize-1;
+	    sbin[5] = bin + 2; if (sbin[5]>dataSize-1) sbin[5] =dataSize-1;
+	    sbin[6] = bin + 3; if (sbin[6]>dataSize-1) sbin[6] =dataSize-1;
+	    float sum = 0;
+	    for (int qx = 0; qx!=7;qx++){
+	      sum += rawadc[sbin[qx]]-pdstl;
+	    }
+	    sum = fabs(sum);
+	    //std::cout << bin << " " << sum << " " << raw_noise/sqrt(7.)*3. << std::endl;
+	    if (sum > raw_noise*sqrt(7.)*5.) roiStart = bin;
+
 	  } else {
             // leaving a ROI?
             if(SigVal < fThreshold[thePlane]) {
               // is the ROI wide enough?
-              unsigned int roiLen = bin - roiStart;
+              //unsigned int roiLen = bin - roiStart;
               // if(roiLen > transformSize) {
               //   mf::LogError("CalWireROI")<<"ROI too long "
               //     <<roiLen<<" on plane:wire "<<thePlane<<":"<<theWire;
               //   break;
               // }
               //if(roiLen > fMinWid && roiLen < transformSize) 
-	      if(roiLen > fMinWid) 
-                rois.push_back(std::make_pair(roiStart, bin));
+	      //std::cout << roiStart << " " << roiLen << std::endl;
+	      // if(roiLen > fMinWid) 
+	      rois.push_back(std::make_pair(roiStart, bin));
               roiStart = 0;
             }
           } // roiStart test
         } // bin
 	// add the last ROI if existed
 	if (roiStart!=0){
-	   unsigned int roiLen = dataSize -1 - roiStart;
-	   if(roiLen > fMinWid) 
-	     rois.push_back(std::make_pair(roiStart, dataSize-1));
+	  //unsigned int roiLen = dataSize -1 - roiStart;
+	   // if(roiLen > fMinWid) 
+	   rois.push_back(std::make_pair(roiStart, dataSize-1));
 	   roiStart = 0;
 	}
+
+	
 
         // skip deconvolution if there are no ROIs
         if(rois.size() == 0) continue;
@@ -366,6 +426,7 @@ namespace caldata {
           unsigned int high = rois[ii].second + fPostROIPad[thePlane];
           if(high >= dataSize) high = dataSize-1;
           rois[ii].second = high;
+	  
         }
 
 	// if (channel==3218){
@@ -383,12 +444,15 @@ namespace caldata {
 	  for (unsigned int ii = 0; ii<rois.size();ii++){
 	    unsigned int roiStart = rois[ii].first;
 	    unsigned int roiEnd = rois[ii].second;
-          
+
+	    // if (channel==806)
+	    //   std::cout << "a" << " " << roiStart << " " << roiEnd << std::endl;
+
 	    int flag1 = 1;
 	    unsigned int jj=ii+1;
 	    while(flag1){	
 	      if (jj<rois.size()){
-		if(rois[jj].first - roiEnd >=0 ) {
+		if(rois[jj].first <= roiEnd  ) {
 		  roiEnd = rois[jj].second;
 		  ii = jj;
 		  jj = ii+1;
@@ -400,7 +464,9 @@ namespace caldata {
 	      }
 	    }
 	    
-
+	   // if (channel==806)
+	   //   std::cout << "b" << " " << roiStart << " " << roiEnd << std::endl;
+	 
 	    trois.push_back(std::make_pair(roiStart,roiEnd));	    
 	  }
 	  
@@ -413,6 +479,9 @@ namespace caldata {
 	  unsigned int roiLen = rois[ir].second - rois[ir].first;
 	  unsigned int roiStart = rois[ir].first;
 	  //treat FFT Size
+	  // if (channel==806)
+	  //   std::cout << roiStart << " " << roiLen << std::endl;
+	   
 
 	  int flag =1;
 	  float tempPre=0,tempPost=0;
@@ -424,7 +493,7 @@ namespace caldata {
 	    if (roiLen > transformSize) transformSize = roiLen;
 	    
 	    // Get signal shaping service.
-	    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+	    
 	    sss->SetDecon(transformSize);
 	    transformSize = fFFT->FFTSize();
 	    // temporary vector of signals
@@ -441,9 +510,11 @@ namespace caldata {
 	      ++hBin;
 	    } // bin
 
-	    
+	    //std::cout << channel << " " << flag << std::endl;
 
 	    sss->Deconvolute(channel,holder);
+	    for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
+
 	    // if (channel==3218){
 	    //   for(unsigned int bin = 0; bin <holder.size(); ++bin) {
 	    // 	std::cout << bin << " " <<  holder[bin] << std::endl;
@@ -453,25 +524,23 @@ namespace caldata {
 	    // If not, include next ROI(if none, go to the end of signal)
 	    // If yes, proceed
 	    tempPre=0,tempPost=0;
-	    for(unsigned int bin = 0; bin < 5; ++bin) {
+	    for(unsigned int bin = 0; bin < 20; ++bin) {
 	      tempPre  += holder[bin];
 	      tempPost += holder[roiLen - bin];
 	    }
-	    tempPre = tempPre/5.;
-	    tempPost = tempPost/5.;
-
-	    // if (channel==3218){
-	    //   std::cout << flag << " " << tempPre << " " << tempPost << std::endl;
-	    // }
-
-	    if (fabs(tempPost-tempPre)<2){
+	    tempPre = tempPre/20.;
+	    tempPost = tempPost/20.;
+	    
+	    double deconNoise = sss->GetDeconNoise(channel)/sqrt(10.)*4;
+	    
+	    if (fabs(tempPost-tempPre)<deconNoise){
 	      flag = 0;
 	    }else{
 	      ir++;
 	      if (ir<rois.size()){
 		roiLen = rois[ir].second - roiStart;
 	      }else{
-		roiLen = dataSize -1 - roiStart;
+		roiLen = dataSize - roiStart;
 	      }
 	    }
 	  }
@@ -489,14 +558,9 @@ namespace caldata {
 	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 ) {
 	    basePre =tempPre;
 	    basePost=tempPost;
-	    float base;
-	    if (fabs(basePre-basePost)<3){
-	      base = (basePre+basePost)/2.;
-	    }else{
-	      base = basePre;
-	    }
+	    float base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
 	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
-	      sigTemp.push_back(holder[jj] - base);
+	      sigTemp.push_back(holder[jj]-base);
 	    } // jj
 	  } // fDoBaselineSub ...
 	  else {
@@ -509,50 +573,20 @@ namespace caldata {
 	}
 	
 
-       // unsigned int hBin = 0;
-       //  // max number of holder bins that should be packed. This is the
-       //  // FFT size - width of the response function. Do this crudely for
-       //  // now since the response functions are < 20 time bins in length
-       //  unsigned int packLen = transformSize - 20;
-       //  for(unsigned int ir = 0; ir < rois.size(); ++ir) {
-       //    // enough room to continue packing?
-       //    unsigned int roiLen = rois[ir].second - rois[ir].first;
-       //    if(roiLen > transformSize) {
-       //      mf::LogWarning("CalWireROI")<<"ROI length "<<roiLen
-       //        <<" > FFT size "<<transformSize<<" on plane:wire "
-       //        <<thePlane<<":"<<theWire;
-       //      continue;
-       //    }
-       //    // not enough room to continue packing. Deconvolute this batch, stuff it
-       //    // into ROIVec and continue
-       //    if(hBin + roiLen > packLen) {
-       //      // need to de-convolute holder and continue packing
-       //      doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
-       //      holderInfo.clear();
-       //      hBin = 0;
-       //      for(unsigned int bin = 0; bin < holder.size(); ++bin) holder[bin] = 0;
-       //    } // hBin + roiLen > packLen
-       //    // save the position of this ROI in the holder vector and the ROI index
-       //    holderInfo.push_back(std::make_pair(hBin, ir));
-       //    for(unsigned int bin = rois[ir].first; bin < rois[ir].second; ++bin) {
-       // 	    if ( (hBin-time_offset >= 0) and (hBin-time_offset < holder.size()) ){
-       // 	      holder[hBin-time_offset] = rawadc[bin]-pdstl;
-       // 	      ++hBin;
-       // 	    }//if time-offset does not force to go out of holder bounds
-       //    } // bin
-       //  } // ir < rois.size
-       //  // do the last deconvolution if needed
-       //  if(holderInfo.size() > 0)
-       //    doDecon(holder, channel, thePlane, rois, holderInfo, ROIVec, sss);
-      
 
 
 
       } // end if not a bad channel 
 
       // create the new wire directly in wirecol
-      wirecol->emplace_back(std::move(ROIVec), digitVec);
-      
+      wirecol->push_back(recob::WireCreator(std::move(ROIVec),*digitVec).move());
+      // add an association between the last object in wirecol
+      // (that we just inserted) and digitVec
+      if (!util::CreateAssn(*this, evt, *wirecol, digitVec, *WireDigitAssn, fSpillName)) {
+        throw art::Exception(art::errors::InsertFailure)
+          << "Can't associate wire #" << (wirecol->size() - 1)
+          << " with raw digit #" << digitVec.key();
+      } // if failed to add association
     //  DumpWire(wirecol->back()); // for debugging
     }
 
@@ -574,19 +608,73 @@ namespace caldata {
     }
     
 
-    if(fSpillName.size()>0)
-      evt.put(std::move(wirecol), fSpillName);
-    else evt.put(std::move(wirecol));
-
-    delete chanFilt;
+    evt.put(std::move(wirecol), fSpillName);
+    evt.put(std::move(WireDigitAssn), fSpillName);
 
     fEventCount++;
 
     return;
   } // produce
 
+
+  float CalWireROI::SubtractBaseline(std::vector<float>& holder, float basePre,
+				     float basePost,unsigned int roiStart,
+				     unsigned int roiLen,unsigned int dataSize)
+  {
+    float base=0;
+
+    //can not trust the early part
+    if (roiStart < 20 && roiStart + roiLen < dataSize - 20){
+      base = basePost;
+      // can not trust the later part
+    }else if (roiStart >= 20 && roiStart + roiLen >= dataSize - 20){
+      base = basePre;
+      // can trust both
+    }else if (roiStart >= 20 && roiStart + roiLen < dataSize - 20){
+      if (fabs(basePre-basePost)<3){
+	base = (basePre+basePost)/2.;
+      }else{
+	if (basePre < basePost){
+	  base = basePre;
+	}else{
+	  base = basePost;
+	}
+      }
+      // can not use both
+    }else{
+      float min = 0,max=0;
+      for (unsigned int bin = 0; bin < roiLen; bin++){
+	if (holder[bin] > max) max = holder[bin];
+	if (holder[bin] < min) min = holder[bin];
+      }
+      int nbin = max - min;
+      if (nbin!=0){
+	TH1F *h1 = new TH1F("h1","h1",nbin,min,max);
+	for (unsigned int bin = 0; bin < roiLen; bin++){
+	  h1->Fill(holder[bin]);
+	}
+	float ped = h1->GetMaximum();
+	float ave=0,ncount = 0;
+	for (unsigned int bin = 0; bin < roiLen; bin++){
+	  if (fabs(holder[bin]-ped)<2){
+	    ave +=holder[bin];
+	    ncount ++;
+	  }
+	}
+	if (ncount==0) ncount=1;
+	ave = ave/ncount;
+	h1->Delete();
+	base = ave;
+      }
+    }
+    
+   
+    return base;
+  }
+
+
   void CalWireROI::doDecon(std::vector<float>& holder, 
-    uint32_t channel, unsigned int thePlane,
+    raw::ChannelID_t channel, unsigned int thePlane,
     std::vector<std::pair<unsigned int, unsigned int> > rois,
     std::vector<std::pair<unsigned int, unsigned int> > holderInfo,
     recob::Wire::RegionsOfInterest_t& ROIVec,
