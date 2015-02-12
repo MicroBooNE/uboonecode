@@ -8,44 +8,42 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
+// C/C++ standard libraries
 #include <string>
 #include <vector>
+#include <utility> // std::move()
+#include <memory> // std::unique_ptr<>
 #include <stdint.h>
 
+// ROOT libraries
+#include "TComplex.h"
+#include "TH1D.h"
+#include "TH1F.h"
 
-extern "C" {
-#include <sys/types.h>
-#include <sys/stat.h>
-}
-
+// framework libraries
+#include "fhiclcpp/ParameterSet.h" 
+#include "messagefacility/MessageLogger/MessageLogger.h" 
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h" 
 #include "art/Framework/Principal/Handle.h" 
 #include "art/Persistency/Common/Ptr.h" 
-#include "art/Persistency/Common/PtrVector.h" 
+#include "art/Persistency/Common/Assns.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
-#include "art/Framework/Services/Optional/TFileService.h" 
-#include "art/Framework/Services/Optional/TFileDirectory.h" 
-#include "fhiclcpp/ParameterSet.h" 
-#include "messagefacility/MessageLogger/MessageLogger.h" 
-#include "cetlib/exception.h"
-#include "cetlib/search_path.h"
+#include "art/Framework/Services/Optional/TFileService.h"
 
-#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
+// LArSoft libraries
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "Geometry/Geometry.h"
 #include "Filters/ChannelFilter.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
+#include "RecoBaseArt/WireCreator.h"
 #include "Utilities/LArFFT.h"
+#include "Utilities/AssociationUtil.h"
+#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "uboone/Database/PedestalRetrievalAlg.h"
-
-#include "TComplex.h"
-#include "TFile.h"
-#include "TH2D.h"
-#include "TH1F.h"
-#include "TF1.h"
 
 ///creation of calibrated signals on wires
 namespace caldata {
@@ -60,8 +58,8 @@ namespace caldata {
     virtual ~CalWireMicroBooNE();
     
     void produce(art::Event& evt); 
-    void beginJob(); 
-    void endJob();                 
+    void beginJob();
+    void endJob();
     void reconfigure(fhicl::ParameterSet const& p);
  
   private:
@@ -94,15 +92,11 @@ namespace caldata {
   CalWireMicroBooNE::CalWireMicroBooNE(fhicl::ParameterSet const& pset) :
     fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
   {
-    fSpillName="";
     this->reconfigure(pset);
 
-    if(fSpillName.size()<1) produces< std::vector<recob::Wire> >();
-    else produces< std::vector<recob::Wire> >(fSpillName);
-
-
-
-  }
+    produces< std::vector<recob::Wire> >(fSpillName);
+    produces<art::Assns<raw::RawDigit, recob::Wire>>(fSpillName);
+  } // CalWireMicroBooNE::CalWireMicroBooNE()
   
   //-------------------------------------------------
   CalWireMicroBooNE::~CalWireMicroBooNE()
@@ -118,7 +112,7 @@ namespace caldata {
     fBaseVarCut       = p.get< int >        ("BaseVarCut");
     fSaveWireWF       = p.get< int >        ("SaveWireWF");
     
-    fSpillName="";
+    fSpillName.clear();
     
     fPedestalRetrievalAlg.reconfigure(p);
     
@@ -154,9 +148,13 @@ namespace caldata {
 
     // Get signal shaping service.
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    double DeconNorm = sss->GetDeconNorm();
 
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
+    // ... and an association set
+    std::unique_ptr<art::Assns<raw::RawDigit,recob::Wire> > WireDigitAssn
+      (new art::Assns<raw::RawDigit,recob::Wire>);
     
     // Read in the digit List object(s). 
     art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
@@ -190,10 +188,10 @@ namespace caldata {
     //  mf::LogError("CalWireMicroBooNE")<<"Set BaseSampleBins modulo dataSize= "<<dataSize;
     //}
 
-    uint32_t     channel(0); // channel number
+    raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    filter::ChannelFilter *chanFilt = new filter::ChannelFilter();  
+    std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
 
     std::vector<float> holder;                // holds signal data
     std::vector<short> rawadc(transformSize);  // vector holding uncompressed adc values
@@ -215,7 +213,7 @@ namespace caldata {
 	holder.resize(transformSize, 0.);
 	
 	// uncompress the data
-	raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
+	raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
 	
 	// loop over all adc values and subtract the pedestal
 	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
@@ -238,10 +236,13 @@ namespace caldata {
 
 	// Do deconvolution.
 	sss->Deconvolute(channel, holder);
-
+	for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
       } // end if not a bad channel 
       
       holder.resize(dataSize,1e-5);
+
+      //normalize the holder (Xin Qian)
+      
 
       //This restores the DC component to signal removed by the deconvolution.
       if(fPostsample) {
@@ -255,7 +256,14 @@ namespace caldata {
       if(fDoBaselineSub) SubtractBaseline(holder);
   
       // Make a single ROI that spans the entire data size
-      wirecol->emplace_back(holder,digitVec);
+      wirecol->push_back(recob::WireCreator(holder,*digitVec).move());
+      // add an association between the last object in wirecol
+      // (that we just inserted) and digitVec
+      if (!util::CreateAssn(*this, evt, *wirecol, digitVec, *WireDigitAssn, fSpillName)) {
+        throw art::Exception(art::errors::InsertFailure)
+          << "Can't associate wire #" << (wirecol->size() - 1)
+          << " with raw digit #" << digitVec.key();
+      } // if failed to add association
     }
 
 
@@ -277,13 +285,8 @@ namespace caldata {
       }
     }
 
-
-    if(fSpillName.size()>0)
-      evt.put(std::move(wirecol), fSpillName);
-    else evt.put(std::move(wirecol));
-
-
-    delete chanFilt;
+    evt.put(std::move(wirecol), fSpillName);
+    evt.put(std::move(WireDigitAssn), fSpillName);
     
     fEventCount++;
 

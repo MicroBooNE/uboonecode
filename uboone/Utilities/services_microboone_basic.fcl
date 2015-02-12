@@ -13,6 +13,7 @@
 #include "sam_microboone.fcl"
 #include "timeservice_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
+#include "spacecharge_microboone.fcl"
 
 #
 # This file defines a set of most basic MicroBooNE services.
@@ -31,6 +32,7 @@ microboone_basic_services:
  LArProperties:                  @local::microboone_properties	   
  DatabaseUtil:	                 @local::microboone_database           
  TimeService:                    @local::microboone_timeservice
+ SpaceCharge:                    @local::microboone_spacecharge
 }
 
 END_PROLOG

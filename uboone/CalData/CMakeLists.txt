@@ -15,6 +15,7 @@ art_make( BASENAME_ONLY
 			RawData
 			Database
 			RecoBase
+			RecoBaseArt
 			SignalShapingServiceMicroBooNE_service
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
