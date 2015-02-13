@@ -50,6 +50,7 @@
 #include "Utilities/LArProperties.h"
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/TimeService.h"
+#include "Utilities/FetchRandomSeed.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
 #include "uboone/Database/PedestalRetrievalAlg.h"
@@ -162,13 +163,13 @@ namespace detsim {
     TString compression(pset.get< std::string >("CompressionType"));
     if(compression.Contains("Huffman",TString::kIgnoreCase)) fCompression = raw::kHuffman;
 
-    // get the random number seed, use a random default if not specified
-    // in the configuration file.
-    const unsigned int
-      noise_seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed()),
-      pedestal_seed = pset.get< unsigned int >("SeedPedestal", sim::GetRandomNumberSeed());
-
-
+    // obtain the random seeds from a service,
+    // unless overridden in configuration with key "Seed" and "SeedPedestal"
+    const unsigned int noise_seed
+      = lar::util::FetchRandomSeed("noise", &pset, "Seed");
+    const unsigned int pedestal_seed
+      = lar::util::FetchRandomSeed("pedestal", &pset, "SeedPedestal");
+    
     createEngine(noise_seed, "noise");
     createEngine(pedestal_seed, "pedestal");
   }
