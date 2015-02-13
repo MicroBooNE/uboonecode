@@ -1151,7 +1151,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
   std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
   std::fill(hit_endT, hit_endT + sizeof(hit_endT)/sizeof(hit_endT[0]), -99999.);
-  std::fill(hit_trkid, hit_trkid + sizeof(hit_trkid)/sizeof(hit_trkid[0]), -99999.);
+  std::fill(hit_trkid, hit_trkid + sizeof(hit_trkid)/sizeof(hit_trkid[0]), -9999);
   std::fill(hit_nelec, hit_nelec + sizeof(hit_nelec)/sizeof(hit_nelec[0]), -99999.);
   std::fill(hit_energy, hit_energy + sizeof(hit_energy)/sizeof(hit_energy[0]), -99999.);
 
@@ -1399,7 +1399,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
     CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
     CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits]/F");
-    CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/F");
+    CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
     CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
     CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
   }
