@@ -164,10 +164,13 @@ namespace detsim {
 
     // get the random number seed, use a random default if not specified
     // in the configuration file.
-    unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
+    const unsigned int
+      noise_seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed()),
+      pedestal_seed = pset.get< unsigned int >("SeedPedestal", sim::GetRandomNumberSeed());
 
 
-    createEngine(seed);
+    createEngine(noise_seed, "noise");
+    createEngine(pedestal_seed, "pedestal");
   }
 
   //-------------------------------------------------
@@ -551,7 +554,7 @@ namespace detsim {
       float ped_mean = 0.0, ped_rms = 0.0; 
       fPedestalRetrievalAlg.GetPedestal(chan, ped_mean, ped_rms);
       art::ServiceHandle<art::RandomNumberGenerator> rng;
-      CLHEP::HepRandomEngine &engine = rng->getEngine();
+      CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");
       CLHEP::RandGaussQ rGaussPed(engine, 0.0, ped_rms);
       ped_mean += rGaussPed.fire();
       
@@ -634,7 +637,7 @@ namespace detsim {
   {
     //ART random number service
     art::ServiceHandle<art::RandomNumberGenerator> rng;
-    CLHEP::HepRandomEngine &engine = rng->getEngine();
+    CLHEP::HepRandomEngine &engine = rng->getEngine("noise");
     CLHEP::RandGaussQ rGauss(engine, 0.0, fNoiseFact);
 
     //In this case fNoiseFact is a value in ADC counts
@@ -650,7 +653,7 @@ namespace detsim {
   void SimWireMicroBooNE::GenNoiseInFreq(std::vector<float> &noise)
   {
     art::ServiceHandle<art::RandomNumberGenerator> rng;
-    CLHEP::HepRandomEngine &engine = rng->getEngine();
+    CLHEP::HepRandomEngine &engine = rng->getEngine("noise");
     CLHEP::RandFlat flat(engine,-1,1);
 
     if(noise.size() != fNTicks)
