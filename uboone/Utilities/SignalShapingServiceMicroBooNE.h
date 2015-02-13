@@ -112,7 +112,7 @@ namespace util {
 
     //  double GetASICGain()                                    { return fASICGainInMVPerFC; }
     std::vector<DoubleVec> GetNoiseFactVec()                { return fNoiseFactVec; }
-    //double GetShapingTime()                                 { return fShapeTimeConst.at(1); };
+    //double GetShapingTime()                                 { return fShapeTimeConst.at(1); }; 
     std::vector<std::vector<size_t> > GetNResponses()                    { return fNResponses; }
     std::vector<std::vector<size_t> > GetNActiveResponses()     { return fNActiveResponses; }
 
@@ -127,6 +127,9 @@ namespace util {
 
     double GetASICGain(unsigned int const channel) const;
     double GetShapingTime(unsigned int const channel) const; 
+
+    double GetRawNoise(unsigned int const channel) const ;
+    double GetDeconNoise(unsigned int const channel) const;
 
     const util::SignalShaping& SignalShaping(unsigned int channel, unsigned wire = 0, size_t ktype=0) const;
 
@@ -143,6 +146,7 @@ namespace util {
     template <class T> void Deconvolute(size_t channel, size_t wire, std::vector<T>& func) const;
     
     void SetDecon(int fftsize);
+    double GetDeconNorm(){return fDeconNorm;};
 
   private:
 
@@ -179,12 +183,13 @@ namespace util {
     size_t fNViews;
 
     
+    
 
     // Fcl parameters.
     std::vector<size_t>      fViewIndex;
     std::map<size_t, size_t> fViewMap;
     size_t                   fViewForNormalization;
-
+    double fDeconNorm;
     double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
 	  //double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
