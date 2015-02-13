@@ -8,7 +8,7 @@ roiAlg_DigitAboveThresholdParams:
     MinWidth:       1
 }
 
-roiAlg_CalibrationPulseFinder
+roiAlg_CalibrationPulseFinder:
 {
     AlgName:        "CalibrationPulseFinder"
     Threshold:      3  
