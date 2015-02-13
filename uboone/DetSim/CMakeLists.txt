@@ -1,32 +1,32 @@
 
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES Geometry
-			Geometry_service
-			Simulation
-	                Utilities
-			TimeService_service
-			Filters
-			RawData
-			Database
-			SignalShapingServiceMicroBooNE_service
+                        Geometry_service
+                        Simulation
+                        Utilities
+                        TimeService_service
+                        Filters
+                        RawData
+                        Database
+                        SignalShapingServiceMicroBooNE_service
                         ${ART_FRAMEWORK_CORE}
-			${ART_FRAMEWORK_PRINCIPAL}
-			${ART_FRAMEWORK_SERVICES_REGISTRY}
-			${ART_FRAMEWORK_SERVICES_OPTIONAL}
-			${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
-			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-			${ART_PERSISTENCY_COMMON}
-			${ART_PERSISTENCY_PROVENANCE}
-			${ART_UTILITIES}
-			${MF_MESSAGELOGGER}
-			${MF_UTILITIES}
-	                ${FHICLCPP}
-			${CETLIB}
-			${CLHEP}
+                        ${ART_FRAMEWORK_PRINCIPAL}
+                        ${ART_FRAMEWORK_SERVICES_REGISTRY}
+                        ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+                        ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
+                        ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
+                        ${ART_PERSISTENCY_COMMON}
+                        ${ART_PERSISTENCY_PROVENANCE}
+                        ${ART_UTILITIES}
+                        ${MF_MESSAGELOGGER}
+                        ${MF_UTILITIES}
+                        ${FHICLCPP}
+                        ${CETLIB}
+                        ${CLHEP}
                         ${ROOT_GEOM}
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
-			${ROOT_BASIC_LIB_LIST}
+                        ${ROOT_BASIC_LIB_LIST}
         )
 
 # install_headers()
