@@ -30,8 +30,8 @@ microboone_simwire:
 # Expert settings
  Test:                false       #turns on special test case: parameters below               
  TestWire:            1200
- TestIndex:           4000
- TestCharge:          10000 
+ TestIndex:           [3200]
+ TestCharge:          [20000] 
  Sample:              -1           # no test: 0-3 generates test output
 }
 #microboone_simwireana: @local::standard_simwireana
