@@ -361,11 +361,11 @@ namespace caldata {
 	      sbin[0] = 0;
 	      sbin[1] = bin-2;
 	      sbin[2] = bin-1;
-	    }else if (bin>=2){
+	    }else if (bin>=1){
 	      sbin[0] =0;
 	      sbin[1] =0;
 	      sbin[2] = bin-1;
-	    }else{
+	    }else if (bin==0) {
 	      sbin[0] =0;
 	      sbin[1] =0;
 	      sbin[2] =0;
@@ -526,7 +526,7 @@ namespace caldata {
 	    tempPre=0,tempPost=0;
 	    for(unsigned int bin = 0; bin < 20; ++bin) {
 	      tempPre  += holder[bin];
-	      tempPost += holder[roiLen - bin];
+	      tempPost += holder[roiLen -1 - bin];
 	    }
 	    tempPre = tempPre/20.;
 	    tempPost = tempPost/20.;
@@ -538,9 +538,11 @@ namespace caldata {
 	    }else{
 	      ir++;
 	      if (ir<rois.size()){
-		roiLen = rois[ir].second - roiStart;
+		roiLen = rois[ir].second - roiStart + 1;
 	      }else{
-		roiLen = dataSize -1 - roiStart;
+		roiLen += 100;
+		if (roiLen>dataSize-roiStart)
+		  roiLen = dataSize - roiStart;
 	      }
 	    }
 	  }
