@@ -430,7 +430,7 @@ namespace caldata {
         }
 
 	// if (channel==3218){
-	//   std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
+	//	std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
 	//   for(unsigned int ii = 0; ii < rois.size(); ++ii) {
 	//     std::cout << rois[ii].first << " " << rois[ii].second << std::endl;
 	//   }
@@ -481,7 +481,7 @@ namespace caldata {
 	  //treat FFT Size
 	  // if (channel==806)
 	  //   std::cout << roiStart << " " << roiLen << std::endl;
-	   
+	  
 
 	  int flag =1;
 	  float tempPre=0,tempPost=0;
@@ -505,12 +505,12 @@ namespace caldata {
 		holder[hBin] = rawadc[bin]-pdstl;
 	      }else{
 		holder[hBin] = rawadc[bin-dataSize]-pdstl;
-		flag = 0;
 	      }
+	      if (bin>=dataSize-1) flag = 0;
 	      ++hBin;
 	    } // bin
 
-	    //std::cout << channel << " " << flag << std::endl;
+	    //std::cout << channel << " " << roiStart << " " << flag << " " << dataSize << " " << holder.size() << " " << roiLen << std::endl;
 
 	    sss->Deconvolute(channel,holder);
 	    for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
@@ -526,7 +526,7 @@ namespace caldata {
 	    tempPre=0,tempPost=0;
 	    for(unsigned int bin = 0; bin < 20; ++bin) {
 	      tempPre  += holder[bin];
-	      tempPost += holder[roiLen - bin];
+	      tempPost += holder[roiLen-1 - bin];
 	    }
 	    tempPre = tempPre/20.;
 	    tempPost = tempPost/20.;
@@ -540,7 +540,7 @@ namespace caldata {
 	      if (ir<rois.size()){
 		roiLen = rois[ir].second - roiStart;
 	      }else{
-		roiLen = dataSize - roiStart;
+		roiLen = dataSize -1 - roiStart;
 	      }
 	    }
 	  }
