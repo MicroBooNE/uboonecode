@@ -26,8 +26,8 @@
   </physvol>-->
 
    <physvol>
-    <volumeref ref="volTPCFrame"/>
-    <position name="posTPCFrame2" unit="cm" x="-256/2-11/2" y="0" z="0"/>
+    <volumeref ref="volFrame"/>
+    <position name="posFrame2" unit="cm" x="-256/2-11" y="0" z="0"/>
    </physvol>
 <!--  <physvol>
     <volumeref ref="volTPCCross"/>

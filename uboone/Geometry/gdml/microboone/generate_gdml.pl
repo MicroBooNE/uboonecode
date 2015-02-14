@@ -536,19 +536,19 @@ sub gen_fieldcage() {
   aunit="deg" 
   lunit="cm"/> 
 
- <box name="TPCFrameA" x="11" y="254" z="1070.19" lunit="cm"/> 
- <box name="TPCFrameB" x="11.1" y="230.29" z="1036.32" lunit="cm"/>
- <box name="TPCVertBar" x="1" y="1" z="1" lunit="cm"/>
- <box name="TPCCrossA" lunit="cm" x="9" y="304.8" z="7"/>
+ <box name="FrameA" x="11" y="254" z="1070.19" lunit="cm"/> 
+ <box name="FrameB" x="11.1" y="230.29" z="1036.32" lunit="cm"/>
+ <box name="VertBar" x="1" y="1" z="1" lunit="cm"/>
+ <box name="CrossA" lunit="cm" x="9" y="304.8" z="7"/>
 
-<subtraction name="TPCFrame">
-<first ref="TPCFrameA"/> <second ref="TPCFrameB"/>
+<subtraction name="Frame">
+<first ref="FrameA"/> <second ref="FrameB"/>
 <position name="posTPCSubtraction" x="0" y="0" z="0"/>
 </subtraction> 
 
-<union name="TPCCross">
-<first ref="TPCCrossA"/> <second ref="TPCCrossA"/>
-<position name="posTPCCross" x="0" y="0" z="0"/>
+<union name="Cross">
+<first ref="CrossA"/> <second ref="CrossA"/>
+<position name="posCross" x="0" y="0" z="0"/>
 <rotation name="rPlus83AboutX" unit="deg" x="83.16" y="0" z="0"/>
 </union> 
 
@@ -574,9 +574,9 @@ EOF
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
   <solidref ref="FieldCageTubeY"/> 
  </volume> 
- <volume name="volTPCFrame">
+ <volume name="volFrame">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="TPCFrame"/>
+  <solidref ref="Frame"/>
  </volume>
  <volume name="volTPCCross">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
@@ -710,8 +710,8 @@ EOF
   </physvol>-->
 
    <physvol>
-    <volumeref ref="volTPCFrame"/>
-    <position name="posTPCFrame2" unit="cm" x="-256/2-11/2" y="0" z="0"/>
+    <volumeref ref="volFrame"/>
+    <position name="posFrame2" unit="cm" x="-256/2-11" y="0" z="0"/>
    </physvol>
 <!--  <physvol>
     <volumeref ref="volTPCCross"/>
@@ -2121,8 +2121,8 @@ sub gen_enclosureExtras()
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
- <box name="PlatformOLDbig" lunit="cm" x="550+1" y="18+1" z="1500+1" />
- <box name="PlatformOLDsmall" lunit="cm" x="550" y="18" z="1500" />
+ <box name="PlatformOLDbig" lunit="cm" x="558+1" y="18+1" z="1500+1" />
+ <box name="PlatformOLDsmall" lunit="cm" x="558" y="18" z="1500" />
  <tube name="PlatformNEW" lunit="cm" rmax="292*2.54-0.5" z="18+1.5" aunit="deg" deltaphi="360" /> 
 
   <subtraction name="PlatformSub0">
@@ -2136,6 +2136,65 @@ sub gen_enclosureExtras()
 	<position name="posPlatformSub1" unit="cm" x="0" y="0" z="0"/>
   </subtraction> 
 
+ <box name="IBeam53_0" lunit="cm" x="9.995*2.54 -0.1" y="(18*12+4)*2.54-0.1" z="12.06*2.54-0.1"/>
+ <box name="IBeam53Segment" lunit="cm" x="(9.995-0.345)*2.54/2" y="(18*12+4)*2.54" z="(12.06-2*0.575)*2.54"/>
+ <box name="IBeam16_0" lunit="cm" x="3.99*2.54-0.1" y="(23*12)*2.54-0.1" z="12.5*2.54-0.1"/>
+ <box name="IBeam16Segment" lunit="cm" x="(3.99-0.22)*2.54/2" y="(23*12)*2.54" z="(11.99-2*0.265)*2.54"/>
+ <box name="IBeam40_0" lunit="cm" x="8.005*2.54 -0.1" y="(18*12+4)*2.54-0.1" z="11.94*2.54-0.1"/>
+ <box name="IBeam40Segment" lunit="cm" x="(8.005-0.295)*2.54/2" y="(18*12+4)*2.54" z="(11.94-2*0.515)*2.54"/>
+ <box name="IBeam45_0" lunit="cm" x="8.02*2.54-0.1" y="(23*12)*2.54-0.1" z="10.1*2.54-0.1"/>
+ <box name="IBeam45Segment" lunit="cm" x="(8.02-0.35)*2.54/2" y="(23*12)*2.54" z="(10.1-2*0.62)*2.54"/>
+ <box name="IBeam17_0" lunit="cm" x="4.01*2.54-0.1" y="(23*12)*2.54-0.1" z="10.11*2.54-0.1"/>
+ <box name="IBeam17Segment" lunit="cm" x="(4.01-0.24)*2.54/2" y="(23*12)*2.54" z="(10.11-2*0.33)*2.54"/>
+
+
+  <subtraction name="IBeam53_1">
+    <first ref="IBeam53_0"/> <second ref="IBeam53Segment"/>
+	<position name="posBeamRemovalPlat2" unit="cm" x="(9.995+.345)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam53">
+    <first ref="IBeam53_1"/> <second ref="IBeam53Segment"/>
+	<position name="posBeamRemovalPlat3" unit="cm" x="-(9.995 +.345)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam16_1">
+    <first ref="IBeam16_0"/> <second ref="IBeam16Segment"/>
+	<position name="posBeamRemovalPlat4" unit="cm" x="(3.99+.22)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam16">
+    <first ref="IBeam16_1"/> <second ref="IBeam16Segment"/>
+	<position name="posBeamRemovalPlat5" unit="cm" x="-(3.99+.22)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam40_1">
+    <first ref="IBeam40_0"/> <second ref="IBeam40Segment"/>
+	<position name="posBeamRemovalPlat6" unit="cm" x="(8.005+.295)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam40">
+    <first ref="IBeam40_1"/> <second ref="IBeam40Segment"/>
+	<position name="posBeamRemovalPlat7" unit="cm" x="-(8.005+0.295)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam17_1">
+    <first ref="IBeam17_0"/> <second ref="IBeam17Segment"/>
+	<position name="posBeamRemovalPlat8" unit="cm" x="(4.01+.24)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam17">
+    <first ref="IBeam17_1"/> <second ref="IBeam17Segment"/>
+	<position name="posBeamRemovalPlat9" unit="cm" x="-(4.01+.24)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam45_1">
+    <first ref="IBeam45_0"/> <second ref="IBeam45Segment"/>
+	<position name="posBeamRemovalPlat10" unit="cm" x="(8.02+.35)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam45">
+    <first ref="IBeam45_1"/> <second ref="IBeam45Segment"/>
+	<position name="posBeamRemovalPlat11" unit="cm" x="-(8.02+.35)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+ 
+
+ 
 
 <box name="Column"
   x="16.79"
@@ -2268,6 +2327,28 @@ sub gen_enclosureExtras()
         <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
         <solidref ref="Platform"/>
     </volume>
+  <volume name="volIBeam53">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam53"/>
+  </volume>
+  <volume name="volIBeam16">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam16"/>
+  </volume>
+  <volume name="volIBeam40">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam40"/>
+  </volume>
+  <volume name="volIBeam17">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam17"/>
+  </volume>
+  <volume name="volIBeam45">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam45"/>
+  </volume>
+
+
     <volume name="volColumn">
         <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
         <solidref ref="Column"/>
