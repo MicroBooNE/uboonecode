@@ -73,7 +73,7 @@
 <box name="rackBox"
   x="90.5"
   y="212.7"
-  z="60.7"
+  z="60.96"
   lunit="cm"/>
 <box name="rackX"
   x="90.5"
@@ -88,7 +88,7 @@
 <box name="rackZ"
   x="5.8"
   y="5.8"
-  z="60.7-2*5.8-0.001"
+  z="60.96-2*5.8-0.001"
   lunit="cm"/>
 
 <box name="rackInnards"
@@ -219,35 +219,35 @@
       <solidref ref="rackBox"/>
       <physvol>
         <volumeref ref="volRackX"/>
-        <position name="posRackX1" unit="cm" x="0" y="(212.7-5.8)/2" z="(60.7-5.8)/2"/>
+        <position name="posRackX1" unit="cm" x="0" y="(212.7-5.8)/2" z="(60.96-5.8)/2"/>
       </physvol>
       <physvol>
         <volumeref ref="volRackX"/>
-        <position name="posRackX2" unit="cm" x="0" y="-(212.7-5.8)/2" z="(60.7-5.8)/2"/>
+        <position name="posRackX2" unit="cm" x="0" y="-(212.7-5.8)/2" z="(60.96-5.8)/2"/>
       </physvol>
       <physvol>
         <volumeref ref="volRackX"/>
-        <position name="posRackX3" unit="cm" x="0" y="(212.7-5.8)/2" z="-(60.7-5.8)/2"/>
+        <position name="posRackX3" unit="cm" x="0" y="(212.7-5.8)/2" z="-(60.96-5.8)/2"/>
       </physvol>
       <physvol>
         <volumeref ref="volRackX"/>
-        <position name="posRackX4" unit="cm" x="0" y="-(212.7-5.8)/2" z="-(60.7-5.8)/2"/>
+        <position name="posRackX4" unit="cm" x="0" y="-(212.7-5.8)/2" z="-(60.96-5.8)/2"/>
       </physvol>
       <physvol>
         <volumeref ref="volRackY"/>
-        <position name="posRackY1" unit="cm" y="0" x="(90.5-5.8)/2" z="(60.7-5.8)/2"/>
+        <position name="posRackY1" unit="cm" y="0" x="(90.5-5.8)/2" z="(60.96-5.8)/2"/>
       </physvol>
       <physvol>
         <volumeref ref="volRackY"/>
-        <position name="posRackY2" unit="cm" y="0" x="-(90.5-5.8)/2" z="(60.7-5.8)/2"/>
+        <position name="posRackY2" unit="cm" y="0" x="-(90.5-5.8)/2" z="(60.96-5.8)/2"/>
       </physvol>
       <physvol>
         <volumeref ref="volRackY"/>
-        <position name="posRackY3" unit="cm" y="0" x="(90.5-5.8)/2" z="-(60.7-5.8)/2"/>
+        <position name="posRackY3" unit="cm" y="0" x="(90.5-5.8)/2" z="-(60.96-5.8)/2"/>
       </physvol>
       <physvol>
         <volumeref ref="volRackY"/>
-        <position name="posRackY4" unit="cm" y="0" x="-(90.5-5.8)/2" z="-(60.7-5.8)/2"/>
+        <position name="posRackY4" unit="cm" y="0" x="-(90.5-5.8)/2" z="-(60.96-5.8)/2"/>
       </physvol>
       <physvol>
         <volumeref ref="volRackZ"/>

@@ -8,10 +8,18 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
+// C/C++ standard libraries
 #include <string>
 #include <vector>
+#include <utility> // std::pair<>
+#include <memory> // std::unique_ptr<>
 #include <iomanip>
 
+// ROOT libraries
+#include "TComplex.h"
+#include "TH1D.h"
+
+// framework libraries
 #include "fhiclcpp/ParameterSet.h" 
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 #include "art/Framework/Core/ModuleMacros.h" 
@@ -22,18 +30,20 @@
 #include "art/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h" 
-#include "art/Framework/Services/Optional/TFileDirectory.h" 
 #include "art/Utilities/Exception.h"
 
-#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
+// LArSoft libraries
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "Geometry/Geometry.h"
 #include "Filters/ChannelFilter.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
+#include "RecoBaseArt/WireCreator.h"
 #include "Utilities/LArFFT.h"
+#include "Utilities/AssociationUtil.h"
+#include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "uboone/Database/PedestalRetrievalAlg.h"
-
 
 /* unused function
 namespace {
@@ -138,7 +148,7 @@ namespace caldata {
     dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
 
     void doDecon(std::vector<float>& holder, 
-      uint32_t channel, unsigned int thePlane,
+      raw::ChannelID_t channel, unsigned int thePlane,
       std::vector<std::pair<unsigned int, unsigned int>> rois,
       std::vector<std::pair<unsigned int, unsigned int>> holderInfo,
       recob::Wire::RegionsOfInterest_t& ROIVec,
@@ -157,11 +167,10 @@ namespace caldata {
   CalWireROI::CalWireROI(fhicl::ParameterSet const& pset):
     fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
   {
-    fSpillName="";
     this->reconfigure(pset);
 
-    if(fSpillName.size()<1) produces< std::vector<recob::Wire> >();
-    else produces< std::vector<recob::Wire> >(fSpillName);
+    produces< std::vector<recob::Wire> >(fSpillName);
+    produces<art::Assns<raw::RawDigit, recob::Wire>>(fSpillName);
   }
   
   //-------------------------------------------------
@@ -206,7 +215,7 @@ namespace caldata {
     fPreROIPad[2]  = zin[0];
     fPostROIPad[2] = zin[1];
     
-    fSpillName="";
+    fSpillName.clear();
     
     size_t pos = fDigitModuleLabel.find(":");
     if( pos!=std::string::npos ) {
@@ -255,6 +264,9 @@ namespace caldata {
     
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
+    // ... and an association set
+    std::unique_ptr<art::Assns<raw::RawDigit,recob::Wire> > WireDigitAssn
+      (new art::Assns<raw::RawDigit,recob::Wire>);
 
    
     
@@ -265,10 +277,10 @@ namespace caldata {
 
     if (!digitVecHandle->size())  return;
     
-    uint32_t     channel(0); // channel number
+    raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    filter::ChannelFilter *chanFilt = new filter::ChannelFilter();  
+    std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double DeconNorm = sss->GetDeconNorm();
@@ -316,7 +328,7 @@ namespace caldata {
       if(!chanFilt->BadChannel(channel)) {
         
         // uncompress the data
-        raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
+        raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
         // loop over all adc values and subtract the pedestal
 	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
         float pdstl = 0.0;
@@ -329,7 +341,7 @@ namespace caldata {
 	double raw_noise = sss->GetRawNoise(channel);
 
         // search for ROIs
-        for(bin = 1; bin < dataSize; ++bin) {
+        for(bin = 0; bin < dataSize; ++bin) {
           float SigVal = fabs(rawadc[bin] - pdstl);
           if(roiStart == 0) {
             // not in a ROI
@@ -341,22 +353,22 @@ namespace caldata {
             //   if(SigVal > fThreshold[thePlane]) roiStart = bin;
             // }
 	    unsigned int sbin[7];
-	    if (bin>=4) {
+	    if (bin>=3) {
 	      sbin[0] = bin -3;
 	      sbin[1] = bin -2;
 	      sbin[2] = bin -1;
-	    }else if (bin>=3){
-	      sbin[0] = 1;
+	    }else if (bin>=2){
+	      sbin[0] = 0;
 	      sbin[1] = bin-2;
 	      sbin[2] = bin-1;
 	    }else if (bin>=2){
-	      sbin[0] =1;
-	      sbin[1] =1;
+	      sbin[0] =0;
+	      sbin[1] =0;
 	      sbin[2] = bin-1;
 	    }else{
-	      sbin[0] =1;
-	      sbin[1] =1;
-	      sbin[2] =1;
+	      sbin[0] =0;
+	      sbin[1] =0;
+	      sbin[2] =0;
 	    }
 	    sbin[3] = bin ; 
 	    sbin[4] = bin + 1; if (sbin[4]>dataSize-1) sbin[4] =dataSize-1;
@@ -418,7 +430,7 @@ namespace caldata {
         }
 
 	// if (channel==3218){
-	//   std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
+	//	std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
 	//   for(unsigned int ii = 0; ii < rois.size(); ++ii) {
 	//     std::cout << rois[ii].first << " " << rois[ii].second << std::endl;
 	//   }
@@ -464,12 +476,12 @@ namespace caldata {
 	
 
 	for (unsigned int ir = 0; ir < rois.size(); ++ir) {
-	  unsigned int roiLen = rois[ir].second - rois[ir].first;
+	  unsigned int roiLen = rois[ir].second - rois[ir].first + 1;
 	  unsigned int roiStart = rois[ir].first;
 	  //treat FFT Size
 	  // if (channel==806)
 	  //   std::cout << roiStart << " " << roiLen << std::endl;
-	   
+	  
 
 	  int flag =1;
 	  float tempPre=0,tempPost=0;
@@ -493,12 +505,12 @@ namespace caldata {
 		holder[hBin] = rawadc[bin]-pdstl;
 	      }else{
 		holder[hBin] = rawadc[bin-dataSize]-pdstl;
-		flag = 0;
 	      }
+	      if (bin>=dataSize-1) flag = 0;
 	      ++hBin;
 	    } // bin
 
-	    //std::cout << channel << " " << flag << std::endl;
+	    //std::cout << channel << " " << roiStart << " " << flag << " " << dataSize << " " << holder.size() << " " << roiLen << std::endl;
 
 	    sss->Deconvolute(channel,holder);
 	    for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
@@ -528,7 +540,7 @@ namespace caldata {
 	      if (ir<rois.size()){
 		roiLen = rois[ir].second - roiStart;
 	      }else{
-		roiLen = dataSize - roiStart;
+		roiLen = dataSize -1 - roiStart;
 	      }
 	    }
 	  }
@@ -567,8 +579,14 @@ namespace caldata {
       } // end if not a bad channel 
 
       // create the new wire directly in wirecol
-      wirecol->emplace_back(std::move(ROIVec), digitVec);
-      
+      wirecol->push_back(recob::WireCreator(std::move(ROIVec),*digitVec).move());
+      // add an association between the last object in wirecol
+      // (that we just inserted) and digitVec
+      if (!util::CreateAssn(*this, evt, *wirecol, digitVec, *WireDigitAssn, fSpillName)) {
+        throw art::Exception(art::errors::InsertFailure)
+          << "Can't associate wire #" << (wirecol->size() - 1)
+          << " with raw digit #" << digitVec.key();
+      } // if failed to add association
     //  DumpWire(wirecol->back()); // for debugging
     }
 
@@ -590,11 +608,8 @@ namespace caldata {
     }
     
 
-    if(fSpillName.size()>0)
-      evt.put(std::move(wirecol), fSpillName);
-    else evt.put(std::move(wirecol));
-
-    delete chanFilt;
+    evt.put(std::move(wirecol), fSpillName);
+    evt.put(std::move(WireDigitAssn), fSpillName);
 
     fEventCount++;
 
@@ -659,7 +674,7 @@ namespace caldata {
 
 
   void CalWireROI::doDecon(std::vector<float>& holder, 
-    uint32_t channel, unsigned int thePlane,
+    raw::ChannelID_t channel, unsigned int thePlane,
     std::vector<std::pair<unsigned int, unsigned int> > rois,
     std::vector<std::pair<unsigned int, unsigned int> > holderInfo,
     recob::Wire::RegionsOfInterest_t& ROIVec,

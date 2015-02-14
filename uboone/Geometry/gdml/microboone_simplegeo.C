@@ -3,7 +3,7 @@ microboone_geo(TString volName="")
   gSystem->Load("libGeom");
   gSystem->Load("libGdml");
 
-  TGeoManager::Import("microboone.gdml");
+  TGeoManager::Import("microboonev4.gdml");
 
   TList* mat = gGeoManager->GetListOfMaterials();
   TIter next(mat);

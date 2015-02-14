@@ -8,6 +8,8 @@
 
 #include "RawDigitAndWireComparisonAlg.h"
 
+#include "RawData/raw.h" // raw::Uncompress()
+
 caldata::RawDigitAndWireComparisonAlg::RawDigitAndWireComparisonAlg(fhicl::ParameterSet const& p):
   fRawDigitPropertiesAlg(p.get<fhicl::ParameterSet>("RawDigitPropertiesAlg")),
   fRecoWirePropertiesAlg(p.get<fhicl::ParameterSet>("RecoWirePropertiesAlg"))
@@ -63,7 +65,9 @@ void caldata::RawDigitAndWireComparisonAlg::RunROICompare(recob::Wire   const& w
   fROICompare.plane   = wire.View();
 
   //first, run the raw digit through the WaveformProperties/ROI alg
-  fRawDigitPropertiesAlg.ProcessWaveform(digit.fADC);
+  std::vector<short> ADCs(digit.Samples());
+  raw::Uncompress(digit.ADCs(), ADCs, digit.Compression());
+  fRawDigitPropertiesAlg.ProcessWaveform(ADCs);
 
   //now loop over the ROIs
   unsigned int range_index=0;
@@ -82,27 +86,27 @@ void caldata::RawDigitAndWireComparisonAlg::RunROICompare(recob::Wire   const& w
     
     //now. get the iterator to the location of the peak time in the digit
     std::vector<short>::const_iterator peaktick = 
-      digit.fADC.cbegin()+fROICompare.wireROI_peaktime;
+      ADCs.cbegin()+fROICompare.wireROI_peaktime;
     
     //what are the local pedestal, noise, and region type?
-    fROICompare.digit_localPed   = fRawDigitPropertiesAlg.GetLocalPedestal(digit.fADC,peaktick);
-    fROICompare.digit_localNoise = fRawDigitPropertiesAlg.GetLocalNoise(digit.fADC,peaktick);
-    fROICompare.digit_isSignal   = fRawDigitPropertiesAlg.IsSignalRegion(digit.fADC,peaktick);
+    fROICompare.digit_localPed   = fRawDigitPropertiesAlg.GetLocalPedestal(ADCs,peaktick);
+    fROICompare.digit_localNoise = fRawDigitPropertiesAlg.GetLocalNoise(ADCs,peaktick);
+    fROICompare.digit_isSignal   = fRawDigitPropertiesAlg.IsSignalRegion(ADCs,peaktick);
 
     //get the region of that guy
     typename util::WaveformPropertiesAlg<short>::Region digit_region = 
-      fRawDigitPropertiesAlg.GetRegion(digit.fADC,peaktick);
+      fRawDigitPropertiesAlg.GetRegion(ADCs,peaktick);
 
     //now we can fill the digit min/max/sum/etc.
     fROICompare.digit_regionSum = fRawDigitPropertiesAlg.GetSum(digit_region);
 
     fROICompare.digit_regionMax = fRawDigitPropertiesAlg.GetMax(digit_region);
     auto digit_max_loc = fRawDigitPropertiesAlg.GetMaxLocation(digit_region);
-    fROICompare.digit_regionMaxTime = std::distance(digit.fADC.cbegin(),digit_max_loc);
+    fROICompare.digit_regionMaxTime = std::distance(ADCs.cbegin(),digit_max_loc);
 
     fROICompare.digit_regionMin = fRawDigitPropertiesAlg.GetMin(digit_region);
     auto digit_min_loc = fRawDigitPropertiesAlg.GetMinLocation(digit_region);
-    fROICompare.digit_regionMinTime = std::distance(digit.fADC.cbegin(),digit_min_loc);
+    fROICompare.digit_regionMinTime = std::distance(ADCs.cbegin(),digit_min_loc);
 
     fROICompare.digit_regionSize = std::distance(digit_region.Start(),digit_region.End());
     

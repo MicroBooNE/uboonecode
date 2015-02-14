@@ -78,12 +78,12 @@ void detsim::SimWireMicroBooNEAna::analyze(art::Event const & evt) {
 
      uint32_t channel = digitVec->Channel();
 
-     for(size_t i = 0; i<digitVec->fADC.size(); i++) {
-       //std::cout << "i: " << i << "\tfADC[" << i << "]: " << digitVec->fADC.at(i) << std::endl;
+     for(size_t i = 0; i<digitVec->NADC(); i++) {
+       //std::cout << "i: " << i << "\tfADC[" << i << "]: " << digitVec->ADC(i) << std::endl;
      }
-     //std::cout << "fADC size: " << digitVec->fADC.size() << "\tEntry 0: " << digitVec->fADC.at(1236) << std::endl;
+     //std::cout << "fADC size: " << digitVec->NADC() << "\tEntry 0: " << digitVec->ADC(1236) << std::endl;
      // uncompress the data
-     raw::Uncompress(digitVec->fADC, rawadc, digitVec->Compression());
+     raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
 
      // loop over all adc values and subtract the pedestal
      float pdstl = digitVec->GetPedestal();

@@ -30,6 +30,12 @@
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
+ <box name="Paddle_PMT"
+  lunit="cm"
+  x="1/8*2.54"
+  y="20*2.54"
+  z="(7+1/3)*2.54"/> 
+
  <tube name="PMT_Lens"
   rmax="2.54*4.0"
   z="2.54*2.5"
@@ -37,6 +43,7 @@
   aunit="deg"
   lunit="cm"/>
 </solids>
+
 <structure>
  <volume name="volOpDetSensitive">
   <materialref ref="LAr"/>
@@ -57,6 +64,10 @@
  <volume name="vol_PMT_Underside">
   <materialref ref="Glass"/>
   <solidref ref="PMT_Underside"/>
+ </volume>
+ <volume name="volPaddle_PMT">
+  <materialref ref="Acrylic"/>
+  <solidref ref="Paddle_PMT"/>
  </volume>
  <volume name="vol_PMT_Lens">
   <materialref ref="LAr"/>

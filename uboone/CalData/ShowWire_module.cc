@@ -9,22 +9,25 @@
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Core/FindOneP.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h" 
+#include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 
+#include "SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "Geometry/Geometry.h"
 #include "RecoBase/Wire.h"
 #include "RawData/RawDigit.h"
-#include "art/Framework/Services/Optional/TFileService.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "uboone/Database/PedestalRetrievalAlg.h"
-
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -51,7 +54,7 @@ private:
   bool fDoSinglePulseChecks;
   unsigned int fSinglePulseLocation;
   unsigned int fSinglePulseBuffer;
-  unsigned int fChannel;
+  raw::ChannelID_t fChannel;
   bool fSaveWaveforms;
   
   dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
@@ -225,14 +228,22 @@ void cal::ShowWire::analyze(art::Event const & e)
   unsigned int event = e.event();
 
   art::ServiceHandle<art::TFileService> tfs;
+  
+  // get the raw::RawDigit associated by fCalDataModuleLabel to wires in
+  // wireVectorHandle; RawDigitsFromWire.at(index) will be a
+  // art::Ptr<raw::RawDigit>
+  art::FindOneP<raw::RawDigit> RawDigitsFromWire
+    (wireVectorHandle, e, fCalDataModuleLabel);
 
+  art::ServiceHandle<geo::Geometry> geom;
+  
+  size_t iWire = 0;
   for(auto const& wire : wireVector){
 
-    unsigned int channel = wire.Channel();
+    raw::ChannelID_t channel = wire.Channel();
     if(channel!=fChannel && fSaveWaveforms) continue;
-    if(wire.SignalType()!=geo::kCollection) continue;
 
-    raw::RawDigit const& rawdigit( *(wire.RawDigit()) );
+    raw::RawDigit const& rawdigit(*(RawDigitsFromWire.at(iWire++)));
     size_t n_samples = rawdigit.Samples();
 
     //this is stupid I have to do this here and can't set it later...
