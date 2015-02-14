@@ -341,7 +341,7 @@ namespace caldata {
 	double raw_noise = sss->GetRawNoise(channel);
 
         // search for ROIs
-        for(bin = 1; bin < dataSize; ++bin) {
+        for(bin = 0; bin < dataSize; ++bin) {
           float SigVal = fabs(rawadc[bin] - pdstl);
           if(roiStart == 0) {
             // not in a ROI
@@ -353,22 +353,22 @@ namespace caldata {
             //   if(SigVal > fThreshold[thePlane]) roiStart = bin;
             // }
 	    unsigned int sbin[7];
-	    if (bin>=4) {
+	    if (bin>=3) {
 	      sbin[0] = bin -3;
 	      sbin[1] = bin -2;
 	      sbin[2] = bin -1;
-	    }else if (bin>=3){
-	      sbin[0] = 1;
+	    }else if (bin>=2){
+	      sbin[0] = 0;
 	      sbin[1] = bin-2;
 	      sbin[2] = bin-1;
 	    }else if (bin>=2){
-	      sbin[0] =1;
-	      sbin[1] =1;
+	      sbin[0] =0;
+	      sbin[1] =0;
 	      sbin[2] = bin-1;
 	    }else{
-	      sbin[0] =1;
-	      sbin[1] =1;
-	      sbin[2] =1;
+	      sbin[0] =0;
+	      sbin[1] =0;
+	      sbin[2] =0;
 	    }
 	    sbin[3] = bin ; 
 	    sbin[4] = bin + 1; if (sbin[4]>dataSize-1) sbin[4] =dataSize-1;
@@ -476,7 +476,7 @@ namespace caldata {
 	
 
 	for (unsigned int ir = 0; ir < rois.size(); ++ir) {
-	  unsigned int roiLen = rois[ir].second - rois[ir].first;
+	  unsigned int roiLen = rois[ir].second - rois[ir].first + 1;
 	  unsigned int roiStart = rois[ir].first;
 	  //treat FFT Size
 	  // if (channel==806)
@@ -526,7 +526,7 @@ namespace caldata {
 	    tempPre=0,tempPost=0;
 	    for(unsigned int bin = 0; bin < 20; ++bin) {
 	      tempPre  += holder[bin];
-	      tempPost += holder[roiLen-1 - bin];
+	      tempPost += holder[roiLen - bin];
 	    }
 	    tempPre = tempPre/20.;
 	    tempPost = tempPost/20.;
