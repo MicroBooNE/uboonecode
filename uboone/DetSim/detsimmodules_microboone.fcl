@@ -30,7 +30,7 @@ microboone_simwire:
 # Expert settings
  Test:                false       #turns on special test case: parameters below               
  TestWire:            1200
- TestIndex:           [3200]
+ TestIndex:           [6400]
  TestCharge:          [20000] 
  Sample:              -1           # no test: 0-3 generates test output
 }

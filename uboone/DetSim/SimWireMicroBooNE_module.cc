@@ -287,12 +287,12 @@ namespace detsim {
 	fTestSimChannel_v.push_back(sim::SimChannel(ch));
 
 	for(size_t i=0; i<fTestIndex.size(); ++i){
-	  
+
 	  fTestSimChannel_v.back().AddIonizationElectrons(-1,
 							  fTestIndex[i],
 							  fTestCharge[i],
 							  xyz,
-							  0.);
+							  std::numeric_limits<double>::max());
 	}
       }
     }
@@ -414,7 +414,6 @@ namespace detsim {
       for(int t = 0; t < (int)(chargeWork.size()); ++t) {
 	
 	int tdc = ts->TPCTick2TDC(t);
-	
 	// continue if tdc < 0
 	if( tdc < 0 ) continue;
 	double charge = sc->Charge(tdc);
@@ -428,7 +427,7 @@ namespace detsim {
           ( (t + time_offset) >= 0 ? t+time_offset : (chargeWork.size() + (t+time_offset)) );
 	
 	if(raw_digit_index <= 0 || raw_digit_index >= (int)(chargeWork.size())) continue;
-	
+
 	// here fill ResponseParams... all the wires!
 	for(int wire = -(fNResponses[0][view]-1); wire<(int)fNResponses[0][view]; ++wire) {
 	  auto wireIndex = (size_t)wire+fNResponses[0][view] - 1;
