@@ -12,30 +12,36 @@
  <box name="PlatformOLDsmall" lunit="cm" x="558" y="(4*12+8+2*11+12.06)*2.54" z="1500" />
  <tube name="PlatformNEW" lunit="cm" rmax="292*2.54-0.5" z="(4*12+7+2*11+12.06)*2.54+1.5" aunit="deg" deltaphi="360" /> 
 
- <tube name="PlatformCircle" lunit="cm" rmax="292*2.54-0.5" z="18" aunit="deg" deltaphi="360" /> 
- <box name="PlatformRect" lunit="cm" x="45*12*2.54" y="18+1" z="4000" />
- 
+ <box name="PlatformRectbig" lunit="cm" x="550+1" y="2.54+1" z="1500+1" />
+ <box name="PlatformRectsmall" lunit="cm" x="550" y="2.54" z="1500" />
+ <tube name="PlatformCircle" lunit="cm" rmax="292*2.54-0.5" z="2.54+1.5" aunit="deg" deltaphi="360" /> 
+
   <subtraction name="PlatformSub0">
     <first ref="PlatformOLDbig"/> <second ref="PlatformNEW"/>
 	<position name="posPlatformSub0" unit="cm" x="0" y="0" z="0"/>
 	<rotation name="rotPlatformSub0" unit="deg" x="90" y="0" z="0"/>
   </subtraction>
 
-  <subtraction name="PlatformDisc">
-    <first ref="PlatformCircle"/> <second ref="PlatformRect"/>
-	<position name="posPlatformDiscSub" unit="cm" x="0" y="0" z="0"/>
-	<rotation name="rotPlatformDisc" unit="deg" x="90" y="0" z="0"/>
-  </subtraction>
-
-
   <subtraction name="PlatformSpace0">
 	<first ref="PlatformOLDsmall"/> <second ref="PlatformSub0"/>
 	<position name="posPlatformSub1" unit="cm" x="0" y="0" z="0"/>
   </subtraction> 
 
+  <subtraction name="PlatformDisc0">
+    <first ref="PlatformRectbig"/> <second ref="PlatformCircle"/>
+	<position name="posPlatformDiscSub" unit="cm" x="0" y="0" z="0"/>
+	<rotation name="rotPlatformDisc" unit="deg" x="90" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="PlatformDisc">
+    <first ref="PlatformRectsmall"/> <second ref="PlatformDisc0"/>
+	<position name="posPlatformDiscSub1" unit="cm" x="0" y="0" z="0"/>
+  </subtraction>
+
+
   <subtraction name="PlatformSpace">
 	<first ref="PlatformSpace0"/> <second ref="PlatformOLDbig"/>
-	<position name="posPlatformSub1" unit="cm" x="45*2.54" y="-30*2.54" z="0"/>
+	<position name="posPlatformSub1" unit="cm" x="(45+9)*2.54" y="-30*2.54" z="0"/>
   </subtraction> 
 
  <box name="IBeam53_0" lunit="cm" x="9.995*2.54 -0.1" y="(22*12+6)*2.54-0.1" z="12.06*2.54-0.1"/>
@@ -273,14 +279,13 @@
         <materialref ref="Air"/> 
 		<!--STEEL_STAINLESS_Fe7Cr2Ni"/>-->
         <solidref ref="PlatformSpace"/>
-	<physvol>
+<!--	<physvol>
         <volumeref ref="volpolySquare"/>
         <position name="pospolySquare" unit="cm" x="0" y="(4*12+8+ 11.94*2+2)*2.54/2" z="0"/>
-      </physvol>
+      </physvol>-->
 	<physvol>
         <volumeref ref="volPlatformDisc"/>
         <position name="posPlatformDisc" unit="cm" x="0" y="(4*12+8+ 11.94*2+2)*2.54/2" z="0"/>
-        <rotation name="rPlus90Z90XDisc" unit="deg" x="90" y="0" z="90"/>
       </physvol>
       <physvol>
         <volumeref ref="volIBeam40"/>
@@ -384,30 +389,57 @@
       </physvol>
       <physvol>
         <volumeref ref="volSquare"/>
-        <position name="posSquarepos0" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*0)*2.54"/>
+        <position name="posSquareposZ0" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*0)*2.54"/>
       </physvol>
       <physvol>
         <volumeref ref="volSquare"/>
-        <position name="posSquareneg0" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*0)*2.54"/>
+        <position name="posSquarenegZ0" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*0)*2.54"/>
       </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZShift0" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*0)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZShift0" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*0)*2.54"/>
+      </physvol>
+	  
 	  
       <physvol>
         <volumeref ref="volSquare"/>
-        <position name="posSquarepos1" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*1)*2.54"/>
+        <position name="posSquareposZ1" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*1)*2.54"/>
       </physvol>
       <physvol>
         <volumeref ref="volSquare"/>
-        <position name="posSquareneg1" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*1)*2.54"/>
+        <position name="posSquarenegZ1" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*1)*2.54"/>
       </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZShift1" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*1)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZShift1" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*1)*2.54"/>
+      </physvol>
+	  
 	  
       <physvol>
         <volumeref ref="volSquare"/>
-        <position name="posSquarepos2" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*2)*2.54"/>
+        <position name="posSquareposZ2" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*2)*2.54"/>
       </physvol>
       <physvol>
         <volumeref ref="volSquare"/>
-        <position name="posSquareneg2" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*2)*2.54"/>
+        <position name="posSquarenegZ2" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*2)*2.54"/>
       </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZShift2" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*2)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZShift2" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*2)*2.54"/>
+      </physvol>
+	  
 	  
       <physvol>
         <volumeref ref="volIBeam53"/>
