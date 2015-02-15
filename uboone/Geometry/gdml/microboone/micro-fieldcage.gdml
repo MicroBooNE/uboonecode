@@ -13,23 +13,6 @@
   deltaphi="360" 
   aunit="deg" 
   lunit="cm"/> 
-
- <box name="FrameA" x="11" y="254" z="1070.19" lunit="cm"/> 
- <box name="FrameB" x="11.1" y="230.29" z="1036.32" lunit="cm"/>
- <box name="VertBar" x="1" y="1" z="1" lunit="cm"/>
- <box name="CrossA" lunit="cm" x="9" y="304.8" z="7"/>
-
-<subtraction name="Frame">
-<first ref="FrameA"/> <second ref="FrameB"/>
-<position name="posTPCSubtraction" x="0" y="0" z="0"/>
-</subtraction> 
-
-<union name="Cross">
-<first ref="CrossA"/> <second ref="CrossA"/>
-<position name="posCross" x="0" y="0" z="0"/>
-<rotation name="rPlus83AboutX" unit="deg" x="83.16" y="0" z="0"/>
-</union> 
-
 </solids> 
 <structure> 
  <volume name="volFieldCageTubeTop"> 
@@ -48,12 +31,4 @@
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
   <solidref ref="FieldCageTubeY"/> 
  </volume> 
- <volume name="volFrame">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="Frame"/>
- </volume>
- <volume name="volTPCCross">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="TPCCross"/>
- </volume>
 </structure>

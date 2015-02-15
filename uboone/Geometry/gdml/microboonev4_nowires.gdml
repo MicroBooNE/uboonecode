@@ -311,22 +311,6 @@
   aunit="deg" 
   lunit="cm"/> 
 
- <box name="FrameA" x="11" y="254" z="1070.19" lunit="cm"/> 
- <box name="FrameB" x="11.1" y="230.29" z="1036.32" lunit="cm"/>
- <box name="VertBar" x="1" y="1" z="1" lunit="cm"/>
- <box name="CrossA" lunit="cm" x="9" y="304.8" z="7"/>
-
-<subtraction name="Frame">
-<first ref="FrameA"/> <second ref="FrameB"/>
-<position name="posTPCSubtraction" x="0" y="0" z="0"/>
-</subtraction> 
-
-<union name="Cross">
-<first ref="CrossA"/> <second ref="CrossA"/>
-<position name="posCross" x="0" y="0" z="0"/>
-<rotation name="rPlus83AboutX" unit="deg" x="83.16" y="0" z="0"/>
-</union> 
-
 
  <box name="TPC"
   lunit="cm"
@@ -390,8 +374,8 @@
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
- <box name="PlatformOLDbig" lunit="cm" x="558+1" y="18+1" z="1500+1" />
- <box name="PlatformOLDsmall" lunit="cm" x="558" y="18" z="1500" />
+ <box name="PlatformOLDbig" lunit="cm" x="550+1" y="18+1" z="1500+1" />
+ <box name="PlatformOLDsmall" lunit="cm" x="550" y="18" z="1500" />
  <tube name="PlatformNEW" lunit="cm" rmax="292*2.54-0.5" z="18+1.5" aunit="deg" deltaphi="360" /> 
 
   <subtraction name="PlatformSub0">
@@ -405,65 +389,6 @@
 	<position name="posPlatformSub1" unit="cm" x="0" y="0" z="0"/>
   </subtraction> 
 
- <box name="IBeam53_0" lunit="cm" x="9.995*2.54 -0.1" y="(18*12+4)*2.54-0.1" z="12.06*2.54-0.1"/>
- <box name="IBeam53Segment" lunit="cm" x="(9.995-0.345)*2.54/2" y="(18*12+4)*2.54" z="(12.06-2*0.575)*2.54"/>
- <box name="IBeam16_0" lunit="cm" x="3.99*2.54-0.1" y="(23*12)*2.54-0.1" z="12.5*2.54-0.1"/>
- <box name="IBeam16Segment" lunit="cm" x="(3.99-0.22)*2.54/2" y="(23*12)*2.54" z="(11.99-2*0.265)*2.54"/>
- <box name="IBeam40_0" lunit="cm" x="8.005*2.54 -0.1" y="(18*12+4)*2.54-0.1" z="11.94*2.54-0.1"/>
- <box name="IBeam40Segment" lunit="cm" x="(8.005-0.295)*2.54/2" y="(18*12+4)*2.54" z="(11.94-2*0.515)*2.54"/>
- <box name="IBeam45_0" lunit="cm" x="8.02*2.54-0.1" y="(23*12)*2.54-0.1" z="10.1*2.54-0.1"/>
- <box name="IBeam45Segment" lunit="cm" x="(8.02-0.35)*2.54/2" y="(23*12)*2.54" z="(10.1-2*0.62)*2.54"/>
- <box name="IBeam17_0" lunit="cm" x="4.01*2.54-0.1" y="(23*12)*2.54-0.1" z="10.11*2.54-0.1"/>
- <box name="IBeam17Segment" lunit="cm" x="(4.01-0.24)*2.54/2" y="(23*12)*2.54" z="(10.11-2*0.33)*2.54"/>
-
-
-  <subtraction name="IBeam53_1">
-    <first ref="IBeam53_0"/> <second ref="IBeam53Segment"/>
-	<position name="posBeamRemovalPlat2" unit="cm" x="(9.995+.345)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-  <subtraction name="IBeam53">
-    <first ref="IBeam53_1"/> <second ref="IBeam53Segment"/>
-	<position name="posBeamRemovalPlat3" unit="cm" x="-(9.995 +.345)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-
-  <subtraction name="IBeam16_1">
-    <first ref="IBeam16_0"/> <second ref="IBeam16Segment"/>
-	<position name="posBeamRemovalPlat4" unit="cm" x="(3.99+.22)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-  <subtraction name="IBeam16">
-    <first ref="IBeam16_1"/> <second ref="IBeam16Segment"/>
-	<position name="posBeamRemovalPlat5" unit="cm" x="-(3.99+.22)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-
-  <subtraction name="IBeam40_1">
-    <first ref="IBeam40_0"/> <second ref="IBeam40Segment"/>
-	<position name="posBeamRemovalPlat6" unit="cm" x="(8.005+.295)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-  <subtraction name="IBeam40">
-    <first ref="IBeam40_1"/> <second ref="IBeam40Segment"/>
-	<position name="posBeamRemovalPlat7" unit="cm" x="-(8.005+0.295)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-
-  <subtraction name="IBeam17_1">
-    <first ref="IBeam17_0"/> <second ref="IBeam17Segment"/>
-	<position name="posBeamRemovalPlat8" unit="cm" x="(4.01+.24)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-  <subtraction name="IBeam17">
-    <first ref="IBeam17_1"/> <second ref="IBeam17Segment"/>
-	<position name="posBeamRemovalPlat9" unit="cm" x="-(4.01+.24)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-
-  <subtraction name="IBeam45_1">
-    <first ref="IBeam45_0"/> <second ref="IBeam45Segment"/>
-	<position name="posBeamRemovalPlat10" unit="cm" x="(8.02+.35)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
-  <subtraction name="IBeam45">
-    <first ref="IBeam45_1"/> <second ref="IBeam45Segment"/>
-	<position name="posBeamRemovalPlat11" unit="cm" x="-(8.02+.35)*0.25*2.54" y="0" z="0"/>
-  </subtraction>
- 
-
- 
 
 <box name="Column"
   x="16.79"
@@ -601,6 +526,103 @@
   aunit="deg"
   lunit="cm"/>
 <sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
+ <box name="G10SideBeam" lunit="cm" x="256" y="2" z="5"/>
+ <box name="G10TopBeam" lunit="cm" x="256" y="4*2.54" z="2.54"/>
+ <box name="G10SideCross" lunit="cm" x="10" y="0.75*2.54" z="43*2.54"/>
+ <box name="G10TopCrossBeamA" lunit="cm" x="10" y=".75*2.54" z="49.9*2.54"/>
+ <box name="G10TopCrossBeamB" lunit="cm" x="10" y=".75*2.54" z="38*2.54"/>
+ <box name="FrameA" x="11" y="254" z="1040" lunit="cm"/> 
+ <box name="FrameB" x="11.1" y="86*2.54" z="1003.52" lunit="cm"/>
+ <box name="VertBar" x="2.5*2.54" y="86*2.54" z="2.5*2.54" lunit="cm"/>
+ <box name="CrossBeamA" lunit="cm" x="9" y="301.12" z="7"/>
+
+<subtraction name="Frame0">
+<first ref="FrameA"/> <second ref="FrameB"/>
+<position name="posFrameSubtraction" x="0" y="0" z="0"/>
+</subtraction> 
+
+<union name="CrossBeam">
+   <first ref="CrossBeamA"/> <second ref="CrossBeamA"/>
+   <rotation name="CrossBeam93rot" unit="deg" x="93" y="0" z="0"/>
+   <position name="posCrossBeamUnion0" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="G10TopCross0">
+   <first ref="G10TopCrossBeamA"/> <second ref="G10TopCrossBeamA"/>
+   <rotationref ref="rPlus60AboutY"/>
+   <position name="posG10TopCrossUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="G10TopCross1">
+	<first ref="G10TopBeam"/> <second ref="G10TopCross0"/>
+	<rotation name="rMinus60AboutY" unit="deg" x="0" y="-30" z="0"/>
+	<position name="posG10CrossBeamUnion0" unit="cm" x="64" y="0" z="111.64/2"/>
+</union>
+ <union name="G10TopCross2">
+	<first ref="G10TopCross1"/> <second ref="G10TopCross0"/>
+	<rotation name="rMinus60AboutY" unit="deg" x="0" y="-30" z="0"/>
+	<position name="posG10CrossBeamUnion0" unit="cm" x="-64" y="0" z="111.64/2"/>
+</union>
+ <union name="G10TopCross">
+	<first ref="G10TopCross2"/> <second ref="G10TopBeam"/>
+	<position name="posG10CrossBeamUnion1" unit="cm" x="0" y="0" z="111.64"/>
+</union>
+
+ <union name="G10TopCrossOuter0">
+   <first ref="G10TopCrossBeamB"/> <second ref="G10TopCrossBeamB"/>
+   <rotation name="rPlus76AboutY" unit="deg" x="0" y="76" z="0" />
+   <position name="posG10TopCrossOutUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="G10TopCrossOuter1">
+	<first ref="G10TopBeam"/> <second ref="G10TopCrossOuter0"/>
+	<position name="posG10CrossOuterUnion0" unit="cm" x="64" y="0" z="36"/>
+	<rotation name="rotTopCross1" unit="deg" x="0" y="-38" z="0"/>
+</union>
+ <union name="G10TopCrossOuter2">
+	<first ref="G10TopCrossOuter1"/> <second ref="G10TopCrossOuter0"/>
+	<position name="posG10CrossOuterUnion1" unit="cm" x="-64" y="0" z="36"/>
+	<rotation name="rotTopCross2" unit="deg" x="0" y="-38" z="0"/>
+</union>
+ <union name="G10TopCrossOuter">
+	<first ref="G10TopCrossOuter2"/> <second ref="G10TopBeam"/>
+	<position name="posG10CrossBeamUnion1" unit="cm" x="0" y="0" z="72"/>
+</union>
+
+ <union name="G10SideCross0">
+   <first ref="G10SideCross"/> <second ref="G10SideCross"/>
+   <rotation name="rotSideCross33AboutY" unit="deg" x="0" y="66" z="0"/>
+   <position name="posG10SideCrossUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="G10SideCross1">
+	<first ref="G10TopBeam"/> <second ref="G10SideCross0"/>
+	<rotation name="rMinus17AboutY" unit="deg" x="0" y="-33" z="0"/>
+	<position name="posG10SideCrossBeamUnion0" unit="cm" x="64" y="0" z="45.63"/>
+</union>
+ <union name="G10SideCross2">
+	<first ref="G10SideCross1"/> <second ref="G10SideCross0"/>
+	<rotation name="rMinus60AboutY" unit="deg" x="0" y="-33" z="0"/>
+	<position name="posG10SideCrossBeamUnion0" unit="cm" x="-64" y="0" z="45.63"/>
+</union>
+ <union name="G10SideCross">
+	<first ref="G10SideCross2"/> <second ref="G10TopBeam"/>
+	<position name="posG10SideCrossBeamUnion1" unit="cm" x="0" y="0" z="45.63*2"/>
+</union>
+ <union name="Frame1">
+	<first ref="Frame0"/> <second ref="VertBar"/>
+	<position name="posVertBarUnion1" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*0"/>
+ </union>
+ <union name="Frame2">
+	<first ref="Frame1"/> <second ref="VertBar"/>
+	<position name="posVertBarUnion2" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*1"/>
+ </union>
+ <union name="Frame3">
+	<first ref="Frame2"/> <second ref="VertBar"/>
+	<position name="posVertBarUnion3" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*2"/>
+ </union>
+ <union name="Frame4">
+	<first ref="Frame3"/> <second ref="VertBar"/>
+	<position name="posVertBarUnion4" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*3"/>
+ </union>
+
+
 
  <box name="DetEnclosureOLDbig" lunit="cm" x="1483.26+1" y="1060+1" z="1483.26+1" />
  <box name="DetEnclosureOLDsmall" lunit="cm" x="1483.26" y="1060" z="1483.26" />
@@ -745,7 +767,6 @@
   <subtraction name="ConcreteDiscRoof">
     <first ref="ConcreteDiscRoof0"/> <second ref="RemovableRoof"/>
 	<position name="posRemoval1" unit="cm" x="0" y="0" z="0"/>
-<!--	<rotation name="rotPlatformSub0" unit="deg" x="90" y="0" z="0"/>-->
   </subtraction>
 
   <subtraction name="ConcreteSteelBeam1">
@@ -824,14 +845,8 @@
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
   <solidref ref="FieldCageTubeY"/> 
  </volume> 
- <volume name="volFrame">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="Frame"/>
- </volume>
- <volume name="volTPCCross">
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="TPCCross"/>
- </volume>
+
+
 
  <volume name="volTPCActive">
   <materialref ref="LAr"/>
@@ -845,20 +860,11 @@
    <position name="posGroundPlate" unit="cm" x="9+0.25" y="124" z="0"/>
   </physvol>-->
 
-   <physvol>
-    <volumeref ref="volFrame"/>
-    <position name="posFrame2" unit="cm" x="-256/2-11" y="0" z="0"/>
-   </physvol>
-<!--  <physvol>
-    <volumeref ref="volTPCCross"/>
-    <position name="posTPCCross" unit="cm" x="-256/2" y="-100" z="0"/>
-    <rotation ref="rMinus41AboutX" unit="deg" x="-41.58" y="0" z="0"/> 
-  </physvol>  -->
-
   <physvol>
    <volumeref ref="volCathodePlate"/>
    <position name="posCathodePlate" unit="cm" x="127.45" y="0" z="0"/>
   </physvol>
+
   <physvol>
    <volumeref ref="volTPCPlaneVert"/>
    <position name="posTPCPlaneVert" unit="cm" x="-0.5*256.35-2*0.3" y="0" z="0"/>
@@ -2095,28 +2101,6 @@
         <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
         <solidref ref="Platform"/>
     </volume>
-  <volume name="volIBeam53">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-	<solidref ref="IBeam53"/>
-  </volume>
-  <volume name="volIBeam16">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-	<solidref ref="IBeam16"/>
-  </volume>
-  <volume name="volIBeam40">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-	<solidref ref="IBeam40"/>
-  </volume>
-  <volume name="volIBeam17">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-	<solidref ref="IBeam17"/>
-  </volume>
-  <volume name="volIBeam45">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-	<solidref ref="IBeam45"/>
-  </volume>
-
-
     <volume name="volColumn">
         <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
         <solidref ref="Column"/>
@@ -2308,6 +2292,34 @@
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="SteelTube"/>
  </volume>
+<volume name="volG10TopBeam">
+    <materialref ref="G10"/>
+    <solidref ref="G10TopBeam"/>
+ </volume>
+<volume name="volG10TopCross">
+    <materialref ref="G10"/>
+    <solidref ref="G10TopCross"/>
+ </volume>
+<volume name="volG10TopCrossOuter">
+    <materialref ref="G10"/>
+    <solidref ref="G10TopCrossOuter"/>
+ </volume>
+<volume name="volG10SideCross">
+    <materialref ref="G10"/>
+    <solidref ref="G10SideCross"/>
+ </volume>
+<volume name="volFrame">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Frame4"/>
+ </volume>
+<volume name="volCrossBeam">
+   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+   <solidref ref="CrossBeam"/>
+ </volume>
+
+
+
+
  <volume name="volCryostat">
   <materialref ref="LAr"/>
   <solidref ref="Cryostat"/>
@@ -2324,6 +2336,62 @@
     <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
     <rotationref ref="rPlus180AboutY"/>
   </physvol> 
+ <physvol>
+    <volumeref ref="volFrame"/>
+    <position name="posFrame2" unit="cm" x="-256/2-8" y="0" z="0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10SideCross"/>
+      <position name="posG10SideCross1" unit="cm" x="0" y="-45.63" z="1050.19/2+5"/>
+	  <rotationref ref="rPlus90AboutX"/> 
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10SideCross"/>
+      <position name="posG10SideCross2" unit="cm" x="0" y="-45.63" z="-1050.19/2-5"/>
+	  <rotationref ref="rPlus90AboutX"/> 
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCross"/>
+      <position name="posG10TopCross0" unit="cm" x="0" y="256/2+2.5*2.54" z="-5/2*111.64 + 2*111.64*0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCross"/>
+      <position name="posG10BottomCross0" unit="cm" x="0" y="-256/2-2.5*2.54" z="-5/2*111.64 +2*111.64*0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCross"/>
+      <position name="posG10TopCross1" unit="cm" x="0" y="256/2+2.5*2.54" z="-5/2*111.64 + 2*111.64*1"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCross"/>
+      <position name="posG10BottomCross1" unit="cm" x="0" y="-256/2-2.5*2.54" z="-5/2*111.64 +2*111.64*1"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCross"/>
+      <position name="posG10TopCross2" unit="cm" x="0" y="256/2+2.5*2.54" z="-5/2*111.64 + 2*111.64*2"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCross"/>
+      <position name="posG10BottomCross2" unit="cm" x="0" y="-256/2-2.5*2.54" z="-5/2*111.64 +2*111.64*2"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCrossOuter"/>
+      <position name="posG10TopCrossOuter0" unit="cm" x="0" y="256/2+2.5*2.54" z="-4*111.64 + 15/2*111.64*0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCrossOuter"/>
+      <position name="posG10BottomCrossOuter0" unit="cm" x="0" y="-256/2-2.5*2.54" z="-4*111.64 + 15/2*111.64*0"/>
+  </physvol>
+
+  <physvol>
+      <volumeref ref="volG10TopCrossOuter"/>
+      <position name="posG10TopCrossOuter1" unit="cm" x="0" y="256/2+2.5*2.54" z="-4*111.64 + 15/2*111.64*1"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volG10TopCrossOuter"/>
+      <position name="posG10BottomCrossOuter1" unit="cm" x="0" y="-256/2-2.5*2.54" z="-4*111.64 + 15/2*111.64*1"/>
+  </physvol>
+
   <physvol>
    <volumeref ref="volTPC"/>
    <position name="posTPC" unit="cm" x="0.0" y="0.97" z="0"/>

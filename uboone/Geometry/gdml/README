@@ -1,5 +1,16 @@
-microboonev0.gdml (microboonev0_nowires.gdml): contains old gdmls (pre-MCC5)
-microboonev1.gdml (microboonev2_nowires.gdml): V2 contains corrected tpc, detenclosure, platform volumes and mass of steel in middle of each rack (MCC5)
-microboonev2.gdml (microboonev3_nowires.gdml): No idea
-microboonev3.gdml (microboonev3_nowires.gdml): Actual geometry used to generate 32 PMT photon library
-microboonev4.gdml (microboonev4_nowires.gdml): 32 PMT geometry merged with stuff from Ariana.
+v0,v1,v2 contains 30 PMT geometry
+
+microboone.gdml (microboone_nowires.gdml): contains old gdml (MCC5) 
+microboonev0.gdml (microboonev0_nowires.gdml): contains old gdml (MCC5)
+microboonev1.gdml (microboonev2_nowires.gdml): contains corrected tpc, detenclosure, platform volumes and mass of steel in middle of each rack
+microboonev2.gdml (microboonev3_nowires.gdml): contains roof, supporting walls, G10 bars on TPC
+
+v3,v4,v5 contain 32 PMT geometry
+microboonev3.gdml (microboonev3_nowires.gdml): geometry used to generate 32 PMT photon library (contains changes listed in v1 above)
+microboonev4.gdml (microboonev4_nowires.gdml): compatible with v2 above (+32 pmt geometry)
+microboonev5.gdml (microboonev5_nowires.gdml): contains detailed information about platform above cryostat
+
+vX
+microboonevX.gdml (microboonevX_nowires.gdml): Working gdml.  This file (may) contain working changes which are not tagged with a version. Don't use this gdml.  
+
+
