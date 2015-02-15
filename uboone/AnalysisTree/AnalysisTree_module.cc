@@ -273,7 +273,8 @@ namespace microboone {
       TrackData_t<Float_t> trkmom;        // momentum.
       TrackData_t<Float_t> trklen;        // length.
       TrackData_t<Float_t> trkmomrange;    // track momentum from range using CSDA tables
-      TrackData_t<Float_t> trkmommschi2;   // track momentum from multiple scattering
+      TrackData_t<Float_t> trkmommschi2;   // track momentum from multiple scattering Chi2 method
+      TrackData_t<Float_t> trkmommsllhd;   // track momentum from multiple scattering LLHD method
       TrackData_t<Short_t> trksvtxid;     // Vertex ID associated with the track start
       TrackData_t<Short_t> trkevtxid;     // Vertex ID associated with the track end
       PlaneData_t<Int_t> trkpidpdg;       // particle PID pdg code
@@ -829,6 +830,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkmom.resize(MaxTracks);
   trkmomrange.resize(MaxTracks);
   trkmommschi2.resize(MaxTracks);
+  trkmommsllhd.resize(MaxTracks);  
   trklen.resize(MaxTracks);
   trksvtxid.resize(MaxTracks);
   trkevtxid.resize(MaxTracks);
@@ -895,6 +897,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkmom       , -99999.);
   FillWith(trkmomrange  , -99999.);  
   FillWith(trkmommschi2 , -99999.);  
+  FillWith(trkmommsllhd , -99999.);  
   FillWith(trklen       , -99999.);
   FillWith(trksvtxid    , -1);
   FillWith(trkevtxid    , -1);
@@ -1088,6 +1091,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
 
   BranchName = "trkmommschi2_" + TrackLabel;
   CreateBranch(BranchName, trkmommschi2, BranchName + NTracksIndexStr + "/F");
+
+  BranchName = "trkmommsllhd_" + TrackLabel;
+  CreateBranch(BranchName, trkmommsllhd, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trklen_" + TrackLabel;
   CreateBranch(BranchName, trklen, BranchName + NTracksIndexStr + "/F");
@@ -2004,6 +2010,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           TrackerData.trklen[iTrk]		  = tlen;
           TrackerData.trkmomrange[iTrk] 	  = trkm.GetTrackMomentum(tlen,13);
           TrackerData.trkmommschi2[iTrk]	  = trkm.GetMomentumMultiScatterChi2(ptrack);
+          TrackerData.trkmommsllhd[iTrk]	  = trkm.GetMomentumMultiScatterLLHD(ptrack);
         } // if we have trajectory
 
       // find vertices associated with this track

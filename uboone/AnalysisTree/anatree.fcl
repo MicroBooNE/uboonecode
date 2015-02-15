@@ -113,8 +113,8 @@ physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
 
 physics.analyzers.analysistree.SaveCryInfo: true
 physics.analyzers.analysistree.SaveGenieInfo: false
-physics.analyzers.analysistree.SaveHitInfo: true
+physics.analyzers.analysistree.SaveHitInfo: false
 physics.analyzers.analysistree.SaveTrackInfo: true
-physics.analyzers.analysistree.SaveVertexInfo: true
+physics.analyzers.analysistree.SaveVertexInfo: false
 physics.analyzers.analysistree.SaveGeantInfo: true
 physics.analyzers.analysistree.SaveAuxDetInfo: false
