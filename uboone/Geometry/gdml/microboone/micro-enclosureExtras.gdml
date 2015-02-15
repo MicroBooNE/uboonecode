@@ -233,7 +233,7 @@
      <solidref ref="Insulation"/>
   </volume>
   <volume name="volPlatformDisc">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<materialref ref="FR4"/>
     <solidref ref="PlatformDisc"/>
   </volume>
   <volume name="volpolySquare">
@@ -421,12 +421,12 @@
       </physvol>
       <physvol>
         <volumeref ref="volIBeam16"/>
-        <position name="posIBeam16pos0" unit="cm" x="(-1)**0*((9*12+2)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
+        <position name="posIBeam16pos0" unit="cm" x="(-1)**0*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
         <rotationref ref="rPlus90AboutX"/>
       </physvol>
       <physvol>
         <volumeref ref="volIBeam16"/>
-        <position name="posIBeam16neg0" unit="cm" x="(-1)**0*((9*12+2)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
+        <position name="posIBeam16neg0" unit="cm" x="(-1)**0*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
         <rotationref ref="rPlus90AboutX"/>
       </physvol>
       <physvol>
@@ -451,12 +451,12 @@
       </physvol>
       <physvol>
         <volumeref ref="volIBeam16"/>
-        <position name="posIBeam16pos1" unit="cm" x="(-1)**1*((9*12+2)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
+        <position name="posIBeam16pos1" unit="cm" x="(-1)**1*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
         <rotationref ref="rPlus90AboutX"/>
       </physvol>
       <physvol>
         <volumeref ref="volIBeam16"/>
-        <position name="posIBeam16neg1" unit="cm" x="(-1)**1*((9*12+2)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
+        <position name="posIBeam16neg1" unit="cm" x="(-1)**1*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
         <rotationref ref="rPlus90AboutX"/>
       </physvol>
       <physvol>

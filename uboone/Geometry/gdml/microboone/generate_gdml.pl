@@ -2206,11 +2206,11 @@ print GDML<<EOF;
       <position name="posGroundBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>  
-    <!--physvol>
+ <!--   <physvol>
       <volumeref ref="volOverburden"/>
-      <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="(41-10)*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
+      <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="34.50000555*12*2.54+22.86 +127*2.54+285" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol-->
+    </physvol>-->
     <physvol>
       <volumeref ref="volDetEnclosure"/>
       <position name="posDetEnclosure" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
@@ -2498,7 +2498,7 @@ sub gen_enclosureExtras()
      <solidref ref="Insulation"/>
   </volume>
   <volume name="volPlatformDisc">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<materialref ref="FR4"/>
     <solidref ref="PlatformDisc"/>
   </volume>
   <volume name="volpolySquare">
@@ -2599,12 +2599,12 @@ EOF
       </physvol>
       <physvol>
         <volumeref ref="volIBeam16"/>
-        <position name="posIBeam16pos$j" unit="cm" x="(-1)**$j*((9*12+2)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
+        <position name="posIBeam16pos$j" unit="cm" x="(-1)**$j*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
         <rotationref ref="rPlus90AboutX"/>
       </physvol>
       <physvol>
         <volumeref ref="volIBeam16"/>
-        <position name="posIBeam16neg$j" unit="cm" x="(-1)**$j*((9*12+2)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
+        <position name="posIBeam16neg$j" unit="cm" x="(-1)**$j*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
         <rotationref ref="rPlus90AboutX"/>
       </physvol>
       <physvol>
