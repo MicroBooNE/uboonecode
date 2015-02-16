@@ -538,7 +538,9 @@ namespace caldata {
 	    }else{
 	      ir++;
 	      if (ir<rois.size()){
-		roiLen = rois[ir].second - roiStart + 1;
+		roiLen += 100;
+		if (roiLen >= rois[ir].first - roiStart + 1)
+		  roiLen = rois[ir].second - roiStart + 1;
 	      }else{
 		roiLen += 100;
 		if (roiLen>dataSize-roiStart)
