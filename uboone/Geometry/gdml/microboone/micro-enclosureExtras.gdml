@@ -239,15 +239,11 @@
      <solidref ref="Insulation"/>
   </volume>
   <volume name="volPlatformDisc">
-	<materialref ref="FR4"/>
+	<materialref ref="G10"/>
     <solidref ref="PlatformDisc"/>
   </volume>
-  <volume name="volpolySquare">
-     <materialref ref="FR4"/>
-     <solidref ref="polySquare"/>
-  </volume>
   <volume name="volpolySmallSquare">
-     <materialref ref="FR4"/>
+     <materialref ref="G10"/>
      <solidref ref="polySmallSquare"/>
   </volume>
   <volume name="volSquare">
@@ -277,12 +273,7 @@
 
     <volume name="volPlatformSpace">
         <materialref ref="Air"/> 
-		<!--STEEL_STAINLESS_Fe7Cr2Ni"/>-->
         <solidref ref="PlatformSpace"/>
-<!--	<physvol>
-        <volumeref ref="volpolySquare"/>
-        <position name="pospolySquare" unit="cm" x="0" y="(4*12+8+ 11.94*2+2)*2.54/2" z="0"/>
-      </physvol>-->
 	<physvol>
         <volumeref ref="volPlatformDisc"/>
         <position name="posPlatformDisc" unit="cm" x="0" y="(4*12+8+ 11.94*2+2)*2.54/2" z="0"/>
