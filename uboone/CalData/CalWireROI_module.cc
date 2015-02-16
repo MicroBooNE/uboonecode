@@ -380,7 +380,7 @@ namespace caldata {
 	    }
 	    sum = fabs(sum);
 	    //std::cout << bin << " " << sum << " " << raw_noise/sqrt(7.)*3. << std::endl;
-	    if (sum > raw_noise*sqrt(7.)*5.) roiStart = bin;
+	    if (sum > raw_noise*sqrt(7.)*6.) roiStart = bin;
 
 	  } else {
             // leaving a ROI?
