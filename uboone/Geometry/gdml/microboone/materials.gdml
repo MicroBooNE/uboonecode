@@ -110,7 +110,7 @@
   </material>
 
   <material name="FR4">
-   <D value="1.98281" unit="g/cm3"/>
+   <D value="1.5224" unit="g/cm3"/>
    <fraction n="0.47" ref="epoxy_resin"/>
    <fraction n="0.53" ref="fibrous_glass"/>
   </material>

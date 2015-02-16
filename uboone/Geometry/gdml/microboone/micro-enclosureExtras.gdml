@@ -8,9 +8,13 @@
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
- <box name="PlatformOLDbig" lunit="cm" x="550+1" y="18+1" z="1500+1" />
- <box name="PlatformOLDsmall" lunit="cm" x="550" y="18" z="1500" />
- <tube name="PlatformNEW" lunit="cm" rmax="292*2.54-0.5" z="18+1.5" aunit="deg" deltaphi="360" /> 
+ <box name="PlatformOLDbig" lunit="cm" x="558+1" y="(4*12+8+2*11+12.06)*2.54+1" z="1500+1" />
+ <box name="PlatformOLDsmall" lunit="cm" x="558" y="(4*12+8+2*11+12.06)*2.54" z="1500" />
+ <tube name="PlatformNEW" lunit="cm" rmax="292*2.54-0.5" z="(4*12+7+2*11+12.06)*2.54+1.5" aunit="deg" deltaphi="360" /> 
+
+ <box name="PlatformRectbig" lunit="cm" x="550+1" y="2.54+1" z="1500+1" />
+ <box name="PlatformRectsmall" lunit="cm" x="550" y="2.54" z="1500" />
+ <tube name="PlatformCircle" lunit="cm" rmax="292*2.54-0.5" z="2.54+1.5" aunit="deg" deltaphi="360" /> 
 
   <subtraction name="PlatformSub0">
     <first ref="PlatformOLDbig"/> <second ref="PlatformNEW"/>
@@ -18,15 +22,98 @@
 	<rotation name="rotPlatformSub0" unit="deg" x="90" y="0" z="0"/>
   </subtraction>
 
-  <subtraction name="Platform">
+  <subtraction name="PlatformSpace0">
 	<first ref="PlatformOLDsmall"/> <second ref="PlatformSub0"/>
 	<position name="posPlatformSub1" unit="cm" x="0" y="0" z="0"/>
   </subtraction> 
 
+  <subtraction name="PlatformDisc0">
+    <first ref="PlatformRectbig"/> <second ref="PlatformCircle"/>
+	<position name="posPlatformDiscSub" unit="cm" x="0" y="0" z="0"/>
+	<rotation name="rotPlatformDisc" unit="deg" x="90" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="PlatformDisc">
+    <first ref="PlatformRectsmall"/> <second ref="PlatformDisc0"/>
+	<position name="posPlatformDiscSub1" unit="cm" x="0" y="0" z="0"/>
+  </subtraction>
+
+
+  <subtraction name="PlatformSpace">
+	<first ref="PlatformSpace0"/> <second ref="PlatformOLDbig"/>
+	<position name="posPlatformSub1" unit="cm" x="(45+9)*2.54" y="-30*2.54" z="0"/>
+  </subtraction> 
+
+ <box name="IBeam53_0" lunit="cm" x="9.995*2.54 -0.1" y="(22*12+6)*2.54-0.1" z="12.06*2.54-0.1"/>
+ <box name="IBeam53Segment" lunit="cm" x="(9.995-0.345)*2.54/2" y="(22*12+6)*2.54" z="(12.06-2*0.575)*2.54"/>
+ <box name="IBeam16_0" lunit="cm" x="3.99*2.54-0.1" y="(17*12+4)*2.54-0.1" z="12.5*2.54-0.1"/>
+ <box name="IBeam16Segment" lunit="cm" x="(3.99-0.22)*2.54/2" y="(17*12+4)*2.54" z="(11.99-2*0.265)*2.54"/>
+ <box name="IBeam40_0" lunit="cm" x="8.005*2.54 -0.1" y="(18*12+3)*2.54-0.1" z="11.94*2.54-0.1"/>
+ <box name="IBeam40Segment" lunit="cm" x="(8.005-0.295)*2.54/2" y="(18*12+3)*2.54" z="(11.94-2*0.515)*2.54"/>
+ <box name="IBeam45_0" lunit="cm" x="8.02*2.54-0.1" y="(17*12 +4)*2.54-0.1" z="10.1*2.54-0.1"/>
+ <box name="IBeam45Segment" lunit="cm" x="(8.02-0.35)*2.54/2" y="(17*12+4)*2.54" z="(10.1-2*0.62)*2.54"/>
+ <box name="IBeam17_0" lunit="cm" x="4.01*2.54-0.1" y="36*2.54-0.1" z="10.11*2.54-0.1"/>
+ <box name="IBeam17Segment" lunit="cm" x="(4.01-0.24)*2.54/2" y="36*2.54" z="(10.11-2*0.33)*2.54"/>
+ <box name="BigSquare" lunit="cm" x="8*2.54" y="(4*12+6-12)*2.54" z="8*2.54"/>
+ <box name="SmallSquare" lunit="cm" x="7*2.54" y="(4*12+6-10)*2.54" z="7*2.54"/>
+ <box name="polySquare" lunit="cm" x="(18*12+4)*2.54-1" y="2.54" z="44*12*2.54"/>
+ <box name="polySmallSquare" lunit="cm" x="(30)*2.54" y="2.54" z="465*2.54"/>
+
+  <subtraction name="Square">
+    <first ref="BigSquare"/> <second ref="SmallSquare"/>
+	<position name="posSquareRemoval0" unit="cm" x="0" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam53_1">
+    <first ref="IBeam53_0"/> <second ref="IBeam53Segment"/>
+	<position name="posBeamRemovalPlat2" unit="cm" x="(9.995+.345)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam53">
+    <first ref="IBeam53_1"/> <second ref="IBeam53Segment"/>
+	<position name="posBeamRemovalPlat3" unit="cm" x="-(9.995 +.345)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam16_1">
+    <first ref="IBeam16_0"/> <second ref="IBeam16Segment"/>
+	<position name="posBeamRemovalPlat4" unit="cm" x="(3.99+.22)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam16">
+    <first ref="IBeam16_1"/> <second ref="IBeam16Segment"/>
+	<position name="posBeamRemovalPlat5" unit="cm" x="-(3.99+.22)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam40_1">
+    <first ref="IBeam40_0"/> <second ref="IBeam40Segment"/>
+	<position name="posBeamRemovalPlat6" unit="cm" x="(8.005+.295)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam40">
+    <first ref="IBeam40_1"/> <second ref="IBeam40Segment"/>
+	<position name="posBeamRemovalPlat7" unit="cm" x="-(8.005+0.295)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam17_1">
+    <first ref="IBeam17_0"/> <second ref="IBeam17Segment"/>
+	<position name="posBeamRemovalPlat8" unit="cm" x="(4.01+.24)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam17">
+    <first ref="IBeam17_1"/> <second ref="IBeam17Segment"/>
+	<position name="posBeamRemovalPlat9" unit="cm" x="-(4.01+.24)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam45_1">
+    <first ref="IBeam45_0"/> <second ref="IBeam45Segment"/>
+	<position name="posBeamRemovalPlat10" unit="cm" x="(8.02+.35)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam45">
+    <first ref="IBeam45_1"/> <second ref="IBeam45Segment"/>
+	<position name="posBeamRemovalPlat11" unit="cm" x="-(8.02+.35)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+ 
+
+ 
 
 <box name="Column"
   x="16.79"
-  y="798"
+  y="750"
   z="16.79"
   lunit="cm"/>
 <tube name="Tank1"
@@ -151,9 +238,265 @@
      <materialref ref="PU_foam_light"/>
      <solidref ref="Insulation"/>
   </volume>
-    <volume name="volPlatform">
-        <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-        <solidref ref="Platform"/>
+  <volume name="volPlatformDisc">
+	<materialref ref="G10"/>
+    <solidref ref="PlatformDisc"/>
+  </volume>
+  <volume name="volpolySmallSquare">
+     <materialref ref="G10"/>
+     <solidref ref="polySmallSquare"/>
+  </volume>
+  <volume name="volSquare">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="Square"/>
+  </volume>
+  <volume name="volIBeam53">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam53"/>
+  </volume>
+  <volume name="volIBeam16">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam16"/>
+  </volume>
+  <volume name="volIBeam40">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam40"/>
+  </volume>
+  <volume name="volIBeam17">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam17"/>
+  </volume>
+  <volume name="volIBeam45">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam45"/>
+  </volume>
+
+    <volume name="volPlatformSpace">
+        <materialref ref="Air"/> 
+        <solidref ref="PlatformSpace"/>
+	<physvol>
+        <volumeref ref="volPlatformDisc"/>
+        <position name="posPlatformDisc" unit="cm" x="0" y="(4*12+8+ 11.94*2+2)*2.54/2" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40pos0" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(24.5+49*0)*2.54"/>
+        <rotation name="rPlus90Z90X40pos0" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40neg0" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(-24.5-49*0)*2.54"/>
+        <rotation name="rPlus90Z90X40pos0" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17pos0" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(24.5+49*0)*2.54"/>
+        <rotation name="rPlus90Z90Xpos170" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17neg0" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(-24.5-49*0)*2.54"/>
+        <rotation name="rPlus90Z90Xneg170" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40pos1" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(24.5+49*1)*2.54"/>
+        <rotation name="rPlus90Z90X40pos1" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40neg1" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(-24.5-49*1)*2.54"/>
+        <rotation name="rPlus90Z90X40pos1" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17pos1" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(24.5+49*1)*2.54"/>
+        <rotation name="rPlus90Z90Xpos171" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17neg1" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(-24.5-49*1)*2.54"/>
+        <rotation name="rPlus90Z90Xneg171" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40pos2" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(24.5+49*2)*2.54"/>
+        <rotation name="rPlus90Z90X40pos2" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40neg2" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(-24.5-49*2)*2.54"/>
+        <rotation name="rPlus90Z90X40pos2" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17pos2" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(24.5+49*2)*2.54"/>
+        <rotation name="rPlus90Z90Xpos172" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17neg2" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(-24.5-49*2)*2.54"/>
+        <rotation name="rPlus90Z90Xneg172" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40pos3" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(24.5+49*3)*2.54"/>
+        <rotation name="rPlus90Z90X40pos3" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40neg3" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(-24.5-49*3)*2.54"/>
+        <rotation name="rPlus90Z90X40pos3" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17pos3" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(24.5+49*3)*2.54"/>
+        <rotation name="rPlus90Z90Xpos173" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17neg3" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(-24.5-49*3)*2.54"/>
+        <rotation name="rPlus90Z90Xneg173" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40pos4" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(24.5+49*4)*2.54"/>
+        <rotation name="rPlus90Z90X40pos4" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40neg4" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(-24.5-49*4)*2.54"/>
+        <rotation name="rPlus90Z90X40pos4" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17pos4" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(24.5+49*4)*2.54"/>
+        <rotation name="rPlus90Z90Xpos174" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17neg4" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(-24.5-49*4)*2.54"/>
+        <rotation name="rPlus90Z90Xneg174" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZ0" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*0)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZ0" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*0)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZShift0" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*0)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZShift0" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*0)*2.54"/>
+      </physvol>
+	  
+	  
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZ1" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*1)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZ1" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*1)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZShift1" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*1)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZShift1" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*1)*2.54"/>
+      </physvol>
+	  
+	  
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZ2" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*2)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZ2" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*2)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZShift2" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*2)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZShift2" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*2)*2.54"/>
+      </physvol>
+	  
+	  
+      <physvol>
+        <volumeref ref="volIBeam53"/>
+        <position name="posIBeam53pos0" unit="cm" x="(-1)**0*((9*12+2-9.995/2)*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="(23*12/2-5)*2.54"/>
+        <rotation name="rPlus90Z90X90Ypos535" unit="deg" x="90" y="0" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam53"/>
+        <position name="posIBeam53neg0" unit="cm" x="(-1)**0*((9*12+2-9.995/2)*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-(23*12/2-5)*2.54"/>
+        <rotation name="rPlus90Z90X90Yneg535" unit="deg" x="90" y="0" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam16"/>
+        <position name="posIBeam16pos0" unit="cm" x="(-1)**0*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam16"/>
+        <position name="posIBeam16neg0" unit="cm" x="(-1)**0*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam45"/>
+        <position name="posIBeam45pos0" unit="cm" x="-(9*12+2-8-8.02/2-.5)*2.54 +0*(36-1.5*8.02)*2.54 " y="-(4*12+8-2*10.11)*2.54/2" z="128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam45"/>
+        <position name="posIBeam45neg0" unit="cm" x="-(9*12+2-8-8.02/2-.5)*2.54+0*(36-1.5*8.02)*2.54" y="-(4*12+8-2*10.11)*2.54/2" z="-128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam53"/>
+        <position name="posIBeam53pos1" unit="cm" x="(-1)**1*((9*12+2-9.995/2)*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="(23*12/2-5)*2.54"/>
+        <rotation name="rPlus90Z90X90Ypos535" unit="deg" x="90" y="0" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam53"/>
+        <position name="posIBeam53neg1" unit="cm" x="(-1)**1*((9*12+2-9.995/2)*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-(23*12/2-5)*2.54"/>
+        <rotation name="rPlus90Z90X90Yneg535" unit="deg" x="90" y="0" z="0"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam16"/>
+        <position name="posIBeam16pos1" unit="cm" x="(-1)**1*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam16"/>
+        <position name="posIBeam16neg1" unit="cm" x="(-1)**1*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam45"/>
+        <position name="posIBeam45pos1" unit="cm" x="-(9*12+2-8-8.02/2-.5)*2.54 +1*(36-1.5*8.02)*2.54 " y="-(4*12+8-2*10.11)*2.54/2" z="128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam45"/>
+        <position name="posIBeam45neg1" unit="cm" x="-(9*12+2-8-8.02/2-.5)*2.54+1*(36-1.5*8.02)*2.54" y="-(4*12+8-2*10.11)*2.54/2" z="-128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volpolySmallSquare"/>
+        <position name="pospolySmallSquare" unit="cm" x="-(9*12+2-18-10.11/2-.5)*2.54" y="-(4*12+8-3*10.11-3)*2.54/2" z="0"/>
+      </physvol>
+
     </volume>
     <volume name="volColumn">
         <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>

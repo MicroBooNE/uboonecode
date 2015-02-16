@@ -145,7 +145,7 @@
   </material>
 
   <material name="FR4">
-   <D value="1.5224" unit="g/cm3"/>
+   <D value="1.98281" unit="g/cm3"/>
    <fraction n="0.47" ref="epoxy_resin"/>
    <fraction n="0.53" ref="fibrous_glass"/>
   </material>
@@ -2197,11 +2197,15 @@
      <solidref ref="Insulation"/>
   </volume>
   <volume name="volPlatformDisc">
-	<materialref ref="G10"/>
+	<materialref ref="Concrete"/>
     <solidref ref="PlatformDisc"/>
   </volume>
+  <volume name="volpolySquare">
+     <materialref ref="Concrete"/>
+     <solidref ref="polySquare"/>
+  </volume>
   <volume name="volpolySmallSquare">
-     <materialref ref="G10"/>
+     <materialref ref="Concrete"/>
      <solidref ref="polySmallSquare"/>
   </volume>
   <volume name="volSquare">
@@ -2231,7 +2235,12 @@
 
     <volume name="volPlatformSpace">
         <materialref ref="Air"/> 
+		<!--STEEL_STAINLESS_Fe7Cr2Ni"/>-->
         <solidref ref="PlatformSpace"/>
+<!--	<physvol>
+        <volumeref ref="volpolySquare"/>
+        <position name="pospolySquare" unit="cm" x="0" y="(4*12+8+ 11.94*2+2)*2.54/2" z="0"/>
+      </physvol>-->
 	<physvol>
         <volumeref ref="volPlatformDisc"/>
         <position name="posPlatformDisc" unit="cm" x="0" y="(4*12+8+ 11.94*2+2)*2.54/2" z="0"/>
@@ -2648,19 +2657,19 @@
   <solidref ref="SteelTube"/>
  </volume>
 <volume name="volaTopBeam">
-    <materialref ref="G10"/>
+    <materialref ref="Concrete"/>
     <solidref ref="aTopBeam"/>
  </volume>
 <volume name="volaTopCross">
-    <materialref ref="G10"/>
+    <materialref ref="Concrete"/>
     <solidref ref="aTopCross"/>
  </volume>
 <volume name="volaTopCrossOuter">
-    <materialref ref="G10"/>
+    <materialref ref="Concrete"/>
     <solidref ref="aTopCrossOuter"/>
  </volume>
 <volume name="volaSideCross">
-    <materialref ref="G10"/>
+    <materialref ref="Concrete"/>
     <solidref ref="aSideCross"/>
  </volume>
 <volume name="volFrame">
