@@ -536,15 +536,19 @@ namespace caldata {
 	    if (fabs(tempPost-tempPre)<deconNoise){
 	      flag = 0;
 	    }else{
-	      ir++;
-	      if (ir<rois.size()){
-		roiLen += 100;
-		if (roiLen >= rois[ir].first - roiStart + 1)
-		  roiLen = rois[ir].second - roiStart + 1;
+	      if (tempPre > tempPost){
+		flag = 0;
 	      }else{
-		roiLen += 100;
-		if (roiLen>dataSize-roiStart)
-		  roiLen = dataSize - roiStart;
+		ir++;
+		if (ir<rois.size()){
+		  roiLen += 100;
+		  if (roiLen >= rois[ir].first - roiStart + 1)
+		    roiLen = rois[ir].second - roiStart + 1;
+		}else{
+		  roiLen += 100;
+		  if (roiLen>dataSize-roiStart)
+		    roiLen = dataSize - roiStart;
+		}
 	      }
 	    }
 	  }
@@ -562,7 +566,12 @@ namespace caldata {
 	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 ) {
 	    basePre =tempPre;
 	    basePost=tempPost;
+	    
+	    
+
 	    float base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
+	    // if (channel==200)
+	    //   std::cout << basePre << " " << basePost << " " << roiStart << " " << roiLen << " " << dataSize << " " << base << std::endl;
 	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
 	      sigTemp.push_back(holder[jj]-base);
 	    } // jj
