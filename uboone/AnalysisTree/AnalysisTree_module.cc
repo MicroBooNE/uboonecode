@@ -432,6 +432,7 @@ namespace microboone {
     std::vector<Int_t>    pdg;
     std::vector<Int_t>    status;    
     std::vector<Float_t>  Eng;
+    std::vector<Float_t>  EndE;
     std::vector<Float_t>  Mass;
     std::vector<Float_t>  Px;
     std::vector<Float_t>  Py;
@@ -1200,6 +1201,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(status, -99999);
   FillWith(Mass, -99999.);
   FillWith(Eng, -99999.);
+  FillWith(EndE, -99999.);
   FillWith(Px, -99999.);
   FillWith(Py, -99999.);
   FillWith(Pz, -99999.);
@@ -1293,6 +1295,7 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   status.resize(MaxGEANTparticles);
   Mass.resize(MaxGEANTparticles);  
   Eng.resize(MaxGEANTparticles);
+  EndE.resize(MaxGEANTparticles);
   Px.resize(MaxGEANTparticles);
   Py.resize(MaxGEANTparticles);
   Pz.resize(MaxGEANTparticles);
@@ -1498,6 +1501,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("status",status,"status[geant_list_size]/I");
     CreateBranch("Mass",Mass,"Mass[geant_list_size]/F");
     CreateBranch("Eng",Eng,"Eng[geant_list_size]/F");
+    CreateBranch("EndE",EndE,"EndE[geant_list_size]/F");
     CreateBranch("Px",Px,"Px[geant_list_size]/F");
     CreateBranch("Py",Py,"Py[geant_list_size]/F");
     CreateBranch("Pz",Pz,"Pz[geant_list_size]/F");
@@ -2300,6 +2304,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             fData->pdg[iPart]=pPart->PdgCode();
             fData->status[iPart] = pPart->StatusCode();
             fData->Eng[iPart]=pPart->E();
+	    fData->EndE[iPart]=pPart->EndE();
             fData->Mass[iPart]=pPart->Mass();
             fData->Px[iPart]=pPart->Px();
             fData->Py[iPart]=pPart->Py();
