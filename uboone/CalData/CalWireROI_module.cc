@@ -44,6 +44,7 @@
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "uboone/Database/PedestalRetrievalAlg.h"
+#include "WaveformPropertiesAlg.h"
 
 /* unused function
 namespace {
@@ -156,7 +157,11 @@ namespace caldata {
     float SubtractBaseline(std::vector<float>& holder, float basePre,
 			   float basePost,unsigned int roiStart,unsigned int roiLen,
 			   unsigned int dataSize);
-      
+
+    bool                               fDoBaselineSub_WaveformPropertiesAlg;
+    util::WaveformPropertiesAlg<float> fROIPropertiesAlg;
+    float SubtractBaseline(const std::vector<float>& holder);
+    
   protected: 
     
   }; // class CalWireROI
@@ -165,7 +170,8 @@ namespace caldata {
   
   //-------------------------------------------------
   CalWireROI::CalWireROI(fhicl::ParameterSet const& pset):
-    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
+  fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg")),
+    fROIPropertiesAlg(pset.get<fhicl::ParameterSet>("ROIPropertiesAlg"))
   {
     this->reconfigure(pset);
 
@@ -196,7 +202,9 @@ namespace caldata {
     fuPlaneRamp       = p.get< bool >                 ("uPlaneRamp");
     fFFTSize          = p.get< int  >                 ("FFTSize");
     fSaveWireWF       = p.get< int >                  ("SaveWireWF");
-    
+
+    fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
+
     fPedestalRetrievalAlg.reconfigure(p);
     
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
@@ -563,22 +571,24 @@ namespace caldata {
 	  unsigned int bEnd = bBegin + roiLen;
 	  float basePre = 0., basePost = 0.;
 
+	  float base=0;
 	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 ) {
 	    basePre =tempPre;
 	    basePost=tempPost;
 	    
 	    
 
-	    float base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
+	    base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
 	    // if (channel==200)
 	    //   std::cout << basePre << " " << basePost << " " << roiStart << " " << roiLen << " " << dataSize << " " << base << std::endl;
-	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
-	      sigTemp.push_back(holder[jj]-base);
-	    } // jj
 	  } // fDoBaselineSub ...
-	  else {
-	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) sigTemp.push_back(holder[jj]);
-	  } // !fDoBaselineSub ...
+	  else if(fDoBaselineSub_WaveformPropertiesAlg)
+	    base = fROIPropertiesAlg.GetWaveformPedestal(holder);
+
+
+	  for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
+	    sigTemp.push_back(holder[jj]-base);
+	  } // jj
 	        
 	  // add the range into ROIVec 
 	  ROIVec.add_range(roiStart, std::move(sigTemp));

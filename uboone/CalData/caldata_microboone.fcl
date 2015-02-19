@@ -18,8 +18,10 @@ microboone_calroi:
  uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
  FFTSize:     256      # re-initialize FFT service to this size
  SaveWireWF:  0
+ DoBaselineSub_WaveformPropertiesAlg:   flase # subtract baseline after deconvolution?
  
  PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
+ ROIPropertiesAlg:      { ROIAlgParams: @local::roiAlg_DigitAboveBaseline }
 }
 
 microboone_calwire:
