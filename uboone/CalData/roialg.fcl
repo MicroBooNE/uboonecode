@@ -16,4 +16,11 @@ roiAlg_CalibrationPulseFinder:
     MinWidth:       1
 }
 
+roiAlg_DigitAboveBaseline:
+{
+    AlgName:       "DigitAboveBaseline"
+    PaddingSize:    5
+    ThresholdInRMS: 1.5
+}
+
 END_PROLOG

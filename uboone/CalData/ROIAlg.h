@@ -36,10 +36,10 @@
 namespace util{
 template <class Digit>
   class ROIAlg_DigitAboveThreshold;
-}
-namespace util{
 template <class Digit>
   class ROIAlg_CalibrationPulseFinder;
+template <class Digit>
+  class ROIAlg_DigitAboveBaseline;
 }
 
 namespace util{
@@ -74,6 +74,10 @@ namespace util{
       }
       if(algName.compare("CalibrationPulseFinder")==0){
 	std::unique_ptr< ROIAlg<Digit> > new_ptr(new ROIAlg_CalibrationPulseFinder<Digit>(p));
+	ptr.swap(new_ptr);
+      }
+      if(algName.compare("DigitAboveBaseline")==0){
+	std::unique_ptr< ROIAlg<Digit> > new_ptr(new ROIAlg_DigitAboveBaseline<Digit>(p));
 	ptr.swap(new_ptr);
       }
       else{
@@ -193,5 +197,6 @@ namespace util{
 
 #include "ROIAlg_DigitAboveThreshold.h"
 #include "ROIAlg_CalibrationPulseFinder.h"
+#include "ROIAlg_DigitAboveBaseline.h"
 
 #endif
