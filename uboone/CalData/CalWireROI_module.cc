@@ -341,7 +341,7 @@ namespace caldata {
 	double raw_noise = sss->GetRawNoise(channel);
 
         // search for ROIs
-        for(bin = 1; bin < dataSize; ++bin) {
+        for(bin = 0; bin < dataSize; ++bin) {
           float SigVal = fabs(rawadc[bin] - pdstl);
           if(roiStart == 0) {
             // not in a ROI
@@ -353,22 +353,22 @@ namespace caldata {
             //   if(SigVal > fThreshold[thePlane]) roiStart = bin;
             // }
 	    unsigned int sbin[7];
-	    if (bin>=4) {
+	    if (bin>=3) {
 	      sbin[0] = bin -3;
 	      sbin[1] = bin -2;
 	      sbin[2] = bin -1;
-	    }else if (bin>=3){
-	      sbin[0] = 1;
+	    }else if (bin>=2){
+	      sbin[0] = 0;
 	      sbin[1] = bin-2;
 	      sbin[2] = bin-1;
-	    }else if (bin>=2){
-	      sbin[0] =1;
-	      sbin[1] =1;
+	    }else if (bin>=1){
+	      sbin[0] =0;
+	      sbin[1] =0;
 	      sbin[2] = bin-1;
-	    }else{
-	      sbin[0] =1;
-	      sbin[1] =1;
-	      sbin[2] =1;
+	    }else if (bin==0) {
+	      sbin[0] =0;
+	      sbin[1] =0;
+	      sbin[2] =0;
 	    }
 	    sbin[3] = bin ; 
 	    sbin[4] = bin + 1; if (sbin[4]>dataSize-1) sbin[4] =dataSize-1;
@@ -380,7 +380,7 @@ namespace caldata {
 	    }
 	    sum = fabs(sum);
 	    //std::cout << bin << " " << sum << " " << raw_noise/sqrt(7.)*3. << std::endl;
-	    if (sum > raw_noise*sqrt(7.)*5.) roiStart = bin;
+	    if (sum > raw_noise*sqrt(7.)*6.) roiStart = bin;
 
 	  } else {
             // leaving a ROI?
@@ -430,7 +430,7 @@ namespace caldata {
         }
 
 	// if (channel==3218){
-	//   std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
+	//	std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
 	//   for(unsigned int ii = 0; ii < rois.size(); ++ii) {
 	//     std::cout << rois[ii].first << " " << rois[ii].second << std::endl;
 	//   }
@@ -476,12 +476,12 @@ namespace caldata {
 	
 
 	for (unsigned int ir = 0; ir < rois.size(); ++ir) {
-	  unsigned int roiLen = rois[ir].second - rois[ir].first;
+	  unsigned int roiLen = rois[ir].second - rois[ir].first + 1;
 	  unsigned int roiStart = rois[ir].first;
 	  //treat FFT Size
 	  // if (channel==806)
 	  //   std::cout << roiStart << " " << roiLen << std::endl;
-	   
+	  
 
 	  int flag =1;
 	  float tempPre=0,tempPost=0;
@@ -505,12 +505,12 @@ namespace caldata {
 		holder[hBin] = rawadc[bin]-pdstl;
 	      }else{
 		holder[hBin] = rawadc[bin-dataSize]-pdstl;
-		flag = 0;
 	      }
+	      if (bin>=dataSize-1) flag = 0;
 	      ++hBin;
 	    } // bin
 
-	    //std::cout << channel << " " << flag << std::endl;
+	    //std::cout << channel << " " << roiStart << " " << flag << " " << dataSize << " " << holder.size() << " " << roiLen << std::endl;
 
 	    sss->Deconvolute(channel,holder);
 	    for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
@@ -526,7 +526,7 @@ namespace caldata {
 	    tempPre=0,tempPost=0;
 	    for(unsigned int bin = 0; bin < 20; ++bin) {
 	      tempPre  += holder[bin];
-	      tempPost += holder[roiLen - bin];
+	      tempPost += holder[roiLen -1 - bin];
 	    }
 	    tempPre = tempPre/20.;
 	    tempPost = tempPost/20.;
@@ -536,11 +536,19 @@ namespace caldata {
 	    if (fabs(tempPost-tempPre)<deconNoise){
 	      flag = 0;
 	    }else{
-	      ir++;
-	      if (ir<rois.size()){
-		roiLen = rois[ir].second - roiStart;
+	      if (tempPre > tempPost){
+		flag = 0;
 	      }else{
-		roiLen = dataSize - roiStart;
+		ir++;
+		if (ir<rois.size()){
+		  roiLen += 100;
+		  if (roiLen >= rois[ir].first - roiStart + 1)
+		    roiLen = rois[ir].second - roiStart + 1;
+		}else{
+		  roiLen += 100;
+		  if (roiLen>dataSize-roiStart)
+		    roiLen = dataSize - roiStart;
+		}
 	      }
 	    }
 	  }
@@ -558,7 +566,12 @@ namespace caldata {
 	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 ) {
 	    basePre =tempPre;
 	    basePost=tempPost;
+	    
+	    
+
 	    float base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
+	    // if (channel==200)
+	    //   std::cout << basePre << " " << basePost << " " << roiStart << " " << roiLen << " " << dataSize << " " << base << std::endl;
 	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
 	      sigTemp.push_back(holder[jj]-base);
 	    } // jj

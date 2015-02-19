@@ -12,68 +12,60 @@
 
 #include <vector>
 #include "RawData/RawDigit.h"
+#include "Utilities/UniqueRangeSet.h"
 #include <map>
 
 
 #include "TMath.h"
 #include "TComplex.h"
+#include "TF1.h"
+#include "TGraphErrors.h"
+
+#include "Utilities/LArFFT.h"
 
 namespace calibration{
 
-  bool hasCompressedRawDigit( std::vector<raw::RawDigit> const& rawDigitVector);
+  class CalibrationAlgs {
 
-  void analyzeEmptyEvent( std::vector<raw::RawDigit> const& rawDigit,
-			  std::vector<float> & pedestal,
-			  std::vector<float> & noise,
-			  std::vector<std::vector<float> > & noise_spectrum);
+  public:
 
-  void analyzeGainEvent( std::vector<raw::RawDigit> const& rawDigit,
-			 std::vector<float> & pedestal,
-			 std::vector<float> & noise,
-			 std::vector<float> & maxADC,
-			 std::vector<float> & Area,
-			 std::vector<float> & mainDC,
-			 std::vector<float> & maxTime,
-			 int const& prePulseTicks);
+    CalibrationAlgs();
 
-  void genChanMap( std::vector<raw::RawDigit> const& rawDigit,
-		   std::map< unsigned int, uint32_t > & chanmap);
+    virtual ~CalibrationAlgs(){}
 
+    void PrepareGainModel();
 
-  void calcPedestal( std::vector<raw::RawDigit> const& rawDigit,
-		     std::vector<float> & pedestal);
+    bool hasCompressedRawDigit( std::vector<raw::RawDigit> const& rawDigitVector);
+    
+    void genChanMap( std::vector<raw::RawDigit> const& rawDigit,
+		     std::map< unsigned int, uint32_t > & chanmap);
+    
+    void calcPedestal_BaselineRegion( util::UniqueRangeSet<std::vector<short>::const_iterator> const& rawData,
+				      float & pedestal);
+    
+    void calcSignal_SignalRegion( util::UniqueRangeSet<std::vector<short>::const_iterator> const& rawData,
+				  float & pedestal,
+				  float & maxADC,
+				  float & area,
+				  float & minADC,
+				  float & time);
+    
+    void calcNoise_BaselineRegion( util::UniqueRangeSet<std::vector<short>::const_iterator> const& rawData,
+				   float const& pedestal,
+				   float & noise);
+    
+    void calcGain(std::vector<float> const& voltages, std::vector<float> const& data,
+		  std::vector<float> const& errors, float& chi,
+		  float& gain, float& gainErr, float& intercept, float& interceptErr,
+		  float& residualSum, float& residualSumSquared);
+    
+  private:
 
-  void calcPedestal_SingleChannel( std::vector<short> const& rawData,
-				   float & pedestal);
+    TGraphErrors *gr;
+    TF1 *gainModel;
+    
 
-  void calcGain( std::vector<raw::RawDigit> const& rawDigit,
-		 std::vector<float> & pedestal,
-		 std::vector<float> & noise,
-		 std::vector<float> & maxADC,
-		 std::vector<float> & Area,
-		 std::vector<float> & minADC,
-		 std::vector<float> & maxTime,
-		 int const& prePulseTicks);
-
-  void calcGain_SingleChannel( std::vector<short> const& rawData,
-			       float & pedestal,
-			       float & noise,
-			       float & maxADC,
-			       float & Airea,
-			       float & minADC,
-			       float & time,
-			       int const& prePulseTicks);
-
-  void calcNoise( std::vector<raw::RawDigit> const& rawDigit,
-		  std::vector<float> const& pedestal,
-		  std::vector<float> & noise,
-		  std::vector< std::vector<float> > & noise_spectrum);
-
-  void calcNoise_SingleChannel( std::vector<short> const& rawData,
-				float const& pedestal,
-				float & noise,
-				std::vector<float> & noise_spectrum);
-
+  }; // end class CalibrationAlgs
 
 }
 #endif //CALIBRATIONTPC_ALGS_H

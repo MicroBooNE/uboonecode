@@ -14,6 +14,14 @@ microboone_analysistree:
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
  POTModuleLabel:           "generator"
+ UseBuffers:               false
+ SaveAuxDetInfo:           false
+ SaveCryInfo:              false
+ SaveGenieInfo:            true
+ SaveGeantInfo:            true
+ SaveHitInfo:              true
+ SaveTrackInfo:            true
+ SaveVertexInfo:           true
 }
 
 END_PROLOG

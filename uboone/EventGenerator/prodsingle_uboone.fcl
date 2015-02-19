@@ -76,6 +76,7 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "single_gen_uboone.root" #default file name, can override from command line with -o or --output
+   compressionLevel: 1
  }
 }
 

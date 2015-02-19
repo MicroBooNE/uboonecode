@@ -1,14 +1,21 @@
 
-
-set( CalibrationTPC_Algs_sources CalibrationTPC_Algs.cc)
-add_library(CalibrationTPC_Algs SHARED ${CalibrationTPC_Algs_sources})
-install ( TARGETS CalibrationTPC_Algs DESTINATION ${flavorqual_dir}/lib )
-
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME  uboonecode_uboone_Calibrations
+	  LIB_LIBRARIES
+                        LArFFT_service
+			${ART_FRAMEWORK_CORE}
+			${ART_UTILITIES}
+			${MF_MESSAGELOGGER}
+			${MF_UTILITIES}
+			${CETLIB}
+			${ROOT_BASIC_LIB_LIST}
           MODULE_LIBRARIES 
-	  		CalibrationTPC_Algs
+			uboonecode_uboone_Calibrations
 			RawData
+			CalData
+			Geometry
+			Geometry_service
+			Utilities
                         LArFFT_service
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
