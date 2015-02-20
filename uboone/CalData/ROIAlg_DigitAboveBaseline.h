@@ -36,21 +36,15 @@ namespace util{
   protected: 
     void AnalyzeWaveform(Region const& region){
 
-      std::cout << "Inside AnalyzeWaveform of size " << std::distance(region.Start(),region.End()) << std::endl;
-      
       //average of the region
       if(region.Start()==region.End()) return;
       const Digit baseline_threshold = DetermineBaselineThreshold(region);
       
-      std::cout << "\tHave baseline: " << baseline_threshold << std::endl;
-
       Tick start_tick,end_tick;
       bool unfinished_business = false;
       
       for( Tick tick=region.Start(); tick!=region.End(); tick++){
 
-	std::cout << "\tProcessing tick: " << std::distance(region.Start(),tick) << std::endl;
-	
 	//first, if we were above threshold, and now we're below
 	if( *tick < baseline_threshold && unfinished_business ){
 	  unfinished_business = false;
@@ -60,10 +54,6 @@ namespace util{
 	  else
 	    end_tick = tick + fPaddingSize;
 
-	  std::cout << "\t\tInsert region: "
-		    << std::distance(region.Start(),start_tick) << ","
-		    << std::distance(region.Start(),end_tick) << std::endl;
-	  
 	  this->InsertSignalRegion(start_tick,end_tick);
 	  continue;
 	}
@@ -79,12 +69,8 @@ namespace util{
       }//end loop over waveform
       
       //handle case where we end in signal region
-      if(unfinished_business){
-	  std::cout << "\t\tInsert region: "
-		    << std::distance(region.Start(),start_tick) << ","
-		    << std::distance(region.Start(),region.End()) << std::endl;
+      if(unfinished_business)
 	this->InsertSignalRegion(start_tick,region.End());
-      }      
     }
 
 
