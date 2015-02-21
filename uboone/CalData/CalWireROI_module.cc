@@ -349,7 +349,7 @@ namespace caldata {
 	double raw_noise = sss->GetRawNoise(channel);
 
         // search for ROIs
-        for(bin = 0; bin < dataSize; ++bin) {
+        for(bin = 1; bin < dataSize; ++bin) {
           float SigVal = fabs(rawadc[bin] - pdstl);
           if(roiStart == 0) {
             // not in a ROI
@@ -544,7 +544,8 @@ namespace caldata {
 	    if (fabs(tempPost-tempPre)<deconNoise){
 	      flag = 0;
 	    }else{
-	      if (tempPre > tempPost){
+	      if (tempPre > tempPost && roiStart <= 2){
+		//if (tempPre > tempPost){
 		flag = 0;
 	      }else{
 		ir++;
