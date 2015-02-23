@@ -9,6 +9,7 @@ art_make( BASENAME_ONLY
                         RawData
                         Database
                         SignalShapingServiceMicroBooNE_service
+                        ${SEEDSERVICE_SERVICE} # artextensions
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}

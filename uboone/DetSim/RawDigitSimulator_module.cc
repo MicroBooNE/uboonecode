@@ -47,6 +47,9 @@ extern "C" {
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussQ.h"
 
+// art extensions
+#include "artextensions/SeedService/SeedService.hh"
+
 // LArSoft includes
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
@@ -59,7 +62,6 @@ extern "C" {
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/LArFFT.h"
 #include "Utilities/LArProperties.h"
-#include "Utilities/FetchRandomSeed.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 
 namespace art {
@@ -128,11 +130,10 @@ namespace detsim{
     std::string compression(pset.get< std::string >("CompressionType"));
     if(compression.compare("Huffman") == 0) fCompression = raw::kHuffman;    
 
-    // obtain the random seed from a service,
-    // unless overridden in configuration with key "Seed" (that is default)
-    const unsigned int seed = lar::util::FetchRandomSeed(&pset);
-
-    createEngine(seed);
+    // create a default random engine; obtain the random seed from SeedService,
+    // unless overridden in configuration with key "Seed"
+    art::ServiceHandle<artext::SeedService>()
+      ->createEngine(*this, pset, "Seed");
 
     fEventCount = 0;
   }

@@ -40,6 +40,9 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+// art extensions
+#include "artextensions/SeedService/SeedService.hh"
+
 // LArSoft libraries
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
@@ -50,7 +53,6 @@
 #include "Utilities/LArProperties.h"
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/TimeService.h"
-#include "Utilities/FetchRandomSeed.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
 #include "uboone/Database/PedestalRetrievalAlg.h"
@@ -163,15 +165,12 @@ namespace detsim {
     TString compression(pset.get< std::string >("CompressionType"));
     if(compression.Contains("Huffman",TString::kIgnoreCase)) fCompression = raw::kHuffman;
 
-    // obtain the random seeds from a service,
+    // create a default random engine; obtain the random seed from SeedService,
     // unless overridden in configuration with key "Seed" and "SeedPedestal"
-    const unsigned int noise_seed
-      = lar::util::FetchRandomSeed("noise", &pset, "Seed");
-    const unsigned int pedestal_seed
-      = lar::util::FetchRandomSeed("pedestal", &pset, "SeedPedestal");
+    art::ServiceHandle<artext::SeedService> Seeds;
+    Seeds->createEngine(*this, "HepJamesRandom", "noise", pset, "Seed");
+    Seeds->createEngine(*this, "HepJamesRandom", "pedestal", pset, "SeedPedestal");
     
-    createEngine(noise_seed, "HepJamesRandom", "noise");
-    createEngine(pedestal_seed, "HepJamesRandom", "pedestal");
   }
 
   //-------------------------------------------------
