@@ -113,14 +113,14 @@ namespace detsim {
     
     dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
 
-
     std::map< double, int > fShapingTimeOrder;
     std::string fTrigModName;                 ///< Trigger data product producer name
 
     bool        fTest; // for forcing a test case
+    std::vector<sim::SimChannel> fTestSimChannel_v;
     size_t      fTestWire;
-    size_t      fTestIndex;
-    double      fTestCharge;
+    std::vector<size_t> fTestIndex;
+    std::vector<double> fTestCharge;
 
     int         fSample; // for histograms, -1 means no histos
 
@@ -154,8 +154,8 @@ namespace detsim {
 
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)
-  : fNoiseHist(0),
-    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
+  : fNoiseHist(0)
+    , fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
   {
     this->reconfigure(pset);
 
@@ -194,9 +194,11 @@ namespace detsim {
     //    fBaselineRMS      = p.get< float               >("BaselineRMS");
     fTrigModName      = p.get< std::string         >("TrigModName");
     fTest             = p.get<bool                 >("Test");
-    fTestWire         = p.get<size_t               >("TestWire");
-    fTestIndex        = p.get<size_t               >("TestIndex");
-    fTestCharge       = p.get<double               >("TestCharge");
+    fTestWire         = p.get< size_t              >("TestWire");
+    fTestIndex        = p.get< std::vector<size_t> >("TestIndex");
+    fTestCharge       = p.get< std::vector<double> >("TestCharge");
+    if(fTestIndex.size() != fTestCharge.size())
+      throw cet::exception(__FUNCTION__)<<"# test pulse mismatched: check TestIndex and TestCharge fcl parameters...";
     fSample           = p.get<int                  >("Sample");
     
     fPedestalRetrievalAlg.reconfigure(p.get<fhicl::ParameterSet>("PedestalRetrievalAlg"));
@@ -271,6 +273,33 @@ namespace detsim {
       mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
       << "greater than FFTSize!";
 
+
+    if(fTest){
+      art::ServiceHandle<geo::Geometry> geo;
+      if(geo->Nchannels()<=fTestWire)
+	throw cet::exception(__FUNCTION__)<<"Invalid test wire channel: "<<fTestWire;
+
+      std::vector<unsigned int> channels;
+      channels.reserve(geo->PlaneIDs().size());
+      for(auto const& plane_id : geo->PlaneIDs())
+	channels.push_back(geo->PlaneWireToChannel(plane_id.Plane,fTestWire));
+
+      double xyz[3] = { std::numeric_limits<double>::max() };
+      for(auto const& ch : channels) {
+
+	fTestSimChannel_v.push_back(sim::SimChannel(ch));
+
+	for(size_t i=0; i<fTestIndex.size(); ++i){
+
+	  fTestSimChannel_v.back().AddIonizationElectrons(-1,
+							  fTestIndex[i],
+							  fTestCharge[i],
+							  xyz,
+							  std::numeric_limits<double>::max());
+	}
+      }
+    }
+
     return;
 
   }
@@ -305,9 +334,6 @@ namespace detsim {
     art::ServiceHandle<geo::Geometry> geo;
     //unsigned int signalSize = fNTicks;
 
-    std::vector<const sim::SimChannel*> chanHandle;
-    evt.getView(fDriftEModuleLabel,chanHandle);
-
     //Get fIndShape and fColShape from SignalShapingService, on the fly
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     //get ASIC Gain and Noise in ADCatLowestGain:
@@ -328,8 +354,16 @@ namespace detsim {
     // and set the entries for the channels that have signal on them
     // using the chanHandle
     std::vector<const sim::SimChannel*> channels(fNChannels,nullptr);
-    for(size_t c = 0; c < chanHandle.size(); ++c){
-      channels.at(chanHandle.at(c)->Channel()) = chanHandle.at(c);
+
+    if(!fTest){
+      std::vector<const sim::SimChannel*> chanHandle;
+      evt.getView(fDriftEModuleLabel,chanHandle);
+      for(size_t c = 0; c < chanHandle.size(); ++c){
+	channels.at(chanHandle.at(c)->Channel()) = chanHandle.at(c);
+      }
+    }else{
+      for(size_t c = 0; c<fTestSimChannel_v.size(); ++c)
+	channels.at(fTestSimChannel_v[c].Channel()) = &(fTestSimChannel_v[c]);
     }
 
     //const auto NChannels = geo->Nchannels();
@@ -369,71 +403,44 @@ namespace detsim {
     
     for(chan = 0; chan < fNChannels; chan++) {
       auto wid = geo->ChannelToWire(chan);
-      size_t wireNum = wid[0].Wire;
       view = (size_t)geo->View(chan);
-      // for a test, one hit on one wire in each view!
 
+      // get the sim::SimChannel for this channel
+      const sim::SimChannel* sc = channels.at(chan);
+      if( !sc ) continue;
+      
+      // remove the time offset
+      int time_offset = 0;//sss->FieldResponseTOffset(chan);
+      
+      // loop over the tdcs and grab the number of electrons for each
+      
+      for(int t = 0; t < (int)(chargeWork.size()); ++t) {
+	
+	int tdc = ts->TPCTick2TDC(t);
+	// continue if tdc < 0
+	if( tdc < 0 ) continue;
+	double charge = sc->Charge(tdc);
+	if(charge==0) continue;
+	
+	// Apply artificial time offset to take care of field response convolution
+	// wrap the negative times to the end of the buffer
+	// The offset should be taken care of in the shaping service, by shifting the response.
+	
+	int raw_digit_index =
+          ( (t + time_offset) >= 0 ? t+time_offset : (chargeWork.size() + (t+time_offset)) );
+	
+	if(raw_digit_index <= 0 || raw_digit_index >= (int)(chargeWork.size())) continue;
 
-
-
-
-      if(fTest) {
-        if(wireNum != fTestWire) continue;
-        std::cout << "got to wire " << fTestWire << std::endl;
-        int time_offset = 0;
-        int raw_digit_index = fTestIndex + time_offset;
-        double charge       = fTestCharge;
-
-        // here fill ResponseParams... all the wires!
-        for(int wire = -(fNResponses[0][view]-1); wire<(int)fNResponses[0][view]; ++wire) {
-          auto wireIndex = wire+(int)fNResponses[0][view] - 1;
-          int wireChan = (int)chan + wire;
+	// here fill ResponseParams... all the wires!
+	for(int wire = -(fNResponses[0][view]-1); wire<(int)fNResponses[0][view]; ++wire) {
+	  auto wireIndex = (size_t)wire+fNResponses[0][view] - 1;
+	  int wireChan = (int)chan + wire;
 	  if(wireChan<0 || wireChan>= (int)fNChannels) continue;
 	  if ((size_t)geo->View(wireChan)!=view) continue;
-          
-
-          responseParamsVec[wireChan][wireIndex].emplace_back(new ResponseParams(charge, raw_digit_index));
-        }
-      } else {
-
-        // get the sim::SimChannel for this channel
-        const sim::SimChannel* sc = channels.at(chan);
-        if( !sc ) continue;
-
-	// remove the time offset
-	int time_offset = 0;//sss->FieldResponseTOffset(chan);
-
-        // loop over the tdcs and grab the number of electrons for each
-
-        for(int t = 0; t < (int)(chargeWork.size()); ++t) {
-
-          int tdc = ts->TPCTick2TDC(t);
-
-          // continue if tdc < 0
-          if( tdc < 0 ) continue;
-          double charge = sc->Charge(tdc);
-          if(charge==0) continue;
-
-          // Apply artificial time offset to take care of field response convolution
-          // wrap the negative times to the end of the buffer
-          // The offset should be taken care of in the shaping service, by shifting the response.
-
-          int raw_digit_index =
-          ( (t + time_offset) >= 0 ? t+time_offset : (chargeWork.size() + (t+time_offset)) );
-
-          if(raw_digit_index <= 0 || raw_digit_index >= (int)(chargeWork.size())) continue;
-
-          // here fill ResponseParams... all the wires!
-          for(int wire = -(fNResponses[0][view]-1); wire<(int)fNResponses[0][view]; ++wire) {
-            auto wireIndex = (size_t)wire+fNResponses[0][view] - 1;
-            int wireChan = (int)chan + wire;
-            if(wireChan<0 || wireChan>= (int)fNChannels) continue;
-	    if ((size_t)geo->View(wireChan)!=view) continue;
-	    
-            responseParamsVec[wireChan][wireIndex].emplace_back(new ResponseParams(charge, raw_digit_index));
-          } // loop over wires
-        } // loop over tdcs
-      } // else
+	  
+	  responseParamsVec[wireChan][wireIndex].emplace_back(new ResponseParams(charge, raw_digit_index));
+	} // loop over wires
+      } // loop over tdcs
     } // loop over channels
 
     double slope0[5] = { 0., 2.1575, 6.4725 , 13.946, 40.857};
@@ -446,6 +453,8 @@ namespace detsim {
     // loop over the collected responses
     //   this is needed because hits generate responses on adjacent wires!
     for(chan = 0; chan < fNChannels; chan++) {
+      if(!channels.at(chan)) continue;
+
       auto wid = geo->ChannelToWire(chan);
       size_t wireNum = wid[0].Wire;
 
@@ -484,9 +493,6 @@ namespace detsim {
       //    fNoiseFactInd *= fASICGain/4.7;
       //        fNoiseFactColl *= fASICGain/4.7;
       // get the sim::SimChannel for this channel
-
-
-
 
       auto& thisChan = responseParamsVec[chan];
       view = (size_t)geo->View(chan);

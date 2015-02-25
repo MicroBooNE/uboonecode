@@ -44,6 +44,7 @@
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "uboone/Database/PedestalRetrievalAlg.h"
+#include "WaveformPropertiesAlg.h"
 
 /* unused function
 namespace {
@@ -156,7 +157,11 @@ namespace caldata {
     float SubtractBaseline(std::vector<float>& holder, float basePre,
 			   float basePost,unsigned int roiStart,unsigned int roiLen,
 			   unsigned int dataSize);
-      
+
+    bool                               fDoBaselineSub_WaveformPropertiesAlg;
+    util::WaveformPropertiesAlg<float> fROIPropertiesAlg;
+    float SubtractBaseline(const std::vector<float>& holder);
+    
   protected: 
     
   }; // class CalWireROI
@@ -165,7 +170,8 @@ namespace caldata {
   
   //-------------------------------------------------
   CalWireROI::CalWireROI(fhicl::ParameterSet const& pset):
-    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
+  fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg")),
+    fROIPropertiesAlg(pset.get<fhicl::ParameterSet>("ROIPropertiesAlg"))
   {
     this->reconfigure(pset);
 
@@ -196,7 +202,9 @@ namespace caldata {
     fuPlaneRamp       = p.get< bool >                 ("uPlaneRamp");
     fFFTSize          = p.get< int  >                 ("FFTSize");
     fSaveWireWF       = p.get< int >                  ("SaveWireWF");
-    
+
+    fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
+
     fPedestalRetrievalAlg.reconfigure(p);
     
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
@@ -353,22 +361,22 @@ namespace caldata {
             //   if(SigVal > fThreshold[thePlane]) roiStart = bin;
             // }
 	    unsigned int sbin[7];
-	    if (bin>=4) {
+	    if (bin>=3) {
 	      sbin[0] = bin -3;
 	      sbin[1] = bin -2;
 	      sbin[2] = bin -1;
-	    }else if (bin>=3){
-	      sbin[0] = 1;
+	    }else if (bin>=2){
+	      sbin[0] = 0;
 	      sbin[1] = bin-2;
 	      sbin[2] = bin-1;
-	    }else if (bin>=2){
-	      sbin[0] =1;
-	      sbin[1] =1;
+	    }else if (bin>=1){
+	      sbin[0] =0;
+	      sbin[1] =0;
 	      sbin[2] = bin-1;
-	    }else{
-	      sbin[0] =1;
-	      sbin[1] =1;
-	      sbin[2] =1;
+	    }else if (bin==0) {
+	      sbin[0] =0;
+	      sbin[1] =0;
+	      sbin[2] =0;
 	    }
 	    sbin[3] = bin ; 
 	    sbin[4] = bin + 1; if (sbin[4]>dataSize-1) sbin[4] =dataSize-1;
@@ -380,7 +388,7 @@ namespace caldata {
 	    }
 	    sum = fabs(sum);
 	    //std::cout << bin << " " << sum << " " << raw_noise/sqrt(7.)*3. << std::endl;
-	    if (sum > raw_noise*sqrt(7.)*5.) roiStart = bin;
+	    if (sum > raw_noise*sqrt(7.)*6.) roiStart = bin;
 
 	  } else {
             // leaving a ROI?
@@ -430,7 +438,7 @@ namespace caldata {
         }
 
 	// if (channel==3218){
-	//   std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
+	//	std::cout << "Xin " << " " << channel << " " << rois.size() << std::endl;
 	//   for(unsigned int ii = 0; ii < rois.size(); ++ii) {
 	//     std::cout << rois[ii].first << " " << rois[ii].second << std::endl;
 	//   }
@@ -476,12 +484,12 @@ namespace caldata {
 	
 
 	for (unsigned int ir = 0; ir < rois.size(); ++ir) {
-	  unsigned int roiLen = rois[ir].second - rois[ir].first;
+	  unsigned int roiLen = rois[ir].second - rois[ir].first + 1;
 	  unsigned int roiStart = rois[ir].first;
 	  //treat FFT Size
 	  // if (channel==806)
 	  //   std::cout << roiStart << " " << roiLen << std::endl;
-	   
+	  
 
 	  int flag =1;
 	  float tempPre=0,tempPost=0;
@@ -505,12 +513,12 @@ namespace caldata {
 		holder[hBin] = rawadc[bin]-pdstl;
 	      }else{
 		holder[hBin] = rawadc[bin-dataSize]-pdstl;
-		flag = 0;
 	      }
+	      if (bin>=dataSize-1) flag = 0;
 	      ++hBin;
 	    } // bin
 
-	    //std::cout << channel << " " << flag << std::endl;
+	    //std::cout << channel << " " << roiStart << " " << flag << " " << dataSize << " " << holder.size() << " " << roiLen << std::endl;
 
 	    sss->Deconvolute(channel,holder);
 	    for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
@@ -526,7 +534,7 @@ namespace caldata {
 	    tempPre=0,tempPost=0;
 	    for(unsigned int bin = 0; bin < 20; ++bin) {
 	      tempPre  += holder[bin];
-	      tempPost += holder[roiLen - bin];
+	      tempPost += holder[roiLen -1 - bin];
 	    }
 	    tempPre = tempPre/20.;
 	    tempPost = tempPost/20.;
@@ -536,11 +544,20 @@ namespace caldata {
 	    if (fabs(tempPost-tempPre)<deconNoise){
 	      flag = 0;
 	    }else{
-	      ir++;
-	      if (ir<rois.size()){
-		roiLen = rois[ir].second - roiStart;
+	      if (tempPre > tempPost && roiStart <= 2){
+		//if (tempPre > tempPost){
+		flag = 0;
 	      }else{
-		roiLen = dataSize - roiStart;
+		ir++;
+		if (ir<rois.size()){
+		  roiLen += 100;
+		  if (roiLen >= rois[ir].first - roiStart + 1)
+		    roiLen = rois[ir].second - roiStart + 1;
+		}else{
+		  roiLen += 100;
+		  if (roiLen>dataSize-roiStart)
+		    roiLen = dataSize - roiStart;
+		}
 	      }
 	    }
 	  }
@@ -555,17 +572,24 @@ namespace caldata {
 	  unsigned int bEnd = bBegin + roiLen;
 	  float basePre = 0., basePost = 0.;
 
+	  float base=0;
 	  if(fDoBaselineSub && fPreROIPad[thePlane] > 0 ) {
 	    basePre =tempPre;
 	    basePost=tempPost;
-	    float base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
-	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
-	      sigTemp.push_back(holder[jj]-base);
-	    } // jj
+	    
+	    
+
+	    base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
+	    // if (channel==200)
+	    //   std::cout << basePre << " " << basePost << " " << roiStart << " " << roiLen << " " << dataSize << " " << base << std::endl;
 	  } // fDoBaselineSub ...
-	  else {
-	    for(unsigned int jj = bBegin; jj < bEnd; ++jj) sigTemp.push_back(holder[jj]);
-	  } // !fDoBaselineSub ...
+	  else if(fDoBaselineSub_WaveformPropertiesAlg)
+	    base = fROIPropertiesAlg.GetWaveformPedestal(holder);
+
+
+	  for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
+	    sigTemp.push_back(holder[jj]-base);
+	  } // jj
 	        
 	  // add the range into ROIVec 
 	  ROIVec.add_range(roiStart, std::move(sigTemp));

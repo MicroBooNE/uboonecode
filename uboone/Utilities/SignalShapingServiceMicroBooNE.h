@@ -179,6 +179,8 @@ namespace util {
 
     void SetResponseSampling(size_t ktype);
 
+    void SetFieldResponseTOffsets( const TH1F* resp, const size_t ktype);
+
     size_t fNPlanes;
     size_t fNViews;
 
@@ -345,3 +347,4 @@ template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute
 
 DECLARE_ART_SERVICE(util::SignalShapingServiceMicroBooNE, LEGACY)
 #endif
+
