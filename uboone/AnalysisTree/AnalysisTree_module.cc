@@ -2072,14 +2072,17 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             //<< " has " << pids.size() 
             //<< " set of ParticleID variables. Only one stored in the tree";
         //}
-        for (size_t ipl = 0; ipl < pids.size(); ++ipl){
-          TrackerData.trkpidpdg[iTrk][ipl] = pids[ipl]->Pdg();
-          TrackerData.trkpidchi[iTrk][ipl] = pids[ipl]->MinChi2();
-          TrackerData.trkpidchipr[iTrk][ipl] = pids[ipl]->Chi2Proton();
-          TrackerData.trkpidchika[iTrk][ipl] = pids[ipl]->Chi2Kaon();
-          TrackerData.trkpidchipi[iTrk][ipl] = pids[ipl]->Chi2Pion();
-          TrackerData.trkpidchimu[iTrk][ipl] = pids[ipl]->Chi2Muon();
-          TrackerData.trkpidpida[iTrk][ipl] = pids[ipl]->PIDA();
+        for (size_t ipid = 0; ipid < pids.size(); ++ipid){
+	  if (!pids[ipid]->PlaneID().isValid) continue;
+	  int planenum = pids[ipid]->PlaneID().Plane;
+	  if (planenum<0||planenum>2) continue;
+          TrackerData.trkpidpdg[iTrk][planenum] = pids[ipid]->Pdg();
+          TrackerData.trkpidchi[iTrk][planenum] = pids[ipid]->MinChi2();
+          TrackerData.trkpidchipr[iTrk][planenum] = pids[ipid]->Chi2Proton();
+          TrackerData.trkpidchika[iTrk][planenum] = pids[ipid]->Chi2Kaon();
+          TrackerData.trkpidchipi[iTrk][planenum] = pids[ipid]->Chi2Pion();
+          TrackerData.trkpidchimu[iTrk][planenum] = pids[ipid]->Chi2Muon();
+          TrackerData.trkpidpida[iTrk][planenum] = pids[ipid]->PIDA();
         }
       } // fmpid.isValid()
       
