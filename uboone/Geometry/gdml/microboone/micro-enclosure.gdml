@@ -19,7 +19,7 @@
 
   <union name="DetEnclosure">
 	<first ref="DetEnclosure0"/> <second ref="DetEnclosureAboveGrade"/>
-	<position name="posDetEnclosure2" unit="cm" x="0" y="1060/2+(29*12+5)*2.54/2-83" z="0"/>
+	<position name="posDetEnclosure3" unit="cm" x="0" y="1060/2+(29*12+5)*2.54/2-83" z="0"/>
 	<rotation name="rotDetUnion1" unit="deg" x="90" y="0" z="0"/>
   </union> 
 

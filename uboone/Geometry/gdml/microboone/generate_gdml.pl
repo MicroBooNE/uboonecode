@@ -1352,7 +1352,7 @@ sub gen_cryostat()
 <sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
  <box name="aSideBeam" lunit="cm" x="256" y="2" z="5"/>
  <box name="aTopBeam" lunit="cm" x="256" y="4*2.54" z="2.54"/>
- <box name="aSideCross" lunit="cm" x="10" y="0.75*2.54" z="43*2.54"/>
+ <box name="aSideCross0" lunit="cm" x="10" y="0.75*2.54" z="43*2.54"/>
  <box name="aTopCrossBeamA" lunit="cm" x="10" y=".75*2.54" z="49.9*2.54"/>
  <box name="aTopCrossBeamB" lunit="cm" x="10" y=".75*2.54" z="38*2.54"/>
  <box name="FrameA" x="11" y="254" z="1040" lunit="cm"/> 
@@ -1377,17 +1377,17 @@ sub gen_cryostat()
  </union>
  <union name="aTopCross1">
     <first ref="aTopBeam"/> <second ref="aTopCross0"/>
-    <rotation name="rMinus60AboutY" unit="deg" x="0" y="-30" z="0"/>
+    <rotation name="rMinus60AboutY0" unit="deg" x="0" y="-30" z="0"/>
     <position name="posaCrossBeamUnion0" unit="cm" x="64" y="0" z="111.64/2"/>
 </union>
  <union name="aTopCross2">
     <first ref="aTopCross1"/> <second ref="aTopCross0"/>
-    <rotation name="rMinus60AboutY" unit="deg" x="0" y="-30" z="0"/>
-    <position name="posaCrossBeamUnion0" unit="cm" x="-64" y="0" z="111.64/2"/>
+    <rotation name="rMinus60AboutY1" unit="deg" x="0" y="-30" z="0"/>
+    <position name="posaCrossBeamUnion1" unit="cm" x="-64" y="0" z="111.64/2"/>
 </union>
  <union name="aTopCross">
     <first ref="aTopCross2"/> <second ref="aTopBeam"/>
-    <position name="posaCrossBeamUnion1" unit="cm" x="0" y="0" z="111.64"/>
+    <position name="posaCrossBeamUnion2" unit="cm" x="0" y="0" z="111.64"/>
  </union>
 
  <union name="aTopCrossOuter0">
@@ -1407,27 +1407,27 @@ sub gen_cryostat()
 </union>
  <union name="aTopCrossOuter">
     <first ref="aTopCrossOuter2"/> <second ref="aTopBeam"/>
-    <position name="posaCrossBeamUnion1" unit="cm" x="0" y="0" z="72"/>
+    <position name="posaCrossBeamUnion3" unit="cm" x="0" y="0" z="72"/>
 </union>
 
- <union name="aSideCross0">
-   <first ref="aSideCross"/> <second ref="aSideCross"/>
+ <union name="aSideCross1">
+   <first ref="aSideCross0"/> <second ref="aSideCross0"/>
    <rotation name="rotSideCross33AboutY" unit="deg" x="0" y="66" z="0"/>
    <position name="posaSideCrossUnion" unit="cm" x="0" y="0" z="0"/>
  </union>
- <union name="aSideCross1">
-    <first ref="aTopBeam"/> <second ref="aSideCross0"/>
+ <union name="aSideCross2">
+    <first ref="aTopBeam"/> <second ref="aSideCross1"/>
     <rotation name="rMinus17AboutY" unit="deg" x="0" y="-33" z="0"/>
     <position name="posaSideCrossBeamUnion0" unit="cm" x="64" y="0" z="45.63"/>
 </union>
- <union name="aSideCross2">
-    <first ref="aSideCross1"/> <second ref="aSideCross0"/>
+ <union name="aSideCross3">
+    <first ref="aSideCross2"/> <second ref="aSideCross1"/>
     <rotation name="rMinus60AboutY" unit="deg" x="0" y="-33" z="0"/>
-    <position name="posaSideCrossBeamUnion0" unit="cm" x="-64" y="0" z="45.63"/>
+    <position name="posaSideCrossBeamUnion1" unit="cm" x="-64" y="0" z="45.63"/>
 </union>
  <union name="aSideCross">
     <first ref="aSideCross2"/> <second ref="aTopBeam"/>
-    <position name="posaSideCrossBeamUnion1" unit="cm" x="0" y="0" z="45.63*2"/>
+    <position name="posaSideCrossBeamUnion2" unit="cm" x="0" y="0" z="45.63*2"/>
 </union>
 
 EOF
@@ -1681,7 +1681,7 @@ sub gen_enclosure()
 
   <union name="DetEnclosure">
 	<first ref="DetEnclosure0"/> <second ref="DetEnclosureAboveGrade"/>
-	<position name="posDetEnclosure2" unit="cm" x="0" y="$DetEnclosureHeight/2+(29*12+5)*2.54/2-83" z="0"/>
+	<position name="posDetEnclosure3" unit="cm" x="0" y="$DetEnclosureHeight/2+(29*12+5)*2.54/2-83" z="0"/>
 	<rotation name="rotDetUnion1" unit="deg" x="90" y="0" z="0"/>
   </union> 
 
@@ -2305,7 +2305,7 @@ sub gen_enclosureExtras()
 
   <subtraction name="PlatformSpace">
 	<first ref="PlatformSpace0"/> <second ref="PlatformOLDbig"/>
-	<position name="posPlatformSub1" unit="cm" x="(45+9)*2.54" y="-30*2.54" z="0"/>
+	<position name="posPlatformSub2" unit="cm" x="(45+9)*2.54" y="-30*2.54" z="0"/>
   </subtraction> 
 
  <box name="IBeam53_0" lunit="cm" x="9.995*2.54 -0.1" y="(22*12+6)*2.54-0.1" z="12.06*2.54-0.1"/>
@@ -2553,7 +2553,7 @@ EOF
       <physvol>
         <volumeref ref="volIBeam40"/>
         <position name="posIbeam40neg$i" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(-24.5-49*$i)*2.54"/>
-        <rotation name="rPlus90Z90X40pos$i" unit="deg" x="90" y="0" z="90"/>
+        <rotation name="rPlus90Z90X40neg$i" unit="deg" x="90" y="0" z="90"/>
       </physvol>
       <physvol>
         <volumeref ref="volIBeam17"/>
@@ -2594,12 +2594,12 @@ EOF
       <physvol>
         <volumeref ref="volIBeam53"/>
         <position name="posIBeam53pos$j" unit="cm" x="(-1)**$j*((9*12+2-9.995/2)*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="(23*12/2-5)*2.54"/>
-        <rotation name="rPlus90Z90X90Ypos53$i" unit="deg" x="90" y="0" z="0"/>
+        <rotationref ref="rPlus90AboutX"/>
       </physvol>
       <physvol>
         <volumeref ref="volIBeam53"/>
         <position name="posIBeam53neg$j" unit="cm" x="(-1)**$j*((9*12+2-9.995/2)*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-(23*12/2-5)*2.54"/>
-        <rotation name="rPlus90Z90X90Yneg53$i" unit="deg" x="90" y="0" z="0"/>
+        <rotationref ref="rPlus90AboutX"/>
       </physvol>
       <physvol>
         <volumeref ref="volIBeam16"/>
