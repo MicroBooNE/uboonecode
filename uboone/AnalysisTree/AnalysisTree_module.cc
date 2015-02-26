@@ -432,6 +432,7 @@ namespace microboone {
     std::vector<Int_t>    pdg;
     std::vector<Int_t>    status;    
     std::vector<Float_t>  Eng;
+    std::vector<Float_t>  EndE;
     std::vector<Float_t>  Mass;
     std::vector<Float_t>  Px;
     std::vector<Float_t>  Py;
@@ -1200,6 +1201,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(status, -99999);
   FillWith(Mass, -99999.);
   FillWith(Eng, -99999.);
+  FillWith(EndE, -99999.);
   FillWith(Px, -99999.);
   FillWith(Py, -99999.);
   FillWith(Pz, -99999.);
@@ -1293,6 +1295,7 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   status.resize(MaxGEANTparticles);
   Mass.resize(MaxGEANTparticles);  
   Eng.resize(MaxGEANTparticles);
+  EndE.resize(MaxGEANTparticles);
   Px.resize(MaxGEANTparticles);
   Py.resize(MaxGEANTparticles);
   Pz.resize(MaxGEANTparticles);
@@ -1498,6 +1501,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("status",status,"status[geant_list_size]/I");
     CreateBranch("Mass",Mass,"Mass[geant_list_size]/F");
     CreateBranch("Eng",Eng,"Eng[geant_list_size]/F");
+    CreateBranch("EndE",EndE,"EndE[geant_list_size]/F");
     CreateBranch("Px",Px,"Px[geant_list_size]/F");
     CreateBranch("Py",Py,"Py[geant_list_size]/F");
     CreateBranch("Pz",Pz,"Pz[geant_list_size]/F");
@@ -2068,14 +2072,17 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             //<< " has " << pids.size() 
             //<< " set of ParticleID variables. Only one stored in the tree";
         //}
-        for (size_t ipl = 0; ipl < pids.size(); ++ipl){
-          TrackerData.trkpidpdg[iTrk][ipl] = pids[ipl]->Pdg();
-          TrackerData.trkpidchi[iTrk][ipl] = pids[ipl]->MinChi2();
-          TrackerData.trkpidchipr[iTrk][ipl] = pids[ipl]->Chi2Proton();
-          TrackerData.trkpidchika[iTrk][ipl] = pids[ipl]->Chi2Kaon();
-          TrackerData.trkpidchipi[iTrk][ipl] = pids[ipl]->Chi2Pion();
-          TrackerData.trkpidchimu[iTrk][ipl] = pids[ipl]->Chi2Muon();
-          TrackerData.trkpidpida[iTrk][ipl] = pids[ipl]->PIDA();
+        for (size_t ipid = 0; ipid < pids.size(); ++ipid){
+	  if (!pids[ipid]->PlaneID().isValid) continue;
+	  int planenum = pids[ipid]->PlaneID().Plane;
+	  if (planenum<0||planenum>2) continue;
+          TrackerData.trkpidpdg[iTrk][planenum] = pids[ipid]->Pdg();
+          TrackerData.trkpidchi[iTrk][planenum] = pids[ipid]->MinChi2();
+          TrackerData.trkpidchipr[iTrk][planenum] = pids[ipid]->Chi2Proton();
+          TrackerData.trkpidchika[iTrk][planenum] = pids[ipid]->Chi2Kaon();
+          TrackerData.trkpidchipi[iTrk][planenum] = pids[ipid]->Chi2Pion();
+          TrackerData.trkpidchimu[iTrk][planenum] = pids[ipid]->Chi2Muon();
+          TrackerData.trkpidpida[iTrk][planenum] = pids[ipid]->PIDA();
         }
       } // fmpid.isValid()
       
@@ -2300,6 +2307,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             fData->pdg[iPart]=pPart->PdgCode();
             fData->status[iPart] = pPart->StatusCode();
             fData->Eng[iPart]=pPart->E();
+	    fData->EndE[iPart]=pPart->EndE();
             fData->Mass[iPart]=pPart->Mass();
             fData->Px[iPart]=pPart->Px();
             fData->Py[iPart]=pPart->Py();
