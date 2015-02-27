@@ -93,7 +93,7 @@ my $pmt_switch="on";		#turn on or off depending on pmts wanted
 my $NumberOfTestBoxes=30;
 my $granite_block="off";
 my $enclosureExtras="on";       #turn on or off depending on whether you'd like to generate the external things around the cryostat (ie. insulation, platform, stands, etc.) in the gdml file
-my $vetoWall_switch="off";  #turn on or off a proposed scintillator wall infront of the cryostat
+my $vetoWall_switch="on";  #turn on or off a proposed scintillator wall infront of the cryostat
 
 
 # The routines that create the GDML sub-files. Most of the explanatory
