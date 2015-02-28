@@ -32,7 +32,7 @@ table_fragment_end
 
 product          version
 larsoft         v04_01_00
-ubutil          v01_13_03
+ubutil          v01_13_04
 uboone_data     v01_01_00
 postgresql      v9_1_14
 gcc		v4_9_1
