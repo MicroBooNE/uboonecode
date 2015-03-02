@@ -40,6 +40,9 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+// art extensions
+#include "artextensions/SeedService/SeedService.hh"
+
 // LArSoft libraries
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
@@ -162,12 +165,12 @@ namespace detsim {
     TString compression(pset.get< std::string >("CompressionType"));
     if(compression.Contains("Huffman",TString::kIgnoreCase)) fCompression = raw::kHuffman;
 
-    // get the random number seed, use a random default if not specified
-    // in the configuration file.
-    unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
-
-
-    createEngine(seed);
+    // create a default random engine; obtain the random seed from SeedService,
+    // unless overridden in configuration with key "Seed" and "SeedPedestal"
+    art::ServiceHandle<artext::SeedService> Seeds;
+    Seeds->createEngine(*this, "HepJamesRandom", "noise", pset, "Seed");
+    Seeds->createEngine(*this, "HepJamesRandom", "pedestal", pset, "SeedPedestal");
+    
   }
 
   //-------------------------------------------------
@@ -557,7 +560,7 @@ namespace detsim {
       float ped_mean = 0.0, ped_rms = 0.0; 
       fPedestalRetrievalAlg.GetPedestal(chan, ped_mean, ped_rms);
       art::ServiceHandle<art::RandomNumberGenerator> rng;
-      CLHEP::HepRandomEngine &engine = rng->getEngine();
+      CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");
       CLHEP::RandGaussQ rGaussPed(engine, 0.0, ped_rms);
       ped_mean += rGaussPed.fire();
       
@@ -640,7 +643,7 @@ namespace detsim {
   {
     //ART random number service
     art::ServiceHandle<art::RandomNumberGenerator> rng;
-    CLHEP::HepRandomEngine &engine = rng->getEngine();
+    CLHEP::HepRandomEngine &engine = rng->getEngine("noise");
     CLHEP::RandGaussQ rGauss(engine, 0.0, fNoiseFact);
 
     //In this case fNoiseFact is a value in ADC counts
@@ -656,7 +659,7 @@ namespace detsim {
   void SimWireMicroBooNE::GenNoiseInFreq(std::vector<float> &noise)
   {
     art::ServiceHandle<art::RandomNumberGenerator> rng;
-    CLHEP::HepRandomEngine &engine = rng->getEngine();
+    CLHEP::HepRandomEngine &engine = rng->getEngine("noise");
     CLHEP::RandFlat flat(engine,-1,1);
 
     if(noise.size() != fNTicks)
