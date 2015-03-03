@@ -21,6 +21,7 @@ services.user.DatabaseUtil.ShouldConnect: false
 source:
 {
   module_type: EmptyEvent
+  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
   maxEvents:   0       # Number of events to create
 }
 

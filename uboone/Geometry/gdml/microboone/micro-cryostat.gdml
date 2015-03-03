@@ -14,7 +14,105 @@
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
+
+
 <sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
+ <box name="aSideBeam" lunit="cm" x="256" y="2" z="5"/>
+ <box name="aTopBeam" lunit="cm" x="256" y="4*2.54" z="2.54"/>
+ <box name="aSideCross0" lunit="cm" x="10" y="0.75*2.54" z="43*2.54"/>
+ <box name="aTopCrossBeamA" lunit="cm" x="10" y=".75*2.54" z="49.9*2.54"/>
+ <box name="aTopCrossBeamB" lunit="cm" x="10" y=".75*2.54" z="38*2.54"/>
+ <box name="FrameA" x="11" y="254" z="1040" lunit="cm"/> 
+ <box name="FrameB" x="11.1" y="86*2.54" z="1003.52" lunit="cm"/>
+ <box name="VertBar" x="2.5*2.54" y="86*2.54" z="2.5*2.54" lunit="cm"/>
+ <box name="CrossBeamA" lunit="cm" x="9" y="301.12" z="7"/>
+
+<subtraction name="Frame0">
+<first ref="FrameA"/> <second ref="FrameB"/>
+<position name="posFrameSubtraction" x="0" y="0" z="0"/>
+</subtraction> 
+
+<union name="CrossBeam">
+   <first ref="CrossBeamA"/> <second ref="CrossBeamA"/>
+   <rotation name="CrossBeam93rot" unit="deg" x="93" y="0" z="0"/>
+   <position name="posCrossBeamUnion0" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="aTopCross0">
+   <first ref="aTopCrossBeamA"/> <second ref="aTopCrossBeamA"/>
+   <rotationref ref="rPlus60AboutY"/>
+   <position name="posaTopCrossUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="aTopCross1">
+    <first ref="aTopBeam"/> <second ref="aTopCross0"/>
+    <rotation name="rMinus60AboutY0" unit="deg" x="0" y="-30" z="0"/>
+    <position name="posaCrossBeamUnion0" unit="cm" x="64" y="0" z="111.64/2"/>
+</union>
+ <union name="aTopCross2">
+    <first ref="aTopCross1"/> <second ref="aTopCross0"/>
+    <rotation name="rMinus60AboutY1" unit="deg" x="0" y="-30" z="0"/>
+    <position name="posaCrossBeamUnion1" unit="cm" x="-64" y="0" z="111.64/2"/>
+</union>
+ <union name="aTopCross">
+    <first ref="aTopCross2"/> <second ref="aTopBeam"/>
+    <position name="posaCrossBeamUnion2" unit="cm" x="0" y="0" z="111.64"/>
+ </union>
+
+ <union name="aTopCrossOuter0">
+   <first ref="aTopCrossBeamB"/> <second ref="aTopCrossBeamB"/>
+   <rotation name="rPlus76AboutY" unit="deg" x="0" y="76" z="0" />
+   <position name="posaTopCrossOutUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="aTopCrossOuter1">
+    <first ref="aTopBeam"/> <second ref="aTopCrossOuter0"/>
+    <position name="posaCrossOuterUnion0" unit="cm" x="64" y="0" z="36"/>
+    <rotation name="rotTopCross1" unit="deg" x="0" y="-38" z="0"/>
+</union>
+ <union name="aTopCrossOuter2">
+    <first ref="aTopCrossOuter1"/> <second ref="aTopCrossOuter0"/>
+    <position name="posaCrossOuterUnion1" unit="cm" x="-64" y="0" z="36"/>
+    <rotation name="rotTopCross2" unit="deg" x="0" y="-38" z="0"/>
+</union>
+ <union name="aTopCrossOuter">
+    <first ref="aTopCrossOuter2"/> <second ref="aTopBeam"/>
+    <position name="posaCrossBeamUnion3" unit="cm" x="0" y="0" z="72"/>
+</union>
+
+ <union name="aSideCross1">
+   <first ref="aSideCross0"/> <second ref="aSideCross0"/>
+   <rotation name="rotSideCross33AboutY" unit="deg" x="0" y="66" z="0"/>
+   <position name="posaSideCrossUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="aSideCross2">
+    <first ref="aTopBeam"/> <second ref="aSideCross1"/>
+    <rotation name="rMinus17AboutY" unit="deg" x="0" y="-33" z="0"/>
+    <position name="posaSideCrossBeamUnion0" unit="cm" x="64" y="0" z="45.63"/>
+</union>
+ <union name="aSideCross3">
+    <first ref="aSideCross2"/> <second ref="aSideCross1"/>
+    <rotation name="rMinus60AboutY" unit="deg" x="0" y="-33" z="0"/>
+    <position name="posaSideCrossBeamUnion1" unit="cm" x="-64" y="0" z="45.63"/>
+</union>
+ <union name="aSideCross">
+    <first ref="aSideCross2"/> <second ref="aTopBeam"/>
+    <position name="posaSideCrossBeamUnion2" unit="cm" x="0" y="0" z="45.63*2"/>
+</union>
+
+ <union name="Frame1">
+    <first ref="Frame0"/> <second ref="VertBar"/>
+    <position name="posVertBarUnion1" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*0"/>
+ </union>
+ <union name="Frame2">
+    <first ref="Frame1"/> <second ref="VertBar"/>
+    <position name="posVertBarUnion2" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*1"/>
+ </union>
+ <union name="Frame3">
+    <first ref="Frame2"/> <second ref="VertBar"/>
+    <position name="posVertBarUnion3" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*2"/>
+ </union>
+ <union name="Frame4">
+    <first ref="Frame3"/> <second ref="VertBar"/>
+    <position name="posVertBarUnion4" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*3"/>
+ </union>
 </solids>
 
 <structure>
@@ -26,6 +124,31 @@
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="SteelTube"/>
  </volume>
+<volume name="volaTopBeam">
+    <materialref ref="G10"/>
+    <solidref ref="aTopBeam"/>
+ </volume>
+<volume name="volaTopCross">
+    <materialref ref="G10"/>
+    <solidref ref="aTopCross"/>
+ </volume>
+<volume name="volaTopCrossOuter">
+    <materialref ref="G10"/>
+    <solidref ref="aTopCrossOuter"/>
+ </volume>
+<volume name="volaSideCross">
+    <materialref ref="G10"/>
+    <solidref ref="aSideCross"/>
+ </volume>
+<volume name="volFrame">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Frame4"/>
+ </volume>
+<volume name="volCrossBeam">
+   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+   <solidref ref="CrossBeam"/>
+ </volume>
+
  <volume name="volCryostat">
   <materialref ref="LAr"/>
   <solidref ref="Cryostat"/>
@@ -41,7 +164,62 @@
     <volumeref ref="volEndCap"/>
     <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
     <rotationref ref="rPlus180AboutY"/>
-  </physvol> 
+  </physvol>
+ <physvol>
+    <volumeref ref="volFrame"/>
+    <position name="posFrame2" unit="cm" x="-256/2-8" y="0" z="0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaSideCross"/>
+      <position name="posaSideCross1" unit="cm" x="0" y="-45.63" z="1050.19/2+5"/>
+      <rotationref ref="rPlus90AboutX"/> 
+  </physvol>
+  <physvol>
+      <volumeref ref="volaSideCross"/>
+      <position name="posaSideCross2" unit="cm" x="0" y="-45.63" z="-1050.19/2-5"/>
+      <rotationref ref="rPlus90AboutX"/> 
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCross"/>
+      <position name="posaTopCross0" unit="cm" x="0" y="256/2+2.5*2.54" z="-5/2*111.64 + 2*111.64*0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCross"/>
+      <position name="posaBottomCross0" unit="cm" x="0" y="-256/2-2.5*2.54" z="-5/2*111.64 +2*111.64*0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCross"/>
+      <position name="posaTopCross1" unit="cm" x="0" y="256/2+2.5*2.54" z="-5/2*111.64 + 2*111.64*1"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCross"/>
+      <position name="posaBottomCross1" unit="cm" x="0" y="-256/2-2.5*2.54" z="-5/2*111.64 +2*111.64*1"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCross"/>
+      <position name="posaTopCross2" unit="cm" x="0" y="256/2+2.5*2.54" z="-5/2*111.64 + 2*111.64*2"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCross"/>
+      <position name="posaBottomCross2" unit="cm" x="0" y="-256/2-2.5*2.54" z="-5/2*111.64 +2*111.64*2"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCrossOuter"/>
+      <position name="posaTopCrossOuter0" unit="cm" x="0" y="256/2+2.5*2.54" z="-4*111.64 + 15/2*111.64*0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCrossOuter"/>
+      <position name="posaBottomCrossOuter0" unit="cm" x="0" y="-256/2-2.5*2.54" z="-4*111.64 + 15/2*111.64*0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCrossOuter"/>
+      <position name="posaTopCrossOuter1" unit="cm" x="0" y="256/2+2.5*2.54" z="-4*111.64 + 15/2*111.64*1"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCrossOuter"/>
+      <position name="posaBottomCrossOuter1" unit="cm" x="0" y="-256/2-2.5*2.54" z="-4*111.64 + 15/2*111.64*1"/>
+  </physvol>
+
   <physvol>
    <volumeref ref="volTPC"/>
    <position name="posTPC" unit="cm" x="0.0" y="0.97" z="0"/>

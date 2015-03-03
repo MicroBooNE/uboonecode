@@ -3,7 +3,7 @@ BEGIN_PROLOG
 microboone_geo:
 {
  SurfaceY:        6.9e2                           #in cm, vertical distance to the surface
- Name:            "microboone"
+ Name:            "microboonev4"
  GDML:            "microboonev4.gdml"
  ROOT:            "microboonev4.gdml"
  DisableWiresInG4: true                           # Whether to use wirefree geometry in LArG4

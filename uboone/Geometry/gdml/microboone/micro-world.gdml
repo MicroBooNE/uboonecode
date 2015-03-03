@@ -113,8 +113,7 @@
    lunit="cm"
    aunit="deg"/>
   <tube name="Overburden"
-    rmin="0"
-    rmax="584*2.54"
+    rmax="292*2.54"
     z="10*12*2.54"
     deltaphi="360" 
     lunit="cm"
@@ -199,7 +198,7 @@
      <solidref ref="GroundBottom" />
    </volume>
   <volume name="volOverburden" >
-    <materialref ref="Dirt" />
+    <materialref ref="Concrete" />
     <solidref ref="Overburden" />
   </volume>
   <volume name="volPolystyreneEnclosure" >
@@ -340,11 +339,11 @@
       <position name="posGroundBottom" unit="cm" x="0.5*256.35" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>  
-    <!--physvol>
+  <!-- <physvol>
       <volumeref ref="volOverburden"/>
-      <position name="posOverburden" unit="cm" x="0.5*256.35" y="(41-10)*12*2.54/2" z="0.5*1037"/>
+      <position name="posOverburden" unit="cm" x="0.5*256.35" y="32.50000555*12*2.54+22.86 +127*2.54+285" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol-->
+    </physvol>-->
     <physvol>
       <volumeref ref="volDetEnclosure"/>
       <position name="posDetEnclosure" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
