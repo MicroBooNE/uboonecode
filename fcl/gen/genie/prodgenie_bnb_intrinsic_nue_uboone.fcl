@@ -2,7 +2,7 @@
 
 process_name: GenieGen
 
-outputs.out1.fileName: "prodgenie_bnb_nu_uboone_%tc_gen.root"
+outputs.out1.fileName: "prodgenie_bnb_intrinsic_nue_uboone_%tc_gen.root"
 
 physics.producers.generator: @local::microboone_genie_simple
 physics.producers.generator.GlobalTimeOffset: 0.
