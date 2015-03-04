@@ -1,6 +1,7 @@
 #include "services_microboone.fcl"
 #include "caldata_microboone.fcl"
 #include "hitfindermodules_microboone.fcl"
+#include "mchitmodules.fcl"
 #include "cluster_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "vertexfindermodules.fcl"
@@ -52,6 +53,7 @@ physics:
   ### hit-finder producers
   gaushit:             @local::microboone_gaushitfinder
   rffhit:              @local::microboone_rffhitfinder
+  mchit:               @local::standard_mchitfinder
 
   ### corner-finder
   corner:              @local::standard_cornerfinder    
@@ -71,6 +73,7 @@ physics:
          opflash,
          caldata, 
          gaushit, #rffhit,
+         mchit,
          fuzzycluster, cccluster,
          pandora ]
 
@@ -105,6 +108,8 @@ outputs:
 
 physics.producers.opflash.InputModule:                          "optreadout"
 physics.producers.opflash.GenModule:                            "generator"
+
+physics.producers.mchit.LArG4ModuleName:                        "largeant"
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 
