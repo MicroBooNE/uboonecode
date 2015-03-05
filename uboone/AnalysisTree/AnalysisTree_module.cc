@@ -2300,6 +2300,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           if (plen) active++;
 
           if (iPart < fData->GetMaxGEANTparticles()) {
+	   if (pPart->E()>0.01){
             fData->process_primary[iPart] = int(isPrimary);
             fData->processname[iPart]= pPart->Process();
             fData->Mother[iPart]=pPart->Mother();
@@ -2336,7 +2337,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               fData->EndPointy_tpcAV[iPart] = mcend.Y();
               fData->EndPointz_tpcAV[iPart] = mcend.Z();
             }		       
-            
+           } 
             //access auxiliary detector parameters
             if (fSaveAuxDetInfo) {
               unsigned short nAD = 0; // number of cells that particle hit
