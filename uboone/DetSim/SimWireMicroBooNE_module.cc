@@ -266,12 +266,12 @@ namespace detsim {
     fNTicks = fFFT->FFTSize();
 
     if ( fNTicks%2 != 0 )
-      LOG_DEBUG("SimWireMicroBooNE") << "Warning: FFTSize not a power of 2. "
+      LOG_DEBUG("SimWireMicroBooNE") << "Warning: FFTSize " << fNTicks << " not a power of 2. "
       << "May cause issues in (de)convolution.\n";
 
     if ( fNTimeSamples > fNTicks )
       mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
-      << "greater than FFTSize!";
+					<< fNTimeSamples << " greater than FFTSize " << fNTicks << "!";
 
 
     if(fTest){
@@ -310,6 +310,20 @@ namespace detsim {
 
   void SimWireMicroBooNE::produce(art::Event& evt)
   {
+
+
+    art::ServiceHandle<util::LArFFT> fFFT;
+    fFFT->ReinitializeFFT(fNTimeSamples,fFFT->FFTOptions(),fFFT->FFTFitBins());
+    fNTicks = fFFT->FFTSize();
+
+    if ( fNTicks%2 != 0 )
+      LOG_DEBUG("SimWireMicroBooNE") << "Warning: FFTSize " << fNTicks << " not a power of 2. "
+      << "May cause issues in (de)convolution.\n";
+
+    if ( fNTimeSamples > fNTicks )
+      mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
+					<< fNTimeSamples << " greater than FFTSize " << fNTicks << "!";
+
 
     art::ServiceHandle<art::TFileService> tfs;
 
@@ -380,7 +394,7 @@ namespace detsim {
 
     _wr = 0;
     unsigned int chan = 0;
-    art::ServiceHandle<util::LArFFT> fFFT;
+    //art::ServiceHandle<util::LArFFT> fFFT;
 
     //std::vector<std::vector<std::vector<ResponseParams* > > > responseParamsVec(fNChannels);
     std::vector<std::vector<std::vector<std::unique_ptr<ResponseParams> > > > responseParamsVec(fNChannels);

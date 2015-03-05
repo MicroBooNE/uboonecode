@@ -236,7 +236,7 @@ namespace caldata {
     // std::string options = fFFT->FFTOptions();
     // int fitbins = fFFT->FFTFitBins();
     // fFFT->ReinitializeFFT(fFFTSize, options, fitbins);
-    reconfFFT(fFFTSize);
+    //reconfFFT(fFFTSize);
     
   }
 
@@ -244,6 +244,9 @@ namespace caldata {
   void CalWireROI::reconfFFT(int temp_fftsize){
     // re-initialize the FFT service for the request size
     art::ServiceHandle<util::LArFFT> fFFT;
+
+    if(fFFT->FFTSize() >= temp_fftsize) return;
+
     std::string options = fFFT->FFTOptions();
     int fitbins = fFFT->FFTFitBins();
     fFFT->ReinitializeFFT(temp_fftsize, options, fitbins);
@@ -268,7 +271,8 @@ namespace caldata {
 
     // get the FFT service to have access to the FFT size
     art::ServiceHandle<util::LArFFT> fFFT;
-  
+    reconfFFT(fFFTSize);
+    
     
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);

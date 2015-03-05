@@ -80,6 +80,7 @@ larana : lardata : Utilities/VectorMap.h
 larana : larevt : Filters/ChannelFilter.h
 larana : larreco : RecoAlg/SpacePointAlg.h
 larana : larsim : MCCheater/BackTracker.h
+larana : larsim : MCSTReco/MCTrackCollectionAnaAlg.h
 larana : larsim : PhotonPropagation/PhotonVisibilityService.h
 larana : larsim : Simulation/BeamGateInfo.h
 larana : larsim : Simulation/BeamTypes.h
@@ -628,7 +629,6 @@ larreco : lardata : Utilities/LArFFT.h
 larreco : lardata : Utilities/LArProperties.h
 larreco : lardata : Utilities/PxHitConverter.h
 larreco : lardata : Utilities/PxUtils.h
-larreco : lardata : Utilities/SeedCreator.h
 larreco : lardata : Utilities/SimpleTimeService.h
 larreco : lardata : Utilities/StatCollector.h
 larreco : lardata : Utilities/SumSecondFunction.h
@@ -860,6 +860,7 @@ larsim : larsim : LArG4/LArStackingAction.h
 larsim : larsim : LArG4/LArVoxelReadout.h
 larsim : larsim : LArG4/LArVoxelReadoutGeometry.h
 larsim : larsim : LArG4/MaterialPropertyLoader.h
+larsim : larsim : LArG4/MergeSimSources.h
 larsim : larsim : LArG4/MuNuclearSplittingProcess.h
 larsim : larsim : LArG4/MuNuclearSplittingProcessXSecBias.h
 larsim : larsim : LArG4/NestAlg.h
@@ -880,6 +881,7 @@ larsim : larsim : MCSTReco/MCRecoEdep.h
 larsim : larsim : MCSTReco/MCRecoPart.h
 larsim : larsim : MCSTReco/MCShowerRecoAlg.h
 larsim : larsim : MCSTReco/MCShowerRecoPart.h
+larsim : larsim : MCSTReco/MCTrackCollectionAnaAlg.h
 larsim : larsim : MCSTReco/MCTrackRecoAlg.h
 larsim : larsim : PhotonPropagation/PhotonLibrary.h
 larsim : larsim : PhotonPropagation/PhotonVisibilityService.h
@@ -992,6 +994,7 @@ uboonecode : larsim : Simulation/SimPhotons.h
 uboonecode : larsim : Simulation/sim.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg_CalibrationPulseFinder.h
+uboonecode : uboonecode : uboone/CalData/ROIAlg_DigitAboveBaseline.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg_DigitAboveThreshold.h
 uboonecode : uboonecode : uboone/CalData/RawDigitAndWireComparisonAlg.h
 uboonecode : uboonecode : uboone/CalData/WaveformPropertiesAlg.h

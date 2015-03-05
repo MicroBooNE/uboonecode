@@ -40306,45 +40306,73 @@
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack1" unit="cm" x="-75" y="408.91+104.1" z="0"/>
+        <position name="posRack1" unit="cm" x="-75" y="408.91+104.1" z="0+100+20"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack2" unit="cm" x="-75" y="408.91+104.1" z="93.85"/>
+        <position name="posRack2" unit="cm" x="-75" y="408.91+104.1" z="93.85+100+20"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack3" unit="cm" x="-75" y="408.91+104.1" z="187.7"/>
+        <position name="posRack3" unit="cm" x="-75" y="408.91+104.1" z="187.7+100+90"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack4" unit="cm" x="-75" y="408.91+104.1" z="275.15"/>
+        <position name="posRack4" unit="cm" x="-75" y="408.91+104.1" z="275.15+100+70"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack5" unit="cm" x="-75" y="408.91+104.1" z="-142.15"/>
+        <position name="posRack5" unit="cm" x="-75" y="408.91+104.1" z="-142.15+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack6" unit="cm" x="-75" y="408.91+104.1" z="-243.8"/>
+        <position name="posRack6" unit="cm" x="-75" y="408.91+104.1" z="-243.8+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack7" unit="cm" x="-75" y="408.91+104.1" z="-326.9"/>
+        <position name="posRack7" unit="cm" x="-75" y="408.91+104.1" z="-326.9+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack8" unit="cm" x="127.9" y="408.91+104.1" z="-326.9"/>
+        <position name="posRack8" unit="cm" x="127.9" y="408.91+104.1" z="-326.9+122"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack9" unit="cm" x="127.9" y="408.91+104.1" z="-387.7"/>
+        <position name="posRack10" unit="cm" x="127.9" y="408.91+104.1" z="-326.9+150+40"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack10" unit="cm" x="53.07" y="408.91+104.1" z="335.85"/>
+        <position name="posRack11" unit="cm" x="100" y="408.91+104.1" z="-387.7-40"/>
         <rotationref ref="rPlus90AboutY"/>
       </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack12" unit="cm" x="105" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack13" unit="cm" x="40" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack14" unit="cm" x="-75" y="408.91+104.1" z="270+40"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack15" unit="cm" x="145" y="408.91+104.1" z="-142.15+100"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="190"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack17" unit="cm" x="-160" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>
+
       <physvol>
          <volumeref ref="volFloorTankBox1"/>
          <position name="posfloortankbox1" unit="cm" x="-450" y="100+.001-530" z="335.28"/>
