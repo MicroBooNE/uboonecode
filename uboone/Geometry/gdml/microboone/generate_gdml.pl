@@ -115,7 +115,7 @@ if ( $granite_block eq "on" ) {  gen_granite(); } # physical volumes defined in 
 #gen_testbox();
 if ( $enclosureExtras eq "on" ) {  gen_enclosureExtras(); } #generation of insulation, etc. will happen if specified
 gen_cryostat();
-if ( $vetoWall_switch eq "on" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
+if ( $vetoWall_switch eq "off" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
 
 gen_enclosure();
 gen_world();
@@ -1801,13 +1801,13 @@ EOF
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="190"/>
+        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="170"/>
       </physvol>
-      <physvol>
+  <!--    <physvol>
         <volumeref ref="volRack"/>
         <position name="posRack17" unit="cm" x="-160" y="408.91+104.1" z="387.7+150+60.8"/>
         <rotationref ref="rPlus90AboutY"/>
-      </physvol>
+      </physvol>-->
 
       <physvol>
          <volumeref ref="volFloorTankBox1"/>

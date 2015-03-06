@@ -135,13 +135,13 @@
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="190"/>
+        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="170"/>
       </physvol>
-      <physvol>
+  <!--    <physvol>
         <volumeref ref="volRack"/>
         <position name="posRack17" unit="cm" x="-160" y="408.91+104.1" z="387.7+150+60.8"/>
         <rotationref ref="rPlus90AboutY"/>
-      </physvol>
+      </physvol>-->
 
       <physvol>
          <volumeref ref="volFloorTankBox1"/>
