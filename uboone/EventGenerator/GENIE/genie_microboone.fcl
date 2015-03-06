@@ -51,10 +51,7 @@ microboone_genie_simple_numi.GlobalTimeOffset:  1.6e6
 microboone_genie_simple_numi.POTPerSpill:       3e13
 microboone_genie_simple_numi.EventsPerSpill:    0
 microboone_genie_simple_numi.FluxType:       "simple_flux"
-microboone_genie_simple_numi.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/normal_window/*.root",
-					      "numi_gsimple_fluxes_02.27.2014/length_window/*.root",
-					      "numi_gsimple_fluxes_02.27.2014/bottom_window/*.root"]
-					      
+microboone_genie_simple_numi.FluxFiles:      ["uboonebeam/numi_gsimple_fluxes_02.09.2015_470/gsimple_*.root"]					      
  
 microboone_genie_simple_numi_dirt:                   @local::microboone_genie_simple_numi
 microboone_genie_simple_numi_dirt.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/normal_window_dirt/second_try/*.root",

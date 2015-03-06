@@ -60,6 +60,7 @@ install_fhicl( LIST databaseutil_microboone.fcl
 		    services_microboone.fcl
 		    services_microboone_simulation.fcl
 		    signalservices_microboone.fcl
+		    seedservice_microboone.fcl
 		    timeservice_microboone.fcl )
 install_source()
 

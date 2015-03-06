@@ -19,9 +19,6 @@ services:
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_detsim_services
 }
-services.user.Geometry.Name: "microboonev4_auxdet"
-services.user.Geometry.GDML: "microboonev4_auxdet.gdml"
-services.user.Geometry.ROOT: "microboonev4_auxdet.gdml"
 
 #source is now a root file
 source:

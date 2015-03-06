@@ -294,7 +294,7 @@ namespace microboone {
       void SetMaxTracks(size_t maxTracks)
         { MaxTracks = maxTracks; Resize(MaxTracks); }
       void Resize(size_t nTracks);
-      void SetAddresses(TTree* pTree, std::string tracker);
+      void SetAddresses(TTree* pTree, std::string tracker, bool isCosmics);
       
       size_t GetMaxTracks() const { return MaxTracks; }
       size_t GetMaxPlanesPerTrack(int /* iTrack */ = 0) const
@@ -544,7 +544,7 @@ namespace microboone {
     void ResizeCry(int nPrimaries);
     
     /// Connect this object with a tree
-    void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
+    void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers, bool isCosmics);
     
     
     /// Returns the number of trackers for which data structures are allocated
@@ -703,6 +703,9 @@ namespace microboone {
     std::vector<std::string> fCosmicTaggerAssocLabel;
     std::vector<std::string> fFlashMatchAssocLabel;
 
+    bool isCosmics;      ///< if it contains cosmics
+    bool fSaveCaloCosmics; ///< save calorimetry information for cosmics
+    float fG4minE;         ///< Energy threshold to save g4 particle info
     /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
        
@@ -729,7 +732,7 @@ namespace microboone {
     void SetAddresses()
       {
         CheckData("SetAddress()"); CheckTree("SetAddress()");
-        fData->SetAddresses(fTree, fTrackModuleLabel);
+        fData->SetAddresses(fTree, fTrackModuleLabel, isCosmics);
       } // SetAddresses()
     
     /// Sets the addresses of all the tree branches of the specified tracking algo,
@@ -743,7 +746,7 @@ namespace microboone {
             << " (" << fData->GetNTrackers() << " available)";
         }
         fData->GetTrackerData(iTracker) \
-          .SetAddresses(fTree, fTrackModuleLabel[iTracker]);
+          .SetAddresses(fTree, fTrackModuleLabel[iTracker], isCosmics);
       } // SetTrackerAddresses()
     
     /// Create the output tree and the data structures, if needed
@@ -941,7 +944,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
 
 
 void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
-  TTree* pTree, std::string tracker
+  TTree* pTree, std::string tracker, bool isCosmics
 ) {
   if (MaxTracks == 0) return; // no tracks, no tree!
   
@@ -1018,18 +1021,20 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   BranchName = "ntrkhits_" + TrackLabel;
   CreateBranch(BranchName, ntrkhits, BranchName + NTracksIndexStr + "[3]/S");
   
-  BranchName = "trkdedx_" + TrackLabel;
-  CreateBranch(BranchName, trkdedx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+  if (!isCosmics){
+    BranchName = "trkdedx_" + TrackLabel;
+    CreateBranch(BranchName, trkdedx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
   
-  BranchName = "trkdqdx_" + TrackLabel;
-  CreateBranch(BranchName, trkdqdx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-  
-  BranchName = "trkresrg_" + TrackLabel;
-  CreateBranch(BranchName, trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-  
-  BranchName = "trkxyz_" + TrackLabel;
-  CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-  
+    BranchName = "trkdqdx_" + TrackLabel;
+    CreateBranch(BranchName, trkdqdx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    
+    BranchName = "trkresrg_" + TrackLabel;
+    CreateBranch(BranchName, trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    
+    BranchName = "trkxyz_" + TrackLabel;
+    CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+  }
+
   BranchName = "trkstartx_" + TrackLabel;
   CreateBranch(BranchName, trkstartx, BranchName + NTracksIndexStr + "/F");
   
@@ -1385,7 +1390,8 @@ void microboone::AnalysisTreeDataStruct::ResizeCry(int nPrimaries) {
 
 void microboone::AnalysisTreeDataStruct::SetAddresses(
   TTree* pTree,
-  const std::vector<std::string>& trackers
+  const std::vector<std::string>& trackers,
+  bool isCosmics
 ) {
   BranchCreator CreateBranch(pTree);
 
@@ -1431,7 +1437,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 
       // note that if the tracker data has maximum number of tracks 0,
       // nothing is initialized (branches are not even created)
-      TrackData[i].SetAddresses(pTree, TrackLabel);    
+      TrackData[i].SetAddresses(pTree, TrackLabel, isCosmics);    
     } // for trackers
   } 
 
@@ -1593,7 +1599,10 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
-  fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ) 
+  fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
+  isCosmics(false),
+  fSaveCaloCosmics          (pset.get< bool >("SaveCaloCosmics",false)),
+  fG4minE                   (pset.get< float>("G4minE",0.01))
 {
   if (fSaveAuxDetInfo == true) fSaveGeantInfo = true;
   mf::LogInfo("AnalysisTree") << "Configuration:"
@@ -1699,37 +1708,44 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (isMC) { //is MC
     // GENIE
     if (!mclist.empty()){//at least one mc record
-      if (fSaveGenieInfo){
+      //if (fSaveGenieInfo){
         //if (mclist[0]->NeutrinoSet()){//is neutrino
         //sometimes there can be multiple neutrino interactions in one spill
         //this is trying to find the primary interaction
         //by looking for the highest energy deposition
-        std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
-        for (size_t i = 0; i<hitlist.size(); i++){
-          //if (hitlist[i]->View() == geo::kV){//collection view
-          std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
-          for (size_t e = 0; e<eveIDs.size(); e++){
-            art::Ptr<simb::MCTruth> ev_mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
-            mctruthemap[ev_mctruth]+=eveIDs[e].energy;
-          }
-        //}
-        }
-        double maxenergy = -1;
-        int imc0 = 0;
-        for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
-          if ((ii->second)>maxenergy){
-            maxenergy = ii->second;
-            mctruth = ii->first;
-            imc = imc0;
-          }
-          imc0++;
-        }
+        //std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
+      static bool isfirsttime = true;
+      if (isfirsttime){
+	for (size_t i = 0; i<hitlist.size(); i++){
+	  //if (hitlist[i]->View() == geo::kV){//collection view
+	  std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+	  for (size_t e = 0; e<eveIDs.size(); e++){
+	    art::Ptr<simb::MCTruth> ev_mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
+	    //mctruthemap[ev_mctruth]+=eveIDs[e].energy;
+	    if (ev_mctruth->Origin() == simb::kCosmicRay) isCosmics = true;
+	  }
+	    //}
+	}
+	isfirsttime = false;
+	if (fSaveCaloCosmics) isCosmics = false; //override to save calo info
+      }
 
-        imc = 0; //set imc to 0 to solve a confusion for BNB+cosmic files where there are two MCTruth
-        mctruth = mclist[0];
+//        double maxenergy = -1;
+//        int imc0 = 0;
+//        for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
+//          if ((ii->second)>maxenergy){
+//            maxenergy = ii->second;
+//            mctruth = ii->first;
+//            imc = imc0;
+//          }
+//          imc0++;
+//        }
 
-        if (mctruth->NeutrinoSet()) nGeniePrimaries = mctruth->NParticles();
-      } //end (fSaveGenieInfo)
+	  //imc = 0; //set imc to 0 to solve a confusion for BNB+cosmic files where there are two MCTruth
+      mctruth = mclist[0];
+
+      if (mctruth->NeutrinoSet()) nGeniePrimaries = mctruth->NParticles();
+	//} //end (fSaveGenieInfo)
       
       const sim::ParticleList& plist = bt->ParticleList();
       nGEANTparticles = plist.size();
@@ -2118,17 +2134,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               <<", only "
               << TrackerData.GetMaxHitsPerTrack(iTrk, planenum) << " stored in tree";
           }
-          for(size_t iTrkHit = 0; iTrkHit < NHits && iTrkHit < TrackerData.GetMaxHitsPerTrack(iTrk, planenum); ++iTrkHit) {
-            TrackerData.trkdedx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dEdx())[iTrkHit];
-            TrackerData.trkdqdx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dQdx())[iTrkHit];
-            TrackerData.trkresrg[iTrk][planenum][iTrkHit] = (calos[ical] -> ResidualRange())[iTrkHit];
-            const auto& TrkPos = (calos[ical] -> XYZ())[iTrkHit];
-            auto& TrkXYZ = TrackerData.trkxyz[iTrk][planenum][iTrkHit];
-            TrkXYZ[0] = TrkPos.X();
-            TrkXYZ[1] = TrkPos.Y();
-            TrkXYZ[2] = TrkPos.Z();
-          } // for track hits
-        } // for calorimetry info
+	  if (!isCosmics){
+	    for(size_t iTrkHit = 0; iTrkHit < NHits && iTrkHit < TrackerData.GetMaxHitsPerTrack(iTrk, planenum); ++iTrkHit) {
+	      TrackerData.trkdedx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dEdx())[iTrkHit];
+	      TrackerData.trkdqdx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dQdx())[iTrkHit];
+	      TrackerData.trkresrg[iTrk][planenum][iTrkHit] = (calos[ical] -> ResidualRange())[iTrkHit];
+	      const auto& TrkPos = (calos[ical] -> XYZ())[iTrkHit];
+	      auto& TrkXYZ = TrackerData.trkxyz[iTrk][planenum][iTrkHit];
+	      TrkXYZ[0] = TrkPos.X();
+	      TrkXYZ[1] = TrkPos.Y();
+	      TrkXYZ[2] = TrkPos.Z();
+	    } // for track hits
+	  }
+	} // for calorimetry info
         if(TrackerData.ntrkhits[iTrk][0] > TrackerData.ntrkhits[iTrk][1] && TrackerData.ntrkhits[iTrk][0] > TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 0;
         else if(TrackerData.ntrkhits[iTrk][1] > TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][1] > TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 1;
         else if(TrackerData.ntrkhits[iTrk][2] > TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][2] > TrackerData.ntrkhits[iTrk][1]) TrackerData.trkpidbestplane[iTrk] = 2;
@@ -2279,8 +2297,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         sim::ParticleList::const_iterator itPart = plist.begin(),
           pend = plist.end(); // iterator to pairs (track id, particle)
         	  
-        for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart)
-        {
+        for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart){
           const simb::MCParticle* pPart = (itPart++)->second;
           if (!pPart) {
             throw art::Exception(art::errors::LogicError)
@@ -2300,6 +2317,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           if (plen) active++;
 
           if (iPart < fData->GetMaxGEANTparticles()) {
+	   if (pPart->E()>fG4minE||isPrimary){
             fData->process_primary[iPart] = int(isPrimary);
             fData->processname[iPart]= pPart->Process();
             fData->Mother[iPart]=pPart->Mother();
@@ -2336,7 +2354,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               fData->EndPointy_tpcAV[iPart] = mcend.Y();
               fData->EndPointz_tpcAV[iPart] = mcend.Z();
             }		       
-            
+           } 
             //access auxiliary detector parameters
             if (fSaveAuxDetInfo) {
               unsigned short nAD = 0; // number of cells that particle hit

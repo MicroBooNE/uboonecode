@@ -47,6 +47,9 @@ extern "C" {
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussQ.h"
 
+// art extensions
+#include "artextensions/SeedService/SeedService.hh"
+
 // LArSoft includes
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
@@ -127,11 +130,10 @@ namespace detsim{
     std::string compression(pset.get< std::string >("CompressionType"));
     if(compression.compare("Huffman") == 0) fCompression = raw::kHuffman;    
 
-    // get the random number seed, use a random default if not specified    
-    // in the configuration file.  
-    unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
-
-    createEngine(seed);
+    // create a default random engine; obtain the random seed from SeedService,
+    // unless overridden in configuration with key "Seed"
+    art::ServiceHandle<artext::SeedService>()
+      ->createEngine(*this, pset, "Seed");
 
     fEventCount = 0;
   }
