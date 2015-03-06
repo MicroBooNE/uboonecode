@@ -704,7 +704,8 @@ namespace microboone {
     std::vector<std::string> fFlashMatchAssocLabel;
 
     bool isCosmics;      ///< if it contains cosmics
-
+    bool fSaveCaloCosmics; ///< save calorimetry information for cosmics
+    float fG4minE;         ///< Energy threshold to save g4 particle info
     /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
        
@@ -1599,7 +1600,9 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
   fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
-  isCosmics(false)
+  isCosmics(false),
+  fSaveCaloCosmics          (pset.get< bool >("SaveCaloCosmics",false)),
+  fG4minE                   (pset.get< float>("G4minE",0.01))
 {
   if (fSaveAuxDetInfo == true) fSaveGeantInfo = true;
   mf::LogInfo("AnalysisTree") << "Configuration:"
@@ -1724,6 +1727,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	    //}
 	}
 	isfirsttime = false;
+	if (fSaveCaloCosmics) isCosmics = false; //override to save calo info
       }
 
 //        double maxenergy = -1;
@@ -2293,8 +2297,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         sim::ParticleList::const_iterator itPart = plist.begin(),
           pend = plist.end(); // iterator to pairs (track id, particle)
         	  
-        for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart)
-        {
+        for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart){
           const simb::MCParticle* pPart = (itPart++)->second;
           if (!pPart) {
             throw art::Exception(art::errors::LogicError)
@@ -2314,7 +2317,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           if (plen) active++;
 
           if (iPart < fData->GetMaxGEANTparticles()) {
-	   if (pPart->E()>0.01){
+	   if (pPart->E()>fG4minE||isPrimary){
             fData->process_primary[iPart] = int(isPrimary);
             fData->processname[iPart]= pPart->Process();
             fData->Mother[iPart]=pPart->Mother();

@@ -22,6 +22,8 @@ microboone_analysistree:
  SaveHitInfo:              true
  SaveTrackInfo:            true
  SaveVertexInfo:           true
+ SaveCaloCosmics:          false
+ G4MinE:                   0.01
 }
 
 END_PROLOG
