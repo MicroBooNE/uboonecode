@@ -595,6 +595,11 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(size_t ktype,double 
   // They have been adjusted to make the SPICE simulation to match the
   // actual electronics response. Default params are Ao=1.4, To=0.5us.
 
+
+  // For the cold electronics,  the gain (i.e. 4.7 mV/fC) represents the peak 
+  // height. The shaping time will not affect the peak height, but make the 
+  // peak broader
+
   double max = 0;
 
   for(size_t i=0; i<nticks;++i) {
@@ -632,6 +637,13 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(size_t ktype,double 
   double last_integral=0;
   double last_max=0;
 
+  //Normalization are the following
+  // Peak is firstly normalized to 1
+  // thus we expect peak to be 1 * 9390 (fADCPerPCtAtLowestAsicGain) * 1.602e-7 * (1 fC) = 9.39 ADC
+  // At 4.7 mV/fC, the ADC value should be 4.7 (mV/fC) * 2 (ADC/mV) ~ 9.4 ADC/fC
+  // so the normalization are consistent
+
+  
 
   for(auto& element : fElectResponse[ktype]){
     element /= max;
