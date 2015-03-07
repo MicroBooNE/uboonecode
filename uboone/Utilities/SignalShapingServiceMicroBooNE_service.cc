@@ -387,7 +387,7 @@ void util::SignalShapingServiceMicroBooNE::init()
       //std::cout << "Input field responses" << std::endl;
 
       for(_vw=0;_vw<fNViews; ++_vw) {
-        SetElectResponse(ktype,fShapeTimeConst.at(1+_vw),fASICGainInMVPerFC.at(_vw));
+        SetElectResponse(ktype,fShapeTimeConst.at(_vw),fASICGainInMVPerFC.at(_vw));
 
         //Electronic response
         //std::cout << "Electonic response " << fElectResponse[ktype].size() << " bins" << std::endl;
@@ -577,7 +577,7 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(size_t ktype,double 
   }
 
   //Gain and shaping time variables from fcl file:
-  double Ao = fShapeTimeConst[0];  //gain
+  double Ao = 1.0;//Gain
   double To = shapingtime;  //peaking time
 
   // this is actually sampling time, in ns
@@ -852,13 +852,13 @@ double util::SignalShapingServiceMicroBooNE::GetShapingTime(unsigned int const c
   double shaping_time = 0;
   switch(view){
     case geo::kU:
-      shaping_time = fShapeTimeConst.at(1);
+      shaping_time = fShapeTimeConst.at(0);
       break;
     case geo::kV:
-      shaping_time = fShapeTimeConst.at(2);
+      shaping_time = fShapeTimeConst.at(1);
       break;
     case geo::kZ:
-      shaping_time = fShapeTimeConst.at(3);
+      shaping_time = fShapeTimeConst.at(2);
       break;
     default:
       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
@@ -885,7 +885,7 @@ double util::SignalShapingServiceMicroBooNE::GetRawNoise(unsigned int const chan
       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
   }
 
-  double shapingtime = fShapeTimeConst.at(plane+1);
+  double shapingtime = fShapeTimeConst.at(plane);
   double gain = fASICGainInMVPerFC.at(plane);
   int temp;
   if (shapingtime == 0.5){
@@ -925,7 +925,7 @@ double util::SignalShapingServiceMicroBooNE::GetDeconNoise(unsigned int const ch
       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
   }
 
-  double shapingtime = fShapeTimeConst.at(plane+1);
+  double shapingtime = fShapeTimeConst.at(plane);
   int temp;
   if (shapingtime == 0.5){
     temp = 0;
