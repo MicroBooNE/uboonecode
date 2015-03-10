@@ -39,7 +39,7 @@
       <li>chmod +x pullProducts</li>
       <li><pre>./pullProducts &lt;product-directory&gt; &lt;slf6|d12|d13&gt; &lt;bundle-version&gt;
 &lt;e6&gt; &lt;debug|prof&gt;</pre></li>
-      <li>For instance: <pre>./pullProducts &lt;product_topdir&gt; slf6 uboonecode-04.02.00 e6 prof</pre></li>
+      <li>For instance: <pre>./pullProducts &lt;product_topdir&gt; slf6 uboone-04.02.00 e6 prof</pre></li>
       <li><pre>
 Usage: pullProducts [-h]
        pullProducts <options> <product_topdir> <OS> <bundle-spec> <qual_set> <build-spec>
@@ -55,7 +55,7 @@ Arguments:
   
   OS               Supported os distributions: slf6, d13, source
  
-  bundle-spec      Bundle name and version, e.g., uboonecode-04.02.00
+  bundle-spec      Bundle name and version, e.g., uboone-04.02.00
  
   qual_set         Supported qualifier sets: 
                    e6
