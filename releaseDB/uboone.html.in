@@ -40,24 +40,24 @@ Release notes and previous versions of uboonecode can be found at the following 
       <li>chmod +x pullProducts</li>
       <li>Scientific Linux 6.x: <pre>./pullProducts &lt;product-directory&gt; slf6 uboone-@UBOONECODE_DOT_VERSION@ e6 &lt;prof|debug&gt;</pre></li>
       <li>Mavericks: <pre>./pullProducts &lt;product-directory&gt; d13 uboone-@UBOONECODE_DOT_VERSION@ e6 &lt;prof|debug&gt;</pre></li>
-      <li>Larsoft needs to be installed separately:  <pre>./pullProducts &lt;product-directory&gt; &lt;slf6|d13&gt; larsoft-@LARSOFT_DOT_VERSION@ s6-e6 &lt;prof|debug&gt;</pre></li>
+      <!--<li>Larsoft needs to be installed separately:  <pre>./pullProducts &lt;product-directory&gt; &lt;slf6|d13&gt; larsoft-@LARSOFT_DOT_VERSION@ s6-e6 &lt;prof|debug&gt;</pre></li>-->
     </ul></li>
   </ul></li>
 </ul>
 
-<p>
-<h2 id="tarballs-contents">Packages</h2>
-The following products are included in the uboone-@UBOONECODE_DOT_VERSION@ distribution bundle:
-<table border="1">
-<thead>
-<tr><th>Product</th><th>Version</th><th>Qualifiers</th></tr>
-</thead>
-<tbody>
-<tr><td>uboonecode </td>  <td> @UBOONECODE_VERSION@  </td>  <td>e6</td></tr>
-<tr><td>ubutil     </td>  <td> @UBUTIL_VERSION@      </td>  <td>e6</td></tr>
-<tr><td>uboone_data</td>  <td> @UBOONE_DATA_VERSION@ </td>  <td></td></tr>
-</tbody>
-</table>
+<!--<p>-->
+<!--<h2 id="tarballs-contents">Packages</h2>-->
+<!--The following products are included in the uboone-@UBOONECODE_DOT_VERSION@ distribution bundle:-->
+<!--<table border="1">-->
+<!--<thead>-->
+<!--<tr><th>Product</th><th>Version</th><th>Qualifiers</th></tr>-->
+<!--</thead>-->
+<!--<tbody>-->
+<!--<tr><td>uboonecode </td>  <td> @UBOONECODE_VERSION@  </td>  <td>e6</td></tr>-->
+<!--<tr><td>ubutil     </td>  <td> @UBUTIL_VERSION@      </td>  <td>e6</td></tr>-->
+<!--<tr><td>uboone_data</td>  <td> @UBOONE_DATA_VERSION@ </td>  <td></td></tr>-->
+<!--</tbody>-->
+<!--</table>-->
 
 <p>
 
