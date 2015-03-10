@@ -32,34 +32,31 @@ Release notes and previous versions of uboonecode can be found at the following 
 <ul>
   <li><a type="application/x-sh" download href="http://scisoft.fnal.gov/scisoft/bundles/tools/pullProducts">pullProducts</a>
   <ul>
-    <li>Will pull the specified product and dependent products from the scisoft server.</li>
+    <li>Will pull the specified distribution bundle from the scisoft server.</li>
     <li>This script will first check to see if a package is installed and will download the product only if not installed.</li>
     <li>USAGE: 
     <ul>
       <li>Download the script.</li>
       <li>chmod +x pullProducts</li>
-      <li><pre>./pullProducts &lt;product-directory&gt; &lt;slf6|d12|d13&gt; &lt;bundle-version&gt; &lt;e6|e7&gt; &lt;debug|prof&gt;</pre></li>
-      <li>Download bundles larsoft and uboone, prof and debug, for your architecture, e.g.:
-      <ul>
-        <li><pre>./pullProducts &lt;product_topdir&gt; slf6 larsoft-@LARSOFT_DOT_VERSION@ s6-e6 prof</pre></li>
-        <li><pre>./pullProducts &lt;product_topdir&gt; slf6 uboone-@UBOONECODE_DOT_VERSION@ e6 prof</pre></li>
-        <li><pre>./pullProducts &lt;product_topdir&gt; slf6 larsoft-@LARSOFT_DOT_VERSION@ s6-e6 debug</pre></li>
-        <li><pre>./pullProducts &lt;product_topdir&gt; slf6 uboone-@UBOONECODE_DOT_VERSION@ e6 debug</pre></li>
-      </ul></li>
+      <li>Scientific Linux 6.x: <pre>./pullProducts &lt;product-directory&gt; slf6 uboone-@UBOONECODE_DOT_VERSION@ e6 &lt;prof|debug&gt;</pre></li>
+      <li>Mavericks: <pre>./pullProducts &lt;product-directory&gt; d13 uboone-@UBOONECODE_DOT_VERSION@ e6 &lt;prof|debug&gt;</pre></li>
+      <li>Larsoft needs to be installed separately:  <pre>./pullProducts &lt;product-directory&gt; &lt;slf6|d13&gt; larsoft-@LARSOFT_DOT_VERSION@ s6-e6 &lt;prof|debug&gt;</pre></li>
     </ul></li>
   </ul></li>
 </ul>
 
 <p>
 <h2 id="tarballs-contents">Packages</h2>
-The following products are included in the uboonecode @UBOONECODE_VERSION@ distribution bundle:
-<table>
-<tr><td colspan="3">
-</td></tr>
-<tr><td><b>Product</b></td><td><b>Version</b></td><td><b>Qualifiers</b></td></tr>
+The following products are included in the uboone-@UBOONECODE_DOT_VERSION@ distribution bundle:
+<table border="1">
+<thead>
+<tr><th>Product</th><th>Version</th><th>Qualifiers</th></tr>
+</thead>
+<tbody>
 <tr><td>uboonecode </td>  <td> @UBOONECODE_VERSION@  </td>  <td>e6</td></tr>
 <tr><td>ubutil     </td>  <td> @UBUTIL_VERSION@      </td>  <td>e6</td></tr>
 <tr><td>uboone_data</td>  <td> @UBOONE_DATA_VERSION@ </td>  <td></td></tr>
+</tbody>
 </table>
 
 <p>
