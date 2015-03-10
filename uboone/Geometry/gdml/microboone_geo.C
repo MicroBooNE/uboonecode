@@ -9,7 +9,7 @@ microboone_geo(TString volName="")
   gSystem->Load("libGeom");
   gSystem->Load("libGdml");
 
-  TGeoManager::Import("microboonev5_nowires.gdml");
+  TGeoManager::Import("microboonev5.gdml");
 
   drawopt optuboone[] = {
     {"volGround",       kOrange-7},
@@ -30,7 +30,7 @@ microboone_geo(TString volName="")
   }
 
   gGeoManager->GetTopNode();
-  gGeoManager->CheckOverlaps(10e-12);
+//  gGeoManager->CheckOverlaps(10e-12);
   gGeoManager->PrintOverlaps();
   gGeoManager->SetMaxVisNodes(70000);
 
