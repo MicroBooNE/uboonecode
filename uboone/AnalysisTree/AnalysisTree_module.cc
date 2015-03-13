@@ -113,6 +113,7 @@
 #include "RecoBase/Hit.h"
 #include "RecoBase/EndPoint2D.h"
 #include "RecoBase/Vertex.h"
+#include "RecoBase/OpFlash.h"
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "RecoObjects/BezierTrack.h"
 #include "RecoAlg/TrackMomentumCalculator.h"
@@ -140,6 +141,7 @@ constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackModuleLabel
 constexpr unsigned short kMaxVertices   = 100;    //max number of 3D vertices
 constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector cells per MC particle
+constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -313,6 +315,7 @@ namespace microboone {
       tdHit = 0x10,
       tdTrack = 0x20,
       tdVtx = 0x40,
+      tdFlash = 0x80,
       tdDefault = 0
     }; // DataBits_t
     
@@ -360,6 +363,13 @@ namespace microboone {
     // vertex information
     Short_t  nvtx;                     //number of vertices
     Float_t  vtx[kMaxVertices][3];     //vtx[3]  
+
+    // flash information
+    Int_t    no_flashes;                //number of flashes
+    Float_t  flash_time[kMaxFlashes];   //flash time
+    Float_t  flash_pe[kMaxFlashes];     //flash total PE
+    Float_t  flash_ycenter[kMaxFlashes];//y center of flash
+    Float_t  flash_zcenter[kMaxFlashes];//z center of flash
 
     //track information
     Char_t   kNTracker;
@@ -509,6 +519,9 @@ namespace microboone {
     
     /// Returns whether we have Geant data
     bool hasGeantInfo() const { return bits & tdGeant; }
+
+    /// Returns whether we have Flash data
+    bool hasFlashInfo() const { return bits & tdFlash; }
 
     /// Sets the specified bits
     void SetBits(unsigned int setbits, bool unset = false)
@@ -687,6 +700,7 @@ namespace microboone {
     std::string fCryGenModuleLabel;
     std::string fG4ModuleLabel;
     std::string fVertexModuleLabel;
+    std::string fOpFlashModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
     std::vector<std::string> fParticleIDModuleLabel;
@@ -699,7 +713,8 @@ namespace microboone {
     bool fSaveHitInfo; ///whether to extract and save Hit information
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
-    
+    bool fSaveFlashInfo;  ///whether to extract and save Flash information
+
     std::vector<std::string> fCosmicTaggerAssocLabel;
     std::vector<std::string> fFlashMatchAssocLabel;
 
@@ -722,8 +737,9 @@ namespace microboone {
         else {
           fData->SetBits(AnalysisTreeDataStruct::tdHit, !fSaveHitInfo);	
 	  fData->SetBits(AnalysisTreeDataStruct::tdTrack, !fSaveTrackInfo);	
-	  fData->SetBits(AnalysisTreeDataStruct::tdVtx, !fSaveVertexInfo);	  	  	    	  	    	  	    	  
+	  fData->SetBits(AnalysisTreeDataStruct::tdVtx, !fSaveVertexInfo);
 	  fData->SetTrackers(GetNTrackers());
+          fData->SetBits(AnalysisTreeDataStruct::tdFlash, !fSaveFlashInfo);	
           if (bClearData) fData->Clear();
         }
       } // CreateData()
@@ -1172,6 +1188,13 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
     std::fill(vtx[ivtx], vtx[ivtx]+3, -99999.);
   }
 
+  no_flashes = 0;
+  std::fill(flash_time, flash_time + sizeof(flash_time)/sizeof(flash_time[0]), -9999);
+  std::fill(flash_pe, flash_pe + sizeof(flash_pe)/sizeof(flash_pe[0]), -9999);
+  std::fill(flash_ycenter, flash_ycenter + sizeof(flash_ycenter)/sizeof(flash_ycenter[0]), -9999);
+  std::fill(flash_zcenter, flash_zcenter + sizeof(flash_zcenter)/sizeof(flash_zcenter[0]), -9999);
+
+
   mcevts_truth = -99999;
   mcevts_truthcry = -99999;
   nuPDG_truth = -99999;
@@ -1424,6 +1447,14 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("vtx",vtx,"vtx[nvtx][3]/F");
   }  
 
+  if (hasFlashInfo()){
+    CreateBranch("no_flashes",&no_flashes,"no_flashes/I");
+    CreateBranch("flash_time",flash_time,"flash_time[no_flashes]/F");
+    CreateBranch("flash_pe",flash_pe,"flash_pe[no_flashes]/F");
+    CreateBranch("flash_ycenter",flash_ycenter,"flash_ycenter[no_flashes]/F");
+    CreateBranch("flash_zcenter",flash_zcenter,"flash_zcenter[no_flashes]/F");
+  }
+
   if (hasTrackInfo()){
     AutoResettingStringSteam sstr;
     sstr() << kMaxTrackHits;
@@ -1585,7 +1616,8 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
   fCryGenModuleLabel        (pset.get< std::string >("CryGenModuleLabel")       ), 
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
-  fVertexModuleLabel        (pset.get< std::string> ("VertexModuleLabel")       ),
+  fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
+  fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
@@ -1598,6 +1630,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveHitInfo	            (pset.get< bool >("SaveHitInfo", false)), 
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
+  fSaveFlashInfo            (pset.get< bool >("SaveFlashInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
   fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
   isCosmics(false),
@@ -1678,6 +1711,11 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (evt.getByLabel(fVertexModuleLabel,vtxListHandle))
     art::fill_ptr_vector(vtxlist, vtxListHandle);
 
+  // * flashes
+  art::Handle< std::vector<recob::OpFlash> > flashListHandle;
+  std::vector<art::Ptr<recob::OpFlash> > flashlist;
+  if (evt.getByLabel(fOpFlashModuleLabel,flashListHandle))
+    art::fill_ptr_vector(flashlist, flashListHandle);
 
   // * MC truth information
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
@@ -1771,6 +1809,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   const size_t NTrackers = GetNTrackers(); // number of trackers passed into fTrackModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
   const size_t NVertices = vtxlist.size(); // number of vertices
+  const size_t NFlashes  = flashlist.size(); // number of flashes
   // make sure there is the data, the tree and everything;
   CreateTree();
 
@@ -1899,7 +1938,22 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       for (size_t j = 0; j<3; ++j) fData->vtx[i][j] = xyz[j];
     }
   }// end (fSaveVertexInfo)
-    
+
+  if (fSaveFlashInfo){
+    fData->no_flashes = (int) NFlashes;
+    if (NFlashes > kMaxFlashes) {
+      // got this error? consider increasing kMaxHits
+      // (or ask for a redesign using vectors)
+      mf::LogError("AnalysisTree:limits") << "event has " << NFlashes
+        << " flashes, only kMaxFlashes=" << kMaxFlashes << " stored in tree";
+    }
+    for (size_t i = 0; i < NFlashes && i < kMaxFlashes ; ++i){//loop over hits
+      fData->flash_time[i]       = flashlist[i]->Time();
+      fData->flash_pe[i]         = flashlist[i]->TotalPE();
+      fData->flash_ycenter[i]    = flashlist[i]->YCenter();
+      fData->flash_zcenter[i]    = flashlist[i]->ZCenter();
+    }
+  }
   //track information for multiple trackers
   if (fSaveTrackInfo){
     for (unsigned int iTracker=0; iTracker < NTrackers; ++iTracker){
