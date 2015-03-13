@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4. Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>uboonecode @UBOONECODE_VERSION@</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000" topmargin="6" leftmargin="6" marginheight="6" marginwidth
+="6">
+
+<p>
+<center>
+[&nbsp;<a href="http://scisoft.fnal.gov/">Distribution Home</a>&nbsp;]&nbsp;
+<br>
+[&nbsp;<a href="http://scisoft.fnal.gov/scisoft/bundles/">Distribution Scripts and Manifests</a>&nbsp;]&nbsp;
+[&nbsp;<a href="http://scisoft.fnal.gov/scisoft/packages/">Individual Package Distribution</a>&nbsp;]&nbsp;
+<br>
+</center>
+</p>
+
+<h1>Download materials for uboonecode and dependencies</h1>
+
+<h2>Uboonecode Releases</h2>
+
+Release notes and previous versions of uboonecode can be found at the following link.
+<ul>
+<li> <a href="https://cdcvs.fnal.gov/redmine/projects/uboonecode/wiki/Uboonecode_Releases">Uboonecode releases</a></li>
+</ul>
+
+<h2 id="scripts-binary">Download scripts for binary distributions.</h2>
+<ul>
+  <li><a type="application/x-sh" download href="http://scisoft.fnal.gov/scisoft/bundles/tools/pullProducts">pullProducts</a>
+  <ul>
+    <li>Will pull the specified distribution bundle from the scisoft server.</li>
+    <li>This script will first check to see if a package is installed and will download the product only if not installed.</li>
+    <li>USAGE: 
+    <ul>
+      <li>Download the script.</li>
+      <li>chmod +x pullProducts</li>
+      <li>Scientific Linux 6.x: <pre>./pullProducts &lt;product-directory&gt; slf6 uboone-@UBOONECODE_DOT_VERSION@ e6 &lt;prof|debug&gt;</pre></li>
+      <li>Mavericks: <pre>./pullProducts &lt;product-directory&gt; d13 uboone-@UBOONECODE_DOT_VERSION@ e6 &lt;prof|debug&gt;</pre></li>
+      <!--<li>Larsoft needs to be installed separately:  <pre>./pullProducts &lt;product-directory&gt; &lt;slf6|d13&gt; larsoft-@LARSOFT_DOT_VERSION@ s6-e6 &lt;prof|debug&gt;</pre></li>-->
+    </ul></li>
+  </ul></li>
+</ul>
+
+<!--<p>-->
+<!--<h2 id="tarballs-contents">Packages</h2>-->
+<!--The following products are included in the uboone-@UBOONECODE_DOT_VERSION@ distribution bundle:-->
+<!--<table border="1">-->
+<!--<thead>-->
+<!--<tr><th>Product</th><th>Version</th><th>Qualifiers</th></tr>-->
+<!--</thead>-->
+<!--<tbody>-->
+<!--<tr><td>uboonecode </td>  <td> @UBOONECODE_VERSION@  </td>  <td>e6</td></tr>-->
+<!--<tr><td>ubutil     </td>  <td> @UBUTIL_VERSION@      </td>  <td>e6</td></tr>-->
+<!--<tr><td>uboone_data</td>  <td> @UBOONE_DATA_VERSION@ </td>  <td></td></tr>-->
+<!--</tbody>-->
+<!--</table>-->
+
+<p>
+
+<center>
+[&nbsp;<a href="http://scisoft.fnal.gov/">Distribution Home</a>&nbsp;]&nbsp;
+</center>
+</p>
+</body>
+</html>
+

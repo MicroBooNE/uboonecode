@@ -93,7 +93,7 @@ my $pmt_switch="on";		#turn on or off depending on pmts wanted
 my $NumberOfTestBoxes=30;
 my $granite_block="off";
 my $enclosureExtras="on";       #turn on or off depending on whether you'd like to generate the external things around the cryostat (ie. insulation, platform, stands, etc.) in the gdml file
-my $vetoWall_switch="on";  #turn on or off a proposed scintillator wall infront of the cryostat
+my $vetoWall_switch="off";  #turn on or off a proposed scintillator wall infront of the cryostat
 
 
 # The routines that create the GDML sub-files. Most of the explanatory
@@ -1801,13 +1801,13 @@ EOF
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="190"/>
+        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="170"/>
       </physvol>
-      <physvol>
+  <!--    <physvol>
         <volumeref ref="volRack"/>
         <position name="posRack17" unit="cm" x="-160" y="408.91+104.1" z="387.7+150+60.8"/>
         <rotationref ref="rPlus90AboutY"/>
-      </physvol>
+      </physvol>-->
 
       <physvol>
          <volumeref ref="volFloorTankBox1"/>
