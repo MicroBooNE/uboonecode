@@ -14,23 +14,12 @@ services:
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:                 @local::microboone_gen_services
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
-# This entry should be copied to derived fcl files to override fclName.
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "prodgenie_common_cosmic_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "gen",
-                                                    "ubProjectVersion", "v1_3" ]
-
 
 #Start each new event with an empty event.
 source:
 {
   module_type: EmptyEvent
+  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
   maxEvents:   10          # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file

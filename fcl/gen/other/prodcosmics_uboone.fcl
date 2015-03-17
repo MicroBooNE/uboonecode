@@ -13,23 +13,12 @@ services:
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_gen_services
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "runType",    "physics",
-                                                    "fclName",    "prodcosmics_uboone.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "gen",
-                                                    "ubProjectVersion", "v1_3" ]
-
-services.user.FileCatalogMetadataExtras.RenameTemplate: "prodcosmics_uboone_${CLUSTER 0}_${PROCESS 0}_gen.root"
 
 #Start each new event with an empty event.
 source:
 {
   module_type: EmptyEvent
+  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
   maxEvents:   10          # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
@@ -71,7 +60,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "cosmics_gen.root" #default file name, can override from command line with -o or --output
+   fileName:    "prodcosmics_uboone_%tc_gen.root"
    dataTier:    "generated"
    compressionLevel: 1
  }

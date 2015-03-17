@@ -1,6 +1,7 @@
 #include "services_microboone.fcl"
 #include "caldata_microboone.fcl"
 #include "hitfindermodules_microboone.fcl"
+#include "mchitmodules.fcl"
 #include "cluster_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "vertexfindermodules.fcl"
@@ -16,24 +17,12 @@ services:
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
-  MemoryPeakReporter:    {}
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_services_reco
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
 services.user.PhotonVisibilityService: @local::microboone_photonvisibilityservice
 services.user.DatabaseUtil.ShouldConnect: false
-
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "fclName",    "standard_reco_uboone_2D.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "reco2D",
-                                                    "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_reco2D.root"
 
 #source is now a root file
 source:
@@ -63,6 +52,7 @@ physics:
   ### hit-finder producers
   gaushit:             @local::microboone_gaushitfinder
   rffhit:              @local::microboone_rffhitfinder
+  mchit:               @local::standard_mchitfinder
 
   ### corner-finder
   corner:              @local::standard_cornerfinder    
@@ -82,6 +72,7 @@ physics:
          opflash,
          caldata, 
          gaushit, #rffhit,
+         mchit,
          fuzzycluster, cccluster,
          pandora ]
 
@@ -105,7 +96,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "standard_reco_uboone_2D.root"
+   fileName:    "%ifb_%tc_reco2D.root"
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
  }
@@ -116,6 +107,8 @@ outputs:
 
 physics.producers.opflash.InputModule:                          "optreadout"
 physics.producers.opflash.GenModule:                            "generator"
+
+physics.producers.mchit.LArG4ModuleName:                        "largeant"
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 

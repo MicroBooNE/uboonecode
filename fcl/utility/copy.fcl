@@ -7,17 +7,6 @@ services:
   message:      @local::standard_warning
   FileCatalogMetadata:  @local::art_file_catalog_mc
 }
-services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
-
-services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
-                                                    "fileFormat", "root",
-                                                    "fclName",    "copy.fcl",
-                                                    "fclVersion", "v1_5",
-                                                    "ubProjectStage",   "merge",
-                                                    "ubProjectVersion", "v1_3" ]
-services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_merged.root"
-
 
 source:
 {
@@ -41,7 +30,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "copy.root" #default file name, can override from command line with -o or --output
+   fileName:    "%ifb_%tc_merged.root"
    dataTier:    "reconstructed"
    compressionLevel: 1
  }

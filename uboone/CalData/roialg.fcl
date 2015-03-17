@@ -1,0 +1,26 @@
+BEGIN_PROLOG
+
+roiAlg_DigitAboveThresholdParams:
+{
+    AlgName:        "DigitAboveThreshold"
+    ThresholdVal:   3
+    NegativePulse:  false
+    MinWidth:       1
+}
+
+roiAlg_CalibrationPulseFinder:
+{
+    AlgName:        "CalibrationPulseFinder"
+    Threshold:      3  
+    PrePulseBins:   30
+    MinWidth:       1
+}
+
+roiAlg_DigitAboveBaseline:
+{
+    AlgName:       "DigitAboveBaseline"
+    PaddingSize:    5
+    ThresholdInRMS: 1.5
+}
+
+END_PROLOG

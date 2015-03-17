@@ -1,0 +1,36 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemaker_reco3d: @local::litemaker_base
+
+litemaker_reco3d.out_filename: "larlite_reco3d.root"
+
+litemaker_reco3d.DataLookUpMap:
+{
+  # Producer names specified below would be looked up & stored in
+  # the output larlite file. The key represents the data product
+  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
+  # string array.
+  sps:        ["pandoraCosmic","pandoraNu",
+               "costrk", "costrkcc",
+               "spacepointfinder","spacepointfindercc",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "beziertracker","beziertrackercc",
+               "featurevtx"]
+  track:      ["trackkalmanhit","trackkalmanhitcc",
+               "trackkalsps","trackkalspscc",
+               "beziertracker","beziertrackercc",
+               "costrk","costrkcc",
+               "stitch","stitchcc",
+               "stitchkalmanhit",
+               "pandoraCosmicKHit", "pandoraNuKHit"]
+  seed:       ["pandoraCosmic", "pandoraNu"]
+  shower:     []
+  pfpart:     ["pandoraCosmic","pandoraNu"]
+}
+
+litemaker_reco3d.AssociationLookUpMap: @local::litemaker_ass_reco
+
+END_PROLOG
