@@ -15,6 +15,8 @@ sed -e '/pandora/s/^/#/g' -i standard_reco_uboone_2D.fcl
 # This gives us back our needed terminating ] for reco module list
 sed -e '/pandora \]/a \]' -i  standard_reco_uboone_2D.fcl
 # Get rid of now-extraneous trailing comma
-sed -e '/gaushit,/s//gaushit/g' -i standard_reco_uboone_2D.fcl 
+#sed -e '/gaushit,/s//gaushit/g' -i standard_reco_uboone_2D.fcl 
+# Last module as of v04_0x_00 is now mchit, not gaushit. So, remove its trailing comma.
+sed -e '/mchit,/s//mchit/g' -i standard_reco_uboone_2D.fcl 
 
 lar -c ./standard_reco_uboone_2D.fcl -s ../lar_ci_hitana_detsim_uboonecode/hitana_uboone_detsim.root  -n -1 -T hitana_uboone_reco2D_hist.root -o hitana_uboone_reco2D.root 
