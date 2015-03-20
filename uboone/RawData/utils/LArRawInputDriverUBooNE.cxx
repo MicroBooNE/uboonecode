@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 /// \file  LArRawInputDriverUBooNE.cxx
 /// \brief Source to convert raw binary files to root files
 /// \Original Authors
@@ -106,6 +106,8 @@ namespace lris {
     fNumberOfEvents=-1;
     fEventCounter=0;
     fChannelMap.clear();
+    fWireMap.clear();
+    fPlaneMap.clear();
     fInputStream.close();
   }
     
@@ -159,7 +161,10 @@ namespace lris {
   // ======================================================================  
   void LArRawInputDriverUBooNE::initChannelMap()
   {
+
     fChannelMap.clear();
+    fWireMap.clear();
+    fPlaneMap.clear();
     mf::LogInfo("")<<"Fetching channel map from DB";
 
     PGconn *conn = PQconnectdb("host=fnalpgsdev.fnal.gov port=5436 dbname=uboonedaq_dev user=uboonedaq_web password=argon!uBooNE");	
@@ -180,10 +185,19 @@ namespace lris {
 	<< "postgresql BEGIN failed." << std::endl;
     }
 
+    // Andrzej's changed database
+    /*
+    PQclear(res);
+    res = PQexec(conn,
+		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id, larsoft_wirenum"
+		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN ADCreceivers_copy_new NATURAL JOIN crates NATURAL JOIN fecards"
+		 );
+    */
+    // Standard & wrong Hoot database
     PQclear(res);
     res = PQexec(conn,
 		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
-		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables NATURAL JOIN ADCreceivers NATURAL JOIN crates NATURAL JOIN fecards "
+		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables NATURAL JOIN ADCreceivers NATURAL JOIN crates NATURAL JOIN fecards"
 		 );
 
     if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
@@ -202,25 +216,43 @@ namespace lris {
       //auto const wPl   =      PQgetvalue(res, i, 2);
       int larsoft_chan = atoi(PQgetvalue(res, i, 3));
       int channel_id   = atoi(PQgetvalue(res, i, 4));
+      int larsoft_wirenum   = atoi(PQgetvalue(res, i, 5));
 
       int boardChan = channel_id%64;
 
+      if (crate_id==9 && slot==5)
+	boardChan = (channel_id-32)%64;
 
-      //std::cout << "Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
-      //	<< slot << ", " << boardChan << "]";
-      //std::cout << "\tCh. Id (LArSoft): " << larsoft_chan 
-      //	<< "\tPlane: " << wPl << std::endl << std::endl;
+      int planeNum = 4;
+      if (larsoft_chan <= 2399)
+	planeNum = 0;
+      else if (larsoft_chan <= 2*2399)
+	planeNum = 1;
+      else if (larsoft_chan  <= 8254)
+	planeNum = 2;
+      else
+	planeNum = 4;
 
+      /*
+      std::cout << "Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
+		<< slot << ", " << boardChan << "]";
+      std::cout << "\tCh. Id (LArSoft): " << larsoft_chan  << std::endl;
+      */
       daqid_t daq_id(crate_id,slot,boardChan);
       std::pair<daqid_t, int> p(daq_id,larsoft_chan);
+      std::pair<daqid_t, int> p2(daq_id,larsoft_wirenum);
+      std::pair<daqid_t, int> p3(daq_id,planeNum);
 
-      if (fChannelMap.find(daq_id) != fChannelMap.end())
+      if (fChannelMap.find(daq_id) != fChannelMap.end()){
+	std::cout << "Multiple entries!" << std::endl;
 	mf::LogWarning("")<<"Multiple DB entries for same (crate,card,channel). "<<std::endl
 		       <<"Redefining (crate,card,channel)=>id link ("
 		       <<daq_id.crate<<", "<<daq_id.card<<", "<<daq_id.channel<<")=>"
 		       <<fChannelMap[daq_id];
-    
+      }
       fChannelMap.insert(p);
+      fWireMap.insert(p2);
+      fPlaneMap.insert(p3);
     }
   }
 
@@ -244,7 +276,7 @@ namespace lris {
     
     if (res) {
       fEventCounter++;
-      art::RunNumber_t rn = daq_header->GetRun();
+      art::RunNumber_t rn = daq_header->GetRun();//+1;
       art::Timestamp tstamp = daq_header->GetTimeStamp();
       art::SubRunID newID(rn, daq_header->GetSubRun());
       if (fCurrentSubRunID.runID() != newID.runID()) { // New Run
@@ -367,6 +399,17 @@ namespace lris {
 	ubdaq::crateHeader crate_header = seb_it->first;
 	ubdaq::crateData crate_data = seb_it->second;
 
+	// Get Time information:
+	//uint32_t sebTSec = crate_header.getSebTimeSec();
+	//std::cout << "Seb Time (sec) : " << sebTSec << std::endl;
+	//crate_header_t crHeader = crate_header.getCrateHeader();
+	// GPStime in UNIX second/micro/nano info
+	//gps_time_t GPStime = crHeader.gps_time;
+	// DAQtime is time of last update of GPS time (in frame, sample, div)
+	//tbclkub_t  DAQtime = crHeader.daqClock_time;
+	//std::cout << "GPS Time seconds: " << GPStime.second << std::endl;
+	//std::cout << "DAQ Frame: " << DAQtime.frame << "\tSample: " << DAQtime.sample << std::endl;
+
 	//now get the card map (for the current crate), and do a loop over all cards
 	std::map<ubdaq::cardHeader,ubdaq::cardData>::iterator card_it;
 	std::map<ubdaq::cardHeader,ubdaq::cardData,ubdaq::compareCardHeader> card_map = crate_data.getCardMap();
@@ -411,30 +454,48 @@ namespace lris {
 			  card_header.getModule(),
 			  channel_number);
 
-
 	    int ch=-1;
+	    //	    int wire = -1;
+	    //	    int pl = -1;
 	    if (fChannelMap.find(daqId)!=fChannelMap.end()){
 	      ch=fChannelMap[daqId];
-	      //std::cout << "Found this channel: " << ch
-	      //	<< "\tChannel Info from header: [Crate, Slot, Chan]: ["
-	      //	<< int(crate_header.getCrateNumber()) << ", " 
-	      //	<< card_header.getModule() << ", "
-	      //	<< channel_number << "]" << std::endl;
+	      //	      wire=fWireMap[daqId];
+	      //	      pl=fPlaneMap[daqId];
+	      /*
+	      std::cout << ch
+			<< "\t\t["
+			<< int(crate_header.getCrateNumber()) << ", " 
+			<< card_header.getModule() << ", "
+			<< channel_number << "]" << std::endl;
+	      */
 	    }
 	    //\todo fix this once there is a proper channel table
 	    else{
+	      //continue;
 	      ch=10000*crate_header.getCrateNumber()
 		+100*card_header.getModule()
 		+channel_number;
-	      //std::cout << "Channel Info from header: [Crate, Slot, Chan]: ["
-	      //	<< int(crate_header.getCrateNumber()) << ", " 
-	      //	<< card_header.getModule() << ", "
-	      //	<< channel_number << "]" << std::endl;
-	      //std::cout << "Channel not found: " << ch << std::endl;
+	      /*
+	      std::cout << ch
+			<< "\t\t["
+			<< int(crate_header.getCrateNumber()) << ", " 
+			<< card_header.getModule() << ", "
+			<< channel_number << "]" << std::endl;
+	      */
 	    }
+	    //	    art::ServiceHandle<geo::Geometry> geom;
+	    //	    _nchannels = geom->Nchannels();
+	   
+	    //if (int(ch) >= 8254)
+	    // continue;
 	    raw::Compress_t compression=raw::kHuffman;
 	    if (fHuffmanDecode) compression=raw::kNone;
-
+	    /*
+	    std::cout << ch << "\t" << wire << "\t" << pl << "\t"
+		      << int(crate_header.getCrateNumber()) << "\t" 
+		      << card_header.getModule() << "\t"
+		      << channel_number << std::endl;
+	    */
 	    raw::RawDigit rd(ch,chdsize,adclist,compression);
 	    tpcDigitList.push_back(rd);
 	  }//<--End channel_it for loop
