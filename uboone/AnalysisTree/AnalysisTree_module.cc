@@ -356,6 +356,9 @@ namespace microboone {
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
     Float_t  hit_endT[kMaxHits];       //hit end time
+    Float_t  hit_goodnessOfFit[kMaxHits]; //chi2/dof goodness of fit 
+    Short_t  hit_multiplicity[kMaxHits];  //multiplicity of the given hit					 
+    Float_t  hit_trueX[kMaxHits];      // hit true X (cm)
     Float_t  hit_nelec[kMaxHits];     //hit number of electrons
     Float_t  hit_energy[kMaxHits];       //hit energy
     Short_t  hit_trkid[kMaxHits];      //is this hit associated with a reco track?
@@ -1179,6 +1182,9 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
   std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
   std::fill(hit_endT, hit_endT + sizeof(hit_endT)/sizeof(hit_endT[0]), -99999.);
+  std::fill(hit_trueX, hit_trueX + sizeof(hit_trueX)/sizeof(hit_trueX[0]), -99999.);
+  std::fill(hit_goodnessOfFit, hit_goodnessOfFit + sizeof(hit_goodnessOfFit)/sizeof(hit_goodnessOfFit[0]), -99999.);
+  std::fill(hit_multiplicity, hit_multiplicity + sizeof(hit_multiplicity)/sizeof(hit_multiplicity[0]), -99999.);
   std::fill(hit_trkid, hit_trkid + sizeof(hit_trkid)/sizeof(hit_trkid[0]), -9999);
   std::fill(hit_nelec, hit_nelec + sizeof(hit_nelec)/sizeof(hit_nelec[0]), -99999.);
   std::fill(hit_energy, hit_energy + sizeof(hit_energy)/sizeof(hit_energy[0]), -99999.);
@@ -1437,6 +1443,9 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
     CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
     CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits]/F");
+    CreateBranch("hit_trueX",hit_trueX,"hit_trueX[no_hits]/F");    
+    CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits]/F");    
+    CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits]/S");    
     CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
     CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
     CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
@@ -1876,6 +1885,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->hit_ph[i]  = hitlist[i]->PeakAmplitude();
       fData->hit_startT[i] = hitlist[i]->PeakTimeMinusRMS();
       fData->hit_endT[i] = hitlist[i]->PeakTimePlusRMS();
+      fData->hit_goodnessOfFit[i] = hitlist[i]->GoodnessOfFit();
+      fData->hit_multiplicity[i] = hitlist[i]->Multiplicity();
+      //std::vector<double> xyz = bt->HitToXYZ(hitlist[i]);
+      //when the size of simIDEs is zero, the above function throws an exception
+      //and crashes, so check that the simIDEs have non-zero size before 
+      //extracting hit true XYZ from simIDEs
+      std::vector<sim::IDE> ides;
+      bt->HitToSimIDEs(hitlist[i], ides);
+      if (ides.size()>0){
+         std::vector<double> xyz = bt->SimIDEsToXYZ(ides);
+         fData->hit_trueX[i] = xyz[0];
+      } 
+      
       /*
       for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
         art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[it]);
