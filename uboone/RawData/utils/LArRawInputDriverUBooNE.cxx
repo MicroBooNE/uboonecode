@@ -106,8 +106,6 @@ namespace lris {
     fNumberOfEvents=-1;
     fEventCounter=0;
     fChannelMap.clear();
-    fWireMap.clear();
-    fPlaneMap.clear();
     fInputStream.close();
   }
     
@@ -163,8 +161,6 @@ namespace lris {
   {
 
     fChannelMap.clear();
-    fWireMap.clear();
-    fPlaneMap.clear();
     mf::LogInfo("")<<"Fetching channel map from DB";
 
     PGconn *conn = PQconnectdb("host=fnalpgsdev.fnal.gov port=5436 dbname=uboonedaq_dev user=uboonedaq_web password=argon!uBooNE");	
@@ -189,7 +185,7 @@ namespace lris {
     /*
     PQclear(res);
     res = PQexec(conn,
-		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id, larsoft_wirenum"
+		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
 		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN ADCreceivers_copy_new NATURAL JOIN crates NATURAL JOIN fecards"
 		 );
     */
@@ -216,23 +212,13 @@ namespace lris {
       //auto const wPl   =      PQgetvalue(res, i, 2);
       int larsoft_chan = atoi(PQgetvalue(res, i, 3));
       int channel_id   = atoi(PQgetvalue(res, i, 4));
-      int larsoft_wirenum   = atoi(PQgetvalue(res, i, 5));
 
       int boardChan = channel_id%64;
 
+      /*
       if (crate_id==9 && slot==5)
 	boardChan = (channel_id-32)%64;
-
-      int planeNum = 4;
-      if (larsoft_chan <= 2399)
-	planeNum = 0;
-      else if (larsoft_chan <= 2*2399)
-	planeNum = 1;
-      else if (larsoft_chan  <= 8254)
-	planeNum = 2;
-      else
-	planeNum = 4;
-
+      */
       /*
       std::cout << "Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
 		<< slot << ", " << boardChan << "]";
@@ -240,8 +226,6 @@ namespace lris {
       */
       daqid_t daq_id(crate_id,slot,boardChan);
       std::pair<daqid_t, int> p(daq_id,larsoft_chan);
-      std::pair<daqid_t, int> p2(daq_id,larsoft_wirenum);
-      std::pair<daqid_t, int> p3(daq_id,planeNum);
 
       if (fChannelMap.find(daq_id) != fChannelMap.end()){
 	std::cout << "Multiple entries!" << std::endl;
@@ -251,8 +235,6 @@ namespace lris {
 		       <<fChannelMap[daq_id];
       }
       fChannelMap.insert(p);
-      fWireMap.insert(p2);
-      fPlaneMap.insert(p3);
     }
   }
 
@@ -491,7 +473,7 @@ namespace lris {
 	    raw::Compress_t compression=raw::kHuffman;
 	    if (fHuffmanDecode) compression=raw::kNone;
 	    /*
-	    std::cout << ch << "\t" << wire << "\t" << pl << "\t"
+	    std::cout << ch << "\t"
 		      << int(crate_header.getCrateNumber()) << "\t" 
 		      << card_header.getModule() << "\t"
 		      << channel_number << std::endl;
