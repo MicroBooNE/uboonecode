@@ -934,6 +934,7 @@ uboonecode : lardata : RawData/raw.h
 uboonecode : lardata : RecoBase/Cluster.h
 uboonecode : lardata : RecoBase/EndPoint2D.h
 uboonecode : lardata : RecoBase/Hit.h
+uboonecode : lardata : RecoBase/OpFlash.h
 uboonecode : lardata : RecoBase/Seed.h
 uboonecode : lardata : RecoBase/Track.h
 uboonecode : lardata : RecoBase/Vertex.h
