@@ -25,7 +25,7 @@ microboone_analysistree:
  SaveVertexInfo:           true
  SaveFlashInfo:            true
  SaveCaloCosmics:          false
- G4MinE:                   0.01
+ G4minE:                   0.01
 }
 
 END_PROLOG
