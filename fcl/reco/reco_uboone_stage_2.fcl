@@ -6,7 +6,8 @@
 #include "trackfindermodules_microboone.fcl"
 #include "calorimetry_microboone.fcl"
 #include "particleid_microboone.fcl"
-#include "showerfindermodules.fcl"
+#include "showerreco3d_microboone.fcl"
+#include "showerquality_microboone.fcl"
 #include "pandoramodules_microboone.fcl"
 #include "cosmicremovalmodules.fcl"
 #include "triggeralgo_service.fcl"
@@ -81,8 +82,8 @@ physics:
   stitchkalmanhitcc:           @local::microboone_trackstitcher
 
   ### shower reco producers
-  showerrecofuzzy:             @local::microboone_shower
-  showerrecopandora:           @local::microboone_shower
+  showerrecofuzzy:             @local::showerreco3d_uboone
+  showerrecopandora:           @local::showerreco3d_uboone_pandora
 
   ### calorimetry producers
   trackkalmanhitcalo:          @local::microboone_calomc                  # Calorimetry for fuzzy cluster
@@ -271,9 +272,8 @@ physics.producers.pandoraNuKHitFlashMatch.TrackModuleLabel:      "pandoraNuKHit"
 physics.producers.pandoraNuKHitFlashMatch.FlashModuleLabel:      "opflash"
 physics.producers.pandoraNuKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
-# Shower reconstruction
-physics.producers.showerrecofuzzy.ClusterModuleLabel:            "fuzzycluster"
-physics.producers.showerrecopandora.ClusterModuleLabel:          "pandoraNu"
+physics.producers.showerrecofuzzy.InputProducer:   "fuzzyclustermerger"
+physics.producers.showerrecopandora.InputProducer: "pandoraNu"
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :

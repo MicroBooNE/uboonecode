@@ -59,6 +59,7 @@ physics:
 
   ### cluster-finder producers
   fuzzycluster:        @local::microboone_fuzzycluster
+  fuzzyclustermerger:  @local::microboone_fuzzyclustermerger
   cccluster:           @local::microboone_clustercrawler
   cctrack:             @local::microboone_cctrackmaker
   cluster3d:           @local::microboone_cluster3d
@@ -80,11 +81,11 @@ physics:
          opflash,
          caldata, 
          gaushit,
-         fuzzycluster, cccluster, cluster3d,
+         fuzzycluster, fuzzyclustermerger, cccluster, cluster3d,
          cctrack,
          pandoraCosmic,
          cluster3dpcatag,
-         mchitfinder,  mcreco
+         mchitfinder,  #mcreco
          ]
 
  #define the output stream, there could be more than one if using filters 
