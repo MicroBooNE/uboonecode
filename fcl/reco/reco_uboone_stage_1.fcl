@@ -108,8 +108,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-#   fileName:    "%ifb_%tc_reco_stage_1.root"
-   fileName:    "test_reco_stage_1.root"
+   fileName:    "%ifb_%tc_reco1.root"
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
  }
