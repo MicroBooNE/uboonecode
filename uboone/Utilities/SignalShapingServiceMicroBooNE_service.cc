@@ -337,7 +337,7 @@ util::SignalShapingServiceMicroBooNE::SignalShaping(unsigned int channel, unsign
 
   // Return appropriate shaper.
 
-  if(view<fViewIndex[0]||view>=fViewIndex[fNViews]) {
+  if(view<fViewIndex[0]||view>fViewIndex[fNViews-1]) {
     throw cet::exception("SignalShapingServiceMicroBooNE")<< "can't determine"
     << " View\n";
   }
