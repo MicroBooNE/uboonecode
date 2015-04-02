@@ -19,22 +19,14 @@ art_file_catalog_mc.fileType:  "mc"
 art_file_catalog_data:           @local::art_file_catalog
 art_file_catalog_data.fileType:  "data"
 
-# Standard configurations for FileCatalogMetadataExtras service.
-# Both fields and values are microboone-specific.
+# Standard configurations for TFileMetadataMicroBooNE service.
 
-microboone_file_catalog:
+microboone_tfile_metadata:
 {
-  Metadata: [ "group",          "uboone",   # This field should move to FileCatalogMetadata. 
-              "fileFormat",     "root",     # This field should move to FileCatalogMetadata.
-              "fclName",        "",
-              "fclVersion",     "",
-              "projectName",    "",
-              "projectStage",   "",
-              "projectVersion", "" ]
-  GeneratePerFileMetadata: true
-  CopyMetadataAttributes:  [ "fileType", "runType" ]
-  RenameTemplate:          ""
-  RenameOverwrite:         true
+  JSONFileName:          "ana_hist.root.json"
+  GenerateTFileMetadata: true
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
 }
 
 END_PROLOG
