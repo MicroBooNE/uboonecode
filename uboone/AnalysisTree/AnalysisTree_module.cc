@@ -232,7 +232,7 @@ namespace microboone {
       PlaneData_t<Float_t>    trkke;
       PlaneData_t<Float_t>    trkrange;
       PlaneData_t<Int_t>      trkidtruth;  //true geant trackid
-      PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles
+      PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: neutrino, 2: cosmic, 3: supernova, 4: singles
       PlaneData_t<Int_t>      trkpdgtruth; //true pdg code
       PlaneData_t<Float_t>    trkefftruth; //completeness
       PlaneData_t<Float_t>    trksimIDEenergytruth;
