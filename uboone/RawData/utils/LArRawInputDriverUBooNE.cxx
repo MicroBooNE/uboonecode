@@ -182,20 +182,21 @@ namespace lris {
     }
 
     // Andrzej's changed database
-    /*
+
     PQclear(res);
     res = PQexec(conn,
 		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
 		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN ADCreceivers_copy_new NATURAL JOIN crates NATURAL JOIN fecards"
 		 );
-    */
+
     // Standard & wrong Hoot database
+    /*
     PQclear(res);
     res = PQexec(conn,
 		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
 		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables NATURAL JOIN ADCreceivers NATURAL JOIN crates NATURAL JOIN fecards"
 		 );
-
+    */
     if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
     {
       mf::LogError("")<< "SELECT command did not return tuples properly";
@@ -437,19 +438,10 @@ namespace lris {
 			  channel_number);
 
 	    int ch=-1;
-	    //	    int wire = -1;
-	    //	    int pl = -1;
 	    if (fChannelMap.find(daqId)!=fChannelMap.end()){
 	      ch=fChannelMap[daqId];
 	      //	      wire=fWireMap[daqId];
 	      //	      pl=fPlaneMap[daqId];
-	      /*
-	      std::cout << ch
-			<< "\t\t["
-			<< int(crate_header.getCrateNumber()) << ", " 
-			<< card_header.getModule() << ", "
-			<< channel_number << "]" << std::endl;
-	      */
 	    }
 	    //\todo fix this once there is a proper channel table
 	    else{
@@ -457,17 +449,7 @@ namespace lris {
 	      ch=10000*crate_header.getCrateNumber()
 		+100*card_header.getModule()
 		+channel_number;
-	      /*
-	      std::cout << ch
-			<< "\t\t["
-			<< int(crate_header.getCrateNumber()) << ", " 
-			<< card_header.getModule() << ", "
-			<< channel_number << "]" << std::endl;
-	      */
 	    }
-	    //	    art::ServiceHandle<geo::Geometry> geom;
-	    //	    _nchannels = geom->Nchannels();
-	   
 	    //if (int(ch) >= 8254)
 	    // continue;
 	    raw::Compress_t compression=raw::kHuffman;
