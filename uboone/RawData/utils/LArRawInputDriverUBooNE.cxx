@@ -216,10 +216,10 @@ namespace lris {
 
       int boardChan = channel_id%64;
 
-      /*
+
       if (crate_id==9 && slot==5)
 	boardChan = (channel_id-32)%64;
-      */
+
       /*
       std::cout << "Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
 		<< slot << ", " << boardChan << "]";
@@ -454,13 +454,17 @@ namespace lris {
 	    // continue;
 	    raw::Compress_t compression=raw::kHuffman;
 	    if (fHuffmanDecode) compression=raw::kNone;
+
+	    raw::RawDigit rd(ch,chdsize,adclist,compression);
+
 	    /*
 	    std::cout << ch << "\t"
 		      << int(crate_header.getCrateNumber()) << "\t" 
 		      << card_header.getModule() << "\t"
-		      << channel_number << std::endl;
+		      << channel_number << "\t"
+		      << rms << std::endl;
 	    */
-	    raw::RawDigit rd(ch,chdsize,adclist,compression);
+
 	    tpcDigitList.push_back(rd);
 	  }//<--End channel_it for loop
 	}//<---End card_it for loop
