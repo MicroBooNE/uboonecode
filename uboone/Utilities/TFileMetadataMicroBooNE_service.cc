@@ -97,6 +97,7 @@ void util::TFileMetadataMicroBooNE::reconfigure(fhicl::ParameterSet const& pset)
   {    
     // Get parameters.
     fGenerateTFileMetadata = pset.get<bool>("GenerateTFileMetadata", false);
+    fJSONFileName = pset.get<std::string>("JSONFileName");
     
     if (!fGenerateTFileMetadata) return;
 
@@ -214,13 +215,12 @@ void util::TFileMetadataMicroBooNE::postEndJob()
   strftime(startbuf,sizeof(startbuf),"%Y-%m-%dT%H:%M:%S",&tstruct);
   
   // open a json file and write everything from the struct md complying to the 
-  // samweb json format. This json file is always named "anahist.json" and holds 
-  // the below information temporarily. If you submitted a grid job invoking this 
-  // service, the information from this file is appended to a final json file and 
-  // this file will be removed
+  // samweb json format. This json file holds the below information temporarily. 
+  // If you submitted a grid job invoking this service, the information from 
+  // this file is appended to a final json file and this file will be removed
   
   ofstream jsonfile;
-  jsonfile.open("anahist.json");
+  jsonfile.open(fJSONFileName);
   jsonfile<<"{\n  \"application\": {\n    \"family\": "<<std::get<0>(md.fapplication)<<",\n    \"name\": ";
   jsonfile<<std::get<1>(md.fapplication)<<",\n    \"version\": "<<std::get<2>(md.fapplication)<<"\n  },\n  ";
   jsonfile<<"\"data_tier\": \""<<md.fdata_tier<<"\",\n  ";

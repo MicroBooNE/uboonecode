@@ -591,7 +591,10 @@ namespace caldata {
 	    //   std::cout << basePre << " " << basePost << " " << roiStart << " " << roiLen << " " << dataSize << " " << base << std::endl;
 	  } // fDoBaselineSub ...
 	  else if(fDoBaselineSub_WaveformPropertiesAlg)
-	    base = fROIPropertiesAlg.GetWaveformPedestal(holder);
+      {
+          holder.resize(roiLen);
+          base = fROIPropertiesAlg.GetWaveformPedestal(holder);
+      }
 
 
 	  for(unsigned int jj = bBegin; jj < bEnd; ++jj) {
