@@ -75,6 +75,7 @@ namespace util{
     // Fcl parameters.
     bool fGenerateTFileMetadata;  
     std::string frunType;                     
+    std::string fJSONFileName;
 
   }; // class TFileMetadataMicroBooNE
 
