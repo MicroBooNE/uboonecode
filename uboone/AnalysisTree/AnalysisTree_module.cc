@@ -681,6 +681,7 @@ namespace microboone {
     void analyze(const art::Event& evt);
   //  void beginJob() {}
     void beginSubRun(const art::SubRun& sr);
+    void endSubRun(const art::SubRun& sr);
 
   private:
 
@@ -690,7 +691,7 @@ namespace microboone {
     double bdist(const TVector3& pos);
 
     TTree* fTree;
-
+    TTree* fPOT;
     // event information is huge and dynamic;
     // run information is much smaller and we still store it statically
     // in the event
@@ -1628,7 +1629,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 
 microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   EDAnalyzer(pset),
-  fTree(nullptr), fData(nullptr),
+  fTree(nullptr), fPOT(nullptr), fData(nullptr),
   fDigitModuleLabel         (pset.get< std::string >("DigitModuleLabel")        ),
   fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
   fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
@@ -1690,6 +1691,11 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
     art::ServiceHandle<art::TFileService> tfs;
     fTree = tfs->make<TTree>("anatree","analysis tree");
   }
+  if (!fPOT) {
+    art::ServiceHandle<art::TFileService> tfs;
+    fPOT = tfs->make<TTree>("pottree","pot tree");
+    fPOT->Branch("pot",&SubRunData.pot,"pot/D");
+  }
   CreateData(bClearData);
   SetAddresses();
 } // microboone::AnalysisTree::CreateTree()
@@ -1705,6 +1711,20 @@ void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
     SubRunData.pot=potListHandle->totpot;
   else
     SubRunData.pot=0.;
+
+}
+
+void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
+{
+
+  art::Handle< sumdata::POTSummary > potListHandle;
+  //sr.getByLabel(fPOTModuleLabel,potListHandle);
+
+  if(sr.getByLabel(fPOTModuleLabel,potListHandle))
+    SubRunData.pot=potListHandle->totpot;
+  else
+    SubRunData.pot=0.;
+  fPOT->Fill();
 
 }
 
