@@ -1054,7 +1054,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
     CreateBranch(BranchName, trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
     BranchName = "trkxyz_" + TrackLabel;
-    CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "[3]" + "/F");
   }
 
   BranchName = "trkstartx_" + TrackLabel;
@@ -1454,8 +1454,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits]/F");    
     CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits]/S");    
     CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
-    CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
-    CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
+    if (!isCosmics){
+      CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
+      CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
+    }
   }
 
   if (hasVertexInfo()){
@@ -1919,7 +1921,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
       */
 
-      if (!evt.isRealData()){
+      if (!evt.isRealData()&&!isCosmics){
          fData -> hit_nelec[i] = 0;
          fData -> hit_energy[i] = 0;
          const sim::SimChannel* chan = 0;
