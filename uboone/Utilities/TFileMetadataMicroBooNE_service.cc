@@ -240,7 +240,7 @@ void util::TFileMetadataMicroBooNE::postEndJob()
       c++;
       size_t n = parent.find_last_of('/');
       size_t f1 = (n == std::string::npos ? 0 : n+1);
-      jsonfile<<"    {\n     \"filename\": \""<<parent.substr(f1)<<"\"\n    }";
+      jsonfile<<"    {\n     \"file_name\": \""<<parent.substr(f1)<<"\"\n    }";
       if (md.fParents.size()==1 || c==md.fParents.size()) jsonfile<<"\n";
       else jsonfile<<",\n"; 
     }      
