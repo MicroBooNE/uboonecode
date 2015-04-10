@@ -5,21 +5,27 @@ BEGIN_PROLOG
 
 microboone_simwire:  
 { 
- module_type:         "SimWireMicroBooNE"
- TrigModName:         "triggersim"
- DriftEModuleLabel:   "largeant"
- NoiseWidth:          62.4        #Exponential Noise width (kHz)
- NoiseRand:           0.1         #frac of randomness of noise freq-spec
- LowCutoff:           7.5         #Low frequency filter cutoff (kHz)
- CompressionType:     "none"      #could also be none		
- 
+ module_type:        "SimWireMicroBooNE"
+ TrigModName:        "triggersim"
+ DriftEModuleLabel:  "largeant"
+ NoiseWidth:         62.4         #Exponential Noise width (kHz)
+ NoiseRand:          0.1          #frac of randomness of noise freq-spec
+ LowCutoff:          7.5          #Low frequency filter cutoff (kHz)
+ CompressionType:    "none"       #could also be none		
  GenNoise:            true        #gen noise...if false function not called
+ #GenNoise:           false        #gen noise...if false function not called
  GetNoiseFromHisto:   false       #generate noise from histogram of freq-distribution
+
  GenNoiseInTime:      true        #generate noise in time-domain. Flat freq. distribution. If false then generate in freq. domani
+ PedestalVec:         [ 2048, 2048, 400 ]
+ #CollectionPed:       400         #ADC baseline for coll plane
+ #InductionPed:        2048        #ADC baseline for ind plane
+ BaselineRMS:         0.3         #ADC baseline fluctuation within channel        
+
  NoiseFileFname:      "uboone_noise_v0.1.root"
  NoiseHistoName:      "NoiseFreq" 
-       
- DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg   
+ 
+ PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg   
 
 # Expert settings
  Test:                false       #turns on special test case: parameters below               

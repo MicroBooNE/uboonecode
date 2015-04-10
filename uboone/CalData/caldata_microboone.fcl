@@ -20,7 +20,7 @@ microboone_calroi:
  SaveWireWF:  0
  DoBaselineSub_WaveformPropertiesAlg:   false # subtract baseline after deconvolution?
  
- DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
+ PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
  ROIPropertiesAlg:      { ROIAlgParams: @local::roiAlg_DigitAboveBaseline }
 }
 
@@ -34,7 +34,7 @@ microboone_calwire:
  BaseVarCut:         25.  # Variance cut for selecting baseline points
  SaveWireWF:          0
  
- DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
+ PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
 }
 
 microboone_calwirePrespill:  @local::microboone_calwire
@@ -56,7 +56,7 @@ microboone_showwire:
     Channel: 7775
     SaveWaveforms: true
     
-    DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
+    PedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
 }
 
 microboone_rawdigitandwirecomparisonana:

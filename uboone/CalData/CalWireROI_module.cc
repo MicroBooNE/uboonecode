@@ -43,7 +43,7 @@
 #include "Utilities/LArFFT.h"
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 #include "WaveformPropertiesAlg.h"
 
 /* unused function
@@ -146,7 +146,7 @@ namespace caldata {
     int  fSaveWireWF;     ///< Save recob::wire object waveforms
     size_t fEventCount;  ///< count of event processed
     
-    lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
+    dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
 
     void doDecon(std::vector<float>& holder, 
       raw::ChannelID_t channel, unsigned int thePlane,
@@ -170,7 +170,7 @@ namespace caldata {
   
   //-------------------------------------------------
   CalWireROI::CalWireROI(fhicl::ParameterSet const& pset):
-    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg")),
+  fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg")),
     fROIPropertiesAlg(pset.get<fhicl::ParameterSet>("ROIPropertiesAlg"))
   {
     this->reconfigure(pset);
@@ -204,8 +204,8 @@ namespace caldata {
     fSaveWireWF       = p.get< int >                  ("SaveWireWF");
 
     fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
-    
-    fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
+
+    fPedestalRetrievalAlg.reconfigure(p);
     
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
       throw art::Exception(art::errors::Configuration)
@@ -266,10 +266,6 @@ namespace caldata {
   //////////////////////////////////////////////////////
   void CalWireROI::produce(art::Event& evt)
   {      
-  
-    //update database cache
-    fPedestalRetrievalAlg.Update( lariov::IOVTimeStamp(evt) );
-  
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
 
@@ -347,7 +343,8 @@ namespace caldata {
         raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
         // loop over all adc values and subtract the pedestal
 	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
-        float pdstl = fPedestalRetrievalAlg.PedMean(channel);
+        float pdstl = 0.0;
+	fPedestalRetrievalAlg.GetPedestalMean(channel, pdstl);
 	//subtract time-offset added in SimWireMicroBooNE_module
 	// Xin, remove the time offset
 	//int time_offset = 0.;//sss->FieldResponseTOffset(channel);

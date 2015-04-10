@@ -55,7 +55,7 @@
 #include "Utilities/TimeService.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
-#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 
 
 
@@ -97,8 +97,8 @@ namespace detsim {
     double                 fLowCutoff;        ///< low frequency filter cutoff (kHz)
     size_t                 fNTicks;           ///< number of ticks of the clock
     double                 fSampleRate;       ///< sampling rate in ns
-    
-    unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)                 
+
+    unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)
 
     TH1D*                  fNoiseDistColl;    ///< distribution of noise counts
     TH1D*                  fNoiseDistInd;     ///< distribution of noise counts
@@ -111,11 +111,10 @@ namespace detsim {
     TH1D*             fNoiseHist;             ///< distribution of noise counts
     float                  fASICGain;
 
+    dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
+
     std::map< double, int > fShapingTimeOrder;
     std::string fTrigModName;                 ///< Trigger data product producer name
-    
-    lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg;      ///< Pedestal Retrieval algorithm
-    
 
     bool        fTest; // for forcing a test case
     std::vector<sim::SimChannel> fTestSimChannel_v;
@@ -156,7 +155,7 @@ namespace detsim {
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)
   : fNoiseHist(0)
-    , fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"))
+  , fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
   {
     this->reconfigure(pset);
 
@@ -191,6 +190,8 @@ namespace detsim {
     fGenNoiseInTime   = p.get< bool                >("GenNoiseInTime");
     fGenNoise         = p.get< bool                >("GenNoise");
 
+    //    fPedestalVec      = p.get< std::vector<float>  >("PedestalVec");
+    //    fBaselineRMS      = p.get< float               >("BaselineRMS");
     fTrigModName      = p.get< std::string         >("TrigModName");
     fTest             = p.get<bool                 >("Test");
     fTestWire         = p.get< size_t              >("TestWire");
@@ -199,7 +200,8 @@ namespace detsim {
     if(fTestIndex.size() != fTestCharge.size())
       throw cet::exception(__FUNCTION__)<<"# test pulse mismatched: check TestIndex and TestCharge fcl parameters...";
     fSample           = p.get<int                  >("Sample");
-    fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
+
+    fPedestalRetrievalAlg.reconfigure(p.get<fhicl::ParameterSet>("PedestalRetrievalAlg"));
 
 
     //Map the Shaping Times to the entry position for the noise ADC
@@ -271,9 +273,9 @@ namespace detsim {
       mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
       << fNTimeSamples << " greater than FFTSize " << fNTicks << "!";
 
-       
+
     if(fTest){
-      art::ServiceHandle<geo::Geometry> geo;  
+      art::ServiceHandle<geo::Geometry> geo;
       if(geo->Nchannels()<=fTestWire)
         throw cet::exception(__FUNCTION__)<<"Invalid test wire channel: "<<fTestWire;
 
@@ -309,8 +311,6 @@ namespace detsim {
   void SimWireMicroBooNE::produce(art::Event& evt)
   {
 
-    //update database cache
-    fPedestalRetrievalAlg.Update( lariov::IOVTimeStamp(evt) );
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fFFT->ReinitializeFFT(fNTimeSamples,fFFT->FFTOptions(),fFFT->FFTFitBins());
@@ -577,11 +577,13 @@ namespace detsim {
 
       //Generate Noise:
       //Pedestal determination and random gaussian variation
-      lariov::DetPedestal pedestal = fPedestalRetrievalAlg.Pedestal(chan);
+      float ped_mean = 0.0, ped_rms = 0.0;
+      fPedestalRetrievalAlg.GetPedestal(chan, ped_mean, ped_rms);
       art::ServiceHandle<art::RandomNumberGenerator> rng;
       CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");
-      CLHEP::RandGaussQ rGaussPed(engine, 0.0, pedestal.PedRms());
-      float ped_mean = pedestal.PedMean() + rGaussPed.fire();
+      CLHEP::RandGaussQ rGaussPed(engine, 0.0, ped_rms);
+      ped_mean += rGaussPed.fire();
+
 
       //Generate Noise
       //geo::SigType_t sigtype = geo->SignalType(chan);

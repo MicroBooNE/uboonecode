@@ -1,3 +1,4 @@
+
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES Geometry
                         Geometry_service
@@ -6,9 +7,8 @@ art_make( BASENAME_ONLY
                         TimeService_service
                         Filters
                         RawData
+                        Database
                         SignalShapingServiceMicroBooNE_service
-			CalibrationDBI_IOVData
-			CalibrationDBI_WebDBI
                         ${SEEDSERVICE_SERVICE} # artextensions
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}

@@ -24,7 +24,7 @@
 #include "Geometry/Geometry.h"
 #include "RecoBase/Wire.h"
 #include "RawData/RawDigit.h"
-#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
@@ -57,7 +57,7 @@ private:
   raw::ChannelID_t fChannel;
   bool fSaveWaveforms;
   
-  lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg;
+  dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
 
   std::string MakeHistName(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
   std::string MakeHistTitle(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
@@ -91,7 +91,7 @@ private:
 cal::ShowWire::ShowWire(fhicl::ParameterSet const & p) 
   :
   EDAnalyzer(p),
-  fPedestalRetrievalAlg(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"))
+  fPedestalRetrievalAlg(p.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
  // More initializers here.
 {
   this->reconfigure(p);
@@ -110,7 +110,7 @@ void cal::ShowWire::reconfigure(fhicl::ParameterSet const& p){
   fChannel             = p.get<unsigned int>("Channel",7775);
   fSaveWaveforms       = p.get<bool>("SaveWaveforms",true);
   
-  fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
+  fPedestalRetrievalAlg.reconfigure(p);
 }
 
 void cal::ShowWire::beginJob(){
@@ -195,7 +195,8 @@ void cal::ShowWire::SetHistogram(TH1F* hist,
 
 void cal::ShowWire::FillWaveforms(recob::Wire const& wire, raw::RawDigit const& rawdigit, TH1F* h_wire, TH1F* h_raw){
 
-  float pedestal = fPedestalRetrievalAlg.PedMean(rawdigit.Channel());
+  float pedestal = 0.0;
+  fPedestalRetrievalAlg.GetPedestalMean(rawdigit.Channel(),pedestal);
 
   size_t begin_iter=0;
   size_t end_iter = rawdigit.Samples();
@@ -217,9 +218,6 @@ void cal::ShowWire::FillWaveforms(recob::Wire const& wire, raw::RawDigit const& 
 void cal::ShowWire::analyze(art::Event const & e)
 {
   // Implementation of required member function here.
-
-  //update database cache
-  fPedestalRetrievalAlg.Update( lariov::IOVTimeStamp(e) );
 
   art::Handle< std::vector<recob::Wire> > wireVectorHandle;
   e.getByLabel(fCalDataModuleLabel,wireVectorHandle);
