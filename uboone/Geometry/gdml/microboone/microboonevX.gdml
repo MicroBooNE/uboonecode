@@ -19886,6 +19886,11 @@
      <position name="posTPCWire1726" unit="cm" y="0" z="316.1" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/>
     </physvol>
+    <physvol>
+     <volumeref ref="volTPCWireCommon"/>
+     <position name="posTPCWire1727" unit="cm" y="0" z="316.7" x="0"/>
+     <rotationref ref="rPlusUVAngleAboutX"/>
+    </physvol>
   </volume>
 
   <volume name="volTPCWireVert">

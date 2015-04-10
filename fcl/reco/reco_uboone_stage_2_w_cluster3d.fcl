@@ -50,58 +50,76 @@ physics:
  {
 
   ### random number saver
-  rns:                         { module_type: RandomNumberSaver }
+  rns:                          { module_type: RandomNumberSaver }
 
   ### pandora core modules
-  pandoraNu:                   @local::microboone_pandora
+  pandoraNu:                    @local::microboone_pandora
 
   ### pandora cosmic kalmanhit
-  pandoraCosmicKHit:           @local::microboone_track3Dkalmanhit
-  pandoraNuKHit:               @local::microboone_track3Dkalmanhit
+  pandoraCosmicKHit:            @local::microboone_track3Dkalmanhit
+  pandoraNuKHit:                @local::microboone_track3Dkalmanhit
 
   ### pandora cosmic pfparticle
-  pandoraCosmicKHitPFPart:     @local::microboone_cosmicpfparticletagger
+  pandoraCosmicKHitPFPart:      @local::microboone_cosmicpfparticletagger
 
   ### pandora analysis
-  pandoraCosmicKHittag:        @local::microboone_cosmictracktagger
-  pandoraCosmicKHitcalo:       @local::microboone_calomc
-  pandoraCosmicKHitpid:        @local::microboone_chi2pid
-  pandoraCosmicKHitFlashMatch: @local::microboone_beamflashtrackmatchtagger
-  pandoraCosmicKHitRemoval:    @local::microboone_crhitremoval
-  pandoraNuKHittag:            @local::microboone_cosmictracktagger
-  pandoraNuKHitcalo:           @local::microboone_calomc
-  pandoraNuKHitpid:            @local::microboone_chi2pid
-  pandoraNuKHitFlashMatch:     @local::microboone_beamflashtrackmatchtagger
+  pandoraCosmicKHittag:         @local::microboone_cosmictracktagger
+  pandoraCosmicKHitcalo:        @local::microboone_calomc
+  pandoraCosmicKHitpid:         @local::microboone_chi2pid
+  pandoraCosmicKHitFlashMatch:  @local::microboone_beamflashtrackmatchtagger
+  pandoraCosmicKHitRemoval:     @local::microboone_crhitremoval
+  pandoraNuKHittag:             @local::microboone_cosmictracktagger
+  pandoraNuKHitcalo:            @local::microboone_calomc
+  pandoraNuKHitpid:             @local::microboone_chi2pid
+  pandoraNuKHitFlashMatch:      @local::microboone_beamflashtrackmatchtagger
   
   ### track fit producers
-  trackkalmanhit:              @local::microboone_track3Dkalmanhit        # Track fit for fuzzy cluster
-  trackkalmanhitcc:            @local::microboone_track3Dkalmanhit        # Track fit for Cluster Crawler (Track Maker)
-  
+  trackkalmanhit:               @local::microboone_track3Dkalmanhit        # Track fit for fuzzy cluster
+  trackkalmanhitcc:             @local::microboone_track3Dkalmanhit        # Track fit for Cluster Crawler (Track Maker)
+  trackkalmanhitc3d:            @local::microboone_track3Dkalmanhit        # Track fit for Cluster3D
+
   ### track stitching
-  stitchkalmanhit:             @local::microboone_trackstitcher
-  stitchkalmanhitcc:           @local::microboone_trackstitcher
+  stitchkalmanhit:              @local::microboone_trackstitcher
+  stitchkalmanhitcc:            @local::microboone_trackstitcher
+  stitchkalmanhitc3d:           @local::microboone_trackstitcher
 
   ### shower reco producers
-  showerrecofuzzy:             @local::showerreco3d_uboone
-  showerrecopandora:           @local::showerreco3d_uboone_pandora
+  showerrecofuzzy:              @local::showerreco3d_uboone
+  showerrecopandora:            @local::showerreco3d_uboone_pandora
 
   ### calorimetry producers
-  trackkalmanhitcalo:          @local::microboone_calomc                  # Calorimetry for fuzzy cluster
-  stitchkalmanhitcalo:         @local::microboone_calomc
-  trackkalmanhitcalocc:        @local::microboone_calomc                  # Calorimeter for Cluster Crawler
-  stitchkalmanhitcalocc:       @local::microboone_calomc
+  trackkalmanhitcalo:           @local::microboone_calomc                  # Calorimetry for fuzzy cluster
+  stitchkalmanhitcalo:          @local::microboone_calomc
+  trackkalmanhitcalocc:         @local::microboone_calomc                  # Calorimeter for Cluster Crawler
+  stitchkalmanhitcalocc:        @local::microboone_calomc
+  trackkalmanhitcaloc3d:        @local::microboone_calomc                  # Calorimeter for Cluster3D
+  stitchkalmanhitcaloc3d:       @local::microboone_calomc
 
   ### PID producers
-  trackkalmanhitpid:           @local::microboone_chi2pid
-  stitchkalmanhitpid:          @local::microboone_chi2pid
-  trackkalmanhitpidcc:         @local::microboone_chi2pid
-  stitchkalmanhitpidcc:        @local::microboone_chi2pid
+  trackkalmanhitpid:            @local::microboone_chi2pid
+  stitchkalmanhitpid:           @local::microboone_chi2pid
+  trackkalmanhitpidcc:          @local::microboone_chi2pid
+  stitchkalmanhitpidcc:         @local::microboone_chi2pid
+  trackkalmanhitpidc3d:         @local::microboone_chi2pid
+  stitchkalmanhitpidc3d:        @local::microboone_chi2pid
 
   ### track-tagging producers
-  trackkalmanhittag:           @local::microboone_cosmictracktagger
-  stitchkalmanhittag:          @local::microboone_cosmictracktagger
-  trackkalmanhittagcc:         @local::microboone_cosmictracktagger
-  stitchkalmanhittagcc:        @local::microboone_cosmictracktagger
+  trackkalmanhittag:            @local::microboone_cosmictracktagger
+  stitchkalmanhittag:           @local::microboone_cosmictracktagger
+  trackkalmanhittagcc:          @local::microboone_cosmictracktagger
+  stitchkalmanhittagcc:         @local::microboone_cosmictracktagger
+  trackkalmanhittagc3d:         @local::microboone_cosmictracktagger
+  stitchkalmanhittagc3d:        @local::microboone_cosmictracktagger
+
+  ### flash-matching producers
+  trackkalmanhitflashmatch:     @local::microboone_beamflashtrackmatchtagger
+  stitchkalmanhitflashmatch:    @local::microboone_beamflashtrackmatchtagger
+  trackkalmanhitflashmatchcc:   @local::microboone_beamflashtrackmatchtagger
+  stitchkalmanhitflashmatchcc:  @local::microboone_beamflashtrackmatchtagger
+  trackkalmanhitflashmatchc3d:  @local::microboone_beamflashtrackmatchtagger
+  stitchkalmanhitflashmatchc3d: @local::microboone_beamflashtrackmatchtagger
+
+
 
  }
 
@@ -117,6 +135,8 @@ physics:
          stitchkalmanhitpid,
          trackkalmanhittag,
          stitchkalmanhittag,
+         trackkalmanhitflashmatch,
+         stitchkalmanhitflashmatch,
          ###>> Cluster Crawler / Track Maker bats second
          trackkalmanhitcc, 
          stitchkalmanhitcc, 
@@ -126,6 +146,8 @@ physics:
          stitchkalmanhitpidcc,
          trackkalmanhittagcc,
          stitchkalmanhittagcc,
+         trackkalmanhitflashmatchcc,
+         stitchkalmanhitflashmatchcc,
          ###>> Pandora up third
          pandoraCosmicKHit,
          pandoraCosmicKHittag,
@@ -140,6 +162,17 @@ physics:
          pandoraNuKHitcalo,
          pandoraNuKHitpid,
          pandoraNuKHitFlashMatch,
+         ###>> Batting last is Cluster3D
+         trackkalmanhitc3d,
+         stitchkalmanhitc3d,
+         trackkalmanhitcaloc3d,
+         stitchkalmanhitcaloc3d,
+         trackkalmanhitpidc3d,
+         stitchkalmanhitpidc3d,
+         trackkalmanhittagc3d,
+         stitchkalmanhittagc3d,
+         trackkalmanhitflashmatchc3d,
+         stitchkalmanhitflashmatchc3d,
          ###>> Shower reconstruction bats cleanup
          showerrecofuzzy, 
          showerrecopandora
@@ -198,6 +231,14 @@ physics.producers.trackkalmanhittag.TrackModuleLabel:            "trackkalmanhit
 physics.producers.stitchkalmanhittag.ClusterModuleLabel:         "fuzzycluster"
 physics.producers.stitchkalmanhittag.TrackModuleLabel:           "stitchkalmanhit"
 
+physics.producers.trackkalmanhitflashmatch.TrackModuleLabel:      "trackkalmanhit"
+physics.producers.trackkalmanhitflashmatch.FlashModuleLabel:      "opflash"
+physics.producers.trackkalmanhitflashmatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+
+physics.producers.stitchkalmanhitflashmatch.TrackModuleLabel:      "stitchkalmanhit"
+physics.producers.stitchkalmanhitflashmatch.FlashModuleLabel:      "opflash"
+physics.producers.stitchkalmanhitflashmatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+
 # ClusterCrawler / Track Maker related
 physics.producers.trackkalmanhitcc.HitModuleLabel:               "cccluster"
 physics.producers.trackkalmanhitcc.ClusterModuleLabel:           "cccluster"
@@ -225,6 +266,14 @@ physics.producers.trackkalmanhittagcc.TrackModuleLabel:          "trackkalmanhit
 
 physics.producers.stitchkalmanhittagcc.ClusterModuleLabel:       "cccluster"
 physics.producers.stitchkalmanhittagcc.TrackModuleLabel:         "stitchkalmanhitcc"
+
+physics.producers.trackkalmanhitflashmatchcc.TrackModuleLabel:      "trackkalmanhitcc"
+physics.producers.trackkalmanhitflashmatchcc.FlashModuleLabel:      "opflash"
+physics.producers.trackkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+
+physics.producers.stitchkalmanhitflashmatchcc.TrackModuleLabel:      "stitchkalmanhitcc"
+physics.producers.stitchkalmanhitflashmatchcc.FlashModuleLabel:      "opflash"
+physics.producers.stitchkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
 # Pandora related
 physics.producers.pandoraCosmicKHit.UseClusterHits:              false
@@ -273,6 +322,42 @@ physics.producers.pandoraNuKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsi
 
 physics.producers.showerrecofuzzy.InputProducer:   "fuzzyclustermerger"
 physics.producers.showerrecopandora.InputProducer: "pandoraNu"
+
+# Cluster3D related
+physics.producers.trackkalmanhitc3d.HitModuleLabel:               "gaushit"
+physics.producers.trackkalmanhitc3d.ClusterModuleLabel:           "cluster3d"
+physics.producers.trackkalmanhitc3d.PFParticleModuleLabel:        "cluster3d"
+physics.producers.trackkalmanhitc3d.UseClusterHits:               false
+physics.producers.trackkalmanhitc3d.UsePFParticleHits:            true
+
+physics.producers.stitchkalmanhitc3d.TrackModuleLabel:            "trackkalmanhitc3d"
+physics.producers.stitchkalmanhitc3d.SpptModuleLabel:             "trackkalmanhitc3d"
+
+physics.producers.trackkalmanhitcaloc3d.TrackModuleLabel:         "trackkalmanhitc3d"
+physics.producers.trackkalmanhitcaloc3d.SpacePointModuleLabel:    "trackkalmanhitc3d"
+
+physics.producers.stitchkalmanhitcaloc3d.TrackModuleLabel:        "stitchkalmanhitc3d"
+physics.producers.stitchkalmanhitcaloc3d.SpacePointModuleLabel:   "trackkalmanhitc3d"
+
+physics.producers.trackkalmanhitpidc3d.CalorimetryModuleLabel:    "trackkalmanhitcaloc3d"
+physics.producers.trackkalmanhitpidc3d.TrackModuleLabel:          "trackkalmanhitc3d"
+
+physics.producers.stitchkalmanhitpidc3d.CalorimetryModuleLabel:   "stitchkalmanhitc3dcalo"
+physics.producers.stitchkalmanhitpidc3d.TrackModuleLabel:         "stitchkalmanhitc3d"
+
+physics.producers.trackkalmanhittagc3d.ClusterModuleLabel:        "cluster3d"
+physics.producers.trackkalmanhittagc3d.TrackModuleLabel:          "trackkalmanhitc3d"
+
+physics.producers.stitchkalmanhittagc3d.ClusterModuleLabel:       "cluster3d"
+physics.producers.stitchkalmanhittagc3d.TrackModuleLabel:         "stitchkalmanhitc3d"
+
+physics.producers.trackkalmanhitflashmatchc3d.TrackModuleLabel:      "trackkalmanhitc3d"
+physics.producers.trackkalmanhitflashmatchc3d.FlashModuleLabel:      "opflash"
+physics.producers.trackkalmanhitflashmatchc3d.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+
+physics.producers.stitchkalmanhitflashmatchc3d.TrackModuleLabel:      "stitchkalmanhitc3d"
+physics.producers.stitchkalmanhitflashmatchc3d.FlashModuleLabel:      "opflash"
+physics.producers.stitchkalmanhitflashmatchc3d.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :

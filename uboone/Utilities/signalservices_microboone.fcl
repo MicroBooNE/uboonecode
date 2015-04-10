@@ -84,4 +84,15 @@ microboone_signalshapingservice:
   ColFieldParams: [ 8.0,16.0,.75 ]
 
 }
+
+# Dynamic induced charge field response.
+
+microboone_dic_signalshapingservice: @local::microboone_signalshapingservice
+microboone_dic_signalshapingservice.NResponses:       [ [5, 5, 5], [1,1,1] ]  # number of responses per view, including primary.
+microboone_dic_signalshapingservice.NActiveResponses: [ [5, 3, 4], [1,1,1] ]  # number of active responses per view, including primary.
+microboone_dic_signalshapingservice.CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
+microboone_dic_signalshapingservice.FieldResponseFVersion: [ "v2.1", "v0.1" ]
+
+
+
 END_PROLOG
