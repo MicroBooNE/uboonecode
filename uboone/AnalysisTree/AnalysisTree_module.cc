@@ -1724,7 +1724,7 @@ void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
     SubRunData.pot=potListHandle->totpot;
   else
     SubRunData.pot=0.;
-  fPOT->Fill();
+  if (fPOT) fPOT->Fill();
 
 }
 
