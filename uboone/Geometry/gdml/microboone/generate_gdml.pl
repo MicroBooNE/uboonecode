@@ -482,7 +482,7 @@ EOF
   }
 
   # The wires in the middle.
-  for ($i = 0; $i < $NumberCenterWires - 1; ++$i)
+  for ($i = 0; $i < $NumberCenterWires ; ++$i)
   {
       my $j = $NumberSideWires+$i;
       $zpos=-0.5*$TPCWirePlaneLength+$TPCWireXPitch*(0.5*$NumberSideWires+$i+1);
