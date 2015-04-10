@@ -1,12 +1,8 @@
-#include "litemaker_base.fcl"
+#include "larlite_maker.fcl"
 
-BEGIN_PROLOG
+physics.analyzers.scanner.out_filename: "larlite_simch.root"
 
-litemaker_simch: @local::litemaker_base
-
-litemaker_simch.out_filename: "larlite_simch.root"
-
-litemaker_simch.DataLookUpMap:
+physics.analyzers.scanner.DataLookUpMap:
 {
   # Producer names specified below would be looked up & stored in
   # the output larlite file. The key represents the data product
@@ -15,4 +11,4 @@ litemaker_simch.DataLookUpMap:
   simch: ["largeant"]
 }
 
-END_PROLOG
+

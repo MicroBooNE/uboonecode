@@ -1,19 +1,14 @@
-#include "litemaker_base.fcl"
+#include "larlite_maker.fcl"
 
-BEGIN_PROLOG
+physics.analyzers.scanner.out_filename: "larlite_mcpart.root"
 
-litemaker_mcpart: @local::litemaker_base
-
-litemaker_mcpart.out_filename: "larlite_mcpart.root"
-
-litemaker_mcpart.AssociationLookUpMap: @local::litemaker_ass_mc
-
-litemaker_mcpart.DataLookUpMap:
+physics.analyzers.scanner.AssociationLookUpMap: 
 {
-  # Producer names specified below would be looked up & stored in
-  # the output larlite file. The key represents the data product
-  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
-  # string array.
+  mctruth: ["generator"]
+}
+
+physics.analyzers.scanner.DataLookUpMap:
+{
   mcpart:     ["largeant"]
 }
 

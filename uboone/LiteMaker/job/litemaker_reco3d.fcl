@@ -1,36 +1,43 @@
-#include "litemaker_base.fcl"
+#include "larlite_maker.fcl"
 
-BEGIN_PROLOG
+physics.analyzers.scanner.out_filename: "larlite_reco3d.root"
 
-litemaker_reco3d: @local::litemaker_base
-
-litemaker_reco3d.out_filename: "larlite_reco3d.root"
-
-litemaker_reco3d.DataLookUpMap:
+physics.analyzers.scanner.DataLookUpMap:
 {
-  # Producer names specified below would be looked up & stored in
-  # the output larlite file. The key represents the data product
-  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
-  # string array.
+#  hit:        ["gaushit","ccluster"]
+#  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+#  endpoint2d: []
   sps:        ["pandoraCosmic","pandoraNu",
-               "costrk", "costrkcc",
-               "spacepointfinder","spacepointfindercc",
+               "pandoraCosmicKHit","pandoraNuKHit",
+               "cluster3d",
                "trackkalmanhit","trackkalmanhitcc"]
   vertex:     ["cccluster",
-               "beziertracker","beziertrackercc",
-               "featurevtx"]
-  track:      ["trackkalmanhit","trackkalmanhitcc",
-               "trackkalsps","trackkalspscc",
-               "beziertracker","beziertrackercc",
-               "costrk","costrkcc",
-               "stitch","stitchcc",
-               "stitchkalmanhit",
-               "pandoraCosmicKHit", "pandoraNuKHit"]
-  seed:       ["pandoraCosmic", "pandoraNu"]
-  shower:     []
-  pfpart:     ["pandoraCosmic","pandoraNu"]
+               "pandoraNu","pandoraCosmic"]
+  track:      ["cctrack",
+               "trackkalmanhit", "stitchkalmanhit",
+               "tracklakmanhitcc", "stitchkalmanhitcc",
+               "pandoraNuKHit","pandoraCosmicKHit"]
+  seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+  shower:     ["showerrecopandora","showerrecofuzzy"]
+  pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
 }
 
-litemaker_reco3d.AssociationLookUpMap: @local::litemaker_ass_reco
-
-END_PROLOG
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  endpoint2d: []
+  sps:        ["pandoraCosmic","pandoraNu",
+               "pandoraCosmicKHit","pandoraNuKHit",
+               "cluster3d",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "pandoraNu","pandoraCosmic"]
+  track:      ["cctrack",
+               "trackkalmanhit", "stitchkalmanhit",
+               "tracklakmanhitcc", "stitchkalmanhitcc",
+               "pandoraNuKHit","pandoraCosmicKHit"]
+  seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+  shower:     ["showerrecopandora","showerrecofuzzy"]
+  pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+}
