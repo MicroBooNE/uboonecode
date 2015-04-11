@@ -270,10 +270,12 @@ physics.producers.stitchkalmanhittagcc.TrackModuleLabel:         "stitchkalmanhi
 physics.producers.trackkalmanhitflashmatchcc.TrackModuleLabel:      "trackkalmanhitcc"
 physics.producers.trackkalmanhitflashmatchcc.FlashModuleLabel:      "opflash"
 physics.producers.trackkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+physics.producers.trackkalmanhitflashmatchcc.HitModuleLabel:        "cccluster"
 
 physics.producers.stitchkalmanhitflashmatchcc.TrackModuleLabel:      "stitchkalmanhitcc"
 physics.producers.stitchkalmanhitflashmatchcc.FlashModuleLabel:      "opflash"
 physics.producers.stitchkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+physics.producers.stitchkalmanhitflashmatchcc.HitModuleLabel:        "cccluster"
 
 # Pandora related
 physics.producers.pandoraCosmicKHit.UseClusterHits:              false
