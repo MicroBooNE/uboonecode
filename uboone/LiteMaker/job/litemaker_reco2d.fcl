@@ -1,29 +1,17 @@
-#include "litemaker_base.fcl"
+#include "larlite_maker.fcl"
 
-BEGIN_PROLOG
+physics.analyzers.scanner.out_filename: "larlite_reco2d.root"
 
-litemaker_reco2d: @local::litemaker_base
-
-litemaker_reco2d.out_filename: "larlite_reco2d.root"
-
-litemaker_reco2d.DataLookUpMap:
+physics.analyzers.scanner.DataLookUpMap:
 {
-  # Producer names specified below would be looked up & stored in
-  # the output larlite file. The key represents the data product
-  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
-  # string array.
-  hit:        ["gaushit","cccluster"]
+  hit:        ["gaushit","ccluster"]
   cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
-  endpoint2d: ["cccluster",
-               "featurevtx"]
+  endpoint2d: []
 }
 
-litemaker_reco2d.AssociationLookUpMap:
+physics.analyzers.scanner.AssociationLookUpMap:
 {
-  hit:        ["gaushit","cccluster"]
+  hit:        ["gaushit","ccluster"]
   cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
-  endpoint2d: ["cccluster",
-               "featurevtx"]
+  endpoint2d: []
 }
-
-END_PROLOG

@@ -1,6 +1,37 @@
 #ifndef SCANNERALGO_TEMPLATE_H
 #define SCANNERALGO_TEMPLATE_H
 
+#include "DataFormat/event_ass.h"
+#include "DataFormat/sparse_vector.h"
+#include "DataFormat/trigger.h"
+#include "DataFormat/potsummary.h"
+#include "DataFormat/hit.h"
+#include "DataFormat/track.h"
+#include "DataFormat/mctruth.h"
+#include "DataFormat/mctree.h"
+#include "DataFormat/user_info.h"
+#include "DataFormat/spacepoint.h"
+#include "DataFormat/rawdigit.h"
+#include "DataFormat/wire.h"
+#include "DataFormat/hit.h"
+#include "DataFormat/cluster.h"
+#include "DataFormat/shower.h"
+#include "DataFormat/mcshower.h"
+#include "DataFormat/mctrack.h"
+#include "DataFormat/simch.h"
+#include "DataFormat/calorimetry.h"
+#include "DataFormat/vertex.h"
+#include "DataFormat/endpoint2d.h"
+#include "DataFormat/seed.h"
+#include "DataFormat/cosmictag.h"
+#include "DataFormat/opflash.h"
+#include "DataFormat/ophit.h"
+#include "DataFormat/mcflux.h"
+#include "DataFormat/pfpart.h"
+#include "DataFormat/partid.h"
+#include "DataFormat/gtruth.h"
+#include "DataFormat/minos.h"
+
 /*
   This file defines certain specilization of templated functions.
   In particular it implements:
@@ -367,10 +398,11 @@ namespace larlite {
       lite_mcs.DaughterTrackID( mcs_ptr->DaughterTrackID() );
 
       //fPtrIndex_mcshower[mcs_ptr] = std::make_pair(lite_data->size(),name_index);
-      
+
       lite_data->push_back(lite_mcs);
     }
   }
+
 
   template <>
   void ScannerAlgo::ScanData(art::Handle<std::vector< ::sim::MCTrack> > const &dh,
@@ -462,6 +494,31 @@ namespace larlite {
   }
 
   template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::raw::RawDigit> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    auto lite_data = (::larlite::event_rawdigit*)lite_dh;
+
+    for(size_t i=0; i<dh->size(); i++){
+
+      const art::Ptr<::raw::RawDigit> rawdigit_ptr(dh,i);
+      std::vector<short> adclist(rawdigit_ptr->NADC(),0);
+      for(size_t tick=0;tick<adclist.size();tick++)
+	adclist[tick]=rawdigit_ptr->ADC(tick);
+    
+      larlite::rawdigit rawdigit_lite( rawdigit_ptr->Channel(),
+				       rawdigit_ptr->NADC(),
+				       adclist,
+				       (::larlite::raw::Compress_t)(rawdigit_ptr->Compression()));
+      //fPtrIndex_rawdigit[rawdigit_ptr] = std::make_pair(lite_data->size(),name_index);
+      
+      lite_data->push_back(rawdigit_lite);
+    }  
+  }
+
+  template <>
   void ScannerAlgo::ScanData(art::Handle<std::vector< ::recob::Wire> > const &dh,
 			     ::larlite::event_base* lite_dh)
   { 
@@ -472,14 +529,19 @@ namespace larlite {
     for(size_t i=0; i<dh->size(); i++){
 
       const art::Ptr<::recob::Wire> wire_ptr(dh,i);
-    
-      larlite::wire wire_lite(wire_ptr->Signal(),
-			      wire_ptr->Channel(),
-			      (larlite::geo::View_t)(wire_ptr->View()),
-			      (larlite::geo::SigType_t)(wire_ptr->SignalType()));
 
-      //fPtrIndex_wire[wire_ptr] = std::make_pair(lite_data->size(),name_index);
-      
+      ::larlite::sparse_vector<float> rois;
+
+      auto const& signalROI = wire_ptr->SignalROI();
+
+      for(const auto& range : signalROI.get_ranges())
+
+	rois.add_range(range.begin_index(),range.data());
+
+      larlite::wire wire_lite(rois,
+			      wire_ptr->Channel(),
+			      (::larlite::geo::View_t)(wire_ptr->View()));
+
       lite_data->push_back(wire_lite);
     }  
   }
@@ -498,23 +560,22 @@ namespace larlite {
       art::Ptr<::recob::Hit> hit_ptr(dh,i);
       
       larlite::hit lite_hit;
-      
-      lite_hit.set_waveform(hit_ptr->fHitSignal);
-      lite_hit.set_times(hit_ptr->StartTime(),
-		       hit_ptr->PeakTime(),
-			 hit_ptr->EndTime());
-      lite_hit.set_times_err(hit_ptr->SigmaStartTime(),
-			     hit_ptr->SigmaPeakTime(),
-			     hit_ptr->SigmaEndTime());
-      lite_hit.set_charge(hit_ptr->Charge(),hit_ptr->Charge(true));
-      lite_hit.set_charge_err(hit_ptr->SigmaCharge(),hit_ptr->SigmaCharge(true));
+      lite_hit.set_rms(hit_ptr->RMS());
+      lite_hit.set_time_range(hit_ptr->StartTick(),hit_ptr->EndTick());
+      lite_hit.set_time_peak(hit_ptr->PeakTime(),hit_ptr->SigmaPeakTime());
+      lite_hit.set_amplitude(hit_ptr->PeakAmplitude(),hit_ptr->SigmaPeakAmplitude());
+      lite_hit.set_sumq(hit_ptr->SummedADC());
+      lite_hit.set_integral(hit_ptr->Integral(),hit_ptr->SigmaIntegral());
       lite_hit.set_multiplicity(hit_ptr->Multiplicity());
-      lite_hit.set_channel(geo->PlaneWireToChannel(hit_ptr->WireID()));
-      //lite_hit.set_channel(hit_ptr->Channel());
-      lite_hit.set_wire(hit_ptr->WireID().Wire);
-      lite_hit.set_fit_goodness(hit_ptr->GoodnessOfFit());
-      lite_hit.set_view((larlite::geo::View_t)(hit_ptr->View()));
-      lite_hit.set_sigtype((larlite::geo::SigType_t)(hit_ptr->SignalType()));
+      lite_hit.set_local_index(hit_ptr->LocalIndex());
+      lite_hit.set_goodness(hit_ptr->GoodnessOfFit());
+      lite_hit.set_ndf(hit_ptr->DegreesOfFreedom());
+      lite_hit.set_channel(hit_ptr->Channel());
+      lite_hit.set_view((::larlite::geo::View_t)(hit_ptr->View()));
+      lite_hit.set_signal_type((::larlite::geo::SigType_t)(hit_ptr->SignalType()));
+
+      auto const& wid = hit_ptr->WireID();
+      lite_hit.set_wire(::larlite::geo::WireID(wid.Cryostat,wid.TPC,wid.Plane,wid.Wire));
       
       // Store address map for downstream association
       //fPtrIndex_hit[hit_ptr] = std::make_pair(lite_data->size(),name_index);
@@ -528,7 +589,7 @@ namespace larlite {
 			     ::larlite::event_base* lite_dh)
   { 
     fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
-    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+
     auto lite_data = (::larlite::event_ophit*)lite_dh;
 
     for(size_t i=0; i<dh->size(); ++i) {
@@ -627,17 +688,36 @@ namespace larlite {
       art::Ptr<::recob::Cluster> cluster_ptr(dh,i);
       
       larlite::cluster lite_cluster;
-      lite_cluster.set_charge(cluster_ptr->Charge());
-      lite_cluster.set_dtdw(cluster_ptr->dTdW());
-      lite_cluster.set_dqdw(cluster_ptr->dQdW());
-      lite_cluster.set_dtdw_err(cluster_ptr->SigmadTdW());
-      lite_cluster.set_dqdw_err(cluster_ptr->SigmadQdW());
+      lite_cluster.set_n_hits(cluster_ptr->NHits());
+
+      lite_cluster.set_start_wire(cluster_ptr->StartWire(), cluster_ptr->SigmaStartWire());
+      lite_cluster.set_start_tick(cluster_ptr->StartTick(), cluster_ptr->SigmaStartTick());
+      lite_cluster.set_start_angle(cluster_ptr->StartAngle());
+      lite_cluster.set_start_charge(cluster_ptr->StartCharge());
+      lite_cluster.set_start_opening(cluster_ptr->StartOpeningAngle());
+
+      lite_cluster.set_end_wire(cluster_ptr->EndWire(), cluster_ptr->SigmaEndWire());
+      lite_cluster.set_end_tick(cluster_ptr->EndTick(), cluster_ptr->SigmaEndTick());
+      lite_cluster.set_end_angle(cluster_ptr->EndAngle());
+      lite_cluster.set_end_charge(cluster_ptr->EndCharge());
+      lite_cluster.set_end_opening(cluster_ptr->EndOpeningAngle());
+
+      lite_cluster.set_integral(cluster_ptr->Integral(), 
+				cluster_ptr->IntegralStdDev(), 
+				cluster_ptr->IntegralAverage());
+      
+      lite_cluster.set_summedADC(cluster_ptr->SummedADC(),
+				 cluster_ptr->SummedADCstdDev(),
+				 cluster_ptr->SummedADCaverage());
+
+      lite_cluster.set_multiple_hit_density(cluster_ptr->MultipleHitDensity());
+      lite_cluster.set_width(cluster_ptr->Width());
+
       lite_cluster.set_id(cluster_ptr->ID());
-      lite_cluster.set_view((larlite::geo::View_t)(cluster_ptr->View()));
-      lite_cluster.set_start_vtx(cluster_ptr->StartPos());
-      lite_cluster.set_end_vtx(cluster_ptr->EndPos());
-      lite_cluster.set_start_vtx_err(cluster_ptr->SigmaStartPos());
-      lite_cluster.set_end_vtx_err(cluster_ptr->SigmaEndPos());
+      lite_cluster.set_view((::larlite::geo::View_t)cluster_ptr->View());
+      
+      auto const& pid = cluster_ptr->Plane();
+      lite_cluster.set_planeID( ::larlite::geo::PlaneID( pid.Cryostat, pid.TPC, pid.Plane ) );
       
       // Store address map for downstream association
       //fPtrIndex_cluster[cluster_ptr] = std::make_pair(lite_data->size(),name_index);
@@ -775,13 +855,21 @@ namespace larlite {
       const art::Ptr<::recob::Shower> shower_ptr(dh,i);
       
       larlite::shower lite_shower;
-      
       lite_shower.set_id(shower_ptr->ID());
-      //light_shower.set_total_charge(shower_ptr->TotalCharge());
+      lite_shower.set_total_energy(shower_ptr->Energy());
+      lite_shower.set_total_energy_err(shower_ptr->EnergyErr());
+      lite_shower.set_total_MIPenergy(shower_ptr->MIPEnergy());
+      lite_shower.set_total_MIPenergy_err(shower_ptr->MIPEnergyErr());
+      lite_shower.set_total_best_plane(shower_ptr->best_plane());
       lite_shower.set_direction(shower_ptr->Direction());
       lite_shower.set_direction_err(shower_ptr->DirectionErr());
-      //light_shower.set_max_width(shower_ptr->MaxWidthX(),shower_ptr->MaxWidthY());
-      //light_shower.set_distance_max_width(shower_ptr->DistanceMaxWidth());
+      lite_shower.set_start_point(shower_ptr->ShowerStart());
+      lite_shower.set_start_point_err(shower_ptr->ShowerStartErr());
+      lite_shower.set_dedx(shower_ptr->dEdx());
+      lite_shower.set_dedx_err(shower_ptr->dEdxErr());
+      lite_shower.set_length(shower_ptr->Length());
+      lite_shower.set_direction(shower_ptr->Direction());
+      lite_shower.set_direction_err(shower_ptr->DirectionErr());
       
       //fPtrIndex_shower[shower_ptr] = std::make_pair(lite_data->size(),name_index);
       
@@ -839,6 +927,7 @@ namespace larlite {
       lite_calo.set_plane_id( larlite::geo::PlaneID( calo_ptr->PlaneID().Cryostat,
 						     calo_ptr->PlaneID().TPC,
 						     calo_ptr->PlaneID().Plane ) );
+
       //fPtrIndex_calo[calo_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_calo);
@@ -857,6 +946,8 @@ namespace larlite {
     for(size_t i=0; i<dh->size(); ++i) {
       
       art::Ptr<::anab::ParticleID> partid_ptr(dh,i);
+
+      auto const& pid = partid_ptr->PlaneID();
       
       larlite::partid lite_partid( partid_ptr->Pdg(),
 				   partid_ptr->Ndf(),
@@ -868,7 +959,8 @@ namespace larlite {
 				   partid_ptr->Chi2Muon(),
 				   partid_ptr->MissingE(),
 				   partid_ptr->MissingEavg(),
-				   partid_ptr->PIDA() );
+				   partid_ptr->PIDA(),
+				   ::larlite::geo::PlaneID(pid.Cryostat,pid.TPC,pid.Plane));
       
       //fPtrIndex_partid[partid_ptr] = std::make_pair(lite_data->size(),name_index);
       
@@ -924,6 +1016,7 @@ namespace larlite {
   template <> std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mcshower; }
 
+
   template <> std::map<art::Ptr< ::sim::MCTrack>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mctrack; }
 
@@ -935,6 +1028,9 @@ namespace larlite {
 
   template <> std::map<art::Ptr< ::recob::Hit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_hit; }
+
+  template <> std::map<art::Ptr< ::raw::RawDigit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  { return fPtrIndex_rawdigit; }
 
   template <> std::map<art::Ptr< ::recob::Wire>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_wire; }
@@ -997,9 +1093,13 @@ namespace larlite {
   { return ::larlite::data::kSimChannel; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCShower> () const
   { return ::larlite::data::kMCShower; }
+
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCTrack> () const
   { return ::larlite::data::kMCTrack; }
+
   // raw
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::raw::RawDigit> () const
+  { return ::larlite::data::kRawDigit; }
   // recob
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::recob::Wire> () const
   { return ::larlite::data::kWire; }
@@ -1055,10 +1155,13 @@ namespace larlite {
   template <class T,class U>
   void ScannerAlgo::ScanAssociation(art::Event const& e,
 				    art::Handle<std::vector<T> > &dh,
-				    ::larlite::event_base* lite_dh)
+				    ::larlite::event_ass* lite_dh)
   { 
     art::FindManyP<U> ptr_coll_v(dh, e, lite_dh->name());
-    auto ass_type = LiteDataType<U>();
+    auto ass_type_a = LiteDataType<T>();
+    auto ass_type_b = LiteDataType<U>();
+
+    larlite::product_id ass_id_a(ass_type_a,lite_dh->name());
 
     try{
       if(!ptr_coll_v.size()) return;
@@ -1067,7 +1170,8 @@ namespace larlite {
       return;
     }
     // Instantiate association container. length = # of producers for associated data type
-    std::vector< ::larlite::AssSet_t> ass_set_v(fAssModuleLabel_v[ass_type].size(),::larlite::AssSet_t());
+    std::vector< ::larlite::AssSet_t> ass_set_v(fAssModuleLabel_v[ass_type_b].size(),
+						::larlite::AssSet_t());
 
     // Return if there's no data products stored for associated data type
     if(!(ass_set_v.size())) return;
@@ -1102,76 +1206,79 @@ namespace larlite {
 
 	if(ass_unit.size()) {
 
-	  auto ass_name = fAssModuleLabel_v[(size_t)ass_type][i];
+	  auto const& ass_name = fAssModuleLabel_v[(size_t)ass_type_b][i];
 
-	  larlite::product_id ass_id(ass_type,ass_name);
+	  larlite::product_id ass_id_b(ass_type_b,ass_name);
 	  
-	  lite_dh->set_association(ass_id,ass_set_v[i]);
+	  lite_dh->set_association(ass_id_a,ass_id_b,ass_set_v[i]);
 
+	  //std::cout<<"Listing association: "<<ass_id_a.second.c_str()<<" => "<<ass_id_b.second.c_str()<<std::endl;
+	  //lite_dh->list_association();
 	  break;
 	}
       }// end looping over association set
     }// end looping over a vector of association set
-  }
 
+  }
+  
   template <> void ScannerAlgo::ScanAssociation <::recob::Cluster,::recob::Cluster>(art::Event const& e,
 										art::Handle<std::vector<::recob::Cluster> > &dh,
-										::larlite::event_base* lite_dh)
+										::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::EndPoint2D,::recob::EndPoint2D>(art::Event const& e,
 										      art::Handle<std::vector<::recob::EndPoint2D> > &dh,
-										      ::larlite::event_base* lite_dh)
+										      ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Vertex,::recob::Vertex>(art::Event const& e,
 										      art::Handle<std::vector<::recob::Vertex> > &dh,
-										      ::larlite::event_base* lite_dh)
+										      ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::CosmicTag,::anab::CosmicTag>(art::Event const& e,
 										      art::Handle<std::vector<::anab::CosmicTag> > &dh,
-										      ::larlite::event_base* lite_dh)
+										      ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::SpacePoint,::recob::SpacePoint>(art::Event const& e,
 										      art::Handle<std::vector<::recob::SpacePoint> > &dh,
-										      ::larlite::event_base* lite_dh)
+										      ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Track,::recob::Track>(art::Event const& e,
 									    art::Handle<std::vector<::recob::Track> > &dh,
-									    ::larlite::event_base* lite_dh)
+									    ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Shower,::recob::Shower>(art::Event const& e,
 										  art::Handle<std::vector<::recob::Shower> > &dh,
-										  ::larlite::event_base* lite_dh)
+										  ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::Calorimetry,::anab::Calorimetry>(art::Event const& e,
 										      art::Handle<std::vector<::anab::Calorimetry> > &dh,
-										      ::larlite::event_base* lite_dh)
+										      ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::ParticleID,::anab::ParticleID>(art::Event const& e,
 										    art::Handle<std::vector<::anab::ParticleID> > &dh,
-										    ::larlite::event_base* lite_dh)
+										    ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::simb::MCTruth,::simb::MCTruth>(art::Event const& e,
 									      art::Handle<std::vector<::simb::MCTruth> > &dh,
-									      ::larlite::event_base* lite_dh)
+									      ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::simb::MCParticle,::simb::MCParticle>(art::Event const& e,
 										    art::Handle<std::vector<::simb::MCParticle> > &dh,
-										    ::larlite::event_base* lite_dh)
+										    ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::PFParticle,::recob::PFParticle>(art::Event const& e,
 										      art::Handle<std::vector<::recob::PFParticle> > &dh,
-										      ::larlite::event_base* lite_dh)
+										      ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   //

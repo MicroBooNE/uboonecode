@@ -235,10 +235,6 @@ namespace microboone {
       PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: neutrino, 2: cosmic, 3: supernova, 4: singles
       PlaneData_t<Int_t>      trkpdgtruth; //true pdg code
       PlaneData_t<Float_t>    trkefftruth; //completeness
-      PlaneData_t<Float_t>    trksimIDEenergytruth;
-      PlaneData_t<Float_t>    trksimIDExtruth;
-      PlaneData_t<Float_t>    trksimIDEytruth;
-      PlaneData_t<Float_t>    trksimIDEztruth;
       PlaneData_t<Float_t>    trkpurtruth; //purity of track
       PlaneData_t<Float_t>    trkpitchc;
       PlaneData_t<Short_t>    ntrkhits;
@@ -681,6 +677,7 @@ namespace microboone {
     void analyze(const art::Event& evt);
   //  void beginJob() {}
     void beginSubRun(const art::SubRun& sr);
+    void endSubRun(const art::SubRun& sr);
 
   private:
 
@@ -690,7 +687,7 @@ namespace microboone {
     double bdist(const TVector3& pos);
 
     TTree* fTree;
-
+    TTree* fPOT;
     // event information is huge and dynamic;
     // run information is much smaller and we still store it statically
     // in the event
@@ -876,10 +873,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkorigin.resize(MaxTracks);
   trkpdgtruth.resize(MaxTracks);
   trkefftruth.resize(MaxTracks);
-  trksimIDEenergytruth.resize(MaxTracks);
-  trksimIDExtruth.resize(MaxTracks);
-  trksimIDEytruth.resize(MaxTracks);
-  trksimIDEztruth.resize(MaxTracks);
   trkpurtruth.resize(MaxTracks);
   trkpitchc.resize(MaxTracks);
   ntrkhits.resize(MaxTracks);
@@ -939,10 +932,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkorigin[iTrk]  , -1 );
     FillWith(trkpdgtruth[iTrk], -99999 );
     FillWith(trkefftruth[iTrk], -99999.);
-    FillWith(trksimIDEenergytruth[iTrk], -99999.);
-    FillWith(trksimIDExtruth[iTrk], -99999.);
-    FillWith(trksimIDEytruth[iTrk], -99999.);
-    FillWith(trksimIDEztruth[iTrk], -99999.);
     FillWith(trkpurtruth[iTrk], -99999.);
     FillWith(trkpitchc[iTrk]  , -99999.);
     FillWith(ntrkhits[iTrk]   ,  -9999 );
@@ -1022,18 +1011,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   BranchName = "trkefftruth_" + TrackLabel;
   CreateBranch(BranchName, trkefftruth, BranchName + NTracksIndexStr + "[3]/F");
  
-  BranchName = "trksimIDEenergytruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEenergytruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDExtruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDExtruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDEytruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEytruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDEztruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEztruth, BranchName + NTracksIndexStr + "[3]/F");
- 
   BranchName = "trkpurtruth_" + TrackLabel;
   CreateBranch(BranchName, trkpurtruth, BranchName + NTracksIndexStr + "[3]/F");
   
@@ -1054,7 +1031,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
     CreateBranch(BranchName, trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
     
     BranchName = "trkxyz_" + TrackLabel;
-    CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "[3]" + "/F");
   }
 
   BranchName = "trkstartx_" + TrackLabel;
@@ -1454,8 +1431,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits]/F");    
     CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits]/S");    
     CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
-    CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
-    CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
+    if (!isCosmics){
+      CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
+      CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
+    }
   }
 
   if (hasVertexInfo()){
@@ -1626,7 +1605,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 
 microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   EDAnalyzer(pset),
-  fTree(nullptr), fData(nullptr),
+  fTree(nullptr), fPOT(nullptr), fData(nullptr),
   fDigitModuleLabel         (pset.get< std::string >("DigitModuleLabel")        ),
   fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
   fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
@@ -1688,6 +1667,11 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
     art::ServiceHandle<art::TFileService> tfs;
     fTree = tfs->make<TTree>("anatree","analysis tree");
   }
+  if (!fPOT) {
+    art::ServiceHandle<art::TFileService> tfs;
+    fPOT = tfs->make<TTree>("pottree","pot tree");
+    fPOT->Branch("pot",&SubRunData.pot,"pot/D");
+  }
   CreateData(bClearData);
   SetAddresses();
 } // microboone::AnalysisTree::CreateTree()
@@ -1703,6 +1687,20 @@ void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
     SubRunData.pot=potListHandle->totpot;
   else
     SubRunData.pot=0.;
+
+}
+
+void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
+{
+
+  art::Handle< sumdata::POTSummary > potListHandle;
+  //sr.getByLabel(fPOTModuleLabel,potListHandle);
+
+  if(sr.getByLabel(fPOTModuleLabel,potListHandle))
+    SubRunData.pot=potListHandle->totpot;
+  else
+    SubRunData.pot=0.;
+  if (fPOT) fPOT->Fill();
 
 }
 
@@ -1919,7 +1917,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
       */
 
-      if (!evt.isRealData()){
+      if (!evt.isRealData()&&!isCosmics){
          fData -> hit_nelec[i] = 0;
          fData -> hit_energy[i] = 0;
          const sim::SimChannel* chan = 0;
@@ -2268,10 +2266,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             std::vector<sim::IDE> vide(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]));
             for (const sim::IDE& ide: vide) {
                tote += ide.energy;
-               TrackerData.trksimIDEenergytruth[iTrk][ipl] = ide.energy;
-               TrackerData.trksimIDExtruth[iTrk][ipl] = ide.x;
-               TrackerData.trksimIDEytruth[iTrk][ipl] = ide.y;
-               TrackerData.trksimIDEztruth[iTrk][ipl] = ide.z;
             }
             TrackerData.trkpdgtruth[iTrk][ipl] = particle->PdgCode();
             TrackerData.trkefftruth[iTrk][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies

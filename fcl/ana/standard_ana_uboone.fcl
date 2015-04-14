@@ -55,12 +55,12 @@ outputs:
 ### Here, we overwrite ALL module labels with the ones defined above.
 physics.analyzers.analysistree:  @local::microboone_analysistree
 physics.analyzers.analysistree.HitsModuleLabel:                 "gaushit"
-physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit", "trackkalmanhitcc", "trackkalsps", "stitch", "trackkalspscc", "stitchcc", "beziertrackercc", "beziertracker", "costrk", "costrkcc"]
-physics.analyzers.analysistree.VertexModuleLabel:               "featurevtx"
-physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo", "trackkalmanhitcccalo", "trackkalspscalo", "stitchcalo","trackkalspscccalo", "stitchcccalo", "beziertrackercccalo", "beziertrackercalo", "costrkcalo", "costrkcccalo"]
-physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid", "trackkalmanhitccpid", "trackkalspspid", "stitchpid","trackkalspsccpid", "stitchccpid", "beziertrackerccpid", "beziertrackerpid", "costrkpid", "costrkccpid"]
-physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag", "trackkalmanhitcctag", "trackkalspstag", "stitchtag","trackkalspscctag", "stitchcctag", "beziertrackercctag", "beziertrackertag", "costrktag", "costrkcctag"]
-physics.analyzers.analysistree.FlashMatchAssocLabel:            ["beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat", "beamflashcompat"]
+physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit","stitchkalmanhit","trackkalmanhitcc","stitchkalmanhitcc","pandoraCosmicKHit","pandoraNuKHit","cctrack","trackkalmanhitc3d","stitchkalmanhitc3d"]
+physics.analyzers.analysistree.VertexModuleLabel:               "cccluster"
+physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo","stitchkalmanhitcalo","trackkalmanhitcalocc","stitchkalmanhitcalocc","pandoraCosmicKHitcalo","pandoraNuKHitcalo","cctrackcaloDUMMY","trackkalmanhitcaloc3d","stitchkalmanhitcaloc3d"]
+physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","trackkalmanhitpidcc","stitchkalmanhitpidcc","pandoraCosmicKHitpid","pandoraNuKHitpid","cctrackpidDUMMY","trackkalmanhitpidc3d","stitchkalmanhitpidc3d"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag","stitchkalmanhittag","trackkalmanhittagcc","stitchkalmanhittagcc","pandoraCosmicKHitPFPart","pandoraNuKHittag","cctracktagDUMMY","trackkalmanhittagc3d","stitchkalmanhittagc3d"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhitflashmatch","stitchkalmanhitflashmatch","trackkalmanhitflashmatchcc","stitchkalmanhitflashmatchcc","pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch","cctrackflashmatchDUMMY","trackkalmanhitflashmatchc3d","stitchkalmanhitflashmatchc3d"]
 physics.analyzers.analysistree.CosmicScoreThresholds:   [0.0]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"

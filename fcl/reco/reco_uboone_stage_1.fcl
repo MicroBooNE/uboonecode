@@ -126,10 +126,6 @@ physics.producers.caldata.DoBaselineSub:                        false
 physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:  true
 
 physics.producers.gaushit.CalDataModuleLabel:                   "caldata"
-physics.producers.gaushit.MinSig:                               [4.0,    4.0,   4.0]
-physics.producers.gaushit.InitWidth:                            [6.0,    6.0,   7.8]
-physics.producers.gaushit.MinWidth:                             [4.0,    4.0,   6.0]
-physics.producers.gaushit.AreaNorms:                            [13.25, 13.25, 26.31]
 
 physics.producers.fuzzycluster.HitsModuleLabel:                 "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:              "caldata"

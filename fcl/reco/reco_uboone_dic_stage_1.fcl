@@ -1,0 +1,5 @@
+# This version reco stage 1 is for "Dynamic Induced Charge" field response.
+
+#include "reco_uboone_stage_1.fcl"
+
+services.SignalShapingServiceMicroBooNE: @local::microboone_dic_signalshapingservice
