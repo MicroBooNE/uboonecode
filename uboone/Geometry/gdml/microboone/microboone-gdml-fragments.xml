@@ -23,7 +23,7 @@
 
       <filename> micro-rotations.gdml </filename>
       <filename> materials.gdml </filename>
-      <filename> micro-plane.gdml </filename>
+      <filename> LAr1-wireplane.gdml </filename>
       <filename> micro-vertplane.gdml </filename>
       <filename> micro-groundplate.gdml </filename>
       <filename> micro-cathode.gdml </filename>
@@ -32,7 +32,6 @@
       <filename> micro-pmtdef.gdml </filename>
       <filename> micro-enclosureExtras.gdml </filename>
       <filename> micro-cryostat.gdml </filename>
-      <filename> micro-vetoWall.gdml </filename>
       <filename> micro-enclosure.gdml </filename>
       <filename> micro-world.gdml </filename>
 
