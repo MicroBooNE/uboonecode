@@ -1,19 +1,9 @@
-#include "litemaker_base.fcl"
+#include "larlite_maker.fcl"
 
-BEGIN_PROLOG
+physics.analyzers.scanner.out_filename: "larlite_mcinfo.root"
 
-litemaker_mcinfo: @local::litemaker_base
-
-litemaker_mcinfo.out_filename: "larlite_mcinfo.root"
-
-litemaker_mcinfo.AssociationLookUpMap: @local::litemaker_ass_mc
-
-litemaker_mcinfo.DataLookUpMap:
+physics.analyzers.scanner.DataLookUpMap:
 {
-  # Producer names specified below would be looked up & stored in
-  # the output larlite file. The key represents the data product
-  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
-  # string array.
   potsummary: ["generator"]
   gtruth:     ["generator"]
   mcflux:     ["generator"]
@@ -22,4 +12,7 @@ litemaker_mcinfo.DataLookUpMap:
   mcshower:   ["mcreco"]
 }
 
-END_PROLOG
+physics.analyzers.scanner.AssociationLookUpMap: {
+  mctruth: ["generator"]
+}
+

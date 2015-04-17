@@ -1,40 +1,43 @@
-#include "litemaker_base.fcl"
+#include "larlite_maker.fcl"
 
-BEGIN_PROLOG
+physics.analyzers.scanner.out_filename: "larlite_anadata.root"
 
-litemaker_anadata: @local::litemaker_base
-
-litemaker_anadata.out_filename: "larlite_anadata.root"
-
-litemaker_anadata.DataLookUpMap:
+physics.analyzers.scanner.DataLookUpMap:
 {
-  # Producer names specified below would be looked up & stored in
-  # the output larlite file. The key represents the data product
-  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
-  # string array.
-  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
-               "trackkalspstag","trackkalspscctag",
-               "beziertrackertag","beziertrackercctag",
-               "costrktag","costrkcctag",
-               "stitchtag","stitchcctag",
-               "stitchkalmanhittag","beamflashcompat",
-               "pandoraCosmicKHittag","pandoraNuKHittag"]
-  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
-               "trackkalspscalo","trackkalspscccalo",
-               "beziertrackercalo","beziertrackercccalo",
-               "costrkcalo","costrkcccalo",
-               "stitchcalo","stitchcccalo",
-               "stitchkalmanhitcalo",
-               "pandoraCosmicKHitcalo","pandoraNuKHitcalo"]
+
+  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+               "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
+               "stitchkalmanhittag","stitchkalmanhittagcc",
+               "trackkalmanhittag","trackkalmanhittagcc",
+               "pandoraCosmicKHitPFPart",
+               "cluster3dpcatag"]
+
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcalocc",
+               "pandoraNuKHitcalo","pandoraCosmicKHitcalo",
+               "stitchkalmanhitcalo","stitchkalmanhitcalocc"]
+
   partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
-               "trackkalspspid","trackkalspsccpid",
-               "beziertrackerpid","beziertrackerccpid",
-               "costrkpid","costrkccpid",
-               "stitchpid","stitchccpid",
-               "stitchkalmanhitpid",
-               "pandoraCosmicKHitpid","pandoraNuKHitpid"]
+               "stitchkalmanhitpid","stitchkalmanhitpidcc",
+               "pandoraNuKHitpid","pandoraCosmicKHitpid"]
+
 }
 
-litemaker_anadata.AssociationLookUpMap: @local::litemaker_ass_reco
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+               "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
+               "stitchkalmanhittag","stitchkalmanhittagcc",
+               "trackkalmanhittag","trackkalmanhittagcc",
+               "pandoraCosmicKHitPFPart",
+               "cluster3dpcatag"]
 
-END_PROLOG
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcalocc",
+               "pandoraNuKHitcalo","pandoraCosmicKHitcalo",
+               "stitchkalmanhitcalo","stitchkalmanhitcalocc"]
+
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "stitchkalmanhitpid","stitchkalmanhitpidcc",
+               "pandoraNuKHitpid","pandoraCosmicKHitpid"]
+
+}
+

@@ -83,7 +83,7 @@
    The size of the LAr TPC along the z-axis.
    </parameter>
 
-   <parameter name="TPCWirePitch" value="0.3">
+   <parameter name="TPCWirePitch" value="0.3"> <!-- 0.3"-->
    The separation between wires in a TPC plane.
    </parameter>
 

@@ -235,10 +235,6 @@ namespace microboone {
       PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: neutrino, 2: cosmic, 3: supernova, 4: singles
       PlaneData_t<Int_t>      trkpdgtruth; //true pdg code
       PlaneData_t<Float_t>    trkefftruth; //completeness
-      PlaneData_t<Float_t>    trksimIDEenergytruth;
-      PlaneData_t<Float_t>    trksimIDExtruth;
-      PlaneData_t<Float_t>    trksimIDEytruth;
-      PlaneData_t<Float_t>    trksimIDEztruth;
       PlaneData_t<Float_t>    trkpurtruth; //purity of track
       PlaneData_t<Float_t>    trkpitchc;
       PlaneData_t<Short_t>    ntrkhits;
@@ -877,10 +873,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkorigin.resize(MaxTracks);
   trkpdgtruth.resize(MaxTracks);
   trkefftruth.resize(MaxTracks);
-  trksimIDEenergytruth.resize(MaxTracks);
-  trksimIDExtruth.resize(MaxTracks);
-  trksimIDEytruth.resize(MaxTracks);
-  trksimIDEztruth.resize(MaxTracks);
   trkpurtruth.resize(MaxTracks);
   trkpitchc.resize(MaxTracks);
   ntrkhits.resize(MaxTracks);
@@ -940,10 +932,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkorigin[iTrk]  , -1 );
     FillWith(trkpdgtruth[iTrk], -99999 );
     FillWith(trkefftruth[iTrk], -99999.);
-    FillWith(trksimIDEenergytruth[iTrk], -99999.);
-    FillWith(trksimIDExtruth[iTrk], -99999.);
-    FillWith(trksimIDEytruth[iTrk], -99999.);
-    FillWith(trksimIDEztruth[iTrk], -99999.);
     FillWith(trkpurtruth[iTrk], -99999.);
     FillWith(trkpitchc[iTrk]  , -99999.);
     FillWith(ntrkhits[iTrk]   ,  -9999 );
@@ -1022,18 +1010,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkefftruth_" + TrackLabel;
   CreateBranch(BranchName, trkefftruth, BranchName + NTracksIndexStr + "[3]/F");
- 
-  BranchName = "trksimIDEenergytruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEenergytruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDExtruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDExtruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDEytruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEytruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDEztruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEztruth, BranchName + NTracksIndexStr + "[3]/F");
  
   BranchName = "trkpurtruth_" + TrackLabel;
   CreateBranch(BranchName, trkpurtruth, BranchName + NTracksIndexStr + "[3]/F");
@@ -1724,7 +1700,7 @@ void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
     SubRunData.pot=potListHandle->totpot;
   else
     SubRunData.pot=0.;
-  fPOT->Fill();
+  if (fPOT) fPOT->Fill();
 
 }
 
@@ -2290,10 +2266,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             std::vector<sim::IDE> vide(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]));
             for (const sim::IDE& ide: vide) {
                tote += ide.energy;
-               TrackerData.trksimIDEenergytruth[iTrk][ipl] = ide.energy;
-               TrackerData.trksimIDExtruth[iTrk][ipl] = ide.x;
-               TrackerData.trksimIDEytruth[iTrk][ipl] = ide.y;
-               TrackerData.trksimIDEztruth[iTrk][ipl] = ide.z;
             }
             TrackerData.trkpdgtruth[iTrk][ipl] = particle->PdgCode();
             TrackerData.trkefftruth[iTrk][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies

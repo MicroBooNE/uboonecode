@@ -128,7 +128,7 @@ namespace larlite {
     template <class T, class U>
     void ScanAssociation(art::Event const& e,
 			 art::Handle<std::vector<T> > &dh,
-			 ::larlite::event_base* lite_dh);
+			 ::larlite::event_ass* lite_dh);
 
     /// Accessor to art::Ptr map ... used to locate associated data product location
     template <class T>

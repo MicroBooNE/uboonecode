@@ -14,6 +14,7 @@ microboone_geo(TString volName="")
   drawopt optuboone[] = {
     {"volGround",       kOrange-7},
     {"volConcreteEnclosure", kGray},
+	{"volTPCWireCommon", kBlue},
     {0, 0}
   };
 

@@ -1,19 +1,11 @@
-#include "litemaker_base.fcl"
+#include "larlite_maker.fcl"
 
-BEGIN_PROLOG
+physics.analyzers.scanner.out_filename: "larlite_opdata.root"
 
-litemaker_opdata: @local::litemaker_base
-
-litemaker_opdata.out_filename: "larlite_opdata.root"
-
-litemaker_opdata.DataLookUpMap:
+physics.analyzers.scanner.DataLookUpMap:
 {
-  # Producer names specified below would be looked up & stored in
-  # the output larlite file. The key represents the data product
-  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
-  # string array.
   ophit:      ["opflash"]
   opflash:    ["opflash"]
 }
 
-END_PROLOG
+
