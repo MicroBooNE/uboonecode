@@ -1,0 +1,174 @@
+## 
+##  Stage 1 Reconstruction
+##
+#include "services_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "trackfindermodules_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "pandoramodules_microboone.fcl"
+#include "triggeralgo_service.fcl"
+#include "cosmicremovalmodules.fcl"
+#include "mchitmodules.fcl"
+#include "mcreco.fcl"
+
+process_name: RecoStage1
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService:            { fileName: "reco_stage_1_hist.root" }
+  Timing:                  {}
+  SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
+  RandomNumberGenerator:   {} #ART native random number generator
+  message:                 @local::microboone_message_services_prod_debug
+  FileCatalogMetadata:     @local::art_file_catalog_mc
+  PhotonVisibilityService: @local::microboone_photonvisibilityservice
+                           @table::microboone_services_reco
+}
+services.DatabaseUtil.ShouldConnect: false
+
+#source is now a root file
+source:
+{
+  module_type: RootInput
+  maxEvents:  10        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ producers:
+ {
+
+  ### random number saver
+  rns:                 { module_type: RandomNumberSaver }
+
+  ### flash finders
+  opreformat:          @local::microboone_opdetreformatter     
+  opflash:             @local::microboone_opflash
+
+  ### calwire producers
+  caldata:             @local::microboone_calroi
+
+  ### hit-finder producers
+  gaushit:             @local::microboone_gaushitfinder
+
+  ### cluster-finder producers
+  fuzzycluster:        @local::microboone_fuzzycluster
+  fuzzyclustermerger:  @local::microboone_fuzzyclustermerger
+  cccluster:           @local::microboone_clustercrawler
+  cctrack:             @local::microboone_cctrackmaker
+  cluster3d:           @local::microboone_cluster3d
+  
+  ### cosmic tagger for cluster3d
+  cluster3dpcatag:     @local::microboone_cosmicpcaxistagger
+
+  ### pandora cosmic pass
+  pandoraCosmic:       @local::microboone_pandora
+
+  ### mc producers
+  mchitfinder:         @local::standard_mchitfinder
+  mcreco:              @local::standard_mcreco
+ }
+
+ #define the producer and filter modules for this path, order matters, 
+ #filters reject all following items.  see lines starting physics.producers below
+ reco: [ rns,
+         opreformat,
+         opflash,
+         caldata, 
+         gaushit,
+         fuzzycluster, fuzzyclustermerger, cccluster, cluster3d,
+         cctrack,
+         pandoraCosmic,
+         cluster3dpcatag,
+         mchitfinder  #mcreco
+         ]
+
+ #define the output stream, there could be more than one if using filters 
+ stream1:  [ out1 ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [reco] 
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [stream1]  
+}
+
+#block to define where the output goes.  if you defined a filter in the physics
+#block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+#entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "%ifb_%tc_reco1.root"
+   dataTier:    "reconstructed-2d"
+   compressionLevel: 1
+ }
+}
+
+
+### Here, we overwrite ALL module labels with the ones defined above.
+
+physics.producers.opreformat.InputModule:                       "optreadout"
+physics.producers.opreformat.GenModule:                         "generator"
+
+physics.producers.opflash.InputModule:                          "opreformat"
+physics.producers.opflash.GenModule:                            "generator"
+physics.producers.opflash.InputLabels:                        [ "FEMBeamHighGain",   "FEMBeamLowGain",
+                                                                "FEMCosmicHighGain", "FEMCosmicLowGain"]
+
+physics.producers.caldata.DigitModuleLabel:                     "daq"
+
+physics.producers.caldata.DoBaselineSub:                        false
+physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:  true
+
+physics.producers.gaushit.CalDataModuleLabel:                   "caldata"
+
+physics.producers.fuzzycluster.HitsModuleLabel:                 "gaushit"
+physics.producers.fuzzycluster.CalDataModuleLabel:              "caldata"
+
+physics.producers.cccluster.CalDataModuleLabel:                 "caldata"
+physics.producers.cccluster.CCHitFinderAlg.CalDataModuleLabel:  "caldata"
+
+physics.producers.pandoraCosmic.GeantModuleLabel:               "largeant"
+physics.producers.pandoraCosmic.HitFinderModuleLabel:           "gaushit"
+physics.producers.pandoraCosmic.ConfigFile:                     "PandoraSettings_MicroBooNE_Cosmic.xml"
+
+physics.producers.cluster3dpcatag.PFParticleModuleLabel:        "cluster3d"
+physics.producers.cluster3dpcatag.PCAxisModuleLabel:            "cluster3d"
+
+### Here we try to suppress known and pointless messages
+services.message.destinations :
+{
+  STDCOUT: 
+  {
+     type:      "cout"      #tells the message service to output this destination to cout
+     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
+     append:     true       #says to append all messages to the output
+     categories:
+     {
+       ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       default:
+       {
+         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
+         reportEvery: 1
+       }
+     }
+  }
+}
+
+

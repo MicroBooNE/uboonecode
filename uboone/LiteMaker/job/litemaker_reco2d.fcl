@@ -1,0 +1,17 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_reco2d.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  endpoint2d: []
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  endpoint2d: []
+}

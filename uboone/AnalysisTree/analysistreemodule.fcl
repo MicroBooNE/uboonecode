@@ -11,9 +11,21 @@ microboone_analysistree:
  G4ModuleLabel:            "largeant"
  TrackModuleLabel:         [ "track3d" ]
  VertexModuleLabel:        "vertex3d"
+ OpFlashModuleLabel:       "opflash"
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
  POTModuleLabel:           "generator"
+ UseBuffers:               false
+ SaveAuxDetInfo:           false
+ SaveCryInfo:              false
+ SaveGenieInfo:            true
+ SaveGeantInfo:            true
+ SaveHitInfo:              true
+ SaveTrackInfo:            true
+ SaveVertexInfo:           true
+ SaveFlashInfo:            true
+ SaveCaloCosmics:          false
+ G4minE:                   0.01
 }
 
 END_PROLOG

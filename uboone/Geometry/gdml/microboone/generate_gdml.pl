@@ -149,6 +149,7 @@ sub gen_defs()
     #TPCWirePlaneLength is the size in the z direction
     $TPCWirePlaneWidth	=	233;
     $TPCWirePlaneLength	=	1037;
+    $PMTOffset          =       424.75*2.54/224.75*2.54/224.75*2.54/224.75*2.54/224.75*2.54/224.75*2.54/224.75*2.54/2 ;
 
     $pi   = pi;
     $inch = 2.54;
@@ -226,7 +227,7 @@ sub gen_rotations()
    <rotation name="rPlus60AboutX"  unit="deg" x="60"  y="0"   z="0"/>
    <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
    <rotation name="rMinus90AboutX"  unit="deg" x="-90"  y="0"   z="0"/>
-   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="90+$UVAngle" y="0"   z="0"/>
+   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="90+ $UVAngle" y="0"   z="0"/>
    <rotation name="rPlus150AboutX"      unit="deg" x="150" y="0"   z="0"/>
    <rotation name="rPlus180AboutX"      unit="deg" x="180" y="0"   z="0"/>
    <rotation name="rMinusUVAngleAboutX" unit="deg" x="-30" y="0"   z="0"/>
@@ -350,90 +351,82 @@ EOF
 }
 
 
-# This is a re-write of Brian Rebel's gen_microplane.C into Perl. It
-# constructs the TPC wire plane for the U or V view.
-
+#Rewrote old wire code because a wire was missing and it wasn't clear where it should go.
+#41015, ahack
 sub gen_microplane()
 {
 
-    $TPCWireXPitch=$TPCWirePitch/$CosUVAngle;
+	$UVWireCount = 2400 ;
 
-    $GDML = "micro-plane" . $suffix . ".gdml";
+    $GDML = "LAr1-wireplane" . $suffix . ".gdml";
     push (@gdmlFiles, $GDML); # Add file to list of GDML fragments
     $GDML = ">" . $GDML;
     open(GDML) or die("Could not open file $GDML for writing");
 
-    # Calculate the number of wire ends on a given y-edge of the plane.
-    my $TPCYWirePitch = $TPCWirePitch / $CosUVAngle;
+    my $TPCYWirePitch = $TPCWirePitch / $SinUVAngle;
+    my $TPCZWirePitch = $TPCWirePitch / $CosUVAngle;
 
-   my $NumberWiresPerEdge = 0;
-   if ( $wires_on == 1 ) 
-    {  $NumberWiresPerEdge = int( $TPCWirePlaneLength / $TPCYWirePitch );}
-  
-    # How many side wires will be "cut off" by the lower or higher
-    # z-edge?
-   my $NumberSideWires = 0;
-    if ( $wires_on == 1 ) 
-    { $NumberSideWires = int( $TanUVAngle * $TPCWirePlaneWidth / $TPCYWirePitch ); }
+  # Calculate the number of wire ends on a given y-edge of the plane.
+    my $NumberWiresPerEdge = 0;
+    if ( $wires_on == 1 )
+      {  $NumberWiresPerEdge = int( $TPCWirePlaneWidth / $TPCYWirePitch );}
 
-    # The number of full-length "center" wires.
-  
+  # The number of full-length "center" wires.
    my $NumberCenterWires = 0.;
-   if ( $wires_on == 1 ) 
-    { $NumberCenterWires = $NumberWiresPerEdge - $NumberSideWires; }
+   if ( $wires_on == 1 )
+      { $NumberCenterWires = $UVWireCount - 2*$NumberWiresPerEdge ; }
 
-    # define the solids
-    print GDML <<EOF;
+ #####################
+ # Define the solids
+  print GDML <<EOF;
 <?xml version='1.0'?>
 <gdml>
 <solids>
 EOF
 
-    # wires on either end of the tpc #subtraction added to avoid overlap for all wires
-    for($i = 0; $i < $NumberSideWires; ++$i)
-    {
-	print GDML <<EOF;
+
+  # End wires 
+  for($i = 0; $i < $NumberWiresPerEdge; $i++)
+{
+  print GDML <<EOF;
 <tube name="TPCWire$i"
   rmax="0.5*$TPCWireThickness"
-  z="$TPCWireXPitch*($i+1)/$SinUVAngle-0.01498648"    
+  z="$TPCYWirePitch*($i+1) * 2 -0.32" 
   deltaphi="360"
   aunit="deg"
   lunit="cm"/> 
 EOF
-    }
+}
 
-    # The solids for the middle wire and the TPC wire plane, and start off the structures.
-    #subtraction added to avoid overlap for all wires
-    print GDML <<EOF;
+ print GDML <<EOF;
 <tube name="TPCWireCommon"
   rmax="0.5*$TPCWireThickness"
-  z="$TPCWirePlaneWidth/$CosUVAngle-0.0259573526"
+  z="$TPCWirePlaneWidth/$CosUVAngle - 0.32 "
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 <box name="TPCPlane"
   x="$TPCWirePlaneThickness"
   y="$TPCWirePlaneWidth"
-  z="$TPCWirePlaneLength"
+  z="$TPCWirePlaneLength + 0.35"
   lunit="cm"/>
 </solids>
 <structure>
 EOF
- 
-    # the wires at either end of the plane
-    for ($i = 0; $i < $NumberSideWires; ++$i)
+
+    # Wires of varying lengths 
+  for ($i = 0; $i < $NumberWiresPerEdge; $i++)
     {
-	print GDML <<EOF;
+    print GDML <<EOF;
     <volume name="volTPCWire$i">
-	<materialref ref="Titanium"/>
-	<solidref ref="TPCWire$i"/>
+    <materialref ref="Titanium"/>
+    <solidref ref="TPCWire$i"/>
     </volume>
 EOF
     }
 
-  
-    # The wires in the middle of the plane, and the plane itself.
-    print GDML <<EOF;
+    # Center wires and plane
+   print GDML <<EOF;
     <volume name="volTPCWireCommon">
       <materialref ref="Titanium"/>
       <solidref ref="TPCWireCommon"/>
@@ -443,58 +436,54 @@ EOF
       <solidref ref="TPCPlane"/>
 EOF
 
-  # the wires at the -z end
-  for ($i = 0; $i < $NumberSideWires; ++$i)
+  # The wires at the -z, +y end (For +60 deg-- can rotate by 180 later for -60)
+  for ($i = 0; $i < $NumberWiresPerEdge ; $i++)
   {
-    $j=$NumberSideWires-$i-1;
 
     print GDML <<EOF;
-    <physvol>
-     <volumeref ref="volTPCWire$j"/> 
-     <position name="posTPCWireF$j" unit="cm" y="-0.5*($i)*$TPCWireXPitch/$TanUVAngle" z="-0.5*$TPCWirePlaneLength+0.5*$TPCWireXPitch*($j+1)" x="0"/>
-     <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol>
+  <physvol>
+     <volumeref ref="volTPCWire$i"/> 
+     <position name="posTPCWire$i" unit="cm" y="-0.5*$TPCWirePlaneWidth + 0.5*$TPCYWirePitch*($i+1)" z="-0.5*$TPCWirePlaneLength+0.5*$TPCZWirePitch*($i+1)" x="0"/>
+     <rotationref ref="rPlusUVAngleAboutX"/> 
+    </physvol>  
 EOF
-  $ypos=-0.5*($i)*$TPCWireXPitch/$TanUVAngle;
-  $zpos=-0.5*$TPCWirePlaneLength+0.5*$TPCWireXPitch*($j);
-  open (MYFILE, '>>data.txt');
-  print MYFILE "TPCWire$j y=$ypos z=$zpos\n";
-  }
-
-  # the wires at the +z end
-  for ($i = 0; $i < $NumberSideWires; ++$i)
-  {
-      my $j = $NumberSideWires-$i-1;
-      my $k = $NumberCenterWires+$NumberSideWires+$i;
-      $zposlast=-0.5*$TPCWirePlaneLength+$TPCWireXPitch*(0.5*$NumberSideWires+$NumberCenterWires);
-      $zpos=$zposlast+0.5*$TPCWireXPitch*($i);
-
-    print GDML <<EOF;
-    <physvol>
-     <volumeref ref="volTPCWire$j"/> 
-     <position name="posTPCWireB$j" unit="cm" y="0.5*($i)*$TPCWireXPitch/$TanUVAngle" z="$zpos" x="0"/>
-     <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol>
-EOF
-
-
+  $ypos=0.5*$TPCWirePlaneWidth - 0.5*$TPCYWirePitch*($i+1);
+  $zpos=-0.5*$TPCWirePlaneLength+0.5*$TPCZWirePitch*($i+1);
+ # open (MYFILE, '>>data.txt');
+ # print MYFILE "TPCWire$i y=$ypos z=$zpos\n";
   }
 
   # The wires in the middle.
-  for ($i = 0; $i < $NumberCenterWires - 1; ++$i)
+for ($i = 0; $i < $NumberCenterWires ; $i++)
   {
-      my $j = $NumberSideWires+$i;
-      $zpos=-0.5*$TPCWirePlaneLength+$TPCWireXPitch*(0.5*$NumberSideWires+$i+1);
+      my $j = $NumberWiresPerEdge  +$i;
+      $zpos=-0.5*$TPCWirePlaneLength + $TPCZWirePitch*(0.5*$NumberWiresPerEdge + $i+1) ;
 
       print GDML <<EOF;
-    <physvol>
+  <physvol>
      <volumeref ref="volTPCWireCommon"/>
      <position name="posTPCWire$j" unit="cm" y="0" z="$zpos" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol>
+    </physvol> 
 EOF
   }
 
+  # The wires at the +z end
+  for ($i = 0; $i < $NumberWiresPerEdge; $i++)
+  {
+
+      my $j = $NumberWiresPerEdge + $NumberCenterWires + $i ;
+      my $k = $NumberWiresPerEdge - $i - 1 ;
+      $zpos = -0.5*$TPCWirePlaneLength + 0.5*$TPCZWirePitch*($NumberWiresPerEdge + 2*$NumberCenterWires + $i +1 ) ;
+
+    print GDML <<EOF;
+   <physvol>
+     <volumeref ref="volTPCWire$k"/> 
+     <position name="posTPCWireB$j" unit="cm" y="0.5*$TPCYWirePitch*($i+1)" z="$zpos" x="0"/>
+    <rotationref ref="rPlusUVAngleAboutX"/>
+    </physvol> 
+EOF
+  }
 
       print GDML <<EOF;
   </volume>
@@ -682,6 +671,14 @@ EOF
    <volumeref ref="volGroundPlate"/>
    <position name="posGroundPlate" unit="cm" x="$ground_plate_X+0.25" y="$ground_plate_Y" z="0"/>
   </physvol>-->
+
+
+<!--  <physvol>
+    <volumeref ref="volTPCCross"/>
+    <position name="posTPCCross" unit="cm" x="-256/2" y="-100" z="0"/>
+    <rotation ref="rMinus41AboutX" unit="deg" x="-41.58" y="0" z="0"/> 
+  </physvol>  -->
+
 EOF
 
 
@@ -828,6 +825,12 @@ sub gen_pmt {
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
+ <box name="Paddle_PMT"
+  lunit="cm"
+  x="1/8*2.54"
+  y="20*2.54"
+  z="(7+1/3)*2.54"/> 
+
 EOF
 	print PMT <<EOF;
  <tube name="PMT_Lens"
@@ -840,6 +843,7 @@ EOF
 
 	print PMT <<EOF;
 </solids>
+
 <structure>
  <volume name="volOpDetSensitive">
   <materialref ref="LAr"/>
@@ -860,6 +864,10 @@ EOF
  <volume name="vol_PMT_Underside">
   <materialref ref="Glass"/>
   <solidref ref="PMT_Underside"/>
+ </volume>
+ <volume name="volPaddle_PMT">
+  <materialref ref="Acrylic"/>
+  <solidref ref="Paddle_PMT"/>
  </volume>
 EOF
 	print PMT <<EOF;
@@ -1327,8 +1335,114 @@ sub gen_cryostat()
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
+
+
 <sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
+ <box name="aSideBeam" lunit="cm" x="256" y="2" z="5"/>
+ <box name="aTopBeam" lunit="cm" x="256" y="4*2.54" z="2.54"/>
+ <box name="aSideCross0" lunit="cm" x="10" y="0.75*2.54" z="43*2.54"/>
+ <box name="aTopCrossBeamA" lunit="cm" x="10" y=".75*2.54" z="49.9*2.54"/>
+ <box name="aTopCrossBeamB" lunit="cm" x="10" y=".75*2.54" z="38*2.54"/>
+ <box name="FrameA" x="11" y="254" z="1040" lunit="cm"/> 
+ <box name="FrameB" x="11.1" y="86*2.54" z="1003.52" lunit="cm"/>
+ <box name="VertBar" x="2.5*2.54" y="86*2.54" z="2.5*2.54" lunit="cm"/>
+ <box name="CrossBeamA" lunit="cm" x="9" y="301.12" z="7"/>
+
+<subtraction name="Frame0">
+<first ref="FrameA"/> <second ref="FrameB"/>
+<position name="posFrameSubtraction" x="0" y="0" z="0"/>
+</subtraction> 
+
+<union name="CrossBeam">
+   <first ref="CrossBeamA"/> <second ref="CrossBeamA"/>
+   <rotation name="CrossBeam93rot" unit="deg" x="93" y="0" z="0"/>
+   <position name="posCrossBeamUnion0" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="aTopCross0">
+   <first ref="aTopCrossBeamA"/> <second ref="aTopCrossBeamA"/>
+   <rotationref ref="rPlus60AboutY"/>
+   <position name="posaTopCrossUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="aTopCross1">
+    <first ref="aTopBeam"/> <second ref="aTopCross0"/>
+    <rotation name="rMinus60AboutY0" unit="deg" x="0" y="-30" z="0"/>
+    <position name="posaCrossBeamUnion0" unit="cm" x="64" y="0" z="111.64/2"/>
+</union>
+ <union name="aTopCross2">
+    <first ref="aTopCross1"/> <second ref="aTopCross0"/>
+    <rotation name="rMinus60AboutY1" unit="deg" x="0" y="-30" z="0"/>
+    <position name="posaCrossBeamUnion1" unit="cm" x="-64" y="0" z="111.64/2"/>
+</union>
+ <union name="aTopCross">
+    <first ref="aTopCross2"/> <second ref="aTopBeam"/>
+    <position name="posaCrossBeamUnion2" unit="cm" x="0" y="0" z="111.64"/>
+ </union>
+
+ <union name="aTopCrossOuter0">
+   <first ref="aTopCrossBeamB"/> <second ref="aTopCrossBeamB"/>
+   <rotation name="rPlus76AboutY" unit="deg" x="0" y="76" z="0" />
+   <position name="posaTopCrossOutUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="aTopCrossOuter1">
+    <first ref="aTopBeam"/> <second ref="aTopCrossOuter0"/>
+    <position name="posaCrossOuterUnion0" unit="cm" x="64" y="0" z="36"/>
+    <rotation name="rotTopCross1" unit="deg" x="0" y="-38" z="0"/>
+</union>
+ <union name="aTopCrossOuter2">
+    <first ref="aTopCrossOuter1"/> <second ref="aTopCrossOuter0"/>
+    <position name="posaCrossOuterUnion1" unit="cm" x="-64" y="0" z="36"/>
+    <rotation name="rotTopCross2" unit="deg" x="0" y="-38" z="0"/>
+</union>
+ <union name="aTopCrossOuter">
+    <first ref="aTopCrossOuter2"/> <second ref="aTopBeam"/>
+    <position name="posaCrossBeamUnion3" unit="cm" x="0" y="0" z="72"/>
+</union>
+
+ <union name="aSideCross1">
+   <first ref="aSideCross0"/> <second ref="aSideCross0"/>
+   <rotation name="rotSideCross33AboutY" unit="deg" x="0" y="66" z="0"/>
+   <position name="posaSideCrossUnion" unit="cm" x="0" y="0" z="0"/>
+ </union>
+ <union name="aSideCross2">
+    <first ref="aTopBeam"/> <second ref="aSideCross1"/>
+    <rotation name="rMinus17AboutY" unit="deg" x="0" y="-33" z="0"/>
+    <position name="posaSideCrossBeamUnion0" unit="cm" x="64" y="0" z="45.63"/>
+</union>
+ <union name="aSideCross3">
+    <first ref="aSideCross2"/> <second ref="aSideCross1"/>
+    <rotation name="rMinus60AboutY" unit="deg" x="0" y="-33" z="0"/>
+    <position name="posaSideCrossBeamUnion1" unit="cm" x="-64" y="0" z="45.63"/>
+</union>
+ <union name="aSideCross">
+    <first ref="aSideCross2"/> <second ref="aTopBeam"/>
+    <position name="posaSideCrossBeamUnion2" unit="cm" x="0" y="0" z="45.63*2"/>
+</union>
+
 EOF
+
+# for($i=1;$i<6;++$i){
+#   $j=$i-1;
+#   $k=$i+5;
+    print FIELDCAGE<<EOF;
+<!-- <union name="Frame$i">
+   <first ref="Frame$j"/> <second ref="CrossBeam"/>
+   <rotation name="CrossBeam43rot$j" unit="deg" x="43" y="180" z="0"/>
+   <position name="posCrossBeamUnion$j" unit="cm" x="-11/2" y="0" z="-200.70*2 +$j*200.70"/>
+ </union> -->
+EOF
+#   }
+
+for($i=1;$i<5;++$i){
+#   $j= 5+$i ;
+#   $k= $j-1;
+    $j= $i-1;
+    print CRYOSTAT<<EOF;
+ <union name="Frame$i">
+    <first ref="Frame$j"/> <second ref="VertBar"/>
+    <position name="posVertBarUnion$i" unit="cm" x="-11/2" y="0" z="-200.70*3/2 + 200.70*$j"/>
+ </union>
+EOF
+}
 
 
 	print CRYOSTAT <<EOF;
@@ -1343,13 +1457,38 @@ EOF
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
   <solidref ref="SteelTube"/>
  </volume>
+<volume name="volaTopBeam">
+    <materialref ref="G10"/>
+    <solidref ref="aTopBeam"/>
+ </volume>
+<volume name="volaTopCross">
+    <materialref ref="G10"/>
+    <solidref ref="aTopCross"/>
+ </volume>
+<volume name="volaTopCrossOuter">
+    <materialref ref="G10"/>
+    <solidref ref="aTopCrossOuter"/>
+ </volume>
+<volume name="volaSideCross">
+    <materialref ref="G10"/>
+    <solidref ref="aSideCross"/>
+ </volume>
+<volume name="volFrame">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="Frame4"/>
+ </volume>
+<volume name="volCrossBeam">
+   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+   <solidref ref="CrossBeam"/>
+ </volume>
+
  <volume name="volCryostat">
   <materialref ref="LAr"/>
   <solidref ref="Cryostat"/>
   <physvol>
    <volumeref ref="volSteelTube"/>
    <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
-  </physvol> 
+  </physvol>
 <physvol>
    <volumeref ref="volEndCap"/>
    <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
@@ -1358,7 +1497,48 @@ EOF
     <volumeref ref="volEndCap"/>
     <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
     <rotationref ref="rPlus180AboutY"/>
-  </physvol> 
+  </physvol>
+ <physvol>
+    <volumeref ref="volFrame"/>
+    <position name="posFrame2" unit="cm" x="-256/2-8" y="0" z="0"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaSideCross"/>
+      <position name="posaSideCross1" unit="cm" x="0" y="-45.63" z="1050.19/2+5"/>
+      <rotationref ref="rPlus90AboutX"/> 
+  </physvol>
+  <physvol>
+      <volumeref ref="volaSideCross"/>
+      <position name="posaSideCross2" unit="cm" x="0" y="-45.63" z="-1050.19/2-5"/>
+      <rotationref ref="rPlus90AboutX"/> 
+  </physvol>
+EOF
+    for($i=0;$i<3;++$i){
+    print CRYOSTAT<<EOF;
+  <physvol>
+      <volumeref ref="volaTopCross"/>
+      <position name="posaTopCross$i" unit="cm" x="0" y="256/2+2.5*2.54" z="-5/2*111.64 + 2*111.64*$i"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCross"/>
+      <position name="posaBottomCross$i" unit="cm" x="0" y="-256/2-2.5*2.54" z="-5/2*111.64 +2*111.64*$i"/>
+  </physvol>
+EOF
+    }
+    for($i=0;$i<2;++$i){
+    print CRYOSTAT<<EOF;
+  <physvol>
+      <volumeref ref="volaTopCrossOuter"/>
+      <position name="posaTopCrossOuter$i" unit="cm" x="0" y="256/2+2.5*2.54" z="-4*111.64 + 15/2*111.64*$i"/>
+  </physvol>
+  <physvol>
+      <volumeref ref="volaTopCrossOuter"/>
+      <position name="posaBottomCrossOuter$i" unit="cm" x="0" y="-256/2-2.5*2.54" z="-4*111.64 + 15/2*111.64*$i"/>
+  </physvol>
+EOF
+	}
+    print CRYOSTAT<<EOF;
+
   <physvol>
    <volumeref ref="volTPC"/>
    <position name="posTPC" unit="cm" x="0.0" y="0.97" z="0"/>
@@ -1366,44 +1546,58 @@ EOF
 EOF
 
 
-  @pmt_pos = ( ' x="-147.8"  y="3.21654"  z="-472"',
-               ' x="-147.76" y="-52.6635" z="-420"',
-               ' x="-147.8"  y="59.0965"  z="-420"',
-               ' x="-147.76" y="-52.6635" z="-380"',
-               ' x="-147.8"  y="59.0965"  z="-380"',
-               ' x="-147.8"  y="3.21654"  z="-328"',
-               ' x="-147.8"  y="3.21654"  z="-272"',
-               ' x="-147.76" y="-52.6635" z="-220"',
-               ' x="-147.8"  y="59.0965"  z="-220"',
-               ' x="-147.76" y="-52.6635" z="-180"',
-               ' x="-147.8"  y="59.0965"  z="-180"',
-               ' x="-147.8"  y="3.21654"  z="-128"',
-               ' x="-147.8"  y="3.21654"  z="-72"',
-               ' x="-147.76" y="-52.6635" z="-20"',
-               ' x="-147.8"  y="59.0965"  z="-20"',
-               ' x="-147.76" y="-52.6635" z="20"',
-               ' x="-147.8"  y="59.0965"  z="20"',
-               ' x="-147.8"  y="3.21654"  z="72"',
-               ' x="-147.8"  y="3.21654"  z="128"',
-               ' x="-147.76" y="-52.6635" z="180"',
-               ' x="-147.8"  y="59.0965"  z="180"',
-               ' x="-147.76" y="-52.6635" z="220"',
-               ' x="-147.8"  y="59.0965"  z="220"',
-               ' x="-147.8"  y="3.21654"  z="272"',
-               ' x="-147.8"  y="3.21654"  z="328"',
-               ' x="-147.76" y="-52.6635" z="380"',
-               ' x="-147.8"  y="59.0965"  z="380"',
-               ' x="-147.76" y="-52.6635" z="420"',
-               ' x="-147.8"  y="59.0965"  z="420"',
-               ' x="-147.8"  y="3.21654"  z="472"' );
+  @pmt_pos = ( ' x="-141.487" y="55.249" z="108.693 - 424.75*2.54*.5"',
+               ' x="-141.342" y="55.249" z="149.287-424.75*2.54*.5"',
+               ' x="-141.380" y="27.431"  z="72.034 - 424.75*2.54*.5"',
+               ' x="-141.387" y="-0.303" z="194.676 - 424.75*2.54*.5"',
+               ' x="-141.098"  y="-28.576"  z="71.407 - 424.75*2.54*.5"',
+               ' x="-141.183"  y="-56.615"  z="108.802 - 424.75*2.54*.5"',
+               ' x="-141.2239"  y="-56.203"  z="149.112- 424.75*2.54*.5"',
+               ' x="-141.363" y="54.646" z="308.909 - 424.75*2.54*.5"',
+               ' x="-141.132"  y="54.693"  z="349.145 - 424.75*2.54*.5"',
+               ' x="-141.096" y="-0.829" z="262.947 - 424.75*2.54*.5"',
+               ' x="-141.031"  y="-0.706"  z="394.771 - 424.75*2.54*.5"',
+               ' x="-140.953"  y="-56.261"  z="308.572 - 424.75*2.54*.5"',
+               ' x="-140.594"  y="-57.022"  z="349.273 - 424.75*2.54*.5"',
+               ' x="-140.929" y="55.771" z="521.066 - 424.75*2.54*.5"',
+               ' x="-140.819"  y="55.822"  z="561.862 - 424.75*2.54*.5"',
+               ' x="-140.564" y="-0.875" z="474.028 - 424.75*2.54*.5"',
+               ' x="-140.597"  y="-0.549"  z="606.217 - 424.75*2.54*.5"',
+               ' x="-140.540"  y="-56.323"  z="521.153 - 424.75*2.54*.5"',
+               ' x="-140.566"  y="-56.205"  z="561.549 - 424.75*2.54*.5"',
+               ' x="-140.607" y="55.800" z="732.006 - 424.75*2.54*.5"',
+               ' x="-140.486"  y="55.625"  z="772.816 - 424.75*2.54*.5"',
+               ' x="-140.570" y="-0.051" z="685.136 - 424.75*2.54*.5"',
+               ' x="-140.250"  y="-0.502"  z="817.141 - 424.75*2.54*.5"',
+               ' x="-140.558"  y="-56.408"  z="732.207 - 424.75*2.54*.5"',
+               ' x="-140.550"  y="-56.284"  z="772.838 - 424.75*2.54*.5"',
+               ' x="-139.780" y="55.822" z="931.998 - 424.75*2.54*.5"',
+               ' x="-139.587"  y="55.313"  z="972.794 - 424.75*2.54*.5"',
+               ' x="-139.363" y="27.607" z="1010.644 - 424.75*2.54*.5"',
+               ' x="-140.122"  y="-0.722"  z="886.531 - 424.75*2.54*.5"',
+               ' x="-139.400"  y="-28.625"  z="1011.288 - 424.75*2.54*.5"', 
+	       ' x="-140.004" y="-56.309" z="932.872 - 424.75*2.54*.5"',
+	       ' x="-139.721" y="-56.514" z="972.797 - 424.75*2.54*.5"',
+  	       ' x="-161.341" y="-28.201 + 20/2*2.54" z="287.161 - 424.75*2.54*.5"',
+	       ' x="-160.858" y="-27.994 + 20/2*2.54" z="498.501 - 424.75*2.54*.5"',
+	       ' x="-160.882" y="-28.100 + 20/2*2.54" z="583.333 - 424.75*2.54*.5"',
+	       ' x="-160.654" y="-27.755 + 20/2*2.54" z="794.575 - 424.75*2.54*.5"' );
 
   if ( $pmt_switch eq "on" ) {
-    for ( $i=0; $i<30; ++$i ){
+    for ( $i=0; $i<32; ++$i ){
       print CRYOSTAT <<EOF;
   <physvol>
    <volumeref ref="volPMT"/>
    <position name="posPMT$i" unit="cm" @pmt_pos[$i]/>
    <rotationref ref="rPMTRotation1"/>
+  </physvol>
+EOF
+    }
+    for ( $i=32; $i<36; ++$i ){
+      print CRYOSTAT <<EOF;
+  <physvol>
+   <volumeref ref="volPaddle_PMT"/>
+   <position name="posPMT$i" unit="cm" @pmt_pos[$i]/>
   </physvol>
 EOF
     }
@@ -1460,6 +1654,7 @@ sub gen_enclosure()
  <box name="DetEnclosureOLDbig" lunit="cm" x="$DetEnclosureWidth+1" y="$DetEnclosureHeight+1" z="$DetEnclosureLength+1" />
  <box name="DetEnclosureOLDsmall" lunit="cm" x="$DetEnclosureWidth" y="$DetEnclosureHeight" z="$DetEnclosureLength" />
  <tube name="DetEnclosureNEW" lunit="cm" rmax="292*2.54-0.1" z="$DetEnclosureHeight+10" aunit="deg" deltaphi="360" /> 
+<tube name="DetEnclosureAboveGrade" rmax="292*2.54-.5" z="(29*12+5)*2.54-83*2" deltaphi="360" lunit="cm" aunit="deg"/>
 
   <subtraction name="DetSub0">
 	<first ref="DetEnclosureOLDbig"/> <second ref="DetEnclosureNEW"/>
@@ -1467,10 +1662,17 @@ sub gen_enclosure()
 	<rotation name="rotDetUnion0" unit="deg" x="90" y="0" z="0"/>
   </subtraction>
 
-  <subtraction name="DetEnclosure">
+  <subtraction name="DetEnclosure0">
 	<first ref="DetEnclosureOLDsmall"/> <second ref="DetSub0"/>
 	<position name="posDetEnclosure2" unit="cm" x="0" y="0" z="0"/>
   </subtraction> 
+
+  <union name="DetEnclosure">
+	<first ref="DetEnclosure0"/> <second ref="DetEnclosureAboveGrade"/>
+	<position name="posDetEnclosure3" unit="cm" x="0" y="$DetEnclosureHeight/2+(29*12+5)*2.54/2-83" z="0"/>
+	<rotation name="rotDetUnion1" unit="deg" x="90" y="0" z="0"/>
+  </union> 
+
 
 </solids>
 
@@ -1491,24 +1693,24 @@ EOF
         <position name="posInsulation" unit="cm" x="0" y="0" z="0"/>
       </physvol> 
       <physvol>
-        <volumeref ref="volPlatform"/>
+        <volumeref ref="volPlatformSpace"/>
         <position name="posPlatform" unit="cm" x="0" y="292.74" z="0"/>
       </physvol>
-      <physvol>
+<!--      <physvol>
         <volumeref ref="volColumn"/>
         <position name="posColumn1" unit="cm" x="266" y="-121.261" z="0"/>
       </physvol>
       <physvol>
         <volumeref ref="volColumn"/>
         <position name="posColumn2" unit="cm" x="-266" y="-121.261" z="0"/>
-      </physvol>
+      </physvol>-->
       <physvol>
         <volumeref ref="volTankBox1"/>
-        <position name="posTank1_1" unit="cm" x="50" y="419" z="-600"/>
+        <position name="posTank1_1" unit="cm" x="50" y="419+98.1" z="-600"/>
       </physvol>
       <physvol>
        <volumeref ref="volTankBox1"/>
-       <position name="posTank1_2" unit="cm" x="-50" y="419" z="-600"/>
+       <position name="posTank1_2" unit="cm" x="-50" y="419+98.1" z="-600"/>
       </physvol>
       <physvol>
        <volumeref ref="volStandSubtraction"/>
@@ -1528,45 +1730,73 @@ EOF
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack1" unit="cm" x="-75" y="408.91" z="0"/>
+        <position name="posRack1" unit="cm" x="-75" y="408.91+104.1" z="0+100+20"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack2" unit="cm" x="-75" y="408.91" z="93.85"/>
+        <position name="posRack2" unit="cm" x="-75" y="408.91+104.1" z="93.85+100+20"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack3" unit="cm" x="-75" y="408.91" z="187.7"/>
+        <position name="posRack3" unit="cm" x="-75" y="408.91+104.1" z="187.7+100+90"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack4" unit="cm" x="-75" y="408.91" z="275.15"/>
+        <position name="posRack4" unit="cm" x="-75" y="408.91+104.1" z="275.15+100+70"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack5" unit="cm" x="-75" y="408.91" z="-142.15"/>
+        <position name="posRack5" unit="cm" x="-75" y="408.91+104.1" z="-142.15+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack6" unit="cm" x="-75" y="408.91" z="-243.8"/>
+        <position name="posRack6" unit="cm" x="-75" y="408.91+104.1" z="-243.8+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack7" unit="cm" x="-75" y="408.91" z="-326.9"/>
+        <position name="posRack7" unit="cm" x="-75" y="408.91+104.1" z="-326.9+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack8" unit="cm" x="127.9" y="408.91" z="-326.9"/>
+        <position name="posRack8" unit="cm" x="127.9" y="408.91+104.1" z="-326.9+122"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack9" unit="cm" x="127.9" y="408.91" z="-387.7"/>
+        <position name="posRack10" unit="cm" x="127.9" y="408.91+104.1" z="-326.9+150+40"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack10" unit="cm" x="53.07" y="408.91" z="335.85"/>
+        <position name="posRack11" unit="cm" x="100" y="408.91+104.1" z="-387.7-40"/>
         <rotationref ref="rPlus90AboutY"/>
       </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack12" unit="cm" x="105" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack13" unit="cm" x="40" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack14" unit="cm" x="-75" y="408.91+104.1" z="270+40"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack15" unit="cm" x="145" y="408.91+104.1" z="-142.15+100"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="170"/>
+      </physvol>
+  <!--    <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack17" unit="cm" x="-160" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>-->
+
       <physvol>
          <volumeref ref="volFloorTankBox1"/>
          <position name="posfloortankbox1" unit="cm" x="-450" y="100+.001-530" z="335.28"/>
@@ -1587,14 +1817,14 @@ EOF
          <volumeref ref="volFloorTankBox1"/>
          <position name="posfloortankbox1_5" unit="cm" x="360+60" y="100+.001-530" z="-335.28-60"/>
       </physvol>
-      <physvol>
+<!--      <physvol>
         <volumeref ref="volWalkway"/>
         <position name="posExtraPlatform" unit="cm" x="0" y="268" z="0"/>
       </physvol>
-      <physvol>
+   <physvol>
         <volumeref ref="volWalkway"/>
         <position name="posWalkway" unit="cm" x="-212" y="181.74" z="0"/>
-      </physvol>
+      </physvol>-->
       <physvol>
          <volumeref ref="volFloorTankBox2"/>
          <position name="posfloortankbox2_1" unit="cm" x="-20" y="100+.001-530" z="-500"/>
@@ -1682,6 +1912,72 @@ sub gen_world()
     x="$WorldWidth" 
     y="$WorldHeight" 
     z="$WorldLength"/>
+<tube name="ConcreteWallAboveGrade0"
+   rmin="292*2.54"
+   rmax="(310)*2.54"
+   z="(29*12+6)*2.54"
+   deltaphi="360"
+   lunit="cm"
+   aunit="deg"/>
+<tube name="ConcreteWallAboveGradeSegment"
+   rmax="304*2.54"
+   z="(4*12+7)*2.54"
+   deltaphi="360"
+   lunit="cm"
+   aunit="deg"/>
+<tube name="ConcreteDiscRoof0"
+	rmax="304*2.54-0.1"
+	z="13*2.54"
+	deltaphi="360"
+	lunit="cm"
+	aunit="deg"/>
+ <box name="ConcreteSteelBeam0"
+  	lunit="cm"
+  	x="48*2.54"
+  	y="2*220*2.54" 
+  	z="(5*12+8)*2.54"/> 
+ <box name="ConcreteSteelBeamSegment1"
+  	lunit="cm"
+  	x="6*2.54+0.1"
+  	y="2*220*2.54 +0.1" 
+  	z="34*2.54+0.1"/> 
+ <box name="ConcreteSteelBeamSegment2"
+  	lunit="cm"
+  	x="12*2.54+0.1"
+  	y="2*230*2.54+0.1" 
+  	z="34*2.54+0.1"/> 
+
+ <box name="SteelGrating"
+  	lunit="cm"
+	x="(23*12*2.54)"
+  	y=".5*2.54"
+	z="(43*12+2+6.56)*2.54"/>
+ <box name="RemovableRoof"
+	lunit="cm"
+	x="(23*12*2.54+.1)"
+	y="(42*12+10)*2.54"
+	z="(12.5+12.5)*2.54"/>
+ <box name="IBeam22_0"
+	lunit="cm"
+	x="4.03*2.54 -0.1"
+	y="(42*12+10)*2.54-0.1"
+	z="12.5*2.54-0.1"/>
+ <box name="IBeam22Segment"
+	lunit="cm"
+	x="(4.03-0.26)*2.54/2"
+	y="(43*12+2)*2.54"
+	z="(12.5-2*0.425)*2.54"/>
+ <box name="IBeam35_0"
+	lunit="cm"
+	x="6.56*2.54-0.1"
+	y="(23*12)*2.54-0.1"
+	z="12.5*2.54-0.1"/>
+ <box name="IBeam35Segment"
+	lunit="cm"
+	x="(6.56-0.3)*2.54/2"
+	y="(23*12)*2.54"
+	z="(12.5-2*0.52)*2.54"/>
+
   <tube name="Ground"
     rmin="312*2.54"
     rmax="((50*12)+310)*2.54"
@@ -1723,15 +2019,82 @@ sub gen_world()
    lunit="cm"
    aunit="deg"/>
   <tube name="Overburden"
-    rmin="0"
-    rmax="584*2.54"
+    rmax="292*2.54"
     z="10*12*2.54"
     deltaphi="360" 
     lunit="cm"
     aunit="deg"/>
+
+  <subtraction name="ConcreteWallAboveGrade">
+    <first ref="ConcreteWallAboveGrade0"/> <second ref="ConcreteWallAboveGradeSegment"/>
+	<position name="posRemoval0" unit="cm" x="0" y="0" z="(122+24+3.5)*2.54"/>
+  </subtraction>
+
+  <subtraction name="ConcreteDiscRoof">
+    <first ref="ConcreteDiscRoof0"/> <second ref="RemovableRoof"/>
+	<position name="posRemoval1" unit="cm" x="0" y="0" z="0"/>
+<!--	<rotation name="rotPlatformSub0" unit="deg" x="90" y="0" z="0"/>-->
+  </subtraction>
+
+  <subtraction name="ConcreteSteelBeam1">
+    <first ref="ConcreteSteelBeam0"/> <second ref="ConcreteSteelBeamSegment1"/>
+	<position name="posBeamRemoval0" unit="cm" x="21*2.54" y="0" z="17*2.54"/>
+  </subtraction>
+
+  <subtraction name="ConcreteSteelBeam">
+    <first ref="ConcreteSteelBeam1"/> <second ref="ConcreteSteelBeamSegment2"/>
+	<position name="posBeamRemoval1" unit="cm" x="-18*2.54" y="0" z="17*2.54"/>
+  </subtraction>
+
+  <subtraction name="IBeam22_1">
+    <first ref="IBeam22_0"/> <second ref="IBeam22Segment"/>
+	<position name="posBeamRemoval2" unit="cm" x="(4.03 -1.885)*0.5*2.54" y="0" z="0"/>
+  </subtraction>
+ 
+  <subtraction name="IBeam22">
+    <first ref="IBeam22_1"/> <second ref="IBeam22Segment"/>
+	<position name="posBeamRemoval3" unit="cm" x="-(4.03 -1.885)*0.5*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam35_1">
+    <first ref="IBeam35_0"/> <second ref="IBeam35Segment"/>
+	<position name="posBeamRemoval4" unit="cm" x="(6.56 - 3.13)*0.5*2.54" y="0" z="0"/>
+  </subtraction>
+ 
+  <subtraction name="IBeam35">
+    <first ref="IBeam35_1"/> <second ref="IBeam35Segment"/>
+	<position name="posBeamRemoval5" unit="cm" x="-(6.56-3.13)*0.5*2.54" y="0" z="0"/>
+  </subtraction>
+
 </solids>
 
 <structure>
+<volume name="volIBeam22">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam22"/>
+</volume>
+<volume name="volIBeam35">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam35"/>
+</volume>
+
+
+<volume name="volConcreteWallAboveGrade" >
+    <materialref ref="Concrete" />
+    <solidref ref="ConcreteWallAboveGrade" />
+  </volume>
+<volume name="volConcreteDiscRoof" >
+    <materialref ref="Concrete" />
+    <solidref ref="ConcreteDiscRoof" />
+  </volume>
+<volume name="volConcreteSteelBeam" >
+    <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+    <solidref ref="ConcreteSteelBeam" />
+  </volume>
+<volume name="volSteelGrating" >
+    <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+    <solidref ref="SteelGrating" />
+  </volume>
   <volume name="volGround" >
     <materialref ref="Dirt" />
     <solidref ref="Ground" />
@@ -1741,7 +2104,7 @@ sub gen_world()
      <solidref ref="GroundBottom" />
    </volume>
   <volume name="volOverburden" >
-    <materialref ref="Dirt" />
+    <materialref ref="Concrete" />
     <solidref ref="Overburden" />
   </volume>
   <volume name="volPolystyreneEnclosure" >
@@ -1760,9 +2123,79 @@ sub gen_world()
     <materialref ref="Concrete" />
     <solidref ref="ConcreteEnclosureBottom" />
   </volume>
+  <volume name="volRemovableRoof" >
+	<materialref ref="Air" />
+	<solidref ref="RemovableRoof"/>
+ 	<physvol>
+       <volumeref ref="volIBeam22"/>
+       <position name="posIBeam220" unit="cm" x="(3*12+5)*2.54+4.03*0.5*2.54" y="0" z="-(12.5*2.54*0.5)"/>
+     </physvol>
+	 <physvol>
+       <volumeref ref="volIBeam22"/>
+       <position name="posIBeam221" unit="cm" x="(3*12+5)*2.54+(6*12+10)*2.54+4.03*0.5*2.54" y="0" z="-(12.5*2.54*0.5)"/>
+     </physvol> 
+	 <physvol>
+       <volumeref ref="volIBeam22"/>
+       <position name="posIBeam222" unit="cm" x="-((3*12+5)*2.54+4.03*0.5*2.54)" y="0" z="-(12.5*2.54*0.5)"/>
+     </physvol> 
+	 <physvol>
+       <volumeref ref="volIBeam22"/>
+       <position name="posIBeam223" unit="cm" x="-((3*12+5)*2.54+(6*12+10)*2.54+4.03*0.5*2.54)" y="0" z="-(12.5*2.54*0.5)"/>
+     </physvol> 
+EOF
+	
+	for($i=0;$i<4;++$i){
+		print GDML<<EOF;
+		<physvol>
+			<volumeref ref="volIBeam35"/>
+			<position name="posIBeam35pos$i" unit="cm" x="0" y="38*0.5*2.54+$i*(6*12+6)*2.54" z="(12.5*2.54*0.5)"/>
+			<rotation name="r90AboutZpos$i" unit="deg" x="0" y="0" z="90"/>
+		</physvol>
+		<physvol>
+			<volumeref ref="volIBeam35"/>
+			<position name="posIBeam35neg$i" unit="cm" x="0" y="-(38*0.5*2.54+$i*(6*12+6)*2.54)" z="(12.5*2.54*0.5)"/>
+			<rotation name="r90AboutZneg$i" unit="deg" x="0" y="0" z="90"/>
+		</physvol>
+
+EOF
+	}
+
+
+print GDML<<EOF;
+  </volume>
+
   <volume name="volWorld" >
     <materialref ref="Air"/> 
     <solidref ref="World"/>
+	<physvol>
+      <volumeref ref="volConcreteWallAboveGrade"/>
+      <position name="posConcreteWallAboveGrade" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 + 22.86" z="0.5*1037"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> 
+	<physvol>
+      <volumeref ref="volRemovableRoof"/>
+      <position name="posRemovableRoof" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 +22.86 +127*2.54" z="0.5*1037"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> 
+	<physvol>
+      <volumeref ref="volConcreteDiscRoof"/>
+      <position name="posConcreteDiscRoof" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 +22.86+2.54 +127.5*2.54" z="0.5*1037"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> 
+	<physvol>
+      <volumeref ref="volConcreteSteelBeam"/>
+      <position name="posConcreteSteelBeam0" unit="cm" x="0.5*256.35+(23+ 4)*12*0.5*2.54" y="34.50000555*12*2.54+22.86 + 121*2.54-0.1" z="0.5*1037"/>
+	<rotation name="rot90X180Y" unit="deg" x="90" y="0" z="180"/>
+    </physvol> 
+	<physvol>
+      <volumeref ref="volConcreteSteelBeam"/>
+      <position name="posConcreteSteelBeam1" unit="cm" x="0.5*256.35-(23 + 4)*12*0.5*2.54" y="34.50000555*12*2.54+22.86+121*2.54-0.1" z="0.5*1037"/>
+      <rotationref ref="rPlus90AboutX"/>
+    </physvol> 
+	<physvol>
+      <volumeref ref="volSteelGrating"/>
+      <position name="posSteelGrating" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54+ 22.86+127*2.54+13*2.54" z="0.5*1037"/>
+    </physvol> 
     <physvol>
       <volumeref ref="volConcreteEnclosure"/>
       <position name="posConcreteEnclosure" unit="cm" x="0.5*$TPCActiveDepth" y="36*2.54/2" z="0.5*$TPCWirePlaneLength"/>
@@ -1788,11 +2221,11 @@ sub gen_world()
       <position name="posGroundBottom" unit="cm" x="0.5*$TPCActiveDepth" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>  
-    <!--physvol>
+  <!-- <physvol>
       <volumeref ref="volOverburden"/>
-      <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="(41-10)*12*2.54/2" z="0.5*$TPCWirePlaneLength"/>
+      <position name="posOverburden" unit="cm" x="0.5*$TPCActiveDepth" y="32.50000555*12*2.54+22.86 +127*2.54+285" z="0.5*1037"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol-->
+    </physvol>-->
     <physvol>
       <volumeref ref="volDetEnclosure"/>
       <position name="posDetEnclosure" unit="cm" x="0.5*$TPCActiveDepth" y="0" z="0.5*$TPCWirePlaneLength"/>
@@ -1855,14 +2288,112 @@ sub gen_enclosureExtras()
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
-<box name="Platform"
-  x="550"
-  y="18"
-  z="1500"
-  lunit="cm"/>
+ <box name="PlatformOLDbig" lunit="cm" x="558+1" y="(4*12+8+2*11+12.06)*2.54+1" z="1500+1" />
+ <box name="PlatformOLDsmall" lunit="cm" x="558" y="(4*12+8+2*11+12.06)*2.54" z="1500" />
+ <tube name="PlatformNEW" lunit="cm" rmax="292*2.54-0.5" z="(4*12+7+2*11+12.06)*2.54+1.5" aunit="deg" deltaphi="360" /> 
+
+ <box name="PlatformRectbig" lunit="cm" x="550+1" y="2.54+1" z="1500+1" />
+ <box name="PlatformRectsmall" lunit="cm" x="550" y="2.54" z="1500" />
+ <tube name="PlatformCircle" lunit="cm" rmax="292*2.54-0.5" z="2.54+1.5" aunit="deg" deltaphi="360" /> 
+
+  <subtraction name="PlatformSub0">
+    <first ref="PlatformOLDbig"/> <second ref="PlatformNEW"/>
+	<position name="posPlatformSub0" unit="cm" x="0" y="0" z="0"/>
+	<rotation name="rotPlatformSub0" unit="deg" x="90" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="PlatformSpace0">
+	<first ref="PlatformOLDsmall"/> <second ref="PlatformSub0"/>
+	<position name="posPlatformSub1" unit="cm" x="0" y="0" z="0"/>
+  </subtraction> 
+
+  <subtraction name="PlatformDisc0">
+    <first ref="PlatformRectbig"/> <second ref="PlatformCircle"/>
+	<position name="posPlatformDiscSub" unit="cm" x="0" y="0" z="0"/>
+	<rotation name="rotPlatformDisc" unit="deg" x="90" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="PlatformDisc">
+    <first ref="PlatformRectsmall"/> <second ref="PlatformDisc0"/>
+	<position name="posPlatformDiscSub1" unit="cm" x="0" y="0" z="0"/>
+  </subtraction>
+
+
+  <subtraction name="PlatformSpace">
+	<first ref="PlatformSpace0"/> <second ref="PlatformOLDbig"/>
+	<position name="posPlatformSub2" unit="cm" x="(45+9)*2.54" y="-30*2.54" z="0"/>
+  </subtraction> 
+
+ <box name="IBeam53_0" lunit="cm" x="9.995*2.54 -0.1" y="(22*12+6)*2.54-0.1" z="12.06*2.54-0.1"/>
+ <box name="IBeam53Segment" lunit="cm" x="(9.995-0.345)*2.54/2" y="(22*12+6)*2.54" z="(12.06-2*0.575)*2.54"/>
+ <box name="IBeam16_0" lunit="cm" x="3.99*2.54-0.1" y="(17*12+4)*2.54-0.1" z="12.5*2.54-0.1"/>
+ <box name="IBeam16Segment" lunit="cm" x="(3.99-0.22)*2.54/2" y="(17*12+4)*2.54" z="(11.99-2*0.265)*2.54"/>
+ <box name="IBeam40_0" lunit="cm" x="8.005*2.54 -0.1" y="(18*12+3)*2.54-0.1" z="11.94*2.54-0.1"/>
+ <box name="IBeam40Segment" lunit="cm" x="(8.005-0.295)*2.54/2" y="(18*12+3)*2.54" z="(11.94-2*0.515)*2.54"/>
+ <box name="IBeam45_0" lunit="cm" x="8.02*2.54-0.1" y="(17*12 +4)*2.54-0.1" z="10.1*2.54-0.1"/>
+ <box name="IBeam45Segment" lunit="cm" x="(8.02-0.35)*2.54/2" y="(17*12+4)*2.54" z="(10.1-2*0.62)*2.54"/>
+ <box name="IBeam17_0" lunit="cm" x="4.01*2.54-0.1" y="36*2.54-0.1" z="10.11*2.54-0.1"/>
+ <box name="IBeam17Segment" lunit="cm" x="(4.01-0.24)*2.54/2" y="36*2.54" z="(10.11-2*0.33)*2.54"/>
+ <box name="BigSquare" lunit="cm" x="8*2.54" y="(4*12+6-12)*2.54" z="8*2.54"/>
+ <box name="SmallSquare" lunit="cm" x="7*2.54" y="(4*12+6-10)*2.54" z="7*2.54"/>
+ <box name="polySquare" lunit="cm" x="(18*12+4)*2.54-1" y="2.54" z="44*12*2.54"/>
+ <box name="polySmallSquare" lunit="cm" x="(30)*2.54" y="2.54" z="465*2.54"/>
+
+  <subtraction name="Square">
+    <first ref="BigSquare"/> <second ref="SmallSquare"/>
+	<position name="posSquareRemoval0" unit="cm" x="0" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam53_1">
+    <first ref="IBeam53_0"/> <second ref="IBeam53Segment"/>
+	<position name="posBeamRemovalPlat2" unit="cm" x="(9.995+.345)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam53">
+    <first ref="IBeam53_1"/> <second ref="IBeam53Segment"/>
+	<position name="posBeamRemovalPlat3" unit="cm" x="-(9.995 +.345)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam16_1">
+    <first ref="IBeam16_0"/> <second ref="IBeam16Segment"/>
+	<position name="posBeamRemovalPlat4" unit="cm" x="(3.99+.22)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam16">
+    <first ref="IBeam16_1"/> <second ref="IBeam16Segment"/>
+	<position name="posBeamRemovalPlat5" unit="cm" x="-(3.99+.22)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam40_1">
+    <first ref="IBeam40_0"/> <second ref="IBeam40Segment"/>
+	<position name="posBeamRemovalPlat6" unit="cm" x="(8.005+.295)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam40">
+    <first ref="IBeam40_1"/> <second ref="IBeam40Segment"/>
+	<position name="posBeamRemovalPlat7" unit="cm" x="-(8.005+0.295)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam17_1">
+    <first ref="IBeam17_0"/> <second ref="IBeam17Segment"/>
+	<position name="posBeamRemovalPlat8" unit="cm" x="(4.01+.24)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam17">
+    <first ref="IBeam17_1"/> <second ref="IBeam17Segment"/>
+	<position name="posBeamRemovalPlat9" unit="cm" x="-(4.01+.24)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+
+  <subtraction name="IBeam45_1">
+    <first ref="IBeam45_0"/> <second ref="IBeam45Segment"/>
+	<position name="posBeamRemovalPlat10" unit="cm" x="(8.02+.35)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+  <subtraction name="IBeam45">
+    <first ref="IBeam45_1"/> <second ref="IBeam45Segment"/>
+	<position name="posBeamRemovalPlat11" unit="cm" x="-(8.02+.35)*0.25*2.54" y="0" z="0"/>
+  </subtraction>
+ 
+
+ 
+
 <box name="Column"
   x="16.79"
-  y="798"
+  y="750"
   z="16.79"
   lunit="cm"/>
 <tube name="Tank1"
@@ -1927,6 +2458,12 @@ sub gen_enclosureExtras()
   z="$RackZ-2*$RackThickness-0.001"
   lunit="cm"/>
 
+<box name="rackInnards"
+  x="33.0"
+  y="84.5"
+  z="20.5"
+  lunit="cm"/>
+
 <box name="floorTankBox1"
    x="59.7"
    y="200"
@@ -1981,9 +2518,133 @@ sub gen_enclosureExtras()
      <materialref ref="PU_foam_light"/>
      <solidref ref="Insulation"/>
   </volume>
-    <volume name="volPlatform">
-        <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-        <solidref ref="Platform"/>
+  <volume name="volPlatformDisc">
+	<materialref ref="G10"/>
+    <solidref ref="PlatformDisc"/>
+  </volume>
+  <volume name="volpolySmallSquare">
+     <materialref ref="G10"/>
+     <solidref ref="polySmallSquare"/>
+  </volume>
+  <volume name="volSquare">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="Square"/>
+  </volume>
+  <volume name="volIBeam53">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam53"/>
+  </volume>
+  <volume name="volIBeam16">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam16"/>
+  </volume>
+  <volume name="volIBeam40">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam40"/>
+  </volume>
+  <volume name="volIBeam17">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam17"/>
+  </volume>
+  <volume name="volIBeam45">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="IBeam45"/>
+  </volume>
+
+    <volume name="volPlatformSpace">
+        <materialref ref="Air"/> 
+        <solidref ref="PlatformSpace"/>
+	<physvol>
+        <volumeref ref="volPlatformDisc"/>
+        <position name="posPlatformDisc" unit="cm" x="0" y="(4*12+8+ 11.94*2+2)*2.54/2" z="0"/>
+      </physvol>
+EOF
+	for($i=0;$i<5;++$i){
+    print GDML <<EOF;
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40pos$i" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(24.5+49*$i)*2.54"/>
+        <rotation name="rPlus90Z90X40pos$i" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam40"/>
+        <position name="posIbeam40neg$i" unit="cm" x="0" y="(4*12+8-11.94)*2.54/2-.5" z="(-24.5-49*$i)*2.54"/>
+        <rotation name="rPlus90Z90X40neg$i" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17pos$i" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(24.5+49*$i)*2.54"/>
+        <rotation name="rPlus90Z90Xpos17$i" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam17"/>
+        <position name="posIbeam17neg$i" unit="cm" x="(-9*12-2+18)*2.54+.5" y="-(4*12+8-10.11)*2.54/2+.5-10.11*2.54" z="(-24.5-49*$i)*2.54"/>
+        <rotation name="rPlus90Z90Xneg17$i" unit="deg" x="90" y="0" z="90"/>
+      </physvol>
+EOF
+}
+	for($j=0;$j<3;++$j){
+    print GDML <<EOF;
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZ$j" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*$j)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZ$j" unit="cm" x="(-9*12-2+4)*2.54+.5" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*$j)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquareposZShift$j" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="(24.5+2*49*$j)*2.54"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volSquare"/>
+        <position name="posSquarenegZShift$j" unit="cm" x="(-9*12-2+8+36)*2.54+1.25" y="-(4*12+8-42)*2.54/2+.5" z="-(24.5+2*49*$j)*2.54"/>
+      </physvol>
+	  
+	  
+EOF
+}
+	for($j=0;$j<2;++$j){
+    print GDML <<EOF;
+      <physvol>
+        <volumeref ref="volIBeam53"/>
+        <position name="posIBeam53pos$j" unit="cm" x="(-1)**$j*((9*12+2-9.995/2)*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="(23*12/2-5)*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam53"/>
+        <position name="posIBeam53neg$j" unit="cm" x="(-1)**$j*((9*12+2-9.995/2)*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-(23*12/2-5)*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam16"/>
+        <position name="posIBeam16pos$j" unit="cm" x="(-1)**$j*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam16"/>
+        <position name="posIBeam16neg$j" unit="cm" x="(-1)**$j*((6*12)/2*2.54-.5)" y="(4*12+8+12.06)*2.54/2" z="-128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam45"/>
+        <position name="posIBeam45pos$j" unit="cm" x="-(9*12+2-8-8.02/2-.5)*2.54 +$j*(36-1.5*8.02)*2.54 " y="-(4*12+8-2*10.11)*2.54/2" z="128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volIBeam45"/>
+        <position name="posIBeam45neg$j" unit="cm" x="-(9*12+2-8-8.02/2-.5)*2.54+$j*(36-1.5*8.02)*2.54" y="-(4*12+8-2*10.11)*2.54/2" z="-128.5*2.54"/>
+        <rotationref ref="rPlus90AboutX"/>
+      </physvol>
+EOF
+}
+    print GDML <<EOF;
+      <physvol>
+        <volumeref ref="volpolySmallSquare"/>
+        <position name="pospolySmallSquare" unit="cm" x="-(9*12+2-18-10.11/2-.5)*2.54" y="-(4*12+8-3*10.11-3)*2.54/2" z="0"/>
+      </physvol>
+
     </volume>
     <volume name="volColumn">
         <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
@@ -2039,6 +2700,10 @@ sub gen_enclosureExtras()
       <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
       <solidref ref="rackZ"/>
     </volume>
+	<volume name="volRackInnards">
+	  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	  <solidref ref="rackInnards"/>
+	</volume>
 
     <volume name="volRack">
       <materialref ref="Air"/>
@@ -2091,6 +2756,10 @@ sub gen_enclosureExtras()
         <volumeref ref="volRackZ"/>
         <position name="posRackZ4" unit="cm" z="0" y="-($RackY-$RackThickness)/2" x="-($RackX-$RackThickness)/2"/>
       </physvol>  
+	  <physvol>
+		<volumeref ref="volRackInnards"/>
+		<position name="posRackInnards" unit="cm" x="0" y="0" z="0"/>
+	  </physvol>
     </volume>
 
   <volume name="volFloorTank1">

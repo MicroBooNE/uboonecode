@@ -23,7 +23,7 @@
 
       <filename> micro-rotations.gdml </filename>
       <filename> materials.gdml </filename>
-      <filename> micro-plane.gdml </filename>
+      <filename> LAr1-wireplane.gdml </filename>
       <filename> micro-vertplane.gdml </filename>
       <filename> micro-groundplate.gdml </filename>
       <filename> micro-cathode.gdml </filename>

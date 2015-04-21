@@ -1,0 +1,112 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_all.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  # Producer names specified below would be looked up & stored in
+  # the output larlite file. The key represents the data product
+  # type which is uniquely defined for larlite::data::kDATA_TREE_NAME
+  # string array.
+  potsummary: ["generator"]
+  gtruth:     ["generator"]
+  mcflux:     ["generator"]
+  mctruth:    ["generator"]
+  mcpart:     ["largeant"]
+  simch:      ["largeant"]
+  mcshower:   ["mcreco"]
+  mctrack:    ["mcreco"]
+  wire:       ["caldata"]
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandora"]
+  endpoint2d: ["cccluster",
+               "featurevtx"]
+  sps:        ["pandora",
+               "costrk", "costrkcc",
+               "spacepointfinder","spacepointfindercc",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "beziertracker","beziertrackercc",
+               "featurevtx"]
+  track:      ["trackkalmanhit","trackkalmanhitcc",
+               "trackkalmansps","trackkalspscc",
+               "beziertracker","beziertrackercc",
+               "costrk","costrkcc",
+               "stitch","stitchcc",
+               "stitchkalmanhit"]
+  shower:     []
+  ophit:      ["opflash"]
+  opflash:    ["opflash"]
+  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
+               "trackkalmanspstag","trackkalspscctag",
+               "beziertrackertag","beziertrackercctag",
+               "costrktag","costrkcctag",
+               "stitchtag","stitchcctag",
+               "stitchkalmanhittag","beamflashcompat"]
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
+               "trackkalmanspscalo","trackkalspscccalo",
+               "beziertrackercalo","beziertrackercccalo",
+               "costrkcalo","costrkcccalo",
+               "stitchcalo","stitchcccalo",
+               "stitchkalmanhitcalo"]
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "trackkalmanspspid","trackkalspsccpid",
+               "beziertrackerpid","beziertrackerccpid",
+               "costrkpid","costrkccpid",
+               "stitchpid","stitchccpid",
+               "stitchkalmanhitpid"]
+  pfpart:     ["pandora"]
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  mctruth:    ["generator"]
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  endpoint2d: ["cccluster",
+               "featurevtx"]
+  sps:        ["pandoraCosmic","pandoraNu",
+               "costrk", "costrkcc",
+               "spacepointfinder","spacepointfindercc",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "beziertracker","beziertrackercc",
+               "featurevtx"]
+  track:      ["trackkalmanhit","trackkalmanhitcc",
+               "trackkalsps","trackkalspscc",
+               "beziertracker","beziertrackercc",
+               "costrk","costrkcc",
+               "stitch","stitchcc",
+               "stitchkalmanhit",
+               "pandoraCosmicKHit", "pandoraNuKHit"]
+  seed:       ["pandoraCosmicKHit", "pandoraNuKHit"]
+  shower:     []
+  pfpart:     ["pandoraCosmic","pandoraNu"]
+
+  ophit:      ["opflash"]
+  opflash:    ["opflash"]
+
+  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
+               "trackkalspstag","trackkalspscctag",
+               "beziertrackertag","beziertrackercctag",
+               "costrktag","costrkcctag",
+               "stitchtag","stitchcctag",
+               "stitchkalmanhittag","beamflashcompat",
+               "pandoraCosmicKHittag","pandoraNuKHittag"]
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
+               "trackkalspscalo","trackkalspscccalo",
+               "beziertrackercalo","beziertrackercccalo",
+               "costrkcalo","costrkcccalo",
+               "stitchcalo","stitchcccalo",
+               "stitchkalmanhitcalo",
+               "pandoraCosmicKHitcalo","pandoraNuKHitcalo"]
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "trackkalspspid","trackkalspsccpid",
+               "beziertrackerpid","beziertrackerccpid",
+               "costrkpid","costrkccpid",
+               "stitchpid","stitchccpid",
+               "stitchkalmanhitpid",
+               "pandoraCosmicKHitpid","pandoraNuKHitpid"]
+}
+
+

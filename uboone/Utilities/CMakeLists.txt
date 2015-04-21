@@ -32,6 +32,10 @@ simple_plugin( FileCatalogMetadataMicroBooNE "service"
                ${uboone_util_lib_list}
 	       BASENAME_ONLY
 	)
+simple_plugin( TFileMetadataMicroBooNE "service"
+               ${uboone_util_lib_list}
+	       BASENAME_ONLY
+	)	
 simple_plugin( TinyHitFinderAna "module"
                ${uboone_util_lib_list}
 	       BASENAME_ONLY
@@ -56,6 +60,7 @@ install_fhicl( LIST databaseutil_microboone.fcl
 		    services_microboone.fcl
 		    services_microboone_simulation.fcl
 		    signalservices_microboone.fcl
+		    seedservice_microboone.fcl
 		    timeservice_microboone.fcl )
 install_source()
 

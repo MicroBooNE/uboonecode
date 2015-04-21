@@ -3,12 +3,18 @@ BEGIN_PROLOG
 microboone_geo:
 {
  SurfaceY:        6.9e2                           #in cm, vertical distance to the surface
- Name:            "microboone"
- GDML:            "microboone.gdml"
- ROOT:            "microboone.gdml"
+ Name:            "microboonev5"
+ GDML:            "microboonev5.gdml"
+ ROOT:            "microboonev5.gdml"
  DisableWiresInG4: true                           # Whether to use wirefree geometry in LArG4
                                                   #  As per Brians request, wire free file is specified by
                                                   #  [GDMLFileName]_nowires.gdml
 }
+
+microboone_geometry_helper:
+{
+ service_provider : StandardGeometryHelper
+}
+
 
 END_PROLOG

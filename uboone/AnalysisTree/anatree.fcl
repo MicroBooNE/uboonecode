@@ -109,7 +109,12 @@ physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["cosmictaggerKHit", "cos
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchBezier"]
 
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
-physics.analyzers.analysistree.SaveCryInfo: false
-
 physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
 
+#physics.analyzers.analysistree.SaveCryInfo: true
+#physics.analyzers.analysistree.SaveGenieInfo: false
+#physics.analyzers.analysistree.SaveHitInfo: false
+#physics.analyzers.analysistree.SaveTrackInfo: true
+#physics.analyzers.analysistree.SaveVertexInfo: false
+#physics.analyzers.analysistree.SaveGeantInfo: true
+#physics.analyzers.analysistree.SaveAuxDetInfo: false

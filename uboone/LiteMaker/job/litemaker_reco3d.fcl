@@ -1,0 +1,43 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_reco3d.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+#  hit:        ["gaushit","ccluster"]
+#  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+#  endpoint2d: []
+  sps:        ["pandoraCosmic","pandoraNu",
+               "pandoraCosmicKHit","pandoraNuKHit",
+               "cluster3d",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "pandoraNu","pandoraCosmic"]
+  track:      ["cctrack",
+               "trackkalmanhit", "stitchkalmanhit",
+               "tracklakmanhitcc", "stitchkalmanhitcc",
+               "pandoraNuKHit","pandoraCosmicKHit"]
+  seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+  shower:     ["showerrecopandora","showerrecofuzzy"]
+  pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  hit:        ["gaushit","ccluster"]
+  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  endpoint2d: []
+  sps:        ["pandoraCosmic","pandoraNu",
+               "pandoraCosmicKHit","pandoraNuKHit",
+               "cluster3d",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["cccluster",
+               "pandoraNu","pandoraCosmic"]
+  track:      ["cctrack",
+               "trackkalmanhit", "stitchkalmanhit",
+               "tracklakmanhitcc", "stitchkalmanhitcc",
+               "pandoraNuKHit","pandoraCosmicKHit"]
+  seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+  shower:     ["showerrecopandora","showerrecofuzzy"]
+  pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+}

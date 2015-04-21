@@ -20,6 +20,8 @@ art_make( BASENAME_ONLY
 		   SimulationBase
 		   Utilities
 		   RawData
+		   MCBase
+		   SummaryData
 		   RecoBase
 		   RecoObjects
 		   LArProperties_service
@@ -52,6 +54,8 @@ art_make( BASENAME_ONLY
 		   Simulation
 		   SimulationBase
 		   Utilities
+		   MCBase
+		   SummaryData
 		   RawData
 		   RecoBase
 		   RecoObjects

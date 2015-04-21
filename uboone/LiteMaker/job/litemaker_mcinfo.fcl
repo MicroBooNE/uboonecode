@@ -1,0 +1,18 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_mcinfo.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  potsummary: ["generator"]
+  gtruth:     ["generator"]
+  mcflux:     ["generator"]
+  mctruth:    ["generator"]
+  mctrack:    ["mcreco"]
+  mcshower:   ["mcreco"]
+}
+
+physics.analyzers.scanner.AssociationLookUpMap: {
+  mctruth: ["generator"]
+}
+

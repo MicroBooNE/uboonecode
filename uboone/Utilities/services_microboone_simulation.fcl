@@ -41,6 +41,7 @@ microboone_g4_dark_services.LArG4Parameters:    @local::microboone_largeantparam
 microboone_g4_dark_services.LArVoxelCalculator: @local::microboone_larvoxelcalculator
 microboone_g4_dark_services.LArG4Parameters.KeepEMShowerDaughters: true
 microboone_g4_dark_services.LArG4Parameters.StoreTrajectories: true
+microboone_g4_dark_services.LArG4Parameters.UseModBoxRecomb: true
 
 # Define microboone_detsim_dark_services ... (2)
 microboone_detsim_dark_services:                                @local::microboone_basic_services
@@ -59,7 +60,9 @@ microboone_simulation_dark_services.SignalShapingServiceMicroBooNE: @local::micr
 # Define microboone_g4_services ... (1*)
 microboone_g4_services:                         @local::microboone_g4_dark_services
 microboone_g4_services.PhotonVisibilityService: @local::microboone_photonvisibilityservice
-microboone_g4_services.LArProperties.ScintYield:          240   # note this is 1% QE on 24000 (which is for 100% QE)
+microboone_g4_services.LArProperties.ScintYield:          24000   
+microboone_g4_services.LArProperties.ScintPreScale:        0.01   # Prescale production by 0.01, correct when QE is applied
+                                                                  # MUST match between g4 and detsim
 microboone_g4_services.LArProperties.EnableCerenkovLight: false # Cerenkov light OFF by default
 microboone_g4_services.LArG4Parameters.UseCustomPhysics:  true
 microboone_g4_services.LArG4Parameters.EnabledPhysics:    [ "Em",
@@ -75,6 +78,8 @@ microboone_g4_services.LArG4Parameters.EnabledPhysics:    [ "Em",
 # Define microboone_detsim_services ... (2*)
 microboone_detsim_services:                   @local::microboone_detsim_dark_services
 microboone_detsim_services.UBOpticalChConfig: @local::microboone_optical_ch_config
+microboone_detsim_services.LArProperties.ScintPreScale:        0.01   # Prescale production by 0.01, correct when QE is applied
+                                                                      # MUST match between g4 and detsim
 
 # Define microboone_simulation_services ... (all*) = (1*) + (2) + (2*)
 microboone_simulation_services:                                 @local::microboone_g4_services

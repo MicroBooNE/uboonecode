@@ -1,0 +1,11 @@
+#include "prodsingle_espec_common_uboone.fcl"
+
+process_name: SinglesGen
+
+outputs.out1.fileName: "prod_bnblike_muminus_uboone_%tc_gen.root"
+physics.producers.generator.PDFCode: 13
+physics.producers.generator.Mass:    0.105658
+physics.producers.generator.Time:    0
+physics.producers.generator.MomentumLowerBound: 0.02
+physics.producers.generator.MomentumUpperBound: 1.0
+

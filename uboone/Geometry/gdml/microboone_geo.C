@@ -9,11 +9,12 @@ microboone_geo(TString volName="")
   gSystem->Load("libGeom");
   gSystem->Load("libGdml");
 
-  TGeoManager::Import("microboone_nowires.gdml");
+  TGeoManager::Import("microboonevX.gdml");
 
   drawopt optuboone[] = {
     {"volGround",       kOrange-7},
     {"volConcreteEnclosure", kGray},
+	{"volTPCWireCommon", kBlue},
     {0, 0}
   };
 
@@ -55,6 +56,10 @@ microboone_geo(TString volName="")
   float m_fchoriz = FieldCageH->Weight();
   TGeoVolume *FieldCageV = gGeoManager->FindVolumeFast("volFieldCageTubeFront");
   float m_fcvert = FieldCageV->Weight();
+  TGeoVolume *Rack = gGeoManager->FindVolumeFast("volRack");
+  float m_rack = Rack->Weight();
+//  TGeoVolume *inn = gGeoManager->FindVolumeFast("volRackInnards");
+//  float m_rackIn = inn->Weight();
 
   float m_tpc_argon = m_tpc - ( m_cathode + m_ground + 2*m_uvplane + m_yplane + 50*(m_fchoriz + m_fcvert));
   //float m_tpc_argon = m_tpc - m_yplane;

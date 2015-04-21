@@ -1,0 +1,11 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_opdata.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  ophit:      ["opflash"]
+  opflash:    ["opflash"]
+}
+
+

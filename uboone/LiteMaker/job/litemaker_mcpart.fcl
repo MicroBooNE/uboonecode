@@ -1,0 +1,15 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_mcpart.root"
+
+physics.analyzers.scanner.AssociationLookUpMap: 
+{
+  mctruth: ["generator"]
+}
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  mcpart:     ["largeant"]
+}
+
+END_PROLOG

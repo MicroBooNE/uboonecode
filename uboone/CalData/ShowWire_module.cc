@@ -9,21 +9,25 @@
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Core/FindOneP.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h" 
+#include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 
+#include "SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "Geometry/Geometry.h"
 #include "RecoBase/Wire.h"
 #include "RawData/RawDigit.h"
-#include "art/Framework/Services/Optional/TFileService.h"
+#include "uboone/Database/PedestalRetrievalAlg.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -50,8 +54,10 @@ private:
   bool fDoSinglePulseChecks;
   unsigned int fSinglePulseLocation;
   unsigned int fSinglePulseBuffer;
-  unsigned int fChannel;
+  raw::ChannelID_t fChannel;
   bool fSaveWaveforms;
+  
+  dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
 
   std::string MakeHistName(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
   std::string MakeHistTitle(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
@@ -82,9 +88,10 @@ private:
 };
 
 
-cal::ShowWire::ShowWire(fhicl::ParameterSet const & p)
+cal::ShowWire::ShowWire(fhicl::ParameterSet const & p) 
   :
-  EDAnalyzer(p)  // ,
+  EDAnalyzer(p),
+  fPedestalRetrievalAlg(p.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
  // More initializers here.
 {
   this->reconfigure(p);
@@ -102,6 +109,8 @@ void cal::ShowWire::reconfigure(fhicl::ParameterSet const& p){
   fSinglePulseBuffer   = p.get<unsigned int>("SinglePulseBuffer",25);
   fChannel             = p.get<unsigned int>("Channel",7775);
   fSaveWaveforms       = p.get<bool>("SaveWaveforms",true);
+  
+  fPedestalRetrievalAlg.reconfigure(p);
 }
 
 void cal::ShowWire::beginJob(){
@@ -186,7 +195,8 @@ void cal::ShowWire::SetHistogram(TH1F* hist,
 
 void cal::ShowWire::FillWaveforms(recob::Wire const& wire, raw::RawDigit const& rawdigit, TH1F* h_wire, TH1F* h_raw){
 
-  const float pedestal = rawdigit.GetPedestal();
+  float pedestal = 0.0;
+  fPedestalRetrievalAlg.GetPedestalMean(rawdigit.Channel(),pedestal);
 
   size_t begin_iter=0;
   size_t end_iter = rawdigit.Samples();
@@ -218,14 +228,22 @@ void cal::ShowWire::analyze(art::Event const & e)
   unsigned int event = e.event();
 
   art::ServiceHandle<art::TFileService> tfs;
+  
+  // get the raw::RawDigit associated by fCalDataModuleLabel to wires in
+  // wireVectorHandle; RawDigitsFromWire.at(index) will be a
+  // art::Ptr<raw::RawDigit>
+  art::FindOneP<raw::RawDigit> RawDigitsFromWire
+    (wireVectorHandle, e, fCalDataModuleLabel);
 
+  art::ServiceHandle<geo::Geometry> geom;
+  
+  size_t iWire = 0;
   for(auto const& wire : wireVector){
 
-    unsigned int channel = wire.Channel();
+    raw::ChannelID_t channel = wire.Channel();
     if(channel!=fChannel && fSaveWaveforms) continue;
-    if(wire.SignalType()!=geo::kCollection) continue;
 
-    raw::RawDigit const& rawdigit( *(wire.RawDigit()) );
+    raw::RawDigit const& rawdigit(*(RawDigitsFromWire.at(iWire++)));
     size_t n_samples = rawdigit.Samples();
 
     //this is stupid I have to do this here and can't set it later...

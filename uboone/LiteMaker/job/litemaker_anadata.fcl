@@ -1,0 +1,43 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_anadata.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+
+  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+               "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
+               "stitchkalmanhittag","stitchkalmanhittagcc",
+               "trackkalmanhittag","trackkalmanhittagcc",
+               "pandoraCosmicKHitPFPart",
+               "cluster3dpcatag"]
+
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcalocc",
+               "pandoraNuKHitcalo","pandoraCosmicKHitcalo",
+               "stitchkalmanhitcalo","stitchkalmanhitcalocc"]
+
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "stitchkalmanhitpid","stitchkalmanhitpidcc",
+               "pandoraNuKHitpid","pandoraCosmicKHitpid"]
+
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+               "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
+               "stitchkalmanhittag","stitchkalmanhittagcc",
+               "trackkalmanhittag","trackkalmanhittagcc",
+               "pandoraCosmicKHitPFPart",
+               "cluster3dpcatag"]
+
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcalocc",
+               "pandoraNuKHitcalo","pandoraCosmicKHitcalo",
+               "stitchkalmanhitcalo","stitchkalmanhitcalocc"]
+
+  partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
+               "stitchkalmanhitpid","stitchkalmanhitpidcc",
+               "pandoraNuKHitpid","pandoraCosmicKHitpid"]
+
+}
+
