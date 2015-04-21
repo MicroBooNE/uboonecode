@@ -335,7 +335,7 @@ EOF
 	print GDML <<EOF;
 	    <physvol>
 	     <volumeref ref="volTPCWireVert"/>
-	     <position name="posTPCWireVert$i" unit="cm" z="-0.5*$TPCWirePlaneLength+$TPCWirePitch*($i+1)" x="0" y="0"/>
+	     <position name="posTPCWireVert$i" unit="cm" z="-518.55+$TPCWirePitch*($i+1)" x="0" y="0"/>
 	     <rotationref ref="rPlus90AboutX"/>
 	    </physvol>
 EOF
@@ -391,7 +391,7 @@ EOF
   print GDML <<EOF;
 <tube name="TPCWire$i"
   rmax="0.5*$TPCWireThickness"
-  z="$TPCYWirePitch*($i+1) * 2 -0.32" 
+  z="$TPCYWirePitch*($i+1) * 2 -0.1" 
   deltaphi="360"
   aunit="deg"
   lunit="cm"/> 
@@ -401,14 +401,14 @@ EOF
  print GDML <<EOF;
 <tube name="TPCWireCommon"
   rmax="0.5*$TPCWireThickness"
-  z="$TPCWirePlaneWidth/$CosUVAngle - 0.32 "
+  z="$TPCWirePlaneWidth/$CosUVAngle - 0.1 "
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 <box name="TPCPlane"
   x="$TPCWirePlaneThickness"
   y="$TPCWirePlaneWidth"
-  z="$TPCWirePlaneLength + 0.35"
+  z="$TPCWirePlaneLength+0.35"
   lunit="cm"/>
 </solids>
 <structure>
@@ -443,7 +443,7 @@ EOF
     print GDML <<EOF;
   <physvol>
      <volumeref ref="volTPCWire$i"/> 
-     <position name="posTPCWire$i" unit="cm" y="-0.5*$TPCWirePlaneWidth + 0.5*$TPCYWirePitch*($i+1)" z="-0.5*$TPCWirePlaneLength+0.5*$TPCZWirePitch*($i+1)" x="0"/>
+     <position name="posTPCWire$i" unit="cm" y="-116.5046422+0.5*$TPCYWirePitch*($i+1)" z="-518.5080405+0.5*$TPCZWirePitch*($i+1)" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/> 
     </physvol>  
 EOF
@@ -462,7 +462,7 @@ for ($i = 0; $i < $NumberCenterWires ; $i++)
       print GDML <<EOF;
   <physvol>
      <volumeref ref="volTPCWireCommon"/>
-     <position name="posTPCWire$j" unit="cm" y="0" z="$zpos" x="0"/>
+     <position name="posTPCWire$j" unit="cm" y="0" z="$zpos-0.2" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/>
     </physvol> 
 EOF
@@ -479,7 +479,7 @@ EOF
     print GDML <<EOF;
    <physvol>
      <volumeref ref="volTPCWire$k"/> 
-     <position name="posTPCWireB$j" unit="cm" y="0.5*$TPCYWirePitch*($i+1)" z="$zpos" x="0"/>
+     <position name="posTPCWireB$j" unit="cm" y="-0.0623772+0.5*$TPCYWirePitch*($i+1)" z="-0.0919595+$zpos" x="0"/>
     <rotationref ref="rPlusUVAngleAboutX"/>
     </physvol> 
 EOF

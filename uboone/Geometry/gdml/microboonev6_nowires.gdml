@@ -262,14 +262,14 @@
 <solids>
 <tube name="TPCWireCommon"
   rmax="0.5*0.015"
-  z="233/0.5 - 0.32 "
+  z="233/0.5 - 0.1 "
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 <box name="TPCPlane"
   x="0.15"
   y="233"
-  z="1037 + 0.35"
+  z="1037+0.35"
   lunit="cm"/>
 
 <tube name="TPCWireVert"
