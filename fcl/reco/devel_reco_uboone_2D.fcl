@@ -101,8 +101,13 @@ outputs:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.opflash.InputModule:                          "optreadout"
+physics.producers.opreformat.InputModule:                       "optreadout"
+physics.producers.opreformat.GenModule:                         "generator"
+
+physics.producers.opflash.InputModule:                          "opreformat"
 physics.producers.opflash.GenModule:                            "generator"
+physics.producers.opflash.InputLabels:                        [ "FEMBeamHighGain",   "FEMBeamLowGain",
+                                                                "FEMCosmicHighGain", "FEMCosmicLowGain"]
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 physcis.producers.caldata.uPlaneROIPad:                         [ 150,  50 ]
