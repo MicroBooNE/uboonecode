@@ -534,15 +534,26 @@ namespace larlite {
 
       auto const& signalROI = wire_ptr->SignalROI();
 
-      for(const auto& range : signalROI.get_ranges())
-
+      std::cout<<"Copying!"<<std::endl;
+      for(const auto& range : signalROI.get_ranges()) {
+	std::cout<<range.begin_index()<<" : "<<range.data().size()<<std::endl;
 	rois.add_range(range.begin_index(),range.data());
-
+      }
+      std::cout<<"Done... checking!"<<std::endl;
+      for(const auto& range : rois.get_ranges()) {
+	std::cout<<range.begin_index()<<" : "<<range.data().size()<<std::endl;
+      }
       larlite::wire wire_lite(rois,
 			      wire_ptr->Channel(),
 			      (::larlite::geo::View_t)(wire_ptr->View()));
-
+      std::cout<<"Stored... checking!"<<std::endl;
+      for(const auto& range : wire_lite.SignalROI().get_ranges())
+	std::cout<<range.begin_index()<<" : "<<range.data().size()<<std::endl;
       lite_data->push_back(wire_lite);
+      std::cout<<"Collected. checking!"<<std::endl;
+      for(const auto& range : lite_data->back().SignalROI().get_ranges())
+	std::cout<<range.begin_index()<<" : "<<range.data().size()<<std::endl;	
+      break;
     }  
   }
 
