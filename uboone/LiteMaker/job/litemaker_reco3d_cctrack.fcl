@@ -1,0 +1,29 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_reco3d_cctrack.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+#  hit:        ["gaushit","ccluster"]
+#  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+#  endpoint2d: []
+  sps:        []
+  vertex:     []
+  track:      ["cctrack"]
+  seed:       ["cctrack"]
+  shower:     []
+  pfpart:     ["cctrack"]
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  hit:        ["cccluster"]
+  cluster:    ["cccluster"]
+  endpoint2d: []
+  sps:        []
+  vertex:     ["cccluster"]
+  track:      ["cctrack"]
+  seed:       ["cctrack"]
+  shower:     []
+  pfpart:     ["cctrack"]
+}

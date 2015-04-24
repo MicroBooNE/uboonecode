@@ -4,7 +4,7 @@ physics.analyzers.scanner.out_filename: "larlite_reco2d.root"
 
 physics.analyzers.scanner.DataLookUpMap:
 {
-  hit:        ["gaushit","cccluster"]
+  hit:        ["gaushit","ccluster"]
   cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
   vertex:     ["cccluster"]
   endpoint2d: []
@@ -12,7 +12,7 @@ physics.analyzers.scanner.DataLookUpMap:
 
 physics.analyzers.scanner.AssociationLookUpMap:
 {
-  hit:        ["gaushit","cccluster"]
+  hit:        ["gaushit","ccluster"]
   cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
   vertex:     ["cccluster"]
   endpoint2d: []

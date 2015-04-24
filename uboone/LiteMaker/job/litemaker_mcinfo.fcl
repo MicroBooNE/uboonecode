@@ -16,3 +16,5 @@ physics.analyzers.scanner.AssociationLookUpMap: {
   mctruth: ["generator"]
 }
 
+#source.inputCommands: ["keep sim::MCTracks_*_*_*","drop raw::OpDetWaveforms_*_*_*"]
+source.inputCommands: ["keep sim::MCTracks_*_*_*","keep sim::MCShowers_*_*_*","keep simb::MCTruths_*_*_*"]

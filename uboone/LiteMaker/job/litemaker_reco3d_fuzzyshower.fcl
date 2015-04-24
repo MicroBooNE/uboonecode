@@ -1,0 +1,26 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_reco3d_fuzzyshower.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  sps:        []
+  vertex:     []
+  track:      []
+  seed:       []
+  shower:     ["showerrecofuzzy"]
+  pfpart:     []
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  hit:        ["gaushit"]
+  cluster:    ["fuzzyclustermerger"]
+  endpoint2d: []
+  sps:        []
+  vertex:     []
+  track:      []
+  seed:       []
+  shower:     ["showerrecofuzzy"]
+  pfpart:     []
+}

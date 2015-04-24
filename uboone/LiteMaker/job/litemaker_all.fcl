@@ -16,97 +16,75 @@ physics.analyzers.scanner.DataLookUpMap:
   simch:      ["largeant"]
   mcshower:   ["mcreco"]
   mctrack:    ["mcreco"]
-  wire:       ["caldata"]
-  hit:        ["gaushit","ccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandora"]
-  endpoint2d: ["cccluster",
-               "featurevtx"]
-  sps:        ["pandora",
-               "costrk", "costrkcc",
-               "spacepointfinder","spacepointfindercc",
-               "trackkalmanhit","trackkalmanhitcc"]
-  vertex:     ["cccluster",
-               "beziertracker","beziertrackercc",
-               "featurevtx"]
-  track:      ["trackkalmanhit","trackkalmanhitcc",
-               "trackkalmansps","trackkalspscc",
-               "beziertracker","beziertrackercc",
-               "costrk","costrkcc",
-               "stitch","stitchcc",
-               "stitchkalmanhit"]
-  shower:     []
+  wire:       ["calroi"]
+  hit:        ["gaushit","cccluster"]
   ophit:      ["opflash"]
   opflash:    ["opflash"]
-  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
-               "trackkalmanspstag","trackkalspscctag",
-               "beziertrackertag","beziertrackercctag",
-               "costrktag","costrkcctag",
-               "stitchtag","stitchcctag",
-               "stitchkalmanhittag","beamflashcompat"]
-  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
-               "trackkalmanspscalo","trackkalspscccalo",
-               "beziertrackercalo","beziertrackercccalo",
-               "costrkcalo","costrkcccalo",
-               "stitchcalo","stitchcccalo",
-               "stitchkalmanhitcalo"]
+  cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
+  vertex:     ["cccluster"]
+  endpoint2d: []
+  sps:        ["pandoraCosmic","pandoraNu",
+               "pandoraCosmicKHit","pandoraNuKHit",
+               "cluster3d",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["pandoraNu","pandoraCosmic"]
+  track:      ["cctrack",
+               "trackkalmanhit", "stitchkalmanhit",
+               "trackkalmanhitcc", "stitchkalmanhitcc",
+               "pandoraNuKHit","pandoraCosmicKHit"]
+  seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+  shower:     ["showerrecopandora","showerrecofuzzy"]
+  pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+               "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
+               "stitchkalmanhittag","stitchkalmanhittagcc",
+               "trackkalmanhittag","trackkalmanhittagcc",
+               "pandoraCosmicKHitPFPart",
+               "cluster3dpcatag"]
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcalocc",
+               "pandoraNuKHitcalo","pandoraCosmicKHitcalo",
+               "stitchkalmanhitcalo","stitchkalmanhitcalocc"]
   partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
-               "trackkalmanspspid","trackkalspsccpid",
-               "beziertrackerpid","beziertrackerccpid",
-               "costrkpid","costrkccpid",
-               "stitchpid","stitchccpid",
-               "stitchkalmanhitpid"]
-  pfpart:     ["pandora"]
+               "stitchkalmanhitpid","stitchkalmanhitpidcc",
+               "pandoraNuKHitpid","pandoraCosmicKHitpid"]
 }
 
 physics.analyzers.scanner.AssociationLookUpMap:
 {
   mctruth:    ["generator"]
-  hit:        ["gaushit","ccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
-  endpoint2d: ["cccluster",
-               "featurevtx"]
-  sps:        ["pandoraCosmic","pandoraNu",
-               "costrk", "costrkcc",
-               "spacepointfinder","spacepointfindercc",
-               "trackkalmanhit","trackkalmanhitcc"]
-  vertex:     ["cccluster",
-               "beziertracker","beziertrackercc",
-               "featurevtx"]
-  track:      ["trackkalmanhit","trackkalmanhitcc",
-               "trackkalsps","trackkalspscc",
-               "beziertracker","beziertrackercc",
-               "costrk","costrkcc",
                "stitch","stitchcc",
                "stitchkalmanhit",
                "pandoraCosmicKHit", "pandoraNuKHit"]
-  seed:       ["pandoraCosmicKHit", "pandoraNuKHit"]
-  shower:     []
-  pfpart:     ["pandoraCosmic","pandoraNu"]
-
+  hit:        ["gaushit","cccluster"]
   ophit:      ["opflash"]
   opflash:    ["opflash"]
-
-  cosmictag:  ["trackkalmanhittag","trackkalmanhitcctag",
-               "trackkalspstag","trackkalspscctag",
-               "beziertrackertag","beziertrackercctag",
-               "costrktag","costrkcctag",
-               "stitchtag","stitchcctag",
-               "stitchkalmanhittag","beamflashcompat",
-               "pandoraCosmicKHittag","pandoraNuKHittag"]
-  calo:       ["trackkalmanhitcalo","trackkalmanhitcccalo",
-               "trackkalspscalo","trackkalspscccalo",
-               "beziertrackercalo","beziertrackercccalo",
-               "costrkcalo","costrkcccalo",
-               "stitchcalo","stitchcccalo",
-               "stitchkalmanhitcalo",
-               "pandoraCosmicKHitcalo","pandoraNuKHitcalo"]
+  cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
+  vertex:     ["cccluster"]
+  endpoint2d: []
+  sps:        ["pandoraCosmic","pandoraNu",
+               "pandoraCosmicKHit","pandoraNuKHit",
+               "cluster3d",
+               "trackkalmanhit","trackkalmanhitcc"]
+  vertex:     ["pandoraNu","pandoraCosmic"]
+  track:      ["cctrack",
+               "trackkalmanhit", "stitchkalmanhit",
+               "trackkalmanhitcc", "stitchkalmanhitcc",
+               "pandoraNuKHit","pandoraCosmicKHit"]
+  seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+  shower:     ["showerrecopandora","showerrecofuzzy"]
+  pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
+  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+               "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
+               "stitchkalmanhittag","stitchkalmanhittagcc",
+               "trackkalmanhittag","trackkalmanhittagcc",
+               "pandoraCosmicKHitPFPart",
+               "cluster3dpcatag"]
+  calo:       ["trackkalmanhitcalo","trackkalmanhitcalocc",
+               "pandoraNuKHitcalo","pandoraCosmicKHitcalo",
+               "stitchkalmanhitcalo","stitchkalmanhitcalocc"]
   partid:     ["trackkalmanhitpid","trackkalmanhitccpid",
-               "trackkalspspid","trackkalspsccpid",
-               "beziertrackerpid","beziertrackerccpid",
-               "costrkpid","costrkccpid",
-               "stitchpid","stitchccpid",
-               "stitchkalmanhitpid",
-               "pandoraCosmicKHitpid","pandoraNuKHitpid"]
+               "stitchkalmanhitpid","stitchkalmanhitpidcc",
+               "pandoraNuKHitpid","pandoraCosmicKHitpid"]
 }
 
 

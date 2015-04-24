@@ -198,7 +198,11 @@ void LiteScanner::analyze(art::Event const & e)
   _mgr.set_id(e.id().run(),
 	      e.id().subRun(),
 	      e.id().event());
-
+  /*
+  std::cout<<" Run: " << _mgr.run_id() << " ... "
+	   <<" SubRun: " << _mgr.subrun_id() << " ... "
+	   <<" Event: " << _mgr.event_id() << std::endl;
+  */
   //
   // Loop over data type to store association ptr map
   //
@@ -435,6 +439,7 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     fAlg.ScanAssociation<T, anab::Calorimetry > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kShower:
+    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kVertex:
