@@ -2541,6 +2541,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	// for each particle, consider all the direct ancestors with the same
 	// PDG ID, and mark them as belonging to the same "group"
 	// (having the same MergedId)
+	/* turn off for now
 	int currentMergedId = 1;
 	for(size_t iPart = 0; iPart < geant_particle; ++iPart){
 	  // if the particle already belongs to a group, don't bother
@@ -2565,6 +2566,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	  }
 	  ++currentMergedId;
 	}// for merging check
+	*/
       } // if (fSaveGeantInfo) 
     }//if (mcevts_truth)
   }//if (isMC){
@@ -2690,8 +2692,8 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
 {
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-
+  //art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArProperties> larprop;
   // Get active volume boundary.
   double xmin = 0.;
   double xmax = 2.*geom->DetHalfWidth();
@@ -2699,7 +2701,8 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
   double ymax = geom->DetHalfHeight();
   double zmin = 0.;
   double zmax = geom->DetLength();
-  double vDrift = 160*pow(10,-6);
+  //double vDrift = 160*pow(10,-6);
+  double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
 
   double result = 0.;
   TVector3 disp;
