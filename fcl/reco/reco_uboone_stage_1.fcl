@@ -49,6 +49,7 @@ physics:
   rns:                 { module_type: RandomNumberSaver }
 
   ### flash finders
+  opreformat:          @local::microboone_opdetreformatter     
   opflash:             @local::microboone_opflash
 
   ### calwire producers
@@ -78,6 +79,7 @@ physics:
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
+         opreformat,
          opflash,
          caldata, 
          gaushit,
@@ -117,8 +119,13 @@ outputs:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.opflash.InputModule:                          "optreadout"
+physics.producers.opreformat.InputModule:                       "optreadout"
+physics.producers.opreformat.GenModule:                         "generator"
+
+physics.producers.opflash.InputModule:                          "opreformat"
 physics.producers.opflash.GenModule:                            "generator"
+physics.producers.opflash.InputLabels:                        [ "FEMBeamHighGain",   "FEMBeamLowGain",
+                                                                "FEMCosmicHighGain", "FEMCosmicLowGain"]
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 

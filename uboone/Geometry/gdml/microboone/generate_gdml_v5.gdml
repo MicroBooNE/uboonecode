@@ -227,7 +227,7 @@ sub gen_rotations()
    <rotation name="rPlus60AboutX"  unit="deg" x="60"  y="0"   z="0"/>
    <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
    <rotation name="rMinus90AboutX"  unit="deg" x="-90"  y="0"   z="0"/>
-   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="90+ $UVAngle" y="0"   z="0"/>
+   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="90+$UVAngle" y="0"   z="0"/>
    <rotation name="rPlus150AboutX"      unit="deg" x="150" y="0"   z="0"/>
    <rotation name="rPlus180AboutX"      unit="deg" x="180" y="0"   z="0"/>
    <rotation name="rMinusUVAngleAboutX" unit="deg" x="-30" y="0"   z="0"/>
@@ -335,7 +335,7 @@ EOF
 	print GDML <<EOF;
 	    <physvol>
 	     <volumeref ref="volTPCWireVert"/>
-	     <position name="posTPCWireVert$i" unit="cm" z="-518.55+$TPCWirePitch*($i+1)" x="0" y="0"/>
+	     <position name="posTPCWireVert$i" unit="cm" z="-0.5*$TPCWirePlaneLength+$TPCWirePitch*($i+1)" x="0" y="0"/>
 	     <rotationref ref="rPlus90AboutX"/>
 	    </physvol>
 EOF
@@ -351,82 +351,90 @@ EOF
 }
 
 
-#Rewrote old wire code because a wire was missing and it wasn't clear where it should go.
-#41015, ahack
+# This is a re-write of Brian Rebel's gen_microplane.C into Perl. It
+# constructs the TPC wire plane for the U or V view.
+
 sub gen_microplane()
 {
 
-	$UVWireCount = 2400 ;
+    $TPCWireXPitch=$TPCWirePitch/$CosUVAngle;
 
-    $GDML = "LAr1-wireplane" . $suffix . ".gdml";
+    $GDML = "micro-plane" . $suffix . ".gdml";
     push (@gdmlFiles, $GDML); # Add file to list of GDML fragments
     $GDML = ">" . $GDML;
     open(GDML) or die("Could not open file $GDML for writing");
 
-    my $TPCYWirePitch = $TPCWirePitch / $SinUVAngle;
-    my $TPCZWirePitch = $TPCWirePitch / $CosUVAngle;
+    # Calculate the number of wire ends on a given y-edge of the plane.
+    my $TPCYWirePitch = $TPCWirePitch / $CosUVAngle;
 
-  # Calculate the number of wire ends on a given y-edge of the plane.
-    my $NumberWiresPerEdge = 0;
-    if ( $wires_on == 1 )
-      {  $NumberWiresPerEdge = int( $TPCWirePlaneWidth / $TPCYWirePitch );}
+   my $NumberWiresPerEdge = 0;
+   if ( $wires_on == 1 ) 
+    {  $NumberWiresPerEdge = int( $TPCWirePlaneLength / $TPCYWirePitch );}
+  
+    # How many side wires will be "cut off" by the lower or higher
+    # z-edge?
+   my $NumberSideWires = 0;
+    if ( $wires_on == 1 ) 
+    { $NumberSideWires = int( $TanUVAngle * $TPCWirePlaneWidth / $TPCYWirePitch ); }
 
-  # The number of full-length "center" wires.
+    # The number of full-length "center" wires.
+  
    my $NumberCenterWires = 0.;
-   if ( $wires_on == 1 )
-      { $NumberCenterWires = $UVWireCount - 2*$NumberWiresPerEdge ; }
+   if ( $wires_on == 1 ) 
+    { $NumberCenterWires = $NumberWiresPerEdge - $NumberSideWires; }
 
- #####################
- # Define the solids
-  print GDML <<EOF;
+    # define the solids
+    print GDML <<EOF;
 <?xml version='1.0'?>
 <gdml>
 <solids>
 EOF
 
-
-  # End wires 
-  for($i = 0; $i < $NumberWiresPerEdge; $i++)
-{
-  print GDML <<EOF;
+    # wires on either end of the tpc #subtraction added to avoid overlap for all wires
+    for($i = 0; $i < $NumberSideWires; ++$i)
+    {
+	print GDML <<EOF;
 <tube name="TPCWire$i"
   rmax="0.5*$TPCWireThickness"
-  z="$TPCYWirePitch*($i+1) * 2 -0.1" 
+  z="$TPCWireXPitch*($i+1)/$SinUVAngle-0.01498648"    
   deltaphi="360"
   aunit="deg"
   lunit="cm"/> 
 EOF
-}
+    }
 
- print GDML <<EOF;
+    # The solids for the middle wire and the TPC wire plane, and start off the structures.
+    #subtraction added to avoid overlap for all wires
+    print GDML <<EOF;
 <tube name="TPCWireCommon"
   rmax="0.5*$TPCWireThickness"
-  z="$TPCWirePlaneWidth/$CosUVAngle - 0.1 "
+  z="$TPCWirePlaneWidth/$CosUVAngle-0.0259573526"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 <box name="TPCPlane"
   x="$TPCWirePlaneThickness"
   y="$TPCWirePlaneWidth"
-  z="$TPCWirePlaneLength+0.35"
+  z="$TPCWirePlaneLength"
   lunit="cm"/>
 </solids>
 <structure>
 EOF
-
-    # Wires of varying lengths 
-  for ($i = 0; $i < $NumberWiresPerEdge; $i++)
+ 
+    # the wires at either end of the plane
+    for ($i = 0; $i < $NumberSideWires; ++$i)
     {
-    print GDML <<EOF;
+	print GDML <<EOF;
     <volume name="volTPCWire$i">
-    <materialref ref="Titanium"/>
-    <solidref ref="TPCWire$i"/>
+	<materialref ref="Titanium"/>
+	<solidref ref="TPCWire$i"/>
     </volume>
 EOF
     }
 
-    # Center wires and plane
-   print GDML <<EOF;
+  
+    # The wires in the middle of the plane, and the plane itself.
+    print GDML <<EOF;
     <volume name="volTPCWireCommon">
       <materialref ref="Titanium"/>
       <solidref ref="TPCWireCommon"/>
@@ -436,54 +444,58 @@ EOF
       <solidref ref="TPCPlane"/>
 EOF
 
-  # The wires at the -z, +y end (For +60 deg-- can rotate by 180 later for -60)
-  for ($i = 0; $i < $NumberWiresPerEdge ; $i++)
+  # the wires at the -z end
+  for ($i = 0; $i < $NumberSideWires; ++$i)
   {
+    $j=$NumberSideWires-$i-1;
 
     print GDML <<EOF;
-  <physvol>
-     <volumeref ref="volTPCWire$i"/> 
-     <position name="posTPCWire$i" unit="cm" y="-116.5046422+0.5*$TPCYWirePitch*($i+1)" z="-518.5080405+0.5*$TPCZWirePitch*($i+1)" x="0"/>
-     <rotationref ref="rPlusUVAngleAboutX"/> 
-    </physvol>  
+    <physvol>
+     <volumeref ref="volTPCWire$j"/> 
+     <position name="posTPCWireF$j" unit="cm" y="-0.5*($i)*$TPCWireXPitch/$TanUVAngle" z="-0.5*$TPCWirePlaneLength+0.5*$TPCWireXPitch*($j+1)" x="0"/>
+     <rotationref ref="rPlusUVAngleAboutX"/>
+    </physvol>
 EOF
-  $ypos=0.5*$TPCWirePlaneWidth - 0.5*$TPCYWirePitch*($i+1);
-  $zpos=-0.5*$TPCWirePlaneLength+0.5*$TPCZWirePitch*($i+1);
- # open (MYFILE, '>>data.txt');
- # print MYFILE "TPCWire$i y=$ypos z=$zpos\n";
+  $ypos=-0.5*($i)*$TPCWireXPitch/$TanUVAngle;
+  $zpos=-0.5*$TPCWirePlaneLength+0.5*$TPCWireXPitch*($j);
+  #open (MYFILE, '>>data.txt');
+ # print MYFILE "TPCWire$j y=$ypos z=$zpos\n";
+  }
+
+  # the wires at the +z end
+  for ($i = 0; $i < $NumberSideWires; ++$i)
+  {
+      my $j = $NumberSideWires-$i-1;
+      my $k = $NumberCenterWires+$NumberSideWires+$i;
+      $zposlast=-0.5*$TPCWirePlaneLength+$TPCWireXPitch*(0.5*$NumberSideWires+$NumberCenterWires);
+      $zpos=$zposlast+0.5*$TPCWireXPitch*($i);
+
+    print GDML <<EOF;
+    <physvol>
+     <volumeref ref="volTPCWire$j"/> 
+     <position name="posTPCWireB$j" unit="cm" y="0.5*($i)*$TPCWireXPitch/$TanUVAngle" z="$zpos" x="0"/>
+     <rotationref ref="rPlusUVAngleAboutX"/>
+    </physvol>
+EOF
+
+
   }
 
   # The wires in the middle.
-for ($i = 0; $i < $NumberCenterWires ; $i++)
+  for ($i = 0; $i < $NumberCenterWires-1 ; ++$i)
   {
-      my $j = $NumberWiresPerEdge  +$i;
-      $zpos=-0.5*$TPCWirePlaneLength + $TPCZWirePitch*(0.5*$NumberWiresPerEdge + $i+1) ;
+      my $j = $NumberSideWires+$i;
+      $zpos=-0.5*$TPCWirePlaneLength+$TPCWireXPitch*(0.5*$NumberSideWires+$i+1);
 
       print GDML <<EOF;
-  <physvol>
+    <physvol>
      <volumeref ref="volTPCWireCommon"/>
-     <position name="posTPCWire$j" unit="cm" y="0" z="$zpos-0.2" x="0"/>
+     <position name="posTPCWire$j" unit="cm" y="0" z="$zpos" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol> 
+    </physvol>
 EOF
   }
 
-  # The wires at the +z end
-  for ($i = 0; $i < $NumberWiresPerEdge; $i++)
-  {
-
-      my $j = $NumberWiresPerEdge + $NumberCenterWires + $i ;
-      my $k = $NumberWiresPerEdge - $i - 1 ;
-      $zpos = -0.5*$TPCWirePlaneLength + 0.5*$TPCZWirePitch*($NumberWiresPerEdge + 2*$NumberCenterWires + $i +1 ) ;
-
-    print GDML <<EOF;
-   <physvol>
-     <volumeref ref="volTPCWire$k"/> 
-     <position name="posTPCWireB$j" unit="cm" y="-0.0623772+0.5*$TPCYWirePitch*($i+1)" z="-0.0919595+$zpos" x="0"/>
-    <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol> 
-EOF
-  }
 
       print GDML <<EOF;
   </volume>
