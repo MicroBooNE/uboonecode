@@ -2,6 +2,8 @@
 
 physics.analyzers.scanner.out_filename: "larlite_all.root"
 
+physics.analyzers.scanner.pot_labels: ["generator"]
+
 physics.analyzers.scanner.DataLookUpMap:
 {
   # Producer names specified below would be looked up & stored in
