@@ -2375,15 +2375,20 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
       //GEANT particles information
       if (fSaveGeantInfo){ 
+
         const sim::ParticleList& plist = bt->ParticleList();
         
         std::string pri("primary");
         int primary=0;
         int active = 0;
-        int geant_particle=0;
+        size_t geant_particle=0;
         sim::ParticleList::const_iterator itPart = plist.begin(),
           pend = plist.end(); // iterator to pairs (track id, particle)
         	  
+	// helper map track ID => index
+	std::map<int, size_t> TrackIDtoIndex;
+	std::vector<int> gpdg;
+	std::vector<int> gmother;
         for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart){
           const simb::MCParticle* pPart = (itPart++)->second;
           if (!pPart) {
@@ -2391,69 +2396,70 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               << "GEANT particle #" << iPart << " returned a null pointer";
           }
           
-          ++geant_particle;
-          bool isPrimary = pPart->Process() == pri;
-          if (isPrimary) ++primary;
-          
-          int TrackID = pPart->TrackId();
-
-          TVector3 mcstart, mcend;
-          double plen = length(*pPart, mcstart, mcend);
-
-          bool isActive = plen != 0;
-          if (plen) active++;
-
+          //++geant_particle;
+	  bool isPrimary = pPart->Process() == pri;
+	  int TrackID = pPart->TrackId();
+	  TrackIDtoIndex.emplace(TrackID, iPart);
+	  gpdg.push_back(pPart->PdgCode());
+	  gmother.push_back(pPart->Mother());
           if (iPart < fData->GetMaxGEANTparticles()) {
-	   if (pPart->E()>fG4minE||isPrimary){
-            fData->process_primary[iPart] = int(isPrimary);
-            fData->processname[iPart]= pPart->Process();
-            fData->Mother[iPart]=pPart->Mother();
-            fData->TrackId[iPart]=TrackID;
-            fData->pdg[iPart]=pPart->PdgCode();
-            fData->status[iPart] = pPart->StatusCode();
-            fData->Eng[iPart]=pPart->E();
-	    fData->EndE[iPart]=pPart->EndE();
-            fData->Mass[iPart]=pPart->Mass();
-            fData->Px[iPart]=pPart->Px();
-            fData->Py[iPart]=pPart->Py();
-            fData->Pz[iPart]=pPart->Pz();
-            fData->P[iPart]=pPart->Momentum().Vect().Mag();
-            fData->StartPointx[iPart]=pPart->Vx();
-            fData->StartPointy[iPart]=pPart->Vy();
-            fData->StartPointz[iPart]=pPart->Vz();
-            fData->StartT[iPart] = pPart->T();
-            fData->EndPointx[iPart]=pPart->EndPosition()[0];
-            fData->EndPointy[iPart]=pPart->EndPosition()[1];
-            fData->EndPointz[iPart]=pPart->EndPosition()[2];
-            fData->EndT[iPart] = pPart->EndT();
-            fData->theta[iPart] = pPart->Momentum().Theta();
-            fData->phi[iPart] = pPart->Momentum().Phi();
-            fData->theta_xz[iPart] = std::atan2(pPart->Px(), pPart->Pz());
-            fData->theta_yz[iPart] = std::atan2(pPart->Py(), pPart->Pz());
-            fData->pathlen[iPart]  = plen;
-            fData->NumberDaughters[iPart]=pPart->NumberDaughters();
-            fData->inTPCActive[iPart] = int(isActive);
-            art::Ptr<simb::MCTruth> const& my_truth = bt->ParticleToMCTruth(pPart);
-	    if (my_truth){
-	      fData->origin[iPart] = my_truth->Origin();
-	      fData->MCTruthIndex[iPart] = my_truth.key();
+	    if (pPart->E()<fG4minE&&(!isPrimary)) continue;
+	    if (isPrimary) ++primary;
+	    
+	    TVector3 mcstart, mcend;
+	    double plen = length(*pPart, mcstart, mcend);
+	    
+	    bool isActive = plen != 0;
+	    if (plen) ++active;
+
+	    fData->process_primary[geant_particle] = int(isPrimary);
+	    fData->processname[geant_particle]= pPart->Process();
+	    fData->Mother[geant_particle]=pPart->Mother();
+	    fData->TrackId[geant_particle]=TrackID;
+	    fData->pdg[geant_particle]=pPart->PdgCode();
+	    fData->status[geant_particle] = pPart->StatusCode();
+	    fData->Eng[geant_particle]=pPart->E();
+	    fData->EndE[geant_particle]=pPart->EndE();
+	    fData->Mass[geant_particle]=pPart->Mass();
+	    fData->Px[geant_particle]=pPart->Px();
+	    fData->Py[geant_particle]=pPart->Py();
+	    fData->Pz[geant_particle]=pPart->Pz();
+	    fData->P[geant_particle]=pPart->Momentum().Vect().Mag();
+	    fData->StartPointx[geant_particle]=pPart->Vx();
+	    fData->StartPointy[geant_particle]=pPart->Vy();
+	    fData->StartPointz[geant_particle]=pPart->Vz();
+	    fData->StartT[geant_particle] = pPart->T();
+	    fData->EndPointx[geant_particle]=pPart->EndPosition()[0];
+	    fData->EndPointy[geant_particle]=pPart->EndPosition()[1];
+	    fData->EndPointz[geant_particle]=pPart->EndPosition()[2];
+	    fData->EndT[geant_particle] = pPart->EndT();
+	    fData->theta[geant_particle] = pPart->Momentum().Theta();
+	    fData->phi[geant_particle] = pPart->Momentum().Phi();
+	    fData->theta_xz[geant_particle] = std::atan2(pPart->Px(), pPart->Pz());
+	    fData->theta_yz[geant_particle] = std::atan2(pPart->Py(), pPart->Pz());
+	    fData->pathlen[geant_particle]  = plen;
+	    fData->NumberDaughters[geant_particle]=pPart->NumberDaughters();
+	    fData->inTPCActive[geant_particle] = int(isActive);
+	    art::Ptr<simb::MCTruth> const& mc_truth = bt->ParticleToMCTruth(pPart);
+	    if (mc_truth){
+	      fData->origin[geant_particle] = mc_truth->Origin();
+	      fData->MCTruthIndex[geant_particle] = mc_truth.key();
 	    }
-            if (isActive){	  
-              fData->StartPointx_tpcAV[iPart] = mcstart.X();
-              fData->StartPointy_tpcAV[iPart] = mcstart.Y();
-              fData->StartPointz_tpcAV[iPart] = mcstart.Z();
-              fData->EndPointx_tpcAV[iPart] = mcend.X();
-              fData->EndPointy_tpcAV[iPart] = mcend.Y();
-              fData->EndPointz_tpcAV[iPart] = mcend.Z();
-            }		       
-           } 
+	    if (isActive){	  
+	      fData->StartPointx_tpcAV[geant_particle] = mcstart.X();
+	      fData->StartPointy_tpcAV[geant_particle] = mcstart.Y();
+	      fData->StartPointz_tpcAV[geant_particle] = mcstart.Z();
+	      fData->EndPointx_tpcAV[geant_particle] = mcend.X();
+	      fData->EndPointy_tpcAV[geant_particle] = mcend.Y();
+	      fData->EndPointz_tpcAV[geant_particle] = mcend.Z();
+	    }		       
             //access auxiliary detector parameters
             if (fSaveAuxDetInfo) {
               unsigned short nAD = 0; // number of cells that particle hit
               
               // find deposit of this particle in each of the detector cells
               for (const sim::AuxDetSimChannel* c: fAuxDetSimChannels) {
-        	
+		
         	// find if this cell has a contribution (IDE) from this particle,
         	// and which one
         	const std::vector<sim::AuxDetIDE>& setOfIDEs = c->AuxDetIDEs();
@@ -2463,108 +2469,105 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         	// - returns if that IDE belongs to the track we are looking for
         	std::vector<sim::AuxDetIDE>::const_iterator iIDE
         	  = std::find_if(
-        	    setOfIDEs.begin(), setOfIDEs.end(),
-        	    [TrackID](const sim::AuxDetIDE& IDE){ return IDE.trackID == TrackID; }
-        	  );
+				 setOfIDEs.begin(), setOfIDEs.end(),
+				 [TrackID](const sim::AuxDetIDE& IDE){ return IDE.trackID == TrackID; }
+				 );
         	if (iIDE == setOfIDEs.end()) continue;
         	
         	// now iIDE points to the energy released by the track #i (TrackID)
-        	
-              // look for IDE with matching trackID
-              // find trackIDs stored in setOfIDEs with the same trackID, but negative,
-              // this is an untracked particle who's energy should be added as deposited by this original trackID
-              float totalE = 0.; // total energy deposited around by the GEANT particle in this cell
-              for(const auto& adtracks: setOfIDEs) {
-                 if( fabs(adtracks.trackID) == TrackID )
-                   totalE += adtracks.energyDeposited;
-              } // for
-              
-              // fill the structure
-              if (nAD < kMaxAuxDets) {
-                fData->AuxDetID[iPart][nAD] = c->AuxDetID();
-                fData->entryX[iPart][nAD]   = iIDE->entryX;
-                fData->entryY[iPart][nAD]   = iIDE->entryY;
-                fData->entryZ[iPart][nAD]   = iIDE->entryZ;
-                fData->entryT[iPart][nAD]   = iIDE->entryT;
-                fData->exitX[iPart][nAD]    = iIDE->exitX;
-                fData->exitY[iPart][nAD]    = iIDE->exitY;
-                fData->exitZ[iPart][nAD]    = iIDE->exitZ;
-                fData->exitT[iPart][nAD]    = iIDE->exitT;
-                fData->exitPx[iPart][nAD]   = iIDE->exitMomentumX;
-                fData->exitPy[iPart][nAD]   = iIDE->exitMomentumY;
-                fData->exitPz[iPart][nAD]   = iIDE->exitMomentumZ;
-                fData->CombinedEnergyDep[iPart][nAD] = totalE;
-              }
-              ++nAD;
-            } // for aux det sim channels
-            fData->NAuxDets[iPart] = nAD; 
-            
-            if (nAD > kMaxAuxDets) {
-              // got this error? consider increasing kMaxAuxDets
-              mf::LogError("AnalysisTree:limits") << "particle #" << iPart
-                << " touches " << nAD << " auxiliary detector cells, only "
-                << kMaxAuxDets << " of them are saved in the tree";
-            } // if too many detector cells
-          } // if (fSaveAuxDetInfo) 
-        }
-        else if (iPart == fData->GetMaxGEANTparticles()) {
-          // got this error? it might be a bug,
-          // since the structure should have enough room for everything
-          mf::LogError("AnalysisTree:limits") << "event has "
-            << plist.size() << " MC particles, only "
-            << fData->GetMaxGEANTparticles() << " will be stored in tree";
-        }     
-      } // for particles
-            
-      fData->geant_list_size_in_tpcAV = active;
-      fData->no_primaries = primary;
-      fData->geant_list_size = geant_particle;
-      
-      LOG_DEBUG("AnalysisTree") << "Counted "
-        << fData->geant_list_size << " GEANT particles ("
-        << fData->geant_list_size_in_tpcAV << " in AV), "
-        << fData->no_primaries << " primaries, "
-        << fData->genie_no_primaries << " GENIE particles";
-      
-      FillWith(fData->MergedId, 0);
+		
+		// look for IDE with matching trackID
+		// find trackIDs stored in setOfIDEs with the same trackID, but negative,
+		// this is an untracked particle who's energy should be added as deposited by this original trackID
+		float totalE = 0.; // total energy deposited around by the GEANT particle in this cell
+		for(const auto& adtracks: setOfIDEs) {
+		  if( fabs(adtracks.trackID) == TrackID )
+		    totalE += adtracks.energyDeposited;
+		} // for
+		
+		// fill the structure
+		if (nAD < kMaxAuxDets) {
+		  fData->AuxDetID[geant_particle][nAD] = c->AuxDetID();
+		  fData->entryX[geant_particle][nAD]   = iIDE->entryX;
+		  fData->entryY[geant_particle][nAD]   = iIDE->entryY;
+		  fData->entryZ[geant_particle][nAD]   = iIDE->entryZ;
+		  fData->entryT[geant_particle][nAD]   = iIDE->entryT;
+		  fData->exitX[geant_particle][nAD]    = iIDE->exitX;
+		  fData->exitY[geant_particle][nAD]    = iIDE->exitY;
+		  fData->exitZ[geant_particle][nAD]    = iIDE->exitZ;
+		  fData->exitT[geant_particle][nAD]    = iIDE->exitT;
+		  fData->exitPx[geant_particle][nAD]   = iIDE->exitMomentumX;
+		  fData->exitPy[geant_particle][nAD]   = iIDE->exitMomentumY;
+		  fData->exitPz[geant_particle][nAD]   = iIDE->exitMomentumZ;
+		  fData->CombinedEnergyDep[geant_particle][nAD] = totalE;
+		}
+		++nAD;
+	      } // for aux det sim channels
+	      fData->NAuxDets[geant_particle] = nAD; 
+	      
+	      if (nAD > kMaxAuxDets) {
+		// got this error? consider increasing kMaxAuxDets
+		mf::LogError("AnalysisTree:limits") 
+		  << "particle #" << iPart
+		  << " touches " << nAD << " auxiliary detector cells, only "
+		  << kMaxAuxDets << " of them are saved in the tree";
+	      } // if too many detector cells
+	    } // if (fSaveAuxDetInfo) 
+	    	    
+	    ++geant_particle;
+	  }
+	  else if (iPart == fData->GetMaxGEANTparticles()) {
+	    // got this error? it might be a bug,
+	    // since the structure should have enough room for everything
+	    mf::LogError("AnalysisTree:limits") << "event has "
+			 << plist.size() << " MC particles, only "
+			 << fData->GetMaxGEANTparticles() << " will be stored in tree";
+	  }     
+	} // for particles
+	
+	fData->geant_list_size_in_tpcAV = active;
+	fData->no_primaries = primary;
+	fData->geant_list_size = geant_particle;
+	fData->processname.resize(geant_particle);
+	LOG_DEBUG("AnalysisTree") 
+	  << "Counted "
+	  << fData->geant_list_size << " GEANT particles ("
+	  << fData->geant_list_size_in_tpcAV << " in AV), "
+	  << fData->no_primaries << " primaries, "
+	  << fData->genie_no_primaries << " GENIE particles";
 
-      // helper map track ID => index
-      std::map<int, size_t> TrackIDtoIndex;
-      const size_t nTrackIDs = fData->TrackId.size();
-      for (size_t index = 0; index < nTrackIDs; ++index)
-        TrackIDtoIndex.emplace(fData->TrackId[index], index);
-      
-      // for each particle, consider all the direct ancestors with the same
-      // PDG ID, and mark them as belonging to the same "group"
-      // (having the same MergedId)
-      int currentMergedId = 1;
-      for(size_t iPart = fData->geant_list_size; iPart-- > 0; ) {
-        // if the particle already belongs to a group, don't bother
-        if (fData->MergedId[iPart]) continue;
-        // the particle starts its own group
-        fData->MergedId[iPart] = currentMergedId;
-        
-        // look in the ancestry, one by one
-        int currentMotherTrackId = fData->Mother[iPart];
-        while(currentMotherTrackId > 0) {
-          // find the mother (we have its track ID in currentMotherTrackId)
-          std::map<int, size_t>::const_iterator iMother
-            = TrackIDtoIndex.find(currentMotherTrackId);
-          if (iMother == TrackIDtoIndex.end()) break; // no mother found
-          size_t currentMotherIndex = iMother->second;
-          // if the mother particle is of a different type,
-          // don't bother with iPart ancestry any further
-          if (fData->pdg[iPart] != fData->pdg[currentMotherIndex]) break;
-          
-          // group the "current mother" (actually, ancestor) with iPart
-          fData->MergedId[currentMotherIndex] = currentMergedId;
-          // then consider the grandmother (one generation earlier)
-          currentMotherTrackId = fData->Mother[currentMotherIndex];
-        } // while ancestry exists
-        ++currentMergedId;
-      } // for merging check
-     } // if (fSaveGeantInfo) 
-            
+	FillWith(fData->MergedId, 0);
+
+	// for each particle, consider all the direct ancestors with the same
+	// PDG ID, and mark them as belonging to the same "group"
+	// (having the same MergedId)
+	/* turn off for now
+	int currentMergedId = 1;
+	for(size_t iPart = 0; iPart < geant_particle; ++iPart){
+	  // if the particle already belongs to a group, don't bother
+	  if (fData->MergedId[iPart]) continue;
+	  // the particle starts its own group
+	  fData->MergedId[iPart] = currentMergedId;
+	  int currentMotherTrackId = fData->Mother[iPart];
+	  while (currentMotherTrackId > 0) {
+	    if (TrackIDtoIndex.find(currentMotherTrackId)==TrackIDtoIndex.end()) break;
+	    size_t gindex = TrackIDtoIndex[currentMotherTrackId];
+	    if (gindex<0||gindex>=plist.size()) break;
+	    // if the mother particle is of a different type,
+	    // don't bother with iPart ancestry any further
+	    if (gpdg[gindex]!=fData->pdg[iPart]) break;
+	    if (TrackIDtoIndex.find(currentMotherTrackId)!=TrackIDtoIndex.end()){
+	      size_t igeantMother = TrackIDtoIndex[currentMotherTrackId];
+	      if (igeantMother>=0&&igeantMother<geant_particle){
+		fData->MergedId[igeantMother] = currentMergedId;
+	      }
+	    }
+	    currentMotherTrackId = gmother[gindex];
+	  }
+	  ++currentMergedId;
+	}// for merging check
+	*/
+      } // if (fSaveGeantInfo) 
     }//if (mcevts_truth)
   }//if (isMC){
   fData->taulife = LArProp->ElectronLifetime();
@@ -2579,7 +2582,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       << "\n - " << fData->no_hits << " hits (" << fData->GetMaxHits() << ")"
       << "\n - " << fData->genie_no_primaries << " genie primaries (" << fData->GetMaxGeniePrimaries() << ")"
       << "\n - " << fData->geant_list_size << " GEANT particles (" << fData->GetMaxGEANTparticles() << "), "
-        << fData->no_primaries << " primaries"
+      << fData->no_primaries << " primaries"
       << "\n - " << fData->geant_list_size_in_tpcAV << " GEANT particles in AV "
       << "\n - " << ((int) fData->kNTracker) << " trackers:"
       ;
@@ -2689,8 +2692,8 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
 {
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-
+  //art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArProperties> larprop;
   // Get active volume boundary.
   double xmin = 0.;
   double xmax = 2.*geom->DetHalfWidth();
@@ -2698,7 +2701,8 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
   double ymax = geom->DetHalfHeight();
   double zmin = 0.;
   double zmax = geom->DetLength();
-  double vDrift = 160*pow(10,-6);
+  //double vDrift = 160*pow(10,-6);
+  double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
 
   double result = 0.;
   TVector3 disp;

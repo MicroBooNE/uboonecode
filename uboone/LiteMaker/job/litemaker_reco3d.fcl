@@ -11,11 +11,10 @@ physics.analyzers.scanner.DataLookUpMap:
                "pandoraCosmicKHit","pandoraNuKHit",
                "cluster3d",
                "trackkalmanhit","trackkalmanhitcc"]
-  vertex:     ["cccluster",
-               "pandoraNu","pandoraCosmic"]
+  vertex:     ["pandoraNu","pandoraCosmic"]
   track:      ["cctrack",
                "trackkalmanhit", "stitchkalmanhit",
-               "tracklakmanhitcc", "stitchkalmanhitcc",
+               "trackkalmanhitcc", "stitchkalmanhitcc",
                "pandoraNuKHit","pandoraCosmicKHit"]
   seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
   shower:     ["showerrecopandora","showerrecofuzzy"]
@@ -24,8 +23,8 @@ physics.analyzers.scanner.DataLookUpMap:
 
 physics.analyzers.scanner.AssociationLookUpMap:
 {
-  hit:        ["gaushit","ccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  hit:        ["gaushit","cccluster"]
+  cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
   endpoint2d: []
   sps:        ["pandoraCosmic","pandoraNu",
                "pandoraCosmicKHit","pandoraNuKHit",
@@ -35,7 +34,7 @@ physics.analyzers.scanner.AssociationLookUpMap:
                "pandoraNu","pandoraCosmic"]
   track:      ["cctrack",
                "trackkalmanhit", "stitchkalmanhit",
-               "tracklakmanhitcc", "stitchkalmanhitcc",
+               "trackkalmanhitcc", "stitchkalmanhitcc",
                "pandoraNuKHit","pandoraCosmicKHit"]
   seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
   shower:     ["showerrecopandora","showerrecofuzzy"]

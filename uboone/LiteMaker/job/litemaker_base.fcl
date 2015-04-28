@@ -6,6 +6,8 @@ litemaker_base:
   module_type:       "LiteScanner"
   # boolean to decide whether or not to store association
   store_association: true
+  # pot summary producer labels
+  pot_labels: []
   # output file name
   out_filename:      "larlite_empty.root"
 

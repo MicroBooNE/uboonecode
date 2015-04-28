@@ -1,0 +1,38 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_reco3d_kalmanhitcc.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  sps:        ["trackkalmanhitcc"]
+  vertex:     []
+  track:      ["trackkalmanhitcc", "stitchkalmanhitcc"]
+  seed:       []
+  shower:     []
+  pfpart:     []
+  cosmictag:  ["stitchkalmanhittagcc",
+               "trackkalmanhittagcc"]
+  calo:       ["stitchkalmanhitcalocc",
+               "trackkalmanhitcalocc"]
+  partid:     ["stitchkalmanhitpidcc",
+               "trackkalmanhitpidcc"]
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  hit:        ["cccluster"]
+  cluster:    ["cccluster"]
+  endpoint2d: []
+  sps:        ["trackkalmanhitcc"]
+  vertex:     ["cccluster"]
+  track:      ["trackkalmanhitcc", "stitchkalmanhitcc"]
+  seed:       []
+  shower:     []
+  pfpart:     []
+  cosmictag:  ["stitchkalmanhittagcc",
+               "trackkalmanhittagcc"]
+  calo:       ["stitchkalmanhitcalocc",
+               "trackkalmanhitcalocc"]
+  partid:     ["stitchkalmanhitpidcc",
+               "trackkalmanhitpidcc"]
+}

@@ -1,0 +1,39 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_reco3d_pandora.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+#  cluster:    ["pandoraNu","pandoraCosmic"]
+  sps:        ["pandoraCosmic","pandoraNu",
+               "pandoraCosmicKHit","pandoraNuKHit"]
+  vertex:     ["pandoraNu","pandoraCosmic"]
+  track:      ["pandoraNuKHit","pandoraCosmicKHit"]
+  seed:       ["pandoraCosmic","pandoraNu"]
+  shower:     ["showerrecopandora"]
+  pfpart:     ["pandoraCosmic","pandoraNu"]
+  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+               "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
+               "pandoraCosmicKHitPFPart"]
+  calo:       ["pandoraNuKHitcalo","pandoraCosmicKHitcalo"]
+  partid:     ["pandoraNuKHitpid","pandoraCosmicKHitpid"]
+               
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  hit:        ["gaushit"]
+  cluster:    ["pandoraNu","pandoraCosmic"]
+  sps:        ["pandoraCosmic","pandoraNu",
+               "pandoraCosmicKHit","pandoraNuKHit"]
+  vertex:     ["pandoraNu","pandoraCosmic"]
+  track:      ["pandoraNuKHit","pandoraCosmicKHit"]
+  seed:       ["pandoraCosmic","pandoraNu"]
+  shower:     ["showerrecopandora"]
+  pfpart:     ["pandoraCosmic","pandoraNu"]
+  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+               "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
+               "pandoraCosmicKHitPFPart"]
+  calo:       ["pandoraNuKHitcalo","pandoraCosmicKHitcalo"]
+  partid:     ["pandoraNuKHitpid","pandoraCosmicKHitpid"]
+}
