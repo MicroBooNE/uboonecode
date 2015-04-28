@@ -1,0 +1,26 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_reco3d_cluster3d.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  sps:        ["cluster3d"]
+  vertex:     []
+  track:      []
+  seed:       ["cluster3d"]
+  shower:     []
+  pfpart:     ["cluster3d"]
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{
+  hit:        ["gaushit"]
+  cluster:    ["fuzzycluster"]
+  endpoint2d: []
+  sps:        ["cluster3d"]
+  vertex:     []
+  track:      []
+  seed:       ["cluster3d"]
+  shower:     []
+  pfpart:     ["cluster3d"]
+}

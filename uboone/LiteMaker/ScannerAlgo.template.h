@@ -535,13 +535,12 @@ namespace larlite {
       auto const& signalROI = wire_ptr->SignalROI();
 
       for(const auto& range : signalROI.get_ranges())
-
 	rois.add_range(range.begin_index(),range.data());
-
+      
       larlite::wire wire_lite(rois,
 			      wire_ptr->Channel(),
 			      (::larlite::geo::View_t)(wire_ptr->View()));
-
+      
       lite_data->push_back(wire_lite);
     }  
   }

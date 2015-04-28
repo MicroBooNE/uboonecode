@@ -1,0 +1,13 @@
+#include "larlite_maker.fcl"
+
+physics.analyzers.scanner.out_filename: "larlite_wire.root"
+
+physics.analyzers.scanner.DataLookUpMap:
+{
+  wire:       ["caldata"]
+}
+
+physics.analyzers.scanner.AssociationLookUpMap:
+{}
+
+
