@@ -312,7 +312,6 @@ namespace detsim {
 
     //update database cache
     fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
-    mf::LogInfo("SimWireMicroBooNE") << "Timestamp: "<<evt.time().value();
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fFFT->ReinitializeFFT(fNTimeSamples,fFFT->FFTOptions(),fFFT->FFTFitBins());
@@ -584,7 +583,6 @@ namespace detsim {
       CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");
       CLHEP::RandGaussQ rGaussPed(engine, 0.0, pedestal.PedRms());
       float ped_mean = pedestal.PedMean() + rGaussPed.fire();
-      if (chan==100) mf::LogInfo("SimWireMicroBooNE")  << " PEDESTAL MEAN CHAN "<<chan<<": " << pedestal.PedMean();
 
       //Generate Noise
       //geo::SigType_t sigtype = geo->SignalType(chan);
