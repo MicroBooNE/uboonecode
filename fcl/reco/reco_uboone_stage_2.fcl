@@ -297,6 +297,11 @@ services.message.destinations :
          limit: 0
          reportEvery: 0
        }
+       CRHitRemoval:
+       {
+         limit: 0
+         reportEvery: 0
+       }
        default:
        {
          limit: -1  #don't print anything at the infomsg level except the explicitly named categories

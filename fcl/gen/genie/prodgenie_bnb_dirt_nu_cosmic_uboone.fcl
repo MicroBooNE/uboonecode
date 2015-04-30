@@ -9,7 +9,7 @@ physics.producers.generator.GlobalTimeOffset: 0.
 physics.producers.generator.RandomTimeOffset: 1600.
 physics.producers.generator.TopVolume: "volWorld"
 
-services.user.Geometry.Name: "microboonev5_auxdet"
-services.user.Geometry.GDML: "microboonev5_auxdet.gdml"
-services.user.Geometry.ROOT: "microboonev5_auxdet.gdml"
+services.user.Geometry.Name: "microboonev6_auxdet"
+services.user.Geometry.GDML: "microboonev6_auxdet.gdml"
+services.user.Geometry.ROOT: "microboonev6_auxdet.gdml"
 
