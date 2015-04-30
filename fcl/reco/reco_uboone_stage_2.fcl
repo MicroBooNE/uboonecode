@@ -300,7 +300,7 @@ services.message.destinations :
        CRHitRemoval:
        {
          limit: 0
-	 reportEvery: 0
+         reportEvery: 0
        }
        default:
        {
