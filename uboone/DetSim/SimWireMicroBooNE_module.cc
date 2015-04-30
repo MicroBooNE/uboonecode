@@ -56,6 +56,7 @@
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
 #include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/UBooneIOVTimeStamp.h"
 
 
 
@@ -310,7 +311,8 @@ namespace detsim {
   {
 
     //update database cache
-    fPedestalRetrievalAlg.Update( lariov::IOVTimeStamp(evt) );
+    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    mf::LogInfo("SimWireMicroBooNE") << "Timestamp: "<<evt.time().value();
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fFFT->ReinitializeFFT(fNTimeSamples,fFFT->FFTOptions(),fFFT->FFTFitBins());
@@ -321,7 +323,7 @@ namespace detsim {
       << "May cause issues in (de)convolution.\n";
 
     if ( fNTimeSamples > fNTicks )
-      mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
+      mf::LogError("SimWireMicroBooNE") << "Cannot have number of readout samples "
       << fNTimeSamples << " greater than FFTSize " << fNTicks << "!";
 
 
@@ -582,6 +584,7 @@ namespace detsim {
       CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");
       CLHEP::RandGaussQ rGaussPed(engine, 0.0, pedestal.PedRms());
       float ped_mean = pedestal.PedMean() + rGaussPed.fire();
+      if (chan==100) mf::LogInfo("SimWireMicroBooNE")  << " PEDESTAL MEAN CHAN "<<chan<<": " << pedestal.PedMean();
 
       //Generate Noise
       //geo::SigType_t sigtype = geo->SignalType(chan);

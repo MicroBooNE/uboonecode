@@ -25,6 +25,7 @@
 #include "RecoBase/Wire.h"
 #include "RawData/RawDigit.h"
 #include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/UBooneIOVTimeStamp.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
@@ -219,7 +220,7 @@ void cal::ShowWire::analyze(art::Event const & e)
   // Implementation of required member function here.
 
   //update database cache
-  fPedestalRetrievalAlg.Update( lariov::IOVTimeStamp(e) );
+  fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(e) );
 
   art::Handle< std::vector<recob::Wire> > wireVectorHandle;
   e.getByLabel(fCalDataModuleLabel,wireVectorHandle);
