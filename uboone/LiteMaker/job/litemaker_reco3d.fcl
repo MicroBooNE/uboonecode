@@ -1,8 +1,12 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_reco3d.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_reco3d: @local::litemaker_base
+
+litemaker_reco3d.out_filename: "larlite_reco3d.root"
+
+litemaker_reco3d.DataLookUpMap:
 {
 #  hit:        ["gaushit","ccluster"]
 #  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
@@ -21,7 +25,7 @@ physics.analyzers.scanner.DataLookUpMap:
   pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
 }
 
-physics.analyzers.scanner.AssociationLookUpMap:
+litemaker_reco3d.AssociationLookUpMap:
 {
   hit:        ["gaushit","cccluster"]
   cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
@@ -40,3 +44,5 @@ physics.analyzers.scanner.AssociationLookUpMap:
   shower:     ["showerrecopandora","showerrecofuzzy"]
   pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
 }
+
+END_PROLOG

@@ -1,8 +1,12 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_reco3d_fuzzyshower.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_reco3d_fuzzyshower: @local::litemaker_base
+
+litemaker_reco3d_fuzzyshower.out_filename: "larlite_reco3d_fuzzyshower.root"
+
+litemaker_reco3d_fuzzyshower.DataLookUpMap:
 {
   sps:        []
   vertex:     []
@@ -12,7 +16,7 @@ physics.analyzers.scanner.DataLookUpMap:
   pfpart:     []
 }
 
-physics.analyzers.scanner.AssociationLookUpMap:
+litemaker_reco3d_fuzzyshower.AssociationLookUpMap:
 {
   hit:        ["gaushit"]
   cluster:    ["fuzzyclustermerger"]
@@ -24,3 +28,5 @@ physics.analyzers.scanner.AssociationLookUpMap:
   shower:     ["showerrecofuzzy"]
   pfpart:     []
 }
+
+END_PROLOG

@@ -1,8 +1,12 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_reco3d_cluster3d.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_reco3d_cluster3d: @local::litemaker_base
+
+litemaker_reco3d_cluster3d.out_filename: "larlite_reco3d_cluster3d.root"
+
+litemaker_reco3d_cluster3d.DataLookUpMap:
 {
   sps:        ["cluster3d"]
   vertex:     []
@@ -12,7 +16,7 @@ physics.analyzers.scanner.DataLookUpMap:
   pfpart:     ["cluster3d"]
 }
 
-physics.analyzers.scanner.AssociationLookUpMap:
+litemaker_reco3d_cluster3d.AssociationLookUpMap:
 {
   hit:        ["gaushit"]
   cluster:    ["fuzzycluster"]
@@ -24,3 +28,5 @@ physics.analyzers.scanner.AssociationLookUpMap:
   shower:     []
   pfpart:     ["cluster3d"]
 }
+
+END_PROLOG

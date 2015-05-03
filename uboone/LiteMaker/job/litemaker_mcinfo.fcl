@@ -1,10 +1,14 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_mcinfo.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.pot_labels: ["generator"]
+litemaker_mcinfo: @local::litemaker_base
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_mcinfo.out_filename: "larlite_mcinfo.root"
+
+litemaker_mcinfo.pot_labels: ["generator"]
+
+litemaker_mcinfo.DataLookUpMap:
 {
   potsummary: ["generator"]
   gtruth:     ["generator"]
@@ -14,9 +18,8 @@ physics.analyzers.scanner.DataLookUpMap:
   mcshower:   ["mcreco"]
 }
 
-physics.analyzers.scanner.AssociationLookUpMap: {
+litemaker_mcinfo.AssociationLookUpMap: {
   mctruth: ["generator"]
 }
 
-#source.inputCommands: ["keep sim::MCTracks_*_*_*","drop raw::OpDetWaveforms_*_*_*"]
-#source.inputCommands: ["keep sim::MCTracks_*_*_*","keep sim::MCShowers_*_*_*","keep simb::MCTruths_*_*_*"]
+END_PROLOG

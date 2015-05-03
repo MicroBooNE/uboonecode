@@ -1,8 +1,12 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_reco3d_kalmanhitcc.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_reco3d_kalmanhitcc: @local::litemaker_base
+
+litemaker_reco3d_kalmanhitcc.out_filename: "larlite_reco3d_kalmanhitcc.root"
+
+litemaker_reco3d_kalmanhitcc.DataLookUpMap:
 {
   sps:        ["trackkalmanhitcc"]
   vertex:     []
@@ -18,7 +22,7 @@ physics.analyzers.scanner.DataLookUpMap:
                "trackkalmanhitpidcc"]
 }
 
-physics.analyzers.scanner.AssociationLookUpMap:
+litemaker_reco3d_kalmanhitcc.AssociationLookUpMap:
 {
   hit:        ["cccluster"]
   cluster:    ["cccluster"]
@@ -36,3 +40,5 @@ physics.analyzers.scanner.AssociationLookUpMap:
   partid:     ["stitchkalmanhitpidcc",
                "trackkalmanhitpidcc"]
 }
+
+END_PROLOG
