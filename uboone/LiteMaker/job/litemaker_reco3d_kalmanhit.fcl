@@ -9,6 +9,7 @@ litemaker_reco3d_kalmanhit.out_filename: "larlite_reco3d_kalmanhit.root"
 litemaker_reco3d_kalmanhit.DataLookUpMap:
 {
   sps:        ["trackkalmanhit"]
+  pcaxis:     []
   vertex:     []
   track:      ["trackkalmanhit", "stitchkalmanhit"]
   seed:       []
@@ -28,6 +29,7 @@ litemaker_reco3d_kalmanhit.AssociationLookUpMap:
   cluster:    ["fuzzycluster"]
   endpoint2d: []
   sps:        ["trackkalmanhit"]
+  pcaxis:     []
   vertex:     []
   track:      ["trackkalmanhit", "stitchkalmanhit"]
   seed:       []

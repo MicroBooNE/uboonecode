@@ -9,6 +9,7 @@ litemaker_reco3d_fuzzyshower.out_filename: "larlite_reco3d_fuzzyshower.root"
 litemaker_reco3d_fuzzyshower.DataLookUpMap:
 {
   sps:        []
+  pcaxis:     []
   vertex:     []
   track:      []
   seed:       []
@@ -22,6 +23,7 @@ litemaker_reco3d_fuzzyshower.AssociationLookUpMap:
   cluster:    ["fuzzyclustermerger"]
   endpoint2d: []
   sps:        []
+  pcaxis:     []
   vertex:     []
   track:      []
   seed:       []

@@ -39,9 +39,11 @@
 #include "RecoBase/Vertex.h"
 #include "RecoBase/EndPoint2D.h"
 #include "RecoBase/PFParticle.h"
+#include "RecoBase/PCAxis.h"
 #include "AnalysisBase/ParticleID.h"
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/CosmicTag.h"
+#include "AnalysisBase/FlashMatch.h"
 #include "Simulation/SimChannel.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/GTruth.h"
@@ -214,6 +216,8 @@ void LiteScanner::analyze(art::Event const & e)
   SaveAssociationSource<recob::PFParticle>(e);
   SaveAssociationSource<anab::Calorimetry>(e);
   SaveAssociationSource<anab::ParticleID>(e);
+  SaveAssociationSource<recob::PCAxis>(e);
+  SaveAssociationSource<anab::FlashMatch>(e);
 
   //
   // Loop over data type to store data & locally art::Ptr
@@ -278,6 +282,10 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<anab::ParticleID>(e,j); break;
       case ::larlite::data::kPFParticle:
 	ScanData<recob::PFParticle>(e,j); break;
+      case ::larlite::data::kPCAxis:
+	ScanData<recob::PCAxis>(e,j); break;
+      case ::larlite::data::kFlashMatch:
+	ScanData<anab::FlashMatch>(e,j); break;
 	//case ::larlite::data::kPOTSummary:
 	//break;
       case ::larlite::data::kUndefined:
@@ -414,6 +422,7 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
   case ::larlite::data::kHit:          break;
   case ::larlite::data::kCosmicTag:
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kOpHit:        break;
   case ::larlite::data::kOpFlash:      break;
@@ -463,6 +472,7 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Seed       > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
     //fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
     break;
   default:

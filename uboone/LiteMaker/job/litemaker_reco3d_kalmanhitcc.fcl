@@ -10,6 +10,7 @@ litemaker_reco3d_kalmanhitcc.DataLookUpMap:
 {
   sps:        ["trackkalmanhitcc"]
   vertex:     []
+  pcaxis:     []
   track:      ["trackkalmanhitcc", "stitchkalmanhitcc"]
   seed:       []
   shower:     []
@@ -28,6 +29,7 @@ litemaker_reco3d_kalmanhitcc.AssociationLookUpMap:
   cluster:    ["cccluster"]
   endpoint2d: []
   sps:        ["trackkalmanhitcc"]
+  pcaxis:     []
   vertex:     ["cccluster"]
   track:      ["trackkalmanhitcc", "stitchkalmanhitcc"]
   seed:       []
