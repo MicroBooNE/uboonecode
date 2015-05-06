@@ -131,7 +131,11 @@ namespace util {
     double GetRawNoise(unsigned int const channel) const ;
     double GetDeconNoise(unsigned int const channel) const;
 
-    const util::SignalShaping& SignalShaping(unsigned int channel, unsigned wire = 0, size_t ktype=0) const;
+    const std::vector<TComplex>& GetConvKernel(unsigned int channel, unsigned int wire) const;  // M. Mooney
+    double Get2DFilterVal(size_t planeNum, size_t freqDimension, double binFrac) const;  // M. Mooney
+    double Get2DFilterNorm(size_t planeNum) const;  // M. Mooney
+
+    const util::SignalShaping& SignalShaping(unsigned int channel, unsigned wire = 0, size_t ktype = 0) const;
 
     int FieldResponseTOffset(unsigned int const channel, size_t ktype) const;
 
@@ -221,7 +225,22 @@ namespace util {
     std::vector<int> fDeconvPol;                ///< switch for DeconvKernel normalization sign (+ -> max pos ADC, - -> max neg ADC). Entry 0,1,2 = U,V,Y plane settings
     std::vector<TF1*> fFilterTF1Vec;  ///< Vector of Parameterized filter functions
     std::vector<std::string> fFilterFuncVec;
-    std::vector<std::vector<TComplex> >fFilterVec;
+    std::vector<std::vector<TComplex> > fFilterVec;
+
+    // Induced charge deconvolution additions (M. Mooney)
+    std::vector<TF1*> fFilterTF1VecICTime;
+    std::vector<std::string> fFilterFuncVecICTime;
+    std::vector<TF1*> fFilterTF1VecICWire;
+    std::vector<std::string> fFilterFuncVecICWire;
+    std::vector<double> fFilterScaleVecICTime;
+    std::vector<double> fFilterScaleVecICWire;
+    std::vector<double> fFilterNormVecIC;
+
+    std::vector<double> fFilterICTimeMaxFreq;
+    std::vector<double> fFilterICTimeMaxVal;
+
+    std::vector<double> fFilterICWireMaxFreq;
+    std::vector<double> fFilterICWireMaxVal;
 
     
 

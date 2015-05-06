@@ -17,6 +17,7 @@
 
 // ROOT libraries
 #include "TComplex.h"
+#include "TFFTComplex.h"
 #include "TH1D.h"
 #include "TH1F.h"
 
@@ -66,7 +67,9 @@ namespace caldata {
     
     int          fDataSize;          ///< size of raw data on one wire
     int          fPostsample;        ///< number of postsample bins
-    int          fDoBaselineSub;        ///< number of postsample bins
+    int          fDoBaselineSub;        ///< do original baseline subtraction
+    int          fDoSimpleBaselineSub;   ///< do simple baseline subtraction (M. Mooney)
+    int          fDoAdaptiveBaselineSub;   ///< do adaptive baseline subtraction (M. Mooney)
     float        fBaseVarCut;        ///< baseline variance cut
     int          fSaveWireWF;        ///< Save recob::wire object waveforms
     std::string  fDigitModuleLabel;  ///< module that made digits
@@ -76,8 +79,17 @@ namespace caldata {
                               ///< ex.:  "daq:preSpill" for prespill data
     size_t fEventCount; ///< count of event processed
 
+    int fBaselineWindowSize;   ///< window size for adaptive baseline method (M. Mooney)
+    int fBaselineSigBinBuffer;   ///< bin buffer between baseline and nearest signal bin for adaptive baseline method (M. Mooney)
+    double fBaselineSigThreshold;   ///< signal threshold for adaptive baseline method (M. Mooney)
 
     void SubtractBaseline(std::vector<float>& holder);
+    void SubtractBaselineSimple(std::vector<float>& holder); // M. Mooney
+    void SubtractBaselineAdaptive(std::vector<float>& holder); // M. Mooney
+    std::vector<bool> FindSignalRegions(const std::vector<float>& deconvVec, int windowSize, int sigBinBuffer, double sigThreshold); // M. Mooney
+    void RunAdaptiveBaselinePass(std::vector<float>& deconvVec, int runMode, int windowSize, int sigBinBuffer, double sigThreshold, const std::vector<bool>& signalRegions = std::vector<bool>()); // M. Mooney
+
+    template <class T> void DeconvoluteInducedCharge(size_t firstChannel, std::vector<std::vector<T> >& signal) const; // M. Mooney
 
     lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg;
 
@@ -109,6 +121,11 @@ namespace caldata {
     fDigitModuleLabel = p.get< std::string >("DigitModuleLabel", "daq");
     fPostsample       = p.get< int >        ("PostsampleBins");
     fDoBaselineSub    = p.get< bool >       ("DoBaselineSub");
+    fDoSimpleBaselineSub    = p.get< bool >       ("DoSimpleBaselineSub");
+    fDoAdaptiveBaselineSub    = p.get< bool >       ("DoAdaptiveBaselineSub");
+    fBaselineWindowSize   = p.get< int >        ("BaselineWindowSize");
+    fBaselineSigBinBuffer   = p.get< int >        ("BaselineSigBinBuffer");
+    fBaselineSigThreshold   = p.get< double >        ("BaselineSigThreshold");
     fBaseVarCut       = p.get< int >        ("BaseVarCut");
     fSaveWireWF       = p.get< int >        ("SaveWireWF");
     
@@ -152,6 +169,13 @@ namespace caldata {
     // Get signal shaping service.
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double DeconNorm = sss->GetDeconNorm();
+    bool doInducedChargeDeconv = false;
+    std::vector<std::vector<size_t> > respNums = sss->GetNResponses();
+    for (size_t i = 0; i < respNums.at(1).size(); i++) {
+      if (respNums.at(1).at(i) > 1) {
+        doInducedChargeDeconv = true;
+      }
+    }
 
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
@@ -198,76 +222,197 @@ namespace caldata {
 
     std::vector<float> holder;                // holds signal data
     std::vector<short> rawadc(transformSize);  // vector holding uncompressed adc values
-    std::vector<TComplex> freqHolder(transformSize+1); // temporary frequency data
+    //std::vector<TComplex> freqHolder(transformSize+1); // temporary frequency data
     
-    // loop over all wires    
     wirecol->reserve(digitVecHandle->size());
-    for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){ // ++ move
-      holder.clear();
+
+    if(!doInducedChargeDeconv) { ////////// Normal Deconvolution (No Induced Charge) //////////
+      // loop over all wires
+      for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){ // ++ move
+        holder.clear();
+        
+        // get the reference to the current raw::RawDigit
+        art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
+        channel = digitVec->Channel();
       
-      // get the reference to the current raw::RawDigit
-      art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
-      channel = digitVec->Channel();
-
-      // skip bad channels
-      if(!chanFilt->BadChannel(channel)) {
-
-        // resize and pad with zeros
-	holder.resize(transformSize, 0.);
-	
-	// uncompress the data
-	raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
-	
-	// loop over all adc values and subtract the pedestal
-	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
-        float pdstl = fPedestalRetrievalAlg.PedMean(channel);
-
-	//David Caratelli
-	//subtract time-offset added in SImWireMicroBooNE_module
-	//Xin remove the time_offset
-	int time_offset = 0;//sss->FieldResponseTOffset(channel);
-	for(bin = 0; bin < dataSize; ++bin) {
-	  if ( (bin-time_offset >= 0) and (bin-time_offset < holder.size())  )
-	  holder[bin-time_offset]=(rawadc[bin]-pdstl);
-	}
-	//Xin fill the remaining bin with data
-	for (bin = dataSize;bin<holder.size();bin++){
-	  holder[bin] = (rawadc[bin-dataSize]-pdstl);
-	}
+        // skip bad channels
+        if(!chanFilt->BadChannel(channel)) {
       
-
-	// Do deconvolution.
-	sss->Deconvolute(channel, holder);
-	for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
-      } // end if not a bad channel 
+          // resize and pad with zeros
+      	  holder.resize(transformSize, 0.);
+      	  
+      	  // uncompress the data
+      	  raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
+      	  
+      	  // loop over all adc values and subtract the pedestal
+      	  // When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
+          float pdstl = fPedestalRetrievalAlg.PedMean(channel);
+      	  
+      	  //David Caratelli
+      	  //subtract time-offset added in SImWireMicroBooNE_module
+      	  //Xin remove the time_offset
+      	  int time_offset = 0;//sss->FieldResponseTOffset(channel);
+      	  for(bin = 0; bin < dataSize; ++bin) {
+      	    if ( (bin-time_offset >= 0) and (bin-time_offset < holder.size())  ) {
+      	      holder[bin-time_offset]=(rawadc[bin]-pdstl);
+	    }
+      	  }
+      	  //Xin fill the remaining bin with data
+      	  for (bin = dataSize;bin<holder.size();bin++) {
+      	    holder[bin] = (rawadc[bin-dataSize]-pdstl);
+      	  }
+          
+      	  // Do deconvolution.
+      	  sss->Deconvolute(channel, holder);
+      	  for(bin = 0; bin < holder.size(); ++bin) {
+            holder[bin]=holder[bin]/DeconNorm;
+	  }
+        } // end if not a bad channel 
+        
+        holder.resize(dataSize,1e-5);
       
-      holder.resize(dataSize,1e-5);
+        //normalize the holder (Xin Qian)
+        
+        //This restores the DC component to signal removed by the deconvolution.
+        if(fPostsample) {
+          float average=0.0;
+      	  for(bin=0; bin < (unsigned short)fPostsample; ++bin) {
+      	    average += holder[holder.size()-1+bin];
+	  }
 
-      //normalize the holder (Xin Qian)
+          average = average / (float)fPostsample;
+          for(bin = 0; bin < holder.size(); ++bin) {
+            holder[bin]-=average;
+	  }
+        }  
+        // baseline subtraction
+        if(fDoBaselineSub) SubtractBaseline(holder);
       
-
-      //This restores the DC component to signal removed by the deconvolution.
-      if(fPostsample) {
-        float average=0.0;
-	for(bin=0; bin < (unsigned short)fPostsample; ++bin) 
-	  average += holder[holder.size()-1+bin];
-        average = average / (float)fPostsample;
-        for(bin = 0; bin < holder.size(); ++bin) holder[bin]-=average;
-      }  
-      // adaptive baseline subtraction
-      if(fDoBaselineSub) SubtractBaseline(holder);
-  
-      // Make a single ROI that spans the entire data size
-      wirecol->push_back(recob::WireCreator(holder,*digitVec).move());
-      // add an association between the last object in wirecol
-      // (that we just inserted) and digitVec
-      if (!util::CreateAssn(*this, evt, *wirecol, digitVec, *WireDigitAssn, fSpillName)) {
-        throw art::Exception(art::errors::InsertFailure)
-          << "Can't associate wire #" << (wirecol->size() - 1)
-          << " with raw digit #" << digitVec.key();
-      } // if failed to add association
+        // Make a single ROI that spans the entire data size
+        wirecol->push_back(recob::WireCreator(holder,*digitVec).move());
+        // add an association between the last object in wirecol
+        // (that we just inserted) and digitVec
+        if (!util::CreateAssn(*this, evt, *wirecol, digitVec, *WireDigitAssn, fSpillName)) {
+          throw art::Exception(art::errors::InsertFailure)
+            << "Can't associate wire #" << (wirecol->size() - 1)
+            << " with raw digit #" << digitVec.key();
+        } // if failed to add association
+      }
     }
+    else { ////////// Deconvolution with Induced Charge (M. Mooney) //////////
 
+      std::vector<std::vector<float> > holders;                // holds signal data (for all wires of one plane)
+      raw::ChannelID_t firstChannel; // first channel used to get plane
+
+      for(size_t planeNum = 0; planeNum <= 2; planeNum++) { // loop over all planes (deconvolute one plane at a time)
+        holders.clear();
+        firstChannel = raw::InvalidChannelID;
+
+        // loop over all wires
+        for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter) { // ++ move
+          holder.clear();
+
+          // get the reference to the current raw::RawDigit
+          art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
+          channel = digitVec->Channel();
+
+          // get plane number associated with channel and skip channel if not current plane being considered
+	  auto view = (size_t)geom->View(channel);
+          if(view != planeNum) {continue;}
+          if(firstChannel == raw::InvalidChannelID) {firstChannel = channel;}
+
+          // NB: should skip bad channels and factor this into deconvolution - add in later!
+        
+          // resize and pad with zeros
+          holder.resize(transformSize, 0.);
+        	
+          // uncompress the data
+          raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
+        	
+          // loop over all adc values and subtract the pedestal
+          // When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
+          float pdstl = fPedestalRetrievalAlg.PedMean(channel);
+        	
+          //David Caratelli
+          //subtract time-offset added in SImWireMicroBooNE_module
+          //Xin remove the time_offset
+          int time_offset = 0;//sss->FieldResponseTOffset(channel);
+          for(bin = 0; bin < dataSize; ++bin) {
+            if ( (bin-time_offset >= 0) and (bin-time_offset < holder.size())  ) {
+              holder[bin-time_offset]=(rawadc[bin]-pdstl);
+            }
+          }
+          //Xin fill the remaining bin with data
+          for (bin = dataSize;bin<holder.size();bin++) {
+            holder[bin] = (rawadc[bin-dataSize]-pdstl);
+          }
+
+          // add processed raw digit to vector
+          holders.push_back(holder);
+        }
+
+        fFFT->ReinitializeFFT(holders.size(),fFFT->FFTOptions(),fFFT->FFTFitBins());
+        for(size_t i = holders.size(); i < (size_t)fFFT->FFTSize(); i++) {
+          holders.push_back(holders.at(i-holders.size()));
+	}
+
+        // do induced charge deconvolution - M. Mooney
+        DeconvoluteInducedCharge(firstChannel, holders);
+
+        size_t counter = 0;
+        for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter) { // ++ move
+          // get the reference to the current raw::RawDigit
+          art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
+          channel = digitVec->Channel();
+
+          // again, get plane number associated with channel and skip channel if not current plane being considered
+	  auto view = (size_t)geom->View(channel);
+          if(view != planeNum) {continue;}
+
+          // NB: should skip bad channels again here
+
+          holder = holders.at(counter);
+          counter++;
+
+          //normalize the holder (Xin Qian)
+          double gain = sss->GetASICGain(channel);
+          for(bin = 0; bin < holder.size(); ++bin) {
+            holder[bin]=holder[bin]/DeconNorm/(gain/4.7);
+          }
+          
+          holder.resize(dataSize,1e-5);
+                  
+          //This restores the DC component to signal removed by the deconvolution.
+          if(fPostsample) {
+            float average=0.0;
+            for(bin=0; bin < (unsigned short)fPostsample; ++bin) {
+              average += holder[holder.size()-1+bin];
+            }
+        
+            average = average / (float)fPostsample;
+            for(bin = 0; bin < holder.size(); ++bin) {
+              holder[bin]-=average;
+            }
+          }  
+          // original baseline subtraction
+          if(fDoBaselineSub) SubtractBaseline(holder);
+          // simple baseline subtraction - M. Mooney
+          if(fDoSimpleBaselineSub) SubtractBaselineSimple(holder);
+          // adaptive baseline subtraction - M. Mooney
+          if(fDoAdaptiveBaselineSub) SubtractBaselineAdaptive(holder);
+        
+          // Make a single ROI that spans the entire data size
+          wirecol->push_back(recob::WireCreator(holder,*digitVec).move());
+          // add an association between the last object in wirecol
+          // (that we just inserted) and digitVec
+          if (!util::CreateAssn(*this, evt, *wirecol, digitVec, *WireDigitAssn, fSpillName)) {
+            throw art::Exception(art::errors::InsertFailure)
+              << "Can't associate wire #" << (wirecol->size() - 1)
+              << " with raw digit #" << digitVec.key();
+          } // if failed to add association
+        }
+      }
+    }
 
     if(wirecol->size() == 0)
       mf::LogWarning("CalWireMicroBooNE") << "No wires made for this event.";
@@ -297,7 +442,6 @@ namespace caldata {
   
   void CalWireMicroBooNE::SubtractBaseline(std::vector<float>& holder)
   {
-    
     float min = 0,max=0;
     for (unsigned int bin = 0; bin < holder.size(); bin++){
       if (holder[bin] > max) max = holder[bin];
@@ -324,8 +468,457 @@ namespace caldata {
       }
       h1->Delete();
     }
+
+    return;
+  }
+
+  void CalWireMicroBooNE::SubtractBaselineSimple(std::vector<float>& holder)
+  {
+    double sum = 0.0;
+    for(size_t i = 0; i < holder.size(); i++) {
+      sum += holder.at(i);
+    }
+    sum /= holder.size();
+
+    for(size_t i = 0; i < holder.size(); i++) {
+      holder.at(i) -= sum;
+    }
+
+    return;
+  }
+
+  void CalWireMicroBooNE::SubtractBaselineAdaptive(std::vector<float>& holder)
+  {
+    double sum = 0.0;
+    for(size_t i = 0; i < holder.size(); i++) {
+      sum += holder.at(i);
+    }
+    sum /= holder.size();
+
+    for(size_t i = 0; i < holder.size(); i++) {
+      holder.at(i) -= sum;
+    }
+
+    const std::vector<bool> signalRegions = FindSignalRegions(holder,fBaselineWindowSize,fBaselineSigBinBuffer,fBaselineSigThreshold);
+    RunAdaptiveBaselinePass(holder,0,fBaselineWindowSize,fBaselineSigBinBuffer,fBaselineSigThreshold,signalRegions);
+    RunAdaptiveBaselinePass(holder,1,fBaselineWindowSize,fBaselineSigBinBuffer,fBaselineSigThreshold);
+    RunAdaptiveBaselinePass(holder,2,fBaselineWindowSize,fBaselineSigBinBuffer,fBaselineSigThreshold);
+
+    return;
+  }
+
+  std::vector<bool> CalWireMicroBooNE::FindSignalRegions(const std::vector<float>& deconvVec, int windowSize, int sigBinBuffer, double sigThreshold)
+  {
+    int numBins = deconvVec.size();
+
+    int window = TMath::Min(windowSize,numBins);
+    window = TMath::Max(window,20);
+
+    double baselineVec[numBins];
+    double newValVec[numBins];
+
+    double baselineVal = 0.0;
+    int index;
+    for(int j = -1*window/2; j <= window/2; j++) {
+      if(j < 0)
+        index = j+numBins;
+      else if(j > numBins-1)
+        index = j-numBins;
+      else
+        index = j;
+
+      baselineVal += deconvVec[index];
+    }
+
+    baselineVec[0] = baselineVal/(window+1);
+    newValVec[0] = deconvVec[0]-baselineVec[0];
+
+    int oldIndex;
+    int newIndex;
+    for(int j = 1; j < numBins; j++){
+      if(j-window/2-1 < 0)
+        oldIndex = j-window/2-1+numBins;
+      else
+        oldIndex = j-window/2-1;
+
+      if(j+window/2 > numBins-1)
+        newIndex = j+window/2-numBins;
+      else
+        newIndex = j+window/2;
+
+      baselineVal -= deconvVec[oldIndex];
+      baselineVal += deconvVec[newIndex];
+
+      baselineVec[j] = baselineVal/(window+1);
+      newValVec[j] = deconvVec[j]-baselineVec[j];
+    }
+
+    std::vector<bool> isNearSigVec;
+
+    bool baselineFlag;
+    for(int j = 0; j < numBins; j++) {
+      baselineFlag = false;
+      for(int k = j-sigBinBuffer; k <= j+sigBinBuffer; k++) {
+	if(k < 0)
+          index = k+numBins;
+        else if(k > numBins-1)
+          index = k-numBins;
+        else
+          index = k;
+
+        if(newValVec[index] > sigThreshold)
+          baselineFlag = true;
+      }
+      isNearSigVec.push_back(baselineFlag);
+    }
+
+    return isNearSigVec;
+  }
+
+  void CalWireMicroBooNE::RunAdaptiveBaselinePass(std::vector<float>& deconvVec, int runMode, int windowSize, int sigBinBuffer, double sigThreshold, const std::vector<bool>& signalRegions)
+  {
+    if((runMode < 0) || (runMode > 2))
+      return;
+
+    int numBins = deconvVec.size();
+
+    double baselineVec[numBins];
+    bool isFilledVec[numBins];
+    bool isNearSigVec[numBins];
+
+    int index;
+
+    if(signalRegions.size() == 0) {
+      bool baselineFlag;
+      for(int j = 0; j < numBins; j++) {
+	baselineFlag = false;
+	for(int k = j-sigBinBuffer; k <= j+sigBinBuffer; k++) {
+	  if(k < 0)
+	    index = k+numBins;
+	  else if(k > numBins-1)
+	     index = k-numBins;
+	  else
+	     index = k;
+
+	  if(deconvVec[index] > sigThreshold)
+	     baselineFlag = true;
+	}
+	isNearSigVec[j] = baselineFlag;
+      }
+    }
+    else {
+      for(int j = 0; j < numBins; j++) {
+        isNearSigVec[j] = signalRegions[j];
+      }
+    }
+
+    int window = TMath::Max(20,TMath::Min(windowSize,numBins));
+    int minWindowBins = TMath::Max(10,TMath::Min(window/10,2*sigBinBuffer));
+    if(runMode != 0) {
+      int counter = 0;
+      while(counter < numBins+minWindowBins) {
+	if((isNearSigVec[counter % numBins] == true) && (isNearSigVec[(counter+1) % numBins] == false) && (isNearSigVec[(counter+minWindowBins) % numBins] == true)) {
+	  for(int k = 1; k <= minWindowBins; k++) {
+	    isNearSigVec[(counter+k) % numBins] = true;
+       	  }
+        }
+        else {
+          counter++;
+	}
+      }
+
+      bool nearSigFlag = false;
+      int nearSigCount = 0;
+      int maxNearSig = 0;
+      for(int j = 0; j < numBins; j++) {
+	if(isNearSigVec[j] == true) {
+	  if(nearSigFlag == false)
+	    nearSigFlag = true;
+
+	  nearSigCount++;
+	}
+        else {
+          if(nearSigFlag == true) {
+	    if(nearSigCount > maxNearSig)
+	      maxNearSig = nearSigCount;
+
+      	    nearSigFlag = false;
+       	    nearSigCount = 0;
+	  }
+        }
+      }
+
+      int index = 0;
+      while((nearSigFlag == true) && (index < numBins)) {
+	if(isNearSigVec[index] == true) {
+	  nearSigCount++;
+	  index++;
+	}
+        else {
+          nearSigFlag = false;
+        }
+      }
+      int newWindowEstimate = TMath::Max(maxNearSig,nearSigCount);
+
+      if((newWindowEstimate == 0) || (window < newWindowEstimate))
+        return;
+
+      if(runMode == 1)
+	window = (window+newWindowEstimate)/2;
+      else if(runMode == 2)
+        window = newWindowEstimate;
+
+      window = TMath::Max(20,TMath::Min(window,numBins));
+      minWindowBins = TMath::Max(10,TMath::Min(window/10,2*sigBinBuffer));
+    }
+
+    double baselineVal = 0.0;
+    int windowBins = 0;
+    for(int j = -1*window/2; j <= window/2; j++) {
+      if(j < 0)
+        index = j+numBins;
+      else if(j > numBins-1)
+        index = j-numBins;
+      else
+        index = j;
+
+      if(isNearSigVec[index] == false) {
+        baselineVal += deconvVec[index];
+        windowBins++;
+      }
+    }
+
+    if(windowBins == 0)
+      baselineVec[0] = 0.0;
+    else
+      baselineVec[0] = baselineVal/windowBins;
+
+    if(windowBins < minWindowBins)
+      isFilledVec[0] = false;
+    else
+      isFilledVec[0] = true;
+
+    int oldIndex;
+    int newIndex;
+    for(int j = 1; j < numBins; j++) {
+      if(j-window/2-1 < 0)
+        oldIndex = j-window/2-1+numBins;
+      else
+        oldIndex = j-window/2-1;
+
+      if(j+window/2 > numBins-1)
+        newIndex = j+window/2-numBins;
+      else
+        newIndex = j+window/2;
+
+      if(isNearSigVec[oldIndex] == false) {
+	baselineVal -= deconvVec[oldIndex];
+	windowBins--;
+      }
+
+      if(isNearSigVec[newIndex] == false)
+      {
+        baselineVal += deconvVec[newIndex];
+        windowBins++;
+      }
+
+      if(windowBins == 0)
+        baselineVec[j] = 0.0;
+      else
+        baselineVec[j] = baselineVal/windowBins;
+
+      if(windowBins < minWindowBins)
+        isFilledVec[j] = false;
+      else
+        isFilledVec[j] = true;
+    }
+
+    int downIndex;
+    int upIndex;
+    for(int j = 0; j < numBins; j++) {
+      if(isFilledVec[j] == false) {
+        downIndex = j;
+	while(isFilledVec[downIndex] == false) {
+	  downIndex--;
+
+          if(downIndex < 0)
+            downIndex = downIndex+numBins;
+	}
+
+	upIndex = j;
+	while(isFilledVec[upIndex] == false) {
+	  upIndex++;
+
+	  if(upIndex > numBins-1)
+	    upIndex = upIndex-numBins;
+	}
+
+	if((upIndex < j) && (downIndex > j))
+	  baselineVec[j] = ((j-downIndex+numBins)*baselineVec[downIndex]+(upIndex+numBins-j)*baselineVec[upIndex])/((double)upIndex+numBins-downIndex+numBins);
+        else if(upIndex < j)
+          baselineVec[j] = ((j-downIndex)*baselineVec[downIndex]+(upIndex+numBins-j)*baselineVec[upIndex])/((double) upIndex+numBins-downIndex);
+        else if(downIndex > j)
+          baselineVec[j] = ((j-downIndex+numBins)*baselineVec[downIndex]+(upIndex-j)*baselineVec[upIndex])/((double) upIndex-downIndex+numBins);
+        else
+	  baselineVec[j] = ((j-downIndex)*baselineVec[downIndex]+(upIndex-j)*baselineVec[upIndex])/((double) upIndex-downIndex);
+      }
+
+      deconvVec[j] -= baselineVec[j];
+    }
   }
 }
+
+template <class T> void caldata::CalWireMicroBooNE::DeconvoluteInducedCharge(size_t firstChannel, std::vector<std::vector<T> >& signal) const
+{
+  art::ServiceHandle<util::LArFFT> fft;
+  art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+  art::ServiceHandle<geo::Geometry> geom;
+
+  auto planeNum = (size_t)geom->View(firstChannel);
+
+  int numBins = signal.at(0).size();
+  int numWires = signal.size();
+  int numResp = sss->GetNResponses().at(1).at(planeNum);
+
+  std::vector<std::vector<TComplex> > signalFreqVecs;
+  signalFreqVecs.resize(numWires);
+
+  std::vector<std::vector<TComplex> > respFreqVecs;
+  respFreqVecs.resize(numWires);
+
+  std::vector<double> wireFactors;
+  wireFactors.resize(numWires);
+
+  fft->ReinitializeFFT(numBins,fft->FFTOptions(),fft->FFTFitBins());
+      
+  for(size_t k = 0; k < (size_t)numWires; k++) {
+    signalFreqVecs[k].resize(numBins);
+    fft->DoFFT(signal[k],signalFreqVecs[k]);
+  }
+
+  for(size_t k = 0; k < (size_t)numResp; k++) {
+    respFreqVecs[numResp-1-k] = sss->GetConvKernel(firstChannel,k);
+    respFreqVecs[numResp-1-k].resize(numBins);
+    respFreqVecs[numResp-1+k].resize(numBins);
+    for(size_t j = 1; j < (size_t)((numBins/2)+1); j++) {
+      respFreqVecs[numResp-1-k][(numBins/2)+j] = respFreqVecs[numResp-1-k][(numBins/2)-j+1];
+    }
+    respFreqVecs[numResp-1+k] = respFreqVecs[numResp-1-k];
+  }
+  for(size_t k = 0; k < (size_t)numWires; k++) {
+    if(k > (size_t)2*(numResp-1)) {
+      respFreqVecs[k].resize(numBins);
+    }
+  }
+
+  for(size_t k = 0; k < (size_t)numWires; k++) {
+    wireFactors[k] = sss->Get2DFilterVal(planeNum,2,((double) k)/((double) numWires));
+  }
+
+  fft->ReinitializeFFT(numWires,fft->FFTOptions(),fft->FFTFitBins());
+
+  TFFTComplex *fFFTComplex;
+  fFFTComplex = new TFFTComplex(numWires,false);
+  TFFTComplex *fInverseFFTComplex;
+  fInverseFFTComplex = new TFFTComplex(numWires,false);
+  int dummy[1] = {0};
+  fFFTComplex->Init(fft->FFTOptions().c_str(),-1,dummy);
+  fInverseFFTComplex->Init(fft->FFTOptions().c_str(),1,dummy);
+
+  double normFactor = sss->Get2DFilterNorm(planeNum);
+
+  std::vector<TComplex> signalFreqVecTemp;
+  std::vector<TComplex> respFreqVecTemp;
+  std::vector<TComplex> signalFreqVecTemp2;
+  std::vector<TComplex> respFreqVecTemp2;
+  std::vector<TComplex> resultFreqVecTemp;
+  std::vector<TComplex> resultFreqVecTemp2;
+  signalFreqVecTemp.resize(numWires);
+  respFreqVecTemp.resize(numWires);
+  signalFreqVecTemp2.resize(numWires);
+  respFreqVecTemp2.resize(numWires);
+  resultFreqVecTemp.resize(numWires);
+  resultFreqVecTemp2.resize(numWires);
+  for(size_t j = 0; j < (size_t)numBins; j++) {
+    for(size_t k = 0; k < (size_t)numWires; k++) {
+      signalFreqVecTemp[k] = signalFreqVecs[k][j];
+      respFreqVecTemp[k] = respFreqVecs[k][j];
+    }
+
+    double real = 0.0;
+    double imaginary = 0.0;
+    
+    for(size_t p = 0; p < (size_t)numWires; ++p) {
+      fFFTComplex->SetPointComplex(p, signalFreqVecTemp[p]);
+    }
+
+    fFFTComplex->Transform();    
+
+    for(size_t i = 0; i < (size_t)numWires; ++i) {
+      fFFTComplex->GetPointComplex(i, real, imaginary);    
+      signalFreqVecTemp2[i] = TComplex(real, imaginary);  
+    }  
+
+    for(size_t p = 0; p < (size_t)numWires; ++p) {
+      fFFTComplex->SetPointComplex(p, respFreqVecTemp[p]);
+    }
+
+    fFFTComplex->Transform();    
+
+    for(size_t i = 0; i < (size_t)numWires; ++i) {
+      fFFTComplex->GetPointComplex(i, real, imaginary);    
+      respFreqVecTemp2[i] = TComplex(real, imaginary);  
+    }  
+
+    double timeFactor = sss->Get2DFilterVal(planeNum,1,((double) j)/((double) numBins));
+    for(size_t k = 0; k < (size_t)numWires; ++k) {
+      double filterFactor = (timeFactor*wireFactors[k])/normFactor;
+      resultFreqVecTemp[k] = TComplex(filterFactor*(signalFreqVecTemp2[k].Re()*respFreqVecTemp2[k].Re()+signalFreqVecTemp2[k].Im()*respFreqVecTemp2[k].Im())/(respFreqVecTemp2[k].Im()*respFreqVecTemp2[k].Im()+respFreqVecTemp2[k].Re()*respFreqVecTemp2[k].Re())/((double) numWires),filterFactor*(signalFreqVecTemp2[k].Im()*respFreqVecTemp2[k].Re()-signalFreqVecTemp2[k].Re()*respFreqVecTemp2[k].Im())/(respFreqVecTemp2[k].Im()*respFreqVecTemp2[k].Im()+respFreqVecTemp2[k].Re()*respFreqVecTemp2[k].Re())/((double) numWires));
+    }
+
+    for(size_t p = 0; p < (size_t)numWires; ++p) {
+      fInverseFFTComplex->SetPointComplex(p, resultFreqVecTemp[p]);
+    }
+
+    fInverseFFTComplex->Transform();    
+
+    for(size_t i = 0; i < (size_t)numWires; ++i) {
+      fInverseFFTComplex->GetPointComplex(i, real, imaginary);    
+      resultFreqVecTemp2[i] = TComplex(real,imaginary);
+    }  
+
+    int shift;
+    for(size_t i = 0; i < (size_t)numWires; ++i) {
+      shift = i-numResp-1;
+      if(shift < 0)
+        shift += numWires;
+
+      signalFreqVecs[i][j] = TComplex(resultFreqVecTemp2[shift].Re()/((double) numBins),resultFreqVecTemp2[shift].Im()/((double) numBins));
+    }
+  }
+
+  fft->ReinitializeFFT(numBins,fft->FFTOptions(),fft->FFTFitBins());
+
+  int time_offset = sss->FieldResponseTOffset(firstChannel,1);
+  for(size_t k = 0; k < (size_t)numWires; k++) {
+    fft->DoInvFFT(signalFreqVecs[k],signal[k]);
+
+    std::vector<T> temp;
+    if (time_offset <= 0) {
+      temp.assign(signal.at(k).end()+time_offset,signal.at(k).end());
+      signal.at(k).erase(signal.at(k).end()+time_offset,signal.at(k).end());
+      signal.at(k).insert(signal.at(k).begin(),temp.begin(),temp.end());
+    }
+    else {
+      temp.assign(signal.at(k).begin(),signal.at(k).begin()+time_offset);
+      signal.at(k).erase(signal.at(k).begin(),signal.at(k).begin()+time_offset);
+      signal.at(k).insert(signal.at(k).end(),temp.begin(),temp.end());
+    }
+  }
+
+  return;
+}
+
 
    //  // subtract baseline using linear interpolation between regions defined
   //   // by the datasize and fBaseSampleBins
