@@ -50,6 +50,7 @@ namespace larlite {
     fPtrIndex_end2d.clear();
     fPtrIndex_partid.clear();
     fPtrIndex_pfpart.clear();
+    fPtrIndex_pcaxis.clear();
   }
 }
 

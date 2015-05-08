@@ -335,7 +335,7 @@ EOF
 	print GDML <<EOF;
 	    <physvol>
 	     <volumeref ref="volTPCWireVert"/>
-	     <position name="posTPCWireVert$i" unit="cm" z="-518.55+$TPCWirePitch*($i+1)" x="0" y="0"/>
+	     <position name="posTPCWireVert$i" unit="cm" z="$TPCWirePitch*(-(($NumberWires-1)/2+1)+($i+1))" x="0" y="0"/>
 	     <rotationref ref="rPlus90AboutX"/>
 	    </physvol>
 EOF
@@ -440,10 +440,14 @@ EOF
   for ($i = 0; $i < $NumberWiresPerEdge ; $i++)
   {
 
+	$ypos= -1/4*($TPCWirePlaneWidth - $TPCWirePlaneLength/$TanUVAngle) + $TPCYWirePitch/2*($i - ($UVWireCount-1)/2) ;
+	$zpos= 1/4*($TPCWirePlaneWidth*abs($TanUVAngle) - $TPCWirePlaneLength) + $TPCZWirePitch/2*($i - ($UVWireCount-1)/2) ; 
+
+#	$ypos = $TanUVAngle; 
     print GDML <<EOF;
   <physvol>
      <volumeref ref="volTPCWire$i"/> 
-     <position name="posTPCWire$i" unit="cm" y="-116.5046422+0.5*$TPCYWirePitch*($i+1)" z="-518.5080405+0.5*$TPCZWirePitch*($i+1)" x="0"/>
+     <position name="posTPCWire$i" unit="cm" y="$ypos" z="$zpos" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/> 
     </physvol>  
 EOF
@@ -457,12 +461,13 @@ EOF
 for ($i = 0; $i < $NumberCenterWires ; $i++)
   {
       my $j = $NumberWiresPerEdge  +$i;
-      $zpos=-0.5*$TPCWirePlaneLength + $TPCZWirePitch*(0.5*$NumberWiresPerEdge + $i+1) ;
+    # $zpos=-0.5*$TPCWirePlaneLength + $TPCZWirePitch*(0.5*$NumberWiresPerEdge + $i+1) ;
+      $zpos=$TPCZWirePitch * ($i - ($NumberCenterWires-1)/2 ) ;
 
       print GDML <<EOF;
   <physvol>
      <volumeref ref="volTPCWireCommon"/>
-     <position name="posTPCWire$j" unit="cm" y="0" z="$zpos-0.2" x="0"/>
+     <position name="posTPCWire$j" unit="cm" y="0" z="$zpos" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/>
     </physvol> 
 EOF
@@ -474,12 +479,14 @@ EOF
 
       my $j = $NumberWiresPerEdge + $NumberCenterWires + $i ;
       my $k = $NumberWiresPerEdge - $i - 1 ;
-      $zpos = -0.5*$TPCWirePlaneLength + 0.5*$TPCZWirePitch*($NumberWiresPerEdge + 2*$NumberCenterWires + $i +1 ) ;
+     # $zpos = -0.5*$TPCWirePlaneLength + 0.5*$TPCZWirePitch*($NumberWiresPerEdge + 2*$NumberCenterWires + $i +1 ) ;
+	 $ypos= 1/4*($TPCWirePlaneWidth - $TPCWirePlaneLength/$TanUVAngle) + $TPCYWirePitch/2*(($j-$k)/2) ; 
+	 $zpos= 1/4*($TPCWirePlaneLength - $TPCWirePlaneWidth*abs($TanUVAngle)) + $TPCZWirePitch/2*(($j-$k)/2) ; 
 
     print GDML <<EOF;
    <physvol>
      <volumeref ref="volTPCWire$k"/> 
-     <position name="posTPCWireB$j" unit="cm" y="-0.0623772+0.5*$TPCYWirePitch*($i+1)" z="-0.0919595+$zpos" x="0"/>
+     <position name="posTPCWireB$j" unit="cm" y="$ypos" z="$zpos" x="0"/> 
     <rotationref ref="rPlusUVAngleAboutX"/>
     </physvol> 
 EOF

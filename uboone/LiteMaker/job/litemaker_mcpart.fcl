@@ -1,13 +1,17 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_mcpart.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.AssociationLookUpMap: 
+litemaker_mcpart: @local::litemaker_base
+
+litemaker_mcpart.out_filename: "larlite_mcpart.root"
+
+litemaker_mcpart.AssociationLookUpMap: 
 {
   mctruth: ["generator"]
 }
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_mcpart.DataLookUpMap:
 {
   mcpart:     ["largeant"]
 }

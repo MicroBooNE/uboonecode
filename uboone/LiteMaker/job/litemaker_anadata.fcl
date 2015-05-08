@@ -1,8 +1,12 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_anadata.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_anadata: @local::litemaker_base
+
+litemaker_anadata.out_filename: "larlite_anadata.root"
+
+litemaker_anadata.DataLookUpMap:
 {
 
   cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
@@ -22,7 +26,7 @@ physics.analyzers.scanner.DataLookUpMap:
 
 }
 
-physics.analyzers.scanner.AssociationLookUpMap:
+litemaker_anadata.AssociationLookUpMap:
 {
   cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
                "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
@@ -41,3 +45,4 @@ physics.analyzers.scanner.AssociationLookUpMap:
 
 }
 
+END_PROLOG

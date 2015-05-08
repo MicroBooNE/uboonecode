@@ -44,6 +44,7 @@
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/UBooneIOVTimeStamp.h"
 #include "WaveformPropertiesAlg.h"
 
 /* unused function
@@ -268,7 +269,7 @@ namespace caldata {
   {      
   
     //update database cache
-    fPedestalRetrievalAlg.Update( lariov::IOVTimeStamp(evt) );
+    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
   
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;

@@ -56,6 +56,7 @@
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
 #include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/UBooneIOVTimeStamp.h"
 
 
 
@@ -310,7 +311,7 @@ namespace detsim {
   {
 
     //update database cache
-    fPedestalRetrievalAlg.Update( lariov::IOVTimeStamp(evt) );
+    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fFFT->ReinitializeFFT(fNTimeSamples,fFFT->FFTOptions(),fFFT->FFTFitBins());
@@ -321,7 +322,7 @@ namespace detsim {
       << "May cause issues in (de)convolution.\n";
 
     if ( fNTimeSamples > fNTicks )
-      mf::LogError("SimWireMircoBooNE") << "Cannot have number of readout samples "
+      mf::LogError("SimWireMicroBooNE") << "Cannot have number of readout samples "
       << fNTimeSamples << " greater than FFTSize " << fNTicks << "!";
 
 

@@ -1,10 +1,15 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_reco3d_kalmanhit.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_reco3d_kalmanhit: @local::litemaker_base
+
+litemaker_reco3d_kalmanhit.out_filename: "larlite_reco3d_kalmanhit.root"
+
+litemaker_reco3d_kalmanhit.DataLookUpMap:
 {
   sps:        ["trackkalmanhit"]
+  pcaxis:     []
   vertex:     []
   track:      ["trackkalmanhit", "stitchkalmanhit"]
   seed:       []
@@ -18,12 +23,13 @@ physics.analyzers.scanner.DataLookUpMap:
                "stitchkalmanhitpid"]
 }
 
-physics.analyzers.scanner.AssociationLookUpMap:
+litemaker_reco3d_kalmanhit.AssociationLookUpMap:
 {
   hit:        ["gaushit"]
   cluster:    ["fuzzycluster"]
   endpoint2d: []
   sps:        ["trackkalmanhit"]
+  pcaxis:     []
   vertex:     []
   track:      ["trackkalmanhit", "stitchkalmanhit"]
   seed:       []
@@ -36,3 +42,4 @@ physics.analyzers.scanner.AssociationLookUpMap:
   partid:     ["trackkalmanhitpid",
                "stitchkalmanhitpid"]
 }
+END_PROLOG

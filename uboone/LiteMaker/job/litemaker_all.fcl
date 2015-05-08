@@ -23,6 +23,7 @@ physics.analyzers.scanner.DataLookUpMap:
   ophit:      ["opflash"]
   opflash:    ["opflash"]
   cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
+  pcaxis:     ["cluster3d"]
   vertex:     ["cccluster"]
   endpoint2d: []
   sps:        ["pandoraCosmic","pandoraNu",
@@ -61,6 +62,7 @@ physics.analyzers.scanner.AssociationLookUpMap:
   ophit:      ["opflash"]
   opflash:    ["opflash"]
   cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
+  pcaxis:     ["cluster3d"]
   vertex:     ["cccluster"]
   endpoint2d: []
   sps:        ["pandoraCosmic","pandoraNu",
@@ -75,7 +77,8 @@ physics.analyzers.scanner.AssociationLookUpMap:
   seed:       ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
   shower:     ["showerrecopandora","showerrecofuzzy"]
   pfpart:     ["cctrack","cluster3d","pandoraCosmic","pandoraNu"]
-  cosmictag:  ["pandoraCosmicKHittag","pandoraNuKHittag",
+  cosmictag:  ["cluster3dpcatag",
+               "pandoraCosmicKHittag","pandoraNuKHittag",
                "pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch",
                "stitchkalmanhittag","stitchkalmanhittagcc",
                "trackkalmanhittag","trackkalmanhittagcc",

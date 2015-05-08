@@ -1,13 +1,18 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_wire.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_wire: @local::litemaker_base
+
+litemaker_wire.out_filename: "larlite_wire.root"
+
+litemaker_wire.DataLookUpMap:
 {
   wire:       ["caldata"]
 }
 
-physics.analyzers.scanner.AssociationLookUpMap:
+litemaker_wire.AssociationLookUpMap:
 {}
 
+END_PROLOG
 
