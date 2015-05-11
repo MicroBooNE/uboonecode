@@ -1,5 +1,5 @@
 #include "services_microboone.fcl"
-#include "detsimwires_microboone.fcl"
+#include "detsimmodules_microboone.fcl"
 #include "caldata_microboone.fcl"
 #include "hitfindermodules_microboone.fcl"
 

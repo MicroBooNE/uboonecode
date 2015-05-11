@@ -1,9 +1,9 @@
 #include "services_microboone.fcl"
-#include "caldata.fcl"
-#include "hitfindermodules.fcl"
-#include "clustermodules.fcl"
-#include "trackfindermodules.fcl"
-#include "opticaldetectormodules.fcl"
+#include "caldata_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "trackfindermodules_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
 
 process_name: OpRecoFlash
 
@@ -15,9 +15,6 @@ services:
   RandomNumberGenerator: {} #ART native random number generator
   user:         @local::microboone_services 	     
 }
-
-services.user.LArFFT: ""
-services.user.BackTracker: ""
 
 services.user.OpDigiProperties: @local::microboone_opdigiproperties
 
@@ -40,8 +37,8 @@ physics:
   caldata:        @local::microboone_calwire	    
   ffthit:         @local::microboone_hitfinder	    
   dbcluster:      @local::microboone_dbcluster	    
-  ophit:          @local::microboone_ophitfinder
-  opflash:        @local::microboone_opflashfinder 
+  opreformat:     @local::microboone_opdetreformatter     
+  opflash:        @local::microboone_opflash
   opdigi:         @local::microboone_opdigi
  }
  
@@ -51,7 +48,7 @@ physics:
  {
   dbclusterana: @local::microboone_dbclusterana
   opdigiana: @local::microboone_opdigiana 
-  ophitana: @local::microboone_ophitana 
+  #ophitana: @local::microboone_ophitana 
   opflashana: @local::microboone_opflashana 
   pmtresponse: @local::microboone_simphotoncounter
  } 
@@ -60,8 +57,9 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- reco: [ ophit, opflash] 
- ana:  [ opdigiana, ophitana, opflashana ]
+ reco: [ opreformat, opflash] 
+ #ana:  [ opdigiana, ophitana, opflashana ]
+ ana:  [ opdigiana, opflashana ]
 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]

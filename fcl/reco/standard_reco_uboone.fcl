@@ -1,7 +1,7 @@
 #include "services_microboone.fcl"
 #include "caldata_microboone.fcl"
 #include "hitfindermodules_microboone.fcl"
-#include "clustermodules.fcl"
+#include "cluster_microboone.fcl"
 #include "trackfindermodules_microboone.fcl"
 #include "calorimetry_microboone.fcl"
 #include "showerfindermodules.fcl"
