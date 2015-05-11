@@ -13,7 +13,7 @@ litemaker_reco3d_cctrack.DataLookUpMap:
 #  endpoint2d: []
   sps:        []
   pcaxis:     []
-  vertex:     []
+  vertex:     ["cccluster"]
   track:      ["cctrack"]
   seed:       ["cctrack"]
   shower:     []

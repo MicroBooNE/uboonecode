@@ -203,6 +203,7 @@ void LiteScanner::analyze(art::Event const & e)
   //
   // Loop over data type to store association ptr map
   //
+  SaveAssociationSource<simb::MCTruth>(e);
   SaveAssociationSource<recob::Hit>(e);
   SaveAssociationSource<recob::Cluster>(e);
   SaveAssociationSource<recob::EndPoint2D>(e);
@@ -421,13 +422,16 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
   case ::larlite::data::kWire:         break;
   case ::larlite::data::kHit:          break;
   case ::larlite::data::kCosmicTag:
+    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kOpHit:        break;
   case ::larlite::data::kOpFlash:      break;
   case ::larlite::data::kCluster:
     fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kSeed:         break;
   case ::larlite::data::kSpacePoint:
@@ -435,7 +439,7 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     break;
   case ::larlite::data::kTrack:
     fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
@@ -448,7 +452,7 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     break;
   case ::larlite::data::kVertex:
     fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     //fAlg.ScanAssociation<T, recob::EndPoint2D > (evt,dh,lite_ass);
     //fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
@@ -473,7 +477,8 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Seed       > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
     break;
   default:
     break;
