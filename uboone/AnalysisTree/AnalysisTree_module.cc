@@ -404,17 +404,19 @@ namespace microboone {
     //genie information
     size_t MaxGeniePrimaries = 0;
     Int_t     genie_no_primaries;
-    std::vector<Int_t>     genie_primaries_pdg;
+    std::vector<Int_t>    genie_primaries_pdg;
     std::vector<Float_t>  genie_Eng;
     std::vector<Float_t>  genie_Px;
     std::vector<Float_t>  genie_Py;
     std::vector<Float_t>  genie_Pz;
     std::vector<Float_t>  genie_P;
-    std::vector<Int_t>     genie_status_code;
+    std::vector<Int_t>    genie_status_code;
     std::vector<Float_t>  genie_mass;
-    std::vector<Int_t>     genie_trackID;
-    std::vector<Int_t>     genie_ND;
-    std::vector<Int_t>     genie_mother;
+    std::vector<Int_t>    genie_trackID;
+    std::vector<Int_t>    genie_ND;
+    std::vector<Int_t>    genie_mother;
+    Float_t               genie_W;
+    Float_t               genie_QSqr;
     
     //cosmic cry information
     Int_t     mcevts_truthcry;    //number of neutrino Int_teractions in the spill
@@ -1210,6 +1212,8 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   no_primaries = 0;
   geant_list_size=0;
   geant_list_size_in_tpcAV = 0;
+  genie_W = -99999;
+  genie_QSqr = -99999;
   
   FillWith(pdg, -99999);
   FillWith(status, -99999);
@@ -1379,7 +1383,6 @@ void microboone::AnalysisTreeDataStruct::ResizeGenie(int nPrimaries) {
   genie_trackID.resize(MaxGeniePrimaries);
   genie_ND.resize(MaxGeniePrimaries);
   genie_mother.resize(MaxGeniePrimaries);
-
 } // microboone::AnalysisTreeDataStruct::ResizeGenie()
 
 void microboone::AnalysisTreeDataStruct::ResizeCry(int nPrimaries) {
@@ -1504,6 +1507,8 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("genie_trackID",genie_trackID,"genie_trackID[genie_no_primaries]/I");
     CreateBranch("genie_ND",genie_ND,"genie_ND[genie_no_primaries]/I");
     CreateBranch("genie_mother",genie_mother,"genie_mother[genie_no_primaries]/I");
+    CreateBranch("genie_W",&genie_W,"genie_W/F");
+    CreateBranch("genie_QSqr",&genie_QSqr,"genie_QSqr/F");
   }
 
    if (hasCryInfo()){
@@ -2370,6 +2375,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_ND[iPart]=part.NumberDaughters();
           fData->genie_mother[iPart]=part.Mother();
         } // for particle
+        const simb::MCNeutrino& nu(mctruth->GetNeutrino());
+        fData->genie_W=nu.W();
+        fData->genie_QSqr=nu.QSqr();
       } //if neutrino set
     }// end (fSaveGenieInfo)  
 

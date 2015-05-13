@@ -10,7 +10,7 @@ litemaker_reco2d.DataLookUpMap:
 {
   hit:        ["gaushit","cccluster"]
   cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
-  vertex:     ["cccluster"]
+  vertex:     []
   endpoint2d: []
 }
 
@@ -18,7 +18,7 @@ litemaker_reco2d.AssociationLookUpMap:
 {
   hit:        ["gaushit","cccluster"]
   cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
-  vertex:     ["cccluster"]
+  vertex:     []
   endpoint2d: []
 }
 
