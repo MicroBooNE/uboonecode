@@ -36,6 +36,7 @@ namespace uboone
 						     std::vector<geo::AuxDetGeo*>   & ad )
   {
     fChannelMap = std::shared_ptr<geo::ChannelMapAlg>( new geo::ChannelMapUBooNEAlg( sortingParam, fPset ) );
+    fChannelMap->Initialize( c, ad );
   }
   
   std::shared_ptr<const geo::ChannelMapAlg> UBooNEGeometryHelper::doGetChannelMapAlg() const

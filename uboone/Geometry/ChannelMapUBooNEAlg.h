@@ -89,10 +89,12 @@ namespace geo {
     unsigned int OpDetFromOpChannel(unsigned int opChannel)               const;
     unsigned int HardwareChannelFromOpChannel(unsigned int opChannel)     const;
     bool         IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const;
+    std::string GetSplitGain( unsigned int isplit ) const;
   private:
     void LoadOpticalMapData( fhicl::ParameterSet const& p);
     unsigned int fNOpDets;
     unsigned int fNSplits;
+    std::vector< std::string > fSplitGains;
     std::vector< std::vector<unsigned int> > fLowgain_channel_ranges;
     std::vector< std::vector<unsigned int> > fHighgain_channel_ranges;
     std::map< unsigned int, unsigned int > fChannel2pmt; 

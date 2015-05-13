@@ -402,6 +402,10 @@ namespace geo {
     unsigned int copyid = opChannel % 100;
     return copyid;
   }
+  std::string ChannelMapUBooNEAlg::GetSplitGain( unsigned int isplit ) const 
+  {
+    return fSplitGains.at( isplit );
+  }
 
   //----------------------------------------------------------------------------
   bool ChannelMapUBooNEAlg::IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const {
@@ -418,6 +422,15 @@ namespace geo {
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
     fNOpDets = pset.get< unsigned int >("numberOfDetectors");
     fNSplits = pset.get<  unsigned int >("numberOfSplits");
+    fSplitGains = pset.get< std::vector< std::string > >( "splitGains" );
+    if ( fSplitGains.size()!=fNSplits ) {
+      throw cet::exception("numberOfSplits does not match the number of specified gains in splitGains");
+    }
+    for (unsigned int i=0; i<fNSplits; i++) {
+      if ( fSplitGains.at(i)!="HighGain" && fSplitGains.at(i)!="LowGain" ) {
+	throw cet::exception( __FUNCTION__ ) << " invalid splitGains option.  Either 'HighGain' or 'LowGain'." << std::endl;
+      }
+    }
     
     // read in low gain, high gain ranges
     std::vector< unsigned int > lorange_input = pset.get< std::vector<unsigned int> >( "ReadoutLowChannelRange" );

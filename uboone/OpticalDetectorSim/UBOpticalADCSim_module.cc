@@ -34,6 +34,9 @@
 #include "UBOpticalADC.h"
 #include "UBLogicPulseADC.h"
 #include "OpticalDetectorData/ChannelDataGroup.h"
+#include "uboone/Geometry/UBooNEGeometryHelper.h"
+#include "Geometry/ChannelMapAlg.h"
+#include "uboone/Geometry/ChannelMapUBooNEAlg.h"
 #include "Simulation/SimPhotons.h"
 #include "Geometry/Geometry.h"
 
@@ -126,6 +129,9 @@ namespace opdet {
     // Initialize
     //
     ::art::ServiceHandle<geo::Geometry> geom;
+    ::art::ServiceHandle<geo::ExptGeoHelperInterface> uboone_geo_helper;
+    std::shared_ptr<const geo::ChannelMapAlg> _chanmap = uboone_geo_helper->GetChannelMapAlg(); // option to get more geometry detail this way
+    std::shared_ptr<const geo::ChannelMapUBooNEAlg> chanmap = std::dynamic_pointer_cast<const geo::ChannelMapUBooNEAlg>( _chanmap );
     ::art::ServiceHandle<util::TimeService> ts;
     ::std::unique_ptr< std::vector<optdata::ChannelDataGroup> > wfs(new ::std::vector<optdata::ChannelDataGroup>);
     ::util::ElecClock clock = ts->OpticalClock();
@@ -143,25 +149,35 @@ namespace opdet {
     //
     // Prepare output container
     //
-    wfs->reserve(3);
+    unsigned int nsplits = geom->NOpHardwareChannels(0);
+    wfs->reserve(nsplits+1);
+    for (unsigned int isplit=0; isplit<nsplits; isplit++) {
+      if ( chanmap->GetSplitGain( isplit )=="HighGain" )
+	wfs->push_back(optdata::ChannelDataGroup(::optdata::kHighGain,clock.Sample(),clock.Frame())); // high gain
+      else
+	wfs->push_back(optdata::ChannelDataGroup(::optdata::kLowGain,clock.Sample(),clock.Frame())); // low gain
+      wfs->at(isplit).reserve(geom->NOpDets());
+      wfs->at(isplit).SetFrame(clock.Frame());
+      wfs->at(isplit).SetTimeSlice(clock.Sample());
+    }
 
-    const size_t hg_index = wfs->size();
-    wfs->push_back(optdata::ChannelDataGroup(::optdata::kHighGain,clock.Sample(),clock.Frame())); // high gain
+    // const size_t hg_index = wfs->size();
+    // wfs->push_back(optdata::ChannelDataGroup(::optdata::kHighGain,clock.Sample(),clock.Frame())); // high gain
 
-    const size_t lg_index = wfs->size();
-    wfs->push_back(optdata::ChannelDataGroup(::optdata::kLowGain,clock.Sample(),clock.Frame())); // low gain
+    // const size_t lg_index = wfs->size();
+    // wfs->push_back(optdata::ChannelDataGroup(::optdata::kLowGain,clock.Sample(),clock.Frame())); // low gain
 
     const size_t logic_index = wfs->size();
     wfs->push_back(optdata::ChannelDataGroup(::optdata::kLogicPulse,clock.Sample(),clock.Frame())); // logic pulse channels
 
     // Create entries ... # PMTs + 2 channels (NuMI & BNB readout channels)
-    wfs->at(hg_index).reserve(geom->NOpChannels());
-    wfs->at(hg_index).SetFrame(clock.Frame());
-    wfs->at(hg_index).SetTimeSlice(clock.Sample());
+    // wfs->at(hg_index).reserve(geom->NOpDets());
+    // wfs->at(hg_index).SetFrame(clock.Frame());
+    // wfs->at(hg_index).SetTimeSlice(clock.Sample());
 
-    wfs->at(lg_index).reserve(geom->NOpChannels());
-    wfs->at(lg_index).SetFrame(clock.Frame());
-    wfs->at(lg_index).SetTimeSlice(clock.Sample());
+    // wfs->at(lg_index).reserve(geom->NOpDets());
+    // wfs->at(lg_index).SetFrame(clock.Frame());
+    // wfs->at(lg_index).SetTimeSlice(clock.Sample());
 
     wfs->at(logic_index).reserve(kLogicNChannel);
     wfs->at(logic_index).SetFrame(clock.Frame());
@@ -182,7 +198,7 @@ namespace opdet {
     // From larsim/Simulation/SimListUtils.cxx, pmtHandle possibly contain same PMT channel number more than once.
     // Create a dumb map (vector of vector) that can be used to identify indexes of pmtHandle that
     // corresponds to a specific PMT to avoid loop over the entire pmt Handle per channel.
-    std::vector<std::vector<size_t> > pmt_indexes(geom->NOpChannels(),std::vector<size_t>());
+    std::vector<std::vector<size_t> > pmt_indexes(geom->NOpDets(),std::vector<size_t>());
     for(auto &v : pmt_indexes) v.reserve(10); // reserve at least 10 (cost nothing in memory but help speed)
 
     for(size_t i=0; i<pmtHandle->size(); ++i) {
@@ -198,11 +214,12 @@ namespace opdet {
     //
     // Loop over channels, process photons, & store waveform 
     //
-    for(size_t ch=0; ch<geom->NOpChannels(); ++ch) {
-      
-      wfs->at(hg_index).push_back(optdata::ChannelData(ch));
-      
-      wfs->at(lg_index).push_back(optdata::ChannelData(ch));
+    for(size_t ch=0; ch<geom->NOpDets(); ++ch) {
+      //wfs->at(hg_index).push_back(optdata::ChannelData(ch));
+      //wfs->at(lg_index).push_back(optdata::ChannelData(ch));
+
+      for (unsigned int isplit=0; isplit<nsplits; isplit++ )
+	wfs->at(isplit).push_back(optdata::ChannelData(ch));
 
       std::vector<double> photon_time;
       for(auto const &pmt_index : pmt_indexes.at(ch)) {

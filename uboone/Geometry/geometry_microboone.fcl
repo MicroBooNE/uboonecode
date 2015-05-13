@@ -17,6 +17,7 @@ microboone_geometry_helper:
 
  numberOfDetectors: 36
  numberOfSplits: 4
+ splitGains: ["LowGain","LowGain","HighGain","HighGain"]
  ReadoutLowChannelRange:  [0,199]
  ReadoutHighChannelRange: [200,399]
  
