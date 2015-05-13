@@ -92,6 +92,7 @@ namespace geo {
   private:
     void LoadOpticalMapData( fhicl::ParameterSet const& p);
     unsigned int fNOpDets;
+    unsigned int fNSplits;
     std::vector< std::vector<unsigned int> > fLowgain_channel_ranges;
     std::vector< std::vector<unsigned int> > fHighgain_channel_ranges;
     std::map< unsigned int, unsigned int > fChannel2pmt; 

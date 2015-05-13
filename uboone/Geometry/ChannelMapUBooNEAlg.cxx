@@ -370,14 +370,14 @@ namespace geo {
   //----------------------------------------------------------------------------
   unsigned int ChannelMapUBooNEAlg::NOpChannels(unsigned int NOpDets) const
   {
-    return 4*NOpDets;
+    return fNSplits*NOpDets;
   }
 
   //----------------------------------------------------------------------------
   unsigned int ChannelMapUBooNEAlg::NOpHardwareChannels(unsigned int opDet) const
   {
     // four channels per optical detector: LoA, LoB, HiA, HiB
-    return 4;
+    return fNSplits;
   }
 
   //----------------------------------------------------------------------------
@@ -417,6 +417,7 @@ namespace geo {
   //----------------------------------------------------------------------------
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
     fNOpDets = pset.get< unsigned int >("numberOfDetectors");
+    fNSplits = pset.get<  unsigned int >("numberOfSplits");
     
     // read in low gain, high gain ranges
     std::vector< unsigned int > lorange_input = pset.get< std::vector<unsigned int> >( "ReadoutLowChannelRange" );

@@ -15,8 +15,8 @@ microboone_geometry_helper:
 {
  service_provider : UBooNEGeometryHelper
 
-
  numberOfDetectors: 36
+ numberOfSplits: 4
  ReadoutLowChannelRange:  [0,199]
  ReadoutHighChannelRange: [200,399]
  

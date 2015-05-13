@@ -49,11 +49,11 @@ namespace opdet {
 
     art::ServiceHandle<geo::Geometry> geom;
     for(size_t i=0; i<kChConfigTypeMax; ++i)
-      if(fParams.at(i).size() != geom->NOpChannels())
+      if(fParams.at(i).size() != geom->NOpDets())
 	throw UBOpticalException(Form("ChConfigType_t %zu # values (%zu) != # channels (%d)!",
 				      i,
 				      fParams.at(i).size(),
-				      geom->NOpChannels()));
+				      geom->NOpDets()));
     
   }
 
