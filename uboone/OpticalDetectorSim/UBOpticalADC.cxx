@@ -65,7 +65,11 @@ namespace opdet {
     //
     size_t nticks = fTimeInfo.Ticks(fDuration);
     std::vector< float > wfm_tmp( nticks, 0.0 );
-    
+    if ( wf.size()!=nticks )
+      wf.resize( nticks, 0 );
+    else
+      wf.assign( nticks, 0 );
+
     // services
     art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
 

@@ -65,7 +65,7 @@ namespace opdet {
 
     for(size_t i=0; i<kChConfigTypeMax; ++i)
       if( tmp_params.at(i).size() != nchannel_values )
-	throw UBOpticalException(Form("ChConfigType_t %zu # values (%zu) != # channels (%d)!",
+	throw UBOpticalException(Form("ChConfigType_t enum=%zu # values (%zu) != # channels (%d)!",
 				      i,
 				      tmp_params.at(i).size(),
 				      nchannel_values));
@@ -74,13 +74,20 @@ namespace opdet {
     for ( size_t i=0; i<kChConfigTypeMax; ++i) {
       std::map< unsigned int, float > pardata;
       unsigned int ich = 0;
-      for ( unsigned int ipmt=0; ipmt<geom->NOpDets(); ipmt++ ) {
-	for ( unsigned int isplit=0; isplit<geom->NOpHardwareChannels( ipmt ); isplit++ ) {
+      for ( unsigned int isplit=0; isplit<geom->NOpHardwareChannels( 0 ); isplit++ ) {
+	for ( unsigned int ipmt=0; ipmt<geom->NOpDets(); ipmt++ ) {
 	  unsigned int channel = geom->OpChannel( ipmt, isplit );
 	  //fParams[.insert( std::pair< unsigned int, float >( channel, tmp_params.at( i ) ) );
 	  pardata[ channel ] = tmp_params.at( i ).at( ich );
 	  ich++;
 	}
+	if ( isplit==0 ) {
+	  // fill logic channels
+	  for ( unsigned int channel=kLogicStartChannel; channel<(kLogicStartChannel+kLogicNChannel); channel++) {
+	    pardata[ channel ] = tmp_params.at( i ).at( ich );
+	    ich++;
+	  }
+	} // first gain set
       }
       fParams[ i ] = pardata;
     }
