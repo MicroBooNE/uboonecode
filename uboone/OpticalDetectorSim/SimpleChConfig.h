@@ -39,8 +39,11 @@ namespace opdet {
       fDefault.at(kPedestalMean)   = 2048;
       fDefault.at(kPedestalSpread) = 0.3;
       fDefault.at(kQE)             = 0.01;
-      fDefault.at(kHighGain)       = 20;
-      fDefault.at(kLowGain)        = 4;
+      //fDefault.at(kHighGain)        = 20;
+      //fDefault.at(kLowGain)        = 4;
+      fDefault.at(kGain)           = 20.0; 
+      fDefault.at(kPMTGain)        = 1.0;
+      fDefault.at(kSplitterGain)   = 20.0;
       fDefault.at(kGainSpread)     = 0.05;
       fDefault.at(kT0)             = 0;
       fDefault.at(kT0Spread)       = 0;
@@ -50,8 +53,9 @@ namespace opdet {
 	fParams.at(kPedestalMean).at(i)   = fDefault.at(kPedestalMean);
 	fParams.at(kPedestalSpread).at(i) = fDefault.at(kPedestalSpread);
 	fParams.at(kQE).at(i)             = fDefault.at(kQE);
-	fParams.at(kHighGain).at(i)       = fDefault.at(kHighGain);
-	fParams.at(kLowGain).at(i)        = fDefault.at(kLowGain);
+	fParams.at(kGain).at(i)           = fDefault.at(kGain);
+	fParams.at(kPMTGain).at(i)        = fDefault.at(kPMTGain);
+	fParams.at(kSplitterGain).at(i)   = fDefault.at(kSplitterGain);
 	fParams.at(kGainSpread).at(i)     = fDefault.at(kGainSpread);
 	fParams.at(kT0).at(i)             = fDefault.at(kT0);
 	fParams.at(kT0Spread).at(i)       = fDefault.at(kT0Spread);

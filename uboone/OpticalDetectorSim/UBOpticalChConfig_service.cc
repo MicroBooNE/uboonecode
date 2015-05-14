@@ -22,8 +22,11 @@ namespace opdet {
     fParams.at(kPedestalMean)   = pset.get<std::vector<float> >("PedestalMean");
     fParams.at(kPedestalSpread) = pset.get<std::vector<float> >("PedestalSpread");
     fParams.at(kQE)             = pset.get<std::vector<float> >("QE");
-    fParams.at(kHighGain)       = pset.get<std::vector<float> >("HighGain");
-    fParams.at(kLowGain)        = pset.get<std::vector<float> >("LowGain");
+    //fParams.at(kHighGain)       = pset.get<std::vector<float> >("HighGain");
+    //fParams.at(kLowGain)        = pset.get<std::vector<float> >("LowGain");
+    fParams.at(kGain)           = pset.get<std::vector<float> >("Gain");
+    fParams.at(kPMTGain)        = pset.get<std::vector<float> >("PMTGain");
+    fParams.at(kSplitterGain)    = pset.get<std::vector<float> >("SplitterGain");
     fParams.at(kGainSpread)     = pset.get<std::vector<float> >("GainSpread");
     fParams.at(kT0)             = pset.get<std::vector<float> >("T0");
     fParams.at(kT0Spread)       = pset.get<std::vector<float> >("T0Spread");
