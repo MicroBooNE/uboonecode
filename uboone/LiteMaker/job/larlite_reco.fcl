@@ -1,8 +1,5 @@
 #include "services_microboone.fcl"
-#include "litemaker_mcpart.fcl"
-#include "litemaker_mcinfo.fcl"
 #include "litemaker_wire.fcl"
-#include "litemaker_simch.fcl"
 #include "litemaker_reco2d.fcl"
 #include "litemaker_reco3d_cluster3d.fcl"
 #include "litemaker_reco3d_kalmanhit.fcl"
@@ -11,7 +8,7 @@
 #include "litemaker_reco3d_fuzzyshower.fcl"
 #include "litemaker_reco3d_pandora.fcl"
 
-process_name: LiteMaker
+process_name: RecoLiteMaker
 
 services:
 {
@@ -35,10 +32,6 @@ physics:
 
  analyzers:
  {
-   mcpart: @local::litemaker_mcpart
-   mcinfo: @local::litemaker_mcinfo
-   simch:  @local::litemaker_simch
-
    wire:   @local::litemaker_wire
    reco2d: @local::litemaker_reco2d
 
@@ -50,10 +43,7 @@ physics:
    fuzzyshower: @local::litemaker_reco3d_fuzzyshower
  }
 
- analyzeIt: [ mcpart,
-              simch,
-              mcinfo,
-              wire,
+ analyzeIt: [ wire,
               reco2d,
               cluster3d,
               kalmanhit,

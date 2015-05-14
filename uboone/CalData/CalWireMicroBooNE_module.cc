@@ -43,7 +43,8 @@
 #include "Utilities/LArFFT.h"
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "uboone/Database/PedestalRetrievalAlg.h"
+#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/UBooneIOVTimeStamp.h"
 
 ///creation of calibrated signals on wires
 namespace caldata {
@@ -79,7 +80,7 @@ namespace caldata {
 
     void SubtractBaseline(std::vector<float>& holder);
 
-    dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg;
+    lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg;
 
 
   protected: 
@@ -90,7 +91,7 @@ namespace caldata {
   
   //-------------------------------------------------
   CalWireMicroBooNE::CalWireMicroBooNE(fhicl::ParameterSet const& pset) :
-    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg"))
+    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"))
   {
     this->reconfigure(pset);
 
@@ -114,7 +115,7 @@ namespace caldata {
     
     fSpillName.clear();
     
-    fPedestalRetrievalAlg.reconfigure(p);
+    fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
     
     size_t pos = fDigitModuleLabel.find(":");
     if( pos!=std::string::npos ) {
@@ -138,6 +139,9 @@ namespace caldata {
   //////////////////////////////////////////////////////
   void CalWireMicroBooNE::produce(art::Event& evt)
   {      
+
+    // update the database cache
+    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
 
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
@@ -217,8 +221,7 @@ namespace caldata {
 	
 	// loop over all adc values and subtract the pedestal
 	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
-        float pdstl = 0.0;
-	fPedestalRetrievalAlg.GetPedestalMean(channel, pdstl);
+        float pdstl = fPedestalRetrievalAlg.PedMean(channel);
 
 	//David Caratelli
 	//subtract time-offset added in SImWireMicroBooNE_module

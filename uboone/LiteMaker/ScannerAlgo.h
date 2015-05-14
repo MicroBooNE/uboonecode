@@ -31,6 +31,8 @@
 #include "RecoBase/Vertex.h"
 #include "RecoBase/EndPoint2D.h"
 #include "RecoBase/PFParticle.h"
+#include "RecoBase/PCAxis.h"
+#include "AnalysisBase/FlashMatch.h"
 #include "AnalysisBase/ParticleID.h"
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/CosmicTag.h"
@@ -182,7 +184,8 @@ namespace larlite {
     std::map<art::Ptr<::recob::Seed>,       std::pair<size_t,size_t> > fPtrIndex_seed;
     std::map<art::Ptr<::anab::ParticleID>,  std::pair<size_t,size_t> > fPtrIndex_partid;
     std::map<art::Ptr<::recob::PFParticle>, std::pair<size_t,size_t> > fPtrIndex_pfpart;
-
+    std::map<art::Ptr<::recob::PCAxis>,     std::pair<size_t,size_t> > fPtrIndex_pcaxis;
+    std::map<art::Ptr<::anab::FlashMatch>,  std::pair<size_t,size_t> > fPtrIndex_fmatch;
   };
 }
 

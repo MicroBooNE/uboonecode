@@ -1,0 +1,37 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemaker_reco3d_cctrack: @local::litemaker_base
+
+litemaker_reco3d_cctrack.out_filename: "larlite_reco3d_cctrack.root"
+
+litemaker_reco3d_cctrack.DataLookUpMap:
+{
+#  hit:        ["gaushit","ccluster"]
+#  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+#  endpoint2d: []
+  sps:        []
+  pcaxis:     []
+  vertex:     ["cccluster"]
+  track:      ["cctrack"]
+  seed:       ["cctrack"]
+  shower:     []
+  pfpart:     ["cctrack"]
+}
+
+litemaker_reco3d_cctrack.AssociationLookUpMap:
+{
+  hit:        ["cccluster"]
+  cluster:    ["cccluster"]
+  endpoint2d: []
+  sps:        []
+  pcaxis:     []
+  vertex:     ["cccluster"]
+  track:      ["cctrack"]
+  seed:       ["cctrack"]
+  shower:     []
+  pfpart:     ["cctrack"]
+}
+
+END_PROLOG

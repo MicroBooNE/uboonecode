@@ -2,6 +2,7 @@
 ##  Stage 2 Reconstruction
 ##
 #include "services_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
 #include "cluster_microboone.fcl"
 #include "trackfindermodules_microboone.fcl"
 #include "calorimetry_microboone.fcl"
@@ -174,105 +175,108 @@ outputs:
 ### Here, we overwrite ALL module labels with the ones defined above.
 
 # Fuzzy Cluster related
-physics.producers.trackkalmanhit.HitModuleLabel:                 "gaushit"
-physics.producers.trackkalmanhit.ClusterModuleLabel:             "fuzzycluster"
+physics.producers.trackkalmanhit.HitModuleLabel:                    "gaushit"
+physics.producers.trackkalmanhit.ClusterModuleLabel:                "fuzzycluster"
 
-physics.producers.stitchkalmanhit.TrackModuleLabel:              "trackkalmanhit"
-physics.producers.stitchkalmanhit.SpptModuleLabel:               "trackkalmanhit"
+physics.producers.stitchkalmanhit.TrackModuleLabel:                 "trackkalmanhit"
+physics.producers.stitchkalmanhit.SpptModuleLabel:                  "trackkalmanhit"
 
-physics.producers.trackkalmanhitcalo.TrackModuleLabel:           "trackkalmanhit"
-physics.producers.trackkalmanhitcalo.SpacePointModuleLabel:      "trackkalmanhit"
+physics.producers.trackkalmanhitcalo.TrackModuleLabel:              "trackkalmanhit"
+physics.producers.trackkalmanhitcalo.SpacePointModuleLabel:         "trackkalmanhit"
 
-physics.producers.stitchkalmanhitcalo.TrackModuleLabel:          "stitchkalmanhit"
-physics.producers.stitchkalmanhitcalo.SpacePointModuleLabel:     "trackkalmanhit"
+physics.producers.stitchkalmanhitcalo.TrackModuleLabel:             "stitchkalmanhit"
+physics.producers.stitchkalmanhitcalo.SpacePointModuleLabel:        "trackkalmanhit"
 
-physics.producers.trackkalmanhitpid.CalorimetryModuleLabel:      "trackkalmanhitcalo"
-physics.producers.trackkalmanhitpid.TrackModuleLabel:            "trackkalmanhit"
+physics.producers.trackkalmanhitpid.CalorimetryModuleLabel:         "trackkalmanhitcalo"
+physics.producers.trackkalmanhitpid.TrackModuleLabel:               "trackkalmanhit"
 
-physics.producers.stitchkalmanhitpid.CalorimetryModuleLabel:     "stitchkalmanhitcalo"
-physics.producers.stitchkalmanhitpid.TrackModuleLabel:           "stitchkalmanhit"
+physics.producers.stitchkalmanhitpid.CalorimetryModuleLabel:        "stitchkalmanhitcalo"
+physics.producers.stitchkalmanhitpid.TrackModuleLabel:              "stitchkalmanhit"
 
-physics.producers.trackkalmanhittag.ClusterModuleLabel:          "fuzzycluster"
-physics.producers.trackkalmanhittag.TrackModuleLabel:            "trackkalmanhit"
+physics.producers.trackkalmanhittag.ClusterModuleLabel:             "fuzzycluster"
+physics.producers.trackkalmanhittag.TrackModuleLabel:               "trackkalmanhit"
 
-physics.producers.stitchkalmanhittag.ClusterModuleLabel:         "fuzzycluster"
-physics.producers.stitchkalmanhittag.TrackModuleLabel:           "stitchkalmanhit"
+physics.producers.stitchkalmanhittag.ClusterModuleLabel:            "fuzzycluster"
+physics.producers.stitchkalmanhittag.TrackModuleLabel:              "stitchkalmanhit"
 
 # ClusterCrawler / Track Maker related
-physics.producers.trackkalmanhitcc.HitModuleLabel:               "cccluster"
-physics.producers.trackkalmanhitcc.ClusterModuleLabel:           "cccluster"
-physics.producers.trackkalmanhitcc.PFParticleModuleLabel:        "cctrack"
-physics.producers.trackkalmanhitcc.UseClusterHits:               false
-physics.producers.trackkalmanhitcc.UsePFParticleHits:            true
+physics.producers.trackkalmanhitcc.HitModuleLabel:                  "cccluster"
+physics.producers.trackkalmanhitcc.ClusterModuleLabel:              "cccluster"
+physics.producers.trackkalmanhitcc.PFParticleModuleLabel:           "cctrack"
+physics.producers.trackkalmanhitcc.UseClusterHits:                  false
+physics.producers.trackkalmanhitcc.UsePFParticleHits:               true
 
-physics.producers.stitchkalmanhitcc.TrackModuleLabel:            "trackkalmanhitcc"
-physics.producers.stitchkalmanhitcc.SpptModuleLabel:             "trackkalmanhitcc"
+physics.producers.stitchkalmanhitcc.TrackModuleLabel:               "trackkalmanhitcc"
+physics.producers.stitchkalmanhitcc.SpptModuleLabel:                "trackkalmanhitcc"
 
-physics.producers.trackkalmanhitcalocc.TrackModuleLabel:         "trackkalmanhitcc"
-physics.producers.trackkalmanhitcalocc.SpacePointModuleLabel:    "trackkalmanhitcc"
+physics.producers.trackkalmanhitcalocc.TrackModuleLabel:            "trackkalmanhitcc"
+physics.producers.trackkalmanhitcalocc.SpacePointModuleLabel:       "trackkalmanhitcc"
 
-physics.producers.stitchkalmanhitcalocc.TrackModuleLabel:        "stitchkalmanhitcc"
-physics.producers.stitchkalmanhitcalocc.SpacePointModuleLabel:   "trackkalmanhitcc"
+physics.producers.stitchkalmanhitcalocc.TrackModuleLabel:           "stitchkalmanhitcc"
+physics.producers.stitchkalmanhitcalocc.SpacePointModuleLabel:      "trackkalmanhitcc"
 
-physics.producers.trackkalmanhitpidcc.CalorimetryModuleLabel:    "trackkalmanhitcalocc"
-physics.producers.trackkalmanhitpidcc.TrackModuleLabel:          "trackkalmanhitcc"
+physics.producers.trackkalmanhitpidcc.CalorimetryModuleLabel:       "trackkalmanhitcalocc"
+physics.producers.trackkalmanhitpidcc.TrackModuleLabel:             "trackkalmanhitcc"
 
-physics.producers.stitchkalmanhitpidcc.CalorimetryModuleLabel:   "stitchkalmanhitcccalo"
-physics.producers.stitchkalmanhitpidcc.TrackModuleLabel:         "stitchkalmanhitcc"
+physics.producers.stitchkalmanhitpidcc.CalorimetryModuleLabel:      "stitchkalmanhitcccalo"
+physics.producers.stitchkalmanhitpidcc.TrackModuleLabel:            "stitchkalmanhitcc"
 
-physics.producers.trackkalmanhittagcc.ClusterModuleLabel:        "cccluster"
-physics.producers.trackkalmanhittagcc.TrackModuleLabel:          "trackkalmanhitcc"
+physics.producers.trackkalmanhittagcc.ClusterModuleLabel:           "cccluster"
+physics.producers.trackkalmanhittagcc.TrackModuleLabel:             "trackkalmanhitcc"
 
-physics.producers.stitchkalmanhittagcc.ClusterModuleLabel:       "cccluster"
-physics.producers.stitchkalmanhittagcc.TrackModuleLabel:         "stitchkalmanhitcc"
+physics.producers.stitchkalmanhittagcc.ClusterModuleLabel:          "cccluster"
+physics.producers.stitchkalmanhittagcc.TrackModuleLabel:            "stitchkalmanhitcc"
 
 # Pandora related
-physics.producers.pandoraCosmicKHit.UseClusterHits:              false
-physics.producers.pandoraCosmicKHit.UsePFParticleHits:           true
-physics.producers.pandoraCosmicKHit.ClusterModuleLabel:          "pandoraCosmic"
-physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:       "pandoraCosmic"
+physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
+physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
+physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
+physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
 
-physics.producers.pandoraCosmicKHittag.TrackModuleLabel:         "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHittag.TrackModuleLabel:            "pandoraCosmicKHit"
 
-physics.producers.pandoraCosmicKHitcalo.TrackModuleLabel:        "pandoraCosmicKHit"
-physics.producers.pandoraCosmicKHitcalo.SpacePointModuleLabel:   "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitcalo.TrackModuleLabel:           "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitcalo.SpacePointModuleLabel:      "pandoraCosmicKHit"
 
-physics.producers.pandoraCosmicKHitpid.CalorimetryModuleLabel:   "pandoraCosmicKHitcalo"
-physics.producers.pandoraCosmicKHitpid.TrackModuleLabel:         "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitpid.CalorimetryModuleLabel:      "pandoraCosmicKHitcalo"
+physics.producers.pandoraCosmicKHitpid.TrackModuleLabel:            "pandoraCosmicKHit"
 
-physics.producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel: "pandoraCosmic"
-physics.producers.pandoraCosmicKHitPFPart.TrackModuleLabel:      "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:    "pandoraCosmic"
+physics.producers.pandoraCosmicKHitPFPart.TrackModuleLabel:         "pandoraCosmicKHit"
 
-physics.producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:  "pandoraCosmicKHit"
-physics.producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:  "opflash"
+physics.producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "opflash"
 physics.producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
-physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels: ["pandoraCosmicKHitPFPart"]
+physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKHitPFPart"]
+physics.producers.pandoraCosmicKHitRemoval.FlashProducerLabel:      "pandoraCosmicKHitFlashMatch"
+physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
+physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabel:      "pandoraCosmicKHit"
 
-physics.producers.pandoraNu.GeantModuleLabel:                    "largeant"
-physics.producers.pandoraNu.HitFinderModuleLabel:                "pandoraCosmicKHitRemoval"
-physics.producers.pandoraNu.ConfigFile:                          "PandoraSettings_MicroBooNE_Neutrino.xml"
+physics.producers.pandoraNu.GeantModuleLabel:                       "largeant"
+physics.producers.pandoraNu.HitFinderModuleLabel:                   "pandoraCosmicKHitRemoval"
+physics.producers.pandoraNu.ConfigFile:                             "PandoraSettings_MicroBooNE_Neutrino.xml"
 
-physics.producers.pandoraNuKHit.UseClusterHits:                  false
-physics.producers.pandoraNuKHit.UsePFParticleHits:               true
-physics.producers.pandoraNuKHit.PFParticleModuleLabel:           "pandoraNu"
-physics.producers.pandoraNuKHit.ClusterModuleLabel:              "pandoraNu"
-physics.producers.pandoraNuKHit.HitFinderModuleLabel:            "pandoraCosmicKHitRemoval"
+physics.producers.pandoraNuKHit.UseClusterHits:                     false
+physics.producers.pandoraNuKHit.UsePFParticleHits:                  true
+physics.producers.pandoraNuKHit.PFParticleModuleLabel:              "pandoraNu"
+physics.producers.pandoraNuKHit.ClusterModuleLabel:                 "pandoraNu"
+physics.producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
 
-physics.producers.pandoraNuKHittag.TrackModuleLabel:             "pandoraNuKHit"
+physics.producers.pandoraNuKHittag.TrackModuleLabel:                "pandoraNuKHit"
 
-physics.producers.pandoraNuKHitcalo.TrackModuleLabel:            "pandoraNuKHit"
-physics.producers.pandoraNuKHitcalo.SpacePointModuleLabel:       "pandoraNuKHit"
+physics.producers.pandoraNuKHitcalo.TrackModuleLabel:               "pandoraNuKHit"
+physics.producers.pandoraNuKHitcalo.SpacePointModuleLabel:          "pandoraNuKHit"
 
-physics.producers.pandoraNuKHitpid.CalorimetryModuleLabel:       "pandoraNuKHitcalo"
-physics.producers.pandoraNuKHitpid.TrackModuleLabel:             "pandoraNuKHit"
+physics.producers.pandoraNuKHitpid.CalorimetryModuleLabel:          "pandoraNuKHitcalo"
+physics.producers.pandoraNuKHitpid.TrackModuleLabel:                "pandoraNuKHit"
 
-physics.producers.pandoraNuKHitFlashMatch.TrackModuleLabel:      "pandoraNuKHit"
-physics.producers.pandoraNuKHitFlashMatch.FlashModuleLabel:      "opflash"
+physics.producers.pandoraNuKHitFlashMatch.TrackModuleLabel:         "pandoraNuKHit"
+physics.producers.pandoraNuKHitFlashMatch.FlashModuleLabel:         "opflash"
 physics.producers.pandoraNuKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
-physics.producers.showerrecofuzzy.InputProducer:   "fuzzyclustermerger"
-physics.producers.showerrecopandora.InputProducer: "pandoraNu"
+physics.producers.showerrecofuzzy.InputProducer:                    "fuzzyclustermerger"
+physics.producers.showerrecopandora.InputProducer:                  "pandoraNu"
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :
@@ -290,6 +294,11 @@ services.message.destinations :
          reportEvery: 0
        }
        TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
        {
          limit: 0
          reportEvery: 0

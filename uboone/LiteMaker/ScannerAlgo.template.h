@@ -31,7 +31,8 @@
 #include "DataFormat/partid.h"
 #include "DataFormat/gtruth.h"
 #include "DataFormat/minos.h"
-
+#include "DataFormat/pcaxis.h"
+#include "DataFormat/flashmatch.h"
 /*
   This file defines certain specilization of templated functions.
   In particular it implements:
@@ -535,13 +536,12 @@ namespace larlite {
       auto const& signalROI = wire_ptr->SignalROI();
 
       for(const auto& range : signalROI.get_ranges())
-
 	rois.add_range(range.begin_index(),range.data());
-
+      
       larlite::wire wire_lite(rois,
 			      wire_ptr->Channel(),
 			      (::larlite::geo::View_t)(wire_ptr->View()));
-
+      
       lite_data->push_back(wire_lite);
     }  
   }
@@ -990,6 +990,50 @@ namespace larlite {
     }
   }
 
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::recob::PCAxis> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    auto lite_data = (::larlite::event_pcaxis*)lite_dh;
+    for(size_t i=0; i<dh->size(); ++i) {
+      
+      art::Ptr<::recob::PCAxis> pcaxis_ptr(dh,i);
+
+      larlite::pcaxis lite_pcaxis( pcaxis_ptr->getSvdOK(),
+				   pcaxis_ptr->getNumHitsUsed(),
+				   pcaxis_ptr->getEigenValues(),
+				   pcaxis_ptr->getEigenVectors(),
+				   pcaxis_ptr->getAvePosition(),
+				   pcaxis_ptr->getAveHitDoca(),
+				   pcaxis_ptr->getID() );
+      
+      lite_data->push_back(lite_pcaxis);
+    }
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::anab::FlashMatch> > const &dh,
+			       ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    auto lite_data = (::larlite::event_flashmatch*)lite_dh;
+    for(size_t i=0; i<dh->size(); ++i) {
+      
+      art::Ptr<::anab::FlashMatch> fmatch_ptr(dh,i);
+
+      larlite::flashmatch lite_fmatch( fmatch_ptr->Chi2(),
+				       fmatch_ptr->FlashID(),
+				       fmatch_ptr->SubjectID(),
+				       fmatch_ptr->InBeam() );
+      
+      lite_data->push_back(lite_fmatch);
+    }
+  }
+
+
   template <class T>
   void ScanData(art::Handle<std::vector<T> > const &dh,
 		::larlite::event_base* lite_dh)
@@ -1068,6 +1112,12 @@ namespace larlite {
   template <> std::map<art::Ptr< ::recob::PFParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_pfpart; }
 
+  template <> std::map<art::Ptr< ::recob::PCAxis>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  { return fPtrIndex_pcaxis; }
+
+  template <> std::map<art::Ptr< ::anab::FlashMatch>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  { return fPtrIndex_fmatch; }
+
   template <class T>
   std::map<art::Ptr<T>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { throw cet::exception(__PRETTY_FUNCTION__)<<"Not implemented for a specified data product type..."; }
@@ -1093,7 +1143,6 @@ namespace larlite {
   { return ::larlite::data::kSimChannel; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCShower> () const
   { return ::larlite::data::kMCShower; }
-
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCTrack> () const
   { return ::larlite::data::kMCTrack; }
 
@@ -1125,6 +1174,8 @@ namespace larlite {
   { return ::larlite::data::kEndPoint2D; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::recob::PFParticle> () const
   { return ::larlite::data::kPFParticle; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::recob::PCAxis> () const
+  { return ::larlite::data::kPCAxis; }
   // anab
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::anab::CosmicTag> () const
   { return ::larlite::data::kCosmicTag; }
@@ -1132,6 +1183,8 @@ namespace larlite {
   { return ::larlite::data::kCalorimetry; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::anab::ParticleID> () const
   { return ::larlite::data::kParticleID; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::anab::FlashMatch> () const
+  { return ::larlite::data::kFlashMatch; }
 
   //
   // LocateLiteProduct implementation
@@ -1220,20 +1273,21 @@ namespace larlite {
     }// end looping over a vector of association set
 
   }
-  
+
+
   template <> void ScannerAlgo::ScanAssociation <::recob::Cluster,::recob::Cluster>(art::Event const& e,
-										art::Handle<std::vector<::recob::Cluster> > &dh,
-										::larlite::event_ass* lite_dh)
+										    art::Handle<std::vector<::recob::Cluster> > &dh,
+										    ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::EndPoint2D,::recob::EndPoint2D>(art::Event const& e,
-										      art::Handle<std::vector<::recob::EndPoint2D> > &dh,
-										      ::larlite::event_ass* lite_dh)
+											  art::Handle<std::vector<::recob::EndPoint2D> > &dh,
+											  ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
-
+  
   template <> void ScannerAlgo::ScanAssociation <::recob::Vertex,::recob::Vertex>(art::Event const& e,
-										      art::Handle<std::vector<::recob::Vertex> > &dh,
-										      ::larlite::event_ass* lite_dh)
+										  art::Handle<std::vector<::recob::Vertex> > &dh,
+										  ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::CosmicTag,::anab::CosmicTag>(art::Event const& e,
@@ -1242,13 +1296,13 @@ namespace larlite {
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::SpacePoint,::recob::SpacePoint>(art::Event const& e,
-										      art::Handle<std::vector<::recob::SpacePoint> > &dh,
-										      ::larlite::event_ass* lite_dh)
+											  art::Handle<std::vector<::recob::SpacePoint> > &dh,
+											  ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Track,::recob::Track>(art::Event const& e,
-									    art::Handle<std::vector<::recob::Track> > &dh,
-									    ::larlite::event_ass* lite_dh)
+										art::Handle<std::vector<::recob::Track> > &dh,
+										::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::Shower,::recob::Shower>(art::Event const& e,
@@ -1257,29 +1311,35 @@ namespace larlite {
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::Calorimetry,::anab::Calorimetry>(art::Event const& e,
-										      art::Handle<std::vector<::anab::Calorimetry> > &dh,
-										      ::larlite::event_ass* lite_dh)
+											  art::Handle<std::vector<::anab::Calorimetry> > &dh,
+											  ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::anab::ParticleID,::anab::ParticleID>(art::Event const& e,
-										    art::Handle<std::vector<::anab::ParticleID> > &dh,
-										    ::larlite::event_ass* lite_dh)
+											art::Handle<std::vector<::anab::ParticleID> > &dh,
+											::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::simb::MCTruth,::simb::MCTruth>(art::Event const& e,
-									      art::Handle<std::vector<::simb::MCTruth> > &dh,
-									      ::larlite::event_ass* lite_dh)
+										  art::Handle<std::vector<::simb::MCTruth> > &dh,
+										  ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
-
+  
   template <> void ScannerAlgo::ScanAssociation <::simb::MCParticle,::simb::MCParticle>(art::Event const& e,
-										    art::Handle<std::vector<::simb::MCParticle> > &dh,
-										    ::larlite::event_ass* lite_dh)
+											art::Handle<std::vector<::simb::MCParticle> > &dh,
+											::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
 
   template <> void ScannerAlgo::ScanAssociation <::recob::PFParticle,::recob::PFParticle>(art::Event const& e,
-										      art::Handle<std::vector<::recob::PFParticle> > &dh,
-										      ::larlite::event_ass* lite_dh)
+											  art::Handle<std::vector<::recob::PFParticle> > &dh,
+											  ::larlite::event_ass* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
+
+  template <> void ScannerAlgo::ScanAssociation <::recob::PCAxis,::recob::PCAxis>(art::Event const& e,
+										  art::Handle<std::vector<::recob::PCAxis> > &dh,
+										  ::larlite::event_ass* lite_dh)
+  { throw cet::exception(__PRETTY_FUNCTION__) << " not implemented!"; }
+
 
   //
   // LiteDataType

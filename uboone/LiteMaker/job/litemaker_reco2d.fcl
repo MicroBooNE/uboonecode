@@ -1,17 +1,25 @@
-#include "larlite_maker.fcl"
+#include "litemaker_base.fcl"
 
-physics.analyzers.scanner.out_filename: "larlite_reco2d.root"
+BEGIN_PROLOG
 
-physics.analyzers.scanner.DataLookUpMap:
+litemaker_reco2d: @local::litemaker_base
+
+litemaker_reco2d.out_filename: "larlite_reco2d.root"
+
+litemaker_reco2d.DataLookUpMap:
 {
-  hit:        ["gaushit","ccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  hit:        ["gaushit","cccluster"]
+  cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
+  vertex:     []
   endpoint2d: []
 }
 
-physics.analyzers.scanner.AssociationLookUpMap:
+litemaker_reco2d.AssociationLookUpMap:
 {
-  hit:        ["gaushit","ccluster"]
-  cluster:    ["fuzzycluster","cccluster","pandoraNu","pandoraCosmic"]
+  hit:        ["gaushit","cccluster"]
+  cluster:    ["fuzzycluster","fuzzyclustermerger","cccluster","pandoraNu","pandoraCosmic"]
+  vertex:     []
   endpoint2d: []
 }
+
+END_PROLOG

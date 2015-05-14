@@ -39,9 +39,11 @@
 #include "RecoBase/Vertex.h"
 #include "RecoBase/EndPoint2D.h"
 #include "RecoBase/PFParticle.h"
+#include "RecoBase/PCAxis.h"
 #include "AnalysisBase/ParticleID.h"
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/CosmicTag.h"
+#include "AnalysisBase/FlashMatch.h"
 #include "Simulation/SimChannel.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/GTruth.h"
@@ -103,7 +105,8 @@ private:
 
   /// Boolean to switch on/off association storage
   bool fStoreAss;
-
+  /// POTSummary producer label
+  std::vector<std::string> fPOTSummaryLabel_v;
 };
 
 
@@ -113,7 +116,7 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
  // More initializers here.
 {
   //  fDataReadFlag.resize((size_t)(::larlite::data::kDATA_TYPE_MAX),std::map<std::string,
-  fStoreAss = p.get<bool>("store_association",false);
+  fStoreAss = p.get<bool>("store_association");
   _mgr.set_out_filename(p.get<std::string>("out_filename","annonymous.root"));
   auto const data_pset = p.get<fhicl::ParameterSet>("DataLookUpMap");
   auto const ass_pset = p.get<fhicl::ParameterSet>("AssociationLookUpMap");
@@ -134,6 +137,7 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
 	fAlg.AssociationRegister(label,(::larlite::data::DataType_t)i);
     }
   }
+  fPOTSummaryLabel_v = p.get<std::vector<std::string> >("pot_labels");
 }
 /*
 template<> void LiteScanner::ScanAssociation<recob::Cluster>(const art::Event& evt, const size_t name_index);
@@ -162,33 +166,26 @@ void LiteScanner::endJob() {
 
 void LiteScanner::beginSubRun(const art::SubRun& sr)
 {
+  if(fPOTSummaryLabel_v.empty()) return;
   // POTSummary
-  auto const& pot_labels = fAlg.ModuleLabels()[::larlite::data::kPOTSummary];
-  for(auto const& label : pot_labels) {
-
+  for(auto const& label : fPOTSummaryLabel_v) {
     auto lite_data = (::larlite::potsummary*)(_mgr.get_subrundata(::larlite::data::kPOTSummary,label));
-
+    
     art::Handle< sumdata::POTSummary > potHandle;
     sr.getByLabel(label,potHandle);
-
+    
     if(potHandle.isValid()) {
-
       lite_data->totpot     = potHandle->totpot;
       lite_data->totgoodpot = potHandle->totgoodpot;
       lite_data->totspills  = potHandle->totspills;
       lite_data->goodspills = potHandle->goodspills;
-
     }else{
-
       lite_data->totpot     = 0;
       lite_data->totgoodpot = 0;
       lite_data->totspills  = 0;
       lite_data->goodspills = 0;
-
     }
-
   }
-  
 }
 
 
@@ -198,10 +195,15 @@ void LiteScanner::analyze(art::Event const & e)
   _mgr.set_id(e.id().run(),
 	      e.id().subRun(),
 	      e.id().event());
-
+  /*
+  std::cout<<" Run: " << _mgr.run_id() << " ... "
+	   <<" SubRun: " << _mgr.subrun_id() << " ... "
+	   <<" Event: " << _mgr.event_id() << std::endl;
+  */
   //
   // Loop over data type to store association ptr map
   //
+  SaveAssociationSource<simb::MCTruth>(e);
   SaveAssociationSource<recob::Hit>(e);
   SaveAssociationSource<recob::Cluster>(e);
   SaveAssociationSource<recob::EndPoint2D>(e);
@@ -215,6 +217,8 @@ void LiteScanner::analyze(art::Event const & e)
   SaveAssociationSource<recob::PFParticle>(e);
   SaveAssociationSource<anab::Calorimetry>(e);
   SaveAssociationSource<anab::ParticleID>(e);
+  SaveAssociationSource<recob::PCAxis>(e);
+  SaveAssociationSource<anab::FlashMatch>(e);
 
   //
   // Loop over data type to store data & locally art::Ptr
@@ -279,6 +283,10 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<anab::ParticleID>(e,j); break;
       case ::larlite::data::kPFParticle:
 	ScanData<recob::PFParticle>(e,j); break;
+      case ::larlite::data::kPCAxis:
+	ScanData<recob::PCAxis>(e,j); break;
+      case ::larlite::data::kFlashMatch:
+	ScanData<anab::FlashMatch>(e,j); break;
 	//case ::larlite::data::kPOTSummary:
 	//break;
       case ::larlite::data::kUndefined:
@@ -414,12 +422,16 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
   case ::larlite::data::kWire:         break;
   case ::larlite::data::kHit:          break;
   case ::larlite::data::kCosmicTag:
+    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kOpHit:        break;
   case ::larlite::data::kOpFlash:      break;
   case ::larlite::data::kCluster:
     fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kSeed:         break;
   case ::larlite::data::kSpacePoint:
@@ -427,7 +439,7 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     break;
   case ::larlite::data::kTrack:
     fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
@@ -435,11 +447,12 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     fAlg.ScanAssociation<T, anab::Calorimetry > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kShower:
+    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kVertex:
     fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     //fAlg.ScanAssociation<T, recob::EndPoint2D > (evt,dh,lite_ass);
     //fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
@@ -463,7 +476,9 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Seed       > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+    fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
     break;
   default:
     break;

@@ -32,6 +32,7 @@
       <filename> micro-pmtdef.gdml </filename>
       <filename> micro-enclosureExtras.gdml </filename>
       <filename> micro-cryostat.gdml </filename>
+      <filename> micro-vetoWall.gdml </filename>
       <filename> micro-enclosure.gdml </filename>
       <filename> micro-world.gdml </filename>
 
