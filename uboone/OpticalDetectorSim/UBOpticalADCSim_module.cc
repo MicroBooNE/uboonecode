@@ -38,9 +38,11 @@
 /// LArSoft
 #include "OpticalDetectorData/ChannelData.h" // from lardata
 #include "Geometry/Geometry.h" // larcore
+#include "Geometry/ExptGeoHelperInterface.h" // larcore
 #include "Simulation/SimPhotons.h" // larsim
 #include "UBOpticalADC.h" // uboonecode
 #include "UBLogicPulseADC.h" // uboonecode
+#include "uboone/Geometry/ChannelMapUBooNEAlg.h" // uboone
 
 /// nutools
 #include "Simulation/BeamGateInfo.h"
@@ -212,7 +214,14 @@ namespace opdet {
     // Handle special readout channels (>= 40)
     //
     art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
-    for(size_t ch=kLogicStartChannel; ch<(kLogicStartChannel+kLogicNChannel); ++ch) {
+    art::ServiceHandle< geo::ExptGeoHelperInterface > geohelper;
+    std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geohelper->GetChannelMapAlg() );
+    std::vector< unsigned int > logicchannels;
+    chanmap->GetLogicChannelList( logicchannels );
+    
+    //for(size_t ch=kLogicStartChannel; ch<(kLogicStartChannel+kLogicNChannel); ++ch) {
+    for ( auto logicch : logicchannels ) {
+      unsigned int ch = logicch % 100; // bad! map of channel number to FEM channel using implicit convention
 
       fLogicGen.SetPedestal( ch_conf->GetParameter( kPedestalMean, ch ), ch_conf->GetParameter( kPedestalSpread, ch ) );
 

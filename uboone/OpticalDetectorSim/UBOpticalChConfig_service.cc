@@ -4,6 +4,9 @@
 #include "UBOpticalChConfig.h"
 #include "Utilities/LArProperties.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "Geometry/Geometry.h" // larcore
+#include "Geometry/ExptGeoHelperInterface.h" // larcore
+#include "uboone/Geometry/ChannelMapUBooNEAlg.h" // uboonecode
 
 namespace opdet {
 
@@ -18,9 +21,9 @@ namespace opdet {
   
   //-----------------------------------------------------------
   void UBOpticalChConfig::doInitialization() {
+  //-----------------------------------------------------------
     reconfigure( _pset );
   }
-
 
   //-----------------------------------------------------------
   void UBOpticalChConfig::reconfigure(fhicl::ParameterSet const& pset)
@@ -39,6 +42,7 @@ namespace opdet {
     tmp_params.at( kT0Spread )       = pset.get<std::vector<float> >("T0Spread");
     tmp_params.at( kDarkRate )       = pset.get<std::vector<float> >("DarkRate");
 
+    std::vector< unsigned int >  channel_list = pset.get<std::vector<unsigned int> >("ChannelList");
     
     // Correct QE by prescaling set in LArProperties
     art::ServiceHandle<util::LArProperties>   LarProp;
@@ -59,9 +63,11 @@ namespace opdet {
     }
     
     art::ServiceHandle<geo::Geometry> geom;
-    
+    art::ServiceHandle< geo::ExptGeoHelperInterface > geohelper;
+    std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geohelper->GetChannelMapAlg() );
+
     // sanity check: number of readout channels in geo service matches number of channels in parameters
-    unsigned int nchannel_values = geom->NOpChannels() + kLogicNChannel;
+    unsigned int nchannel_values = geom->NOpChannels() + chanmap->NOpLogicChannels();
 
     for(size_t i=0; i<kChConfigTypeMax; ++i)
       if( tmp_params.at(i).size() != nchannel_values )
@@ -70,32 +76,24 @@ namespace opdet {
 				      tmp_params.at(i).size(),
 				      nchannel_values));
 
+    if ( nchannel_values != channel_list.size() )
+      throw UBOpticalException(Form("number of pars (%d) != # channels in list (%zu)!", nchannel_values, channel_list.size() ));
+    
     // finally fll fParams data member
     for ( size_t i=0; i<kChConfigTypeMax; ++i) {
       std::map< unsigned int, float > pardata;
-      unsigned int ich = 0;
-      for ( unsigned int isplit=0; isplit<geom->NOpHardwareChannels( 0 ); isplit++ ) {
-	for ( unsigned int ipmt=0; ipmt<geom->NOpDets(); ipmt++ ) {
-	  unsigned int channel = geom->OpChannel( ipmt, isplit );
-	  //fParams[.insert( std::pair< unsigned int, float >( channel, tmp_params.at( i ) ) );
-	  pardata[ channel ] = tmp_params.at( i ).at( ich );
-	  ich++;
-	}
-	if ( isplit==0 ) {
-	  // fill logic channels
-	  for ( unsigned int channel=kLogicStartChannel; channel<(kLogicStartChannel+kLogicNChannel); channel++) {
-	    pardata[ channel ] = tmp_params.at( i ).at( ich );
-	    ich++;
-	  }
-	} // first gain set
+      int nch = 0;
+      for ( auto channel : channel_list ) {
+	pardata[ channel ] = tmp_params.at( i ).at( nch );
+	nch++;
       }
       fParams[ i ] = pardata;
     }
     
   }
-
-
+  
+  
   DEFINE_ART_SERVICE(UBOpticalChConfig)
-    
+  
 }
 #endif

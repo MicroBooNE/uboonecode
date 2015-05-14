@@ -419,6 +419,16 @@ namespace geo {
   }
 
   //----------------------------------------------------------------------------
+  unsigned int ChannelMapUBooNEAlg::NOpLogicChannels() const {
+    return fLogicChannelList.size();
+  }
+  
+  //----------------------------------------------------------------------------
+  void ChannelMapUBooNEAlg::GetLogicChannelList( std::vector< unsigned int >& channels ) const {
+    channels = fLogicChannelList; // copy
+  }
+
+  //----------------------------------------------------------------------------
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
     fNOpDets = pset.get< unsigned int >("numberOfDetectors");
     fNSplits = pset.get<  unsigned int >("numberOfSplits");
@@ -460,6 +470,8 @@ namespace geo {
       std::cout << "]" << std::endl;
     }
     
+    // read in active logic channel lists
+    fLogicChannelList = pset.get< std::vector<unsigned int> >( "LogicChannelList" );
   }
 
 } // namespace

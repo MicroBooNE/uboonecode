@@ -49,6 +49,7 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
          )
 
 simple_plugin(UBOpticalChConfig "service"
+	      uboone_Geometry
 	      Geometry_service
 	      Geometry
 	      ${ART_UTILITIES}

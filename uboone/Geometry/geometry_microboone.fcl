@@ -15,11 +15,13 @@ microboone_geometry_helper:
 {
  service_provider : UBooNEGeometryHelper
 
- numberOfDetectors: 36
+ numberOfDetectors: 32
  numberOfSplits: 4
- splitGains: ["LowGain","LowGain","HighGain","HighGain"]
+ splitGains: ["LowGain","HighGain","LowGain","HighGain"]
  ReadoutLowChannelRange:  [0,199]
  ReadoutHighChannelRange: [200,399]
+ LogicChannelList: [ 40,   41,  42,  43,  44,  45,  46,  47, 
+                     140, 141, 142, 143, 144, 145, 146, 147 ]
  
  # OpDet ID (determined by load order in GDML file): name of Optical Detector (P=PMT, L=light guide paddle)
  OpDet0_name:  "P01"
@@ -31,7 +33,7 @@ microboone_geometry_helper:
  OpDet6_name:  "P07"
  OpDet7_name:  "P08"
  OpDet8_name:  "P09"
- OpDet9_name: "P10"
+ OpDet9_name:  "P10"
  OpDet10_name: "P11"
  OpDet11_name: "P12"
  OpDet12_name: "P13"
@@ -70,7 +72,7 @@ microboone_geometry_helper:
  OpDet6_channels:  [ 6, 106, 206, 306 ]
  OpDet7_channels:  [ 7, 107, 207, 307 ]
  OpDet8_channels:  [ 8, 108, 208, 308 ]
- OpDet9_channels: [ 9, 109, 209, 309 ]
+ OpDet9_channels:  [ 9, 109, 209, 309 ]
  OpDet10_channels: [10, 110, 210, 310 ]
  OpDet11_channels: [11, 111, 211, 311 ]
  OpDet12_channels: [12, 112, 212, 312 ]
