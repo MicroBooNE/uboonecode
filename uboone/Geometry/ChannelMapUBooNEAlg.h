@@ -20,6 +20,7 @@
 #include "Geometry/ChannelMapAlg.h"
 #include "Geometry/GeoObjectSorterStandard.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "uboone/OpticalDetectorSim/UBOpChannelTypes.h"
 
 namespace geo {
 
@@ -91,7 +92,9 @@ namespace geo {
     bool         IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const;
     unsigned int NOpLogicChannels() const;
     void         GetLogicChannelList( std::vector< unsigned int >& channels ) const;
-    std::string GetSplitGain( unsigned int isplit ) const;
+    opdet::OpChannelType_t GetSplitGain( unsigned int isplit ) const;
+    opdet::OpChannelType_t GetChannelType( unsigned int opChannel ) const;
+
   private:
     void LoadOpticalMapData( fhicl::ParameterSet const& p);
     unsigned int fNOpDets;

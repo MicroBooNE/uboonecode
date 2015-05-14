@@ -402,10 +402,6 @@ namespace geo {
     unsigned int copyid = opChannel % 100;
     return copyid;
   }
-  std::string ChannelMapUBooNEAlg::GetSplitGain( unsigned int isplit ) const 
-  {
-    return fSplitGains.at( isplit );
-  }
 
   //----------------------------------------------------------------------------
   bool ChannelMapUBooNEAlg::IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const {
@@ -427,6 +423,27 @@ namespace geo {
   void ChannelMapUBooNEAlg::GetLogicChannelList( std::vector< unsigned int >& channels ) const {
     channels = fLogicChannelList; // copy
   }
+
+  //----------------------------------------------------------------------------
+  opdet::OpChannelType_t ChannelMapUBooNEAlg::GetChannelType( unsigned int opChannel ) const {
+    
+    for ( unsigned int i : fLogicChannelList ) {
+      if ( i==opChannel )
+	return opdet::kLogicPulse;
+    }
+    
+    unsigned int isplit = opChannel/100;
+    return GetSplitGain( isplit );
+  }
+
+  //----------------------------------------------------------------------------
+  opdet::OpChannelType_t ChannelMapUBooNEAlg::GetSplitGain( unsigned int isplit ) const {
+    if ( fSplitGains.at(isplit)=="HighGain" )
+      return opdet::kHighGain;
+    else
+      return opdet::kLowGain;
+  }
+
 
   //----------------------------------------------------------------------------
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
