@@ -211,7 +211,10 @@ namespace opdet {
     //
     // Handle special readout channels (>= 40)
     //
+    art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
     for(size_t ch=kLogicStartChannel; ch<(kLogicStartChannel+kLogicNChannel); ++ch) {
+
+      fLogicGen.SetPedestal( ch_conf->GetParameter( kPedestalMean, ch ), ch_conf->GetParameter( kPedestalSpread, ch ) );
 
       if( (ch == kFEMChannelBNB || ch == kFEMChannelNuMI) && fBeamModName.size() ) {
 

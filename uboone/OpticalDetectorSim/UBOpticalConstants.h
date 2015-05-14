@@ -25,7 +25,6 @@ namespace opdet {
     kQE,             // Quantum efficiency
     kPMTGain,        // p.e/photon
     kSplitterGain,   // adc/p.e.
-    kGain,           // adc/photon
     kGainSpread,     // Spread in gain (in fraction)
     kT0,             // T0 in ns
     kT0Spread,       // T0 spread in ns
