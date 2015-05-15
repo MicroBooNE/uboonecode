@@ -64,9 +64,9 @@ namespace uboone {
               services: {
                 Geometry: {
                   SurfaceY: 6.9e2 # in cm, vertical distance to the surface
-                  Name:     "microboonev5"
-                  GDML:     "microboonev5.gdml"
-                  ROOT:     "microboonev5.gdml"
+                  Name:     "microboonevX"
+                  GDML:     "microboonevX.gdml"
+                  ROOT:     "microboonevX.gdml"
                   SortingParameters: {}
                 } # Geometry
               } # services
