@@ -223,4 +223,9 @@
    <fraction n="0.922582" ref="carbon"/>
   </material>
 
+  <material name="Argon_gas_87K" formula="Ar">
+   <D value="0.0056" unit="g/cm3"/> <!-- standard pressure, 87.3K -->
+   <fraction n="1.0000" ref="argon"/>
+  </material>
+
 </materials>
