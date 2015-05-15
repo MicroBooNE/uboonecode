@@ -383,6 +383,9 @@ namespace lris {
 	//get the crateHeader/crateData objects
       //	ubdaq::crateHeader crate_header = seb_it->first;
       //	ubdaq::crateData crate_data = seb_it->second;
+      int tpc_seb_num = seb_it.first;
+      tpc_crate_data_t const& tpc_crate = seb_it.second;
+
 
 	// Get Time information:
 	//uint32_t sebTSec = crate_header.getSebTimeSec();
@@ -434,7 +437,7 @@ namespace lris {
 	  //use there as well.
 	  auto const tpc_channel_number = channel.getChannelNumber();
 	    
-	  ubdaq::channelData chD = channel.data;
+	  auto const& chD = channel.data();
 
 	    //Huffman decoding
 	  if (fHuffmanDecode) chD.decompress();
