@@ -24,6 +24,8 @@
 
 //uboone datatypes
 
+
+/*
 #include "datatypes/eventRecord.h"
 #include "datatypes/globalHeader.h"
 #include "datatypes/triggerData.h"
@@ -38,11 +40,14 @@
 #include "datatypes/channelDataPMT.h"
 #include "datatypes/windowHeaderPMT.h"
 #include "datatypes/windowDataPMT.h"
-#include "datatypes/beamHeader.h"
-#include "datatypes/beamData.h"
+*/
+#include "datatypes/ub_BeamHeader.h"
+#include "datatypes/ub_BeamData.h"
+
+
 
 //boost
-#include <boost/archive/binary_iarchive.hpp>
+//#include <boost/archive/binary_iarchive.hpp>
 #include <boost/algorithm/string.hpp>
 
 //root
@@ -307,10 +312,10 @@ namespace lris {
     fInputStream.seekg(fEventLocation[fEventCounter]);
     try {
       boost::archive::binary_iarchive ia(fInputStream); 
-      ubdaq::eventRecord event_record;  
+      ubdaq::ub_EventRecord event_record;  
       ia >> event_record;
       //set granularity 
-      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
+      //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
 
       fillDAQHeaderData(event_record, daqHeader);
       fillTPCData(event_record, tpcDigitList);
@@ -326,10 +331,10 @@ namespace lris {
   }
   
   // =====================================================================
-  void LArRawInputDriverUBooNE::fillDAQHeaderData(ubdaq::eventRecord& event_record,
+  void LArRawInputDriverUBooNE::fillDAQHeaderData(ubdaq::ub_EventRecord& event_record,
 						  raw::DAQHeader& daqHeader)
   {
-      ubdaq::globalHeader *global_header = event_record.getGlobalHeaderPtr();
+      ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
       
       // art::Timestamp is an unsigned long long. The conventional 
       // use is for the upper 32 bits to have the seconds since 1970 epoch 
@@ -337,22 +342,20 @@ namespace lris {
       // current second.
       // (time_t is a 64 bit word)
 
-      uint32_t seconds=global_header->getSeconds();
-      uint32_t nano_seconds=global_header->getMilliSeconds()*1000000
-	+ global_header->getMicroSeconds()*1000
-	+ global_header->getNanoSeconds();
+      uint32_t seconds=global_header.getSeconds();
+      uint32_t nano_seconds=global_header.getNanoSeconds();
       time_t mytime = ((time_t)seconds<<32) | nano_seconds;
 
       //\/      uint32_t subrun_num = global_header->getSubrunNumber();
       
       daqHeader.SetStatus(1);
-      daqHeader.SetFileFormat(global_header->getRecordType());
-      daqHeader.SetSoftwareVersion(global_header->DAQ_version_number);
-      daqHeader.SetRun(global_header->getRunNumber());
-      daqHeader.SetSubRun(global_header->getSubrunNumber());
+      daqHeader.SetFileFormat(global_header.getRecordType());
+      daqHeader.SetSoftwareVersion(global_header.DAQ_version_number);
+      daqHeader.SetRun(global_header.getRunNumber());
+      daqHeader.SetSubRun(global_header.getSubrunNumber());
       
       //\/ Add the subRun number too!
-      daqHeader.SetEvent(global_header->getEventNumber());
+      daqHeader.SetEvent(global_header.getEventNumber());
       daqHeader.SetTimeStamp(mytime);
 
       /// \todo: What is the "fixed word" ? Leaving it unset for now
@@ -362,7 +365,7 @@ namespace lris {
   }
 
   // =====================================================================
-  void LArRawInputDriverUBooNE::fillTPCData(ubdaq::eventRecord& event_record,
+  void LArRawInputDriverUBooNE::fillTPCData(ubdaq::ub_EventRecord& event_record,
 					    std::vector<raw::RawDigit>& tpcDigitList)
   {    
       // ### Swizzling to get the number of channels...trying the method used in write_read.cpp
@@ -374,13 +377,12 @@ namespace lris {
       // ### is the channel number.
       
       //get the seb map, and do a loop over all sebs/crates
-      std::map<ubdaq::crateHeader,ubdaq::crateData,ubdaq::compareCrateHeader> seb_map = event_record.getSEBMap();
-      std::map<ubdaq::crateHeader,ubdaq::crateData>::iterator seb_it;
-      for( seb_it = seb_map.begin(); seb_it != seb_map.end(); seb_it++){
+
+    for( auto const& seb_it : event_record.getTPCSEBMap()) {
 	
 	//get the crateHeader/crateData objects
-	ubdaq::crateHeader crate_header = seb_it->first;
-	ubdaq::crateData crate_data = seb_it->second;
+      //	ubdaq::crateHeader crate_header = seb_it->first;
+      //	ubdaq::crateData crate_data = seb_it->second;
 
 	// Get Time information:
 	//uint32_t sebTSec = crate_header.getSebTimeSec();
@@ -393,26 +395,49 @@ namespace lris {
 	//std::cout << "GPS Time seconds: " << GPStime.second << std::endl;
 	//std::cout << "DAQ Frame: " << DAQtime.frame << "\tSample: " << DAQtime.sample << std::endl;
 
-	//now get the card map (for the current crate), and do a loop over all cards
-	std::map<ubdaq::cardHeader,ubdaq::cardData>::iterator card_it;
-	std::map<ubdaq::cardHeader,ubdaq::cardData,ubdaq::compareCardHeader> card_map = crate_data.getCardMap();
-	for(card_it = card_map.begin(); card_it != card_map.end(); card_it++){
-	  
-	  //get the cardHeader/cardData objects
-	  ubdaq::cardHeader card_header = card_it->first;
-	  ubdaq::cardData card_data = card_it->second;
-	  
-	  //now get the channel map (for the current card), and do a loop over all channels
-	  std::map<int,ubdaq::channelData> channel_map = card_data.getChannelMap();
-	  std::map<int,ubdaq::channelData>::iterator channel_it;
-	  for(channel_it = channel_map.begin(); channel_it != channel_map.end(); channel_it++){
+      auto const& tpc_crate_header = tpc_crate.header();
+      auto const& tpc_crate_trailer = tpc_crate.trailer();
+
+      //Special to the crate, there is a special header that the DAQ attaches. You can access this
+      //like so. The type here is a unique ptr to a ub_CrateHeader_v6 struct. That has useful info
+      //like the local host time, which may or may not be set properly right now...
+      auto const& tpc_crate_DAQ_header = tpc_crate.crateHeader();
+      ub_LocalHostTime this_time = tpc_crate_DAQ_header->local_host_time;
+      
+      //The Crate Data is split up into Cards. You use the "getCards()" command to get access to
+      //each of those. Note that calling this function will dissect the data if it has not already
+      //been dissected (debugInfo() calls getCards()). You can do a look over the cards like so:
+      for(auto const& card : tpc_crate.getCards()){
+
+	//The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
+	//object), and technically a trailer (though here it's empty!).
+	auto const& tpc_card_header = card.header();
+	auto const& tpc_card_trailer = card.trailer();
+
+	//Of course, you can probe for information in the card header. You'll have to find the appropriate
+	//header file to know what type you have, but again, these will follow typical practice. And, you
+	//can always use debugInfo to not only print the info, but it tells you the type.
+	auto const this_event_number = card.getEvent();
+	auto const this_frame_number = card.getFrame();
+
+
+	//And, you guessed it, the tpc card data is split up into one more level: by channel.
+	for(auto const& channel : card.getChannels()){
+
+	  //There's a header and trailer here. Remember these are just uint16_t, that contain the
+	  //channel number.
+	  auto const& tpc_channel_header = channel.header();
+	  auto const& tpc_channel_trailer = channel.trailer();
+
+	  //The channel object (ub_MarkedRawChannelData) has a method for returning the channel.
+	  //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
+	  //use there as well.
+	  auto const tpc_channel_number = channel.getChannelNumber();
 	    
-	    //get the channel number and channelData
-	    int channel_number = channel_it->first;
-	    ubdaq::channelData chD = channel_it->second;
+	  ubdaq::channelData chD = channel.data;
 
 	    //Huffman decoding
-	    if (fHuffmanDecode) chD.decompress();
+	  if (fHuffmanDecode) chD.decompress();
 
 	    //\todo here fill in the detector RawData structures. something like this:
 	    //\tode following code is from pulse_viewer.cpp, not sure what is the most 
@@ -472,7 +497,7 @@ namespace lris {
   }
 
   // =====================================================================
-  void LArRawInputDriverUBooNE::fillPMTData(ubdaq::eventRecord& event_record,
+  void LArRawInputDriverUBooNE::fillPMTData(ubdaq::ub_EventRecord& event_record,
 					    std::vector<optdata::FIFOChannel>& pmtDigitList)
   {
     //fill PMT data
@@ -543,7 +568,7 @@ namespace lris {
   }
 
   // =====================================================================
-  void LArRawInputDriverUBooNE::fillBeamData(ubdaq::eventRecord& event_record,
+  void LArRawInputDriverUBooNE::fillBeamData(ubdaq::ub_EventRecord& event_record,
 					     raw::BeamInfo& beamInfo)
   {
     ubdaq::beamHeader bh=event_record.getBeamHeader();

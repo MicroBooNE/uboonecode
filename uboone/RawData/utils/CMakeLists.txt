@@ -5,12 +5,14 @@ include_directories( $ENV{UBOONEDAQ_DATATYPES_INC} )
 
 ##<<<<<<< HEAD
 find_ups_product( postgresql v9_1_5 )
-find_ups_product( uboonedaq_datatypes v5_00_01 )
-find_ups_product( boost v1_56_0 )
+find_ups_product( uboonedaq_datatypes v6_08_00 )
+find_ups_product( boost v1_57_0 )
 
 cet_find_library( PQ NAMES pq PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
-cet_find_library( UBDut NAMES udata_types PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
-cet_find_library( UBDuut NAMES udata_utilities PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
+#cet_find_library( UBDut NAMES udata_types PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
+find_library( UBDut NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LIB} )
+#cet_find_library( UBDuut NAMES udata_utilities PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
+
 cet_find_library( BOOSER NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
 
 ##=======
@@ -32,7 +34,7 @@ art_make( BASENAME_ONLY
                         RawData
                         SummaryData
 			${UBDut}
-			${UBDuut}
+#			${UBDuut}
                         ${PQ}
 			${BOOSER}
 #                        daq_datatypes
