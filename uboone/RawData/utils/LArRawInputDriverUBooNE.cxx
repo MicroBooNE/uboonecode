@@ -362,8 +362,9 @@ namespace lris {
       
       //get the seb map, and do a loop over all sebs/crates
 
-    for( auto const& seb_it : event_record.getTPCSEBMap()) {
-        
+    for( auto const& seb_it : event_record.getTPCSEBMap()) {    // I think auto should be tpc_map_t::const_iterator  -NJT
+
+          
         //get the crateHeader/crateData objects
       //        ubdaq::crateHeader crate_header = seb_it->first;
       //        ubdaq::crateData crate_data = seb_it->second;
@@ -382,44 +383,44 @@ namespace lris {
         //std::cout << "GPS Time seconds: " << GPStime.second << std::endl;
         //std::cout << "DAQ Frame: " << DAQtime.frame << "\tSample: " << DAQtime.sample << std::endl;
 
-      auto const& tpc_crate_header = tpc_crate.header();
-      auto const& tpc_crate_trailer = tpc_crate.trailer();
+      // auto const& tpc_crate_header = tpc_crate.header();    // unsued
+      // auto const& tpc_crate_trailer = tpc_crate.trailer();  // unused.
 
       //Special to the crate, there is a special header that the DAQ attaches. You can access this
       //like so. The type here is a unique ptr to a ub_CrateHeader_v6 struct. That has useful info
       //like the local host time, which may or may not be set properly right now...
-      auto const& tpc_crate_DAQ_header = tpc_crate.crateHeader();
+      auto const& tpc_crate_DAQ_header = tpc_crate.crateHeader(); // I think auto should be tpc_crate_data_t::ub_CrateHeader_t --NJT
       ub_LocalHostTime this_time = tpc_crate_DAQ_header->local_host_time;
       
       //The Crate Data is split up into Cards. You use the "getCards()" command to get access to
       //each of those. Note that calling this function will dissect the data if it has not already
       //been dissected (debugInfo() calls getCards()). You can do a look over the cards like so:
-      for(auto const& card : tpc_crate.getCards()){
+      for(auto const& card : tpc_crate.getCards()){  // This auto is tpc_crate_data_t::card_t
 
         //The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
         //object), and technically a trailer (though here it's empty!).
-        auto const& tpc_card_header = card.header();
-        auto const& tpc_card_trailer = card.trailer();
+        // auto const& tpc_card_header = card.header();   // not really used
+        // auto const& tpc_card_trailer = card.trailer(); // not really used
 
         //Of course, you can probe for information in the card header. You'll have to find the appropriate
         //header file to know what type you have, but again, these will follow typical practice. And, you
         //can always use debugInfo to not only print the info, but it tells you the type.
-        auto const this_event_number = card.getEvent();
-        auto const this_frame_number = card.getFrame();
+        // auto const this_event_number = card.getEvent(); /// auto are ints here
+        // auto const this_frame_number = card.getFrame(); /// auto are ints here
 
 
         //And, you guessed it, the tpc card data is split up into one more level: by channel.
-        for(auto const& channel : card.getChannels()){
+        for(auto const& channel : card.getChannels()){ // auto here tpc_crate_data_t::card_t::card_channel_type
 
             //There's a header and trailer here. Remember these are just uint16_t, that contain the
             //channel number.
-            auto const& tpc_channel_header = channel.header();
-            auto const& tpc_channel_trailer = channel.trailer();
+            // auto const& tpc_channel_header = channel.header();   // unused
+            // auto const& tpc_channel_trailer = channel.trailer(); // unsued
 
             //The channel object (ub_MarkedRawChannelData) has a method for returning the channel.
             //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
             //use there as well.
-            auto const tpc_channel_number = channel.getChannelNumber();
+            auto const tpc_channel_number = channel.getChannelNumber(); // auto is int here
             
             
             // MODIFIED by Nathaniel Sat May 16, to use my new version of datatypes (v6_08, on branch master)
@@ -430,9 +431,9 @@ namespace lris {
                   if (fHuffmanDecode) {
               channel.decompress(adclist); // All-in-one call.
             } else {
-                    auto const& chD = channel.data();
+              const ubRawData& chD = channel.data(); 
               adclist.reserve(chD.size()); // optimize
-              for(auto chD::const_iterator it = chD.begin(); it!= chD.end(); it++) {
+              for(ubRawData::const_iterator it = chD.begin(); it!= chD.end(); it++) {
                 adclist.push_back(*it);
               }
               chD.decompress();
@@ -503,13 +504,13 @@ namespace lris {
         int card_number = card_data.getModule();
         
         // nathaniel's version of datatypes:
-        for(auto const& channel_data : card_data.getChannels() ) {
+        for(auto const& channel_data : card_data.getChannels() ) { // auto here is pmt_crate_data_t::card_t::card_channel-type
           int channel_number = channel_data.getChannelNumber();
           
           //now get the windows
-          auto const& windows = channel_data.getWindows();  // vector of ub_PMT_WindowData objects
-          for(const auto& window: windows ) {
-            const auto& window_header = window.header();
+          auto const& windows = channel_data.getWindows();  // auto here is std::vector<ub_PMT_WindowData_v6>
+          for(const auto& window: windows ) {               // auto here is ub_PMT_WindowData_v6
+            const auto& window_header = window.header();    // auto here is ub_PMT_WindowHeader_v6
             const ub_RawData& window_data = window.data();
             size_t win_data_size=window_data.size();
             
@@ -526,7 +527,7 @@ namespace lris {
             optdata::FIFOChannel rd(category, time, frame, channel_number,win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
             
-            for(auto it = window_data.begin(); it!= window_data.end(); it++){
+            for(ubRawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
               rd.push_back(*it & 0xfff);                
             }
             pmtDigitList.push_back(rd);
