@@ -25,24 +25,8 @@
 //uboone datatypes
 
 
-/*
-#include "datatypes/eventRecord.h"
-#include "datatypes/globalHeader.h"
-#include "datatypes/triggerData.h"
-#include "datatypes/crateHeader.h"
-#include "datatypes/crateData.h"
-#include "datatypes/cardHeader.h"
-#include "datatypes/cardData.h"
-#include "datatypes/channelData.h"
-#include "datatypes/crateDataPMT.h"
-#include "datatypes/cardHeaderPMT.h"
-#include "datatypes/cardDataPMT.h"
-#include "datatypes/channelDataPMT.h"
-#include "datatypes/windowHeaderPMT.h"
-#include "datatypes/windowDataPMT.h"
-*/
-#include "datatypes/ub_BeamHeader.h"
-#include "datatypes/ub_BeamData.h"
+#include "datatypes/raw_data_access.h"
+
 
 
 
@@ -70,8 +54,8 @@ namespace lris {
 
   // ======================================================================
   LArRawInputDriverUBooNE::LArRawInputDriverUBooNE(fhicl::ParameterSet const & ps, 
-						   art::ProductRegistryHelper &helper,
-						   art::SourceHelper const &pm)
+                                                   art::ProductRegistryHelper &helper,
+                                                   art::SourceHelper const &pm)
     :
     fSourceHelper(pm),
     fCurrentSubRunID(),
@@ -93,12 +77,12 @@ namespace lris {
       std::vector<std::string> hist;
       boost::split(hist, it, boost::is_any_of(","));
       if (hist.size() != 4)
-	mf::LogWarning("") << "Bad definition in fhicl file for histogram "<<hist.at(0)<<". Ignoring it.";
+        mf::LogWarning("") << "Bad definition in fhicl file for histogram "<<hist.at(0)<<". Ignoring it.";
       else {
-	TH1D* h=tfbeamdir.make<TH1D>(hist[0].c_str(),hist[0].c_str(),
-				      atoi(hist[1].c_str()),atof(hist[2].c_str()),atof(hist[3].c_str()));
-	std::pair<std::string, TH1D*> p(hist[0],h);
-	fHistMapBeam.insert(p);
+        TH1D* h=tfbeamdir.make<TH1D>(hist[0].c_str(),hist[0].c_str(),
+                                      atoi(hist[1].c_str()),atof(hist[2].c_str()),atof(hist[3].c_str()));
+        std::pair<std::string, TH1D*> p(hist[0],h);
+        fHistMapBeam.insert(p);
       }
     }
   }
@@ -116,7 +100,7 @@ namespace lris {
     
   // ======================================================================
   void LArRawInputDriverUBooNE::readFile(std::string const &name,
-					 art::FileBlock* &fb)
+                                         art::FileBlock* &fb)
   {
     // Fill and return a new Fileblock.
     fb = new art::FileBlock(art::FileFormatVersion(1, "LArRawInput 2011a"),
@@ -127,7 +111,7 @@ namespace lris {
     // Throwing an exception if the file fails to open
     if( !fInputStream.is_open() ) {
       throw art::Exception( art::errors::FileReadError )
-	<< "failed to open input file " << name << std::endl;
+        << "failed to open input file " << name << std::endl;
     }
 
     //seek to the end of file, check the end word, check number of events and sizes
@@ -138,7 +122,7 @@ namespace lris {
 
     if(end_of_file_marker != 0xe0f0){
       throw art::Exception( art::errors::FileReadError )
-	<< "File "<<name<<" has incorrect end of file marker. "<< end_of_file_marker<<std::endl;
+        << "File "<<name<<" has incorrect end of file marker. "<< end_of_file_marker<<std::endl;
     }
     
     //get number of events from word at end of file
@@ -168,13 +152,13 @@ namespace lris {
     fChannelMap.clear();
     mf::LogInfo("")<<"Fetching channel map from DB";
 
-    PGconn *conn = PQconnectdb("host=fnalpgsdev.fnal.gov port=5436 dbname=uboonedaq_dev user=uboonedaq_web password=argon!uBooNE");	
+    PGconn *conn = PQconnectdb("host=fnalpgsdev.fnal.gov port=5436 dbname=uboonedaq_dev user=uboonedaq_web password=argon!uBooNE");        
     
     if(PQstatus(conn)!=CONNECTION_OK) {
       mf::LogError("") << "Couldn't open connection to postgresql interface";
       PQfinish(conn);
       throw art::Exception( art::errors::FileReadError )
-	<< "Failed to get channel map from DB." << std::endl;
+        << "Failed to get channel map from DB." << std::endl;
     }
 
     PGresult *res  = PQexec(conn, "BEGIN");    
@@ -183,24 +167,24 @@ namespace lris {
       PQclear(res);
       PQfinish(conn);
       throw art::Exception( art::errors::FileReadError )
-	<< "postgresql BEGIN failed." << std::endl;
+        << "postgresql BEGIN failed." << std::endl;
     }
 
     // Andrzej's changed database
 
     PQclear(res);
     res = PQexec(conn,
-		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
-		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN ADCreceivers_copy_new NATURAL JOIN crates NATURAL JOIN fecards"
-		 );
+                 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
+                 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN ADCreceivers_copy_new NATURAL JOIN crates NATURAL JOIN fecards"
+                 );
 
     // Standard & wrong Hoot database
     /*
     PQclear(res);
     res = PQexec(conn,
-		 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
-		 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables NATURAL JOIN ADCreceivers NATURAL JOIN crates NATURAL JOIN fecards"
-		 );
+                 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
+                 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables NATURAL JOIN ADCreceivers NATURAL JOIN crates NATURAL JOIN fecards"
+                 );
     */
     if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
     {
@@ -208,7 +192,7 @@ namespace lris {
       PQclear(res);
       PQfinish(conn);
       throw art::Exception( art::errors::FileReadError )
-	<< "postgresql SELECT failed." << std::endl;
+        << "postgresql SELECT failed." << std::endl;
     }
 
     int num_records=PQntuples(res);
@@ -223,22 +207,22 @@ namespace lris {
 
 
       if (crate_id==9 && slot==5)
-	boardChan = (channel_id-32)%64;
+        boardChan = (channel_id-32)%64;
 
       /*
       std::cout << "Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
-		<< slot << ", " << boardChan << "]";
+                << slot << ", " << boardChan << "]";
       std::cout << "\tCh. Id (LArSoft): " << larsoft_chan  << std::endl;
       */
       daqid_t daq_id(crate_id,slot,boardChan);
       std::pair<daqid_t, int> p(daq_id,larsoft_chan);
 
       if (fChannelMap.find(daq_id) != fChannelMap.end()){
-	std::cout << "Multiple entries!" << std::endl;
-	mf::LogWarning("")<<"Multiple DB entries for same (crate,card,channel). "<<std::endl
-		       <<"Redefining (crate,card,channel)=>id link ("
-		       <<daq_id.crate<<", "<<daq_id.card<<", "<<daq_id.channel<<")=>"
-		       <<fChannelMap[daq_id];
+        std::cout << "Multiple entries!" << std::endl;
+        mf::LogWarning("")<<"Multiple DB entries for same (crate,card,channel). "<<std::endl
+                       <<"Redefining (crate,card,channel)=>id link ("
+                       <<daq_id.crate<<", "<<daq_id.card<<", "<<daq_id.channel<<")=>"
+                       <<fChannelMap[daq_id];
       }
       fChannelMap.insert(p);
     }
@@ -246,10 +230,10 @@ namespace lris {
 
   // =====================================================================
   bool LArRawInputDriverUBooNE::readNext(art::RunPrincipal* const &/*inR*/,
-					 art::SubRunPrincipal* const &/*inSR*/,
-					 art::RunPrincipal* &outR,
-					 art::SubRunPrincipal* &outSR,
-					 art::EventPrincipal* &outE)
+                                         art::SubRunPrincipal* const &/*inSR*/,
+                                         art::RunPrincipal* &outR,
+                                         art::SubRunPrincipal* &outSR,
+                                         art::EventPrincipal* &outE)
   {
     // Create empty result, then fill it from current file:
     std::unique_ptr<raw::DAQHeader> daq_header(new raw::DAQHeader);
@@ -268,34 +252,34 @@ namespace lris {
       art::Timestamp tstamp = daq_header->GetTimeStamp();
       art::SubRunID newID(rn, daq_header->GetSubRun());
       if (fCurrentSubRunID.runID() != newID.runID()) { // New Run
-	outR = fSourceHelper.makeRunPrincipal(rn, tstamp);
+        outR = fSourceHelper.makeRunPrincipal(rn, tstamp);
       }
       if (fCurrentSubRunID != newID) { // New SubRun
-	outSR = fSourceHelper.makeSubRunPrincipal(rn,
-						  daq_header->GetSubRun(),
-						  tstamp);
-	fCurrentSubRunID = newID;	
+        outSR = fSourceHelper.makeSubRunPrincipal(rn,
+                                                  daq_header->GetSubRun(),
+                                                  tstamp);
+        fCurrentSubRunID = newID;        
       }
 
       outE = fSourceHelper.makeEventPrincipal(fCurrentSubRunID.run(),
-						fCurrentSubRunID.subRun(),
-						daq_header->GetEvent(),
-						tstamp);
+                                                fCurrentSubRunID.subRun(),
+                                                daq_header->GetEvent(),
+                                                tstamp);
     
 
       // Put products in the event.
       art::put_product_in_principal(std::move(tpc_raw_digits),
-				    *outE,
-				    "daq"); // Module label
+                                    *outE,
+                                    "daq"); // Module label
       art::put_product_in_principal(std::move(pmt_raw_digits),
-				    *outE,
-				    "daq"); // Module label
+                                    *outE,
+                                    "daq"); // Module label
       art::put_product_in_principal(std::move(daq_header),
-				    *outE,
-				    "daq"); // Module label
+                                    *outE,
+                                    "daq"); // Module label
       art::put_product_in_principal(std::move(beam_info),
-				    *outE,
-				    "daq"); // Module label
+                                    *outE,
+                                    "daq"); // Module label
      
     }
 
@@ -305,9 +289,9 @@ namespace lris {
 
   // =====================================================================
   bool LArRawInputDriverUBooNE::processNextEvent(std::vector<raw::RawDigit>& tpcDigitList,
-						 std::vector<optdata::FIFOChannel>& pmtDigitList,
-						 raw::DAQHeader& daqHeader,
-						 raw::BeamInfo& beamInfo)
+                                                 std::vector<optdata::FIFOChannel>& pmtDigitList,
+                                                 raw::DAQHeader& daqHeader,
+                                                 raw::BeamInfo& beamInfo)
   {       
     fInputStream.seekg(fEventLocation[fEventCounter]);
     try {
@@ -324,7 +308,7 @@ namespace lris {
 
     } catch ( art::Exception const& e ) {
       throw art::Exception( art::errors::FileReadError )
-	<< "Failed to read the event."<<e.what() << std::endl;
+        << "Failed to read the event."<<e.what() << std::endl;
     }
   
     return true;
@@ -332,7 +316,7 @@ namespace lris {
   
   // =====================================================================
   void LArRawInputDriverUBooNE::fillDAQHeaderData(ubdaq::ub_EventRecord& event_record,
-						  raw::DAQHeader& daqHeader)
+                                                  raw::DAQHeader& daqHeader)
   {
       ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
       
@@ -366,7 +350,7 @@ namespace lris {
 
   // =====================================================================
   void LArRawInputDriverUBooNE::fillTPCData(ubdaq::ub_EventRecord& event_record,
-					    std::vector<raw::RawDigit>& tpcDigitList)
+                                            std::vector<raw::RawDigit>& tpcDigitList)
   {    
       // ### Swizzling to get the number of channels...trying the method used in write_read.cpp
       // ### provided by Wes --- About the data:
@@ -379,24 +363,24 @@ namespace lris {
       //get the seb map, and do a loop over all sebs/crates
 
     for( auto const& seb_it : event_record.getTPCSEBMap()) {
-	
-	//get the crateHeader/crateData objects
-      //	ubdaq::crateHeader crate_header = seb_it->first;
-      //	ubdaq::crateData crate_data = seb_it->second;
+        
+        //get the crateHeader/crateData objects
+      //        ubdaq::crateHeader crate_header = seb_it->first;
+      //        ubdaq::crateData crate_data = seb_it->second;
       int tpc_seb_num = seb_it.first;
       tpc_crate_data_t const& tpc_crate = seb_it.second;
 
 
-	// Get Time information:
-	//uint32_t sebTSec = crate_header.getSebTimeSec();
-	//std::cout << "Seb Time (sec) : " << sebTSec << std::endl;
-	//crate_header_t crHeader = crate_header.getCrateHeader();
-	// GPStime in UNIX second/micro/nano info
-	//gps_time_t GPStime = crHeader.gps_time;
-	// DAQtime is time of last update of GPS time (in frame, sample, div)
-	//tbclkub_t  DAQtime = crHeader.daqClock_time;
-	//std::cout << "GPS Time seconds: " << GPStime.second << std::endl;
-	//std::cout << "DAQ Frame: " << DAQtime.frame << "\tSample: " << DAQtime.sample << std::endl;
+        // Get Time information:
+        //uint32_t sebTSec = crate_header.getSebTimeSec();
+        //std::cout << "Seb Time (sec) : " << sebTSec << std::endl;
+        //crate_header_t crHeader = crate_header.getCrateHeader();
+        // GPStime in UNIX second/micro/nano info
+        //gps_time_t GPStime = crHeader.gps_time;
+        // DAQtime is time of last update of GPS time (in frame, sample, div)
+        //tbclkub_t  DAQtime = crHeader.daqClock_time;
+        //std::cout << "GPS Time seconds: " << GPStime.second << std::endl;
+        //std::cout << "DAQ Frame: " << DAQtime.frame << "\tSample: " << DAQtime.sample << std::endl;
 
       auto const& tpc_crate_header = tpc_crate.header();
       auto const& tpc_crate_trailer = tpc_crate.trailer();
@@ -412,159 +396,142 @@ namespace lris {
       //been dissected (debugInfo() calls getCards()). You can do a look over the cards like so:
       for(auto const& card : tpc_crate.getCards()){
 
-	//The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
-	//object), and technically a trailer (though here it's empty!).
-	auto const& tpc_card_header = card.header();
-	auto const& tpc_card_trailer = card.trailer();
+        //The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
+        //object), and technically a trailer (though here it's empty!).
+        auto const& tpc_card_header = card.header();
+        auto const& tpc_card_trailer = card.trailer();
 
-	//Of course, you can probe for information in the card header. You'll have to find the appropriate
-	//header file to know what type you have, but again, these will follow typical practice. And, you
-	//can always use debugInfo to not only print the info, but it tells you the type.
-	auto const this_event_number = card.getEvent();
-	auto const this_frame_number = card.getFrame();
+        //Of course, you can probe for information in the card header. You'll have to find the appropriate
+        //header file to know what type you have, but again, these will follow typical practice. And, you
+        //can always use debugInfo to not only print the info, but it tells you the type.
+        auto const this_event_number = card.getEvent();
+        auto const this_frame_number = card.getFrame();
 
 
-	//And, you guessed it, the tpc card data is split up into one more level: by channel.
-	for(auto const& channel : card.getChannels()){
+        //And, you guessed it, the tpc card data is split up into one more level: by channel.
+        for(auto const& channel : card.getChannels()){
 
-	  //There's a header and trailer here. Remember these are just uint16_t, that contain the
-	  //channel number.
-	  auto const& tpc_channel_header = channel.header();
-	  auto const& tpc_channel_trailer = channel.trailer();
+            //There's a header and trailer here. Remember these are just uint16_t, that contain the
+            //channel number.
+            auto const& tpc_channel_header = channel.header();
+            auto const& tpc_channel_trailer = channel.trailer();
 
-	  //The channel object (ub_MarkedRawChannelData) has a method for returning the channel.
-	  //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
-	  //use there as well.
-	  auto const tpc_channel_number = channel.getChannelNumber();
-	    
-	  auto const& chD = channel.data();
+            //The channel object (ub_MarkedRawChannelData) has a method for returning the channel.
+            //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
+            //use there as well.
+            auto const tpc_channel_number = channel.getChannelNumber();
+            
+            
+            // MODIFIED by Nathaniel Sat May 16, to use my new version of datatypes (v6_08, on branch master)
+            // output:
+            std::vector<short> adclist;
+    
+                    //Huffman decoding
+                  if (fHuffmanDecode) {
+              channel.decompress(adclist); // All-in-one call.
+            } else {
+                    auto const& chD = channel.data();
+              adclist.reserve(chD.size()); // optimize
+              for(auto chD::const_iterator it = chD.begin(); it!= chD.end(); it++) {
+                adclist.push_back(*it);
+              }
+              chD.decompress();
+            }
 
-	    //Huffman decoding
-	  if (fHuffmanDecode) chD.decompress();
+            daqid_t daqId(crate_header.getCrateNumber(),
+                          card_header.getModule(),
+                          channel_number);
 
-	    //\todo here fill in the detector RawData structures. something like this:
-	    //\tode following code is from pulse_viewer.cpp, not sure what is the most 
-	    //      elegant way to do this
-	    //\todo adclist is a vector<short>, but need only 12bit so probably 
-	    //      ok to cast uint16_t to short
+            int ch=-1;
+            if (fChannelMap.find(daqId)!=fChannelMap.end()){
+              ch=fChannelMap[daqId];
+              //              wire=fWireMap[daqId];
+              //              pl=fPlaneMap[daqId];
+            }
+            //\todo fix this once there is a proper channel table
+            else{
+              //continue;
+              ch=10000*crate_header.getCrateNumber()
+                +100*card_header.getModule()
+                +channel_number;
+            }
 
-	    std::unique_ptr<uint16_t> blk_chD(new uint16_t);
-	    std::vector<short> adclist;
-	    size_t chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));
-	    char* cdptr=chD.getChannelDataPtr();
+            //if (int(ch) >= 8254)
+            // continue;
+            raw::Compress_t compression=raw::kHuffman;
+            if (fHuffmanDecode) compression=raw::kNone;
 
-	    for (unsigned int i=0;i<chdsize;i++) {
-	      std::copy(cdptr+i*sizeof(uint16_t),
-			cdptr+(i+1)*sizeof(uint16_t),
-			(char*)blk_chD.get());
+            raw::RawDigit rd(ch,chdsize,adclist,compression);
 
-	      adclist.push_back(*blk_chD);	      
-	    }
+            /*
+            std::cout << ch << "\t"
+                      << int(crate_header.getCrateNumber()) << "\t" 
+                      << card_header.getModule() << "\t"
+                      << channel_number << "\t"
+                      << rms << std::endl;
+            */
 
-	    daqid_t daqId(crate_header.getCrateNumber(),
-			  card_header.getModule(),
-			  channel_number);
-
-	    int ch=-1;
-	    if (fChannelMap.find(daqId)!=fChannelMap.end()){
-	      ch=fChannelMap[daqId];
-	      //	      wire=fWireMap[daqId];
-	      //	      pl=fPlaneMap[daqId];
-	    }
-	    //\todo fix this once there is a proper channel table
-	    else{
-	      //continue;
-	      ch=10000*crate_header.getCrateNumber()
-		+100*card_header.getModule()
-		+channel_number;
-	    }
-	    //if (int(ch) >= 8254)
-	    // continue;
-	    raw::Compress_t compression=raw::kHuffman;
-	    if (fHuffmanDecode) compression=raw::kNone;
-
-	    raw::RawDigit rd(ch,chdsize,adclist,compression);
-
-	    /*
-	    std::cout << ch << "\t"
-		      << int(crate_header.getCrateNumber()) << "\t" 
-		      << card_header.getModule() << "\t"
-		      << channel_number << "\t"
-		      << rms << std::endl;
-	    */
-
-	    tpcDigitList.push_back(rd);
-	  }//<--End channel_it for loop
-	}//<---End card_it for loop
+            tpcDigitList.push_back(rd);
+          }//<--End channel_it for loop
+        }//<---End card_it for loop
       }//<---End seb_it for loop
   }
 
   // =====================================================================
   void LArRawInputDriverUBooNE::fillPMTData(ubdaq::ub_EventRecord& event_record,
-					    std::vector<optdata::FIFOChannel>& pmtDigitList)
+                                            std::vector<optdata::FIFOChannel>& pmtDigitList)
   {
     //fill PMT data
 
+      // MODIFIED by Nathaniel Sat May 16, to use my new version of datatypes (v6_08, on branch master)
+    
     //crate -> card -> channel -> window
-    std::map<ubdaq::crateHeader,ubdaq::crateDataPMT,ubdaq::compareCrateHeader> seb_pmt_map = event_record.getSEBPMTMap();
-    std::map<ubdaq::crateHeader,ubdaq::crateDataPMT>::iterator seb_pmt_it;
-    for( seb_pmt_it = seb_pmt_map.begin(); seb_pmt_it != seb_pmt_map.end(); seb_pmt_it++){
-      //get the crateHeader/crateData objects
-      //crateHeader crate_header = seb_pmt_it->first;
-      ubdaq::crateDataPMT crate_pmt_data = seb_pmt_it->second;
+    
+    using namespace gov::fnal::uboone::datatypes;
+    
+    ub_EventRecord::pmt_map_t seb_pmt_map = event_record.getPMTSEBMap();
+    
+    for(pmt_map_t::const_iterator it:  seb_pmt_map) {
+      pmt_crate_data_t crate_data = it->second;
+      int crate_number = crate_data..crateHeader()->crate_number;
       
       //now get the card map (for the current crate), and do a loop over all cards
-      std::map<ubdaq::cardHeaderPMT,ubdaq::cardDataPMT>::iterator card_pmt_it;
-      std::map<ubdaq::cardHeaderPMT,ubdaq::cardDataPMT,ubdaq::compareCardHeaderPMT> card_pmt_map = crate_pmt_data.getCardMap();
-      for(card_pmt_it = card_pmt_map.begin(); card_pmt_it != card_pmt_map.end(); card_pmt_it++){
-	//get the cardHeader/cardData objects
-	//cardHeaderPMT card_pmt_header = card_pmt_it->first;
-	ubdaq::cardDataPMT card_pmt_data = card_pmt_it->second;
-	
-	//now get the channel map (for the current card), and do a loop over all channels
-	std::map<int,ubdaq::channelDataPMT> channel_pmt_map = card_pmt_data.getChannelMap();
-	std::map<int,ubdaq::channelDataPMT>::iterator channel_pmt_it;
-	for(channel_pmt_it = channel_pmt_map.begin(); channel_pmt_it != channel_pmt_map.end(); channel_pmt_it++){
-	  //get the channel number and channelData
-	  int channel_number = channel_pmt_it->first;
-	  ubdaq::channelDataPMT channel_pmt_data = channel_pmt_it->second;
-	  
-	  //now get the windows
-	  std::map<ubdaq::windowHeaderPMT,ubdaq::windowDataPMT>::iterator window_it;
-	  std::map<ubdaq::windowHeaderPMT,ubdaq::windowDataPMT,ubdaq::compareWindowHeaderPMT> window_map = channel_pmt_data.getWindowMap();
-	  for(window_it = window_map.begin(); window_it != window_map.end(); window_it++){
-	    ubdaq::windowHeaderPMT winHeader=window_it->first;
-	    ubdaq::windowDataPMT winData=window_it->second;
-	    size_t win_data_size=winData.getWindowDataSize()/sizeof(uint16_t);
-	    
-	    //\todo check category, time & frame
-	    optdata::Optical_Category_t category = optdata::kUndefined;
-	    switch (winHeader.getDiscriminant()) {
-	    case 1:
-	      category=optdata::kCosmicPMTTrigger;
-	      break;
-	    case 3:
-	      category=optdata::kBeamPMTTrigger;
-	      break;
-	    default:
-	      category=optdata::kUndefined;
-	     
-	    }
-	    optdata::TimeSlice_t time=winHeader.getSample();
-	    optdata::Frame_t frame=winHeader.getFrame();
-	    optdata::FIFOChannel rd(category, time, frame, channel_number,win_data_size);
-
-	    std::unique_ptr<uint16_t> blk_winD(new uint16_t);	    
-	    for (unsigned int i=0;i<win_data_size;i++) {
-	      std::copy(winData.getWindowDataPtr()+i*sizeof(uint16_t),
-			winData.getWindowDataPtr()+(i+1)*sizeof(uint16_t),
-			(char*)blk_winD.get());
-	      
-	      rd.push_back(*blk_winD & 0xfff);
-	    }
-	    pmtDigitList.push_back(rd);
-	  }
-	}//<--End channel_pmt_it for loop
+      std::vector<pmt_crate_data_t::card_t> const& cards = crate_data.getCards();
+       
+      for( pmt_crate_data_t::card_t const& card_data : cards ) {
+        
+        int card_number = card_data.getModule();
+        
+        // nathaniel's version of datatypes:
+        for(auto const& channel_data : card_data.getChannels() ) {
+          int channel_number = channel_data.getChannelNumber();
+          
+          //now get the windows
+          auto const& windows = channel_data.getWindows();  // vector of ub_PMT_WindowData objects
+          for(const auto& window: windows ) {
+            const auto& window_header = window.header();
+            const ub_RawData& window_data = window.data();
+            size_t win_data_size=window_data.size();
+            
+            //\todo check category, time & frame
+            optdata::Optical_Category_t category = optdata::kUndefined;
+            switch (window_header.getDiscriminantor()&0x04==0x04) {
+              category=optdata::kBeamPMTTrigger;
+            } else {
+              category=optdata::kCosmicPMTTrigger;
+            }
+            
+            optdata::TimeSlice_t time=window_header.getSample();
+            optdata::Frame_t frame=window_header.getFrame();
+            optdata::FIFOChannel rd(category, time, frame, channel_number,win_data_size);
+            rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
+            
+            for(auto it = window_data.begin(); it!= window_data.end(); it++){
+              rd.push_back(*it & 0xfff);                
+            }
+            pmtDigitList.push_back(rd);
+          }
+        }//<--End channel_pmt_it for loop
       }//<---End card_pmt_it for loop
     }//<---End seb_pmt_it for loop
     
@@ -572,7 +539,7 @@ namespace lris {
 
   // =====================================================================
   void LArRawInputDriverUBooNE::fillBeamData(ubdaq::ub_EventRecord& event_record,
-					     raw::BeamInfo& beamInfo)
+                                             raw::BeamInfo& beamInfo)
   {
     ubdaq::beamHeader bh=event_record.getBeamHeader();
     std::vector<ubdaq::beamData> bdv=event_record.getBeamDataVector();
@@ -583,9 +550,9 @@ namespace lris {
       beamInfo.SetNumberOfDevices(bh.getNumberOfDevices());
       
       for (int i=0;i<bh.getNumberOfDevices();i++) {
-	beamInfo.Set(bdv[i].getDeviceName(),bdv[i].getData());
-	if (fHistMapBeam.find(bdv[i].getDeviceName())!=fHistMapBeam.end()) 
-	  fHistMapBeam[bdv[i].getDeviceName()]->Fill(bdv[i].getData()[0]);
+        beamInfo.Set(bdv[i].getDeviceName(),bdv[i].getData());
+        if (fHistMapBeam.find(bdv[i].getDeviceName())!=fHistMapBeam.end()) 
+          fHistMapBeam[bdv[i].getDeviceName()]->Fill(bdv[i].getData()[0]);
       }
     }
   }
