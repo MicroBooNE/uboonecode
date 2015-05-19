@@ -80,14 +80,14 @@ namespace caldata {
     size_t fEventCount; ///< count of event processed
 
     int fBaselineWindowSize;   ///< window size for adaptive baseline method (M. Mooney)
-    int fBaselineSigBinBuffer;   ///< bin buffer between baseline and nearest signal bin for adaptive baseline method (M. Mooney)
+    int fBaselineMaxSigBinBuffer;   ///< bin buffer between baseline and nearest signal bin for adaptive baseline method (M. Mooney)
     double fBaselineSigThreshold;   ///< signal threshold for adaptive baseline method (M. Mooney)
 
     void SubtractBaseline(std::vector<float>& holder);
     void SubtractBaselineSimple(std::vector<float>& holder); // M. Mooney
     void SubtractBaselineAdaptive(std::vector<float>& holder); // M. Mooney
-    std::vector<bool> FindSignalRegions(const std::vector<float>& deconvVec, int windowSize, int sigBinBuffer, double sigThreshold); // M. Mooney
-    void RunAdaptiveBaselinePass(std::vector<float>& deconvVec, int runMode, int windowSize, int sigBinBuffer, double sigThreshold, const std::vector<bool>& signalRegions = std::vector<bool>()); // M. Mooney
+    std::vector<bool> FindSignalRegions(const std::vector<float>& deconvVec, int windowSize, double sigThreshold); // M. Mooney
+    void RunAdaptiveBaselinePass(std::vector<float>& deconvVec, int windowSize, int maxSigBinBuffer, double sigThreshold, const std::vector<bool>& signalRegions); // M. Mooney
 
     template <class T> void DeconvoluteInducedCharge(size_t firstChannel, std::vector<std::vector<T> >& signal) const; // M. Mooney
 
@@ -124,7 +124,7 @@ namespace caldata {
     fDoSimpleBaselineSub    = p.get< bool >       ("DoSimpleBaselineSub");
     fDoAdaptiveBaselineSub    = p.get< bool >       ("DoAdaptiveBaselineSub");
     fBaselineWindowSize   = p.get< int >        ("BaselineWindowSize");
-    fBaselineSigBinBuffer   = p.get< int >        ("BaselineSigBinBuffer");
+    fBaselineMaxSigBinBuffer   = p.get< int >        ("BaselineMaxSigBinBuffer");
     fBaselineSigThreshold   = p.get< double >        ("BaselineSigThreshold");
     fBaseVarCut       = p.get< int >        ("BaseVarCut");
     fSaveWireWF       = p.get< int >        ("SaveWireWF");
@@ -499,24 +499,24 @@ namespace caldata {
       holder.at(i) -= sum;
     }
 
-    const std::vector<bool> signalRegions = FindSignalRegions(holder,fBaselineWindowSize,fBaselineSigBinBuffer,fBaselineSigThreshold);
-    RunAdaptiveBaselinePass(holder,0,fBaselineWindowSize,fBaselineSigBinBuffer,fBaselineSigThreshold,signalRegions);
-    RunAdaptiveBaselinePass(holder,1,fBaselineWindowSize,fBaselineSigBinBuffer,fBaselineSigThreshold);
-    RunAdaptiveBaselinePass(holder,2,fBaselineWindowSize,fBaselineSigBinBuffer,fBaselineSigThreshold);
+    // first find signal regions based on simple threshold after averaging bins over set time window (signal agnostic)
+    const std::vector<bool> signalRegions = FindSignalRegions(holder,fBaselineWindowSize,fBaselineSigThreshold); // diff threshold/plane?
+    // then pass through and find best baseline under signal, setting bin not near signal to zero (in future compress into ROI's?)
+    RunAdaptiveBaselinePass(holder,20,fBaselineMaxSigBinBuffer,fBaselineSigThreshold,signalRegions); // diff threshold/plane?
 
     return;
   }
 
-  std::vector<bool> CalWireMicroBooNE::FindSignalRegions(const std::vector<float>& deconvVec, int windowSize, int sigBinBuffer, double sigThreshold)
+  std::vector<bool> CalWireMicroBooNE::FindSignalRegions(const std::vector<float>& deconvVec, int windowSize, double sigThreshold)
   {
+    // setup
     int numBins = deconvVec.size();
-
     int window = TMath::Min(windowSize,numBins);
-    window = TMath::Max(window,20);
-
+    window = TMath::Max(window,20);    
     double baselineVec[numBins];
     double newValVec[numBins];
-
+    
+    // find first baseline adjustment
     double baselineVal = 0.0;
     int index;
     for(int j = -1*window/2; j <= window/2; j++) {
@@ -526,178 +526,13 @@ namespace caldata {
         index = j-numBins;
       else
         index = j;
-
+    
       baselineVal += deconvVec[index];
     }
-
     baselineVec[0] = baselineVal/(window+1);
     newValVec[0] = deconvVec[0]-baselineVec[0];
-
-    int oldIndex;
-    int newIndex;
-    for(int j = 1; j < numBins; j++){
-      if(j-window/2-1 < 0)
-        oldIndex = j-window/2-1+numBins;
-      else
-        oldIndex = j-window/2-1;
-
-      if(j+window/2 > numBins-1)
-        newIndex = j+window/2-numBins;
-      else
-        newIndex = j+window/2;
-
-      baselineVal -= deconvVec[oldIndex];
-      baselineVal += deconvVec[newIndex];
-
-      baselineVec[j] = baselineVal/(window+1);
-      newValVec[j] = deconvVec[j]-baselineVec[j];
-    }
-
-    std::vector<bool> isNearSigVec;
-
-    bool baselineFlag;
-    for(int j = 0; j < numBins; j++) {
-      baselineFlag = false;
-      for(int k = j-sigBinBuffer; k <= j+sigBinBuffer; k++) {
-	if(k < 0)
-          index = k+numBins;
-        else if(k > numBins-1)
-          index = k-numBins;
-        else
-          index = k;
-
-        if(newValVec[index] > sigThreshold)
-          baselineFlag = true;
-      }
-      isNearSigVec.push_back(baselineFlag);
-    }
-
-    return isNearSigVec;
-  }
-
-  void CalWireMicroBooNE::RunAdaptiveBaselinePass(std::vector<float>& deconvVec, int runMode, int windowSize, int sigBinBuffer, double sigThreshold, const std::vector<bool>& signalRegions)
-  {
-    if((runMode < 0) || (runMode > 2))
-      return;
-
-    int numBins = deconvVec.size();
-
-    double baselineVec[numBins];
-    bool isFilledVec[numBins];
-    bool isNearSigVec[numBins];
-
-    int index;
-
-    if(signalRegions.size() == 0) {
-      bool baselineFlag;
-      for(int j = 0; j < numBins; j++) {
-	baselineFlag = false;
-	for(int k = j-sigBinBuffer; k <= j+sigBinBuffer; k++) {
-	  if(k < 0)
-	    index = k+numBins;
-	  else if(k > numBins-1)
-	     index = k-numBins;
-	  else
-	     index = k;
-
-	  if(deconvVec[index] > sigThreshold)
-	     baselineFlag = true;
-	}
-	isNearSigVec[j] = baselineFlag;
-      }
-    }
-    else {
-      for(int j = 0; j < numBins; j++) {
-        isNearSigVec[j] = signalRegions[j];
-      }
-    }
-
-    int window = TMath::Max(20,TMath::Min(windowSize,numBins));
-    int minWindowBins = TMath::Max(10,TMath::Min(window/10,2*sigBinBuffer));
-    if(runMode != 0) {
-      int counter = 0;
-      while(counter < numBins+minWindowBins) {
-	if((isNearSigVec[counter % numBins] == true) && (isNearSigVec[(counter+1) % numBins] == false) && (isNearSigVec[(counter+minWindowBins) % numBins] == true)) {
-	  for(int k = 1; k <= minWindowBins; k++) {
-	    isNearSigVec[(counter+k) % numBins] = true;
-       	  }
-        }
-        else {
-          counter++;
-	}
-      }
-
-      bool nearSigFlag = false;
-      int nearSigCount = 0;
-      int maxNearSig = 0;
-      for(int j = 0; j < numBins; j++) {
-	if(isNearSigVec[j] == true) {
-	  if(nearSigFlag == false)
-	    nearSigFlag = true;
-
-	  nearSigCount++;
-	}
-        else {
-          if(nearSigFlag == true) {
-	    if(nearSigCount > maxNearSig)
-	      maxNearSig = nearSigCount;
-
-      	    nearSigFlag = false;
-       	    nearSigCount = 0;
-	  }
-        }
-      }
-
-      int index = 0;
-      while((nearSigFlag == true) && (index < numBins)) {
-	if(isNearSigVec[index] == true) {
-	  nearSigCount++;
-	  index++;
-	}
-        else {
-          nearSigFlag = false;
-        }
-      }
-      int newWindowEstimate = TMath::Max(maxNearSig,nearSigCount);
-
-      if((newWindowEstimate == 0) || (window < newWindowEstimate))
-        return;
-
-      if(runMode == 1)
-	window = (window+newWindowEstimate)/2;
-      else if(runMode == 2)
-        window = newWindowEstimate;
-
-      window = TMath::Max(20,TMath::Min(window,numBins));
-      minWindowBins = TMath::Max(10,TMath::Min(window/10,2*sigBinBuffer));
-    }
-
-    double baselineVal = 0.0;
-    int windowBins = 0;
-    for(int j = -1*window/2; j <= window/2; j++) {
-      if(j < 0)
-        index = j+numBins;
-      else if(j > numBins-1)
-        index = j-numBins;
-      else
-        index = j;
-
-      if(isNearSigVec[index] == false) {
-        baselineVal += deconvVec[index];
-        windowBins++;
-      }
-    }
-
-    if(windowBins == 0)
-      baselineVec[0] = 0.0;
-    else
-      baselineVec[0] = baselineVal/windowBins;
-
-    if(windowBins < minWindowBins)
-      isFilledVec[0] = false;
-    else
-      isFilledVec[0] = true;
-
+    
+    // now adjust baseline everywhere in one pass using deltas
     int oldIndex;
     int newIndex;
     for(int j = 1; j < numBins; j++) {
@@ -705,97 +540,242 @@ namespace caldata {
         oldIndex = j-window/2-1+numBins;
       else
         oldIndex = j-window/2-1;
-
+    
       if(j+window/2 > numBins-1)
         newIndex = j+window/2-numBins;
       else
         newIndex = j+window/2;
+     
+      baselineVal -= deconvVec[oldIndex];
+      baselineVal += deconvVec[newIndex];
+    
+      baselineVec[j] = baselineVal/(window+1);
+      newValVec[j] = deconvVec[j]-baselineVec[j];
+    }
+    
+    // define signal regions based on simple threshold
+    std::vector<bool> signalRegions;
+    for(int j = 0; j < numBins; j++) {
+      if(newValVec[j] > sigThreshold)
+        signalRegions.push_back(true);
+      else
+        signalRegions.push_back(false);
+    }
+    
+    // return boolean vector representing signal regions
+    return signalRegions;
+  }
 
-      if(isNearSigVec[oldIndex] == false) {
-	baselineVal -= deconvVec[oldIndex];
-	windowBins--;
+  void CalWireMicroBooNE::RunAdaptiveBaselinePass(std::vector<float>& deconvVec, int windowSize, int maxSigBinBuffer, double sigThreshold, const std::vector<bool>& signalRegions)
+  {
+    // setup
+    int numBins = deconvVec.size();
+    int window = TMath::Min(windowSize,numBins);
+    int minWindowBins = window/2;
+    bool isNearSigVec[numBins];
+    double baselineVec[numBins];
+    bool isFilledVec[numBins];
+  
+    // initialize signal region array
+    for(int j = 0; j < numBins; j++) {
+      isNearSigVec[j] = signalRegions.at(j);
+    }
+  
+    // find signal bin buffer based on biggest signal width (defined using threshold)
+    int counter = 0;
+    int firstBin;
+    int lastBin;
+    int sigWidth;
+    int sigBinBuffer;
+    int thisBin;
+    while(counter < numBins-1) {
+      if(((signalRegions.at(counter) == false) && (signalRegions.at(counter+1) == true)) || ((counter == 0) && (signalRegions.at(counter) == true))) {
+        if(counter == 0) {
+          firstBin = counter;
+          lastBin = counter;
+        }
+        else {
+          firstBin = counter+1;
+          lastBin = counter+1;
+        }
+  
+        while((lastBin < numBins) && (signalRegions.at(lastBin) == true))
+          lastBin++;
+  
+        sigWidth = lastBin-firstBin;
+        sigBinBuffer = TMath::Max(10,TMath::Min(2*sigWidth,maxSigBinBuffer));
+  
+        thisBin = firstBin-1;
+        while((thisBin >= 0) && (firstBin-thisBin <= sigBinBuffer)) {
+          isNearSigVec[thisBin] = true;
+          thisBin--;
+        }
+  
+        thisBin = lastBin+1;
+        while((thisBin < numBins) && (thisBin-lastBin <= sigBinBuffer)) {
+          isNearSigVec[thisBin] = true;
+          thisBin++;
+        }        
       }
+  
+      counter++;
+    }
+  
+    // merge two signal regions if they are too close
+    int counter2 = 0;
+    while(counter2 < numBins+minWindowBins) {
+      if((isNearSigVec[counter2 % numBins] == true) && (isNearSigVec[(counter2+1) % numBins] == false) && (isNearSigVec[(counter2+minWindowBins) % numBins] == true)) {
+        for(int k = 1; k <= minWindowBins; k++) {
+          isNearSigVec[(counter2+k) % numBins] = true;
+        }
+      }
+      else {
+        counter2++;
+      }
+    }
+    
+    // find first baseline adjustment, ignoring signal regions
+    double baselineVal = 0.0;
+    int windowBins = 0;
+    int index;
+    for(int j = -1*window/2; j <= window/2; j++) {
+      if(j < 0)
+        index = j+numBins;
+      else if(j > numBins-1)
+        index = j-numBins;
+      else
+        index = j;
+    
+      if(isNearSigVec[index] == false) {
+        baselineVal += deconvVec[index];
+        windowBins++;
+      }
+    }
+  
+    if(windowBins == 0)
+      baselineVec[0] = 0.0;
+    else
+      baselineVec[0] = baselineVal/windowBins;
+    
+    if(windowBins < minWindowBins)
+      isFilledVec[0] = false;
+    else
+      isFilledVec[0] = true;
 
-      if(isNearSigVec[newIndex] == false)
-      {
+    // now find all baseline adjustments, ignoring signal regions, in one pass using deltas
+    int oldIndex;
+    int newIndex;
+    for(int j = 1; j < numBins; j++) {
+      if(j-window/2-1 < 0)
+        oldIndex = j-window/2-1+numBins;
+      else
+        oldIndex = j-window/2-1;
+    
+      if(j+window/2 > numBins-1)
+        newIndex = j+window/2-numBins;
+      else
+        newIndex = j+window/2;
+     
+      if(isNearSigVec[oldIndex] == false) {
+        baselineVal -= deconvVec[oldIndex];
+        windowBins--;
+      }
+    
+      if(isNearSigVec[newIndex] == false) {
         baselineVal += deconvVec[newIndex];
         windowBins++;
       }
-
+    
       if(windowBins == 0)
         baselineVec[j] = 0.0;
       else
         baselineVec[j] = baselineVal/windowBins;
-
+    
       if(windowBins < minWindowBins)
         isFilledVec[j] = false;
       else
         isFilledVec[j] = true;
     }
 
+    // calculate linear interpolation of baseline across signal regions and apply baseline adjustments  
     int downIndex;
     int upIndex;
     for(int j = 0; j < numBins; j++) {
       if(isFilledVec[j] == false) {
         downIndex = j;
-	while(isFilledVec[downIndex] == false) {
-	  downIndex--;
-
+        while(isFilledVec[downIndex] == false) {
+          downIndex--;
+    
           if(downIndex < 0)
             downIndex = downIndex+numBins;
-	}
-
-	upIndex = j;
-	while(isFilledVec[upIndex] == false) {
-	  upIndex++;
-
-	  if(upIndex > numBins-1)
-	    upIndex = upIndex-numBins;
-	}
-
-	if((upIndex < j) && (downIndex > j))
-	  baselineVec[j] = ((j-downIndex+numBins)*baselineVec[downIndex]+(upIndex+numBins-j)*baselineVec[upIndex])/((double)upIndex+numBins-downIndex+numBins);
+  
+          if(downIndex == j)
+            return;
+        }
+    
+        upIndex = j;
+        while(isFilledVec[upIndex] == false) {
+          upIndex++;
+    
+          if(upIndex > numBins-1)
+            upIndex = upIndex-numBins;
+  
+          if(upIndex == j)
+            return;
+        }
+  
+        if((upIndex < j) && (downIndex > j))
+          baselineVec[j] = ((j-downIndex+numBins)*baselineVec[downIndex]+(upIndex+numBins-j)*baselineVec[upIndex])/((double) upIndex+numBins-downIndex+numBins);
         else if(upIndex < j)
           baselineVec[j] = ((j-downIndex)*baselineVec[downIndex]+(upIndex+numBins-j)*baselineVec[upIndex])/((double) upIndex+numBins-downIndex);
         else if(downIndex > j)
           baselineVec[j] = ((j-downIndex+numBins)*baselineVec[downIndex]+(upIndex-j)*baselineVec[upIndex])/((double) upIndex-downIndex+numBins);
         else
-	  baselineVec[j] = ((j-downIndex)*baselineVec[downIndex]+(upIndex-j)*baselineVec[upIndex])/((double) upIndex-downIndex);
+          baselineVec[j] = ((j-downIndex)*baselineVec[downIndex]+(upIndex-j)*baselineVec[upIndex])/((double) upIndex-downIndex);
       }
-
-      deconvVec[j] -= baselineVec[j];
+    
+      // set bins not near signal to zero - in future we should just compress into ROI's for use in hit-finding/clustering/tracking
+      if(isNearSigVec[j] == false) {
+        deconvVec[j] = 0.0;
+      }
+      else {
+        deconvVec[j] -= baselineVec[j];
+      }
     }
   }
 }
 
 template <class T> void caldata::CalWireMicroBooNE::DeconvoluteInducedCharge(size_t firstChannel, std::vector<std::vector<T> >& signal) const
 {
+  // setup services
   art::ServiceHandle<util::LArFFT> fft;
   art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
   art::ServiceHandle<geo::Geometry> geom;
 
+  // additional setup
   auto planeNum = (size_t)geom->View(firstChannel);
-
   int numBins = signal.at(0).size();
   int numWires = signal.size();
   int numResp = sss->GetNResponses().at(1).at(planeNum);
 
+  // setup vectors
   std::vector<std::vector<TComplex> > signalFreqVecs;
   signalFreqVecs.resize(numWires);
-
   std::vector<std::vector<TComplex> > respFreqVecs;
   respFreqVecs.resize(numWires);
-
   std::vector<double> wireFactors;
   wireFactors.resize(numWires);
 
+  // prepare FFT for time-domain case
   fft->ReinitializeFFT(numBins,fft->FFTOptions(),fft->FFTFitBins());
-      
+  
+  // do raw digit time-domain FFT
   for(size_t k = 0; k < (size_t)numWires; k++) {
     signalFreqVecs[k].resize(numBins);
     fft->DoFFT(signal[k],signalFreqVecs[k]);
   }
 
+  // do response function time-domain FFT
   for(size_t k = 0; k < (size_t)numResp; k++) {
     respFreqVecs[numResp-1-k] = sss->GetConvKernel(firstChannel,k);
     respFreqVecs[numResp-1-k].resize(numBins);
@@ -811,12 +791,15 @@ template <class T> void caldata::CalWireMicroBooNE::DeconvoluteInducedCharge(siz
     }
   }
 
+  // cache filter values for wire-domain projection
   for(size_t k = 0; k < (size_t)numWires; k++) {
     wireFactors[k] = sss->Get2DFilterVal(planeNum,2,((double) k)/((double) numWires));
   }
 
+  // prepare FFT for wire-domain case
   fft->ReinitializeFFT(numWires,fft->FFTOptions(),fft->FFTFitBins());
 
+  // setup complex-to-complex FFT's for wire-domain cases (should port this type into LArFFT)
   TFFTComplex *fFFTComplex;
   fFFTComplex = new TFFTComplex(numWires,false);
   TFFTComplex *fInverseFFTComplex;
@@ -825,8 +808,10 @@ template <class T> void caldata::CalWireMicroBooNE::DeconvoluteInducedCharge(siz
   fFFTComplex->Init(fft->FFTOptions().c_str(),-1,dummy);
   fInverseFFTComplex->Init(fft->FFTOptions().c_str(),1,dummy);
 
+  // get normalization factor for 2D filter
   double normFactor = sss->Get2DFilterNorm(planeNum);
 
+  // do loop over time-domain frequencies, doing FFT/inverse-FFT in wire-domain for each
   std::vector<TComplex> signalFreqVecTemp;
   std::vector<TComplex> respFreqVecTemp;
   std::vector<TComplex> signalFreqVecTemp2;
@@ -840,53 +825,54 @@ template <class T> void caldata::CalWireMicroBooNE::DeconvoluteInducedCharge(siz
   resultFreqVecTemp.resize(numWires);
   resultFreqVecTemp2.resize(numWires);
   for(size_t j = 0; j < (size_t)numBins; j++) {
+    // setup for this iteration
     for(size_t k = 0; k < (size_t)numWires; k++) {
       signalFreqVecTemp[k] = signalFreqVecs[k][j];
       respFreqVecTemp[k] = respFreqVecs[k][j];
     }
-
     double real = 0.0;
     double imaginary = 0.0;
     
+    // do raw digit wire-domain FFT
     for(size_t p = 0; p < (size_t)numWires; ++p) {
       fFFTComplex->SetPointComplex(p, signalFreqVecTemp[p]);
     }
-
     fFFTComplex->Transform();    
-
     for(size_t i = 0; i < (size_t)numWires; ++i) {
       fFFTComplex->GetPointComplex(i, real, imaginary);    
       signalFreqVecTemp2[i] = TComplex(real, imaginary);  
     }  
 
+    // do response function wire-domain FFT
     for(size_t p = 0; p < (size_t)numWires; ++p) {
       fFFTComplex->SetPointComplex(p, respFreqVecTemp[p]);
     }
-
     fFFTComplex->Transform();    
-
     for(size_t i = 0; i < (size_t)numWires; ++i) {
       fFFTComplex->GetPointComplex(i, real, imaginary);    
       respFreqVecTemp2[i] = TComplex(real, imaginary);  
     }  
 
+    // get filter values for time-domain projection
     double timeFactor = sss->Get2DFilterVal(planeNum,1,((double) j)/((double) numBins));
+
+    // apply 2D filter
     for(size_t k = 0; k < (size_t)numWires; ++k) {
       double filterFactor = (timeFactor*wireFactors[k])/normFactor;
       resultFreqVecTemp[k] = TComplex(filterFactor*(signalFreqVecTemp2[k].Re()*respFreqVecTemp2[k].Re()+signalFreqVecTemp2[k].Im()*respFreqVecTemp2[k].Im())/(respFreqVecTemp2[k].Im()*respFreqVecTemp2[k].Im()+respFreqVecTemp2[k].Re()*respFreqVecTemp2[k].Re())/((double) numWires),filterFactor*(signalFreqVecTemp2[k].Im()*respFreqVecTemp2[k].Re()-signalFreqVecTemp2[k].Re()*respFreqVecTemp2[k].Im())/(respFreqVecTemp2[k].Im()*respFreqVecTemp2[k].Im()+respFreqVecTemp2[k].Re()*respFreqVecTemp2[k].Re())/((double) numWires));
     }
 
+    // do wire-domain inverse-FFT for result vector
     for(size_t p = 0; p < (size_t)numWires; ++p) {
       fInverseFFTComplex->SetPointComplex(p, resultFreqVecTemp[p]);
     }
-
     fInverseFFTComplex->Transform();    
-
     for(size_t i = 0; i < (size_t)numWires; ++i) {
       fInverseFFTComplex->GetPointComplex(i, real, imaginary);    
       resultFreqVecTemp2[i] = TComplex(real,imaginary);
     }  
 
+    // store result for this iteration
     int shift;
     for(size_t i = 0; i < (size_t)numWires; ++i) {
       shift = i-numResp-1;
@@ -897,8 +883,10 @@ template <class T> void caldata::CalWireMicroBooNE::DeconvoluteInducedCharge(siz
     }
   }
 
+  // prepare FFT for time-domain case (second time)
   fft->ReinitializeFFT(numBins,fft->FFTOptions(),fft->FFTFitBins());
 
+  // do time-domain inverse-FFT for results vectors and store final result of 2D deconvolution
   int time_offset = sss->FieldResponseTOffset(firstChannel,1);
   for(size_t k = 0; k < (size_t)numWires; k++) {
     fft->DoInvFFT(signalFreqVecs[k],signal[k]);
@@ -916,6 +904,7 @@ template <class T> void caldata::CalWireMicroBooNE::DeconvoluteInducedCharge(siz
     }
   }
 
+  // finish 2D deconvolution
   return;
 }
 
