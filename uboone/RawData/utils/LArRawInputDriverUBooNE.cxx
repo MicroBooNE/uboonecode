@@ -4,7 +4,7 @@
 /// \Original Authors
 /// \version $Id: LArRawInputDriver.h,v 1.7 2010/01/14 19:20:33 brebel Exp $
 /// \author  brebel@fnal.gov, soderber@fnal.gov
-/// \MicroBooNE Author: jasaadi@fnal.gov, zsrko@fnal.gov (with much help from Wes and Eric)
+/// \MicroBooNE Author: jasaadi@fnal.gov, zarko@fnal.gov (with much help from Wes and Eric)
 ////////////////////////////////////////////////////////////////////////
 
 //LArSoft 
@@ -368,7 +368,7 @@ namespace lris {
         //get the crateHeader/crateData objects
       //        ubdaq::crateHeader crate_header = seb_it->first;
       //        ubdaq::crateData crate_data = seb_it->second;
-      int tpc_seb_num = seb_it.first;
+      //      int tpc_seb_num = seb_it.first;
       tpc_crate_data_t const& tpc_crate = seb_it.second;
 
 
@@ -383,14 +383,14 @@ namespace lris {
         //std::cout << "GPS Time seconds: " << GPStime.second << std::endl;
         //std::cout << "DAQ Frame: " << DAQtime.frame << "\tSample: " << DAQtime.sample << std::endl;
 
-      // auto const& tpc_crate_header = tpc_crate.header();    // unsued
-      // auto const& tpc_crate_trailer = tpc_crate.trailer();  // unused.
+      //      auto const& tpc_crate_header = tpc_crate.header();    
+      //      auto const& tpc_crate_trailer = tpc_crate.trailer();  
 
       //Special to the crate, there is a special header that the DAQ attaches. You can access this
       //like so. The type here is a unique ptr to a ub_CrateHeader_v6 struct. That has useful info
       //like the local host time, which may or may not be set properly right now...
       auto const& tpc_crate_DAQ_header = tpc_crate.crateHeader(); // I think auto should be tpc_crate_data_t::ub_CrateHeader_t --NJT
-      ub_LocalHostTime this_time = tpc_crate_DAQ_header->local_host_time;
+      //     ub_LocalHostTime this_time = tpc_crate_DAQ_header->local_host_time;
       
       //The Crate Data is split up into Cards. You use the "getCards()" command to get access to
       //each of those. Note that calling this function will dissect the data if it has not already
@@ -399,8 +399,8 @@ namespace lris {
 
         //The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
         //object), and technically a trailer (though here it's empty!).
-        // auto const& tpc_card_header = card.header();   // not really used
-        // auto const& tpc_card_trailer = card.trailer(); // not really used
+	//	auto const& tpc_card_header = card.header();   
+	//	auto const& tpc_card_trailer = card.trailer(); 
 
         //Of course, you can probe for information in the card header. You'll have to find the appropriate
         //header file to know what type you have, but again, these will follow typical practice. And, you
@@ -421,27 +421,28 @@ namespace lris {
             //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
             //use there as well.
             auto const tpc_channel_number = channel.getChannelNumber(); // auto is int here
-            
-            
-            // MODIFIED by Nathaniel Sat May 16, to use my new version of datatypes (v6_08, on branch master)
+                        
+
             // output:
             std::vector<short> adclist;
-    
+	    size_t chdsize(0);
                     //Huffman decoding
-                  if (fHuffmanDecode) {
+	    if (fHuffmanDecode) {
               channel.decompress(adclist); // All-in-one call.
             } else {
-              const ubRawData& chD = channel.data(); 
+              const ub_RawData& chD = channel.data(); 
+	      //	      chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
+	      chdsize = chD.size()/sizeof(uint16_t);    
               adclist.reserve(chD.size()); // optimize
-              for(ubRawData::const_iterator it = chD.begin(); it!= chD.end(); it++) {
+              for(ub_RawData::const_iterator it = chD.begin(); it!= chD.end(); it++) {
                 adclist.push_back(*it);
               }
-              chD.decompress();
+	      //              chD.decompress();
             }
 
-            daqid_t daqId(crate_header.getCrateNumber(),
-                          card_header.getModule(),
-                          channel_number);
+            daqid_t daqId(tpc_crate.crateHeader()->crate_number,
+                          card.getModule(),
+                          tpc_channel_number);
 
             int ch=-1;
             if (fChannelMap.find(daqId)!=fChannelMap.end()){
@@ -452,9 +453,9 @@ namespace lris {
             //\todo fix this once there is a proper channel table
             else{
               //continue;
-              ch=10000*crate_header.getCrateNumber()
-                +100*card_header.getModule()
-                +channel_number;
+              ch=10000*tpc_crate.crateHeader()->crate_number
+                +100*card.getModule()
+                +tpc_channel_number;
             }
 
             //if (int(ch) >= 8254)
@@ -490,11 +491,11 @@ namespace lris {
     
     using namespace gov::fnal::uboone::datatypes;
     
-    ub_EventRecord::pmt_map_t seb_pmt_map = event_record.getPMTSEBMap();
+    auto const seb_pmt_map = event_record.getPMTSEBMap();
     
-    for(pmt_map_t::const_iterator it:  seb_pmt_map) {
-      pmt_crate_data_t crate_data = it->second;
-      int crate_number = crate_data..crateHeader()->crate_number;
+    for(auto const& it:  seb_pmt_map) {
+      pmt_crate_data_t const& crate_data = it.second;
+      int crate_number = crate_data.crateHeader()->crate_number;
       
       //now get the card map (for the current crate), and do a loop over all cards
       std::vector<pmt_crate_data_t::card_t> const& cards = crate_data.getCards();
