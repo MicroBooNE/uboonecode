@@ -495,14 +495,14 @@ namespace lris {
     
     for(auto const& it:  seb_pmt_map) {
       pmt_crate_data_t const& crate_data = it.second;
-      int crate_number = crate_data.crateHeader()->crate_number;
+      //      int crate_number = crate_data.crateHeader()->crate_number;
       
       //now get the card map (for the current crate), and do a loop over all cards
       std::vector<pmt_crate_data_t::card_t> const& cards = crate_data.getCards();
        
       for( pmt_crate_data_t::card_t const& card_data : cards ) {
         
-        int card_number = card_data.getModule();
+	//        int card_number = card_data.getModule();
         
         // nathaniel's version of datatypes:
         for(auto const& channel_data : card_data.getChannels() ) { // auto here is pmt_crate_data_t::card_t::card_channel-type
@@ -517,7 +517,7 @@ namespace lris {
             
             //\todo check category, time & frame
             optdata::Optical_Category_t category = optdata::kUndefined;
-            switch (window_header.getDiscriminantor()&0x04==0x04) {
+            if ((window_header.getDiscriminantor()&0x04)==0x04) {
               category=optdata::kBeamPMTTrigger;
             } else {
               category=optdata::kCosmicPMTTrigger;
@@ -528,7 +528,7 @@ namespace lris {
             optdata::FIFOChannel rd(category, time, frame, channel_number,win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
             
-            for(ubRawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
+            for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
               rd.push_back(*it & 0xfff);                
             }
             pmtDigitList.push_back(rd);
@@ -543,8 +543,9 @@ namespace lris {
   void LArRawInputDriverUBooNE::fillBeamData(ubdaq::ub_EventRecord& event_record,
                                              raw::BeamInfo& beamInfo)
   {
-    ubdaq::beamHeader bh=event_record.getBeamHeader();
-    std::vector<ubdaq::beamData> bdv=event_record.getBeamDataVector();
+    /*
+        ubdaq::ub_BeamHeader bh=event_record.getBeamHeader();
+    std::vector<ubdaq::ub_BeamData> bdv=event_record.getBeamDataVector();
     if (bdv.size()>0) {
       beamInfo.SetRecordType(bh.getRecordType());
       beamInfo.SetSeconds(bh.getSeconds());
@@ -557,6 +558,8 @@ namespace lris {
           fHistMapBeam[bdv[i].getDeviceName()]->Fill(bdv[i].getData()[0]);
       }
     }
+    */
   }
+
 }//<---Endlris
 
