@@ -226,6 +226,7 @@ namespace caldata {
     
     wirecol->reserve(digitVecHandle->size());
 
+    //double normSum[3] = {0.0,0.0,0.0};  //NORM CHECK (M. Mooney)
     if(!doInducedChargeDeconv) { ////////// Normal Deconvolution (No Induced Charge) //////////
       // loop over all wires
       for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){ // ++ move
@@ -265,7 +266,7 @@ namespace caldata {
       	  // Do deconvolution.
       	  sss->Deconvolute(channel, holder);
       	  for(bin = 0; bin < holder.size(); ++bin) {
-            holder[bin]=holder[bin]/DeconNorm;
+            holder[bin] /= DeconNorm;
 	  }
         } // end if not a bad channel 
         
@@ -285,8 +286,15 @@ namespace caldata {
             holder[bin]-=average;
 	  }
         }  
-        // baseline subtraction
+        // original baseline subtraction
         if(fDoBaselineSub) SubtractBaseline(holder);
+        // simple baseline subtraction - M. Mooney
+        if(fDoSimpleBaselineSub) SubtractBaselineSimple(holder);
+        // adaptive baseline subtraction - M. Mooney
+        if(fDoAdaptiveBaselineSub) SubtractBaselineAdaptive(holder);
+
+        //for(std::vector<float>::iterator vecIt = holder.begin(); vecIt != holder.end(); ++vecIt)  //NORM CHECK (M. Mooney)
+        //  normSum[(size_t)geom->View(channel)] += *vecIt;
       
         // Make a single ROI that spans the entire data size
         wirecol->push_back(recob::WireCreator(holder,*digitVec).move());
@@ -298,6 +306,10 @@ namespace caldata {
             << " with raw digit #" << digitVec.key();
         } // if failed to add association
       }
+
+      //for(size_t planeNum = 0; planeNum <=2; planeNum++) {  //NORM CHECK (M. Mooney)
+      //  std::cout << "NORM INFO:  " << planeNum << " " << normSum[planeNum] << std::endl;
+      //}
     }
     else { ////////// Deconvolution with Induced Charge (M. Mooney) //////////
 
@@ -375,9 +387,8 @@ namespace caldata {
           counter++;
 
           //normalize the holder (Xin Qian)
-          double gain = sss->GetASICGain(channel);
           for(bin = 0; bin < holder.size(); ++bin) {
-            holder[bin]=holder[bin]/DeconNorm/(gain/4.7);
+            holder[bin] /= DeconNorm;
           }
           
           holder.resize(dataSize,1e-5);
@@ -399,8 +410,12 @@ namespace caldata {
           // simple baseline subtraction - M. Mooney
           if(fDoSimpleBaselineSub) SubtractBaselineSimple(holder);
           // adaptive baseline subtraction - M. Mooney
-          if(fDoAdaptiveBaselineSub) SubtractBaselineAdaptive(holder);
-        
+          //if(fDoAdaptiveBaselineSub) SubtractBaselineAdaptive(holder);
+          SubtractBaselineAdaptive(holder); // REQUIRE (for now)
+
+	  //for(std::vector<float>::iterator vecIt = holder.begin(); vecIt != holder.end(); ++vecIt)  //NORM CHECK (M. Mooney)
+	  //  normSum[planeNum] += *vecIt;
+
           // Make a single ROI that spans the entire data size
           wirecol->push_back(recob::WireCreator(holder,*digitVec).move());
           // add an association between the last object in wirecol
@@ -411,6 +426,8 @@ namespace caldata {
               << " with raw digit #" << digitVec.key();
           } // if failed to add association
         }
+
+	//std::cout << "NORM INFO:  " << planeNum << " " << normSum[planeNum] << std::endl;  //NORM CHECK (M. Mooney)
       }
     }
 
@@ -879,7 +896,7 @@ template <class T> void caldata::CalWireMicroBooNE::DeconvoluteInducedCharge(siz
       if(shift < 0)
         shift += numWires;
 
-      signalFreqVecs[i][j] = TComplex(resultFreqVecTemp2[shift].Re()/((double) numBins),resultFreqVecTemp2[shift].Im()/((double) numBins));
+      signalFreqVecs[i][j] = TComplex(resultFreqVecTemp2[shift].Re(),resultFreqVecTemp2[shift].Im());
     }
   }
 

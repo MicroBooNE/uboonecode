@@ -29,7 +29,7 @@ microboone_signalshapingservice:
   NActiveResponses:     [ [1, 1, 1], [1, 1, 1] ]  # number of active responses per view, including primary. 1 is current number
   CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
   FieldResponseFVersion:  [ "v0.1", "v0.1" ]
-  DeconNorm: 200
+  DeconNorm: 200.
 
 # Settings for synthesized response, including adjacent wires
 
@@ -38,7 +38,7 @@ microboone_signalshapingservice:
   #NActiveResponses:     [ [5, 5, 5], [5, 5, 5] ]  # number of active responses per view, including primary.
   #CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
   #FieldResponseFVersion:   [ "v2.1", "v2.1" ]
-  #DeconNorm: 0.001542
+  #DeconNorm: 200.
 
 #----------------------------------------------------------------
 
@@ -102,6 +102,6 @@ microboone_dic_signalshapingservice.NResponses:       [ [5, 5, 5], [5, 5, 5] ]  
 microboone_dic_signalshapingservice.NActiveResponses: [ [5, 5, 5], [5, 5, 5] ]  # number of active responses per view, including primary.
 microboone_dic_signalshapingservice.CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
 microboone_dic_signalshapingservice.FieldResponseFVersion: [ "v2.1", "v2.1" ]
-microboone_dic_signalshapingservice.DeconNorm:  0.001542
+microboone_dic_signalshapingservice.DeconNorm:  200.
 
 END_PROLOG

@@ -35,7 +35,7 @@ microboone_calwire:
  DoAdaptiveBaselineSub:   false # subtract baseline after deconvolution (using adaptive method)?
  BaselineWindowSize:  200    # window size for adaptive baseline method
  BaselineMaxSigBinBuffer:  100    # bin buffer between baseline and nearest signal bin for adaptive baseline method
- BaselineSigThreshold:  300.   # signal threshold for adaptive baseline method
+ BaselineSigThreshold:  10.   # signal threshold for adaptive baseline method
  BaseVarCut:         25.  # Variance cut for selecting baseline points
  SaveWireWF:          0
  
