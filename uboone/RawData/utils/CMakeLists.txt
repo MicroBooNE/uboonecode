@@ -3,20 +3,15 @@ include_directories( $ENV{POSTGRESQL_INC} )
 include_directories( $ENV{BOOST_INC} )
 include_directories( $ENV{UBOONEDAQ_DATATYPES_INC} )
 
-##<<<<<<< HEAD
 find_ups_product( postgresql v9_1_5 )
 find_ups_product( uboonedaq_datatypes v6_08_00 )
 find_ups_product( boost v1_57_0 )
 
 cet_find_library( PQ NAMES pq PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
-#cet_find_library( UBDut NAMES udata_types PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
 find_library( UBDut NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LIB} )
-#cet_find_library( UBDuut NAMES udata_utilities PATHS ENV UBOONEDAQ_DATATYPES_LIB NO_DEFAULT_PATH )
 
 cet_find_library( BOOSER NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
 
-##=======
-##>>>>>>> v03_04_00
 #simple_plugin( LArRawInputSourceUBooNE
 #               "source"
 #               Geometry
@@ -34,10 +29,8 @@ art_make( BASENAME_ONLY
                         RawData
                         SummaryData
 			${UBDut}
-#			${UBDuut}
                         ${PQ}
 			${BOOSER}
-#                        daq_datatypes
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_SOURCES}
                         ${ART_FRAMEWORK_PRINCIPAL}
@@ -59,7 +52,8 @@ art_make( BASENAME_ONLY
 	  SOURCE_LIBRARIES Geometry
 	                OpticalDetectorData
 			RawData
-			uboone_RawData
+			${UBDut}
+#			uboone_RawData
 			SummaryData
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_IO_SOURCES}
