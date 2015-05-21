@@ -60,7 +60,7 @@ namespace opdet {
     if ( nchannel_values != channel_list.size() )
       throw UBOpticalException(Form("number of pars (%d) != # channels in list (%zu)!", nchannel_values, channel_list.size() ));
 
-    std::cout << "NReadoutChannels=" << nchannel_values << " NParams=" << tmp_params.at( kQE ).size() << std::endl;
+    //std::cout << "NReadoutChannels=" << nchannel_values << " NParams=" << tmp_params.at( kQE ).size() << std::endl;
     
     // ------------------------------------------------------------------------------------------------------
     

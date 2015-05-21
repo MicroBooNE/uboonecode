@@ -459,12 +459,12 @@ namespace geo {
       std::vector< unsigned int > chinput =  pset.get< std::vector<unsigned int> >( entryname );
       fPMT2channels[ iop ] = chinput;
 
-      std::cout << entryname << ": [";
+      //std::cout << entryname << ": [";
       for (std::vector<unsigned int>::iterator it_ch=chinput.begin(); it_ch!=chinput.end(); it_ch++) {
 	fChannel2pmt[ *it_ch ] = iop;
-	std::cout << *it_ch << ",";
+	//std::cout << *it_ch << ",";
       }
-      std::cout << "]" << std::endl;
+      //std::cout << "]" << std::endl;
     }
     
     // read in channel types
@@ -499,7 +499,7 @@ namespace geo {
       }
     }//end loop over categories
 
-    std::cout << "Number of defined readout channels: " << fNReadoutChannels << std::endl;
+    //std::cout << "Number of defined readout channels: " << fNReadoutChannels << std::endl;
     
   }
   
