@@ -27,7 +27,8 @@ namespace opdet {
 
 
   DEFINE_ENUM_WITH_STRING_CONVERSIONS( UBOpticalChannelCategory_t, \
-				       (Undefined)\
+				       (Uncategorized)\
+				       (UnspecifiedLogic)\
 				       (FEMCosmicHighGain)\
 				       (FEMCosmicLowGain)\
 				       (FEMBeamHighGain)\
@@ -36,13 +37,42 @@ namespace opdet {
 				       (FEMBeamLogicPulse)\
 				       (FEMBeamTriggerBNB)\
 				       (FEMBeamTriggerNUMI)\
-				       (FEMFlasherLogicPulse) )
+				       (FEMFlasherLogicPulse)\
+				       (NumUBOpticalChannelCategories) )
 
   DEFINE_ENUM_WITH_STRING_CONVERSIONS( UBOpticalChannelGain_t, \
+				       (Undefined)\
 				       (HighGain)\
 				       (LowGain)\
-				       (LogicChannel) )
+				       (LogicChannel)\
+				       (NumUBOpticalChannelGains) )
   
+    UBOpticalChannelGain_t GetUBTypeFromCategory( UBOpticalChannelCategory_t cat ) {
+
+    UBOpticalChannelGain_t chtype = Undefined;
+    switch ( cat ) {
+    case UnspecifiedLogic:
+    case FEMCosmicLogicPulse:
+    case FEMBeamLogicPulse:
+    case FEMBeamTriggerBNB:
+    case FEMBeamTriggerNUMI:
+    case FEMFlasherLogicPulse:
+      chtype = LogicChannel;
+      break;
+    case FEMCosmicHighGain:
+    case FEMBeamHighGain:
+      chtype = HighGain;
+      break;
+    case FEMCosmicLowGain:
+    case FEMBeamLowGain:
+      chtype = LowGain;
+      break;
+    default:
+      chtype = Undefined;
+      break;
+    }
+    return chtype;
+  }
 }
 
 #endif

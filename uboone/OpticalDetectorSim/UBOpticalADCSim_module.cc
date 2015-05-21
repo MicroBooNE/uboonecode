@@ -38,7 +38,6 @@
 /// LArSoft
 #include "OpticalDetectorData/ChannelData.h" // from lardata
 #include "Geometry/Geometry.h" // larcore
-#include "Geometry/ExptGeoHelperInterface.h" // larcore
 #include "Simulation/SimPhotons.h" // larsim
 #include "UBOpticalADC.h" // uboonecode
 #include "UBLogicPulseADC.h" // uboonecode
@@ -213,19 +212,19 @@ namespace opdet {
     //
     // Handle special readout channels (>= 40)
     //
+    std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geom->GetChannelMapAlg() );
     art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
-    art::ServiceHandle< geo::ExptGeoHelperInterface > geohelper;
-    std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geohelper->GetChannelMapAlg() );
     std::vector< unsigned int > logicchannels;
     chanmap->GetLogicChannelList( logicchannels );
     
     //for(size_t ch=kLogicStartChannel; ch<(kLogicStartChannel+kLogicNChannel); ++ch) {
     for ( auto logicch : logicchannels ) {
-      unsigned int ch = logicch % 100; // bad! map of channel number to FEM channel using implicit convention
+      unsigned int ch = logicch; 
+      opdet::UBOpticalChannelCategory_t chcat = chanmap->GetChannelType( ch );
 
       fLogicGen.SetPedestal( ch_conf->GetParameter( kPedestalMean, ch ), ch_conf->GetParameter( kPedestalSpread, ch ) );
 
-      if( (ch == kFEMChannelBNB || ch == kFEMChannelNuMI) && fBeamModName.size() ) {
+      if( (chcat == opdet::FEMBeamTriggerBNB || chcat == opdet::FEMBeamTriggerNUMI) && fBeamModName.size() ) {
 
 	// get beam gate data product
 	for(auto const& name : fBeamModName) {
@@ -237,8 +236,8 @@ namespace opdet {
 
 	    const art::Ptr<sim::BeamGateInfo> beam_ptr(beamHandle,i);
 	    
-	    if( (beam_ptr->BeamType() == ::sim::kBNB  && ch == kFEMChannelBNB) ||
-		(beam_ptr->BeamType() == ::sim::kNuMI && ch == kFEMChannelNuMI) )
+	    if( (beam_ptr->BeamType() == ::sim::kBNB  && chcat == opdet::FEMBeamTriggerBNB ) ||
+		(beam_ptr->BeamType() == ::sim::kNuMI && chcat == opdet::FEMBeamTriggerNUMI ) )
 
 	      fLogicGen.AddPulse(beam_ptr->Start());
 

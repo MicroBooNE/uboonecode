@@ -67,7 +67,7 @@ namespace opdet {
     std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geohelper->GetChannelMapAlg() );
 
     // sanity check: number of readout channels in geo service matches number of channels in parameters
-    unsigned int nchannel_values = geom->NOpChannels() + chanmap->NOpLogicChannels();
+    unsigned int nchannel_values = geom->NOpChannels();
 
     for(size_t i=0; i<kChConfigTypeMax; ++i)
       if( tmp_params.at(i).size() != nchannel_values )

@@ -93,19 +93,24 @@ namespace geo {
     bool         IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const;
     unsigned int NOpLogicChannels() const;
     void         GetLogicChannelList( std::vector< unsigned int >& channels ) const;
-    opdet::UBOpticalChannelGain_t GetChannelGain( unsigned int isplit ) const;
+    opdet::UBOpticalChannelGain_t GetChannelGain( unsigned int opchannel ) const;
     opdet::UBOpticalChannelCategory_t GetChannelType( unsigned int opChannel ) const;
 
   private:
     void LoadOpticalMapData( fhicl::ParameterSet const& p);
     unsigned int fNOpDets;
-    unsigned int fNSplits;
-    std::vector< std::string > fSplitGains;
-    std::vector< std::vector<unsigned int> > fLowgain_channel_ranges;
-    std::vector< std::vector<unsigned int> > fHighgain_channel_ranges;
-    std::map< unsigned int, unsigned int > fChannel2pmt; 
-    std::map< unsigned int, std::vector< unsigned int > > fPMT2channels;
-    std::vector< unsigned int > fLogicChannelList;
+    unsigned int fNReadoutChannels;
+    std::map< unsigned int, unsigned int > fChannel2pmt;  // readout channel to opdet(pmt) id
+    std::map< unsigned int, std::vector< unsigned int > > fPMT2channels; // opdet(pmt) id to readout channel
+    std::map< opdet::UBOpticalChannelCategory_t, std::set< unsigned int > > fCategoryChannels; // list of channels assigned to each category
+    std::map< opdet::UBOpticalChannelGain_t, std::set< unsigned int> > fGainChannels; // list of chanels assignd to channel type
+    std::map< unsigned int, opdet::UBOpticalChannelCategory_t > fChannelCategory;
+    std::map< unsigned int, opdet::UBOpticalChannelGain_t > fChannelGain;
+    std::set< unsigned int > fLogicChannels;
+      
+    // ----------------------------------------------------------------
+    // Prevent multiple loading
+    static unsigned short __fInstances__;
 
   };
 

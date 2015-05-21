@@ -23,12 +23,18 @@
 
 namespace geo {
 
+  unsigned short ChannelMapUBooNEAlg::__fInstances__ = 0;
+
   //----------------------------------------------------------------------------
   ChannelMapUBooNEAlg::ChannelMapUBooNEAlg(fhicl::ParameterSet const& sort_pars, fhicl::ParameterSet const& helper_pset )
     : ChannelMapAlg(), fSorter(geo::GeoObjectSorterStandard(sort_pars))
   {
     // parameter set will come from UBooNEGomeotryHelper service
     LoadOpticalMapData( helper_pset );
+    if ( __fInstances__ > 0 ) {
+      throw std::runtime_error("Creating second copy of this class.  Should only be one.  Get it via Geometry service using GetChannelMapAlg() (and cast to ChannelMapUBooNEAlg)");
+    }
+    __fInstances__++;
   }
 
   //----------------------------------------------------------------------------
@@ -370,21 +376,23 @@ namespace geo {
   //----------------------------------------------------------------------------
   unsigned int ChannelMapUBooNEAlg::NOpChannels(unsigned int NOpDets) const
   {
-    return fNSplits*NOpDets;
+    return fNReadoutChannels;
   }
 
   //----------------------------------------------------------------------------
   unsigned int ChannelMapUBooNEAlg::NOpHardwareChannels(unsigned int opDet) const
   {
-    // four channels per optical detector: LoA, LoB, HiA, HiB
-    return fNSplits;
+    auto it = fPMT2channels.find( opDet );
+    if ( it!=fPMT2channels.end() )
+      return (*it).second.size();
+    else
+      throw std::runtime_error( "ChannelMapUBooNEAlg::NOpHardwareChannels : Invalid opdet value" );
   }
 
   //----------------------------------------------------------------------------
   unsigned int ChannelMapUBooNEAlg::OpChannel(unsigned int pmtID, unsigned int copynum) const
   {
     // converts OpDet and Gain Channel
-    // 0=low A, 1= low B, 2 = high A, 3 = high B
     unsigned int uniqueChannel = fPMT2channels.at(pmtID).at(copynum);
     return uniqueChannel;
   }
@@ -399,78 +407,52 @@ namespace geo {
   //----------------------------------------------------------------------------
   unsigned int ChannelMapUBooNEAlg::HardwareChannelFromOpChannel(unsigned int opChannel) const
   {
-    unsigned int copyid = opChannel % 100;
-    return copyid;
+    auto it = fPMT2channels.find( OpDetFromOpChannel(opChannel)  );
+    if ( it!=fPMT2channels.end() ) {
+      auto readoutChList = it->second;
+      for ( unsigned int hwch=0; hwch<readoutChList.size(); hwch++ )
+	if ( opChannel==readoutChList.at(hwch) )
+	  return hwch;
+    }
+
+    throw std::runtime_error( "Could not find copy index of readout channel" );
   }
 
   //----------------------------------------------------------------------------
   bool ChannelMapUBooNEAlg::IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const {
-    unsigned int pmtid = OpDetFromOpChannel( opChannel );
-    if ( pmtid>=36 )
-      return false;
-    if ( opChannel>=336 )
-      return false;
-
-    return true;
-  }
-
-  //----------------------------------------------------------------------------
-  unsigned int ChannelMapUBooNEAlg::NOpLogicChannels() const {
-    return fLogicChannelList.size();
-  }
-  
-  //----------------------------------------------------------------------------
-  void ChannelMapUBooNEAlg::GetLogicChannelList( std::vector< unsigned int >& channels ) const {
-    channels = fLogicChannelList; // copy
+    auto it=fChannel2pmt.find( opChannel );
+    if ( it!=fChannel2pmt.end() )
+      return true;
+    return false;
   }
 
   //----------------------------------------------------------------------------
   opdet::UBOpticalChannelCategory_t ChannelMapUBooNEAlg::GetChannelType( unsigned int opChannel ) const {
-    
-    for ( unsigned int i : fLogicChannelList ) {
-      if ( i==opChannel )
-	return opdet::Undefined;
-    }
-    
-    return opdet::Undefined;
+    auto it = fChannelCategory.find( opChannel );
+    if ( it!=fChannelCategory.end() )
+      return it->second;
+    return opdet::Uncategorized;
   }
 
   //----------------------------------------------------------------------------
-  opdet::UBOpticalChannelGain_t ChannelMapUBooNEAlg::GetChannelGain( unsigned int isplit ) const {
-    if ( fSplitGains.at(isplit)=="HighGain" )
-      return opdet::HighGain;
-    else
-      return opdet::LowGain;
+  opdet::UBOpticalChannelGain_t ChannelMapUBooNEAlg::GetChannelGain( unsigned int opChannel ) const {
+    auto it = fChannelGain.find( opChannel );
+    if ( it!=fChannelGain.end() )
+      return it->second;
+    throw std::runtime_error( "ChannelMapUBooNEAlg::GetChannelGain : Could not find channel type (low,high,logic)" );
   }
 
+  //----------------------------------------------------------------------------
+  void  ChannelMapUBooNEAlg::GetLogicChannelList( std::vector< unsigned int >& channels ) const {
+    channels.resize( fLogicChannels.size() );
+    std::copy( fLogicChannels.begin(), fLogicChannels.end(), channels.begin() );
+  }
 
   //----------------------------------------------------------------------------
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
     fNOpDets = pset.get< unsigned int >("numberOfDetectors");
-    fNSplits = pset.get<  unsigned int >("numberOfSplits");
-    fSplitGains = pset.get< std::vector< std::string > >( "splitGains" );
-    if ( fSplitGains.size()!=fNSplits ) {
-      throw cet::exception("numberOfSplits does not match the number of specified gains in splitGains");
-    }
-    for (unsigned int i=0; i<fNSplits; i++) {
-      if ( fSplitGains.at(i)!="HighGain" && fSplitGains.at(i)!="LowGain" ) {
-	throw cet::exception( __FUNCTION__ ) << " invalid splitGains option.  Either 'HighGain' or 'LowGain'." << std::endl;
-      }
-    }
-    
-    // read in low gain, high gain ranges
-    std::vector< unsigned int > lorange_input = pset.get< std::vector<unsigned int> >( "ReadoutLowChannelRange" );
-    std::vector< unsigned int > hirange_input = pset.get< std::vector<unsigned int> >( "ReadoutHighChannelRange" );
-    for (unsigned int i=0; i<(unsigned int)lorange_input.size(); i+=2 ) {
-      unsigned int lo[2] = { lorange_input.at(i), lorange_input.at(i+1) };
-      std::vector< unsigned int > vlo( lo, lo+2 );
-      fLowgain_channel_ranges.push_back( vlo );
-    }
-    for (unsigned int i=0; i<(unsigned int)hirange_input.size(); i+=2 ) {
-      unsigned int hi[2] = { hirange_input.at(i), hirange_input.at(i+1) };
-      std::vector< unsigned int > vhi( hi, hi+2 );
-      fHighgain_channel_ranges.push_back( vhi );
-    }
+
+    fNReadoutChannels = 0;
 
     // read in opdet to channel map, store
     for (unsigned int iop=0; iop<fNOpDets; iop++) {
@@ -478,6 +460,7 @@ namespace geo {
       sprintf(entryname,"OpDet%d_channels",iop);
       std::vector< unsigned int > chinput =  pset.get< std::vector<unsigned int> >( entryname );
       fPMT2channels[ iop ] = chinput;
+      fNReadoutChannels += chinput.size();
       std::cout << entryname << ": [";
       for (std::vector<unsigned int>::iterator it_ch=chinput.begin(); it_ch!=chinput.end(); it_ch++) {
 	fChannel2pmt[ *it_ch ] = iop;
@@ -486,8 +469,33 @@ namespace geo {
       std::cout << "]" << std::endl;
     }
     
-    // read in active logic channel lists
-    fLogicChannelList = pset.get< std::vector<unsigned int> >( "LogicChannelList" );
-  }
+    // read in channel types
+    for ( unsigned int icat=0; icat<(unsigned int)opdet::NumUBOpticalChannelCategories; icat++ ) {
+      std::vector< unsigned int > cat_channels;
+      try {
+	cat_channels = pset.get< std::vector<unsigned int> >( opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)icat ) );
+      }
+      catch (...) {
+	continue;
+      }
 
+      // save category channels
+      fCategoryChannels[ (opdet::UBOpticalChannelCategory_t)icat ] = std::set< unsigned int >( cat_channels.begin(), cat_channels.end() );
+      // save gain channel 
+      opdet::UBOpticalChannelGain_t chtype = opdet::GetUBTypeFromCategory( (opdet::UBOpticalChannelCategory_t)icat );
+      if ( fGainChannels.find( chtype )==fGainChannels.end() )
+	fGainChannels[ chtype ] = std::set< unsigned int >( cat_channels.begin(), cat_channels.end() ); // new set
+      else {
+	for ( auto v : cat_channels )
+	  fGainChannels[ chtype ].insert( v ); // append to set
+      }
+
+      for ( auto v : cat_channels ) {
+	fChannelGain[ v ] = chtype;
+	if (chtype==opdet::LogicChannel)
+	  fLogicChannels.insert( v );
+      }
+    }
+  }
+  
 } // namespace
