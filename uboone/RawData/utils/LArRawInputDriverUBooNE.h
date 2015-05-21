@@ -104,12 +104,11 @@ namespace lris {
 		     std::vector<optdata::FIFOChannel>& pmtDigitList);
     void fillBeamData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
 		      raw::BeamInfo& beamInfo);
-      
+
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;
     std::ifstream                  fInputStream;
     std::vector<std::streampos>    fEventLocation;
-    uint32_t                       fNumberOfEvents;
     uint32_t                       fEventCounter; 
     bool                           fHuffmanDecode;
     std::map<daqid_t, int>         fChannelMap;   
