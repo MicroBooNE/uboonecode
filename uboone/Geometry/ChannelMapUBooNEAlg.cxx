@@ -452,15 +452,13 @@ namespace geo {
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
     fNOpDets = pset.get< unsigned int >("numberOfDetectors");
 
-    fNReadoutChannels = 0;
-
     // read in opdet to channel map, store
     for (unsigned int iop=0; iop<fNOpDets; iop++) {
       char entryname[50];
       sprintf(entryname,"OpDet%d_channels",iop);
       std::vector< unsigned int > chinput =  pset.get< std::vector<unsigned int> >( entryname );
       fPMT2channels[ iop ] = chinput;
-      fNReadoutChannels += chinput.size();
+
       std::cout << entryname << ": [";
       for (std::vector<unsigned int>::iterator it_ch=chinput.begin(); it_ch!=chinput.end(); it_ch++) {
 	fChannel2pmt[ *it_ch ] = iop;
@@ -470,6 +468,8 @@ namespace geo {
     }
     
     // read in channel types
+    fNReadoutChannels = 0;
+
     for ( unsigned int icat=0; icat<(unsigned int)opdet::NumUBOpticalChannelCategories; icat++ ) {
       std::vector< unsigned int > cat_channels;
       try {
@@ -478,6 +478,8 @@ namespace geo {
       catch (...) {
 	continue;
       }
+
+      fNReadoutChannels += cat_channels.size();
 
       // save category channels
       fCategoryChannels[ (opdet::UBOpticalChannelCategory_t)icat ] = std::set< unsigned int >( cat_channels.begin(), cat_channels.end() );
@@ -495,7 +497,10 @@ namespace geo {
 	if (chtype==opdet::LogicChannel)
 	  fLogicChannels.insert( v );
       }
-    }
+    }//end loop over categories
+
+    std::cout << "Number of defined readout channels: " << fNReadoutChannels << std::endl;
+    
   }
   
 } // namespace
