@@ -14,6 +14,7 @@
 #include "RawData/BeamInfo.h"
 #include "OpticalDetectorData/FIFOChannel.h"
 #include "Geometry/Geometry.h"
+#include "Geometry/ExptGeoHelperInterface.h"
 #include "SummaryData/RunData.h"
 
 //ART, ...
@@ -24,6 +25,8 @@
 
 //uboone datatypes
 
+// uboonecode
+#include "uboone/Geometry/ChannelMapUBooNEAlg.h"
 
 #include "datatypes/raw_data_access.h"
 

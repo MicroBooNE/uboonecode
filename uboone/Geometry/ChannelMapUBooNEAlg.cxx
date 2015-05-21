@@ -425,23 +425,22 @@ namespace geo {
   }
 
   //----------------------------------------------------------------------------
-  opdet::OpChannelType_t ChannelMapUBooNEAlg::GetChannelType( unsigned int opChannel ) const {
+  opdet::UBOpticalChannelCategory_t ChannelMapUBooNEAlg::GetChannelType( unsigned int opChannel ) const {
     
     for ( unsigned int i : fLogicChannelList ) {
       if ( i==opChannel )
-	return opdet::kLogicPulse;
+	return opdet::Undefined;
     }
     
-    unsigned int isplit = opChannel/100;
-    return GetSplitGain( isplit );
+    return opdet::Undefined;
   }
 
   //----------------------------------------------------------------------------
-  opdet::OpChannelType_t ChannelMapUBooNEAlg::GetSplitGain( unsigned int isplit ) const {
+  opdet::UBOpticalChannelGain_t ChannelMapUBooNEAlg::GetChannelGain( unsigned int isplit ) const {
     if ( fSplitGains.at(isplit)=="HighGain" )
-      return opdet::kHighGain;
+      return opdet::HighGain;
     else
-      return opdet::kLowGain;
+      return opdet::LowGain;
   }
 
 

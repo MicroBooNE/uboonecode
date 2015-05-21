@@ -17,10 +17,11 @@
 #include <set>
 #include <iostream>
 
-#include "Geometry/ChannelMapAlg.h"
-#include "Geometry/GeoObjectSorterStandard.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "uboone/OpticalDetectorSim/UBOpChannelTypes.h"
+
+#include "Geometry/ChannelMapAlg.h" // larcore
+#include "Geometry/GeoObjectSorterStandard.h" //  larcore
+#include "uboone/Geometry/UBOpChannelTypes.h" // uboonecode
 
 namespace geo {
 
@@ -92,8 +93,8 @@ namespace geo {
     bool         IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const;
     unsigned int NOpLogicChannels() const;
     void         GetLogicChannelList( std::vector< unsigned int >& channels ) const;
-    opdet::OpChannelType_t GetSplitGain( unsigned int isplit ) const;
-    opdet::OpChannelType_t GetChannelType( unsigned int opChannel ) const;
+    opdet::UBOpticalChannelGain_t GetChannelGain( unsigned int isplit ) const;
+    opdet::UBOpticalChannelCategory_t GetChannelType( unsigned int opChannel ) const;
 
   private:
     void LoadOpticalMapData( fhicl::ParameterSet const& p);
