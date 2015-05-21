@@ -10,6 +10,7 @@
 //LArSoft 
 #include "uboone/RawData/utils/LArRawInputDriverUBooNE.h"
 #include "RawData/RawDigit.h"
+#include "RawData/TriggerData.h"
 #include "RawData/DAQHeader.h"
 #include "RawData/BeamInfo.h"
 #include "OpticalDetectorData/FIFOChannel.h"
@@ -250,10 +251,10 @@ namespace lris {
     std::unique_ptr<std::vector<raw::RawDigit> >  tpc_raw_digits( new std::vector<raw::RawDigit>  );
     std::unique_ptr<std::vector<optdata::FIFOChannel> >  pmt_raw_digits( new std::vector<optdata::FIFOChannel>  );
     std::unique_ptr<raw::BeamInfo> beam_info(new raw::BeamInfo);
-
+    std::unique_ptr<raw::Trigger> trig_info(new raw::Trigger);
     bool res=false;
 
-    res=processNextEvent(*tpc_raw_digits, *pmt_raw_digits, *daq_header, *beam_info );
+    res=processNextEvent(*tpc_raw_digits, *pmt_raw_digits, *daq_header, *beam_info, *trig_info );
 
     if (res) {
       fEventCounter++;
@@ -305,7 +306,8 @@ namespace lris {
   bool LArRawInputDriverUBooNE::processNextEvent(std::vector<raw::RawDigit>& tpcDigitList,
                                                  std::vector<optdata::FIFOChannel>& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
-                                                 raw::BeamInfo& beamInfo)
+                                                 raw::BeamInfo& beamInfo,
+						 raw::Trigger& trigInfo)
   {       
     try {
       boost::archive::binary_iarchive ia(fInputStream); 
@@ -319,6 +321,7 @@ namespace lris {
       fillTPCData(event_record, tpcDigitList);
       fillPMTData(event_record, pmtDigitList);
       fillBeamData(event_record, beamInfo);
+      fillTriggerData(event_record, trigInfo);
       //std::cout<<"Done ProcessNextEvent..."<<std::endl;
     } catch (...) {
       //throw art::Exception( art::errors::FileReadError )
@@ -573,6 +576,47 @@ namespace lris {
           fHistMapBeam[bdv[i].getDeviceName()]->Fill(bdv[i].getData()[0]);
       }
     }
+    */
+  }
+
+  void LArRawInputDriverUBooNE::fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
+						raw::Trigger& trigInfo)
+  {
+
+    /*
+      auto const& trig_data = event_record.triggerData();
+    trigInfo = raw::Trigger( trig_data.getTrigEventNum(),
+                              
+    Trigger(unsigned int counter,
+            double       trigger_time,
+            double       beamgate_time,
+            uint32_t     bits)
+      : fTriggerNumber       ( counter           ),
+      fTriggerTime         ( trigger_time      ),
+      fBeamGateTime        ( beamgate_time     ),
+      fTriggerBits         ( bits              )
+      {}
+
+
+
+    uint16_t getSampleNumber() const noexcept;
+    uint16_t getSampleRemainder() const noexcept;
+    uint16_t getSampleNumber_2MHz() const noexcept;
+    uint16_t getSampleNumber_16MHz() const noexcept;
+    uint16_t getSampleNumber_64MHz() const noexcept;
+    bool     getBusy() const noexcept;
+    uint32_t getFrame() const noexcept;
+    uint32_t getTrigEventNum() const noexcept;
+    uint16_t  getTriggerBits() const noexcept;
+    bool     isPmtTrigger() const noexcept;
+    bool     isExtTrigger() const noexcept;
+    bool     isActiveTrigger() const noexcept;
+    bool     isBnbTrigger()    const noexcept;
+    bool     isNumiTrigger()   const noexcept;
+    bool     isVetoTrigger()   const noexcept;
+    bool     isCalibTrigger()  const noexcept;
+    uint16_t getPhase64Mhz_1() const noexcept;
+    uint16_t getPhase64Mhz_2() const noexcept;
     */
   }
 
