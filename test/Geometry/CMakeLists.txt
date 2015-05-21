@@ -30,6 +30,8 @@ cet_test(geometry_microboone HANDBUILT
 # unit test (use the hard-coded configuration for MicroBooNE v5 geometry)
 cet_test(geometry_uboone_test
   SOURCES geometry_uboone_test.cxx
+  DATAFILES test_geometry_uboone.fcl
+  TEST_ARGS ./test_geometry_uboone.fcl
   LIBRARIES Geometry
             GeometryTestLib
             ${MF_MESSAGELOGGER}
