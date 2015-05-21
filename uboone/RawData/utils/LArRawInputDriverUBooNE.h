@@ -42,6 +42,7 @@ namespace raw {
   class RawDigit; 
   class BeamInfo;
   class DAQHeader;
+  class Trigger;
 }
 
 class TH1D;
@@ -95,7 +96,8 @@ namespace lris {
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
 			  std::vector<optdata::FIFOChannel>& pmtDigitList,
 			  raw::DAQHeader& daqHeader,
-			  raw::BeamInfo& beamInfo);
+			  raw::BeamInfo& beamInfo,
+			  raw::Trigger& trigInfo);
     void fillDAQHeaderData(gov::fnal::uboone::datatypes::ub_EventRecord& event_record,
 			   raw::DAQHeader& daqHeader);
     void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
@@ -104,6 +106,8 @@ namespace lris {
 		     std::vector<optdata::FIFOChannel>& pmtDigitList);
     void fillBeamData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
 		      raw::BeamInfo& beamInfo);
+    void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
+			 raw::Trigger& trigInfo);
 
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;
