@@ -59,7 +59,6 @@ namespace lris {
     :
     fSourceHelper(pm),
     fCurrentSubRunID(),
-    fNumberOfEvents(-1),
     fEventCounter(0),
     fHuffmanDecode(ps.get<bool>("huffmanDecode",false))
   {
@@ -92,7 +91,6 @@ namespace lris {
   void LArRawInputDriverUBooNE::closeCurrentFile()
   {
     fCurrentSubRunID.flushSubRun();
-    fNumberOfEvents=-1;
     fEventCounter=0;
     fChannelMap.clear();
     fInputStream.close();
@@ -121,18 +119,22 @@ namespace lris {
     fInputStream.read( (char*)&end_of_file_marker , sizeof(uint16_t));
 
     if(end_of_file_marker != 0xe0f0){
-      throw art::Exception( art::errors::FileReadError )
-        << "File "<<name<<" has incorrect end of file marker. "<< end_of_file_marker<<std::endl;
+      //throw art::Exception( art::errors::FileReadError )
+      std::cout << "File "<<name<<" has incorrect end of file marker. "<< end_of_file_marker<<std::endl;
     }
     
+    return;
+    /*
     //get number of events from word at end of file
     fInputStream.seekg( -1*(sizeof(uint16_t)+sizeof(uint32_t)), std::ios::end);
     fInputStream.read( (char*)&fNumberOfEvents , sizeof(uint32_t));
 
+    fNumberOfEvents = 10;
     //now get all of the event sizes, 
     uint32_t tmp_event_size;
     std::streampos count_event_size=0;
     fInputStream.seekg( -1*(sizeof(uint16_t)+(fNumberOfEvents+1)*sizeof(uint32_t)), std::ios::end);
+
     for(uint32_t i=0; i<fNumberOfEvents; i++){
       // since we want the beginning, push back the event size before incrementing it
       fEventLocation.push_back(count_event_size);
@@ -143,6 +145,7 @@ namespace lris {
     fInputStream.seekg(std::ios::beg);
 
     mf::LogInfo("")<<"Opened file "<<name<<" with "<<fNumberOfEvents<<" event(s)";
+    */
   }
 
   // ======================================================================  
@@ -243,8 +246,7 @@ namespace lris {
 
     bool res=false;
 
-    if (fEventCounter < fNumberOfEvents) 
-      res=processNextEvent(*tpc_raw_digits, *pmt_raw_digits, *daq_header, *beam_info );
+    res=processNextEvent(*tpc_raw_digits, *pmt_raw_digits, *daq_header, *beam_info );
     
     if (res) {
       fEventCounter++;
@@ -293,7 +295,7 @@ namespace lris {
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo)
   {       
-    fInputStream.seekg(fEventLocation[fEventCounter]);
+    //fInputStream.seekg(fEventLocation[fEventCounter]);
     try {
       boost::archive::binary_iarchive ia(fInputStream); 
       ubdaq::ub_EventRecord event_record;  
@@ -307,8 +309,9 @@ namespace lris {
       fillBeamData(event_record, beamInfo);
 
     } catch ( art::Exception const& e ) {
-      throw art::Exception( art::errors::FileReadError )
-        << "Failed to read the event."<<e.what() << std::endl;
+      //throw art::Exception( art::errors::FileReadError )
+      std::cout<< "Failed to read the event."<<e.what() << std::endl;
+      return false;
     }
   
     return true;
