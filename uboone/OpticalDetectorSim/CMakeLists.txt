@@ -28,6 +28,8 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
 			uboonecode_uboone_OpticalDetectorSim
 			TimeService_service
 			Utilities
+			UBooNEGeometryHelper_service
+			uboone_Geometry
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
@@ -47,6 +49,7 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
          )
 
 simple_plugin(UBOpticalChConfig "service"
+	      uboone_Geometry
 	      Geometry_service
 	      Geometry
 	      ${ART_UTILITIES}

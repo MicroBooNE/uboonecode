@@ -4,6 +4,9 @@
 #include "UBOpticalChConfig.h"
 #include "Utilities/LArProperties.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "Geometry/Geometry.h" // larcore
+#include "Geometry/ExptGeoHelperInterface.h" // larcore
+#include "uboone/Geometry/ChannelMapUBooNEAlg.h" // uboonecode
 
 namespace opdet {
 
@@ -11,54 +14,86 @@ namespace opdet {
   UBOpticalChConfig::UBOpticalChConfig(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg)
   //---------------------------------------------------------------------------------
   {
-    this->reconfigure(pset);
+    _pset = pset;
+    //this->reconfigure(pset);
+    //fInitialized;
   }
   
+  //-----------------------------------------------------------
+  void UBOpticalChConfig::doInitialization() {
+  //-----------------------------------------------------------
+    reconfigure( _pset );
+  }
+
   //-----------------------------------------------------------
   void UBOpticalChConfig::reconfigure(fhicl::ParameterSet const& pset)
   //-----------------------------------------------------------
   {
     
-    fParams.at(kPedestalMean)   = pset.get<std::vector<float> >("PedestalMean");
-    fParams.at(kPedestalSpread) = pset.get<std::vector<float> >("PedestalSpread");
-    fParams.at(kQE)             = pset.get<std::vector<float> >("QE");
-    fParams.at(kHighGain)       = pset.get<std::vector<float> >("HighGain");
-    fParams.at(kLowGain)        = pset.get<std::vector<float> >("LowGain");
-    fParams.at(kGainSpread)     = pset.get<std::vector<float> >("GainSpread");
-    fParams.at(kT0)             = pset.get<std::vector<float> >("T0");
-    fParams.at(kT0Spread)       = pset.get<std::vector<float> >("T0Spread");
-    fParams.at(kDarkRate)       = pset.get<std::vector<float> >("DarkRate");
+    std::vector< std::vector<float> > tmp_params;
+    tmp_params.resize( kChConfigTypeMax );
+    tmp_params.at( kPedestalMean )   = pset.get<std::vector<float> >("PedestalMean");
+    tmp_params.at( kPedestalSpread ) = pset.get<std::vector<float> >("PedestalSpread");
+    tmp_params.at( kQE )             = pset.get<std::vector<float> >("QE");
+    tmp_params.at( kPMTGain )        = pset.get<std::vector<float> >("PMTGain");
+    tmp_params.at( kSplitterGain )   = pset.get<std::vector<float> >("PMTGain");
+    tmp_params.at( kGainSpread )     = pset.get<std::vector<float> >("GainSpread");
+    tmp_params.at( kT0 )             = pset.get<std::vector<float> >("T0");
+    tmp_params.at( kT0Spread )       = pset.get<std::vector<float> >("T0Spread");
+    tmp_params.at( kDarkRate )       = pset.get<std::vector<float> >("DarkRate");
 
+    std::vector< unsigned int >  channel_list = pset.get<std::vector<unsigned int> >("ChannelList");
     
     // Correct QE by prescaling set in LArProperties
     art::ServiceHandle<util::LArProperties>   LarProp;
-    for (unsigned int i = 0; i < fParams.at(kQE).size(); i++) {
-
-      if ( LarProp->ScintPreScale() > fParams.at(kQE)[i]) {
-        fParams.at(kQE)[i] /= LarProp->ScintPreScale();
+    auto tmp_QE = tmp_params.at( kQE );
+    for (unsigned int i = 0; i < tmp_QE.size(); i++) {
+      
+      if ( LarProp->ScintPreScale() > tmp_QE.at(i) ) {
+        tmp_QE[i] /= LarProp->ScintPreScale();
       }
       else {
         mf::LogError("UBOpticalChConfig_service") << "Quantum efficiency set in UBOpticalChConfig_service, "
-                                                  << fParams.at(kQE)[i]
+                                                  << tmp_QE[i]
                                                   << " is too large.  It is larger than the prescaling applied during simulation, "
                                                   << LarProp->ScintPreScale()
                                                   << ".  Final QE must be equalt to or smaller than the QE applied at simulation time.";
         assert(false);
       }
     }
-
+    
     art::ServiceHandle<geo::Geometry> geom;
+    art::ServiceHandle< geo::ExptGeoHelperInterface > geohelper;
+    std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geohelper->GetChannelMapAlg() );
+
+    // sanity check: number of readout channels in geo service matches number of channels in parameters
+    unsigned int nchannel_values = geom->NOpChannels() + chanmap->NOpLogicChannels();
+
     for(size_t i=0; i<kChConfigTypeMax; ++i)
-      if(fParams.at(i).size() != geom->NOpChannels())
-	throw UBOpticalException(Form("ChConfigType_t %zu # values (%zu) != # channels (%d)!",
+      if( tmp_params.at(i).size() != nchannel_values )
+	throw UBOpticalException(Form("ChConfigType_t enum=%zu # values (%zu) != # channels (%d)!",
 				      i,
-				      fParams.at(i).size(),
-				      geom->NOpChannels()));
+				      tmp_params.at(i).size(),
+				      nchannel_values));
+
+    if ( nchannel_values != channel_list.size() )
+      throw UBOpticalException(Form("number of pars (%d) != # channels in list (%zu)!", nchannel_values, channel_list.size() ));
+    
+    // finally fll fParams data member
+    for ( size_t i=0; i<kChConfigTypeMax; ++i) {
+      std::map< unsigned int, float > pardata;
+      int nch = 0;
+      for ( auto channel : channel_list ) {
+	pardata[ channel ] = tmp_params.at( i ).at( nch );
+	nch++;
+      }
+      fParams[ i ] = pardata;
+    }
     
   }
-
-
+  
+  
   DEFINE_ART_SERVICE(UBOpticalChConfig)
-    
+  
 }
 #endif

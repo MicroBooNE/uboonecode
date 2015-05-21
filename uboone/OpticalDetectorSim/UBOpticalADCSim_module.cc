@@ -5,7 +5,15 @@
  * 
  * \brief optdata::ChannelData producer module for microboone
  *
+ * The module takes in art data products, SimPhotons and BeamGateInfo
+ * It then produces an art data product consisting of a vector of ChannelData instances,
+ * which represents raw ADC waveforms for each readout channel.
+ * 
+ * the classes UBOpticalADC and UBLogicPulseADC are processors
+ * that produce the adc waveforms for this class.
+ *
  * @author kazuhiro
+ * @author twongjirad
  */
 
 /** \addtogroup OpticalDetectorSim
@@ -14,9 +22,6 @@
 
 #ifndef UBOpticalADCSim_module_CC
 #define UBOpticalADCSim_module_CC
-
-// LArSoft includes
-//#include "Geometry/Geometry.h"
 
 // framework
 #include "fhiclcpp/ParameterSet.h"
@@ -31,11 +36,13 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
-#include "UBOpticalADC.h"
-#include "UBLogicPulseADC.h"
-#include "OpticalDetectorData/ChannelDataGroup.h"
-#include "Simulation/SimPhotons.h"
-#include "Geometry/Geometry.h"
+#include "OpticalDetectorData/ChannelData.h" // from lardata
+#include "Geometry/Geometry.h" // larcore
+#include "Geometry/ExptGeoHelperInterface.h" // larcore
+#include "Simulation/SimPhotons.h" // larsim
+#include "UBOpticalADC.h" // uboonecode
+#include "UBLogicPulseADC.h" // uboonecode
+#include "uboone/Geometry/ChannelMapUBooNEAlg.h" // uboone
 
 /// nutools
 #include "Simulation/BeamGateInfo.h"
@@ -107,9 +114,9 @@ namespace opdet {
 
     fLogicGen.SetAmplitude(pset.get<double>("LogicPulseAmplitude"));
 
-    fLogicGen.SetPedestal(2048,0.3);
+    fLogicGen.SetPedestal(2048,0.3); // move to ubchannelconfig
 
-    produces< std::vector<optdata::ChannelDataGroup> >();
+    produces< std::vector<optdata::ChannelData> >();
   }
 
   //#################################
@@ -123,11 +130,15 @@ namespace opdet {
   {
 
     // 
-    // Initialize
+    // Get services
     //
     ::art::ServiceHandle<geo::Geometry> geom;
     ::art::ServiceHandle<util::TimeService> ts;
-    ::std::unique_ptr< std::vector<optdata::ChannelDataGroup> > wfs(new ::std::vector<optdata::ChannelDataGroup>);
+
+    // allocate the container
+    ::std::unique_ptr< std::vector<optdata::ChannelData> > wfs(new ::std::vector<optdata::ChannelData>);
+
+    // get the clock definition
     ::util::ElecClock clock = ts->OpticalClock();
     clock.SetTime(ts->G4ToElecTime(fG4StartTime));
     if(clock.Time()<0)
@@ -136,36 +147,8 @@ namespace opdet {
 				    (-1)*(ts->G4ToElecTime(0))
 				    )
 			       );
-
     fOpticalGen.SetTimeInfo(clock,fDuration);
     fLogicGen.SetTimeInfo(clock,fDuration);
-
-    //
-    // Prepare output container
-    //
-    wfs->reserve(3);
-
-    const size_t hg_index = wfs->size();
-    wfs->push_back(optdata::ChannelDataGroup(::optdata::kHighGain,clock.Sample(),clock.Frame())); // high gain
-
-    const size_t lg_index = wfs->size();
-    wfs->push_back(optdata::ChannelDataGroup(::optdata::kLowGain,clock.Sample(),clock.Frame())); // low gain
-
-    const size_t logic_index = wfs->size();
-    wfs->push_back(optdata::ChannelDataGroup(::optdata::kLogicPulse,clock.Sample(),clock.Frame())); // logic pulse channels
-
-    // Create entries ... # PMTs + 2 channels (NuMI & BNB readout channels)
-    wfs->at(hg_index).reserve(geom->NOpChannels());
-    wfs->at(hg_index).SetFrame(clock.Frame());
-    wfs->at(hg_index).SetTimeSlice(clock.Sample());
-
-    wfs->at(lg_index).reserve(geom->NOpChannels());
-    wfs->at(lg_index).SetFrame(clock.Frame());
-    wfs->at(lg_index).SetTimeSlice(clock.Sample());
-
-    wfs->at(logic_index).reserve(kLogicNChannel);
-    wfs->at(logic_index).SetFrame(clock.Frame());
-    wfs->at(logic_index).SetTimeSlice(clock.Sample());
 
     //
     // Read-in data
@@ -177,17 +160,16 @@ namespace opdet {
       return;
     }
 
-    //std::vector<sim::SimPhotons> const& pmts(*pmtHandle);
-
     // From larsim/Simulation/SimListUtils.cxx, pmtHandle possibly contain same PMT channel number more than once.
     // Create a dumb map (vector of vector) that can be used to identify indexes of pmtHandle that
     // corresponds to a specific PMT to avoid loop over the entire pmt Handle per channel.
-    std::vector<std::vector<size_t> > pmt_indexes(geom->NOpChannels(),std::vector<size_t>());
+    // this assumes consecutiely numbered opdets, which is OK, I think. Would using a map future-proof this?
+    std::vector<std::vector<size_t> > pmt_indexes(geom->NOpDets(),std::vector<size_t>());
     for(auto &v : pmt_indexes) v.reserve(10); // reserve at least 10 (cost nothing in memory but help speed)
 
     for(size_t i=0; i<pmtHandle->size(); ++i) {
       const art::Ptr<sim::SimPhotons> pmt(pmtHandle,i);
-      if(pmt->OpChannel() > (int)(pmt_indexes.size()))
+      if(pmt->OpChannel() >= (int)geom->NOpDets())
 	throw UBOpticalException(Form("Found OpChannel (%d) larger than # channels from geo (%zu)!",
 				      pmt->OpChannel(),
 				      pmt_indexes.size())
@@ -196,43 +178,56 @@ namespace opdet {
     }
 
     //
-    // Loop over channels, process photons, & store waveform 
+    // Loop over opdets, and channels, process photons, make, then store waveforms
     //
-    for(size_t ch=0; ch<geom->NOpChannels(); ++ch) {
+    for(unsigned int ipmt=0; ipmt<geom->NOpDets(); ipmt++) {
       
-      wfs->at(hg_index).push_back(optdata::ChannelData(ch));
-      
-      wfs->at(lg_index).push_back(optdata::ChannelData(ch));
-
+      // transfer the time of each hit (in opdet 'ch') into a vector<double>
       std::vector<double> photon_time;
-      for(auto const &pmt_index : pmt_indexes.at(ch)) {
+      for(auto const &pmt_index : pmt_indexes.at(ipmt)) {
 	
 	const art::Ptr<sim::SimPhotons> pmt_ptr(pmtHandle,pmt_index);
 
 	photon_time.reserve(photon_time.size() + pmt_ptr->size());
 	
 	for(size_t photon_index=0; photon_index<pmt_ptr->size(); ++photon_index)
-
 	  photon_time.push_back(pmt_ptr->at(photon_index).Time);
-
+	
       }
 
+      // send the hits over to the waveform generator
       fOpticalGen.SetPhotons(photon_time);
-      fOpticalGen.GenDarkNoise(ch,fG4StartTime);
-      fOpticalGen.GenWaveform(ch,
-			      wfs->at(hg_index).at(ch),
-			      wfs->at(lg_index).at(ch));
-    }
-
+      
+      // generate dark noise hits
+      fOpticalGen.GenDarkNoise(ipmt,fG4StartTime);
+      
+      /// for each pmt we generate multiple readout streams with different gains
+      for (unsigned int ireadout=0; ireadout<geom->NOpHardwareChannels(ipmt); ireadout++) {
+	unsigned int channel_num = geom->OpChannel( ipmt, ireadout );
+	optdata::ChannelData adc_wfm( channel_num );
+	fOpticalGen.GenWaveform(ipmt, adc_wfm );
+	wfs->emplace_back( adc_wfm );
+      }	
+    } // loop over pmts
+    
     //
     // Handle special readout channels (>= 40)
     //
-    for(size_t ch=kLogicStartChannel; ch<(kLogicStartChannel+kLogicNChannel); ++ch) {
+    art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
+    art::ServiceHandle< geo::ExptGeoHelperInterface > geohelper;
+    std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geohelper->GetChannelMapAlg() );
+    std::vector< unsigned int > logicchannels;
+    chanmap->GetLogicChannelList( logicchannels );
+    
+    //for(size_t ch=kLogicStartChannel; ch<(kLogicStartChannel+kLogicNChannel); ++ch) {
+    for ( auto logicch : logicchannels ) {
+      unsigned int ch = logicch % 100; // bad! map of channel number to FEM channel using implicit convention
 
-      wfs->at(logic_index).push_back(optdata::ChannelData(ch));
+      fLogicGen.SetPedestal( ch_conf->GetParameter( kPedestalMean, ch ), ch_conf->GetParameter( kPedestalSpread, ch ) );
 
       if( (ch == kFEMChannelBNB || ch == kFEMChannelNuMI) && fBeamModName.size() ) {
 
+	// get beam gate data product
 	for(auto const& name : fBeamModName) {
 	  art::Handle< std::vector<sim::BeamGateInfo> > beamHandle;
 	  evt.getByLabel(name, beamHandle);
@@ -252,25 +247,23 @@ namespace opdet {
 	}
 
       }
-
-      fLogicGen.GenWaveform((*(wfs->at(logic_index).rbegin())));
       
-    }
-    //size_t bnb_index  = geom->NOpChannels();
-    //size_t numi_index = bnb_index+1;
-
-    // BNB
+      optdata::ChannelData logic_wfm( ch );
+      fLogicGen.GenWaveform( logic_wfm );
+      wfs->emplace_back( logic_wfm );
+      
+    }//loop over logic channels
     
-
-    // NuMI
-
-    // Store
+    //
+    // Finally, pass to art event
+    // 
     if(wfs->size())
       evt.put(std::move(wfs));
 
     // Make sure to free memory
     fOpticalGen.Reset();
-
+    fLogicGen.Reset();
+    
   }
 } 
 /** @} */ // end of doxygen group 

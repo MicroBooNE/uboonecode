@@ -38,6 +38,10 @@ namespace opdet {
     virtual ~UBOpticalChConfig(){};
 
     void reconfigure(fhicl::ParameterSet const& pset);
+    void doInitialization();
+
+  private:
+    fhicl::ParameterSet _pset;
 
   };
 
