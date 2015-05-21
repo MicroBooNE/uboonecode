@@ -88,8 +88,9 @@ namespace lris {
   
   
   // ======================================================================
-  void LArRawInputDriverUBooNE::closeCurrentFile()
-  {
+  void LArRawInputDriverUBooNE::closeCurrentFile()  
+  {    
+    mf::LogInfo(__FUNCTION__)<<"File boundary (processed "<<fEventCounter<<" events)"<<std::endl;
     fCurrentSubRunID.flushSubRun();
     fEventCounter=0;
     fChannelMap.clear();
@@ -105,6 +106,7 @@ namespace lris {
                             name);
     
     fInputStream.open(name.c_str(),std::ios_base::in | std::ios_base::binary);
+    
     
     // Throwing an exception if the file fails to open
     if( !fInputStream.is_open() ) {
@@ -122,6 +124,7 @@ namespace lris {
       //throw art::Exception( art::errors::FileReadError )
       std::cout << "File "<<name<<" has incorrect end of file marker. "<< end_of_file_marker<<std::endl;
     }
+    fInputStream.seekg(std::ios::beg);
     
     return;
     /*
@@ -238,6 +241,7 @@ namespace lris {
                                          art::SubRunPrincipal* &outSR,
                                          art::EventPrincipal* &outE)
   {
+    mf::LogInfo(__FUNCTION__)<<"Attempting to read event: "<<fEventCounter<<std::endl;
     // Create empty result, then fill it from current file:
     std::unique_ptr<raw::DAQHeader> daq_header(new raw::DAQHeader);
     std::unique_ptr<std::vector<raw::RawDigit> >  tpc_raw_digits( new std::vector<raw::RawDigit>  );
@@ -247,7 +251,7 @@ namespace lris {
     bool res=false;
 
     res=processNextEvent(*tpc_raw_digits, *pmt_raw_digits, *daq_header, *beam_info );
-    
+
     if (res) {
       fEventCounter++;
       art::RunNumber_t rn = daq_header->GetRun();//+1;
@@ -262,12 +266,17 @@ namespace lris {
                                                   tstamp);
         fCurrentSubRunID = newID;        
       }
-
+      /*
+      std::cout<<"\033[93mAbout to make a principal for run: " << fCurrentSubRunID.run()
+	       <<" subrun: " << fCurrentSubRunID.subRun()
+	       <<" event: " << daq_header->GetEvent()
+	       <<"\033[00m"<< std::endl;
+      */
       outE = fSourceHelper.makeEventPrincipal(fCurrentSubRunID.run(),
-                                                fCurrentSubRunID.subRun(),
-                                                daq_header->GetEvent(),
-                                                tstamp);
-    
+					      fCurrentSubRunID.subRun(),
+					      daq_header->GetEvent(),
+					      tstamp);
+      //std::cout<<"\033[93mDone\033[00m"<<std::endl;
 
       // Put products in the event.
       art::put_product_in_principal(std::move(tpc_raw_digits),
@@ -295,22 +304,22 @@ namespace lris {
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo)
   {       
-    //fInputStream.seekg(fEventLocation[fEventCounter]);
     try {
       boost::archive::binary_iarchive ia(fInputStream); 
       ubdaq::ub_EventRecord event_record;  
       ia >> event_record;
+      //std::cout<<event_record.debugInfo()<<std::endl;
       //set granularity 
       //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
-
+      
       fillDAQHeaderData(event_record, daqHeader);
       fillTPCData(event_record, tpcDigitList);
       fillPMTData(event_record, pmtDigitList);
       fillBeamData(event_record, beamInfo);
-
-    } catch ( art::Exception const& e ) {
+      //std::cout<<"Done ProcessNextEvent..."<<std::endl;
+    } catch (...) {
       //throw art::Exception( art::errors::FileReadError )
-      std::cout<< "Failed to read the event."<<e.what() << std::endl;
+      std::cout<< "\033[93mFailed to read the event.\033[00m\n"<< std::endl;
       return false;
     }
   
@@ -342,7 +351,7 @@ namespace lris {
       daqHeader.SetSubRun(global_header.getSubrunNumber());
       
       //\/ Add the subRun number too!
-      daqHeader.SetEvent(global_header.getEventNumber());
+      daqHeader.SetEvent(global_header.getEventNumber()+1);
       daqHeader.SetTimeStamp(mytime);
 
       /// \todo: What is the "fixed word" ? Leaving it unset for now
