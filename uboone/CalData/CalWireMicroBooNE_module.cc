@@ -620,7 +620,7 @@ namespace caldata {
           lastBin++;
   
         sigWidth = lastBin-firstBin;
-        sigBinBuffer = TMath::Max(10,TMath::Min(2*sigWidth,maxSigBinBuffer));
+        sigBinBuffer = TMath::Max(10,TMath::Min(2*sigWidth,maxSigBinBuffer)); // NB:  Could decrease this if it is multiple low-angle track hits (say from within a shower) as opposed to one high-angle track (which requires much padding).  Could implement a check to see if there are multiple maxima (similar to what is done in GaussHitFinder), using a smaller value for sigBinBuffer in that case.  This may be important for shower events, or better resolving features near a busy vertex.
   
         thisBin = firstBin-1;
         while((thisBin >= 0) && (firstBin-thisBin <= sigBinBuffer)) {
