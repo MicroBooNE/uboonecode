@@ -198,13 +198,13 @@ namespace util {
     double fDeconNorm;
     double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
-	  //double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
+	  //double fASICGainInMVPerFC;                ///< Cold electronics ASIC gain setting in mV/fC
     std::vector<DoubleVec> fNoiseFactVec;       ///< RMS noise in ADCs for lowest gain setting
 
     std::vector<std::vector<size_t> > fNResponses;
     std::vector<std::vector<size_t> > fNActiveResponses;
     //double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
-    std::vector<double> fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
+    std::vector<double> fASICGainInMVPerFC;       ///< Cold electronics ASIC gain setting in mV/fC
     //std::vector<double> fNoiseFactColl;         ///< RMS Noise in ADCs for lowest Gain Setting
     //std::vector<double> fNoiseFactInd;          ///< RMS Noise in ADCs for lowest Gain Setting
 
@@ -213,17 +213,16 @@ namespace util {
 
     std::vector<double> fCalibResponseTOffset; // calibrated time offset to align U/V/Y Signals 
 
-    int fNFieldBins[2];         			///< number of bins for field response
-    int fFieldLowEdge[2];            ///< low edge of the field response histo (for test output)
-    double fFieldBinWidth[2];        ///<  Bin with of the input field response.
-    double fCol3DCorrection; 			///< correction factor to account for 3D path of 
-						///< electrons thru wires
-    double fInd3DCorrection;  			///< correction factor to account for 3D path of 
-						///< electrons thru wires
+    int fNFieldBins[2];         		///< number of bins for field response
+    int fFieldLowEdge[2];           ///< low edge of the field response histo (for test output)
+    double fFieldBinWidth[2];       ///<  Bin with of the input field response.
+
+    DoubleVec f3DCorrectionVec;  ///< correction factor to account for 3D path of electrons, 1 for each plane (default = 1.0)
+    
     DoubleVec fFieldRespAmpVec;
-    std::vector<double> fShapeTimeConst;  	///< time constants for exponential shaping
-    std::vector<int> fDeconvPol;                ///< switch for DeconvKernel normalization sign (+ -> max pos ADC, - -> max neg ADC). Entry 0,1,2 = U,V,Y plane settings
-    std::vector<TF1*> fFilterTF1Vec;  ///< Vector of Parameterized filter functions
+    std::vector<double> fShapeTimeConst; ///< time constants for exponential shaping
+    std::vector<int> fDeconvPol;         ///< switch for DeconvKernel normalization sign (+ -> max pos ADC, - -> max neg ADC). Entry 0,1,2 = U,V,Y plane settings
+    std::vector<TF1*> fFilterTF1Vec;     ///< Vector of Parameterized filter functions
     std::vector<std::string> fFilterFuncVec;
     std::vector<std::vector<TComplex> > fFilterVec;
 

@@ -44,8 +44,7 @@ microboone_signalshapingservice:
 
   DefaultDriftVelocity: [-1,-1,-1] # in cm/usec per drift region ... if negative value, use LArSoft derived drift velocity
 
-  Col3DCorrection:  2.5
-  Ind3DCorrection:  1.5
+  Drift3DCorrVec: [ 1.0, 1.0, 1.0 ]
   
   FieldResponseFNameBase: "uboone_response"
   FieldResponseHNameBase: "FieldResponse"
