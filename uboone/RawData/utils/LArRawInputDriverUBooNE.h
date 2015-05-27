@@ -92,7 +92,6 @@ namespace lris {
 
   private:
     //Other functions
-    void registerOpticalData( art::ProductRegistryHelper &helper );
     void initChannelMap();
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
 			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
@@ -120,6 +119,11 @@ namespace lris {
     
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
+
+    // PMT Helper Methods
+    std::map< opdet::UBOpticalChannelCategory_t, std::string > fPMTdataProductNames;
+    void registerOpticalData( art::ProductRegistryHelper &helper );
+    void putPMTDigitsIntoEvent( std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > >& pmtdigitlist, art::EventPrincipal* &outE );
     
   };  // LArRawInputDriverUBooNE
 

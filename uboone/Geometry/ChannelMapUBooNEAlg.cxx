@@ -521,6 +521,7 @@ namespace geo {
       }
 
       for ( auto v : cat_channels ) {
+	fChannelCategory[ v ] = (opdet::UBOpticalChannelCategory_t)icat;
 	fChannelGain[ v ] = chtype;
 	if (chtype==opdet::LogicChannel)
 	  fLogicChannels.insert( v );

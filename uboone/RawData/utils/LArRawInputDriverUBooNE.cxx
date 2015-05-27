@@ -246,11 +246,25 @@ namespace lris {
   // =====================================================================
   void LArRawInputDriverUBooNE::registerOpticalData( art::ProductRegistryHelper &helper ) {
     // we make a data product for each category of channels
+    fPMTdataProductNames.clear();
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
       std::stringstream ss;
       ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
       helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
+      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, ss.str() ) );
     }
+  }
+
+  // =====================================================================
+  void LArRawInputDriverUBooNE::putPMTDigitsIntoEvent( std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > >& pmtdigitlist, 
+						       art::EventPrincipal* &outE ) {
+    for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
+      
+      art::put_product_in_principal(std::move( pmtdigitlist[(opdet::UBOpticalChannelCategory_t)cat]  ),
+				    *outE,
+				    fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ]); // Module label
+    }
+    
   }
   
   // =====================================================================
@@ -311,6 +325,7 @@ namespace lris {
       art::put_product_in_principal(std::move(beam_info),
                                     *outE,
                                     "daq"); // Module label
+      putPMTDigitsIntoEvent( pmt_raw_digits, outE );
       // art::put_product_in_principal(std::move(pmt_raw_digits),
       //                               *outE,
       //                               "daq"); // Module label
@@ -568,7 +583,10 @@ namespace lris {
             
             optdata::TimeSlice_t time=window_header.getSample();
             optdata::Frame_t frame=window_header.getFrame();
+	    int crate_number = crate_data.crateHeader()->crate_number; 
 
+	    //std::cout << "fill (CSF): " << crate_number << ", " << card_data.getModule() << ", " << channel_number;
+	    
 	    // here we translate crate/card/daq channel to data product channel number
 	    // also need to go from clock time to time stamp
 	    unsigned int data_product_ch_num = ub_pmt_channel_map->GetChannelNumberFromCrateSlotFEMCh( crate_data.crateHeader()->crate_number, card_data.getModule(), channel_number );
@@ -576,7 +594,10 @@ namespace lris {
 	    double window_timestamp = timeService->OpticalClock().Time( time, frame );
             raw::OpDetWaveform rd( window_timestamp, channel_number,win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
-            
+
+	    //std::cout << " into ReadoutCH=" << data_product_ch_num << " category=" << opdet::UBOpChannelEnumName( ch_category ) << std::endl;
+	    
+	    
             for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
               rd.push_back(*it & 0xfff);                
             }
