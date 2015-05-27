@@ -61,6 +61,8 @@ physics: {
       PrintWires:  true
       # wire pitch for planes #0, #1 and #2
       ExpectedWirePitch: [ 0.3, 0.3, 0.3 ]
+      # plane pitches (#0 -> #1, #1 -> #2)
+      ExpectedWirePitch: [ 0.3, 0.3 ]
     }
   }
 
