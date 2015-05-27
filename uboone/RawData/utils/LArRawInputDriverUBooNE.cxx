@@ -246,7 +246,7 @@ namespace lris {
     // we make a data product for each category of channels
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
       std::stringstream ss;
-      ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
+      ss << "pmtreadout_" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
       helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
     }
   }
