@@ -142,8 +142,9 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   }
 
   fNoiseFactVec =  pset.get<std::vector<DoubleVec> >("NoiseFactVec");
-  fCol3DCorrection = pset.get<double>("Col3DCorrection");
-  fInd3DCorrection = pset.get<double>("Ind3DCorrection");
+
+  f3DCorrectionVec = pset.get<DoubleVec>("Drift3DCorrVec");
+
   fFieldRespAmpVec = pset.get<DoubleVec>("FieldRespAmpVec");
 
   fShapeTimeConst = pset.get<std::vector<double> >("ShapeTimeConst");
@@ -286,7 +287,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
         fNFieldBins[ktype] = Xaxis->GetNbins();
 
         // internal time is in nsec
-        fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
+        fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.*f3DCorrectionVec[_vw];
         //fFieldResponseTOffset[ktype].at(_vw) = (resp->GetBinCenter(1) + fCalibResponseTOffset[_vw])*1000.;
 //
 //        double delta = resp->GetXaxis()->GetBinCenter(2) - resp->GetXaxis()->GetBinCenter(1);
@@ -358,6 +359,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponseTOffsets(const TH1F* 
   }
 
   //std::cout << "view " << _vw << ", wire " << _wr << ", toffset " << tOffset << std::endl;
+  tOffset *= f3DCorrectionVec[_vw];
   fFieldResponseTOffset[ktype].at(_vw) = (-tOffset+ fCalibResponseTOffset[_vw])*1000.;
 
 }

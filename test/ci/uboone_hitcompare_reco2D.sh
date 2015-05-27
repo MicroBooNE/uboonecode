@@ -13,7 +13,7 @@ sed -e '/fuzzy/s/^/#/g' -i.bak standard_reco_uboone_2D.fcl
 sed -e '/ccluster/s/^/#/g' -i.bak standard_reco_uboone_2D.fcl 
 sed -e '/pandora/s/^/#/g' -i.bak standard_reco_uboone_2D.fcl 
 # This gives us back our needed terminating ] for reco module list
-sed -e '/pandora \]/a \]' -i.bak  standard_reco_uboone_2D.fcl
+perl -pe 's/pandora \]/$&\n ]/;' -i.bak  standard_reco_uboone_2D.fcl
 # Get rid of now-extraneous trailing comma
 #sed -e '/gaushit,/s//gaushit/g' -i.bak standard_reco_uboone_2D.fcl 
 # Last module as of v04_0x_00 is now mchit, not gaushit. So, remove its trailing comma.
