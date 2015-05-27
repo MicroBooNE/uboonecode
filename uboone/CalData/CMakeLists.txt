@@ -33,6 +33,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_GEOM}
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
+			${ROOT_FFTW}
 			${ROOT_BASIC_LIB_LIST}
         )
 
