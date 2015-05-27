@@ -121,6 +121,8 @@ namespace lris {
         << "failed to open input file " << name << std::endl;
     }
 
+    return;
+
     //seek to the end of file, check the end word, check number of events and sizes
     //read in the end of file word first
     uint16_t end_of_file_marker;
@@ -326,7 +328,7 @@ namespace lris {
                                                  raw::BeamInfo& beamInfo,
 						 raw::Trigger& trigInfo)
   {       
-    try {
+    //try {
       boost::archive::binary_iarchive ia(fInputStream); 
       ubdaq::ub_EventRecord event_record;  
       ia >> event_record;
@@ -340,12 +342,13 @@ namespace lris {
       fillBeamData(event_record, beamInfo);
       fillTriggerData(event_record, trigInfo);
       //std::cout<<"Done ProcessNextEvent..."<<std::endl;
+      /*
     } catch (...) {
       //throw art::Exception( art::errors::FileReadError )
       std::cout<< "\033[93mFailed to read the event.\033[00m\n"<< std::endl;
       return false;
     }
-  
+      */  
     return true;
   }
   

@@ -16,6 +16,9 @@ simple_plugin( LArRawInputSourceUBooNE
                "source"
 	       uboone_Geometry
                Geometry
+	       Geometry_service
+	       Utilities
+	       TimeService_service
                RawData
 	       uboone_RawData
                ${ART_FRAMEWORK_PERSISTENCY_COMMON}
@@ -27,6 +30,9 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME uboone_RawData
 	  LIB_LIBRARIES Geometry
+	  	        Geometry_service
+		        Utilities
+	       	        TimeService_service
 	                uboone_Geometry
                         OpticalDetectorData
                         RawData
@@ -98,3 +104,5 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc
 
 install_headers()
 install_source()
+
+add_subdirectory(job)
