@@ -10,19 +10,13 @@
 
 // LArSoft libraries
 #include "test/Geometry/geometry_unit_test_uboone.h"
+#include "test/Geometry/geometry_boost_unit_test_base.h"
 #include "test/Geometry/GeometryIteratorTestAlg.h"
-#include "Geometry/GeometryCore.h"
 #include "Geometry/ChannelMapStandardAlg.h"
-
-// utility libraries
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Boost libraries
 #define BOOST_TEST_MODULE GeometryIteratorTestMicroBooNE
 #include <boost/test/included/unit_test.hpp>
-
-// C/C++ standard libraries
-#include <string>
 
 //------------------------------------------------------------------------------
 //---  The test environment
@@ -30,12 +24,17 @@
 
 // we define here all the configuration that is needed;
 // in the specific, the type of the channel mapping and a proper test name,
-// used for output only; we use MicroBooNEGeometryFixtureConfigurer as base
-// class, that is already configured to use MicroBooNE geometry.
+// used for output only; we use MicroBooNEGeometryEnvironmentConfiguration
+// as base class, that is already configured to use MicroBooNE geometry.
+// We wrap it in testing::BoostCommandLineConfiguration<> so that it can learn
+// the configuration file name from the command line.
 struct MicroBooNEGeometryConfiguration:
-  public uboone::testing::MicroBooNEGeometryFixtureConfigurer<geo::ChannelMapStandardAlg>
+  public testing::BoostCommandLineConfiguration<
+    uboone::testing::MicroBooNEGeometryEnvironmentConfiguration
+      <geo::ChannelMapStandardAlg>
+    >
 {
-  /// Constructor: overrides the application name
+  /// Constructor: overrides the application name; ignores command line
   MicroBooNEGeometryConfiguration()
     { SetApplicationName("GeometryIteratorUnitTest"); }
 }; // class MicroBooNEGeometryConfiguration
@@ -47,13 +46,13 @@ struct MicroBooNEGeometryConfiguration:
  * - `Tester`, a configured instance of the test algorithm.
  */
 class MicroBooNEGeometryIteratorTestFixture:
-  private testing::GeometryTesterFixture<MicroBooNEGeometryConfiguration>
+  private testing::GeometryTesterEnvironment<MicroBooNEGeometryConfiguration>
 {
     public:
   geo::GeometryIteratorTestAlg Tester;
   
   /// Constructor: initialize the tester with the Geometry from base class
-  MicroBooNEGeometryIteratorTestFixture(): Tester(TesterConfiguration())
+  MicroBooNEGeometryIteratorTestFixture(): Tester(TesterParameters())
     { Tester.Setup(*Geometry()); }
 
 }; // class MicroBooNEGeometryIteratorTestFixture

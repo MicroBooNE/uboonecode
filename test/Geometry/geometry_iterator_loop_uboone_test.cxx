@@ -31,7 +31,7 @@
 // we use an existing class provided for this purpose, since our test
 // environment allows us to tailor it at run time.
 using MicroBooNEGeometryConfiguration
-  = uboone::testing::MicroBooNEGeometryFixtureConfigurer
+  = uboone::testing::MicroBooNEGeometryEnvironmentConfiguration
     <geo::ChannelMapStandardAlg>;
 
 /*
@@ -42,7 +42,7 @@ using MicroBooNEGeometryConfiguration
  * - `geo::GeometryCore const* GlobalGeometry()` (static member)
  */
 using MicroBooNEGeometryTestEnvironment
-  = testing::GeometryTesterFixture<MicroBooNEGeometryConfiguration>;
+  = testing::GeometryTesterEnvironment<MicroBooNEGeometryConfiguration>;
 
 
 //------------------------------------------------------------------------------
@@ -98,8 +98,7 @@ int main(int argc, char const** argv) {
   //
   
   // 1. we initialize it from the configuration in the environment,
-  geo::GeometryIteratorLoopTestAlg Tester
-    (TestEnvironment.TesterConfiguration());
+  geo::GeometryIteratorLoopTestAlg Tester(TestEnvironment.TesterParameters());
   
   // 2. we set it up with the geometry from the environment
   Tester.Setup(*TestEnvironment.Geometry());

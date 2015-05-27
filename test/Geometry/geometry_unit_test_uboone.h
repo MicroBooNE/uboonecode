@@ -9,7 +9,7 @@
  * using Boost unit test, the configuration file location must be hard coded too
  * (or you can use the provided configuration).
  * 
- * For an example of usage, see larcore/test/Geometry/geometry_iterator_test.cxx
+ * For an example of usage, see larcore/test/Geometry/geometry_test.cxx
  */
 
 #ifndef TEST_GEOMETRY_UNIT_TEST_UBOONE_H
@@ -35,7 +35,7 @@ namespace uboone {
     /** ************************************************************************
      * @brief Class holding the configuration for a MicroBooNE fixture
      * @tparam CHANNELMAP the class used for channel mapping
-     * @see BasicGeometryFixtureConfigurer, GeometryTesterFixture
+     * @see BasicGeometryEnvironmentConfiguration
      *
      * This class needs to be fully constructed by the default constructor
      * in order to be useful as Boost unit test fixture.
@@ -45,18 +45,28 @@ namespace uboone {
      * 
      * This class should be used with ChannelMapStandardAlg.
      * 
-     * We reuse BasicGeometryFixtureConfigurer as base class and we override its
-     * setup.
+     * We reuse BasicGeometryEnvironmentConfiguration as base class and then we
+     * fix its setup.
      */
     template <typename CHANNELMAP = geo::ChannelMapStandardAlg>
-    struct MicroBooNEGeometryFixtureConfigurer:
-      public ::testing::BasicGeometryFixtureConfigurer<CHANNELMAP>
+    struct MicroBooNEGeometryEnvironmentConfiguration:
+      public ::testing::BasicGeometryEnvironmentConfiguration<CHANNELMAP>
     {
-      // remember that BasicGeometryFixtureConfigurer is not polymorphic
-      using base_t = ::testing::BasicGeometryFixtureConfigurer<CHANNELMAP>;
+      // remember that BasicGeometryEnvironmentConfiguration is not polymorphic
+      using base_t
+        = ::testing::BasicGeometryEnvironmentConfiguration<CHANNELMAP>;
       
-      /// Default constructor; this is what is used in Boost unit test
-      MicroBooNEGeometryFixtureConfigurer()
+      /// Default constructor
+      MicroBooNEGeometryEnvironmentConfiguration() { MicroBooNEdefaultInit(); }
+      
+      /// Constructor; accepts the name as parameter
+      MicroBooNEGeometryEnvironmentConfiguration(std::string name):
+        MicroBooNEGeometryEnvironmentConfiguration()
+        { base_t::SetApplicationName(name); }
+      
+      
+        private:
+      void MicroBooNEdefaultInit()
         {
           // overwrite the configuration that happened in the base class:
           base_t::SetApplicationName("MicroBooNEGeometryTest");
@@ -71,14 +81,8 @@ namespace uboone {
                 } # Geometry
               } # services
             )");
-        } // MicroBooNEGeometryFixtureConfigurer()
-      
-      /// Constructor; accepts the name as parameter
-      MicroBooNEGeometryFixtureConfigurer(std::string name):
-        MicroBooNEGeometryFixtureConfigurer()
-        { base_t::SetApplicationName(name); }
-      
-    }; // class MicroBooNEGeometryFixtureConfigurer<>
+        }
+    }; // class MicroBooNEGeometryEnvironmentConfiguration<>
     
     
   } // namespace testing
