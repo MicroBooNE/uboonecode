@@ -13,10 +13,12 @@
 #include "RawData/TriggerData.h"
 #include "RawData/DAQHeader.h"
 #include "RawData/BeamInfo.h"
-#include "OpticalDetectorData/FIFOChannel.h"
+#include "RawData/OpDetWaveform.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/ExptGeoHelperInterface.h"
 #include "SummaryData/RunData.h"
+#include "Utilities/TimeService.h"
+#include "OpticalDetectorData/OpticalTypes.h" // lardata -- I want to move the enums we use back to UBooNE as they are UBooNE-specific
 
 //ART, ...
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
@@ -28,6 +30,7 @@
 
 // uboonecode
 #include "uboone/Geometry/ChannelMapUBooNEAlg.h"
+#include "uboone/Geometry/UBOpChannelTypes.h"
 
 #include "datatypes/raw_data_access.h"
 
@@ -68,8 +71,8 @@ namespace lris {
   {
     helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
-    helper.reconstitutes<std::vector<optdata::FIFOChannel>,art::InEvent>("daq");
     helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
+    registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
     initChannelMap();
 
     art::ServiceHandle<art::TFileService> tfs;
@@ -239,6 +242,16 @@ namespace lris {
   }
 
   // =====================================================================
+  void LArRawInputDriverUBooNE::registerOpticalData( art::ProductRegistryHelper &helper ) {
+    // we make a data product for each category of channels
+    for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
+      std::stringstream ss;
+      ss << "pmtreadout_" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
+      helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
+    }
+  }
+  
+  // =====================================================================
   bool LArRawInputDriverUBooNE::readNext(art::RunPrincipal* const &/*inR*/,
                                          art::SubRunPrincipal* const &/*inSR*/,
                                          art::RunPrincipal* &outR,
@@ -249,12 +262,16 @@ namespace lris {
     // Create empty result, then fill it from current file:
     std::unique_ptr<raw::DAQHeader> daq_header(new raw::DAQHeader);
     std::unique_ptr<std::vector<raw::RawDigit> >  tpc_raw_digits( new std::vector<raw::RawDigit>  );
-    std::unique_ptr<std::vector<optdata::FIFOChannel> >  pmt_raw_digits( new std::vector<optdata::FIFOChannel>  );
     std::unique_ptr<raw::BeamInfo> beam_info(new raw::BeamInfo);
     std::unique_ptr<raw::Trigger> trig_info(new raw::Trigger);
+    std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > pmt_raw_digits;
+    for ( unsigned int opdetcat=0; opdetcat<(unsigned int)opdet::NumUBOpticalChannelCategories; opdetcat++ ) {
+      pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
+    }
+
     bool res=false;
 
-    res=processNextEvent(*tpc_raw_digits, *pmt_raw_digits, *daq_header, *beam_info, *trig_info );
+    res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info );
 
     if (res) {
       fEventCounter++;
@@ -286,15 +303,15 @@ namespace lris {
       art::put_product_in_principal(std::move(tpc_raw_digits),
                                     *outE,
                                     "daq"); // Module label
-      art::put_product_in_principal(std::move(pmt_raw_digits),
-                                    *outE,
-                                    "daq"); // Module label
       art::put_product_in_principal(std::move(daq_header),
                                     *outE,
                                     "daq"); // Module label
       art::put_product_in_principal(std::move(beam_info),
                                     *outE,
                                     "daq"); // Module label
+      // art::put_product_in_principal(std::move(pmt_raw_digits),
+      //                               *outE,
+      //                               "daq"); // Module label
      
     }
 
@@ -304,7 +321,7 @@ namespace lris {
 
   // =====================================================================
   bool LArRawInputDriverUBooNE::processNextEvent(std::vector<raw::RawDigit>& tpcDigitList,
-                                                 std::vector<optdata::FIFOChannel>& pmtDigitList,
+                                                 std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 raw::Trigger& trigInfo)
@@ -499,13 +516,17 @@ namespace lris {
 
   // =====================================================================
   void LArRawInputDriverUBooNE::fillPMTData(ubdaq::ub_EventRecord& event_record,
-                                            std::vector<optdata::FIFOChannel>& pmtDigitList)
+					    std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList )
   {
     //fill PMT data
 
       // MODIFIED by Nathaniel Sat May 16, to use my new version of datatypes (v6_08, on branch master)
     
     //crate -> card -> channel -> window
+
+    ::art::ServiceHandle<geo::Geometry> geom;
+    ::art::ServiceHandle< util::TimeService > timeService;
+    std::shared_ptr<const geo::ChannelMapUBooNEAlg> ub_pmt_channel_map = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geom->GetChannelMapAlg() ); // With UB-specific methods we need
     
     using namespace gov::fnal::uboone::datatypes;
     
@@ -533,23 +554,30 @@ namespace lris {
             const ub_RawData& window_data = window.data();
             size_t win_data_size=window_data.size();
             
-            //\todo check category, time & frame
-            optdata::Optical_Category_t category = optdata::kUndefined;
-            if ((window_header.getDiscriminantor()&0x04)==0x04) {
-              category=optdata::kBeamPMTTrigger;
-            } else {
-              category=optdata::kCosmicPMTTrigger;
-            }
+            // //\todo check category, time & frame
+            // optdata::Optical_Category_t category = optdata::kUndefined;
+            // if ((window_header.getDiscriminantor()&0x04)==0x04) {
+            //   category=optdata::kBeamPMTTrigger;
+            // } else {
+            //   category=optdata::kCosmicPMTTrigger;
+            // }
+	    // tmw: In this new scheme, category is no longer needed (5/26/15)
             
             optdata::TimeSlice_t time=window_header.getSample();
             optdata::Frame_t frame=window_header.getFrame();
-            optdata::FIFOChannel rd(category, time, frame, channel_number,win_data_size);
+
+	    // here we translate crate/card/daq channel to data product channel number
+	    // also need to go from clock time to time stamp
+	    unsigned int data_product_ch_num = ub_pmt_channel_map->GetChannelNumberFromCrateSlotFEMCh( crate_data.crateHeader()->crate_number, card_data.getModule(), channel_number );
+	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelType( data_product_ch_num );
+	    double window_timestamp = timeService->OpticalClock().Time( time, frame );
+            raw::OpDetWaveform rd( window_timestamp, channel_number,win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
             
             for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
               rd.push_back(*it & 0xfff);                
             }
-            pmtDigitList.push_back(rd);
+            pmtDigitList[ch_category]->emplace_back(rd);
           }
         }//<--End channel_pmt_it for loop
       }//<---End card_pmt_it for loop

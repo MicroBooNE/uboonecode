@@ -93,8 +93,10 @@ namespace geo {
     bool         IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const;
     unsigned int NOpLogicChannels() const;
     void         GetLogicChannelList( std::vector< unsigned int >& channels ) const;
-    opdet::UBOpticalChannelGain_t GetChannelGain( unsigned int opchannel ) const;
+    opdet::UBOpticalChannelGain_t     GetChannelGain( unsigned int opchannel ) const;
     opdet::UBOpticalChannelCategory_t GetChannelType( unsigned int opChannel ) const;
+    unsigned int GetNumberOfChannelsInCategory( opdet::UBOpticalChannelCategory_t category ) const;
+    unsigned int GetChannelNumberFromCrateSlotFEMCh( unsigned int crate, unsigned int slot, unsigned int femch ) const;
 
   private:
     void LoadOpticalMapData( fhicl::ParameterSet const& p);

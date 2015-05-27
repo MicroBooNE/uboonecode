@@ -1,4 +1,5 @@
 #ifndef __UBOpChannelTypes__
+#define __UBOpChannelTypes__
 
 #include <boost/preprocessor.hpp>
 

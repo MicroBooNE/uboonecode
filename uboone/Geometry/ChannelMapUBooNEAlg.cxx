@@ -449,6 +449,20 @@ namespace geo {
   }
 
   //----------------------------------------------------------------------------
+  unsigned int ChannelMapUBooNEAlg::GetNumberOfChannelsInCategory( opdet::UBOpticalChannelCategory_t category ) const {
+    auto it = fCategoryChannels.find( category );
+    if ( it==fCategoryChannels.end() )
+      return 0;
+    return (*it).second.size();
+  }
+
+  //----------------------------------------------------------------------------
+  unsigned int ChannelMapUBooNEAlg::GetChannelNumberFromCrateSlotFEMCh( unsigned int crate, unsigned int slot, unsigned int femch ) const {
+    throw std::runtime_error( "ChannelMapUBooNEAlg::GetChannelNumberFromCrateSlotFEMCh -- NOT IMPLEMENTED YET." );
+    return 0;
+  }
+
+  //----------------------------------------------------------------------------
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
     fNOpDets = pset.get< unsigned int >("numberOfDetectors");
 

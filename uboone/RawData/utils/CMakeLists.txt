@@ -14,9 +14,10 @@ cet_find_library( BOOSER NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAUL
 
 simple_plugin( LArRawInputSourceUBooNE
                "source"
+	       uboone_Geometry
                Geometry
-               uboone_RawData
                RawData
+	       uboone_RawData
                ${ART_FRAMEWORK_PERSISTENCY_COMMON}
                BASENAME_ONLY
              )
@@ -26,6 +27,7 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME uboone_RawData
 	  LIB_LIBRARIES Geometry
+	                uboone_Geometry
                         OpticalDetectorData
                         RawData
                         SummaryData

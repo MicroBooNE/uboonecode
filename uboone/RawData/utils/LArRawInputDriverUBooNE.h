@@ -21,8 +21,11 @@
 #include <boost/archive/binary_iarchive.hpp>
 #include "datatypes/ub_EventRecord.h"
 
+#include "uboone/Geometry/UBOpChannelTypes.h"
+
 #include <fstream>
 #include <vector>
+#include <map>
 
 namespace gov {
   namespace fnal {
@@ -34,15 +37,12 @@ namespace gov {
   }
 }
 
-namespace optdata {
-  class FIFOChannel;
-}
-
 namespace raw {
   class RawDigit; 
   class BeamInfo;
   class DAQHeader;
   class Trigger;
+  class OpDetWaveform;
 }
 
 class TH1D;
@@ -92,9 +92,10 @@ namespace lris {
 
   private:
     //Other functions
+    void registerOpticalData( art::ProductRegistryHelper &helper );
     void initChannelMap();
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
-			  std::vector<optdata::FIFOChannel>& pmtDigitList,
+			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo,
 			  raw::Trigger& trigInfo);
@@ -103,7 +104,7 @@ namespace lris {
     void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
 		     std::vector<raw::RawDigit>& digitList);
     void fillPMTData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
-		     std::vector<optdata::FIFOChannel>& pmtDigitList);
+		     std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList );
     void fillBeamData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
 		      raw::BeamInfo& beamInfo);
     void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
