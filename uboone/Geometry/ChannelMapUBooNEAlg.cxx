@@ -458,14 +458,27 @@ namespace geo {
 
   //----------------------------------------------------------------------------
   unsigned int ChannelMapUBooNEAlg::GetChannelNumberFromCrateSlotFEMCh( unsigned int crate, unsigned int slot, unsigned int femch ) const {
-    throw std::runtime_error( "ChannelMapUBooNEAlg::GetChannelNumberFromCrateSlotFEMCh -- NOT IMPLEMENTED YET." );
-    return 0;
+    CrateSlotFEMCh csf( crate, slot, femch );
+    auto it = fCSF2Readout.find( csf );
+    if ( it==fCSF2Readout.end() )
+      throw std::runtime_error( "(crate,slot,femch) entry not found in map to readout channel number.");
+    return (*it).second;
   }
 
+  void ChannelMapUBooNEAlg::GetCrateSlotFEMChFromReadoutChannel( unsigned int readoutch, unsigned int& crate, unsigned int& slot, unsigned int& femch ) const {
+    auto it = fReadout2CSF.find( readoutch );
+    if ( it==fReadout2CSF.end() )
+      throw std::runtime_error( "readout channel number entry not found in map to (crate,slot,femch)" );
+    crate = (*it).second.crate;
+    slot = (*it).second.slot;
+    femch = (*it).second.femch;
+  }
+  
   //----------------------------------------------------------------------------
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
     fNOpDets = pset.get< unsigned int >("numberOfDetectors");
-
+    
+    // ----------------------------------------------------------------------
     // read in opdet to channel map, store
     for (unsigned int iop=0; iop<fNOpDets; iop++) {
       char entryname[50];
@@ -481,6 +494,7 @@ namespace geo {
       //std::cout << "]" << std::endl;
     }
     
+    // ----------------------------------------------------------------------
     // read in channel types
     fNReadoutChannels = 0;
 
@@ -510,11 +524,24 @@ namespace geo {
 	fChannelGain[ v ] = chtype;
 	if (chtype==opdet::LogicChannel)
 	  fLogicChannels.insert( v );
+	fReadoutChannelSet.insert( v );
       }
     }//end loop over categories
 
     //std::cout << "Number of defined readout channels: " << fNReadoutChannels << std::endl;
-    
+
+    // ----------------------------------------------------------------------
+    // Read in Crate, Slot, FEMCh
+    char readoutname[100];
+    for ( auto v : fReadoutChannelSet ) {
+      sprintf(readoutname,"ReadoutChannel%d",v);
+      std::vector< unsigned int > fichl_csf = pset.get< std::vector<unsigned int> >( readoutname );
+      if ( fichl_csf.size()!=3 ) {
+	throw std::runtime_error( "Need to have 3 entries for Crate, Slot, FEMCh map." );
+      }
+      fReadout2CSF.insert( std::make_pair( v, CrateSlotFEMCh( fichl_csf.at(0), fichl_csf.at(1), fichl_csf.at(2) ) ) );
+      fCSF2Readout.insert( std::make_pair( CrateSlotFEMCh( fichl_csf.at(0), fichl_csf.at(1), fichl_csf.at(2) ), v ) );
+    }
   }
   
 } // namespace

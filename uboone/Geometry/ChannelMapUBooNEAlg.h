@@ -97,11 +97,13 @@ namespace geo {
     opdet::UBOpticalChannelCategory_t GetChannelType( unsigned int opChannel ) const;
     unsigned int GetNumberOfChannelsInCategory( opdet::UBOpticalChannelCategory_t category ) const;
     unsigned int GetChannelNumberFromCrateSlotFEMCh( unsigned int crate, unsigned int slot, unsigned int femch ) const;
+    void GetCrateSlotFEMChFromReadoutChannel( unsigned int readoutch, unsigned int& crate, unsigned int& slot, unsigned int& femch ) const;
 
   private:
     void LoadOpticalMapData( fhicl::ParameterSet const& p);
     unsigned int fNOpDets;
     unsigned int fNReadoutChannels;
+    std::set< unsigned int > fReadoutChannelSet;
     std::map< unsigned int, unsigned int > fChannel2pmt;  // readout channel to opdet(pmt) id
     std::map< unsigned int, std::vector< unsigned int > > fPMT2channels; // opdet(pmt) id to readout channel
     std::map< opdet::UBOpticalChannelCategory_t, std::set< unsigned int > > fCategoryChannels; // list of channels assigned to each category
@@ -109,11 +111,47 @@ namespace geo {
     std::map< unsigned int, opdet::UBOpticalChannelCategory_t > fChannelCategory;
     std::map< unsigned int, opdet::UBOpticalChannelGain_t > fChannelGain;
     std::set< unsigned int > fLogicChannels;
+
+    class CrateSlotFEMCh {
+    public:
+      CrateSlotFEMCh( unsigned int _crate, unsigned int _slot, unsigned int _femch ) {
+	crate = _crate;
+	slot  = _slot;
+	femch = _femch;
+      }
+      ~CrateSlotFEMCh() {};
       
+      unsigned int crate;
+      unsigned int slot;
+      unsigned int femch;
+
+      // comparison
+      bool operator<( CrateSlotFEMCh other ) const {
+	if ( crate<other.crate )
+	  return true;
+	if ( slot<other.slot )
+	  return true;
+	if ( femch<other.femch )
+	  return true;
+	return false;
+      };
+      
+      // assignment
+      CrateSlotFEMCh& operator=(CrateSlotFEMCh other) {
+	std::swap(crate, other.crate);
+	std::swap(slot,  other.slot);
+	std::swap(femch,  other.femch);
+        return *this;
+      };
+    };
+    
+    std::map< unsigned int, CrateSlotFEMCh > fReadout2CSF;
+    std::map< CrateSlotFEMCh, unsigned int> fCSF2Readout;
+    
     // ----------------------------------------------------------------
     // Prevent multiple loading
     static unsigned short __fInstances__;
-
+    
   };
 
 
