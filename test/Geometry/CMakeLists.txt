@@ -38,6 +38,7 @@ cet_test(geometry_uboone_test
             ${MF_UTILITIES}
             ${FHICLCPP}
             ${CETLIB}
+	    ${ROOT_CORE}
 )
 
 
@@ -51,6 +52,7 @@ cet_test(geometry_iterator_uboone_test
             ${MF_UTILITIES}
             ${FHICLCPP}
             ${CETLIB}
+	    ${ROOT_CORE}
 )
 
 
@@ -63,4 +65,5 @@ cet_test(geometry_iterator_loop_uboone_test
             ${MF_UTILITIES}
             ${FHICLCPP}
             ${CETLIB}
+	    ${ROOT_CORE}
 )
