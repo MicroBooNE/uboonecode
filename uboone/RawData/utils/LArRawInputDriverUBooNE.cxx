@@ -583,8 +583,7 @@ namespace lris {
             
             optdata::TimeSlice_t time=window_header.getSample();
             optdata::Frame_t frame=window_header.getFrame();
-	    int crate_number = crate_data.crateHeader()->crate_number; 
-
+	    //int crate_number = crate_data.crateHeader()->crate_number; 
 	    //std::cout << "fill (CSF): " << crate_number << ", " << card_data.getModule() << ", " << channel_number;
 	    
 	    // here we translate crate/card/daq channel to data product channel number
