@@ -18,6 +18,7 @@
 #include "Geometry/ExptGeoHelperInterface.h"
 #include "SummaryData/RunData.h"
 #include "Utilities/TimeService.h"
+#include "Utilities/ElecClock.h" // lardata
 #include "OpticalDetectorData/OpticalTypes.h" // lardata -- I want to move the enums we use back to UBooNE as they are UBooNE-specific
 
 //ART, ...
@@ -72,6 +73,7 @@ namespace lris {
     helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
     helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
+    helper.reconstitutes<std::vector<raw::Trigger>,   art::InEvent>("daq");
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
     initChannelMap();
 
@@ -279,7 +281,7 @@ namespace lris {
     std::unique_ptr<raw::DAQHeader> daq_header(new raw::DAQHeader);
     std::unique_ptr<std::vector<raw::RawDigit> >  tpc_raw_digits( new std::vector<raw::RawDigit>  );
     std::unique_ptr<raw::BeamInfo> beam_info(new raw::BeamInfo);
-    std::unique_ptr<raw::Trigger> trig_info(new raw::Trigger);
+    std::unique_ptr<std::vector<raw::Trigger>> trig_info( new std::vector<raw::Trigger> );
     std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > pmt_raw_digits;
     for ( unsigned int opdetcat=0; opdetcat<(unsigned int)opdet::NumUBOpticalChannelCategories; opdetcat++ ) {
       pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
@@ -325,10 +327,10 @@ namespace lris {
       art::put_product_in_principal(std::move(beam_info),
                                     *outE,
                                     "daq"); // Module label
+      art::put_product_in_principal(std::move(trig_info),
+				    *outE,
+				    "daq"); // Module label
       putPMTDigitsIntoEvent( pmt_raw_digits, outE );
-      // art::put_product_in_principal(std::move(pmt_raw_digits),
-      //                               *outE,
-      //                               "daq"); // Module label
      
     }
 
@@ -341,7 +343,7 @@ namespace lris {
                                                  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
-						 raw::Trigger& trigInfo)
+						 std::vector<raw::Trigger>& trigInfo)
   {       
     //try {
       boost::archive::binary_iarchive ia(fInputStream); 
@@ -631,44 +633,29 @@ namespace lris {
   }
 
   void LArRawInputDriverUBooNE::fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
-						raw::Trigger& trigInfo)
+						std::vector<raw::Trigger>& trigInfo)
   {
 
-    /*
-      auto const& trig_data = event_record.triggerData();
-    trigInfo = raw::Trigger( trig_data.getTrigEventNum(),
-                              
-    Trigger(unsigned int counter,
-            double       trigger_time,
-            double       beamgate_time,
-            uint32_t     bits)
-      : fTriggerNumber       ( counter           ),
-      fTriggerTime         ( trigger_time      ),
-      fBeamGateTime        ( beamgate_time     ),
-      fTriggerBits         ( bits              )
-      {}
+    ::art::ServiceHandle< util::TimeService > timeService;
 
+    auto const& trig_data =  event_record.triggerData();
 
+    // Make a trigger clock 
+    util::ElecClock trig_clock = timeService->TriggerClock( trig_data.getSampleNumber(), trig_data.getFrame() );
+    double trigger_time = trig_clock.Time();
+    double beam_time = 0;
+    if ( trig_data.isBnbTrigger() || trig_data.isNumiTrigger() )
+      beam_time = trigger_time;
+    else {
+      std::cerr << "WARNING: THE BEAM TIME VALUE FOR NOT-(BNB or NUMI) TRIGGERS HAS NOT BEEN SETUP!" << std::endl;
+    }
+    
+    raw::Trigger swiz_trig( trig_data.getTrigEventNum(),
+			    trigger_time,
+			    beam_time,
+			    (uint32_t)trig_data.getTriggerBits() ); // warning casting 16 bit to 32 bit and praying...
+    trigInfo.emplace_back( swiz_trig );
 
-    uint16_t getSampleNumber() const noexcept;
-    uint16_t getSampleRemainder() const noexcept;
-    uint16_t getSampleNumber_2MHz() const noexcept;
-    uint16_t getSampleNumber_16MHz() const noexcept;
-    uint16_t getSampleNumber_64MHz() const noexcept;
-    bool     getBusy() const noexcept;
-    uint32_t getFrame() const noexcept;
-    uint32_t getTrigEventNum() const noexcept;
-    uint16_t  getTriggerBits() const noexcept;
-    bool     isPmtTrigger() const noexcept;
-    bool     isExtTrigger() const noexcept;
-    bool     isActiveTrigger() const noexcept;
-    bool     isBnbTrigger()    const noexcept;
-    bool     isNumiTrigger()   const noexcept;
-    bool     isVetoTrigger()   const noexcept;
-    bool     isCalibTrigger()  const noexcept;
-    uint16_t getPhase64Mhz_1() const noexcept;
-    uint16_t getPhase64Mhz_2() const noexcept;
-    */
   }
 
 }//<---Endlris
