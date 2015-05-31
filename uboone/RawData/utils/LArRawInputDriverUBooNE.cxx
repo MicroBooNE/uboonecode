@@ -35,9 +35,6 @@
 
 #include "datatypes/raw_data_access.h"
 
-
-
-
 //boost
 //#include <boost/archive/binary_iarchive.hpp>
 #include <boost/algorithm/string.hpp>
@@ -638,24 +635,30 @@ namespace lris {
 
     ::art::ServiceHandle< util::TimeService > timeService;
 
-    auto const& trig_data =  event_record.triggerData();
+    for(auto const& it_trig_map : event_record.getTRIGSEBMap()){
 
-    // Make a trigger clock 
-    util::ElecClock trig_clock = timeService->TriggerClock( trig_data.getSampleNumber(), trig_data.getFrame() );
-    double trigger_time = trig_clock.Time();
-    double beam_time = 0;
-    if ( trig_data.isBnbTrigger() || trig_data.isNumiTrigger() )
-      beam_time = trigger_time;
-    else {
-      std::cerr << "WARNING: THE BEAM TIME VALUE FOR NOT-(BNB or NUMI) TRIGGERS HAS NOT BEEN SETUP!" << std::endl;
+      int seb_num = it_trig_map.first;
+      trig_crate_data_t const& trig_crate = it_trig_map.second;  //  is typedef of ub_Trigger_CrateData_X
+      trig_card_data_t const& trig_data  = trig_crate.getTriggerCardData(); // typedef of ub_Trigger_CardData_X
+      
+
+      // Make a trigger clock 
+      util::ElecClock trig_clock = timeService->TriggerClock( trig_data.getSampleNumber(), trig_data.getFrame() );
+      double trigger_time = trig_clock.Time();
+      double beam_time = 0;
+      if ( trig_data.isBnbTrigger() || trig_data.isNumiTrigger() )
+	beam_time = trigger_time;
+      else {
+	std::cerr << "WARNING: THE BEAM TIME VALUE FOR NOT-(BNB or NUMI) TRIGGERS HAS NOT BEEN SETUP!" << std::endl;
+      }
+      
+      raw::Trigger swiz_trig( trig_data.getTrigEventNum(),
+			      trigger_time,
+			      beam_time,
+			      (uint32_t)trig_data.getTriggerData().trig_data_1 ); // warning casting 16 bit to 32 bit and praying...
+      trigInfo.emplace_back( swiz_trig );
+      
     }
-    
-    raw::Trigger swiz_trig( trig_data.getTrigEventNum(),
-			    trigger_time,
-			    beam_time,
-			    (uint32_t)trig_data.getTriggerBits() ); // warning casting 16 bit to 32 bit and praying...
-    trigInfo.emplace_back( swiz_trig );
-
   }
 
 }//<---Endlris
