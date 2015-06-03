@@ -117,7 +117,7 @@ namespace opdet {
       std::stringstream ss;
       ss << fDataProductsStemName << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
       //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
-      produces< std::vector<raw::OpDetWaveform> >();
+      produces< std::vector<raw::OpDetWaveform> >(ss.str());
       fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, ss.str() ) );
     }
   }
@@ -125,7 +125,8 @@ namespace opdet {
 
   /// ------------------------------------------------------------------------------------
 
-  void OpticalDRAMReadout::putPMTDigitsIntoEvent( std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > >& pmtdigitlist, 
+  void OpticalDRAMReadout::putPMTDigitsIntoEvent( std::map< opdet::UBOpticalChannelCategory_t, 
+						  std::unique_ptr< std::vector<raw::OpDetWaveform> > >& pmtdigitlist, 
 						  art::Event& event ) {
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ )
       event.put( std::move( pmtdigitlist[(opdet::UBOpticalChannelCategory_t)cat] ), fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ] );    

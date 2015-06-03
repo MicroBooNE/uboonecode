@@ -44,7 +44,7 @@ namespace opdet {
     art::ServiceHandle<geo::Geometry> geom;
     unsigned int ch = geom->OpChannel( pmtid, 0 ); // get channel reading out that PMT
 
-    double dark_rate = ch_conf->GetParameter(kDarkRate,ch);
+    double dark_rate = ch_conf->GetFloat(kDarkRate,ch);
 
     unsigned int dark_count = RandomServer::GetME().Poisson(dark_rate * fDuration);
 
@@ -79,17 +79,17 @@ namespace opdet {
     // Configure to generate high gain SPE
     fSPE.Reset();
 
-    fSPE.SetT0(ch_conf->GetParameter(kT0,ch),
-	       ch_conf->GetParameter(kT0Spread,ch));
+    fSPE.SetT0(ch_conf->GetFloat(kT0,ch),
+	       ch_conf->GetFloat(kT0Spread,ch));
     
-    fSPE.SetGain(ch_conf->GetParameter(kPMTGain,ch),
-		 ch_conf->GetParameter(kGainSpread,ch));
+    fSPE.SetGain(ch_conf->GetFloat(kPMTGain,ch),
+		 ch_conf->GetFloat(kGainSpread,ch));
     
     // Create combined photon time with QE applied on signal photons
 
     fPhotonTime.clear();
     fPhotonTime.reserve(fInputPhotonTime.size() + fDarkPhotonTime.size());
-    const double qe = ch_conf->GetParameter(kQE,ch);
+    const double qe = ch_conf->GetFloat(kQE,ch);
     for(auto const &v : fDarkPhotonTime) fPhotonTime.push_back(v);
     for(auto const &v : fInputPhotonTime)
       if(RandomServer::GetME().Uniform(1.) < qe) fPhotonTime.push_back(v);
@@ -98,7 +98,7 @@ namespace opdet {
     fSPE.Process(wfm_tmp,fTimeInfo);
 
     // convert from pe waveform to adc
-    double gain_ratio = ch_conf->GetParameter(kSplitterGain,ch);
+    double gain_ratio = ch_conf->GetFloat(kSplitterGain,ch);
     for(auto &v : wfm_tmp) 
       v *= gain_ratio;
 
@@ -106,8 +106,8 @@ namespace opdet {
     // Simulate pedestal
     //
     fPED.Reset();
-    fPED.SetPedestal(ch_conf->GetParameter(kPedestalMean,ch),
-		     ch_conf->GetParameter(kPedestalSpread,ch));
+    fPED.SetPedestal(ch_conf->GetFloat(kPedestalMean,ch),
+		     ch_conf->GetFloat(kPedestalSpread,ch));
     fPED.Process(wfm_tmp,fTimeInfo);
 
     // Make sure algorithms did not alter the waveform size

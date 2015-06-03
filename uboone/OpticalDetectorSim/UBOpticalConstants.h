@@ -29,6 +29,10 @@ namespace opdet {
     kT0,             // T0 in ns
     kT0Spread,       // T0 spread in ns
     kDarkRate,       // Dark Rate in GHz
+    kDisc0Threshold, // Discriminator 0 threshold
+    kDisc1Threshold, // Discriminator 1 threshold
+    kDisc3Threshold, // Discriminator 3 threshold
+    
     kChConfigTypeMax
   };
   

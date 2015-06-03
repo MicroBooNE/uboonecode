@@ -1,0 +1,12 @@
+BEGIN_PROLOG
+
+OpDetWaveformAna:
+{
+  module_type:  "OpDetWaveformAna"
+  InputModule:  []
+  AnaHit:       []
+  AnaWaveform:  []
+  SaveWaveform: []
+}
+
+END_PROLOG

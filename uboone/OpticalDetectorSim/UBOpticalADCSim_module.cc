@@ -36,7 +36,7 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
-#include "OpticalDetectorData/ChannelData.h" // from lardata
+#include "OpticalDetectorData/ChannelDataGroup.h" // from lardata
 #include "Geometry/Geometry.h" // larcore
 #include "Simulation/SimPhotons.h" // larsim
 #include "UBOpticalADC.h" // uboonecode
@@ -115,7 +115,7 @@ namespace opdet {
 
     fLogicGen.SetPedestal(2048,0.3); // move to ubchannelconfig
 
-    produces< std::vector<optdata::ChannelData> >();
+    produces< optdata::ChannelDataGroup >();
   }
 
   //#################################
@@ -135,7 +135,7 @@ namespace opdet {
     ::art::ServiceHandle<util::TimeService> ts;
 
     // allocate the container
-    ::std::unique_ptr< std::vector<optdata::ChannelData> > wfs(new ::std::vector<optdata::ChannelData>);
+    ::std::unique_ptr< optdata::ChannelDataGroup > wfs(new optdata::ChannelDataGroup);
 
     // get the clock definition
     ::util::ElecClock clock = ts->OpticalClock();
@@ -148,6 +148,10 @@ namespace opdet {
 			       );
     fOpticalGen.SetTimeInfo(clock,fDuration);
     fLogicGen.SetTimeInfo(clock,fDuration);
+
+    wfs->reserve(geom->NOpChannels());
+    wfs->SetFrame(clock.Frame());
+    wfs->SetTimeSlice(clock.Sample());
 
     //
     // Read-in data
@@ -222,7 +226,7 @@ namespace opdet {
       unsigned int ch = logicch; 
       opdet::UBOpticalChannelCategory_t chcat = chanmap->GetChannelType( ch );
 
-      fLogicGen.SetPedestal( ch_conf->GetParameter( kPedestalMean, ch ), ch_conf->GetParameter( kPedestalSpread, ch ) );
+      fLogicGen.SetPedestal( ch_conf->GetFloat( kPedestalMean, ch ), ch_conf->GetFloat( kPedestalSpread, ch ) );
 
       if( (chcat == opdet::FEMBeamTriggerBNB || chcat == opdet::FEMBeamTriggerNUMI) && fBeamModName.size() ) {
 
