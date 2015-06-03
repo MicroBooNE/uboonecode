@@ -97,7 +97,7 @@ namespace lris {
 			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo,
-			  raw::Trigger& trigInfo);
+			  std::vector<raw::Trigger>& trigInfo);
     void fillDAQHeaderData(gov::fnal::uboone::datatypes::ub_EventRecord& event_record,
 			   raw::DAQHeader& daqHeader);
     void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
@@ -107,7 +107,7 @@ namespace lris {
     void fillBeamData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
 		      raw::BeamInfo& beamInfo);
     void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
-			 raw::Trigger& trigInfo);
+			 std::vector<raw::Trigger>& trigInfo);
 
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;

@@ -180,8 +180,9 @@ namespace opdet {
       pmt_indexes.at(pmt->OpChannel()).push_back(i);
     }
 
+    // ================================================================================================================================
     //
-    // Loop over opdets, and channels, process photons, make, then store waveforms
+    // Loop over opdets, and make waveforms for each readout channels. process photons, make, then store waveforms
     //
     for(unsigned int ipmt=0; ipmt<geom->NOpDets(); ipmt++) {
       
@@ -190,14 +191,14 @@ namespace opdet {
       for(auto const &pmt_index : pmt_indexes.at(ipmt)) {
 	
 	const art::Ptr<sim::SimPhotons> pmt_ptr(pmtHandle,pmt_index);
-
+	
 	photon_time.reserve(photon_time.size() + pmt_ptr->size());
 	
 	for(size_t photon_index=0; photon_index<pmt_ptr->size(); ++photon_index)
 	  photon_time.push_back(pmt_ptr->at(photon_index).Time);
 	
       }
-
+      
       // send the hits over to the waveform generator
       fOpticalGen.SetPhotons(photon_time);
       
@@ -205,6 +206,8 @@ namespace opdet {
       fOpticalGen.GenDarkNoise(ipmt,fG4StartTime);
       
       /// for each pmt we generate multiple readout streams with different gains
+      /// tmw: right now adc/pe is assigned per channel. I don't like this. 
+      /// this is a shaper property
       for (unsigned int ireadout=0; ireadout<geom->NOpHardwareChannels(ipmt); ireadout++) {
 	unsigned int channel_num = geom->OpChannel( ipmt, ireadout );
 	optdata::ChannelData adc_wfm( channel_num );
@@ -213,6 +216,7 @@ namespace opdet {
       }	
     } // loop over pmts
     
+    // ================================================================================================================================
     //
     // Handle special readout channels (>= 40)
     //
@@ -256,7 +260,8 @@ namespace opdet {
       wfs->emplace_back( logic_wfm );
       
     }//loop over logic channels
-    
+
+    // ================================================================================================================================    
     //
     // Finally, pass to art event
     // 
