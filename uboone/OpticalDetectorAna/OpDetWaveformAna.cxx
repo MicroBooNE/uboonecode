@@ -43,10 +43,12 @@ namespace pmtana {
     ClearWaveform();
     
     _ch = ch;
+    _t_wrt_trigger = time_wrt_trigger;
 
-    _preco_mgr.RecoPulse(wf);
+    //_preco_mgr.RecoPulse(wf);
     _ped_mean = _preco_alg.PedMean();
     _ped_rms  = _preco_alg.PedRms();
+    /*
     for(size_t i = 0; i<_preco_alg.GetNPulse(); ++i) {
       auto const& p = _preco_alg.GetPulse(i);
       
@@ -59,13 +61,14 @@ namespace pmtana {
 
       if(_hitana_tree) _hitana_tree->Fill();
     }
-
+    */
     if( _wfana_tree || _wf_tree ) {
       for(auto const& adc : wf) {
 	if(adc > _max_adc) _max_adc = adc;
 	if(adc < _min_adc) _min_adc = adc;
       }
       _wf_size = wf.size();
+
 
       if( _wf_tree ) _wf = wf;
     }
@@ -87,6 +90,7 @@ namespace pmtana {
 
     _ped_mean = _ped_rms = -1;
     _tstart = _tpeak = _tend = -1;
+    _t_wrt_trigger = 0;
     _q = _amp = -1;
     _max_adc = 0;
     _min_adc = std::numeric_limits<unsigned short>::max();
@@ -129,15 +133,15 @@ namespace pmtana {
       throw std::exception();
     }
     _wfana_tree = ptr;
-    _wfana_tree->Branch( "run",      &_run,      "run/i"      );
-    _wfana_tree->Branch( "subrun",   &_subrun,   "subrun/i"   );
-    _wfana_tree->Branch( "event",    &_event,    "event/i"    );
-    _wfana_tree->Branch( "ch",       &_ch,       "ch/i"       );
-    _wfana_tree->Branch( "ped_mean", &_ped_mean, "ped_mean/F" );
-    _wfana_tree->Branch( "ped_rms",  &_ped_rms,  "ped_rms/F"  );
-    _wfana_tree->Branch( "max_adc",  &_max_adc,  "max_adc/s"  );
-    _wfana_tree->Branch( "min_adc",  &_min_adc,  "min_adc/s"  );
-    _wfana_tree->Branch( "wf_size",  &_wf_size,  "wf_size/i"  );
+    _wfana_tree->Branch( "run",       &_run,      "run/i"      );
+    _wfana_tree->Branch( "subrun",    &_subrun,   "subrun/i"   );
+    _wfana_tree->Branch( "event",     &_event,    "event/i"    );
+    _wfana_tree->Branch( "ch",        &_ch,       "ch/i"       );
+    _wfana_tree->Branch( "ped_mean",  &_ped_mean, "ped_mean/F" );
+    _wfana_tree->Branch( "ped_rms",   &_ped_rms,  "ped_rms/F"  );
+    _wfana_tree->Branch( "max_adc",   &_max_adc,  "max_adc/s"  );
+    _wfana_tree->Branch( "min_adc",   &_min_adc,  "min_adc/s"  );
+    _wfana_tree->Branch( "wf_size",   &_wf_size,  "wf_size/i"  );
 
   }
   void OpDetWaveformAna::SaveWaveform ( TTree* ptr )
@@ -155,11 +159,12 @@ namespace pmtana {
     _wf_tree->Branch( "subrun",   &_subrun,   "subrun/i"   );
     _wf_tree->Branch( "event",    &_event,    "event/i"    );
     _wf_tree->Branch( "ch",       &_ch,       "ch/i"       );
+    _wf_tree->Branch( "t_wrt_trigger", &_t_wrt_trigger, "t_wrt_trigger/D"   );
     _wf_tree->Branch( "ped_mean", &_ped_mean, "ped_mean/F" );
     _wf_tree->Branch( "ped_rms",  &_ped_rms,  "ped_rms/F"  );
     _wf_tree->Branch( "max_adc",  &_max_adc,  "max_adc/s"  );
     _wf_tree->Branch( "min_adc",  &_min_adc,  "min_adc/s"  );
-    _wf_tree->Branch( "std::vector<short>", &_wf  );
+    _wf_tree->Branch( "wf", "std::vector<short>", &_wf  );
   }
 
 }

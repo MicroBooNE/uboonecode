@@ -582,12 +582,12 @@ namespace lris {
             
             optdata::TimeSlice_t time=window_header.getSample();
             optdata::Frame_t frame=window_header.getFrame();
-	    //int crate_number = crate_data.crateHeader()->crate_number; 
-	    //std::cout << "fill (CSF): " << crate_number << ", " << card_data.getModule() << ", " << channel_number;
+	    int crate_number = crate_data.crateHeader()->crate_number; 
+	    unsigned int data_product_ch_num = ub_pmt_channel_map->GetChannelNumberFromCrateSlotFEMCh( crate_data.crateHeader()->crate_number, card_data.getModule(), channel_number );
+	    //std::cout << "fill (CSF): " << crate_number << ", " << card_data.getModule() << ", " << channel_number << " ==> Readout Channel " << data_product_ch_num << std::endl;
 	    
 	    // here we translate crate/card/daq channel to data product channel number
 	    // also need to go from clock time to time stamp
-	    unsigned int data_product_ch_num = ub_pmt_channel_map->GetChannelNumberFromCrateSlotFEMCh( crate_data.crateHeader()->crate_number, card_data.getModule(), channel_number );
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelType( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( time, frame );
             raw::OpDetWaveform rd( window_timestamp, channel_number,win_data_size);

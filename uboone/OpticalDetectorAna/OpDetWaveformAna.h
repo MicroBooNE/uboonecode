@@ -73,6 +73,7 @@ namespace pmtana {
     double _tstart;
     double _tpeak;
     double _tend;
+    double _t_wrt_trigger;
     double _q;
     double _amp;
     unsigned short _max_adc;

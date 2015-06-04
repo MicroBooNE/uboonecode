@@ -95,13 +95,16 @@ microboone_geometry_helper:
  OpDet35_channels: [35, 135, 235, 335 ]
 
  # Channel Categories: Corresponds to types in "UBOpChannelTypes.h": Must match exactly
- FEMBeamLowGain:     [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 ]
- FEMBeamHighGain:    [ 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 132, 134, 135 ]
- FEMCosmicLowGain:   [ 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 232, 234, 235 ]
- FEMCosmicHighGain:  [ 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 332, 334, 335 ]
- UnspecifiedLogic:   [ 36, 37, 38, 39, 40, 41, 42,  43,  44,  45,  140, 141, 142, 143, 144, 145 ]
- FEMBeamTriggerBNB:  [ 46, 146 ]
- FEMBeamTriggerNUMI: [ 47, 147 ]
+ OpdetBeamLowGain:     [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 ]
+ OpdetBeamHighGain:    [ 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 132, 134, 135 ]
+ OpdetCosmicLowGain:   [ 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 232, 234, 235 ]
+ OpdetCosmicHighGain:  [ 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 332, 334, 335 ]
+ UnspecifiedLogic:   [ 36, 37, 38, 39, 40, 41, 42,  43,  44,  45,  
+ 		       136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147,  
+		       236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247,  
+		       336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347 ]
+ BNBLogicPulse:  [ 46 ]
+ NUMILogicPulse: [ 47 ]
 
  # Crate, slot, FEM channel map for each optical readout channel number
  # Optical Detector Readout Channels
@@ -196,6 +199,12 @@ microboone_geometry_helper:
  ReadoutChannel134:  [ 10, 6,  34 ]
  ReadoutChannel135:  [ 10, 6,  35 ]
 
+ # MISC
+ ReadoutChannel136: [ 10, 6,  36 ]
+ ReadoutChannel137: [ 10, 6,  37 ]
+ ReadoutChannel138: [ 10, 6,  38 ]
+ ReadoutChannel139: [ 10, 6,  39 ] 
+
  # Trigger Readout Channels
  ReadoutChannel140: [ 10, 6,  40 ]
  ReadoutChannel141: [ 10, 6,  41 ]
@@ -244,6 +253,22 @@ microboone_geometry_helper:
  ReadoutChannel234:  [ 10, 7,  34 ]
  ReadoutChannel235:  [ 10, 7,  35 ]
 
+ # MISC
+ ReadoutChannel236: [ 10, 7,  36 ]
+ ReadoutChannel237: [ 10, 7,  37 ]
+ ReadoutChannel238: [ 10, 7,  38 ]
+ ReadoutChannel239: [ 10, 7,  39 ] 
+
+ # Trigger Readout Channels
+ ReadoutChannel240: [ 10, 7,  40 ]
+ ReadoutChannel241: [ 10, 7,  41 ]
+ ReadoutChannel242: [ 10, 7,  42 ]
+ ReadoutChannel243: [ 10, 7,  43 ]
+ ReadoutChannel244: [ 10, 7,  44 ]
+ ReadoutChannel245: [ 10, 7,  45 ]
+ ReadoutChannel246: [ 10, 7,  46 ]
+ ReadoutChannel247: [ 10, 7,  47 ]  
+
  # Optical Detector Readout Channels
  ReadoutChannel300:  [ 10, 8,  0 ]
  ReadoutChannel301:  [ 10, 8,  1 ]
@@ -281,6 +306,22 @@ microboone_geometry_helper:
  ReadoutChannel333:  [ 10, 8,  33 ]
  ReadoutChannel334:  [ 10, 8,  34 ]
  ReadoutChannel335:  [ 10, 8,  35 ]
+
+ # MISC
+ ReadoutChannel336:  [ 10, 8,  36 ]
+ ReadoutChannel337:  [ 10, 8,  37 ]
+ ReadoutChannel338:  [ 10, 8,  38 ]
+ ReadoutChannel339:  [ 10, 8,  39 ] 
+
+ # Trigger Readout Channels
+ ReadoutChannel340:  [ 10, 8,  40 ]
+ ReadoutChannel341:  [ 10, 8,  41 ]
+ ReadoutChannel342:  [ 10, 8,  42 ]
+ ReadoutChannel343:  [ 10, 8,  43 ]
+ ReadoutChannel344:  [ 10, 8,  44 ]
+ ReadoutChannel345:  [ 10, 8,  45 ]
+ ReadoutChannel346:  [ 10, 8,  46 ]
+ ReadoutChannel347:  [ 10, 8,  47 ]  
  
 }
 

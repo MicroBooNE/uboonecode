@@ -232,7 +232,7 @@ namespace opdet {
 
       fLogicGen.SetPedestal( ch_conf->GetFloat( kPedestalMean, ch ), ch_conf->GetFloat( kPedestalSpread, ch ) );
 
-      if( (chcat == opdet::FEMBeamTriggerBNB || chcat == opdet::FEMBeamTriggerNUMI) && fBeamModName.size() ) {
+      if( (chcat == opdet::BNBLogicPulse || chcat == opdet::NUMILogicPulse) && fBeamModName.size() ) {
 
 	// get beam gate data product
 	for(auto const& name : fBeamModName) {
@@ -244,8 +244,8 @@ namespace opdet {
 
 	    const art::Ptr<sim::BeamGateInfo> beam_ptr(beamHandle,i);
 	    
-	    if( (beam_ptr->BeamType() == ::sim::kBNB  && chcat == opdet::FEMBeamTriggerBNB ) ||
-		(beam_ptr->BeamType() == ::sim::kNuMI && chcat == opdet::FEMBeamTriggerNUMI ) )
+	    if( (beam_ptr->BeamType() == ::sim::kBNB  && chcat == opdet::BNBLogicPulse ) ||
+		(beam_ptr->BeamType() == ::sim::kNuMI && chcat == opdet::NUMILogicPulse ) )
 
 	      fLogicGen.AddPulse(beam_ptr->Start());
 

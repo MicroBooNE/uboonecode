@@ -30,15 +30,14 @@ namespace opdet {
   DEFINE_ENUM_WITH_STRING_CONVERSIONS( UBOpticalChannelCategory_t, \
 				       (Uncategorized)\
 				       (UnspecifiedLogic)\
-				       (FEMCosmicHighGain)\
-				       (FEMCosmicLowGain)\
-				       (FEMBeamHighGain)\
-				       (FEMBeamLowGain)\
-				       (FEMCosmicLogicPulse)\
-				       (FEMBeamLogicPulse)\
-				       (FEMBeamTriggerBNB)\
-				       (FEMBeamTriggerNUMI)\
-				       (FEMFlasherLogicPulse)\
+				       (OpdetCosmicHighGain)\
+				       (OpdetCosmicLowGain)\
+				       (OpdetBeamHighGain)\
+				       (OpdetBeamLowGain)\
+				       (BNBLogicPulse) \
+				       (NUMILogicPulse) \
+				       (FlasherLogicPulse)\
+				       (StrobeLogicPulse)\
 				       (NumUBOpticalChannelCategories) )
 
   DEFINE_ENUM_WITH_STRING_CONVERSIONS( UBOpticalChannelGain_t, \
@@ -53,19 +52,18 @@ namespace opdet {
     UBOpticalChannelGain_t chtype = Undefined;
     switch ( cat ) {
     case UnspecifiedLogic:
-    case FEMCosmicLogicPulse:
-    case FEMBeamLogicPulse:
-    case FEMBeamTriggerBNB:
-    case FEMBeamTriggerNUMI:
-    case FEMFlasherLogicPulse:
+    case BNBLogicPulse:
+    case NUMILogicPulse:
+    case FlasherLogicPulse:
+    case StrobeLogicPulse:
       chtype = LogicChannel;
       break;
-    case FEMCosmicHighGain:
-    case FEMBeamHighGain:
+    case OpdetCosmicHighGain:
+    case OpdetBeamHighGain:
       chtype = HighGain;
       break;
-    case FEMCosmicLowGain:
-    case FEMBeamLowGain:
+    case OpdetCosmicLowGain:
+    case OpdetBeamLowGain:
       chtype = LowGain;
       break;
     default:

@@ -77,7 +77,8 @@ void UBBasicOpticalAna::beginJob()
 {
   art::ServiceHandle<art::TFileService> fs;
   for(size_t i=0; i<_ana_v.size(); ++i) {
-
+   
+    
     if( _do_hitana_v [i] ) _ana_v[i].AnaHit       ( fs->make<TTree> ( Form( "hitana_%s_tree", _module_v[i].c_str() ), "" ) );
     if( _do_wfana_v  [i] ) _ana_v[i].AnaWaveform  ( fs->make<TTree> ( Form( "hitwf_%s_tree",  _module_v[i].c_str() ), "" ) );
     if( _store_wf_v  [i] ) _ana_v[i].SaveWaveform ( fs->make<TTree> ( Form( "wf_%s_tree",     _module_v[i].c_str() ), "" ) );
@@ -91,18 +92,19 @@ void UBBasicOpticalAna::analyze(art::Event const & e)
 
   // Implementation of required member function here.
   for(size_t i=0; i<_module_v.size(); ++i) {
-    
+   
+    _ana_v[i].TickPeriod(ts->OpticalClock().TickPeriod());
+ 
     art::Handle< std::vector< raw::OpDetWaveform > > wf_handle;
     e.getByLabel( _module_v[i], wf_handle );
 
     if(!wf_handle.isValid()) continue;
 
     for(auto const& wf : *wf_handle) {
-
+      if(!wf.size()) continue;
       _ana_v[i].AnaWaveform( wf.ChannelNumber(),
 			     wf.TimeStamp() - ts->TriggerTime(),
 			     wf );
-      
     }
   }
 }
