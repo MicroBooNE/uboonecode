@@ -5,8 +5,7 @@
 #include "Utilities/LArProperties.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "Geometry/Geometry.h" // larcore
-#include "Geometry/ExptGeoHelperInterface.h" // larcore
-#include "uboone/Geometry/ChannelMapUBooNEAlg.h" // uboonecode
+#include "uboone/Geometry/UBOpReadoutMap.h" // uboonecode
 
 namespace opdet {
 
@@ -30,7 +29,7 @@ namespace opdet {
   //-----------------------------------------------------------
   {
     art::ServiceHandle<geo::Geometry> geom;
-    std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geom->GetChannelMapAlg() );
+    art::ServiceHandle<geo::UBOpReadoutMap> chanmap;
     
     std::vector< std::vector< float    > > tmp_float_params;
     std::vector< std::vector< uint16_t > > tmp_int_params;
@@ -76,7 +75,7 @@ namespace opdet {
     for (unsigned int i = 0; i < tmp_QE.size(); i++) {
 
       unsigned int chnum = channel_list.at(i);
-      if ( chanmap->GetChannelGain( chnum )==opdet::LogicChannel )
+      if ( chanmap->GetChannelType( chnum )==opdet::LogicChannel )
 	continue; // skip QE check for logic channels
       
       if ( LarProp->ScintPreScale() > tmp_QE.at(i) ) {

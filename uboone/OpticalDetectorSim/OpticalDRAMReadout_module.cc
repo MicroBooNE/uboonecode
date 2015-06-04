@@ -23,8 +23,8 @@
 #include "Utilities/TimeService.h"
 #include "uboone/OpticalDetectorSim/UBOpticalException.h"
 #include "Geometry/Geometry.h" // larcore
-#include "uboone/Geometry/ChannelMapUBooNEAlg.h" // uboonecode
 #include "uboone/Geometry/UBOpChannelTypes.h"  // uboonecode
+#include "uboone/Geometry/UBOpReadoutMap.h"  // uboonecode
 
 // ART includes.
 #include "fhiclcpp/ParameterSet.h"
@@ -175,7 +175,7 @@ namespace opdet {
 
     // geometry and channel map services
     ::art::ServiceHandle<geo::Geometry> geom;
-    std::shared_ptr<const geo::ChannelMapUBooNEAlg> ub_pmt_channel_map = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geom->GetChannelMapAlg() ); // With UB-specific methods we need
+    ::art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
 
     // -----------------------------------
     // Create out container of waveforms: one container per readout channel type
@@ -274,7 +274,7 @@ namespace opdet {
 	  // if FIFO has correct categories, then fine.
 	  // but for now, get it using the channel number
 	  unsigned int data_product_ch_num = fifo_ptr->ChannelNumber();
-	  opdet::UBOpticalChannelCategory_t category = ub_pmt_channel_map->GetChannelType( data_product_ch_num );
+	  opdet::UBOpticalChannelCategory_t category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	  auto it_wfarray = pmt_raw_digits.find( category );
 	  double window_timestamp = ts->OpticalClock().Time( fifo_ptr->TimeSlice(), fifo_ptr->Frame() );
 

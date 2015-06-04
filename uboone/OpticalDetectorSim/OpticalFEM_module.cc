@@ -19,8 +19,8 @@
 #include "Utilities/TimeService.h"
 #include "UBOpticalChConfig.h"
 #include "UBOpticalConstants.h"
-#include "uboone/Geometry/ChannelMapUBooNEAlg.h"
 #include "uboone/Geometry/UBOpChannelTypes.h"
+#include "uboone/Geometry/UBOpReadoutMap.h"
 
 // ART includes.
 #include "fhiclcpp/ParameterSet.h"
@@ -330,7 +330,7 @@ namespace opdet {
     // Channel map algorithm
     //
     art::ServiceHandle<geo::Geometry> geom;
-    std::shared_ptr< const geo::ChannelMapUBooNEAlg > ch_map = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geom->GetChannelMapAlg() );
+    art::ServiceHandle<geo::UBOpReadoutMap> ch_map;
     art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
 
     // This two-dimensional map contains, for each
@@ -359,7 +359,7 @@ namespace opdet {
 
       optdata::Channel_t channel = channelData.ChannelNumber();
 
-      ::opdet::UBOpticalChannelGain_t gain_type = ch_map->GetChannelGain(channelData.ChannelNumber());
+      ::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channelData.ChannelNumber());
       size_t gain_index = 0;
       // Determine the gain category.
       switch(gain_type) {
@@ -488,7 +488,7 @@ namespace opdet {
     for ( auto const& channelData : *channelDataHandle ) {
 
       ::optdata::Channel_t channel = channelData.ChannelNumber();
-      ::opdet::UBOpticalChannelGain_t gain_type = ch_map->GetChannelGain(channelData.ChannelNumber());
+      ::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channelData.ChannelNumber());
       size_t gain_index = 0;
       // Determine the gain category.
       switch(gain_type) {

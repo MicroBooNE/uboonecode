@@ -15,6 +15,7 @@ cet_find_library( BOOSER NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAUL
 simple_plugin( LArRawInputSourceUBooNE
                "source"
 	       uboone_RawData
+	       UBOpReadoutMap_service
                ${ART_FRAMEWORK_PERSISTENCY_COMMON}
                BASENAME_ONLY
              )
@@ -28,6 +29,7 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc
 		        Utilities
 	       	        TimeService_service
 	                uboone_Geometry
+			UBOpReadoutMap_service
                         OpticalDetectorData
                         RawData
                         SummaryData

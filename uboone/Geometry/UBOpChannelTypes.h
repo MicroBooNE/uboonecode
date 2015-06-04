@@ -40,16 +40,16 @@ namespace opdet {
 				       (StrobeLogicPulse)\
 				       (NumUBOpticalChannelCategories) )
 
-  DEFINE_ENUM_WITH_STRING_CONVERSIONS( UBOpticalChannelGain_t, \
+  DEFINE_ENUM_WITH_STRING_CONVERSIONS( UBOpticalChannelType_t, \
 				       (Undefined)\
 				       (HighGain)\
 				       (LowGain)\
 				       (LogicChannel)\
 				       (NumUBOpticalChannelGains) )
   
-    UBOpticalChannelGain_t GetUBTypeFromCategory( UBOpticalChannelCategory_t cat ) {
+    UBOpticalChannelType_t GetUBTypeFromCategory( UBOpticalChannelCategory_t cat ) {
 
-    UBOpticalChannelGain_t chtype = Undefined;
+    UBOpticalChannelType_t chtype = Undefined;
     switch ( cat ) {
     case UnspecifiedLogic:
     case BNBLogicPulse:

@@ -35,7 +35,7 @@ namespace uboone
                                                      std::vector<geo::CryostatGeo*> & c,
 						     std::vector<geo::AuxDetGeo*>   & ad )
   {
-    fChannelMap = std::shared_ptr<geo::ChannelMapAlg>( new geo::ChannelMapUBooNEAlg( sortingParam, fPset ) );
+    fChannelMap = std::shared_ptr<geo::ChannelMapAlg>( new geo::ChannelMapUBooNEAlg( fPset ) );
     fChannelMap->Initialize( c, ad );
   }
   

@@ -24,6 +24,7 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
           MODULE_LIBRARIES Simulation
 			OpticalDetectorData
 			UBOpticalChConfig_service
+			UBOpReadoutMap_service
 			uboonecode_uboone_OpticalDetectorSim
 			TimeService_service
 			Utilities
@@ -49,6 +50,7 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
 
 simple_plugin(UBOpticalChConfig "service"
 	      uboone_Geometry
+	      UBOpReadoutMap_service	
 	      Geometry_service
 	      Geometry
 #	      uboonecode_uboone_OpticalDetectorSim

@@ -15,7 +15,6 @@
 #include "RawData/BeamInfo.h"
 #include "RawData/OpDetWaveform.h"
 #include "Geometry/Geometry.h"
-#include "Geometry/ExptGeoHelperInterface.h"
 #include "SummaryData/RunData.h"
 #include "Utilities/TimeService.h"
 #include "Utilities/ElecClock.h" // lardata
@@ -30,8 +29,8 @@
 //uboone datatypes
 
 // uboonecode
-#include "uboone/Geometry/ChannelMapUBooNEAlg.h"
 #include "uboone/Geometry/UBOpChannelTypes.h"
+#include "uboone/Geometry/UBOpReadoutMap.h"
 
 #include "datatypes/raw_data_access.h"
 
@@ -543,7 +542,7 @@ namespace lris {
 
     ::art::ServiceHandle<geo::Geometry> geom;
     ::art::ServiceHandle< util::TimeService > timeService;
-    std::shared_ptr<const geo::ChannelMapUBooNEAlg> ub_pmt_channel_map = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geom->GetChannelMapAlg() ); // With UB-specific methods we need
+    ::art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     
     using namespace gov::fnal::uboone::datatypes;
     
@@ -588,7 +587,7 @@ namespace lris {
 	    
 	    // here we translate crate/card/daq channel to data product channel number
 	    // also need to go from clock time to time stamp
-	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelType( data_product_ch_num );
+	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( time, frame );
             raw::OpDetWaveform rd( window_timestamp, channel_number,win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.

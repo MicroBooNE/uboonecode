@@ -41,7 +41,7 @@
 #include "Simulation/SimPhotons.h" // larsim
 #include "UBOpticalADC.h" // uboonecode
 #include "UBLogicPulseADC.h" // uboonecode
-#include "uboone/Geometry/ChannelMapUBooNEAlg.h" // uboone
+#include "uboone/Geometry/UBOpReadoutMap.h" // uboone
 
 /// nutools
 #include "Simulation/BeamGateInfo.h"
@@ -220,7 +220,7 @@ namespace opdet {
     //
     // Handle special readout channels (>= 40)
     //
-    std::shared_ptr< const geo::ChannelMapUBooNEAlg > chanmap = std::dynamic_pointer_cast< const geo::ChannelMapUBooNEAlg >( geom->GetChannelMapAlg() );
+    art::ServiceHandle<geo::UBOpReadoutMap> chanmap;
     art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
     std::vector< unsigned int > logicchannels;
     chanmap->GetLogicChannelList( logicchannels );
@@ -228,7 +228,7 @@ namespace opdet {
     //for(size_t ch=kLogicStartChannel; ch<(kLogicStartChannel+kLogicNChannel); ++ch) {
     for ( auto logicch : logicchannels ) {
       unsigned int ch = logicch; 
-      opdet::UBOpticalChannelCategory_t chcat = chanmap->GetChannelType( ch );
+      opdet::UBOpticalChannelCategory_t chcat = chanmap->GetChannelCategory( ch );
 
       fLogicGen.SetPedestal( ch_conf->GetFloat( kPedestalMean, ch ), ch_conf->GetFloat( kPedestalSpread, ch ) );
 
