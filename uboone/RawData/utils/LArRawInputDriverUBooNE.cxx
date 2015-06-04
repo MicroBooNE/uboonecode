@@ -582,7 +582,7 @@ namespace lris {
             
             optdata::TimeSlice_t time=window_header.getSample();
             optdata::Frame_t frame=window_header.getFrame();
-	    int crate_number = crate_data.crateHeader()->crate_number; 
+	    //int crate_number = crate_data.crateHeader()->crate_number; 
 	    unsigned int data_product_ch_num = ub_pmt_channel_map->GetChannelNumberFromCrateSlotFEMCh( crate_data.crateHeader()->crate_number, card_data.getModule(), channel_number );
 	    //std::cout << "fill (CSF): " << crate_number << ", " << card_data.getModule() << ", " << channel_number << " ==> Readout Channel " << data_product_ch_num << std::endl;
 	    
