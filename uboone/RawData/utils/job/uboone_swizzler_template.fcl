@@ -11,6 +11,7 @@ services:
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
+	  OpReadoutMap:           @local::microboone_opreadoutmap
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
           }

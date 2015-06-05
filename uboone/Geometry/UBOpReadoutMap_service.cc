@@ -82,23 +82,6 @@ namespace geo {
   
   //----------------------------------------------------------------------------
   void UBOpReadoutMap::LoadOpticalReadoutMapData( fhicl::ParameterSet const& pset ) {
-    fNOpDets = pset.get< unsigned int >("numberOfDetectors");
-    
-    // ----------------------------------------------------------------------
-    // read in opdet to channel map, store
-    for (unsigned int iop=0; iop<fNOpDets; iop++) {
-      char entryname[50];
-      sprintf(entryname,"OpDet%d_channels",iop);
-      std::vector< unsigned int > chinput =  pset.get< std::vector<unsigned int> >( entryname );
-      fPMT2channels[ iop ] = chinput;
-
-      //std::cout << entryname << ": [";
-      for (std::vector<unsigned int>::iterator it_ch=chinput.begin(); it_ch!=chinput.end(); it_ch++) {
-	fChannel2pmt[ *it_ch ] = iop;
-	//std::cout << *it_ch << ",";
-      }
-      //std::cout << "]" << std::endl;
-    }
     
     // ----------------------------------------------------------------------
     // read in channel types
@@ -150,5 +133,6 @@ namespace geo {
       fCSF2Readout.insert( std::make_pair( CrateSlotFEMCh( fichl_csf.at(0), fichl_csf.at(1), fichl_csf.at(2) ), v ) );
     }
   }
-  
+
+  DEFINE_ART_SERVICE(UBOpReadoutMap)  
 } // namespace
