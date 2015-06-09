@@ -35,6 +35,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_GEOM}
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
+                        ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
 	  SOURCE_LIBRARIES Geometry
 	                OpticalDetectorData
