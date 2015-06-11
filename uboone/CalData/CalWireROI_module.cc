@@ -284,7 +284,9 @@ namespace caldata {
   {      
   
     //update database cache
-    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    //Temporarily replace with the generic version until time stamp becomes available
+    //fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    fPedestalRetrievalAlg.Update( evt );
   
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
@@ -339,6 +341,10 @@ namespace caldata {
       // get the reference to the current raw::RawDigit
       art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
       channel = digitVec->Channel();
+
+      // The following test is meant to be temporary until the "correct" solution is implemented
+      if (chanFilt->GetChannelStatus(channel) == filter::ChannelFilter::NOTPHYSICAL) continue;
+
       unsigned int dataSize = digitVec->Samples();
       // vector holding uncompressed adc values
       std::vector<short> rawadc(dataSize);
