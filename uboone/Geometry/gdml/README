@@ -11,9 +11,6 @@ microboonev4.gdml (microboonev4_nowires.gdml): compatible with v2 above (+32 pmt
 microboonev5.gdml (microboonev5_nowires.gdml): Contains the correct number of racks.  Was previously 10, now 15. 
 microboonev6.gdml (microboonev6_nowires.gdml): Contains the 2 wires which were previously missing 
 
-v7 has the correct shape of liquid argon and cold argon gas
-microboonev7.gdml (microboonev7_nowires.gdml): Has the correct shape of liquid argon and cold gas inside tank; tank thickness was also corrected. Previous versions had extra LAr outside the vessel endcap and above the active region in the tank, no ullage.
-
 
 vX
 microboonevX.gdml (microboonevX_nowires.gdml): Working gdml.  This file (may) contain working changes which are not tagged with a version. Don't use this gdml.  

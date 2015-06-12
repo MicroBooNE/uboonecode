@@ -1,7 +1,7 @@
 #
 # Geometry iterators test module on MicroBooNE detector geometry
 # 
-# Version: 1.1
+# Version: 1.0
 #
 
 #include "geometry_microboone.fcl"
@@ -9,10 +9,10 @@
 process_name: testGeoIter
 
 services: {
-  
-  Geometry:               @local::microboone_geo
-  ExptGeoHelperInterface: @local::microboone_geometry_helper
-  
+  user: {
+    Geometry:               @local::microboone_geo
+    ExptGeoHelperInterface: @local::microboone_geometry_helper
+  }
   message: {
     destinations: {
       LogDebugFile: {

@@ -8,7 +8,6 @@ art_make( BASENAME_ONLY
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
-      ${Boost_SYSTEM_LIBRARY}
 			${ROOT_BASIC_LIB_LIST}
           MODULE_LIBRARIES 
 			uboonecode_uboone_Calibrations

@@ -2,9 +2,9 @@
 <gdml>
 <solids>
 <tube name="Insulation"
-  rmin="191.61+0.1"
-  rmax="191.61+0.1+2.54*16"
-  z="1086.49"
+  rmin="193+0.1"
+  rmax="193+0.1+2.54*16"
+  z="424.75*2.54+3*2.54"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>

@@ -10,7 +10,6 @@ use Math::BigFloat;
 Math::BigFloat->precision(-10);
 use XML::LibXML;
 use Getopt::Long;
-use warnings 'uninitialized';  # this protects against misspelled variables!
 
 # Get the input parameters from an XML file. Optionally append a
 # suffix to the GDML sub-files we create.
@@ -91,11 +90,11 @@ $cryostat_on = $cryostat;
 my $WireInterval=10;
 my $NumberOfTPCPlanes=3;
 my $pmt_switch="on";		#turn on or off depending on pmts wanted
-my $test_switch="off";          #turn on if test boxes wanted.
 my $NumberOfTestBoxes=30;
 my $granite_block="off";
 my $enclosureExtras="on";       #turn on or off depending on whether you'd like to generate the external things around the cryostat (ie. insulation, platform, stands, etc.) in the gdml file
 my $vetoWall_switch="off";  #turn on or off a proposed scintillator wall infront of the cryostat
+
 
 # The routines that create the GDML sub-files. Most of the explanatory
 # comments are in gen_defs().
@@ -1326,88 +1325,26 @@ sub gen_cryostat()
     $CRYOSTAT = ">" . $CRYOSTAT;
     open(CRYOSTAT) or die("Could not open file $CRYOSTAT for writing");
 
-    $EndcapRmax = 0.5*($CryostatEndcapLength+$CryostatOuterRadius**2/$CryostatEndcapLength);
-    $EndcapThetaDeg = asin($CryostatOuterRadius/$EndcapRmax)*180.0/pi;
-    $EndcapZcenter = 0.5*$CryostatLength+$CryostatEndcapLength-$EndcapRmax;
-    $EndcapRmin = $EndcapRmax - $CryostatEndcapThickness;
-    $UllageThetaDeg = asin($CryostatInnerRadius/$EndcapRmin)*180.0/pi;
-    $UllageLength = 2*($EndcapZcenter + sqrt($EndcapRmin**2-$CryostatInnerRadius**2));
-
     print CRYOSTAT <<EOF;
 <?xml version='1.0'?>
 <gdml>
-<define>
- <position name="posEndCap1" unit="cm" x="0" y="0" z="$EndcapZcenter"/>
- <position name="posEndCap2" unit="cm" x="0" y="0" z="-$EndcapZcenter"/>
-</define>
 <solids>
- <tube name="CryostatTube" 
+ <tube name="Cryostat" 
   rmax="$CryostatOuterRadius"
-  z="$CryostatLength"
+  z="$CryostatLength+2*$CryostatEndcapThickness + 200"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
- <sphere name="CryostatEnd" rmin="0" rmax="$EndcapRmax" deltaphi="360" deltatheta="$EndcapThetaDeg" aunit="deg" lunit="cm"/>
-  <union name="CryostatUnion1">
-   <first ref="CryostatTube"/>
-   <second ref="CryostatEnd"/>
-   <positionref ref="posEndCap1"/>
-  </union>
-  <union name="Cryostat">
-   <first ref="CryostatUnion1"/>
-   <second ref="CryostatEnd"/>
-   <positionref ref="posEndCap2"/>
-   <rotationref ref="rPlus180AboutY"/>
-  </union>
-
- <tube name="UllageTube" 
-  rmax="$CryostatInnerRadius"
-  z="$UllageLength"
-  deltaphi="360"
-  aunit="deg"
-  lunit="cm"/>
- <sphere name="UllageEnd" rmin="0" rmax="$EndcapRmin" deltaphi="360" deltatheta="$UllageThetaDeg" aunit="deg" lunit="cm"/>
-  <union name="UllageUnion1">
-   <first ref="UllageTube"/>
-   <second ref="UllageEnd"/>
-   <positionref ref="posEndCap1"/>
-  </union>
-  <union name="UllageUnion2">
-   <first ref="UllageUnion1"/>
-   <second ref="UllageEnd"/>
-   <positionref ref="posEndCap2"/>
-   <rotationref ref="rPlus180AboutY"/>
-  </union>
-  <box name="UllageBox" lunit="cm" x="2*$CryostatInnerRadius" y="$UllageLevelFromTop" z="$CryostatLength+$CryostatEndcapLength"/>
-  <intersection name="Ullage">
-   <first ref="UllageUnion2"/>
-   <second ref="UllageBox"/>
-   <position name="posUllageBox" unit="cm" x="0" y="$CryostatInnerRadius-0.5*$UllageLevelFromTop" z="0"/>
-  </intersection>
- 
-
 <tube name="SteelTube"
   rmin="$CryostatInnerRadius"
-  rmax="$CryostatOuterRadius-0.0001"
+  rmax="$CryostatOuterRadius-0.1"
   z="$CryostatLength"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 
-<sphere name="EndCap" rmin="$EndcapRmin" rmax="$EndcapRmax" deltaphi="360" deltatheta="$EndcapThetaDeg" aunit="deg" lunit="cm"/>
 
-  <union name="SteelVesselUnion1">
-   <first ref="SteelTube"/>
-   <second ref="EndCap"/>
-   <positionref ref="posEndCap1"/>
-  </union>
-  <union name="SteelVessel">
-   <first ref="SteelVesselUnion1"/>
-   <second ref="EndCap"/>
-   <positionref ref="posEndCap2"/>
-   <rotationref ref="rPlus180AboutY"/>
-  </union>
-
+<sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
  <box name="aSideBeam" lunit="cm" x="256" y="2" z="5"/>
  <box name="aTopBeam" lunit="cm" x="256" y="4*2.54" z="2.54"/>
  <box name="aSideCross0" lunit="cm" x="10" y="0.75*2.54" z="43*2.54"/>
@@ -1519,13 +1456,13 @@ EOF
 </solids>
 
 <structure>
- <volume name="volUllage">
-   <materialref ref="Argon_gas_87K"/>
-   <solidref ref="Ullage"/>
- </volume>
- <volume name="volSteelVessel">
+<volume name="volEndCap">
+   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+   <solidref ref="EndCap"/>
+  </volume>
+ <volume name="volSteelTube">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="SteelVessel"/>
+  <solidref ref="SteelTube"/>
  </volume>
 <volume name="volaTopBeam">
     <materialref ref="G10"/>
@@ -1556,11 +1493,17 @@ EOF
   <materialref ref="LAr"/>
   <solidref ref="Cryostat"/>
   <physvol>
-   <volumeref ref="volUllage"/>
+   <volumeref ref="volSteelTube"/>
+   <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
   </physvol>
-  <physvol>
-   <volumeref ref="volSteelVessel"/>
-   <position name="posSteelVessel" unit="cm" x="0" y="0" z="0"/>
+<physvol>
+   <volumeref ref="volEndCap"/>
+   <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
+   </physvol>
+   <physvol>
+    <volumeref ref="volEndCap"/>
+    <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
+    <rotationref ref="rPlus180AboutY"/>
   </physvol>
  <physvol>
     <volumeref ref="volFrame"/>

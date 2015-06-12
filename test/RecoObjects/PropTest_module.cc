@@ -266,9 +266,8 @@ namespace trkf
 	int n = vec1.size();
 	for(int i=0; i<n; ++i) {
 	  assert(std::abs(vec1(i) - vec2(i)) <= 1.e-8);
-	  for(int j=0; j<n; ++j) {
-	    assert(std::abs(err1(i,j) - err2(i,j)) <= 1.e-6);
-	  }
+	  for(int j=0; j<n; ++j)
+	    assert(std::abs(err1(i,j) - err2(i,j)) <= 1.e-8);
 	}
       }
     }

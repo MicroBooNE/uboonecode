@@ -52,7 +52,6 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc
                         ${ROOT_GEOM}
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
-                        ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
         )							   
 

@@ -29,13 +29,8 @@ microboone_calwire:
  module_type:        "CalWireMicroBooNE"
  DigitModuleLabel:   "daq"
  PostsampleBins:       0
- DoBaselineSub:   true # subtract baseline after deconvolution (using original method)?
+ DoBaselineSub:   true # subtract baseline after deconvolution?
                           # modulo the data size (3200 for uB)
- DoSimpleBaselineSub:   false # subtract baseline after deconvolution (using simple method)?
- DoAdaptiveBaselineSub:   false # subtract baseline after deconvolution (using adaptive method)? -- FORCED ON BY DEFAULT FOR DYNAMIC INDUCED CHARGE DECONV CASE
- BaselineWindowSize:  200    # window size for adaptive baseline method
- BaselineMaxSigBinBuffer:  100    # bin buffer between baseline and nearest signal bin for adaptive baseline method
- BaselineSigThreshold:  3.   # signal threshold for adaptive baseline method
  BaseVarCut:         25.  # Variance cut for selecting baseline points
  SaveWireWF:          0
  
