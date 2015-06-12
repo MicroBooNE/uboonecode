@@ -1,22 +1,77 @@
 <?xml version='1.0'?>
 <gdml>
+<define>
+ <position name="posEndCap1" unit="cm" x="0" y="0" z="305.624305042141"/>
+ <position name="posEndCap2" unit="cm" x="0" y="0" z="-305.624305042141"/>
+</define>
 <solids>
- <tube name="Cryostat" 
-  rmax="193"
-  z="424.75*2.54+3*2.54+2*2.5 + 200"
+ <tube name="CryostatTube" 
+  rmax="191.61"
+  z="1086.49"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
+ <sphere name="CryostatEnd" rmin="0" rmax="305.250694957859" deltaphi="360" deltatheta="38.8816337686467" aunit="deg" lunit="cm"/>
+  <union name="CryostatUnion1">
+   <first ref="CryostatTube"/>
+   <second ref="CryostatEnd"/>
+   <positionref ref="posEndCap1"/>
+  </union>
+  <union name="Cryostat">
+   <first ref="CryostatUnion1"/>
+   <second ref="CryostatEnd"/>
+   <positionref ref="posEndCap2"/>
+   <rotationref ref="rPlus180AboutY"/>
+  </union>
+
+ <tube name="UllageTube" 
+  rmax="190.5"
+  z="1085.42710951018"
+  deltaphi="360"
+  aunit="deg"
+  lunit="cm"/>
+ <sphere name="UllageEnd" rmin="0" rmax="304.140694957859" deltaphi="360" deltatheta="38.7816992291948" aunit="deg" lunit="cm"/>
+  <union name="UllageUnion1">
+   <first ref="UllageTube"/>
+   <second ref="UllageEnd"/>
+   <positionref ref="posEndCap1"/>
+  </union>
+  <union name="UllageUnion2">
+   <first ref="UllageUnion1"/>
+   <second ref="UllageEnd"/>
+   <positionref ref="posEndCap2"/>
+   <rotationref ref="rPlus180AboutY"/>
+  </union>
+  <box name="UllageBox" lunit="cm" x="2*190.5" y="34.29" z="1086.49+67.63"/>
+  <intersection name="Ullage">
+   <first ref="UllageUnion2"/>
+   <second ref="UllageBox"/>
+   <position name="posUllageBox" unit="cm" x="0" y="190.5-0.5*34.29" z="0"/>
+  </intersection>
+ 
+
 <tube name="SteelTube"
-  rmin="190.46"
-  rmax="193-0.1"
-  z="424.75*2.54+3*2.54"
+  rmin="190.5"
+  rmax="191.61-0.0001"
+  z="1086.49"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 
+<sphere name="EndCap" rmin="304.140694957859" rmax="305.250694957859" deltaphi="360" deltatheta="38.8816337686467" aunit="deg" lunit="cm"/>
 
-<sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
+  <union name="SteelVesselUnion1">
+   <first ref="SteelTube"/>
+   <second ref="EndCap"/>
+   <positionref ref="posEndCap1"/>
+  </union>
+  <union name="SteelVessel">
+   <first ref="SteelVesselUnion1"/>
+   <second ref="EndCap"/>
+   <positionref ref="posEndCap2"/>
+   <rotationref ref="rPlus180AboutY"/>
+  </union>
+
  <box name="aSideBeam" lunit="cm" x="256" y="2" z="5"/>
  <box name="aTopBeam" lunit="cm" x="256" y="4*2.54" z="2.54"/>
  <box name="aSideCross0" lunit="cm" x="10" y="0.75*2.54" z="43*2.54"/>
@@ -116,13 +171,13 @@
 </solids>
 
 <structure>
-<volume name="volEndCap">
-   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-   <solidref ref="EndCap"/>
-  </volume>
- <volume name="volSteelTube">
+ <volume name="volUllage">
+   <materialref ref="Argon_gas_87K"/>
+   <solidref ref="Ullage"/>
+ </volume>
+ <volume name="volSteelVessel">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="SteelTube"/>
+  <solidref ref="SteelVessel"/>
  </volume>
 <volume name="volaTopBeam">
     <materialref ref="G10"/>
@@ -153,17 +208,11 @@
   <materialref ref="LAr"/>
   <solidref ref="Cryostat"/>
   <physvol>
-   <volumeref ref="volSteelTube"/>
-   <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
+   <volumeref ref="volUllage"/>
   </physvol>
-<physvol>
-   <volumeref ref="volEndCap"/>
-   <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
-   </physvol>
-   <physvol>
-    <volumeref ref="volEndCap"/>
-    <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
-    <rotationref ref="rPlus180AboutY"/>
+  <physvol>
+   <volumeref ref="volSteelVessel"/>
+   <position name="posSteelVessel" unit="cm" x="0" y="0" z="0"/>
   </physvol>
  <physvol>
     <volumeref ref="volFrame"/>

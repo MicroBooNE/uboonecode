@@ -1,16 +1,17 @@
+#include "database_standard.fcl"
+
 BEGIN_PROLOG
 
+microboone_databaseretrievalalg: @local::standard_databaseretrievalalg
 microboone_databaseretrievalalg:
 {
-  AlgName: "DatabaseRetrievalAlg"
-  DBFolderName:  "detpedestals"
   DBUrl: "http://dbdata0.fnal.gov:8086/uboonecon_dev/app/"
   DBTag: ""
 }
 
+microboone_pedestalretrievalalg: @local::standard_pedestalretrievalalg
 microboone_pedestalretrievalalg:
 {
-    AlgName:            "DetPedestalRetrievalAlg"
     DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg
     DatabaseRetrievalAlg: 
     {

@@ -55,21 +55,40 @@
    The thickness of the mound of dirt around the enclosure.
    </parameter>
 
-   <parameter name="CryostatInnerRadius" value="190.46">
+   <parameter name="CryostatInnerRadius" value="190.5">
    The inner radius of the steel cryostat.
    </parameter>
+<!-- ID is 150" per MicroBooNE-doc-2170-v3 -->
 
-   <parameter name="CryostatOuterRadius" value="193">
+   <parameter name="CryostatOuterRadius" value="191.61">
    The outer radius of the steel cryostat.
    </parameter>
+<!-- wall thickness is 7/16" per MicroBooNE-doc-2170-v3 -->
 
-   <parameter name="CryostatLength" value="424.75*2.54+3*2.54">
-   The length of the steel cryostat.
+   <parameter name="CryostatLength" value="1086.49">
+   The length of tubular part of the steel cryostat.
    </parameter>
 <!--I've into the length of the SF part of the endcaps into the length of the cryostat(3 total inches)--> 
-   <parameter name="CryostatEndcapThickness" value="2.5">
+
+   <parameter name="CryostatEndcapThickness" value="1.11">
    The thickness of the walls at the ends of the steel cryostat.
    </parameter>
+<!-- The "head" (endcap) is min 0.4281" thick per MicroBooNE-doc-2170-v3,
+     nom. 7/16" per MicroBooNE-doc-4308-v1 -->
+
+   <parameter name="CryostatEndcapLength" value="67.63">
+   The length of the cryostat endcap, from tip to flange.
+   </parameter>
+<!-- The "height" of a "head" (endcap) is 2'4+1/8" MicroBooNE-doc-2170-v3,
+     including the length of the SF part of an endcap (1.5") that has been 
+     included in the length of the tubular part of the cryostat above.
+-->
+
+   <parameter name="UllageLevelFromTop" value="34.29">
+   The distance from the top of the cryostat interior to the liquid argon surface.
+   </parameter>
+<!-- "The operating level should be 61.5 inches above the cryostat centerline 
+      +-1 inch" per M. Zuckerbrot 2015/05/11 -->
 
    <parameter name="TPCDepth" value="260">
    The size of the LAr TPC along the x-axis.
@@ -390,6 +409,11 @@
    <D value="1.06" unit="g/cm3"/>
    <fraction n="0.077418" ref="hydrogen"/>
    <fraction n="0.922582" ref="carbon"/>
+  </material>
+
+  <material name="Argon_gas_87K" formula="Ar">
+   <D value="0.0056" unit="g/cm3"/> <!-- standard pressure, 87.3K -->
+   <fraction n="1.0000" ref="argon"/>
   </material>
 
 </materials>

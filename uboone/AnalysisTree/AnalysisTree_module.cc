@@ -383,6 +383,8 @@ namespace microboone {
     Float_t  enu_truth[kMaxTruth];       //true neutrino energy
     Float_t  Q2_truth[kMaxTruth];        //Momentum transfer squared
     Float_t  W_truth[kMaxTruth];         //hadronic invariant mass
+    Float_t  X_truth[kMaxTruth];
+    Float_t  Y_truth[kMaxTruth];
     Int_t     hitnuc_truth[kMaxTruth];    //hit nucleon
     Float_t  nuvtxx_truth[kMaxTruth];    //neutrino vertex x
     Float_t  nuvtxy_truth[kMaxTruth];    //neutrino vertex y
@@ -415,8 +417,6 @@ namespace microboone {
     std::vector<Int_t>    genie_trackID;
     std::vector<Int_t>    genie_ND;
     std::vector<Int_t>    genie_mother;
-    Float_t               genie_W;
-    Float_t               genie_QSqr;
     
     //cosmic cry information
     Int_t     mcevts_truthcry;    //number of neutrino Int_teractions in the spill
@@ -1191,6 +1191,8 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(enu_truth, enu_truth + sizeof(enu_truth)/sizeof(enu_truth[0]), -99999.);
   std::fill(Q2_truth, Q2_truth + sizeof(Q2_truth)/sizeof(Q2_truth[0]), -99999.);
   std::fill(W_truth, W_truth + sizeof(W_truth)/sizeof(W_truth[0]), -99999.);
+  std::fill(X_truth, X_truth + sizeof(X_truth)/sizeof(X_truth[0]), -99999.);
+  std::fill(Y_truth, Y_truth + sizeof(Y_truth)/sizeof(Y_truth[0]), -99999.);
   std::fill(hitnuc_truth, hitnuc_truth + sizeof(hitnuc_truth)/sizeof(hitnuc_truth[0]), -99999.);
   std::fill(nuvtxx_truth, nuvtxx_truth + sizeof(nuvtxx_truth)/sizeof(nuvtxx_truth[0]), -99999.);
   std::fill(nuvtxy_truth, nuvtxy_truth + sizeof(nuvtxy_truth)/sizeof(nuvtxy_truth[0]), -99999.);
@@ -1212,8 +1214,6 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   no_primaries = 0;
   geant_list_size=0;
   geant_list_size_in_tpcAV = 0;
-  genie_W = -99999;
-  genie_QSqr = -99999;
   
   FillWith(pdg, -99999);
   FillWith(status, -99999);
@@ -1478,6 +1478,8 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("enu_truth",enu_truth,"enu_truth[mcevts_truth]/F");
     CreateBranch("Q2_truth",Q2_truth,"Q2_truth[mcevts_truth]/F");
     CreateBranch("W_truth",W_truth,"W_truth[mcevts_truth]/F");
+    CreateBranch("X_truth",X_truth,"X_truth[mcevts_truth]/F");
+    CreateBranch("Y_truth",Y_truth,"Y_truth[mcevts_truth]/F");
     CreateBranch("hitnuc_truth",hitnuc_truth,"hitnuc_truth[mcevts_truth]/I");
     CreateBranch("nuvtxx_truth",nuvtxx_truth,"nuvtxx_truth[mcevts_truth]/F");
     CreateBranch("nuvtxy_truth",nuvtxy_truth,"nuvtxy_truth[mcevts_truth]/F");
@@ -1507,8 +1509,6 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("genie_trackID",genie_trackID,"genie_trackID[genie_no_primaries]/I");
     CreateBranch("genie_ND",genie_ND,"genie_ND[genie_no_primaries]/I");
     CreateBranch("genie_mother",genie_mother,"genie_mother[genie_no_primaries]/I");
-    CreateBranch("genie_W",&genie_W,"genie_W/F");
-    CreateBranch("genie_QSqr",&genie_QSqr,"genie_QSqr/F");
   }
 
    if (hasCryInfo()){
@@ -2322,6 +2322,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->mode_truth[neutrino_i]   = mclist[iList]->GetNeutrino().Mode();
           fData->Q2_truth[neutrino_i]     = mclist[iList]->GetNeutrino().QSqr();
           fData->W_truth[neutrino_i]      = mclist[iList]->GetNeutrino().W();
+          fData->X_truth[neutrino_i]      = mclist[iList]->GetNeutrino().X();
+          fData->Y_truth[neutrino_i]      = mclist[iList]->GetNeutrino().Y();
           fData->hitnuc_truth[neutrino_i] = mclist[iList]->GetNeutrino().HitNuc();
           fData->enu_truth[neutrino_i]    = mclist[iList]->GetNeutrino().Nu().E();
           fData->nuvtxx_truth[neutrino_i] = mclist[iList]->GetNeutrino().Nu().Vx();
@@ -2376,8 +2378,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_mother[iPart]=part.Mother();
         } // for particle
         const simb::MCNeutrino& nu(mctruth->GetNeutrino());
-        fData->genie_W=nu.W();
-        fData->genie_QSqr=nu.QSqr();
       } //if neutrino set
     }// end (fSaveGenieInfo)  
 
