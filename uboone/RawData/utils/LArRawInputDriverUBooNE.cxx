@@ -421,7 +421,12 @@ namespace lris {
       //        ubdaq::crateData crate_data = seb_it->second;
       //      int tpc_seb_num = seb_it.first;
       tpc_crate_data_t const& tpc_crate = seb_it.second;
-
+      
+      if ( !tpc_crate.wasDissected() ) {
+	std::cerr << "Warning crate data corrupted! Skipping." << std::endl;
+	tpc_crate.dissectionException().what();
+	continue;
+      }
 
         // Get Time information:
         //uint32_t sebTSec = crate_header.getSebTimeSec();
@@ -448,6 +453,12 @@ namespace lris {
       //been dissected (debugInfo() calls getCards()). You can do a look over the cards like so:
       for(auto const& card : tpc_crate.getCards()){  // This auto is tpc_crate_data_t::card_t
 
+	if ( !card.wasDissected() ) {
+	  std::cerr << "Warning card data corrupted! Skipping." << std::endl;
+	  card.dissectionException().what();
+	  continue;
+	}
+
         //The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
         //object), and technically a trailer (though here it's empty!).
 	//	auto const& tpc_card_header = card.header();   
@@ -462,6 +473,13 @@ namespace lris {
 
         //And, you guessed it, the tpc card data is split up into one more level: by channel.
         for(auto const& channel : card.getChannels()){ // auto here tpc_crate_data_t::card_t::card_channel_type
+
+
+	  if ( !channel.wasDissected() ) {
+	    std::cerr << "Warning channel data corrupted! Skipping." << std::endl;
+	    //channel.dissectionException().what();
+	    continue;
+	  }
 
             //There's a header and trailer here. Remember these are just uint16_t, that contain the
             //channel number.
@@ -552,15 +570,31 @@ namespace lris {
       pmt_crate_data_t const& crate_data = it.second;
       //      int crate_number = crate_data.crateHeader()->crate_number;
       
+      if ( !crate_data.wasDissected() ) {
+	std::cerr << "Warning PMT crate data corrupted! Skipping." << std::endl;
+	continue;
+      }
+
       //now get the card map (for the current crate), and do a loop over all cards
       std::vector<pmt_crate_data_t::card_t> const& cards = crate_data.getCards();
        
       for( pmt_crate_data_t::card_t const& card_data : cards ) {
         
+	if ( !card_data.wasDissected() ) {
+	  std::cerr << "Warning PMT card data corrupted! Skipping." << std::endl;
+	  continue;
+	}
+
 	//        int card_number = card_data.getModule();
         
         // nathaniel's version of datatypes:
         for(auto const& channel_data : card_data.getChannels() ) { // auto here is pmt_crate_data_t::card_t::card_channel-type
+
+	  // if ( !channel_data.wasDissected() ){
+	  //   std::cerr << "Warning PMT channel data corrupted! Skipping." << std::endl;
+	  //   continue;
+	  // }
+
           int channel_number = channel_data.getChannelNumber();
           
           //now get the windows
