@@ -222,11 +222,11 @@ namespace lris {
       if (crate_id==9 && slot==5)
         boardChan = (channel_id-32)%64;
 
-      /*
-      std::cout << "Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
-                << slot << ", " << boardChan << "]";
-      std::cout << "\tCh. Id (LArSoft): " << larsoft_chan  << std::endl;
-      */
+
+      // std::cout << "(" << i << ") Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
+      //           << slot << ", " << boardChan << "]";
+      // std::cout << "\tCh. Id (LArSoft): " << larsoft_chan  << std::endl;
+
       daqid_t daq_id(crate_id,slot,boardChan);
       std::pair<daqid_t, int> p(daq_id,larsoft_chan);
 
@@ -420,7 +420,8 @@ namespace lris {
       //        ubdaq::crateHeader crate_header = seb_it->first;
       //        ubdaq::crateData crate_data = seb_it->second;
       //      int tpc_seb_num = seb_it.first;
-      tpc_crate_data_t const& tpc_crate = seb_it.second;
+      tpc_crate_data_t const& tpc_crate = seb_it.second; // (ub_TPC_CrateData_v6)
+      int crate_number = seb_it.first; // confirmed this is correct. for now, crate's are not given their ID number to store and then retrieve.
       
       if ( !tpc_crate.wasDissected() ) {
 	std::cerr << "Warning crate data corrupted! Skipping." << std::endl;
@@ -508,24 +509,30 @@ namespace lris {
               }
 	      //              chD.decompress();
             }
-
-            daqid_t daqId(tpc_crate.crateHeader()->crate_number,
+	    
+	    //int crate_number = tpc_crate.crateHeader()->crate_number;
+            daqid_t daqId( crate_number,
                           card.getModule(),
                           tpc_channel_number);
 
-            int ch=-1;
-            if (fChannelMap.find(daqId)!=fChannelMap.end()){
-              ch=fChannelMap[daqId];
+            int ch=0;
+	    auto it_chsearch = fChannelMap.find(daqId);
+            if ( it_chsearch!=fChannelMap.end() ){
+              ch=(*it_chsearch).second;
+	      //              fChannelMap[daqId];
               //              wire=fWireMap[daqId];
               //              pl=fPlaneMap[daqId];
             }
+	    else {
+	      std::cout << "Warning DAQ ID not found (" << (int)tpc_crate.crateHeader()->crate_number << ", " << card.getModule() << ", " << tpc_channel_number << ")" <<  std::endl;
+	    }
             //\todo fix this once there is a proper channel table
-            else{
-              //continue;
-              ch=10000*tpc_crate.crateHeader()->crate_number
-                +100*card.getModule()
-                +tpc_channel_number;
-            }
+            // else{
+            //   //continue;
+            //   ch=10000*tpc_crate.crateHeader()->crate_number
+            //     +100*card.getModule()
+            //     +tpc_channel_number;
+            // }
 
             //if (int(ch) >= 8254)
             // continue;
