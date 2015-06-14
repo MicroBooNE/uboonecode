@@ -142,8 +142,9 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   }
 
   fNoiseFactVec =  pset.get<std::vector<DoubleVec> >("NoiseFactVec");
-  fCol3DCorrection = pset.get<double>("Col3DCorrection");
-  fInd3DCorrection = pset.get<double>("Ind3DCorrection");
+
+  f3DCorrectionVec = pset.get<DoubleVec>("Drift3DCorrVec");
+
   fFieldRespAmpVec = pset.get<DoubleVec>("FieldRespAmpVec");
 
   fShapeTimeConst = pset.get<std::vector<double> >("ShapeTimeConst");
@@ -187,6 +188,48 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
     in->Close();
     delete in;
   }
+
+  // Load 2D filters for induced charge deconvolution (M. Mooney)
+
+  fFilterFuncVecICTime.resize(fNViews);
+  fFilterFuncVecICWire.resize(fNViews);
+  mf::LogInfo("SignalShapingServiceMicroBooNE") << "Getting 2D Filters from .fcl file" ;
+
+  std::vector<DoubleVec> paramsICTime = pset.get<std::vector<DoubleVec> >("FilterParamsVecICTime");
+  fFilterFuncVecICTime = pset.get<std::vector<std::string> > ("FilterFuncVecICTime");
+
+  fFilterTF1VecICTime.resize(fNViews);
+  fFilterICTimeMaxFreq.resize(fNViews);
+  fFilterICTimeMaxVal.resize(fNViews);
+  for(_vw=0;_vw<fNViews; ++_vw) {
+    std::string name = Form("FilterICTime_vw%02i_wr%02i", (int)_vw, (int)_wr);
+    fFilterTF1VecICTime[_vw] = new TF1(name.c_str(), fFilterFuncVecICTime[_vw].c_str() );
+    for(_ind=0; _ind<paramsICTime[_vw].size(); ++_ind) {
+      fFilterTF1VecICTime[_vw]->SetParameter(_ind, paramsICTime[_vw][_ind]);
+      fFilterICTimeMaxFreq[_vw] = fFilterTF1VecICTime[_vw]->GetMaximumX();
+      fFilterICTimeMaxVal[_vw] = fFilterTF1VecICTime[_vw]->GetMaximum();
+    }
+  }
+
+  std::vector<DoubleVec> paramsICWire = pset.get<std::vector<DoubleVec> >("FilterParamsVecICWire");
+  fFilterFuncVecICWire = pset.get<std::vector<std::string> > ("FilterFuncVecICWire");
+
+  fFilterTF1VecICWire.resize(fNViews);
+  fFilterICWireMaxFreq.resize(fNViews);
+  fFilterICWireMaxVal.resize(fNViews);
+  for(_vw=0;_vw<fNViews; ++_vw) {
+    std::string name = Form("FilterICWire_vw%02i_wr%02i", (int)_vw, (int)_wr);
+    fFilterTF1VecICWire[_vw] = new TF1(name.c_str(), fFilterFuncVecICWire[_vw].c_str() );
+    for(_ind=0; _ind<paramsICWire[_vw].size(); ++_ind) {
+      fFilterTF1VecICWire[_vw]->SetParameter(_ind, paramsICWire[_vw][_ind]);
+      fFilterICWireMaxFreq[_vw] = fFilterTF1VecICWire[_vw]->GetMaximumX();
+      fFilterICWireMaxVal[_vw] = fFilterTF1VecICWire[_vw]->GetMaximum();
+    }
+  }
+
+  fFilterScaleVecICTime = pset.get<DoubleVec>("FilterScaleVecICTime");
+  fFilterScaleVecICWire = pset.get<DoubleVec>("FilterScaleVecICWire");
+  fFilterNormVecIC = pset.get<DoubleVec>("FilterNormVecIC");
 
   /*
    We allow different drift velocities.
@@ -244,7 +287,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
         fNFieldBins[ktype] = Xaxis->GetNbins();
 
         // internal time is in nsec
-        fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
+        fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.*f3DCorrectionVec[_vw];
         //fFieldResponseTOffset[ktype].at(_vw) = (resp->GetBinCenter(1) + fCalibResponseTOffset[_vw])*1000.;
 //
 //        double delta = resp->GetXaxis()->GetBinCenter(2) - resp->GetXaxis()->GetBinCenter(1);
@@ -316,6 +359,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponseTOffsets(const TH1F* 
   }
 
   //std::cout << "view " << _vw << ", wire " << _wr << ", toffset " << tOffset << std::endl;
+  tOffset *= f3DCorrectionVec[_vw];
   fFieldResponseTOffset[ktype].at(_vw) = (-tOffset+ fCalibResponseTOffset[_vw])*1000.;
 
 }
@@ -978,7 +1022,72 @@ int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int cons
   return tpc_clock.Ticks(time_offset/1.e3);
 }
 
+//----------------------------------------------------------------------
+// Get convolution kernel from SignalShaping service for use in CalWire's
+// DeconvoluteInducedCharge() - added by M. Mooney
+const std::vector<TComplex>& util::SignalShapingServiceMicroBooNE::GetConvKernel(unsigned int channel, unsigned int wire) const
+{
+  if(!fInit)
+    init();
 
+  art::ServiceHandle<geo::Geometry> geom;
+  //geo::SigType_t sigtype = geom->SignalType(channel);
+
+  auto view = (size_t)geom->View(channel);
+
+  // Return appropriate shaper.
+
+  if(view<fViewIndex[0]||view>fViewIndex[fNViews-1]) {
+    throw cet::exception("SignalShapingServiceMicroBooNE")<< "can't determine"
+    << " View\n";
+  }
+
+  return fSignalShapingVec[0][view][wire].ConvKernel();
+}
+
+//----------------------------------------------------------------------
+// Evaluate 2D filter used in induced charge deconvolution (M. Mooney)
+double util::SignalShapingServiceMicroBooNE::Get2DFilterVal(size_t planeNum, size_t freqDimension, double binFrac) const
+{
+  art::ServiceHandle<util::DetectorProperties> detprop;
+  double ts = detprop->SamplingRate();
+
+  double freq;
+  double filtVal;
+  double val;
+  if(freqDimension == 1) {
+    freq = fFilterScaleVecICTime.at(planeNum)*(500.0/ts)*2.0*(0.5-fabs(binFrac-0.5));
+    filtVal = fFilterTF1VecICTime.at(planeNum)->Eval(freq);
+
+    if(freq < fFilterICTimeMaxFreq.at(planeNum))
+      val = fFilterICTimeMaxVal.at(planeNum);
+    else
+      val = filtVal;
+
+    return val;
+  }
+  else if(freqDimension == 2) {
+    freq = fFilterScaleVecICWire.at(planeNum)*(0.5-fabs(binFrac-0.5));
+    filtVal = fFilterTF1VecICWire.at(planeNum)->Eval(freq);
+
+    if(freq < fFilterICWireMaxFreq.at(planeNum))
+      val = fFilterICWireMaxVal.at(planeNum);
+    else
+      val = filtVal;
+
+    return val;
+  }
+  else {
+    return 0.0;
+  }
+}
+
+//----------------------------------------------------------------------
+// Return 2D filter normalization, used in induced charge deconvolution (M. Mooney)
+double util::SignalShapingServiceMicroBooNE::Get2DFilterNorm(size_t planeNum) const
+{
+  return fFilterNormVecIC.at(planeNum);
+}
 
 namespace util {
   

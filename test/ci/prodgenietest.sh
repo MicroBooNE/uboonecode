@@ -1,6 +1,20 @@
 #!/bin/bash
 #Test LArSoft code with "prodgenie.fcl".
 
+# only try to strace if we have it..
+strace() {
+   if [ -x /usr/bin/strace ]
+   then
+       /usr/bin/strace "$@"
+   else
+       if [ "$1" = "-o" ]
+       then
+           shift
+           shift
+       fi
+       "$@"
+   fi
+}
 
 cp  ${UBOONECODE_DIR}/job/prodgenie_bnb_nu_uboone.fcl .
 

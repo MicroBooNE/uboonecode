@@ -23,10 +23,47 @@ cet_test(geometry_microboone HANDBUILT
   TEST_ARGS --rethrow-all --config ./test_geometry_uboone.fcl
 )
 
-# FCL files need to be copied to the test area (DATAFILES directive) since they
-# are not installed.
-cet_test(geometry_iterator_microboone HANDBUILT
-  DATAFILES test_geometry_iterators_uboone.fcl
-  TEST_EXEC lar
-  TEST_ARGS --rethrow-all --config ./test_geometry_iterators_uboone.fcl
+
+#
+# the following are tests equivalent to the module ones, but with no framework
+#
+# unit test (use the hard-coded configuration for MicroBooNE v5 geometry)
+cet_test(geometry_uboone_test
+  SOURCES geometry_uboone_test.cxx
+  DATAFILES test_geometry_uboone.fcl
+  TEST_ARGS ./test_geometry_uboone.fcl
+  LIBRARIES Geometry
+            GeometryTestLib
+            ${MF_MESSAGELOGGER}
+            ${MF_UTILITIES}
+            ${FHICLCPP}
+            ${CETLIB}
+	    ${ROOT_CORE}
+)
+
+
+# unit test (use the hard-coded configuration for MicroBooNE v5 geometry)
+# this uses BOOST for the test
+cet_test(geometry_iterator_uboone_test
+  SOURCES geometry_iterator_uboone_test.cxx
+  LIBRARIES Geometry
+            GeometryTestLib
+            ${MF_MESSAGELOGGER}
+            ${MF_UTILITIES}
+            ${FHICLCPP}
+            ${CETLIB}
+	    ${ROOT_CORE}
+)
+
+
+# unit test (use the hard-coded configuration for MicroBooNE v5 geometry)
+cet_test(geometry_iterator_loop_uboone_test
+  SOURCES geometry_iterator_loop_uboone_test.cxx
+  LIBRARIES Geometry
+            GeometryTestLib
+            ${MF_MESSAGELOGGER}
+            ${MF_UTILITIES}
+            ${FHICLCPP}
+            ${CETLIB}
+	    ${ROOT_CORE}
 )

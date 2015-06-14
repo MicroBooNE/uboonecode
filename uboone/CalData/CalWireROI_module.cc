@@ -188,7 +188,22 @@ namespace caldata {
   //////////////////////////////////////////////////////
   void CalWireROI::reconfigure(fhicl::ParameterSet const& p)
   {
-  
+    // Get signal shaping service.
+    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    bool doInducedChargeDeconv = false;
+    std::vector<std::vector<size_t> > respNums = sss->GetNResponses();
+    for (size_t i = 0; i < respNums.at(1).size(); i++) {
+      if (respNums.at(1).at(i) > 1) {
+        doInducedChargeDeconv = true;
+      }
+    }
+
+    // Throw exception if deconvolution should include dynamic induced charge effects (not yet implemented in CalROI) - M. Mooney
+    if (doInducedChargeDeconv == true) {
+      throw art::Exception(art::errors::Configuration)
+        << "CalWireROI can not yet handle deconvolution with dynamic induced charge effects turned on.  Please use CalWireMicroBooNE instead.";
+    }
+
     std::vector<unsigned short> uin;    std::vector<unsigned short> vin;
     std::vector<unsigned short> zin;
     
@@ -269,7 +284,9 @@ namespace caldata {
   {      
   
     //update database cache
-    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    //Temporarily replace with the generic version until time stamp becomes available
+    //fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    fPedestalRetrievalAlg.Update( evt );
   
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
@@ -324,6 +341,10 @@ namespace caldata {
       // get the reference to the current raw::RawDigit
       art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
       channel = digitVec->Channel();
+
+      // The following test is meant to be temporary until the "correct" solution is implemented
+      if (chanFilt->GetChannelStatus(channel) == filter::ChannelFilter::NOTPHYSICAL) continue;
+
       unsigned int dataSize = digitVec->Samples();
       // vector holding uncompressed adc values
       std::vector<short> rawadc(dataSize);

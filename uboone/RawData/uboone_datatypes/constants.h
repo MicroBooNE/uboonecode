@@ -1,6 +1,8 @@
 #ifndef _UBOONETYPES_CONSTANTS_H
 #define _UBOONETYPES_CONSTANTS_H
 
+#undef VERSION // this might come from CLHEP
+
 namespace gov {
 namespace fnal {
 namespace uboone {
