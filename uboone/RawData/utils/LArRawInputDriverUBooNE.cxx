@@ -165,7 +165,13 @@ namespace lris {
     fChannelMap.clear();
     mf::LogInfo("")<<"Fetching channel map from DB";
 
-    PGconn *conn = PQconnectdb("host=fnalpgsdev.fnal.gov port=5436 dbname=uboonedaq_dev user=uboonedaq_web password=argon!uBooNE");        
+    //use this command since it is a recursive call to connect to the database with a built in delay or increasing length everytime
+    //the database already has too many open connections.
+
+    PGconn *conn= art::ServiceHandle<util::DatabaseUtil>()->GetConnect(0);
+
+    //Don't use this command below because it doesn't really retry or wait a few seconds before retrying.
+    //PGconn *conn = PQconnectdb("host=fnalpgsdev.fnal.gov port=5436 dbname=uboonedaq_dev user=uboonedaq_web password=argon!uBooNE");        
     
     if(PQstatus(conn)!=CONNECTION_OK) {
       mf::LogError("") << "Couldn't open connection to postgresql interface";
