@@ -63,6 +63,10 @@ physics: {
       ExpectedWirePitch: [ 0.3, 0.3, 0.3 ]
       # plane pitches (#0 -> #1, #1 -> #2)
       ExpectedWirePitch: [ 0.3, 0.3 ]
+      SkipTests: [
+        # - CheckOverlaps disabled because it takes lot of time
+        "CheckOverlaps"
+      ]
     }
   }
 
