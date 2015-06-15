@@ -13,6 +13,8 @@
 #define UBooNE_ExptGeoHelperInterface_h
 
 #include "Geometry/ExptGeoHelperInterface.h"
+#include "Geometry/CryostatGeo.h"
+#include "Geometry/AuxDetGeo.h"
 
 #include <memory>
 #include <vector>
@@ -20,14 +22,6 @@
 // Forward declarations
 //
 class TString;
-
-namespace geo
-{
-  class ChannelMapAlg;
-  class AuxDetGeo;
-  class CryostaGeo;
-  class ExptGeoHelperInterface;
-}
 
 namespace geo
 {
@@ -60,15 +54,12 @@ namespace uboone
     // std::shared_ptr<const geo::ChannelMapAlg> & GetChannelMapAlg() const;
   
   private:
+
+    void doConfigureChannelMapAlg( fhicl::ParameterSet const & sortingParameters, geo::GeometryCore* geom ) override;
+    ChannelMapAlgPtr_t doGetChannelMapAlg() const override;
     
-    void  doConfigureChannelMapAlg( const TString & detectorName,
-                                    fhicl::ParameterSet const & sortingParam,
-                                    std::vector<geo::CryostatGeo*> & c,
-				    std::vector<geo::AuxDetGeo*>   & ad ) override;
-    std::shared_ptr<const geo::ChannelMapAlg> doGetChannelMapAlg() const override;
-    
-    fhicl::ParameterSet const & fPset;
-    art::ActivityRegistry & fReg;
+    fhicl::ParameterSet fPset; ///< copy of configuration parameter set
+    //art::ActivityRegistry fReg; ///< copy of activity registry
     std::shared_ptr<geo::ChannelMapAlg> fChannelMap;
   
   };

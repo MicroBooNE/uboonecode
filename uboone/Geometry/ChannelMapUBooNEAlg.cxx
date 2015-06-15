@@ -24,8 +24,8 @@
 namespace geo {
 
   //----------------------------------------------------------------------------
-  ChannelMapUBooNEAlg::ChannelMapUBooNEAlg( fhicl::ParameterSet const& pvals )
-    : ChannelMapStandardAlg( pvals )
+  ChannelMapUBooNEAlg::ChannelMapUBooNEAlg( fhicl::ParameterSet const& pvals, fhicl::ParameterSet const& sortingParameters )
+    : ChannelMapStandardAlg( sortingParameters )
   {
     // parameter set will come from UBooNEGomeotryHelper service
     LoadOpticalMapData( pvals );
