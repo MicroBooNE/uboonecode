@@ -165,86 +165,8 @@ namespace lris {
     fChannelMap.clear();
     mf::LogInfo("")<<"Fetching channel map from DB";
 
-    //use this command since it is a recursive call to connect to the database with a built in delay or increasing length everytime
-    //the database already has too many open connections.
+    fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap();
 
-    PGconn *conn= art::ServiceHandle<util::DatabaseUtil>()->GetConnect(0);
-
-    //Don't use this command below because it doesn't really retry or wait a few seconds before retrying.
-    //PGconn *conn = PQconnectdb("host=fnalpgsdev.fnal.gov port=5436 dbname=uboonedaq_dev user=uboonedaq_web password=argon!uBooNE");        
-    
-    if(PQstatus(conn)!=CONNECTION_OK) {
-      mf::LogError("") << "Couldn't open connection to postgresql interface";
-      PQfinish(conn);
-      throw art::Exception( art::errors::FileReadError )
-        << "Failed to get channel map from DB." << std::endl;
-    }
-
-    PGresult *res  = PQexec(conn, "BEGIN");    
-    if (PQresultStatus(res) != PGRES_COMMAND_OK) { 
-      mf::LogError("")<< "postgresql BEGIN failed";
-      PQclear(res);
-      PQfinish(conn);
-      throw art::Exception( art::errors::FileReadError )
-        << "postgresql BEGIN failed." << std::endl;
-    }
-
-    // Andrzej's changed database
-
-    PQclear(res);
-    res = PQexec(conn,
-                 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
-                 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN ADCreceivers_copy_new NATURAL JOIN crates NATURAL JOIN fecards"
-                 );
-
-    // Standard & wrong Hoot database
-    /*
-    PQclear(res);
-    res = PQexec(conn,
-                 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
-                 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables NATURAL JOIN ADCreceivers NATURAL JOIN crates NATURAL JOIN fecards"
-                 );
-    */
-    if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
-    {
-      mf::LogError("")<< "SELECT command did not return tuples properly";
-      PQclear(res);
-      PQfinish(conn);
-      throw art::Exception( art::errors::FileReadError )
-        << "postgresql SELECT failed." << std::endl;
-    }
-
-    int num_records=PQntuples(res);
-    for (int i=0;i<num_records;i++) {
-      int crate_id     = atoi(PQgetvalue(res, i, 0));
-      int slot         = atoi(PQgetvalue(res, i, 1));
-      //auto const wPl   =      PQgetvalue(res, i, 2);
-      int larsoft_chan = atoi(PQgetvalue(res, i, 3));
-      int channel_id   = atoi(PQgetvalue(res, i, 4));
-
-      int boardChan = channel_id%64;
-
-
-      if (crate_id==9 && slot==5)
-        boardChan = (channel_id-32)%64;
-
-
-      // std::cout << "(" << i << ") Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
-      //           << slot << ", " << boardChan << "]";
-      // std::cout << "\tCh. Id (LArSoft): " << larsoft_chan  << std::endl;
-
-      daqid_t daq_id(crate_id,slot,boardChan);
-      std::pair<daqid_t, int> p(daq_id,larsoft_chan);
-
-      if (fChannelMap.find(daq_id) != fChannelMap.end()){
-        std::cout << "Multiple entries!" << std::endl;
-        mf::LogWarning("")<<"Multiple DB entries for same (crate,card,channel). "<<std::endl
-                       <<"Redefining (crate,card,channel)=>id link ("
-                       <<daq_id.crate<<", "<<daq_id.card<<", "<<daq_id.channel<<")=>"
-                       <<fChannelMap[daq_id];
-      }
-      fChannelMap.insert(p);
-    }
   }
 
   // =====================================================================
@@ -517,9 +439,7 @@ namespace lris {
             }
 	    
 	    //int crate_number = tpc_crate.crateHeader()->crate_number;
-            daqid_t daqId( crate_number,
-                          card.getModule(),
-                          tpc_channel_number);
+	    util::UBDaqID daqId( crate_number, card.getModule(), tpc_channel_number);
 
             int ch=0;
 	    auto it_chsearch = fChannelMap.find(daqId);

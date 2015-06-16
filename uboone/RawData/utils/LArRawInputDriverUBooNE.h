@@ -22,6 +22,7 @@
 #include "datatypes/ub_EventRecord.h"
 
 #include "uboone/Geometry/UBOpChannelTypes.h"
+#include "Utilities/DatabaseUtil.h" // lardata
 
 #include <fstream>
 #include <vector>
@@ -49,27 +50,6 @@ class TH1D;
 
 ///Conversion of binary data to root files
 namespace lris {
-
-  struct daqid_t {
-    daqid_t():crate(-1),card(-1),channel(-1) {};
-    daqid_t(int crate_id, int card_id, int channel_id):
-      crate(crate_id),card(card_id),channel(channel_id) {};
-
-    int crate;
-    int card;
-    int channel;
-  };
-
-  bool operator<(daqid_t const& lhs,daqid_t const& rhs) {
-    bool is_less=false;
-    if (lhs.crate   == rhs.crate && 
-	lhs.card    == rhs.card  && 
-	lhs.channel <  rhs.channel) is_less=true;
-    else if (lhs.crate == rhs.crate && 
-	     lhs.card  <  rhs.card) is_less=true;
-    else if (lhs.crate < rhs.crate) is_less=true;
-    return is_less;
-  }
 
   class LArRawInputDriverUBooNE {
     /// Class to fill the constraints on a template argument to the class,
@@ -115,7 +95,7 @@ namespace lris {
     std::vector<std::streampos>    fEventLocation;
     uint32_t                       fEventCounter; 
     bool                           fHuffmanDecode;
-    std::map<daqid_t, int>         fChannelMap;   
+    util::UBChannelMap_t           fChannelMap;   
     
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
