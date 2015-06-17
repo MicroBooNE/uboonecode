@@ -35,14 +35,16 @@ namespace opdet {
 
   //--------------------------------------------------------------------------
   //void UBOpticalADC::GenDarkNoise(double dark_rate, double period)
-  void UBOpticalADC::GenDarkNoise(const unsigned int ch, const double g4start)
+  void UBOpticalADC::GenDarkNoise(const unsigned int pmtid, const double g4start)
   //--------------------------------------------------------------------------
   {
     fDarkPhotonTime.clear();
 
     art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
+    art::ServiceHandle<geo::Geometry> geom;
+    unsigned int ch = geom->OpChannel( pmtid, 0 ); // get channel reading out that PMT
 
-    double dark_rate = ch_conf->GetParameter(kDarkRate,ch);
+    double dark_rate = ch_conf->GetFloat(kDarkRate,ch);
 
     unsigned int dark_count = RandomServer::GetME().Poisson(dark_rate * fDuration);
 
@@ -55,74 +57,69 @@ namespace opdet {
   }
 
   //-------------------------------------------------------------------
-  void UBOpticalADC::GenWaveform(const unsigned int ch, 
-				 std::vector<unsigned short>& high_wf,
-				 std::vector<unsigned short>& low_wf  )
+  void UBOpticalADC::GenWaveform(const unsigned int ch, optdata::ChannelData& wf )
   //-------------------------------------------------------------------
   {
     //
-    // Initialize
+    // Initialize, zero
     //
     size_t nticks = fTimeInfo.Ticks(fDuration);
-    std::vector<float> high_tmp_wf(nticks,0);
-    std::vector<float> low_tmp_wf;
-    low_tmp_wf.reserve(nticks);
+    std::vector< float > wfm_tmp( nticks, 0.0 );
+    if ( wf.size()!=nticks )
+      wf.resize( nticks, 0 );
+    else
+      wf.assign( nticks, 0 );
 
+    // services
     art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
+
     //
     // Generate Signal & DarkNoise
     //
     // Configure to generate high gain SPE
     fSPE.Reset();
 
-    fSPE.SetT0(ch_conf->GetParameter(kT0,ch),
-	       ch_conf->GetParameter(kT0Spread,ch));
-
-    fSPE.SetGain(ch_conf->GetParameter(kHighGain,ch),
-		 ch_conf->GetParameter(kGainSpread,ch));
+    fSPE.SetT0(ch_conf->GetFloat(kT0,ch),
+	       ch_conf->GetFloat(kT0Spread,ch));
+    
+    fSPE.SetGain(ch_conf->GetFloat(kPMTGain,ch),
+		 ch_conf->GetFloat(kGainSpread,ch));
     
     // Create combined photon time with QE applied on signal photons
 
     fPhotonTime.clear();
     fPhotonTime.reserve(fInputPhotonTime.size() + fDarkPhotonTime.size());
-    const double qe = ch_conf->GetParameter(kQE,ch);
+    const double qe = ch_conf->GetFloat(kQE,ch);
     for(auto const &v : fDarkPhotonTime) fPhotonTime.push_back(v);
     for(auto const &v : fInputPhotonTime)
-
       if(RandomServer::GetME().Uniform(1.) < qe) fPhotonTime.push_back(v);
 
     fSPE.SetPhotons(fPhotonTime);
-    fSPE.Process(high_tmp_wf,fTimeInfo);
+    fSPE.Process(wfm_tmp,fTimeInfo);
 
-    // Copy waveform to low_tmp_wf with gain ratio
-    double gain_ratio = (ch_conf->GetParameter(kLowGain,ch) / 
-			 ch_conf->GetParameter(kHighGain,ch));
-    for(auto const &v : high_tmp_wf) 
-
-      low_tmp_wf.push_back(v * gain_ratio);
+    // convert from pe waveform to adc
+    double gain_ratio = ch_conf->GetFloat(kSplitterGain,ch);
+    for(auto &v : wfm_tmp) 
+      v *= gain_ratio;
 
     //
     // Simulate pedestal
     //
     fPED.Reset();
-    fPED.SetPedestal(ch_conf->GetParameter(kPedestalMean,ch),
-		     ch_conf->GetParameter(kPedestalSpread,ch));
-    fPED.Process(high_tmp_wf,fTimeInfo);
-    fPED.Process(low_tmp_wf,fTimeInfo);
+    fPED.SetPedestal(ch_conf->GetFloat(kPedestalMean,ch),
+		     ch_conf->GetFloat(kPedestalSpread,ch));
+    fPED.Process(wfm_tmp,fTimeInfo);
 
     // Make sure algorithms did not alter the waveform size
 
-    if(high_tmp_wf.size()!=nticks || low_tmp_wf.size()!=nticks)
-
+    if(wf.size()!=nticks || wfm_tmp.size()!=nticks)
       throw UBOpticalException("Waveform length changed (prohibited)!");
 
     //
     // Digitize amplitude
     //
-    high_wf.clear();
-    low_wf.clear();
-    Digitize(high_tmp_wf,high_wf);
-    Digitize(low_tmp_wf,low_wf);
+    wf.clear();
+    Digitize(wfm_tmp,wf);
     
   }
   

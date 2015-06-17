@@ -19,8 +19,12 @@
 #include "OpticalDetectorData/FIFOChannel.h"
 #include "OpticalDetectorData/OpticalRawDigit.h"
 #include "RawData/TriggerData.h"
+#include "RawData/OpDetWaveform.h" // from lardata
 #include "Utilities/TimeService.h"
 #include "uboone/OpticalDetectorSim/UBOpticalException.h"
+#include "Geometry/Geometry.h" // larcore
+#include "uboone/Geometry/UBOpChannelTypes.h"  // uboonecode
+#include "uboone/Geometry/UBOpReadoutMap.h"  // uboonecode
 
 // ART includes.
 #include "fhiclcpp/ParameterSet.h"
@@ -59,14 +63,22 @@ namespace opdet {
       
   private:  
 
-    /// Producer module label for raw::FIFOChannel
-    std::string fFIFOModuleName;
+    /// Producer module label for raw::FIFOChannel 
+    std::string fFIFOModuleName; // (deprecated)
 
     /// Producer module label for raw::Trigger
     std::string fTrigModuleName;
 
+    // Stem name for data products: defaults to opdrammcreadout
+    std::string fDataProductsStemName;
+
     /// Readout frame offset (w.r.t. trigger frame)
     std::vector<optdata::Frame_t> fReadoutFrameOffset;
+
+    /// Names of data products: one for each Optical Category
+    std::map< opdet::UBOpticalChannelCategory_t, std::string > fPMTdataProductNames;
+    void registerOpticalData();
+    void putPMTDigitsIntoEvent( std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > >& pmtdigitlist, art::Event& event);
 
   };
 } // namespace opdet
@@ -81,16 +93,47 @@ namespace opdet {
 // Implementation
 namespace opdet {
   
+  /// ------------------------------------------------------------------------------------
+  /// Constructor
   OpticalDRAMReadout::OpticalDRAMReadout(fhicl::ParameterSet const& parameterSet)
   {
-    // Describe the data products we can write.
-    produces< std::vector< optdata::OpticalRawDigit > >();
 
     // Read in the parameters from the .fcl file.
     this->reconfigure(parameterSet);
 
+    // Describe the data products we can write.
+    //produces< std::vector< optdata::OpticalRawDigit > >(); // deprecated
+    registerOpticalData();
+
   }
-  
+
+  /// ------------------------------------------------------------------------------------
+
+  void OpticalDRAMReadout::registerOpticalData()
+  {
+    // we make a data product for each category of channels
+    fPMTdataProductNames.clear();
+    for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
+      std::stringstream ss;
+      ss << fDataProductsStemName << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
+      //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
+      produces< std::vector<raw::OpDetWaveform> >(ss.str());
+      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, ss.str() ) );
+    }
+  }
+
+
+  /// ------------------------------------------------------------------------------------
+
+  void OpticalDRAMReadout::putPMTDigitsIntoEvent( std::map< opdet::UBOpticalChannelCategory_t, 
+						  std::unique_ptr< std::vector<raw::OpDetWaveform> > >& pmtdigitlist, 
+						  art::Event& event ) {
+    for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ )
+      event.put( std::move( pmtdigitlist[(opdet::UBOpticalChannelCategory_t)cat] ), fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ] );    
+  }
+
+  /// ------------------------------------------------------------------------------------
+
   void OpticalDRAMReadout::reconfigure(fhicl::ParameterSet const& p)
   {
     
@@ -99,6 +142,16 @@ namespace opdet {
     fTrigModuleName     = p.get<std::string> ("TrigModuleName");
     
     fReadoutFrameOffset = p.get<std::vector<optdata::Frame_t> >("ReadoutFrameOffset");
+
+    try {
+      fDataProductsStemName = p.get<std::string>( "OpDataProductStemName" );
+    }
+    catch (...) {
+      fDataProductsStemName = "opdrammcreadout";
+    }
+
+    // do we want to give user option to name data?
+    // do this here
 
     if(fReadoutFrameOffset.size()!=2)
 
@@ -111,12 +164,29 @@ namespace opdet {
 
   void OpticalDRAMReadout::produce(art::Event& event)
   {
+
+    // -----------------------------------
+    // Get needed services
+
     // Obtain optical clock to be used for sample/frame number generation
     art::ServiceHandle<util::TimeService> ts;
     ts->preProcessEvent(event);
     ::util::ElecClock clock = ts->OpticalClock();
 
-    std::unique_ptr< std::vector<optdata::OpticalRawDigit> > wf_array( new std::vector<optdata::OpticalRawDigit> );
+    // geometry and channel map services
+    ::art::ServiceHandle<geo::Geometry> geom;
+    ::art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
+
+    // -----------------------------------
+    // Create out container of waveforms: one container per readout channel type
+    std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > pmt_raw_digits;
+    for ( unsigned int opdetcat=0; opdetcat<(unsigned int)opdet::NumUBOpticalChannelCategories; opdetcat++ ) {
+      pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
+    }
+    //std::unique_ptr< std::vector<optdata::OpticalRawDigit> > wf_array( new std::vector<optdata::OpticalRawDigit> ); // deprecated
+
+    // -----------------------------------
+    // PMT Trigger Sim
 
     // Check if trigger data product exists or not. If not, throw a warning
     art::Handle< std::vector<raw::Trigger> > trig_array;
@@ -169,14 +239,21 @@ namespace opdet {
     }
     */   
     
-    
+    // -----------------------------------    
     // Read in optdata::FIFOChannel & store relevant portion
+
     art::Handle< std::vector<optdata::FIFOChannel> > fifo_array;
     event.getByLabel(fFIFOModuleName, fifo_array);
 
-    if(fifo_array.isValid()) {
+    if(!fifo_array.isValid()) {
+      throw UBOpticalException("OpticalDRAMReadout_module::produce. Input data invalid!");
+    }
+    else {
 
-      wf_array->reserve(fifo_array->size());
+      // we want to reserve enough space, once. trading speed at the cost of wasting memory
+      for ( auto &it : pmt_raw_digits )
+	it.second->reserve( fifo_array->size() );
+
 
       for(size_t i=0; i<fifo_array->size(); ++i) {
 
@@ -193,29 +270,28 @@ namespace opdet {
 	  }
 	
 	if(store){
-	  
-	  wf_array->push_back(optdata::OpticalRawDigit(fifo_ptr->Category(),
-						       fifo_ptr->TimeSlice(),
-						       fifo_ptr->Frame(),
-						       fifo_ptr->ChannelNumber(),
-						       fifo_ptr->size()
-						       )
-			      );
 
-	  auto wf = wf_array->rbegin();
+	  // if FIFO has correct categories, then fine.
+	  // but for now, get it using the channel number
+	  unsigned int data_product_ch_num = fifo_ptr->ChannelNumber();
+	  opdet::UBOpticalChannelCategory_t category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
+	  auto it_wfarray = pmt_raw_digits.find( category );
+	  double window_timestamp = ts->OpticalClock().Time( fifo_ptr->TimeSlice(), fifo_ptr->Frame() );
 
-	  for(auto const& v : *fifo_ptr)
+	  raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, fifo_ptr->size() );
+	  (*it_wfarray).second->emplace_back( rd );
 
-	    wf->push_back(v);
+	}// if store
+      }// loop over FIFO data
 
-	}
-      }
+    }// if valid
 
-    }
-    
-    event.put( std::move( wf_array ) ); 
+    // hand over data to event
+    //event.put( std::move( wf_array ) );
+    putPMTDigitsIntoEvent( pmt_raw_digits, event );
 
   }
+  
 }
 
 #endif

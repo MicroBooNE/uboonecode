@@ -1,2 +1,2 @@
-add_subdirectory(uboone_datatypes)
+#add_subdirectory(uboone_datatypes)
 add_subdirectory(utils)
