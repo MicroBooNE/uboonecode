@@ -450,7 +450,7 @@ namespace lris {
               //              pl=fPlaneMap[daqId];
             }
 	    else {
-	      std::cout << "Warning DAQ ID not found (" << (int)tpc_crate.crateHeader()->crate_number << ", " << card.getModule() << ", " << tpc_channel_number << ")" <<  std::endl;
+	      //std::cout << "Warning DAQ ID not found (" << (int)tpc_crate.crateHeader()->crate_number << ", " << card.getModule() << ", " << tpc_channel_number << ")" <<  std::endl;
 	    }
             //\todo fix this once there is a proper channel table
             // else{

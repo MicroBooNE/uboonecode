@@ -1,19 +1,95 @@
 BEGIN_PROLOG
 
-microboone_geo:
+microboone_geometry_helper:
 {
- SurfaceY:        6.9e2                           #in cm, vertical distance to the surface
- Name:            "microboonev6"
- GDML:            "microboonev6.gdml"
- ROOT:            "microboonev6.gdml"
- DisableWiresInG4: true                           # Whether to use wirefree geometry in LArG4
-                                                  #  As per Brians request, wire free file is specified by
-                                                  #  [GDMLFileName]_nowires.gdml
+ service_provider : UBooNEGeometryHelper
+
+ numberOfDetectors: 32       # number of optical detectors, 32 PMTs, 4 acrylic light paddles
+ numberOfHardwareChanels: 4  # number of readout channels per opdet
+ 
+ # OpDet ID (determined by load order in GDML file): name of Optical Detector (P=PMT, L=light guide paddle)
+ OpDet0_name:  "P01"
+ OpDet1_name:  "P02"
+ OpDet2_name:  "P03"
+ OpDet3_name:  "P04"
+ OpDet4_name:  "P05"
+ OpDet5_name:  "P06"
+ OpDet6_name:  "P07"
+ OpDet7_name:  "P08"
+ OpDet8_name:  "P09"
+ OpDet9_name:  "P10"
+ OpDet10_name: "P11"
+ OpDet11_name: "P12"
+ OpDet12_name: "P13"
+ OpDet13_name: "P14"
+ OpDet14_name: "P15"
+ OpDet15_name: "P16"
+ OpDet16_name: "P17"
+ OpDet17_name: "P18"
+ OpDet18_name: "P19"
+ OpDet19_name: "P20"
+ OpDet20_name: "P21"
+ OpDet21_name: "P22"
+ OpDet22_name: "P23"
+ OpDet23_name: "P24"
+ OpDet24_name: "P25"
+ OpDet25_name: "P26"
+ OpDet26_name: "P27"
+ OpDet27_name: "P28"
+ OpDet28_name: "P29"
+ OpDet29_name: "P30"
+ OpDet30_name: "P31"
+ OpDet31_name: "P32"
+ OpDet32_name: "L01"
+ OpDet33_name: "L02"
+ OpDet34_name: "L03"
+ OpDet35_name: "L04"
+ 
+ # ADC/FEM channel number: Opdet to readout channel map.
+ OpDet0_channels:  [ 0, 100, 200, 300 ]
+ OpDet1_channels:  [ 1, 101, 201, 301 ]
+ OpDet2_channels:  [ 2, 102, 202, 302 ]
+ OpDet3_channels:  [ 3, 103, 203, 303 ]
+ OpDet4_channels:  [ 4, 104, 204, 304 ]
+ OpDet5_channels:  [ 5, 105, 205, 305 ]
+ OpDet6_channels:  [ 6, 106, 206, 306 ]
+ OpDet7_channels:  [ 7, 107, 207, 307 ]
+ OpDet8_channels:  [ 8, 108, 208, 308 ]
+ OpDet9_channels:  [ 9, 109, 209, 309 ]
+ OpDet10_channels: [10, 110, 210, 310 ]
+ OpDet11_channels: [11, 111, 211, 311 ]
+ OpDet12_channels: [12, 112, 212, 312 ]
+ OpDet13_channels: [13, 113, 213, 313 ]
+ OpDet14_channels: [14, 114, 214, 314 ]
+ OpDet15_channels: [15, 115, 215, 315 ]
+ OpDet16_channels: [16, 116, 216, 316 ]
+ OpDet17_channels: [17, 117, 217, 317 ]
+ OpDet18_channels: [18, 118, 218, 318 ]
+ OpDet19_channels: [19, 119, 219, 319 ]
+ OpDet20_channels: [20, 120, 220, 320 ]
+ OpDet21_channels: [21, 121, 221, 321 ]
+ OpDet22_channels: [22, 122, 222, 322 ]
+ OpDet23_channels: [23, 123, 223, 323 ]
+ OpDet24_channels: [24, 124, 224, 324 ]
+ OpDet25_channels: [25, 125, 225, 325 ]
+ OpDet26_channels: [26, 126, 226, 326 ]
+ OpDet27_channels: [27, 127, 227, 327 ]
+ OpDet28_channels: [28, 128, 228, 328 ]
+ OpDet29_channels: [29, 129, 229, 329 ]
+ OpDet30_channels: [30, 130, 230, 330 ]
+ OpDet31_channels: [31, 131, 231, 331 ]
+ OpDet32_channels: [32, 132, 232, 332 ]
+ OpDet33_channels: [33, 133, 233, 333 ]
+ OpDet34_channels: [34, 134, 234, 334 ] 
+ OpDet35_channels: [35, 135, 235, 335 ]
+
+ 
 }
 
 microboone_opreadoutmap:
 {
-
+ service_provider: UBOpReadoutMap
+ 
  # Channel Categories: Corresponds to types in "UBOpChannelTypes.h": Must match exactly
  OpdetBeamLowGain:     [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35 ]
  OpdetBeamHighGain:    [ 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 132, 134, 135 ]
@@ -243,7 +319,7 @@ microboone_opreadoutmap:
  ReadoutChannel346:  [ 10, 8,  46 ]
  ReadoutChannel347:  [ 10, 8,  47 ]  
  
-}
 
+}
 
 END_PROLOG

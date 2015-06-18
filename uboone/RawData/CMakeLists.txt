@@ -1,2 +1,5 @@
+# copied version of uboone_datatypes to build here. never used?
 #add_subdirectory(uboone_datatypes)
-add_subdirectory(utils)
+
+# Include for Swizzler
+#add_subdirectory(utils)
