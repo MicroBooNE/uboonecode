@@ -53,6 +53,7 @@ cet_test(geometry_iterator_uboone_test
             ${FHICLCPP}
             ${CETLIB}
 	    ${ROOT_CORE}
+  USE_BOOST_UNIT
 )
 
 
