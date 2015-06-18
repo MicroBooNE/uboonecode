@@ -23,12 +23,16 @@ namespace opdet {
     kPedestalMean=0, // Pedestal mean in ADC count
     kPedestalSpread, // Pedestal standard deviation in ADC count
     kQE,             // Quantum efficiency
-    kHighGain,       // High gain ADC/p.e.
-    kLowGain,        // Low gain ADC/p.e.
-    kGainSpread,     // Spread in PMT gain (in fraction)
+    kPMTGain,        // p.e/photon
+    kSplitterGain,   // adc/p.e.
+    kGainSpread,     // Spread in gain (in fraction)
     kT0,             // T0 in ns
     kT0Spread,       // T0 spread in ns
     kDarkRate,       // Dark Rate in GHz
+    kDisc0Threshold, // Discriminator 0 threshold
+    kDisc1Threshold, // Discriminator 1 threshold
+    kDisc3Threshold, // Discriminator 3 threshold
+    
     kChConfigTypeMax
   };
   

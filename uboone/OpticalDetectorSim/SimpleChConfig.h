@@ -14,7 +14,7 @@
 #ifndef SIMPLECHCONFIG_H
 #define SIMPLECHCONFIG_H
 
-#include <vector>
+#include <map>
 #include "UBOpticalException.h"
 #include "UBOpticalConstants.h"
 namespace opdet {
@@ -28,63 +28,27 @@ namespace opdet {
   protected:
     
     /// Default constructor
-    SimpleChConfig() : fParams(kChConfigTypeMax,std::vector<float>()),
-		       fDefault(kChConfigTypeMax,0)
-    {
-      size_t n_channels = kLogicStartChannel;
-      
-      for(size_t i=0; i<kChConfigTypeMax; ++i)
-	fParams.at(i).resize(n_channels,0);
-      
-      fDefault.at(kPedestalMean)   = 2048;
-      fDefault.at(kPedestalSpread) = 0.3;
-      fDefault.at(kQE)             = 0.01;
-      fDefault.at(kHighGain)       = 20;
-      fDefault.at(kLowGain)        = 4;
-      fDefault.at(kGainSpread)     = 0.05;
-      fDefault.at(kT0)             = 0;
-      fDefault.at(kT0Spread)       = 0;
-      fDefault.at(kDarkRate)       = 1.e-5;
-      
-      for(size_t i=0; i<n_channels; ++i) {
-	fParams.at(kPedestalMean).at(i)   = fDefault.at(kPedestalMean);
-	fParams.at(kPedestalSpread).at(i) = fDefault.at(kPedestalSpread);
-	fParams.at(kQE).at(i)             = fDefault.at(kQE);
-	fParams.at(kHighGain).at(i)       = fDefault.at(kHighGain);
-	fParams.at(kLowGain).at(i)        = fDefault.at(kLowGain);
-	fParams.at(kGainSpread).at(i)     = fDefault.at(kGainSpread);
-	fParams.at(kT0).at(i)             = fDefault.at(kT0);
-	fParams.at(kT0Spread).at(i)       = fDefault.at(kT0Spread);
-	fParams.at(kDarkRate).at(i)       = fDefault.at(kDarkRate);
-      }
+  SimpleChConfig() : fInitialized(false) {};
 
-    }
-    
     /// Default destructor
     virtual ~SimpleChConfig(){};
 
   public:
 
-    float GetParameter(const ChConfigType_t type, 
-		       const unsigned short ch) const
-    {
-      if(ch == kINVALID_CHANNEL) return fDefault.at(type);
-      if(ch >= fParams.at(type).size()) 
-	throw UBOpticalException("Invalid channel number provided!");
-      return fParams.at(type).at(ch);
-    }
+    const std::map<unsigned int, float>& GetFloat (const ChConfigType_t type);
+    const std::map<unsigned int, int>&   GetInt   (const ChConfigType_t type);
 
-    const std::vector<float>& GetParameter(const ChConfigType_t type) const
-    { return fParams.at(type); }
-
+    float GetFloat ( const ChConfigType_t type, const unsigned int ch);
+    int   GetInt   ( const ChConfigType_t type, const unsigned int ch);
 
   protected:
-    
-    std::vector<std::vector<float> > fParams;
+    bool fInitialized;
+    virtual void doInitialization() = 0;
+    std::map< ChConfigType_t, std::map< unsigned int, float > > fFloatParams; // [ Parameter Enum, [ Channel Number, Value ] ]
+    std::map< ChConfigType_t, std::map< unsigned int, int   > > fIntParams; // [ Parameter Enum, [ Channel Number, Value ] ]
 
-    std::vector<float>  fDefault;
-    
   };
+
 }
 
 #endif

@@ -1,0 +1,9 @@
+#include "uboone_swizzler_template.fcl"
+
+# modify an input file
+source.fileNames: ["/data/uboonedaq/NoiseTests/NoiseRun-2015_5_26_4_46_44-212-0.ubdaq"] 
+
+# modify an output file
+outputs.out1.fileName: "swizzled.root"
+
+

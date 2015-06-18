@@ -1,3 +1,9 @@
+#include "microboone_opdetmap.fcl"        
+#include "microboone_opchreadoutmap.fcl"  
+
+# opdetmap: maps optical detector to readout channel
+# opchreadoutmap: maps readout channel to category and type
+
 BEGIN_PROLOG
 
 microboone_geo:
@@ -9,11 +15,6 @@ microboone_geo:
  DisableWiresInG4: true                           # Whether to use wirefree geometry in LArG4
                                                   #  As per Brians request, wire free file is specified by
                                                   #  [GDMLFileName]_nowires.gdml
-}
-
-microboone_geometry_helper:
-{
- service_provider : StandardGeometryHelper
 }
 
 

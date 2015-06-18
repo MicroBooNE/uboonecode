@@ -17,8 +17,16 @@
 #include "art/Framework/Principal/EventPrincipal.h"
 #include "art/Persistency/Provenance/SubRunID.h"
 
+#include "datatypes/raw_data_access.h"
+#include <boost/archive/binary_iarchive.hpp>
+#include "datatypes/ub_EventRecord.h"
+
+#include "uboone/Geometry/UBOpChannelTypes.h"
+#include "Utilities/DatabaseUtil.h" // lardata
+
 #include <fstream>
 #include <vector>
+#include <map>
 
 namespace gov {
   namespace fnal {
@@ -30,41 +38,18 @@ namespace gov {
   }
 }
 
-namespace optdata {
-  class FIFOChannel;
-}
-
 namespace raw {
   class RawDigit; 
   class BeamInfo;
   class DAQHeader;
+  class Trigger;
+  class OpDetWaveform;
 }
 
 class TH1D;
 
 ///Conversion of binary data to root files
 namespace lris {
-
-  struct daqid_t {
-    daqid_t():crate(-1),card(-1),channel(-1) {};
-    daqid_t(int crate_id, int card_id, int channel_id):
-      crate(crate_id),card(card_id),channel(channel_id) {};
-
-    int crate;
-    int card;
-    int channel;
-  };
-
-  bool operator<(daqid_t const& lhs,daqid_t const& rhs) {
-    bool is_less=false;
-    if (lhs.crate   == rhs.crate && 
-	lhs.card    == rhs.card  && 
-	lhs.channel <  rhs.channel) is_less=true;
-    else if (lhs.crate == rhs.crate && 
-	     lhs.card  <  rhs.card) is_less=true;
-    else if (lhs.crate < rhs.crate) is_less=true;
-    return is_less;
-  }
 
   class LArRawInputDriverUBooNE {
     /// Class to fill the constraints on a template argument to the class,
@@ -89,29 +74,36 @@ namespace lris {
     //Other functions
     void initChannelMap();
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
-			  std::vector<optdata::FIFOChannel>& pmtDigitList,
+			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
-			  raw::BeamInfo& beamInfo);
-    void fillDAQHeaderData(gov::fnal::uboone::datatypes::eventRecord& event_record,
+			  raw::BeamInfo& beamInfo,
+			  std::vector<raw::Trigger>& trigInfo);
+    void fillDAQHeaderData(gov::fnal::uboone::datatypes::ub_EventRecord& event_record,
 			   raw::DAQHeader& daqHeader);
-    void fillTPCData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
+    void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
 		     std::vector<raw::RawDigit>& digitList);
-    void fillPMTData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
-		     std::vector<optdata::FIFOChannel>& pmtDigitList);
-    void fillBeamData(gov::fnal::uboone::datatypes::eventRecord &event_record, 
+    void fillPMTData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
+		     std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList );
+    void fillBeamData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
 		      raw::BeamInfo& beamInfo);
-      
+    void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
+			 std::vector<raw::Trigger>& trigInfo);
+
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;
     std::ifstream                  fInputStream;
     std::vector<std::streampos>    fEventLocation;
-    uint32_t                       fNumberOfEvents;
     uint32_t                       fEventCounter; 
     bool                           fHuffmanDecode;
-    std::map<daqid_t, int>         fChannelMap;   
+    util::UBChannelMap_t           fChannelMap;   
     
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
+
+    // PMT Helper Methods
+    std::map< opdet::UBOpticalChannelCategory_t, std::string > fPMTdataProductNames;
+    void registerOpticalData( art::ProductRegistryHelper &helper );
+    void putPMTDigitsIntoEvent( std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > >& pmtdigitlist, art::EventPrincipal* &outE );
     
   };  // LArRawInputDriverUBooNE
 

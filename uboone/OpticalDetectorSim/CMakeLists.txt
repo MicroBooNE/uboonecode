@@ -21,13 +21,15 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
 	                ${FHICLCPP}
 			${CETLIB}
                         ${ROOT_BASIC_LIB_LIST}
-
           MODULE_LIBRARIES Simulation
 			OpticalDetectorData
 			UBOpticalChConfig_service
+			UBOpReadoutMap_service
 			uboonecode_uboone_OpticalDetectorSim
 			TimeService_service
 			Utilities
+			UBooNEGeometryHelper_service
+			uboone_Geometry
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
@@ -47,8 +49,11 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
          )
 
 simple_plugin(UBOpticalChConfig "service"
+	      uboone_Geometry
+	      UBOpReadoutMap_service	
 	      Geometry_service
 	      Geometry
+#	      uboonecode_uboone_OpticalDetectorSim
 	      ${ART_UTILITIES}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}

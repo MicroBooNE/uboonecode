@@ -58,7 +58,7 @@ namespace opdet {
 
     if(logic_tmp_wf.size()!=nticks)
 
-      throw UBOpticalException("Waveform length changed (prohibited)!");
+      throw UBOpticalException("Waveform of logic pulse length changed (prohibited)!");
 
     //
     // Digitize amplitude
