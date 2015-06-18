@@ -40,9 +40,10 @@ simple_plugin( RawDigitWriter "module"
 art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME uboone_RawData
-	  LIB_LIBRARIES Geometry
-	  	        Geometry_service
-		        Utilities
+	  LIB_LIBRARIES DatabaseUtil_service
+                  Geometry
+	  	            Geometry_service
+		              Utilities
 	       	        TimeService_service
 	                uboone_Geometry
 			UBOpReadoutMap_service
