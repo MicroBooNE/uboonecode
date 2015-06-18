@@ -16,8 +16,18 @@ art_make( BASENAME_ONLY
 			CalData
 			Geometry
 			Geometry_service
+			BackTracker_service
+			Simulation
+			RecoBase
+			RecoObjects  
+			RecoAlg
 			Utilities
+			Filters
                         LArFFT_service
+			SignalShapingServiceMicroBooNE_service
+			${SIMULATIONBASE}
+			${LARRECO_LIB}
+			${LARDATA_LIB}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
