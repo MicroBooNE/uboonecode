@@ -2,7 +2,7 @@
 
 # The *parent* line must the first non-commented line and defines this product and version
 # The version must be of the form vxx_yy_zz (e.g. v01_02_03)
-parent uboonecode v04_12_00
+parent uboonecode v04_13_00
 defaultqual e7
 
 # These optional lines define where headers, libraries, and executables go and should
@@ -31,24 +31,25 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
-larsoft         v04_12_00
-ubutil          v01_21_00
+larsoft         v04_13_00
+ubutil          v01_22_00
 uboone_data     v01_01_00
+uboonedaq_datatypes v6_11_00  - optional
 
-cetbuildtools	v4_11_01	-	only_for_build
+cetbuildtools	v4_11_03	-	only_for_build
 end_product_list
 
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
 # e7  - with gcc 4.9.1 and -std=c++1y
-qualifier	larsoft		ubutil		uboone_data	notes
-e7:debug	e7:debug	e7:debug	-nq-
-e7:opt		e7:opt		e7:opt		-nq-
-e7:prof		e7:prof		e7:prof		-nq-
-e7:noifdh:debug	e7:noifdh:debug	e7:debug	-nq-
-e7:noifdh:opt	e7:noifdh:opt	e7:opt		-nq-
-e7:noifdh:prof	e7:noifdh:prof	e7:prof		-nq-
+qualifier	larsoft		ubutil		uboone_data uboonedaq_datatypes	notes
+e7:debug	e7:debug	e7:debug	-nq-        e7:debug
+e7:opt		e7:opt		e7:opt		-nq-        e7:opt
+e7:prof		e7:prof		e7:prof		-nq-        e7:prof
+e7:noifdh:debug	e7:noifdh:debug	e7:debug	-nq-  e7:debug
+e7:noifdh:opt	e7:noifdh:opt	e7:opt		-nq-  e7:opt
+e7:noifdh:prof	e7:noifdh:prof	e7:prof		-nq- e7:prof 
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
