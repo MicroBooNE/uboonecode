@@ -423,14 +423,16 @@ namespace lris {
 
             // output:
             std::vector<short> adclist;
-	    size_t chdsize(0);
-                    //Huffman decoding
+	    size_t chdsize(0); 
+
+	    //Huffman decoding
 	    if (fHuffmanDecode) {
               channel.decompress(adclist); // All-in-one call.
             } else {
               const ub_RawData& chD = channel.data(); 
-	      //	      chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
-	      chdsize = chD.size()/sizeof(uint16_t);    
+	      // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
+	      // chdsize = chD.size()/sizeof(uint16_t);    
+	      chdsize = chD.size();
               adclist.reserve(chD.size()); // optimize
               for(ub_RawData::const_iterator it = chD.begin(); it!= chD.end(); it++) {
                 adclist.push_back(*it);
@@ -462,8 +464,9 @@ namespace lris {
 
             //if (int(ch) >= 8254)
             // continue;
-            raw::Compress_t compression=raw::kHuffman;
-            if (fHuffmanDecode) compression=raw::kNone;
+            //raw::Compress_t compression=raw::kHuffman;
+            //if (fHuffmanDecode) compression=raw::kNone;
+	    raw::Compress_t compression=raw::kNone; // as of June 19,2015 compression not used by the DAQ. Data stored is uncompressed.
 
             raw::RawDigit rd(ch,chdsize,adclist,compression);
 
