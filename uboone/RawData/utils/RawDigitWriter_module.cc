@@ -37,6 +37,8 @@
 // Optical Channel Maps
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
+// TPC Channel Map
+#include "Utilities/DatabaseUtil.h" // lardata
 
 // ROOT
 #include "TTree.h"
@@ -76,6 +78,9 @@ namespace zmqds {
     void analyze (const art::Event& evt);
     
   private:
+
+    // Channel Map
+    util::UBChannelBiMap_t fChannelMap;
 
     // FICHL Parameters
     
@@ -143,6 +148,10 @@ namespace zmqds {
       fTOpDetWaveforms->Branch( "category", &fCategory, "category/I" );
       fTOpDetWaveforms->Branch( "gaintype", &fType, "gaintype/I" );
       fTOpDetWaveforms->Branch( "adcs", &opdetwaveforms );
+
+      fChannelMap.clear();
+      mf::LogInfo("")<<"Fetching channel map from DB";
+      fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelBiMap();
       
     }
 
@@ -194,9 +203,12 @@ namespace zmqds {
     for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){
       art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
       fWireID = digitVec->Channel();
-      fCrate = -1;
-      fSlot = -1;
-      fFemCH = -1;
+      util::UBChannelBiMap_t::right_const_iterator it_mapentry = fChannelMap.right.find( (util::UBLArSoftCh_t)fWireID );
+      if ( it_mapentry!=fChannelMap.right.end() ) {
+	fCrate = it_mapentry->second.crate;
+	fSlot  = it_mapentry->second.card;
+	fFemCH = it_mapentry->second.channel;
+      }
 
       // uncompress the data, copy
       //raw::Uncompress(digitVec->ADCs(), rawdigits, digitVec->Compression());

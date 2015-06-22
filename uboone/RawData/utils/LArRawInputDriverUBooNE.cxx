@@ -485,7 +485,7 @@ namespace lris {
 	    
             raw::RawDigit rd(ch,chdsize,adclist,compression);
             tpcDigitList.push_back(rd);
-
+	    
             /*
             std::cout << ch << "\t"
                       << int(crate_header.getCrateNumber()) << "\t" 
@@ -497,6 +497,12 @@ namespace lris {
           }//<--End channel_it for loop
         }//<---End card_it for loop
       }//<---End seb_it for loop
+
+    if ( tpcDigitList.size()!=8256 ) {
+      char warn[256];
+      sprintf( warn, "Error: Number of channels saved (%d) did not match the expectation (8256)!", (int)tpcDigitList.size() );
+      throw std::runtime_error( warn );
+    }
   }
 
   // =====================================================================
