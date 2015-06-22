@@ -410,15 +410,15 @@ namespace lris {
 	    continue;
 	  }
 
-            //There's a header and trailer here. Remember these are just uint16_t, that contain the
-            //channel number.
-            // auto const& tpc_channel_header = channel.header();   // unused
-            // auto const& tpc_channel_trailer = channel.trailer(); // unsued
-
-            //The channel object (ub_MarkedRawChannelData) has a method for returning the channel.
-            //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
-            //use there as well.
-            auto const tpc_channel_number = channel.getChannelNumber(); // auto is int here
+	  //There's a header and trailer here. Remember these are just uint16_t, that contain the
+	  //channel number.
+	  // auto const& tpc_channel_header = channel.header();   // unused
+	  // auto const& tpc_channel_trailer = channel.trailer(); // unsued
+	  
+	  //The channel object (ub_MarkedRawChannelData) has a method for returning the channel.
+	  //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
+	  //use there as well.
+	  auto const tpc_channel_number = channel.getChannelNumber(); // auto is int here
                         
 
             // output:
@@ -452,7 +452,17 @@ namespace lris {
               //              pl=fPlaneMap[daqId];
             }
 	    else {
-	      //std::cout << "Warning DAQ ID not found (" << (int)tpc_crate.crateHeader()->crate_number << ", " << card.getModule() << ", " << tpc_channel_number << ")" <<  std::endl;
+	      if ( ( crate_number==1 && card.getModule()==8 && (tpc_channel_number>=32 && tpc_channel_number<64) ) ||
+		   ( crate_number==9 && card.getModule()==5 && (tpc_channel_number>=32 && tpc_channel_number<64) ) ) {
+		// As of 6/22/2016: We expect these FEM channels to have no database entry.
+		continue; // do not write to data product
+	      }
+	      else {
+		// unexpected channels are missing. throw.
+		char warn[256];
+		sprintf( warn, "Warning DAQ ID not found ( %d, %d, %d )!", crate_number, card.getModule(), tpc_channel_number );
+		throw std::runtime_error( warn );
+	      }
 	    }
             //\todo fix this once there is a proper channel table
             // else{
@@ -467,18 +477,23 @@ namespace lris {
             //raw::Compress_t compression=raw::kHuffman;
             //if (fHuffmanDecode) compression=raw::kNone;
 	    raw::Compress_t compression=raw::kNone; // as of June 19,2015 compression not used by the DAQ. Data stored is uncompressed.
-
+	    if ( adclist.size()!=9595 ) {
+	      char warn[256];
+	      sprintf( warn, "Error: Number of ADCs in (crate,slot,channel)=( %d, %d, %d ) does not equal 9595!", crate_number, card.getModule(), tpc_channel_number );
+	      throw std::runtime_error( warn );
+	    }
+	    
             raw::RawDigit rd(ch,chdsize,adclist,compression);
+            tpcDigitList.push_back(rd);
 
             /*
             std::cout << ch << "\t"
                       << int(crate_header.getCrateNumber()) << "\t" 
                       << card_header.getModule() << "\t"
-                      << channel_number << "\t"
+		      << channel_number << "\t"
                       << rms << std::endl;
             */
 
-            tpcDigitList.push_back(rd);
           }//<--End channel_it for loop
         }//<---End card_it for loop
       }//<---End seb_it for loop
