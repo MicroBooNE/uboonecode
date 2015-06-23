@@ -14,6 +14,7 @@
 #include "art/Framework/Core/EDAnalyzer.h"
 
 #include "RecoObjects/KETrack.h"
+#include "RecoObjects/SurfYZLine.h"
 #include "RecoObjects/SurfYZPlane.h"
 #include "RecoObjects/SurfXYZPlane.h"
 #include "RecoObjects/PropAny.h"
@@ -65,13 +66,21 @@ namespace trkf
     std::vector<std::shared_ptr<const trkf::Surface> > surfaces;
     std::vector<trkf::KETrack> tracks;
 
-    int nsurf = 20;
+    int nsurf = 30;
     for(int isurf = 0; isurf < nsurf; ++isurf) {
 
       // Make random surface.
 
       std::shared_ptr<const trkf::Surface> psurf;
       if(isurf < 10) {
+	double x0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
+	double y0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
+	double z0 = 1000.*double(rand()) / double(RAND_MAX);       // (0,1000)
+	double phi = TMath::TwoPi() * double(rand()) / double(RAND_MAX) - TMath::Pi();  // (-pi,pi)
+	psurf = std::shared_ptr<const trkf::Surface>(new trkf::SurfYZLine(x0, y0, z0, phi));
+	surfaces.push_back(psurf);
+      }
+      else if(isurf < 20) {
 	double y0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
 	double z0 = 1000.*double(rand()) / double(RAND_MAX);       // (0,1000)
 	double phi = TMath::TwoPi() * double(rand()) / double(RAND_MAX) - TMath::Pi();  // (-pi,pi)
