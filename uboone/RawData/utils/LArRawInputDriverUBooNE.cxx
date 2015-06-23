@@ -73,6 +73,9 @@ namespace lris {
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
     initChannelMap();
 
+    if ( fHuffmanDecode )
+      tpc_crate_data_t::doDissect(true); // setup for decoding
+
     art::ServiceHandle<art::TFileService> tfs;
     //initialize beam histograms specified in fhicl file
     art::TFileDirectory tfbeamdir = tfs->mkdir( "Beam" );
@@ -428,6 +431,19 @@ namespace lris {
 	    //Huffman decoding
 	    if (fHuffmanDecode) {
               channel.decompress(adclist); // All-in-one call.
+	      uint16_t frailer = channel.getChannelTrailerWord();
+	      if ( adclist.size()<9595 ) {
+		short lachadawin = adclist.at( adclist.size()-1 );
+		std::vector<short> kaxufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
+		for ( auto& it : kaxufix )
+		  adclist.emplace_back( it );
+		//std::cout << "trailer: " << trailer_word << std::endl;
+		//short thecheat = adclist.at( adclist.size()-1 );
+		//while ( adclist.size()<9595 ) {
+		//adclist.push_back( thecheat );
+		//}
+	      }
+
             } else {
               const ub_RawData& chD = channel.data(); 
 	      // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
@@ -619,6 +635,7 @@ namespace lris {
     */
   }
 
+  // =====================================================================
   void LArRawInputDriverUBooNE::fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 						std::vector<raw::Trigger>& trigInfo)
   {
@@ -650,5 +667,73 @@ namespace lris {
     }
   }
 
+  // =====================================================================  
+  std::vector<short> LArRawInputDriverUBooNE::decodeChannelTrailer(unsigned short last_adc, unsigned short data)
+  {
+    // bug fix for missing channel trailer in TPC Data.
+    // undoes the hack that fixed the above where the last word is used as the trailer
+    // we then use the fake trailer, or frailer, combine it with the last word in the channel data window, or lachadawin, 
+    // to recover the end of the channel waveform.
+
+    //std::vector<unsigned short> res;
+    std::vector<short> res;
+    if(data>>12 == 0x0) {
+      //std::cout << "Non-huffman data word..." << std::endl;
+      res.push_back(  (short) data & 0xfff);
+      return res;
+    }
+    if(data>>14 == 0x2) {
+      //std::cout << "Huffman data word..." << std::endl;
+      size_t zero_count=0;
+      for(int index=13; index>=0; --index) {
+	if(!(data>>index & 0x1)) zero_count +=1;
+	else {
+	  switch(zero_count){
+	      
+	  case 0:
+	    break;
+	  case 1:
+	    last_adc -= 1; break;
+	  case 2:
+	    last_adc += 1; break;
+	  case 3:
+	    last_adc -= 2; break;
+	  case 4:
+	    last_adc += 2; break;
+	  case 5:
+	    last_adc -= 3; break;
+	  case 6:
+	    last_adc += 3; break;
+	  default:
+
+	    std::cerr << "Unexpected 0-count for huffman word: "
+		      << "\033[95m"
+		      << zero_count << " zeros in the word 0x"
+		      << std::hex
+		      << data
+		      << std::dec
+		      << "\033[00m"
+		      << std::endl;
+	    std::cerr << "Binary representation of the whole word: "
+		      << "\033[00m";
+	    for(int i=15; i>=0; --i)
+	      std::cout << ((data>>i) & 0x1);
+	    std::cout << "\033[00m" << std::endl;
+	    throw std::exception();
+	  }
+	  res.push_back((short)last_adc);
+	  zero_count = 0;
+	}
+      }
+      return res;
+    }
+
+    std::cerr << "\033[93mERROR\033[00m Unexpected upper 4 bit: 0x"
+	      << std::hex
+	      << ((data >> 12) & 0xf)
+	      << std::dec
+	      << std::endl;
+    throw std::exception();
+  }
 }//<---Endlris
 

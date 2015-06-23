@@ -104,6 +104,9 @@ namespace lris {
     std::map< opdet::UBOpticalChannelCategory_t, std::string > fPMTdataProductNames;
     void registerOpticalData( art::ProductRegistryHelper &helper );
     void putPMTDigitsIntoEvent( std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > >& pmtdigitlist, art::EventPrincipal* &outE );
+
+    // TPC Helper Methods
+    std::vector<short> decodeChannelTrailer(unsigned short last_adc, unsigned short data);
     
   };  // LArRawInputDriverUBooNE
 
