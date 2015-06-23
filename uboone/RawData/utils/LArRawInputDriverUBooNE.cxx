@@ -443,7 +443,7 @@ namespace lris {
 		//adclist.push_back( thecheat );
 		//}
 	      }
-
+	      chdsize = adclist.size();
             } else {
               const ub_RawData& chD = channel.data(); 
 	      // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
