@@ -2695,48 +2695,8 @@ double microboone::AnalysisTree::length(const recob::Track& track)
   return result;
 }
 
-// Length of MC particle, trajectory by trajectory (with out the manual shifting for x correction)
-double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
-{
-  // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
-  //art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> larprop;
-  
-  // Get active volume boundary.
-  double xmin = 0.;
-  double xmax = 2.*geom->DetHalfWidth();
-  double ymin = -geom->DetHalfHeight();
-  double ymax = geom->DetHalfHeight();
-  double zmin = 0.;
-  double zmax = geom->DetLength();
-
-  double result = 0.;
-  TVector3 disp;
-  int n = part.NumberTrajectoryPoints();
-  bool first = true;
-
-  for(int i = 0; i < n; ++i) {
-    // check if the particle is inside a TPC
-   double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
-   if (mypos[0] >= xmin && mypos[0] <= xmax && mypos[1] >= ymin && mypos[1] <= ymax && mypos[2] >= zmin && mypos[2] <= zmax){
-     if(first){
-      start = mypos;
-     }
-     else {
-      disp -= mypos;
-      result += disp.Mag();
-     }
-     first = false;
-     disp = mypos;
-     end = mypos;
-   }
-  }
-  return result;
-}
-
 // Length of MC particle, trajectory by trajectory (with the manual shifting for x correction)
-/*double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
+double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
 {
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
@@ -2785,7 +2745,48 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
    }
   }
   return result;
+}
+
+/*// Length of MC particle, trajectory by trajectory (with out the manual shifting for x correction)
+double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
+{
+  // Get geometry.
+  art::ServiceHandle<geo::Geometry> geom;
+  //art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArProperties> larprop;
+  
+  // Get active volume boundary.
+  double xmin = 0.;
+  double xmax = 2.*geom->DetHalfWidth();
+  double ymin = -geom->DetHalfHeight();
+  double ymax = geom->DetHalfHeight();
+  double zmin = 0.;
+  double zmax = geom->DetLength();
+
+  double result = 0.;
+  TVector3 disp;
+  int n = part.NumberTrajectoryPoints();
+  bool first = true;
+
+  for(int i = 0; i < n; ++i) {
+    // check if the particle is inside a TPC
+   double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
+   if (mypos[0] >= xmin && mypos[0] <= xmax && mypos[1] >= ymin && mypos[1] <= ymax && mypos[2] >= zmin && mypos[2] <= zmax){
+     if(first){
+      start = mypos;
+     }
+     else {
+      disp -= mypos;
+      result += disp.Mag();
+     }
+     first = false;
+     disp = mypos;
+     end = mypos;
+   }
+  }
+  return result;
 }*/
+
 
 
 namespace microboone{
