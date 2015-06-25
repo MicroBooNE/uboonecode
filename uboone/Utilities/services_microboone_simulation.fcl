@@ -1,5 +1,4 @@
 #include "services_microboone_basic.fcl"
-#include 
 
 #
 # This file defines a set of service configurations for MicroBooNE simulation.
