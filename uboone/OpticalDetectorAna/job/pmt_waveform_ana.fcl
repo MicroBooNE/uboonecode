@@ -26,5 +26,5 @@ physics:
  end_paths: [ ana ]
 }
 
-physics.ana.opdetana: @local::OpDetWaveformAna
+physics.analyzers.opdetana: @local::OpDetWaveformAna
 
