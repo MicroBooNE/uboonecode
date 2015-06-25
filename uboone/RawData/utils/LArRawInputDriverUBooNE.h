@@ -72,7 +72,7 @@ namespace lris {
 
   private:
     //Other functions
-    void initChannelMap();
+
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
 			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
@@ -95,7 +95,7 @@ namespace lris {
     std::vector<std::streampos>    fEventLocation;
     uint32_t                       fEventCounter; 
     bool                           fHuffmanDecode;
-    util::UBChannelMap_t           fChannelMap;   
+    const util::UBChannelMap_t&    fChannelMap;   
     
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
