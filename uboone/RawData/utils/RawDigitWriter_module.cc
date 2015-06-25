@@ -144,6 +144,7 @@ namespace zmqds {
       fTOpDetWaveforms->Branch( "opfemch", &fOpFemCH, "opfemch/I" );
       fTOpDetWaveforms->Branch( "frame", &fFrame, "frame/I" );
       fTOpDetWaveforms->Branch( "sample", &fSample, "sample/I" );
+      fTOpDetWaveforms->Branch( "timestamp", &fTimeStamp, "timestamp/D" );
       fTOpDetWaveforms->Branch( "readoutch", &fOpReadoutCH, "readoutch/I" );
       fTOpDetWaveforms->Branch( "category", &fCategory, "category/I" );
       fTOpDetWaveforms->Branch( "gaintype", &fType, "gaintype/I" );
@@ -230,15 +231,17 @@ namespace zmqds {
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
     
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
-      std::stringstream ss;
-      ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
+      //std::stringstream ss;
+      //ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
 
-      evt.getByLabel( ss.str(), wfHandle);
+      evt.getByLabel( "pmtreadout", opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), wfHandle);
 
       std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
 
-      if ( opwfms.size()==0 )
+      if ( opwfms.size()==0 ) {
+	std::cout << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) << " zero waveforms." << std::endl;
 	continue;
+      }
 
       for(auto &wfm : opwfms )  {
 	fOpReadoutCH = wfm.ChannelNumber();

@@ -114,11 +114,8 @@ namespace opdet {
     // we make a data product for each category of channels
     fPMTdataProductNames.clear();
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
-      std::stringstream ss;
-      ss << fDataProductsStemName << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
-      //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
-      produces< std::vector<raw::OpDetWaveform> >(ss.str());
-      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, ss.str() ) );
+      produces< std::vector<raw::OpDetWaveform> >( opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) );
+      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) ) );
     }
   }
 
@@ -279,6 +276,8 @@ namespace opdet {
 	  double window_timestamp = ts->OpticalClock().Time( fifo_ptr->TimeSlice(), fifo_ptr->Frame() );
 
 	  raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, fifo_ptr->size() );
+	  for ( size_t iadc=0; iadc< fifo_ptr->size(); iadc++ )
+	    rd.push_back( fifo_ptr->at(iadc) );
 	  (*it_wfarray).second->emplace_back( rd );
 
 	}// if store
