@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "UBOpReadoutMap.h"
+#include <sstream>
 
 namespace geo {
 
@@ -66,8 +67,11 @@ namespace geo {
   unsigned int UBOpReadoutMap::GetChannelNumberFromCrateSlotFEMCh( unsigned int crate, unsigned int slot, unsigned int femch ) const {
     CrateSlotFEMCh csf( crate, slot, femch );
     auto it = fCSF2Readout.find( csf );
-    if ( it==fCSF2Readout.end() )
-      throw std::runtime_error( "(crate,slot,femch) entry not found in map to readout channel number.");
+    if ( it==fCSF2Readout.end() ) {
+      std::stringstream ss;
+      ss << "(crate,slot,femch)=(" << crate << ", " << slot << ", " << femch << " ) entry not found in map to readout channel number.";
+      throw std::runtime_error( ss.str() );
+    }
     return (*it).second;
   }
 
@@ -129,9 +133,11 @@ namespace geo {
       if ( fichl_csf.size()!=3 ) {
 	throw std::runtime_error( "Need to have 3 entries for Crate, Slot, FEMCh map." );
       }
+      //std::cout << "reading in " << readoutname << " : " << fichl_csf.at(0) << ", " << fichl_csf.at(1) << ", " << fichl_csf.at(2) << std::endl;
       fReadout2CSF.insert( std::make_pair( v, CrateSlotFEMCh( fichl_csf.at(0), fichl_csf.at(1), fichl_csf.at(2) ) ) );
       fCSF2Readout.insert( std::make_pair( CrateSlotFEMCh( fichl_csf.at(0), fichl_csf.at(1), fichl_csf.at(2) ), v ) );
     }
+    //std::cout << "size of csf2readout: " << fCSF2Readout.size() << std::endl;
   }
 
   DEFINE_ART_SERVICE(UBOpReadoutMap)  

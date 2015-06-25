@@ -22,6 +22,7 @@ simple_plugin( LArRawInputSourceUBooNE
 
 simple_plugin( RawDigitWriter "module"
 	       UBOpReadoutMap_service
+	       DatabaseUtil_service
 	       RawData
                ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}

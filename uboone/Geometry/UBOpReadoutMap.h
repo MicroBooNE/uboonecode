@@ -73,13 +73,14 @@ namespace geo {
 
       // comparison
       bool operator<( CrateSlotFEMCh other ) const {
-	if ( crate<other.crate )
-	  return true;
-	if ( slot<other.slot )
-	  return true;
-	if ( femch<other.femch )
-	  return true;
-	return false;
+	bool is_less = false;
+	if ( this->crate == other.crate &&
+	     this->slot  == other.slot  &&
+	     this->femch <  other.femch) is_less=true;
+	else if (this->crate == other.crate &&
+		 this->slot  <  other.slot) is_less=true;
+	else if (this->crate <  other.crate) is_less=true;
+	return is_less;
       };
       
       // assignment

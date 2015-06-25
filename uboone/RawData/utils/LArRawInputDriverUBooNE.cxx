@@ -22,6 +22,7 @@
 
 //ART, ...
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "art/Utilities/Exception.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -64,14 +65,19 @@ namespace lris {
     fSourceHelper(pm),
     fCurrentSubRunID(),
     fEventCounter(0),
-    fHuffmanDecode(ps.get<bool>("huffmanDecode",false))
+    fHuffmanDecode(ps.get<bool>("huffmanDecode",false)),
+    fChannelMap( art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap() )
   {
+    mf::LogInfo("")<<"Fetched channel map from DB";
+
     helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
     helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::Trigger>,   art::InEvent>("daq");
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
-    initChannelMap();
+
+    //if ( fHuffmanDecode )
+    tpc_crate_data_t::doDissect(true); // setup for decoding
 
     art::ServiceHandle<art::TFileService> tfs;
     //initialize beam histograms specified in fhicl file
@@ -98,7 +104,6 @@ namespace lris {
     mf::LogInfo(__FUNCTION__)<<"File boundary (processed "<<fEventCounter<<" events)"<<std::endl;
     fCurrentSubRunID.flushSubRun();
     fEventCounter=0;
-    fChannelMap.clear();
     fInputStream.close();
   }
     
@@ -158,26 +163,14 @@ namespace lris {
     */
   }
 
-  // ======================================================================  
-  void LArRawInputDriverUBooNE::initChannelMap()
-  {
-
-    fChannelMap.clear();
-    mf::LogInfo("")<<"Fetching channel map from DB";
-
-    fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap();
-
-  }
 
   // =====================================================================
   void LArRawInputDriverUBooNE::registerOpticalData( art::ProductRegistryHelper &helper ) {
     // we make a data product for each category of channels
     fPMTdataProductNames.clear();
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
-      std::stringstream ss;
-      ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
-      helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
-      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, ss.str() ) );
+      helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>( "pmtreadout", opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) );
+      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) ) );
     }
   }
 
@@ -187,8 +180,9 @@ namespace lris {
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
       
       art::put_product_in_principal(std::move( pmtdigitlist[(opdet::UBOpticalChannelCategory_t)cat]  ),
-				    *outE,
-				    fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ]); // Module label
+      				    *outE,
+				    "pmtreadout", // module
+      				    fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ]); // instance
     }
     
   }
@@ -410,27 +404,42 @@ namespace lris {
 	    continue;
 	  }
 
-            //There's a header and trailer here. Remember these are just uint16_t, that contain the
-            //channel number.
-            // auto const& tpc_channel_header = channel.header();   // unused
-            // auto const& tpc_channel_trailer = channel.trailer(); // unsued
-
-            //The channel object (ub_MarkedRawChannelData) has a method for returning the channel.
-            //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
-            //use there as well.
-            auto const tpc_channel_number = channel.getChannelNumber(); // auto is int here
+	  //There's a header and trailer here. Remember these are just uint16_t, that contain the
+	  //channel number.
+	  // auto const& tpc_channel_header = channel.header();   // unused
+	  // auto const& tpc_channel_trailer = channel.trailer(); // unsued
+	  
+	  //The channel object (ub_MarkedRawChannelData) has a method for returning the channel.
+	  //You can look at the other objects too (like ub_MarkedRawCardData) and see methods of
+	  //use there as well.
+	  auto const tpc_channel_number = channel.getChannelNumber(); // auto is int here
                         
 
             // output:
             std::vector<short> adclist;
-	    size_t chdsize(0);
-                    //Huffman decoding
+	    size_t chdsize(0); 
+
+	    //Huffman decoding
 	    if (fHuffmanDecode) {
               channel.decompress(adclist); // All-in-one call.
+	      uint16_t frailer = channel.getChannelTrailerWord();
+	      if ( adclist.size()<9595 ) {
+		short lachadawin = adclist.at( adclist.size()-1 );
+		std::vector<short> kaxufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
+		for ( auto& it : kaxufix )
+		  adclist.emplace_back( it );
+		//std::cout << "trailer: " << trailer_word << std::endl;
+		//short thecheat = adclist.at( adclist.size()-1 );
+		//while ( adclist.size()<9595 ) {
+		//adclist.push_back( thecheat );
+		//}
+	      }
+	      chdsize = adclist.size();
             } else {
               const ub_RawData& chD = channel.data(); 
-	      //	      chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
-	      chdsize = chD.size()/sizeof(uint16_t);    
+	      // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
+	      // chdsize = chD.size()/sizeof(uint16_t);    
+	      chdsize = chD.size();
               adclist.reserve(chD.size()); // optimize
               for(ub_RawData::const_iterator it = chD.begin(); it!= chD.end(); it++) {
                 adclist.push_back(*it);
@@ -450,7 +459,17 @@ namespace lris {
               //              pl=fPlaneMap[daqId];
             }
 	    else {
-	      //std::cout << "Warning DAQ ID not found (" << (int)tpc_crate.crateHeader()->crate_number << ", " << card.getModule() << ", " << tpc_channel_number << ")" <<  std::endl;
+	      if ( ( crate_number==1 && card.getModule()==8 && (tpc_channel_number>=32 && tpc_channel_number<64) ) ||
+		   ( crate_number==9 && card.getModule()==5 && (tpc_channel_number>=32 && tpc_channel_number<64) ) ) {
+		// As of 6/22/2016: We expect these FEM channels to have no database entry.
+		continue; // do not write to data product
+	      }
+	      else {
+		// unexpected channels are missing. throw.
+		char warn[256];
+		sprintf( warn, "Warning DAQ ID not found ( %d, %d, %d )!", crate_number, card.getModule(), tpc_channel_number );
+		throw std::runtime_error( warn );
+	      }
 	    }
             //\todo fix this once there is a proper channel table
             // else{
@@ -462,23 +481,35 @@ namespace lris {
 
             //if (int(ch) >= 8254)
             // continue;
-            raw::Compress_t compression=raw::kHuffman;
-            if (fHuffmanDecode) compression=raw::kNone;
-
+            //raw::Compress_t compression=raw::kHuffman;
+            //if (fHuffmanDecode) compression=raw::kNone;
+	    raw::Compress_t compression=raw::kNone; // as of June 19,2015 compression not used by the DAQ. Data stored is uncompressed.
+	    if ( adclist.size()!=9595 ) {
+	      char warn[256];
+	      sprintf( warn, "Error: Number of ADCs in (crate,slot,channel)=( %d, %d, %d ) does not equal 9595!", crate_number, card.getModule(), tpc_channel_number );
+	      throw std::runtime_error( warn );
+	    }
+	    
             raw::RawDigit rd(ch,chdsize,adclist,compression);
-
+            tpcDigitList.push_back(rd);
+	    
             /*
             std::cout << ch << "\t"
                       << int(crate_header.getCrateNumber()) << "\t" 
                       << card_header.getModule() << "\t"
-                      << channel_number << "\t"
+		      << channel_number << "\t"
                       << rms << std::endl;
             */
 
-            tpcDigitList.push_back(rd);
           }//<--End channel_it for loop
         }//<---End card_it for loop
       }//<---End seb_it for loop
+
+    if ( tpcDigitList.size()!=8256 ) {
+      char warn[256];
+      sprintf( warn, "Error: Number of channels saved (%d) did not match the expectation (8256)!", (int)tpcDigitList.size() );
+      //throw std::runtime_error( warn );
+    }
   }
 
   // =====================================================================
@@ -548,8 +579,8 @@ namespace lris {
             
             optdata::TimeSlice_t time=window_header.getSample();
             optdata::Frame_t frame=window_header.getFrame();
-	    //int crate_number = crate_data.crateHeader()->crate_number; 
 	    unsigned int data_product_ch_num = ub_pmt_channel_map->GetChannelNumberFromCrateSlotFEMCh( crate_data.crateHeader()->crate_number, card_data.getModule(), channel_number );
+	    //int crate_number = crate_data.crateHeader()->crate_number; 
 	    //std::cout << "fill (CSF): " << crate_number << ", " << card_data.getModule() << ", " << channel_number << " ==> Readout Channel " << data_product_ch_num << std::endl;
 	    
 	    // here we translate crate/card/daq channel to data product channel number
@@ -595,6 +626,7 @@ namespace lris {
     */
   }
 
+  // =====================================================================
   void LArRawInputDriverUBooNE::fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 						std::vector<raw::Trigger>& trigInfo)
   {
@@ -626,5 +658,73 @@ namespace lris {
     }
   }
 
+  // =====================================================================  
+  std::vector<short> LArRawInputDriverUBooNE::decodeChannelTrailer(unsigned short last_adc, unsigned short data)
+  {
+    // bug fix for missing channel trailer in TPC Data.
+    // undoes the hack that fixed the above where the last word is used as the trailer
+    // we then use the fake trailer, or frailer, combine it with the last word in the channel data window, or lachadawin, 
+    // to recover the end of the channel waveform.
+
+    //std::vector<unsigned short> res;
+    std::vector<short> res;
+    if(data>>12 == 0x0) {
+      //std::cout << "Non-huffman data word..." << std::endl;
+      res.push_back(  (short) data & 0xfff);
+      return res;
+    }
+    if(data>>14 == 0x2) {
+      //std::cout << "Huffman data word..." << std::endl;
+      size_t zero_count=0;
+      for(int index=13; index>=0; --index) {
+	if(!(data>>index & 0x1)) zero_count +=1;
+	else {
+	  switch(zero_count){
+	      
+	  case 0:
+	    break;
+	  case 1:
+	    last_adc -= 1; break;
+	  case 2:
+	    last_adc += 1; break;
+	  case 3:
+	    last_adc -= 2; break;
+	  case 4:
+	    last_adc += 2; break;
+	  case 5:
+	    last_adc -= 3; break;
+	  case 6:
+	    last_adc += 3; break;
+	  default:
+
+	    std::cerr << "Unexpected 0-count for huffman word: "
+		      << "\033[95m"
+		      << zero_count << " zeros in the word 0x"
+		      << std::hex
+		      << data
+		      << std::dec
+		      << "\033[00m"
+		      << std::endl;
+	    std::cerr << "Binary representation of the whole word: "
+		      << "\033[00m";
+	    for(int i=15; i>=0; --i)
+	      std::cout << ((data>>i) & 0x1);
+	    std::cout << "\033[00m" << std::endl;
+	    throw std::exception();
+	  }
+	  res.push_back((short)last_adc);
+	  zero_count = 0;
+	}
+      }
+      return res;
+    }
+
+    std::cerr << "\033[93mERROR\033[00m Unexpected upper 4 bit: 0x"
+	      << std::hex
+	      << ((data >> 12) & 0xf)
+	      << std::dec
+	      << std::endl;
+    throw std::exception();
+  }
 }//<---Endlris
 

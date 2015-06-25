@@ -164,10 +164,12 @@ namespace opdet {
 					 const optdata::TimeSlice_t readout_start_tdc,
 					 const optdata::TimeSlice_t readout_size)
   {
+    
     // Obtain optical clock to be used for sample/frame number generation
     art::ServiceHandle<util::TimeService> ts;
     ::util::ElecClock clock = ts->OpticalClock();
     size_t numberOfGates = beamGates.size();
+
     // Determine the "begin" and "end" bin of the beam-gate
     // windows relative to the first channel time slice.
     _beamBeginBin.clear();
@@ -255,6 +257,7 @@ namespace opdet {
 	  << "; slices to save = " << beam_words;
       }
     }
+
   }
 
   //-------------------------------------------------
@@ -294,6 +297,7 @@ namespace opdet {
       return;
     }
 
+    
     // Create a work vector for the channel diff subtraction. To save
     // on execution time and memory use, make a rough estimate to the
     // size of this vector and allocate it now. That estimate will be
@@ -305,7 +309,7 @@ namespace opdet {
     auto const firstFrame = (*channelDataHandle).Frame();
     auto const firstTDC   = firstSlice + firstFrame * clock.FrameTicks();
     //
-    // Figure out beamgate timings
+    // std::cout << " Figure out beamgate timings " << std::endl;
     //
     art::Handle< std::vector<sim::BeamGateInfo> > beamGates;
     event.getByLabel(fBeamModule, beamGates);
@@ -355,123 +359,126 @@ namespace opdet {
 
     // For each ChannelDataGroup object in this event:
     //for ( auto const& channelDataGroup : (*channelDataHandle) ) {
-    for ( auto const& channelData : (*channelDataHandle) ) {
 
-      optdata::Channel_t channel = channelData.ChannelNumber();
+    if ( numberOfGates>0 ) {
+      for ( auto const& channelData : (*channelDataHandle) ) {
 
-      ::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channelData.ChannelNumber());
-      size_t gain_index = 0;
-      // Determine the gain category.
-      switch(gain_type) {
-      case ::opdet::LowGain:
-	gain_index=0; break;
-      case ::opdet::HighGain:
-	gain_index=1; break;
-      case ::opdet::LogicChannel:
-	gain_index=2; break;
-      default:
-	mf::LogError("OpticalFEM") 
-	  << "Unknown channel data category = " <<  gain_type
-	  << "; skipping channel data group";
-	continue; // skip to the next ChannelDataGroup
-      }
+	optdata::Channel_t channel = channelData.ChannelNumber();
 
-      auto const& gateFrame      = _gateFrame.at      (gain_index);
-      auto const& gateWindowTime = _gateWindowTime.at (gain_index);
-      auto const& beamBeginBin   = _beamBeginBin.at   (gain_index);
-      auto const& beamEndBin     = _beamEndBin.at     (gain_index);
+	::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channelData.ChannelNumber());
+	size_t gain_index = 0;
+	// Determine the gain category.
+	switch(gain_type) {
+	case ::opdet::LowGain:
+	  gain_index=0; break;
+	case ::opdet::HighGain:
+	  gain_index=1; break;
+	case ::opdet::LogicChannel:
+	  gain_index=2; break;
+	default:
+	  mf::LogError("OpticalFEM") 
+	    << "Unknown channel data category = " <<  gain_type
+	    << "; skipping channel data group";
+	  continue; // skip to the next ChannelDataGroup
+	}
 
-      // For each beam gate...
-      for ( size_t gateIndex = 0; 
-	    (gain_type == ::opdet::LowGain || gain_type == ::opdet::HighGain) && gateIndex < numberOfGates; 
-	    ++gateIndex ) {
-	mf::LogDebug("OpticalFEM")
-	  << "Writing beam gate channels:"
-	  << " at frame=" << gateFrame[gateIndex]
-	  << " slice="    << gateWindowTime[gateIndex]
-	  << " beginBin=" << beamBeginBin[gateIndex]
-	  << " endBin="   << beamEndBin[gateIndex];
+	auto const& gateFrame      = _gateFrame.at      (gain_index);
+	auto const& gateWindowTime = _gateWindowTime.at (gain_index);
+	auto const& beamBeginBin   = _beamBeginBin.at   (gain_index);
+	auto const& beamEndBin     = _beamEndBin.at     (gain_index);
+
+	// For each beam gate...
+	for ( size_t gateIndex = 0; 
+	      (gain_type == ::opdet::LowGain || gain_type == ::opdet::HighGain) && gateIndex < numberOfGates; 
+	      ++gateIndex ) {
+	  mf::LogDebug("OpticalFEM")
+	    << "Writing beam gate channels:"
+	    << " at frame=" << gateFrame[gateIndex]
+	    << " slice="    << gateWindowTime[gateIndex]
+	    << " beginBin=" << beamBeginBin[gateIndex]
+	    << " endBin="   << beamEndBin[gateIndex] << std::endl;
 		  
-	// Create a new FIFOChannel, copying the channel
-	// number from the input channel, with length
-	// beam_words.
+	  // Create a new FIFOChannel, copying the channel
+	  // number from the input channel, with length
+	  // beam_words.
 
-	if( (beamEndBin[gateIndex] - beamBeginBin[gateIndex]) < 1 ) continue;
+	  if( (beamEndBin[gateIndex] - beamBeginBin[gateIndex]) < 1 ) continue;
 
-	optdata::Optical_Category_t category = optdata::kFEMBeamLowGain;
-	if( gain_index == 1 ) category = optdata::kFEMBeamHighGain;
+	  optdata::Optical_Category_t category = optdata::kFEMBeamLowGain;
+	  if( gain_index == 1 ) category = optdata::kFEMBeamHighGain;
 	  
-	optdata::FIFOChannel 
-	  beamFIFOChannel( category, 
-			   gateWindowTime[gateIndex], 
-			   gateFrame[gateIndex],
-			   channel,
-			   beamEndBin[gateIndex] - beamBeginBin[gateIndex]);
+	  optdata::FIFOChannel 
+	    beamFIFOChannel( category, 
+			     gateWindowTime[gateIndex], 
+			     gateFrame[gateIndex],
+			     channel,
+			     beamEndBin[gateIndex] - beamBeginBin[gateIndex]);
 	
-	// Copy the time slices.
-	for ( optdata::TimeSlice_t t = beamBeginBin[gateIndex]; 
-	      t != beamEndBin[gateIndex]; ++t )
-	  beamFIFOChannel.push_back( channelData[t] );
+	  // Copy the time slices.
+	  for ( optdata::TimeSlice_t t = beamBeginBin[gateIndex]; 
+		t != beamEndBin[gateIndex]; ++t )
+	    beamFIFOChannel.push_back( channelData[t] );
 	
-	// Dump the FIFO channels as histograms. 
-	if (fm_hist) {
-	  art::ServiceHandle<art::TFileService> tfs;
-	  std::ostringstream hname;
-	  hname << "BFIFO_R" << event.run()
-		<< "E" << event.id().event()
-		<< "G" << gain_index
-		<< "C" << channel
-		<< "F" << beamFIFOChannel.Frame()
-		<< "S" << beamFIFOChannel.TimeSlice();
-	  std::ostringstream htitle;
-	  htitle << ";Beam FIFO ADC counts for Run " << event.run()
-		 << " Event " << event.id().event()
-		 << " Gain " << gain_index 
-		 << " Channel " << channel 
-		 << " Frame " << beamFIFOChannel.Frame()
-		 << " Sample " << beamFIFOChannel.TimeSlice()
-		 << ";";
-	  TH1* fifoHist = tfs->make<TH1S>(hname.str().c_str(),
-					  htitle.str().c_str(),
-					  beamFIFOChannel.size(), 
-					  0, beamFIFOChannel.size() );
-	  // Reminder: The first bin in a histogram is bin 1, NOT bin 0!
-	  for ( size_t i = 0; i != beamFIFOChannel.size(); ++i )
-	    fifoHist->SetBinContent(i+1,beamFIFOChannel[i]);
-	  // The DIFF isn't written at all, but it's fun to look at. 
-	  std::ostringstream dname;
-	  dname << "BDIFF_R" << event.run()
-		<< "E" << event.id().event()
-		<< "G" << gain_index
-		<< "C" << channel
-		<< "F" << beamFIFOChannel.Frame()
-		<< "S" << beamFIFOChannel.TimeSlice();
-	  std::ostringstream dtitle;
-	  dtitle << ";Beam FIFO DIFF for Run " << event.run()
-		 << " Event " << event.id().event()
-		 << " Gain " << gain_index 
-		 << " Channel " << channel 
-		 << " Frame " << beamFIFOChannel.Frame()
-		 << " Sample " << beamFIFOChannel.TimeSlice()
-		 << ";";
-	  TH1* diffHist = tfs->make<TH1S>(dname.str().c_str(),
-					  dtitle.str().c_str(),
-					  beamFIFOChannel.size(), 
-					  0, beamFIFOChannel.size() );
-	  for ( size_t i = beamBeginBin[gateIndex], b = 1; 
-		i != beamEndBin[gateIndex]; ++i, ++b ) {
-	    if ( i >= fm_delay0[gain_index] )
-	      diffHist->
-		SetBinContent(b,std::max(0,(int)channelData[i] 
-					 - (int)channelData[i - fm_delay0[gain_index]]));
-	  } // fill diffHist
-	} // if fm_hist
+	  // Dump the FIFO channels as histograms. 
+	  if (fm_hist) {
+	    art::ServiceHandle<art::TFileService> tfs;
+	    std::ostringstream hname;
+	    hname << "BFIFO_R" << event.run()
+		  << "E" << event.id().event()
+		  << "G" << gain_index
+		  << "C" << channel
+		  << "F" << beamFIFOChannel.Frame()
+		  << "S" << beamFIFOChannel.TimeSlice();
+	    std::ostringstream htitle;
+	    htitle << ";Beam FIFO ADC counts for Run " << event.run()
+		   << " Event " << event.id().event()
+		   << " Gain " << gain_index 
+		   << " Channel " << channel 
+		   << " Frame " << beamFIFOChannel.Frame()
+		   << " Sample " << beamFIFOChannel.TimeSlice()
+		   << ";";
+	    TH1* fifoHist = tfs->make<TH1S>(hname.str().c_str(),
+					    htitle.str().c_str(),
+					    beamFIFOChannel.size(), 
+					    0, beamFIFOChannel.size() );
+	    // Reminder: The first bin in a histogram is bin 1, NOT bin 0!
+	    for ( size_t i = 0; i != beamFIFOChannel.size(); ++i )
+	      fifoHist->SetBinContent(i+1,beamFIFOChannel[i]);
+	    // The DIFF isn't written at all, but it's fun to look at. 
+	    std::ostringstream dname;
+	    dname << "BDIFF_R" << event.run()
+		  << "E" << event.id().event()
+		  << "G" << gain_index
+		  << "C" << channel
+		  << "F" << beamFIFOChannel.Frame()
+		  << "S" << beamFIFOChannel.TimeSlice();
+	    std::ostringstream dtitle;
+	    dtitle << ";Beam FIFO DIFF for Run " << event.run()
+		   << " Event " << event.id().event()
+		   << " Gain " << gain_index 
+		   << " Channel " << channel 
+		   << " Frame " << beamFIFOChannel.Frame()
+		   << " Sample " << beamFIFOChannel.TimeSlice()
+		   << ";";
+	    TH1* diffHist = tfs->make<TH1S>(dname.str().c_str(),
+					    dtitle.str().c_str(),
+					    beamFIFOChannel.size(), 
+					    0, beamFIFOChannel.size() );
+	    for ( size_t i = beamBeginBin[gateIndex], b = 1; 
+		  i != beamEndBin[gateIndex]; ++i, ++b ) {
+	      if ( i >= fm_delay0[gain_index] )
+		diffHist->
+		  SetBinContent(b,std::max(0,(int)channelData[i] 
+					   - (int)channelData[i - fm_delay0[gain_index]]));
+	    } // fill diffHist
+	  } // if fm_hist
 	
-	// Include this beam-gate channel in the output.
-	channelCollection->push_back( std::move(beamFIFOChannel) );
+	  // Include this beam-gate channel in the output.
+	  channelCollection->push_back( std::move(beamFIFOChannel) );
 		      
-      } // for each input channel
-    } // for each beam gate.
+	} // for each input channel
+      } // for each beam gate.
+    } // if number of beam gates > 0
 
     // Save on typing: define a type for the size of the
     // "diff vector": the ADC channel subtracted from
@@ -486,7 +493,7 @@ namespace opdet {
     
     // Discriminator processing. Go through each channel in this group.
     for ( auto const& channelData : *channelDataHandle ) {
-
+      
       ::optdata::Channel_t channel = channelData.ChannelNumber();
       ::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channelData.ChannelNumber());
       size_t gain_index = 0;
@@ -504,11 +511,6 @@ namespace opdet {
 	  << "; skipping channel data group";
 	continue; // skip to the next ChannelDataGroup
       }
-
-      auto const& gateFrame      = _gateFrame.at      (gain_index);
-      auto const& gateWindowTime = _gateWindowTime.at (gain_index);
-      auto const& beamBeginBin   = _beamBeginBin.at   (gain_index);
-      auto const& beamEndBin     = _beamEndBin.at     (gain_index);
 
       // Fill information for PMT Trigger generation here if relevant
       unsigned int crate, slot, femch;
@@ -607,9 +609,10 @@ namespace opdet {
 	
 	// Check if we're outside all the beam gates AND this is not a logic pulse channel
 	bool outsideBeamGates = true;
-	if( channel < kLogicStartChannel ) {
+	//if( channel < kLogicStartChannel ) {
+	if ( ch_map->GetChannelType( channel )!=::opdet::LogicChannel && numberOfGates>0 ) {
 	  for ( size_t b = 0; b != numberOfGates; ++b )
-	    if ( slice >= beamBeginBin[b] && slice < beamEndBin[b] )
+	    if ( slice >= _beamBeginBin.at(gain_index)[b] && slice < _beamEndBin.at(gain_index)[b] )
 	      outsideBeamGates = false;
 	}
 	
@@ -663,7 +666,7 @@ namespace opdet {
 	      maxADC = std::max( maxADC, diffVector[s] );
 	    
 	    // Save this value for PMT trigger tests IF not logic pulse channel
-	    if( channel < kLogicStartChannel ) maxADC1.push_back( maxADC );
+	    if( ch_map->GetChannelType( channel )!=::opdet::LogicChannel ) maxADC1.push_back( maxADC );
 	    
 	    // Go back (if negative) or forward (if positive) from
 	    // the point of the last disc0 firing to start saving
@@ -787,7 +790,7 @@ namespace opdet {
 	      maxADC = std::max( maxADC, diffVector[s] );
 	    
 	    // Save this value for PMT trigger tests if not logic channel.
-	    if( channel < kLogicStartChannel ) maxADC3.push_back( maxADC );
+	    if( ch_map->GetChannelType( channel )!=::opdet::LogicChannel ) maxADC3.push_back( maxADC );
 	    
 	    LOG_DEBUG("OpticalFEM")
 	      << "Disc 3 fires, channel=" << channel
@@ -893,8 +896,8 @@ namespace opdet {
       }
     } // if fm_hist
     
-    // PMT Trigger processing. We only do this for the high-gain
-    // FEM.
+    // std::cout <<  "PMT Trigger processing. We only do this for the high-gain FEM" << std::endl;
+
     for(auto const& slot : fm_triggerFEMSlot) {
       auto gain_index = slot_to_gain_index[slot];
       // Go through the time slices again, testing if the PMT trigger
@@ -926,7 +929,8 @@ namespace opdet {
 	    << " at frame=" << frame
 	    << " slice=" << sample
 	    << " max ADC sum=" << maxADCSum1[slot][slice]
-	    << " multiplicity sum=" << multiplicitySum1[slot][slice];
+	    << " multiplicity sum=" << multiplicitySum1[slot][slice]
+	    << std::endl;
 	  
 	  if (fm_hist) {
 	    // Dump some trigger sums as histograms. 
