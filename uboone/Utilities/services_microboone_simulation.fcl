@@ -1,4 +1,5 @@
 #include "services_microboone_basic.fcl"
+#include 
 
 #
 # This file defines a set of service configurations for MicroBooNE simulation.
@@ -86,5 +87,7 @@ microboone_simulation_services:                                 @local::microboo
 microboone_simulation_services.LArFFT:                          @local::microboone_larfft
 microboone_simulation_services.SignalShapingServiceMicroBooNE:  @local::microboone_signalshapingservice
 microboone_simulation_services.UBOpticalChConfig:               @local::microboone_optical_ch_config
+microboone_simulation_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
+microboone_simulation_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
 
 END_PROLOG

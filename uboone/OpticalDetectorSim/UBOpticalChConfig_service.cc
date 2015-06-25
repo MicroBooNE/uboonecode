@@ -52,19 +52,20 @@ namespace opdet {
 
     // ------------------------------------------------------------------------------------------------------
     // sanity check: number of readout channels in geo service matches number of channels in parameters
-    unsigned int nchannel_values = geom->NOpChannels();
+    unsigned int nchannel_values = channel_list.size();
 
     for(size_t i=0; i<kChConfigTypeMax; ++i) {
 
       size_t nchannel_input = tmp_float_params.at(i).size();
       if(!nchannel_input)
 	nchannel_input = tmp_int_params.at(i).size();
-
-      if(nchannel_input != nchannel_values) 
+      
+      if(nchannel_input != nchannel_values)  {
 	throw UBOpticalException(Form("ChConfigType_t enum=%zu # values (%zu) != # channels (%d)!",
 				      i,
 				      nchannel_input,
 				      nchannel_values));
+      }
     }
     
     // ------------------------------------------------------------------------------------------------------
