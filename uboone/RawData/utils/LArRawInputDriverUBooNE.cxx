@@ -22,6 +22,7 @@
 
 //ART, ...
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "art/Utilities/Exception.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -168,10 +169,8 @@ namespace lris {
     // we make a data product for each category of channels
     fPMTdataProductNames.clear();
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
-      std::stringstream ss;
-      ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
-      helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
-      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, ss.str() ) );
+      helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>( "pmtreadout", opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) );
+      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) ) );
     }
   }
 
@@ -181,8 +180,9 @@ namespace lris {
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
       
       art::put_product_in_principal(std::move( pmtdigitlist[(opdet::UBOpticalChannelCategory_t)cat]  ),
-				    *outE,
-				    fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ]); // Module label
+      				    *outE,
+				    "pmtreadout", // module
+      				    fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ]); // instance
     }
     
   }
