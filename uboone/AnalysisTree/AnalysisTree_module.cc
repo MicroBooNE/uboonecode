@@ -109,6 +109,7 @@
 #include "SummaryData/POTSummary.h"
 #include "MCCheater/BackTracker.h"
 #include "RecoBase/Track.h"
+#include "RecoBase/Shower.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/EndPoint2D.h"
@@ -142,6 +143,7 @@ constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackMod
 constexpr unsigned short kMaxVertices   = 100;    //max number of 3D vertices
 constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector cells per MC particle
 constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
+constexpr int kMaxShowers    = 1000;   //maximum number of showers
 constexpr int kMaxTruth      = 10;     //maximum number of neutrino truth interactions
 
 /// total_extent\<T\>::value has the total number of elements of an array
@@ -313,6 +315,7 @@ namespace microboone {
       tdTrack = 0x20,
       tdVtx = 0x40,
       tdFlash = 0x80,
+      tdShower = 0x100,
       tdDefault = 0
     }; // DataBits_t
     
@@ -362,7 +365,22 @@ namespace microboone {
 
     // vertex information
     Short_t  nvtx;                     //number of vertices
-    Float_t  vtx[kMaxVertices][3];     //vtx[3]  
+    Float_t  vtx[kMaxVertices][3];     //vtx[3] 
+    
+    // shower information
+    Short_t  nshowers;                     //number of showers
+    Int_t    showerID[kMaxShowers];        //Shower ID
+    Int_t    shwr_bestplane[kMaxShowers];  //Shower best plane 
+    Float_t  shwr_length[kMaxShowers];     //Shower length  
+    Float_t  shwr_startdcosx[kMaxShowers]; //X directional cosine at start of shower 
+    Float_t  shwr_startdcosy[kMaxShowers]; //Y directional cosine at start of shower 
+    Float_t  shwr_startdcosz[kMaxShowers]; //Z directional cosine at start of shower 
+    Float_t  shwr_startx[kMaxShowers];     //startx of shower 
+    Float_t  shwr_starty[kMaxShowers];     //starty of shower 
+    Float_t  shwr_startz[kMaxShowers];     //startz of shower 
+    Float_t  shwr_totEng[kMaxShowers][3];  //Total energy of the shower per plane 
+    Float_t  shwr_dedx[kMaxShowers][3];    //dedx of the shower per plane
+    Float_t  shwr_mipEng[kMaxShowers][3];   //Total MIP energy of the shower per plane
 
     // flash information
     Int_t    no_flashes;                //number of flashes
@@ -402,7 +420,7 @@ namespace microboone {
     Float_t  tpy_flux[kMaxTruth];        //Py of parent particle leaving BNB target
     Float_t  tpz_flux[kMaxTruth];        //Pz of parent particle leaving BNB target
     Int_t    tptype_flux[kMaxTruth];     //Type of parent particle leaving BNB target
-
+     
     //genie information
     size_t MaxGeniePrimaries = 0;
     Int_t     genie_no_primaries;
@@ -526,6 +544,9 @@ namespace microboone {
 
     /// Returns whether we have Flash data
     bool hasFlashInfo() const { return bits & tdFlash; }
+    
+    /// Returns whether we have Shower data
+    bool hasShowerInfo() const { return bits & tdShower; }
 
     /// Sets the specified bits
     void SetBits(unsigned int setbits, bool unset = false)
@@ -705,6 +726,7 @@ namespace microboone {
     std::string fCryGenModuleLabel;
     std::string fG4ModuleLabel;
     std::string fVertexModuleLabel;
+    std::string fShowerModuleLabel;
     std::string fOpFlashModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
@@ -719,6 +741,7 @@ namespace microboone {
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
     bool fSaveFlashInfo;  ///whether to extract and save Flash information
+    bool fSaveShowerInfo;  ///whether to extract and save Shower information
 
     std::vector<std::string> fCosmicTaggerAssocLabel;
     std::vector<std::string> fFlashMatchAssocLabel;
@@ -745,6 +768,7 @@ namespace microboone {
 	  fData->SetBits(AnalysisTreeDataStruct::tdVtx, !fSaveVertexInfo);
 	  fData->SetTrackers(GetNTrackers());
           fData->SetBits(AnalysisTreeDataStruct::tdFlash, !fSaveFlashInfo);	
+          fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);	
           if (bClearData) fData->Clear();
         }
       } // CreateData()
@@ -1182,6 +1206,22 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(flash_ycenter, flash_ycenter + sizeof(flash_ycenter)/sizeof(flash_ycenter[0]), -9999);
   std::fill(flash_zcenter, flash_zcenter + sizeof(flash_zcenter)/sizeof(flash_zcenter[0]), -9999);
 
+  nshowers = 0;
+  std::fill(showerID, showerID + sizeof(showerID)/sizeof(showerID[0]), -9999);
+  std::fill(shwr_bestplane, shwr_bestplane + sizeof(shwr_bestplane)/sizeof(shwr_bestplane[0]), -9999);
+  std::fill(shwr_length, shwr_length + sizeof(shwr_length)/sizeof(shwr_length[0]), -99999.);
+  std::fill(shwr_startdcosx, shwr_startdcosx + sizeof(shwr_startdcosx)/sizeof(shwr_startdcosx[0]), -99999.);
+  std::fill(shwr_startdcosy, shwr_startdcosy + sizeof(shwr_startdcosy)/sizeof(shwr_startdcosy[0]), -99999.);
+  std::fill(shwr_startdcosz, shwr_startdcosz + sizeof(shwr_startdcosz)/sizeof(shwr_startdcosz[0]), -99999.);
+  std::fill(shwr_startx, shwr_startx + sizeof(shwr_startx)/sizeof(shwr_startx[0]), -99999.);
+  std::fill(shwr_starty, shwr_starty + sizeof(shwr_starty)/sizeof(shwr_starty[0]), -99999.);
+  std::fill(shwr_startz, shwr_startz + sizeof(shwr_startz)/sizeof(shwr_startz[0]), -99999.);
+  for (size_t ishwr = 0; ishwr < kMaxShowers; ++ishwr) {
+     std::fill(shwr_totEng[ishwr], shwr_totEng[ishwr]+3, -99999.);
+     std::fill(shwr_dedx[ishwr], shwr_dedx[ishwr]+3, -99999.);
+     std::fill(shwr_mipEng[ishwr], shwr_mipEng[ishwr]+3, -99999.);
+  }   
+  
 
   mcevts_truth = -99999;
   mcevts_truthcry = -99999;
@@ -1452,6 +1492,22 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("flash_ycenter",flash_ycenter,"flash_ycenter[no_flashes]/F");
     CreateBranch("flash_zcenter",flash_zcenter,"flash_zcenter[no_flashes]/F");
   }
+  
+  if (hasShowerInfo()){
+    CreateBranch("nshowers",&nshowers,"nshowers/S");
+    CreateBranch("showerID",showerID,"showerID[nshowers]/I");
+    CreateBranch("shwr_bestplane",shwr_bestplane,"shwr_bestplane[nshowers]/I");
+    CreateBranch("shwr_length",shwr_length,"shwr_length[nshowers]/F");
+    CreateBranch("shwr_startdcosx",shwr_startdcosx,"shwr_startdcosx[nshowers]/F");
+    CreateBranch("shwr_startdcosy",shwr_startdcosy,"shwr_startdcosy[nshowers]/F");
+    CreateBranch("shwr_startdcosz",shwr_startdcosz,"shwr_startdcosz[nshowers]/F");
+    CreateBranch("shwr_startx",shwr_startx,"shwr_startx[nshowers]/F");
+    CreateBranch("shwr_starty",shwr_starty,"shwr_starty[nshowers]/F");
+    CreateBranch("shwr_startz",shwr_startz,"shwr_startz[nshowers]/F");
+    CreateBranch("shwr_totEng",shwr_totEng,"shwr_totEng[nshowers][3]/F");
+    CreateBranch("shwr_dedx",shwr_dedx,"shwr_dedx[nshowers][3]/F");
+    CreateBranch("shwr_mipEng",shwr_mipEng,"shwr_mipEng[nshowers][3]/F");
+  }  
 
   if (hasTrackInfo()){
     AutoResettingStringSteam sstr;
@@ -1619,6 +1675,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fCryGenModuleLabel        (pset.get< std::string >("CryGenModuleLabel")       ), 
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
+  fShowerModuleLabel        (pset.get< std::string >("ShowerModuleLabel")       ),
   fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
@@ -1633,6 +1690,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
   fSaveFlashInfo            (pset.get< bool >("SaveFlashInfo", false)),
+  fSaveShowerInfo            (pset.get< bool >("SaveShowerInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
   fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
   isCosmics(false),
@@ -1731,6 +1789,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   std::vector<art::Ptr<recob::Vertex> > vtxlist;
   if (evt.getByLabel(fVertexModuleLabel,vtxListHandle))
     art::fill_ptr_vector(vtxlist, vtxListHandle);
+    
+   // * showers 
+  art::Handle< std::vector<recob::Shower> > showerListHandle;
+  std::vector<art::Ptr<recob::Shower> > showerlist;
+  if (evt.getByLabel(fShowerModuleLabel,showerListHandle))
+    art::fill_ptr_vector(showerlist, showerListHandle);   
 
   // * flashes
   art::Handle< std::vector<recob::OpFlash> > flashListHandle;
@@ -1831,6 +1895,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   const size_t NTrackers = GetNTrackers(); // number of trackers passed into fTrackModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
   const size_t NVertices = vtxlist.size(); // number of vertices
+  const size_t NShowers  = showerlist.size(); //number of showers
   const size_t NFlashes  = flashlist.size(); // number of flashes
   // make sure there is the data, the tree and everything;
   CreateTree();
@@ -1989,6 +2054,35 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->flash_zcenter[i]    = flashlist[i]->ZCenter();
     }
   }
+  
+  if (fSaveShowerInfo){
+    fData->nshowers = NShowers;
+    if (NShowers > kMaxShowers) {
+      // got this error? consider increasing kMaxShowers
+      // (or ask for a redesign using vectors)
+      mf::LogError("AnalysisTree:limits") << "event has " << NShowers
+        << " showers, only kMaxShowers=" << kMaxShowers << " stored in tree";
+    }
+    for (size_t i = 0; i < NShowers && i < kMaxShowers ; ++i){
+      TVector3 dir_start, pos_start;         
+      dir_start = showerlist[i]->Direction();
+      pos_start = showerlist[i]->ShowerStart();
+      
+      fData->showerID[i]        = showerlist[i]->ID();
+      fData->shwr_bestplane[i]  = showerlist[i]->best_plane();
+      fData->shwr_length[i]     = showerlist[i]->Length();
+      fData->shwr_startdcosx[i] = dir_start.X();
+      fData->shwr_startdcosy[i] = dir_start.Y();
+      fData->shwr_startdcosz[i] = dir_start.Z();   
+      fData->shwr_startx[i]     = pos_start.X();
+      fData->shwr_starty[i]     = pos_start.Y();
+      fData->shwr_startz[i]     = pos_start.Z();  
+      for (size_t j = 0; j<3; ++j) fData->shwr_totEng[i][j] = showerlist[i]->Energy()[j];
+      for (size_t j = 0; j<3; ++j) fData->shwr_dedx[i][j]   = showerlist[i]->dEdx()[j];
+      for (size_t j = 0; j<3; ++j) fData->shwr_mipEng[i][j] = showerlist[i]->MIPEnergy()[j];                 
+    }
+  }  
+  
   //track information for multiple trackers
   if (fSaveTrackInfo){
     for (unsigned int iTracker=0; iTracker < NTrackers; ++iTracker){
@@ -2695,48 +2789,8 @@ double microboone::AnalysisTree::length(const recob::Track& track)
   return result;
 }
 
-// Length of MC particle, trajectory by trajectory (with out the manual shifting for x correction)
-double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
-{
-  // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
-  //art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> larprop;
-  
-  // Get active volume boundary.
-  double xmin = 0.;
-  double xmax = 2.*geom->DetHalfWidth();
-  double ymin = -geom->DetHalfHeight();
-  double ymax = geom->DetHalfHeight();
-  double zmin = 0.;
-  double zmax = geom->DetLength();
-
-  double result = 0.;
-  TVector3 disp;
-  int n = part.NumberTrajectoryPoints();
-  bool first = true;
-
-  for(int i = 0; i < n; ++i) {
-    // check if the particle is inside a TPC
-   double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
-   if (mypos[0] >= xmin && mypos[0] <= xmax && mypos[1] >= ymin && mypos[1] <= ymax && mypos[2] >= zmin && mypos[2] <= zmax){
-     if(first){
-      start = mypos;
-     }
-     else {
-      disp -= mypos;
-      result += disp.Mag();
-     }
-     first = false;
-     disp = mypos;
-     end = mypos;
-   }
-  }
-  return result;
-}
-
 // Length of MC particle, trajectory by trajectory (with the manual shifting for x correction)
-/*double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
+double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
 {
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
@@ -2785,7 +2839,48 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
    }
   }
   return result;
+}
+
+/*// Length of MC particle, trajectory by trajectory (with out the manual shifting for x correction)
+double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
+{
+  // Get geometry.
+  art::ServiceHandle<geo::Geometry> geom;
+  //art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArProperties> larprop;
+  
+  // Get active volume boundary.
+  double xmin = 0.;
+  double xmax = 2.*geom->DetHalfWidth();
+  double ymin = -geom->DetHalfHeight();
+  double ymax = geom->DetHalfHeight();
+  double zmin = 0.;
+  double zmax = geom->DetLength();
+
+  double result = 0.;
+  TVector3 disp;
+  int n = part.NumberTrajectoryPoints();
+  bool first = true;
+
+  for(int i = 0; i < n; ++i) {
+    // check if the particle is inside a TPC
+   double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
+   if (mypos[0] >= xmin && mypos[0] <= xmax && mypos[1] >= ymin && mypos[1] <= ymax && mypos[2] >= zmin && mypos[2] <= zmax){
+     if(first){
+      start = mypos;
+     }
+     else {
+      disp -= mypos;
+      result += disp.Mag();
+     }
+     first = false;
+     disp = mypos;
+     end = mypos;
+   }
+  }
+  return result;
 }*/
+
 
 
 namespace microboone{

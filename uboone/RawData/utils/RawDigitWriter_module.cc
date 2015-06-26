@@ -80,7 +80,7 @@ namespace zmqds {
   private:
 
     // Channel Map
-    util::UBChannelBiMap_t fChannelMap;
+    const util::UBChannelReverseMap_t& fChannelReverseMap;
 
     // FICHL Parameters
     
@@ -120,7 +120,7 @@ namespace zmqds {
 
   //-------------------------------------------------
   RawDigitWriter::RawDigitWriter(fhicl::ParameterSet const& pset) 
-    : EDAnalyzer(pset)
+    : EDAnalyzer(pset), fChannelReverseMap( art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelReverseMap() )
     {
 
       art::ServiceHandle<art::TFileService> tfs;
@@ -144,14 +144,13 @@ namespace zmqds {
       fTOpDetWaveforms->Branch( "opfemch", &fOpFemCH, "opfemch/I" );
       fTOpDetWaveforms->Branch( "frame", &fFrame, "frame/I" );
       fTOpDetWaveforms->Branch( "sample", &fSample, "sample/I" );
+      fTOpDetWaveforms->Branch( "timestamp", &fTimeStamp, "timestamp/D" );
       fTOpDetWaveforms->Branch( "readoutch", &fOpReadoutCH, "readoutch/I" );
       fTOpDetWaveforms->Branch( "category", &fCategory, "category/I" );
       fTOpDetWaveforms->Branch( "gaintype", &fType, "gaintype/I" );
       fTOpDetWaveforms->Branch( "adcs", &opdetwaveforms );
 
-      fChannelMap.clear();
-      mf::LogInfo("")<<"Fetching channel map from DB";
-      fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelBiMap();
+      mf::LogInfo("")<<"Fetched channel map from DB";
       
     }
 
@@ -203,8 +202,8 @@ namespace zmqds {
     for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter){
       art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
       fWireID = digitVec->Channel();
-      util::UBChannelBiMap_t::right_const_iterator it_mapentry = fChannelMap.right.find( (util::UBLArSoftCh_t)fWireID );
-      if ( it_mapentry!=fChannelMap.right.end() ) {
+      util::UBChannelReverseMap_t::const_iterator it_mapentry = fChannelReverseMap.find( (util::UBLArSoftCh_t)fWireID );
+      if ( it_mapentry!=fChannelReverseMap.end() ) {
 	fCrate = it_mapentry->second.crate;
 	fSlot  = it_mapentry->second.card;
 	fFemCH = it_mapentry->second.channel;
@@ -232,15 +231,17 @@ namespace zmqds {
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
     
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
-      std::stringstream ss;
-      ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
+      //std::stringstream ss;
+      //ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
 
-      evt.getByLabel( ss.str(), wfHandle);
+      evt.getByLabel( "pmtreadout", opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), wfHandle);
 
       std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
 
-      if ( opwfms.size()==0 )
+      if ( opwfms.size()==0 ) {
+	std::cout << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) << " zero waveforms." << std::endl;
 	continue;
+      }
 
       for(auto &wfm : opwfms )  {
 	fOpReadoutCH = wfm.ChannelNumber();

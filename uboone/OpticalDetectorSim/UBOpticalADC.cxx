@@ -90,6 +90,7 @@ namespace opdet {
     fPhotonTime.clear();
     fPhotonTime.reserve(fInputPhotonTime.size() + fDarkPhotonTime.size());
     const double qe = ch_conf->GetFloat(kQE,ch);
+
     for(auto const &v : fDarkPhotonTime) fPhotonTime.push_back(v);
     for(auto const &v : fInputPhotonTime)
       if(RandomServer::GetME().Uniform(1.) < qe) fPhotonTime.push_back(v);

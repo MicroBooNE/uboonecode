@@ -2,7 +2,7 @@
 
 # The *parent* line must the first non-commented line and defines this product and version
 # The version must be of the form vxx_yy_zz (e.g. v01_02_03)
-parent uboonecode v04_13_00
+parent uboonecode v04_14_00
 defaultqual e7
 
 # These optional lines define where headers, libraries, and executables go and should
@@ -31,12 +31,12 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
-larsoft         v04_13_00
-ubutil          v01_22_00
+larsoft         v04_14_00
+ubutil          v01_23_00
 uboone_data     v01_01_00
 uboonedaq_datatypes v6_11_05a  - optional
 
-cetbuildtools	v4_11_03	-	only_for_build
+cetbuildtools	v4_12_05	-	only_for_build
 end_product_list
 
 

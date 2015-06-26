@@ -52,19 +52,20 @@ namespace opdet {
 
     // ------------------------------------------------------------------------------------------------------
     // sanity check: number of readout channels in geo service matches number of channels in parameters
-    unsigned int nchannel_values = geom->NOpChannels();
+    unsigned int nchannel_values = channel_list.size();
 
     for(size_t i=0; i<kChConfigTypeMax; ++i) {
 
       size_t nchannel_input = tmp_float_params.at(i).size();
       if(!nchannel_input)
 	nchannel_input = tmp_int_params.at(i).size();
-
-      if(nchannel_input != nchannel_values) 
+      
+      if(nchannel_input != nchannel_values)  {
 	throw UBOpticalException(Form("ChConfigType_t enum=%zu # values (%zu) != # channels (%d)!",
 				      i,
 				      nchannel_input,
 				      nchannel_values));
+      }
     }
     
     // ------------------------------------------------------------------------------------------------------
@@ -78,8 +79,9 @@ namespace opdet {
       if ( chanmap->GetChannelType( chnum )==opdet::LogicChannel )
 	continue; // skip QE check for logic channels
       
-      if ( LarProp->ScintPreScale() > tmp_QE.at(i) ) {
-        tmp_QE[i] /= LarProp->ScintPreScale();
+      if ( LarProp->ScintPreScale() >= tmp_QE.at(i) ) {
+        //tmp_QE[i] /= LarProp->ScintPreScale();
+	tmp_float_params.at( kQE )[i] /=  LarProp->ScintPreScale();
       }
       else {
         mf::LogError("UBOpticalChConfig_service") << "Quantum efficiency set in UBOpticalChConfig_service, "

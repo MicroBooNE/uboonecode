@@ -46,6 +46,8 @@
 /// nutools
 #include "Simulation/BeamGateInfo.h"
 
+#include <algorithm>
+
 namespace opdet {
   /**
      \class UBOpticalADCSim
@@ -196,7 +198,6 @@ namespace opdet {
 	
 	for(size_t photon_index=0; photon_index<pmt_ptr->size(); ++photon_index)
 	  photon_time.push_back(pmt_ptr->at(photon_index).Time);
-	
       }
       
       // send the hits over to the waveform generator

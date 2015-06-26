@@ -22,6 +22,7 @@
 
 //ART, ...
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "art/Utilities/Exception.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -64,17 +65,19 @@ namespace lris {
     fSourceHelper(pm),
     fCurrentSubRunID(),
     fEventCounter(0),
-    fHuffmanDecode(ps.get<bool>("huffmanDecode",false))
+    fHuffmanDecode(ps.get<bool>("huffmanDecode",false)),
+    fChannelMap( art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap() )
   {
+    mf::LogInfo("")<<"Fetched channel map from DB";
+
     helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
     helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::Trigger>,   art::InEvent>("daq");
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
-    initChannelMap();
 
-    if ( fHuffmanDecode )
-      tpc_crate_data_t::doDissect(true); // setup for decoding
+    //if ( fHuffmanDecode )
+    tpc_crate_data_t::doDissect(true); // setup for decoding
 
     art::ServiceHandle<art::TFileService> tfs;
     //initialize beam histograms specified in fhicl file
@@ -101,7 +104,6 @@ namespace lris {
     mf::LogInfo(__FUNCTION__)<<"File boundary (processed "<<fEventCounter<<" events)"<<std::endl;
     fCurrentSubRunID.flushSubRun();
     fEventCounter=0;
-    fChannelMap.clear();
     fInputStream.close();
   }
     
@@ -161,26 +163,14 @@ namespace lris {
     */
   }
 
-  // ======================================================================  
-  void LArRawInputDriverUBooNE::initChannelMap()
-  {
-
-    fChannelMap.clear();
-    mf::LogInfo("")<<"Fetching channel map from DB";
-
-    fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap();
-
-  }
 
   // =====================================================================
   void LArRawInputDriverUBooNE::registerOpticalData( art::ProductRegistryHelper &helper ) {
     // we make a data product for each category of channels
     fPMTdataProductNames.clear();
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
-      std::stringstream ss;
-      ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
-      helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>(ss.str()); 
-      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, ss.str() ) );
+      helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>( "pmtreadout", opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) );
+      fPMTdataProductNames.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)cat, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) ) );
     }
   }
 
@@ -190,8 +180,9 @@ namespace lris {
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
       
       art::put_product_in_principal(std::move( pmtdigitlist[(opdet::UBOpticalChannelCategory_t)cat]  ),
-				    *outE,
-				    fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ]); // Module label
+      				    *outE,
+				    "pmtreadout", // module
+      				    fPMTdataProductNames[ (opdet::UBOpticalChannelCategory_t)cat ]); // instance
     }
     
   }
@@ -443,7 +434,7 @@ namespace lris {
 		//adclist.push_back( thecheat );
 		//}
 	      }
-
+	      chdsize = adclist.size();
             } else {
               const ub_RawData& chD = channel.data(); 
 	      // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
@@ -517,7 +508,7 @@ namespace lris {
     if ( tpcDigitList.size()!=8256 ) {
       char warn[256];
       sprintf( warn, "Error: Number of channels saved (%d) did not match the expectation (8256)!", (int)tpcDigitList.size() );
-      throw std::runtime_error( warn );
+      //throw std::runtime_error( warn );
     }
   }
 
@@ -588,8 +579,8 @@ namespace lris {
             
             optdata::TimeSlice_t time=window_header.getSample();
             optdata::Frame_t frame=window_header.getFrame();
-	    //int crate_number = crate_data.crateHeader()->crate_number; 
 	    unsigned int data_product_ch_num = ub_pmt_channel_map->GetChannelNumberFromCrateSlotFEMCh( crate_data.crateHeader()->crate_number, card_data.getModule(), channel_number );
+	    //int crate_number = crate_data.crateHeader()->crate_number; 
 	    //std::cout << "fill (CSF): " << crate_number << ", " << card_data.getModule() << ", " << channel_number << " ==> Readout Channel " << data_product_ch_num << std::endl;
 	    
 	    // here we translate crate/card/daq channel to data product channel number
