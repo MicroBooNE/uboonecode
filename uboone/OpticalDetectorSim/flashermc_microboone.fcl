@@ -1,0 +1,39 @@
+
+BEGIN_PROLOG
+
+microboone_flasher_sim:
+{
+
+  module_type:  "UBFlasherMC"
+
+  EnableSpread: false
+
+  Duration:     6.4e3
+
+  G4StartTime:  100.0
+
+  LogicPulseAmplitude: 3000
+
+  TTLChannel: 37
+
+  TTLMod36Channel: 38
+
+  LEDlevelsHex: [ 0x010, 0x010, 0x010, 0x010, 0x010, 0x010,
+                  0x010, 0x010, 0x010, 0x010, 0x010, 0x010,
+                  0x010, 0x010, 0x010, 0x010, 0x010, 0x010,
+                  0x010, 0x010, 0x010, 0x010, 0x010, 0x010,
+                  0x010, 0x010, 0x010, 0x010, 0x010, 0x010,
+                  0x010, 0x010, 0x010, 0x010, 0x010, 0x010 ]
+
+  PulserRateMHz: 0.001
+  
+  HexToPE: 1.0
+  
+  Mode: "Burst"
+
+  PulserEfficency: 0.90
+
+  MakeDebugPlots: true
+}
+
+END_PROLOG
