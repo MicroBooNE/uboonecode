@@ -201,7 +201,7 @@ namespace trkf
 	// displacement vector.
 
 	double pdotdx = mom1[0]*dx[0] + mom1[1]*dx[1] + mom1[2]*dx[2];
-	assert(pdotdx * (*dist12) > 0.);
+	assert(pdotdx * (*dist12) >= 0.);
 
 	// Check propagation distance against displacement vector.
 
@@ -265,7 +265,7 @@ namespace trkf
 	    // Compare numerical and analytic partial derivative.
 
 	    double dij = (trk1b.getVector()(i) - trk1a.getVector()(i)) / (2.*small);
-	    //std::cout << "(" << i << "," << j << "): " << dij << ", " << pm(i,j) << std::endl;
+	    std::cout << "(" << i << "," << j << "): " << dij << ", " << pm(i,j) << std::endl;
 	    assert(std::abs(dij - pm(i,j)) <= 1.e-5*std::abs(dij));
 	  }
 	}
