@@ -134,7 +134,7 @@ namespace trkf
 
     // Loop over initial surface/track.
 
-    for(int isurf = 1; isurf < nsurf; ++isurf) {
+    for(int isurf = 0; isurf < nsurf; ++isurf) {
 
       std::cout << "\nInitial track " << isurf << std::endl;
 
@@ -158,7 +158,7 @@ namespace trkf
 
       // Loop over destination surface.
 
-      for(int jsurf = 0; jsurf < isurf; ++jsurf) {
+      for(int jsurf = 0; jsurf < nsurf; ++jsurf) {
 
 	std::cout << "Destination " << jsurf << std::endl;
 
@@ -201,7 +201,7 @@ namespace trkf
 	// displacement vector.
 
 	double pdotdx = mom1[0]*dx[0] + mom1[1]*dx[1] + mom1[2]*dx[2];
-	assert(pdotdx * (*dist12) >= 0.);
+	assert(pdotdx * (*dist12) >= -1.e-10);
 
 	// Check propagation distance against displacement vector.
 
@@ -266,7 +266,7 @@ namespace trkf
 
 	    double dij = (trk1b.getVector()(i) - trk1a.getVector()(i)) / (2.*small);
 	    std::cout << "(" << i << "," << j << "): " << dij << ", " << pm(i,j) << std::endl;
-	    assert(std::abs(dij - pm(i,j)) <= 1.e-5*std::abs(dij));
+	    assert(std::abs(dij - pm(i,j)) <= 1.e-5*std::max(std::abs(dij), 1.));
 	  }
 	}
 
@@ -275,7 +275,7 @@ namespace trkf
 	boost::optional<double> dist21 = prop->err_prop(trk2, psurf1, trkf::Propagator::UNKNOWN,
 							false);
 	assert(!!dist21);
-	assert(std::abs(dist - std::abs(*dist21)) <= 1.e-10);
+	assert(std::abs(dist - std::abs(*dist21)) <= 1.e-10 * std::max(1., dist));
 
 	// Check that state vector and error matrix returned to the original.
 	// This will test that the forward and backward propagation matrices
