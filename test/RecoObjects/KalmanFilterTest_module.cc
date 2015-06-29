@@ -57,7 +57,7 @@ namespace trkf
 
     // Make a test track.
 
-    std::shared_ptr<const trkf::Surface> psurf(new trkf::SurfYZPlane(0., 1000., 0.));
+    std::shared_ptr<const trkf::Surface> psurf(new trkf::SurfYZPlane(0., 0., 1000., 0.));
     TrackVector vec(5);
     vec(0) = 10.;
     vec(1) = 0.;
