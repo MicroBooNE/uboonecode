@@ -1,7 +1,7 @@
 #
 # Geometry test module on MicroBooNE detector geometry
 # 
-# Version: 1.0
+# Version: 1.1
 #
 
 #include "geometry_microboone.fcl"
@@ -9,10 +9,10 @@
 process_name: testGeo
 
 services: {
-  user: {
-    Geometry:               @local::microboone_geo
-    ExptGeoHelperInterface: @local::microboone_geometry_helper
-  }
+  
+  Geometry:               @local::microboone_geo
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  
   message: {
     destinations: {
       LogDebugFile: { 
@@ -59,6 +59,14 @@ physics: {
     geotest: {
       module_type: "GeometryTest"
       PrintWires:  true
+      # wire pitch for planes #0, #1 and #2
+      ExpectedWirePitch: [ 0.3, 0.3, 0.3 ]
+      # plane pitches (#0 -> #1, #1 -> #2)
+      ExpectedWirePitch: [ 0.3, 0.3 ]
+      SkipTests: [
+        # - CheckOverlaps disabled because it takes lot of time
+        "CheckOverlaps"
+      ]
     }
   }
 

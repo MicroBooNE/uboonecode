@@ -1,13 +1,33 @@
+#include "database_standard.fcl"
+
 BEGIN_PROLOG
 
+microboone_databaseretrievalalg: @local::standard_databaseretrievalalg
+microboone_databaseretrievalalg:
+{
+  DBUrl: "http://dbdata0.fnal.gov:8086/uboonecon_dev/app/"
+  DBTag: ""
+}
+
+microboone_pedestalretrievalalg: @local::standard_pedestalretrievalalg
 microboone_pedestalretrievalalg:
 {
-    AlgName:            "PedestalRetrievalAlg"
-    CollectionPedMean:  400
-    InductionPedMean:   2048
+    DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg
+    DatabaseRetrievalAlg: 
+    {
+      DBFolderName: "detpedestals"
+    }
     
-    CollectionPedRMS:   0.3
-    InductionPedRMS:    0.3
+    UseDB: false
+    UseTable: false
+    UseDefault: true
+    
+    DefaultCollMean: 400.0
+    DefaultCollRms:  0.3
+    DefaultIndMean:  2048.0
+    DefaultIndRms:   0.3
+    DefaultMeanErr:  0.0
+    DefaultRmsErr:   0.0
 }
 
 END_PROLOG

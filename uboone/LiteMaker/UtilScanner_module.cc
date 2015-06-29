@@ -29,8 +29,15 @@
 #include "Utilities/GeometryUtilities.h"
 #include "Utilities/DetectorProperties.h"
 
+// LArLite
 #include "Base/Base-TypeDef.h"
-
+#include "Base/AnalysisConstants.h"
+#include "Base/DataFormatConstants.h"
+#include "Base/FrameworkConstants.h"
+#include "Base/GeoConstants.h"
+#include "Base/GeoTypes.h"
+#include "Base/MCConstants.h"
+#include "Base/RawConstants.h"
 
 // ART includes.
 

@@ -1,0 +1,48 @@
+#include "geometry_microboone.fcl"
+#include "timeservice_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+
+microboone_rawdigits_writer:
+{
+	module_type:RawDigitWriter
+}
+
+process_name: RawDigitWriter
+services:
+{
+  TFileService: { fileName: "raw_digits.root" }
+  user: {
+          ExptGeoHelperInterface: @local::microboone_geometry_helper
+          Geometry:               @local::microboone_geo
+          TimeService:            @local::microboone_timeservice
+          DatabaseUtil:           @local::microboone_database
+	  UBOpReadoutMap:         @local::microboone_opreadoutmap
+          }
+}
+
+outputs:
+{
+ out1:
+  {
+   module_type: RootOutput
+   fileName:    "larsoft.root" 
+   compressionLevel: 1			    
+  }
+}
+
+physics:
+{
+
+ analyzers:
+ {
+   rawdigitwriter: @local::microboone_rawdigits_writer
+ }
+
+ simulate: []
+ analyzeIt: [ rawdigitwriter ]
+ stream1:   []
+ end_paths: [ analyzeIt ]
+}
+
+

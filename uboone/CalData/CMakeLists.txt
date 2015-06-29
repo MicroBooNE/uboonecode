@@ -13,7 +13,8 @@ art_make( BASENAME_ONLY
 	                Utilities
 			Filters
 			RawData
-			Database
+			CalibrationDBI_IOVData
+			CalibrationDBI_WebDBI
 			RecoBase
 			RecoBaseArt
 			SignalShapingServiceMicroBooNE_service
@@ -32,6 +33,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_GEOM}
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
+			${ROOT_FFTW}
 			${ROOT_BASIC_LIB_LIST}
         )
 

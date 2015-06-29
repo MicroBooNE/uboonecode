@@ -10,6 +10,7 @@ use Math::BigFloat;
 Math::BigFloat->precision(-10);
 use XML::LibXML;
 use Getopt::Long;
+use warnings 'uninitialized';  # this protects against misspelled variables!
 
 # Get the input parameters from an XML file. Optionally append a
 # suffix to the GDML sub-files we create.
@@ -90,11 +91,11 @@ $cryostat_on = $cryostat;
 my $WireInterval=10;
 my $NumberOfTPCPlanes=3;
 my $pmt_switch="on";		#turn on or off depending on pmts wanted
+my $test_switch="off";          #turn on if test boxes wanted.
 my $NumberOfTestBoxes=30;
 my $granite_block="off";
 my $enclosureExtras="on";       #turn on or off depending on whether you'd like to generate the external things around the cryostat (ie. insulation, platform, stands, etc.) in the gdml file
-my $vetoWall_switch="on";  #turn on or off a proposed scintillator wall infront of the cryostat
-
+my $vetoWall_switch="off";  #turn on or off a proposed scintillator wall infront of the cryostat
 
 # The routines that create the GDML sub-files. Most of the explanatory
 # comments are in gen_defs().
@@ -227,7 +228,7 @@ sub gen_rotations()
    <rotation name="rPlus60AboutX"  unit="deg" x="60"  y="0"   z="0"/>
    <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
    <rotation name="rMinus90AboutX"  unit="deg" x="-90"  y="0"   z="0"/>
-   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="90+$UVAngle" y="0"   z="0"/>
+   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="90+ $UVAngle" y="0"   z="0"/>
    <rotation name="rPlus150AboutX"      unit="deg" x="150" y="0"   z="0"/>
    <rotation name="rPlus180AboutX"      unit="deg" x="180" y="0"   z="0"/>
    <rotation name="rMinusUVAngleAboutX" unit="deg" x="-30" y="0"   z="0"/>
@@ -335,7 +336,7 @@ EOF
 	print GDML <<EOF;
 	    <physvol>
 	     <volumeref ref="volTPCWireVert"/>
-	     <position name="posTPCWireVert$i" unit="cm" z="-0.5*$TPCWirePlaneLength+$TPCWirePitch*($i+1)" x="0" y="0"/>
+	     <position name="posTPCWireVert$i" unit="cm" z="$TPCWirePitch*(-(($NumberWires-1)/2+1)+($i+1))" x="0" y="0"/>
 	     <rotationref ref="rPlus90AboutX"/>
 	    </physvol>
 EOF
@@ -351,90 +352,82 @@ EOF
 }
 
 
-# This is a re-write of Brian Rebel's gen_microplane.C into Perl. It
-# constructs the TPC wire plane for the U or V view.
-
+#Rewrote old wire code because a wire was missing and it wasn't clear where it should go.
+#41015, ahack
 sub gen_microplane()
 {
 
-    $TPCWireXPitch=$TPCWirePitch/$CosUVAngle;
+	$UVWireCount = 2400 ;
 
-    $GDML = "micro-plane" . $suffix . ".gdml";
+    $GDML = "LAr1-wireplane" . $suffix . ".gdml";
     push (@gdmlFiles, $GDML); # Add file to list of GDML fragments
     $GDML = ">" . $GDML;
     open(GDML) or die("Could not open file $GDML for writing");
 
-    # Calculate the number of wire ends on a given y-edge of the plane.
-    my $TPCYWirePitch = $TPCWirePitch / $CosUVAngle;
+    my $TPCYWirePitch = $TPCWirePitch / $SinUVAngle;
+    my $TPCZWirePitch = $TPCWirePitch / $CosUVAngle;
 
-   my $NumberWiresPerEdge = 0;
-   if ( $wires_on == 1 ) 
-    {  $NumberWiresPerEdge = int( $TPCWirePlaneLength / $TPCYWirePitch );}
-  
-    # How many side wires will be "cut off" by the lower or higher
-    # z-edge?
-   my $NumberSideWires = 0;
-    if ( $wires_on == 1 ) 
-    { $NumberSideWires = int( $TanUVAngle * $TPCWirePlaneWidth / $TPCYWirePitch ); }
+  # Calculate the number of wire ends on a given y-edge of the plane.
+    my $NumberWiresPerEdge = 0;
+    if ( $wires_on == 1 )
+      {  $NumberWiresPerEdge = int( $TPCWirePlaneWidth / $TPCYWirePitch );}
 
-    # The number of full-length "center" wires.
-  
+  # The number of full-length "center" wires.
    my $NumberCenterWires = 0.;
-   if ( $wires_on == 1 ) 
-    { $NumberCenterWires = $NumberWiresPerEdge - $NumberSideWires; }
+   if ( $wires_on == 1 )
+      { $NumberCenterWires = $UVWireCount - 2*$NumberWiresPerEdge ; }
 
-    # define the solids
-    print GDML <<EOF;
+ #####################
+ # Define the solids
+  print GDML <<EOF;
 <?xml version='1.0'?>
 <gdml>
 <solids>
 EOF
 
-    # wires on either end of the tpc #subtraction added to avoid overlap for all wires
-    for($i = 0; $i < $NumberSideWires; ++$i)
-    {
-	print GDML <<EOF;
+
+  # End wires 
+  for($i = 0; $i < $NumberWiresPerEdge; $i++)
+{
+  print GDML <<EOF;
 <tube name="TPCWire$i"
   rmax="0.5*$TPCWireThickness"
-  z="$TPCWireXPitch*($i+1)/$SinUVAngle-0.01498648"    
+  z="$TPCYWirePitch*($i+1) * 2 -0.1" 
   deltaphi="360"
   aunit="deg"
   lunit="cm"/> 
 EOF
-    }
+}
 
-    # The solids for the middle wire and the TPC wire plane, and start off the structures.
-    #subtraction added to avoid overlap for all wires
-    print GDML <<EOF;
+ print GDML <<EOF;
 <tube name="TPCWireCommon"
   rmax="0.5*$TPCWireThickness"
-  z="$TPCWirePlaneWidth/$CosUVAngle-0.0259573526"
+  z="$TPCWirePlaneWidth/$CosUVAngle - 0.1 "
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 <box name="TPCPlane"
   x="$TPCWirePlaneThickness"
   y="$TPCWirePlaneWidth"
-  z="$TPCWirePlaneLength"
+  z="$TPCWirePlaneLength+0.35"
   lunit="cm"/>
 </solids>
 <structure>
 EOF
- 
-    # the wires at either end of the plane
-    for ($i = 0; $i < $NumberSideWires; ++$i)
+
+    # Wires of varying lengths 
+  for ($i = 0; $i < $NumberWiresPerEdge; $i++)
     {
-	print GDML <<EOF;
+    print GDML <<EOF;
     <volume name="volTPCWire$i">
-	<materialref ref="Titanium"/>
-	<solidref ref="TPCWire$i"/>
+    <materialref ref="Titanium"/>
+    <solidref ref="TPCWire$i"/>
     </volume>
 EOF
     }
 
-  
-    # The wires in the middle of the plane, and the plane itself.
-    print GDML <<EOF;
+    # Center wires and plane
+   print GDML <<EOF;
     <volume name="volTPCWireCommon">
       <materialref ref="Titanium"/>
       <solidref ref="TPCWireCommon"/>
@@ -444,58 +437,61 @@ EOF
       <solidref ref="TPCPlane"/>
 EOF
 
-  # the wires at the -z end
-  for ($i = 0; $i < $NumberSideWires; ++$i)
+  # The wires at the -z, +y end (For +60 deg-- can rotate by 180 later for -60)
+  for ($i = 0; $i < $NumberWiresPerEdge ; $i++)
   {
-    $j=$NumberSideWires-$i-1;
 
+	$ypos= -1/4*($TPCWirePlaneWidth - $TPCWirePlaneLength/$TanUVAngle) + $TPCYWirePitch/2*($i - ($UVWireCount-1)/2) ;
+	$zpos= 1/4*($TPCWirePlaneWidth*abs($TanUVAngle) - $TPCWirePlaneLength) + $TPCZWirePitch/2*($i - ($UVWireCount-1)/2) ; 
+
+#	$ypos = $TanUVAngle; 
     print GDML <<EOF;
-    <physvol>
-     <volumeref ref="volTPCWire$j"/> 
-     <position name="posTPCWireF$j" unit="cm" y="-0.5*($i)*$TPCWireXPitch/$TanUVAngle" z="-0.5*$TPCWirePlaneLength+0.5*$TPCWireXPitch*($j+1)" x="0"/>
-     <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol>
+  <physvol>
+     <volumeref ref="volTPCWire$i"/> 
+     <position name="posTPCWire$i" unit="cm" y="$ypos" z="$zpos" x="0"/>
+     <rotationref ref="rPlusUVAngleAboutX"/> 
+    </physvol>  
 EOF
-  $ypos=-0.5*($i)*$TPCWireXPitch/$TanUVAngle;
-  $zpos=-0.5*$TPCWirePlaneLength+0.5*$TPCWireXPitch*($j);
-  #open (MYFILE, '>>data.txt');
- # print MYFILE "TPCWire$j y=$ypos z=$zpos\n";
-  }
-
-  # the wires at the +z end
-  for ($i = 0; $i < $NumberSideWires; ++$i)
-  {
-      my $j = $NumberSideWires-$i-1;
-      my $k = $NumberCenterWires+$NumberSideWires+$i;
-      $zposlast=-0.5*$TPCWirePlaneLength+$TPCWireXPitch*(0.5*$NumberSideWires+$NumberCenterWires);
-      $zpos=$zposlast+0.5*$TPCWireXPitch*($i);
-
-    print GDML <<EOF;
-    <physvol>
-     <volumeref ref="volTPCWire$j"/> 
-     <position name="posTPCWireB$j" unit="cm" y="0.5*($i)*$TPCWireXPitch/$TanUVAngle" z="$zpos" x="0"/>
-     <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol>
-EOF
-
-
+  $ypos=0.5*$TPCWirePlaneWidth - 0.5*$TPCYWirePitch*($i+1);
+  $zpos=-0.5*$TPCWirePlaneLength+0.5*$TPCZWirePitch*($i+1);
+ # open (MYFILE, '>>data.txt');
+ # print MYFILE "TPCWire$i y=$ypos z=$zpos\n";
   }
 
   # The wires in the middle.
-  for ($i = 0; $i < $NumberCenterWires - 1; ++$i)
+for ($i = 0; $i < $NumberCenterWires ; $i++)
   {
-      my $j = $NumberSideWires+$i;
-      $zpos=-0.5*$TPCWirePlaneLength+$TPCWireXPitch*(0.5*$NumberSideWires+$i+1);
+      my $j = $NumberWiresPerEdge  +$i;
+    # $zpos=-0.5*$TPCWirePlaneLength + $TPCZWirePitch*(0.5*$NumberWiresPerEdge + $i+1) ;
+      $zpos=$TPCZWirePitch * ($i - ($NumberCenterWires-1)/2 ) ;
 
       print GDML <<EOF;
-    <physvol>
+  <physvol>
      <volumeref ref="volTPCWireCommon"/>
      <position name="posTPCWire$j" unit="cm" y="0" z="$zpos" x="0"/>
      <rotationref ref="rPlusUVAngleAboutX"/>
-    </physvol>
+    </physvol> 
 EOF
   }
 
+  # The wires at the +z end
+  for ($i = 0; $i < $NumberWiresPerEdge; $i++)
+  {
+
+      my $j = $NumberWiresPerEdge + $NumberCenterWires + $i ;
+      my $k = $NumberWiresPerEdge - $i - 1 ;
+     # $zpos = -0.5*$TPCWirePlaneLength + 0.5*$TPCZWirePitch*($NumberWiresPerEdge + 2*$NumberCenterWires + $i +1 ) ;
+	 $ypos= 1/4*($TPCWirePlaneWidth - $TPCWirePlaneLength/$TanUVAngle) + $TPCYWirePitch/2*(($j-$k)/2) ; 
+	 $zpos= 1/4*($TPCWirePlaneLength - $TPCWirePlaneWidth*abs($TanUVAngle)) + $TPCZWirePitch/2*(($j-$k)/2) ; 
+
+    print GDML <<EOF;
+   <physvol>
+     <volumeref ref="volTPCWire$k"/> 
+     <position name="posTPCWireB$j" unit="cm" y="$ypos" z="$zpos" x="0"/> 
+    <rotationref ref="rPlusUVAngleAboutX"/>
+    </physvol> 
+EOF
+  }
 
       print GDML <<EOF;
   </volume>
@@ -1330,26 +1326,88 @@ sub gen_cryostat()
     $CRYOSTAT = ">" . $CRYOSTAT;
     open(CRYOSTAT) or die("Could not open file $CRYOSTAT for writing");
 
+    $EndcapRmax = 0.5*($CryostatEndcapLength+$CryostatOuterRadius**2/$CryostatEndcapLength);
+    $EndcapThetaDeg = asin($CryostatOuterRadius/$EndcapRmax)*180.0/pi;
+    $EndcapZcenter = 0.5*$CryostatLength+$CryostatEndcapLength-$EndcapRmax;
+    $EndcapRmin = $EndcapRmax - $CryostatEndcapThickness;
+    $UllageThetaDeg = asin($CryostatInnerRadius/$EndcapRmin)*180.0/pi;
+    $UllageLength = 2*($EndcapZcenter + sqrt($EndcapRmin**2-$CryostatInnerRadius**2));
+
     print CRYOSTAT <<EOF;
 <?xml version='1.0'?>
 <gdml>
+<define>
+ <position name="posEndCap1" unit="cm" x="0" y="0" z="$EndcapZcenter"/>
+ <position name="posEndCap2" unit="cm" x="0" y="0" z="-$EndcapZcenter"/>
+</define>
 <solids>
- <tube name="Cryostat" 
+ <tube name="CryostatTube" 
   rmax="$CryostatOuterRadius"
-  z="$CryostatLength+2*$CryostatEndcapThickness + 200"
+  z="$CryostatLength"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
+ <sphere name="CryostatEnd" rmin="0" rmax="$EndcapRmax" deltaphi="360" deltatheta="$EndcapThetaDeg" aunit="deg" lunit="cm"/>
+  <union name="CryostatUnion1">
+   <first ref="CryostatTube"/>
+   <second ref="CryostatEnd"/>
+   <positionref ref="posEndCap1"/>
+  </union>
+  <union name="Cryostat">
+   <first ref="CryostatUnion1"/>
+   <second ref="CryostatEnd"/>
+   <positionref ref="posEndCap2"/>
+   <rotationref ref="rPlus180AboutY"/>
+  </union>
+
+ <tube name="UllageTube" 
+  rmax="$CryostatInnerRadius"
+  z="$UllageLength"
+  deltaphi="360"
+  aunit="deg"
+  lunit="cm"/>
+ <sphere name="UllageEnd" rmin="0" rmax="$EndcapRmin" deltaphi="360" deltatheta="$UllageThetaDeg" aunit="deg" lunit="cm"/>
+  <union name="UllageUnion1">
+   <first ref="UllageTube"/>
+   <second ref="UllageEnd"/>
+   <positionref ref="posEndCap1"/>
+  </union>
+  <union name="UllageUnion2">
+   <first ref="UllageUnion1"/>
+   <second ref="UllageEnd"/>
+   <positionref ref="posEndCap2"/>
+   <rotationref ref="rPlus180AboutY"/>
+  </union>
+  <box name="UllageBox" lunit="cm" x="2*$CryostatInnerRadius" y="$UllageLevelFromTop" z="$CryostatLength+$CryostatEndcapLength"/>
+  <intersection name="Ullage">
+   <first ref="UllageUnion2"/>
+   <second ref="UllageBox"/>
+   <position name="posUllageBox" unit="cm" x="0" y="$CryostatInnerRadius-0.5*$UllageLevelFromTop" z="0"/>
+  </intersection>
+ 
+
 <tube name="SteelTube"
   rmin="$CryostatInnerRadius"
-  rmax="$CryostatOuterRadius-0.1"
+  rmax="$CryostatOuterRadius-0.0001"
   z="$CryostatLength"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 
+<sphere name="EndCap" rmin="$EndcapRmin" rmax="$EndcapRmax" deltaphi="360" deltatheta="$EndcapThetaDeg" aunit="deg" lunit="cm"/>
 
-<sphere name="EndCap" rmin="144*2.54" rmax="144.5*2.54" deltaphi="360" deltatheta="31.3822" aunit="deg" lunit="cm"/>
+  <union name="SteelVesselUnion1">
+   <first ref="SteelTube"/>
+   <second ref="EndCap"/>
+   <positionref ref="posEndCap1"/>
+  </union>
+  <union name="SteelVessel">
+   <first ref="SteelVesselUnion1"/>
+   <second ref="EndCap"/>
+   <positionref ref="posEndCap2"/>
+   <rotationref ref="rPlus180AboutY"/>
+  </union>
+
  <box name="aSideBeam" lunit="cm" x="256" y="2" z="5"/>
  <box name="aTopBeam" lunit="cm" x="256" y="4*2.54" z="2.54"/>
  <box name="aSideCross0" lunit="cm" x="10" y="0.75*2.54" z="43*2.54"/>
@@ -1461,13 +1519,13 @@ EOF
 </solids>
 
 <structure>
-<volume name="volEndCap">
-   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-   <solidref ref="EndCap"/>
-  </volume>
- <volume name="volSteelTube">
+ <volume name="volUllage">
+   <materialref ref="Argon_gas_87K"/>
+   <solidref ref="Ullage"/>
+ </volume>
+ <volume name="volSteelVessel">
   <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-  <solidref ref="SteelTube"/>
+  <solidref ref="SteelVessel"/>
  </volume>
 <volume name="volaTopBeam">
     <materialref ref="G10"/>
@@ -1498,17 +1556,11 @@ EOF
   <materialref ref="LAr"/>
   <solidref ref="Cryostat"/>
   <physvol>
-   <volumeref ref="volSteelTube"/>
-   <position name="posSteelTube" unit="cm" x="0" y="0" z="0"/>
+   <volumeref ref="volUllage"/>
   </physvol>
-<physvol>
-   <volumeref ref="volEndCap"/>
-   <position name="posEndCap1" unit="cm" x="0" y="0" z="427.75*2.54/2- 2.54*sqrt(144.5^2-75.5^2)"/>
-   </physvol>
-   <physvol>
-    <volumeref ref="volEndCap"/>
-    <position name="posEndCap2" unit="cm" x="0" y="0" z="-(427.75*2.54/2 - 2.54*sqrt(144.5^2-75.5^2))"/>
-    <rotationref ref="rPlus180AboutY"/>
+  <physvol>
+   <volumeref ref="volSteelVessel"/>
+   <position name="posSteelVessel" unit="cm" x="0" y="0" z="0"/>
   </physvol>
  <physvol>
     <volumeref ref="volFrame"/>
@@ -1742,45 +1794,73 @@ EOF
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack1" unit="cm" x="-75" y="408.91+104.1" z="0"/>
+        <position name="posRack1" unit="cm" x="-75" y="408.91+104.1" z="0+100+20"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack2" unit="cm" x="-75" y="408.91+104.1" z="93.85"/>
+        <position name="posRack2" unit="cm" x="-75" y="408.91+104.1" z="93.85+100+20"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack3" unit="cm" x="-75" y="408.91+104.1" z="187.7"/>
+        <position name="posRack3" unit="cm" x="-75" y="408.91+104.1" z="187.7+100+90"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack4" unit="cm" x="-75" y="408.91+104.1" z="275.15"/>
+        <position name="posRack4" unit="cm" x="-75" y="408.91+104.1" z="275.15+100+70"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack5" unit="cm" x="-75" y="408.91+104.1" z="-142.15"/>
+        <position name="posRack5" unit="cm" x="-75" y="408.91+104.1" z="-142.15+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack6" unit="cm" x="-75" y="408.91+104.1" z="-243.8"/>
+        <position name="posRack6" unit="cm" x="-75" y="408.91+104.1" z="-243.8+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack7" unit="cm" x="-75" y="408.91+104.1" z="-326.9"/>
+        <position name="posRack7" unit="cm" x="-75" y="408.91+104.1" z="-326.9+100"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack8" unit="cm" x="127.9" y="408.91+104.1" z="-326.9"/>
+        <position name="posRack8" unit="cm" x="127.9" y="408.91+104.1" z="-326.9+122"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack9" unit="cm" x="127.9" y="408.91+104.1" z="-387.7"/>
+        <position name="posRack10" unit="cm" x="127.9" y="408.91+104.1" z="-326.9+150+40"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack10" unit="cm" x="53.07" y="408.91+104.1" z="335.85"/>
+        <position name="posRack11" unit="cm" x="100" y="408.91+104.1" z="-387.7-40"/>
         <rotationref ref="rPlus90AboutY"/>
       </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack12" unit="cm" x="105" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack13" unit="cm" x="40" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack14" unit="cm" x="-75" y="408.91+104.1" z="270+40"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack15" unit="cm" x="145" y="408.91+104.1" z="-142.15+100"/>
+      </physvol>
+      <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack16" unit="cm" x="145" y="408.91+104.1" z="170"/>
+      </physvol>
+  <!--    <physvol>
+        <volumeref ref="volRack"/>
+        <position name="posRack17" unit="cm" x="-160" y="408.91+104.1" z="387.7+150+60.8"/>
+        <rotationref ref="rPlus90AboutY"/>
+      </physvol>-->
+
       <physvol>
          <volumeref ref="volFloorTankBox1"/>
          <position name="posfloortankbox1" unit="cm" x="-450" y="100+.001-530" z="335.28"/>

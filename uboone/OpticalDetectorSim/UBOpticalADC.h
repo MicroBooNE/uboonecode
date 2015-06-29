@@ -14,7 +14,9 @@
 #ifndef UBOPTICALADC_H
 #define UBOPTICALADC_H
 
-#include "UBADCBase.h"
+// LArSoft
+#include "UBADCBase.h" // uboonecode
+#include "OpticalDetectorData/ChannelData.h" // lardata
 
 namespace opdet {
   /**
@@ -44,9 +46,7 @@ namespace opdet {
     void SetPhotons(const std::vector<double>& g4time);
 
     /// Method to generate waveform for a specific channel
-    void GenWaveform(const unsigned int ch, 
-		     std::vector<unsigned short> &high_wf,
-		     std::vector<unsigned short> &low_wf  );
+    void GenWaveform(const unsigned int pmtid, optdata::ChannelData& adc_wf );
 
     /// Method to retrieve signal G4 photon time vector
     const std::vector<double>& SignalPhotonTime() const { return fPhotonTime; }
@@ -55,14 +55,14 @@ namespace opdet {
     const std::vector<double>& DarkPhotonTime() const { return fDarkPhotonTime; }
     
     /// Function to generate dark noise photon timings (called in GenWaveform)
-    void GenDarkNoise(const unsigned int ch, const double g4start);
+    void GenDarkNoise(const unsigned int pmtid, const double g4start);
 
   protected:
 
-    /// G4 photon time for signal in G4 clock
+    /// G4 photon times for signal in G4 clock. Hits in an Optical detector
     std::vector<double> fInputPhotonTime;
 
-    /// Dark noise photon time in G4 clock
+    /// Dark noise photon time in G4 clock. Hits in an Optical detector
     std::vector<double> fDarkPhotonTime;
 
     /// Photon time that is injected to the waveform (after QE applied)

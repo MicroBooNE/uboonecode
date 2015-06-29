@@ -43,7 +43,8 @@
 #include "Utilities/LArFFT.h"
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "uboone/Database/PedestalRetrievalAlg.h"
+#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "uboone/Database/UBooneIOVTimeStamp.h"
 #include "WaveformPropertiesAlg.h"
 
 /* unused function
@@ -146,7 +147,7 @@ namespace caldata {
     int  fSaveWireWF;     ///< Save recob::wire object waveforms
     size_t fEventCount;  ///< count of event processed
     
-    dtbse::PedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
+    lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
 
     void doDecon(std::vector<float>& holder, 
       raw::ChannelID_t channel, unsigned int thePlane,
@@ -170,7 +171,7 @@ namespace caldata {
   
   //-------------------------------------------------
   CalWireROI::CalWireROI(fhicl::ParameterSet const& pset):
-  fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("PedestalRetrievalAlg")),
+    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg")),
     fROIPropertiesAlg(pset.get<fhicl::ParameterSet>("ROIPropertiesAlg"))
   {
     this->reconfigure(pset);
@@ -187,7 +188,22 @@ namespace caldata {
   //////////////////////////////////////////////////////
   void CalWireROI::reconfigure(fhicl::ParameterSet const& p)
   {
-  
+    // Get signal shaping service.
+    art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
+    bool doInducedChargeDeconv = false;
+    std::vector<std::vector<size_t> > respNums = sss->GetNResponses();
+    for (size_t i = 0; i < respNums.at(1).size(); i++) {
+      if (respNums.at(1).at(i) > 1) {
+        doInducedChargeDeconv = true;
+      }
+    }
+
+    // Throw exception if deconvolution should include dynamic induced charge effects (not yet implemented in CalROI) - M. Mooney
+    if (doInducedChargeDeconv == true) {
+      throw art::Exception(art::errors::Configuration)
+        << "CalWireROI can not yet handle deconvolution with dynamic induced charge effects turned on.  Please use CalWireMicroBooNE instead.";
+    }
+
     std::vector<unsigned short> uin;    std::vector<unsigned short> vin;
     std::vector<unsigned short> zin;
     
@@ -204,8 +220,8 @@ namespace caldata {
     fSaveWireWF       = p.get< int >                  ("SaveWireWF");
 
     fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
-
-    fPedestalRetrievalAlg.reconfigure(p);
+    
+    fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
     
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
       throw art::Exception(art::errors::Configuration)
@@ -266,6 +282,12 @@ namespace caldata {
   //////////////////////////////////////////////////////
   void CalWireROI::produce(art::Event& evt)
   {      
+  
+    //update database cache
+    //Temporarily replace with the generic version until time stamp becomes available
+    //fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    fPedestalRetrievalAlg.Update( evt );
+  
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
 
@@ -319,6 +341,10 @@ namespace caldata {
       // get the reference to the current raw::RawDigit
       art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
       channel = digitVec->Channel();
+
+      // The following test is meant to be temporary until the "correct" solution is implemented
+      if (chanFilt->GetChannelStatus(channel) == filter::ChannelFilter::NOTPHYSICAL) continue;
+
       unsigned int dataSize = digitVec->Samples();
       // vector holding uncompressed adc values
       std::vector<short> rawadc(dataSize);
@@ -343,8 +369,7 @@ namespace caldata {
         raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
         // loop over all adc values and subtract the pedestal
 	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
-        float pdstl = 0.0;
-	fPedestalRetrievalAlg.GetPedestalMean(channel, pdstl);
+        float pdstl = fPedestalRetrievalAlg.PedMean(channel);
 	//subtract time-offset added in SimWireMicroBooNE_module
 	// Xin, remove the time offset
 	//int time_offset = 0.;//sss->FieldResponseTOffset(channel);
@@ -588,7 +613,10 @@ namespace caldata {
 	    //   std::cout << basePre << " " << basePost << " " << roiStart << " " << roiLen << " " << dataSize << " " << base << std::endl;
 	  } // fDoBaselineSub ...
 	  else if(fDoBaselineSub_WaveformPropertiesAlg)
-	    base = fROIPropertiesAlg.GetWaveformPedestal(holder);
+      {
+          holder.resize(roiLen);
+          base = fROIPropertiesAlg.GetWaveformPedestal(holder);
+      }
 
 
 	  for(unsigned int jj = bBegin; jj < bEnd; ++jj) {

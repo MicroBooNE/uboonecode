@@ -109,10 +109,12 @@
 #include "SummaryData/POTSummary.h"
 #include "MCCheater/BackTracker.h"
 #include "RecoBase/Track.h"
+#include "RecoBase/Shower.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/EndPoint2D.h"
 #include "RecoBase/Vertex.h"
+#include "RecoBase/OpFlash.h"
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "RecoObjects/BezierTrack.h"
 #include "RecoAlg/TrackMomentumCalculator.h"
@@ -140,6 +142,9 @@ constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackModuleLabel
 constexpr unsigned short kMaxVertices   = 100;    //max number of 3D vertices
 constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector cells per MC particle
+constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
+constexpr int kMaxShowers    = 1000;   //maximum number of showers
+constexpr int kMaxTruth      = 10;     //maximum number of neutrino truth interactions
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -229,13 +234,9 @@ namespace microboone {
       PlaneData_t<Float_t>    trkke;
       PlaneData_t<Float_t>    trkrange;
       PlaneData_t<Int_t>      trkidtruth;  //true geant trackid
-      PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles
+      PlaneData_t<Short_t>    trkorigin;   //_ev_origin 0: unknown, 1: neutrino, 2: cosmic, 3: supernova, 4: singles
       PlaneData_t<Int_t>      trkpdgtruth; //true pdg code
       PlaneData_t<Float_t>    trkefftruth; //completeness
-      PlaneData_t<Float_t>    trksimIDEenergytruth;
-      PlaneData_t<Float_t>    trksimIDExtruth;
-      PlaneData_t<Float_t>    trksimIDEytruth;
-      PlaneData_t<Float_t>    trksimIDEztruth;
       PlaneData_t<Float_t>    trkpurtruth; //purity of track
       PlaneData_t<Float_t>    trkpitchc;
       PlaneData_t<Short_t>    ntrkhits;
@@ -294,7 +295,7 @@ namespace microboone {
       void SetMaxTracks(size_t maxTracks)
         { MaxTracks = maxTracks; Resize(MaxTracks); }
       void Resize(size_t nTracks);
-      void SetAddresses(TTree* pTree, std::string tracker);
+      void SetAddresses(TTree* pTree, std::string tracker, bool isCosmics);
       
       size_t GetMaxTracks() const { return MaxTracks; }
       size_t GetMaxPlanesPerTrack(int /* iTrack */ = 0) const
@@ -313,6 +314,8 @@ namespace microboone {
       tdHit = 0x10,
       tdTrack = 0x20,
       tdVtx = 0x40,
+      tdFlash = 0x80,
+      tdShower = 0x100,
       tdDefault = 0
     }; // DataBits_t
     
@@ -353,13 +356,38 @@ namespace microboone {
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
     Float_t  hit_endT[kMaxHits];       //hit end time
+    Float_t  hit_goodnessOfFit[kMaxHits]; //chi2/dof goodness of fit 
+    Short_t  hit_multiplicity[kMaxHits];  //multiplicity of the given hit					 
+    Float_t  hit_trueX[kMaxHits];      // hit true X (cm)
     Float_t  hit_nelec[kMaxHits];     //hit number of electrons
     Float_t  hit_energy[kMaxHits];       //hit energy
     Short_t  hit_trkid[kMaxHits];      //is this hit associated with a reco track?
 
     // vertex information
     Short_t  nvtx;                     //number of vertices
-    Float_t  vtx[kMaxVertices][3];     //vtx[3]  
+    Float_t  vtx[kMaxVertices][3];     //vtx[3] 
+    
+    // shower information
+    Short_t  nshowers;                     //number of showers
+    Int_t    showerID[kMaxShowers];        //Shower ID
+    Int_t    shwr_bestplane[kMaxShowers];  //Shower best plane 
+    Float_t  shwr_length[kMaxShowers];     //Shower length  
+    Float_t  shwr_startdcosx[kMaxShowers]; //X directional cosine at start of shower 
+    Float_t  shwr_startdcosy[kMaxShowers]; //Y directional cosine at start of shower 
+    Float_t  shwr_startdcosz[kMaxShowers]; //Z directional cosine at start of shower 
+    Float_t  shwr_startx[kMaxShowers];     //startx of shower 
+    Float_t  shwr_starty[kMaxShowers];     //starty of shower 
+    Float_t  shwr_startz[kMaxShowers];     //startz of shower 
+    Float_t  shwr_totEng[kMaxShowers][3];  //Total energy of the shower per plane 
+    Float_t  shwr_dedx[kMaxShowers][3];    //dedx of the shower per plane
+    Float_t  shwr_mipEng[kMaxShowers][3];   //Total MIP energy of the shower per plane
+
+    // flash information
+    Int_t    no_flashes;                //number of flashes
+    Float_t  flash_time[kMaxFlashes];   //flash time
+    Float_t  flash_pe[kMaxFlashes];     //flash total PE
+    Float_t  flash_ycenter[kMaxFlashes];//y center of flash
+    Float_t  flash_zcenter[kMaxFlashes];//z center of flash
 
     //track information
     Char_t   kNTracker;
@@ -367,44 +395,46 @@ namespace microboone {
     
     //mctruth information
     Int_t     mcevts_truth;    //number of neutrino Int_teractions in the spill
-    Int_t     nuPDG_truth;     //neutrino PDG code
-    Int_t     ccnc_truth;      //0=CC 1=NC
-    Int_t     mode_truth;      //0=QE/El, 1=RES, 2=DIS, 3=Coherent production
-    Float_t  enu_truth;       //true neutrino energy
-    Float_t  Q2_truth;        //Momentum transfer squared
-    Float_t  W_truth;         //hadronic invariant mass
-    Int_t     hitnuc_truth;    //hit nucleon
-    Float_t  nuvtxx_truth;    //neutrino vertex x
-    Float_t  nuvtxy_truth;    //neutrino vertex y
-    Float_t  nuvtxz_truth;    //neutrino vertex z
-    Float_t  nu_dcosx_truth;  //neutrino dcos x
-    Float_t  nu_dcosy_truth;  //neutrino dcos y
-    Float_t  nu_dcosz_truth;  //neutrino dcos z
-    Float_t  lep_mom_truth;   //lepton momentum
-    Float_t  lep_dcosx_truth; //lepton dcos x
-    Float_t  lep_dcosy_truth; //lepton dcos y
-    Float_t  lep_dcosz_truth; //lepton dcos z
+    Int_t     nuPDG_truth[kMaxTruth];     //neutrino PDG code
+    Int_t     ccnc_truth[kMaxTruth];      //0=CC 1=NC
+    Int_t     mode_truth[kMaxTruth];      //0=QE/El, 1=RES, 2=DIS, 3=Coherent production
+    Float_t  enu_truth[kMaxTruth];       //true neutrino energy
+    Float_t  Q2_truth[kMaxTruth];        //Momentum transfer squared
+    Float_t  W_truth[kMaxTruth];         //hadronic invariant mass
+    Float_t  X_truth[kMaxTruth];
+    Float_t  Y_truth[kMaxTruth];
+    Int_t     hitnuc_truth[kMaxTruth];    //hit nucleon
+    Float_t  nuvtxx_truth[kMaxTruth];    //neutrino vertex x
+    Float_t  nuvtxy_truth[kMaxTruth];    //neutrino vertex y
+    Float_t  nuvtxz_truth[kMaxTruth];    //neutrino vertex z
+    Float_t  nu_dcosx_truth[kMaxTruth];  //neutrino dcos x
+    Float_t  nu_dcosy_truth[kMaxTruth];  //neutrino dcos y
+    Float_t  nu_dcosz_truth[kMaxTruth];  //neutrino dcos z
+    Float_t  lep_mom_truth[kMaxTruth];   //lepton momentum
+    Float_t  lep_dcosx_truth[kMaxTruth]; //lepton dcos x
+    Float_t  lep_dcosy_truth[kMaxTruth]; //lepton dcos y
+    Float_t  lep_dcosz_truth[kMaxTruth]; //lepton dcos z
 
     //flux information
-    Float_t  tpx_flux;        //Px of parent particle leaving BNB target
-    Float_t  tpy_flux;        //Py of parent particle leaving BNB target
-    Float_t  tpz_flux;        //Pz of parent particle leaving BNB target
-    Int_t     tptype_flux;     //Type of parent particle leaving BNB target
-
+    Float_t  tpx_flux[kMaxTruth];        //Px of parent particle leaving BNB target
+    Float_t  tpy_flux[kMaxTruth];        //Py of parent particle leaving BNB target
+    Float_t  tpz_flux[kMaxTruth];        //Pz of parent particle leaving BNB target
+    Int_t    tptype_flux[kMaxTruth];     //Type of parent particle leaving BNB target
+     
     //genie information
     size_t MaxGeniePrimaries = 0;
     Int_t     genie_no_primaries;
-    std::vector<Int_t>     genie_primaries_pdg;
+    std::vector<Int_t>    genie_primaries_pdg;
     std::vector<Float_t>  genie_Eng;
     std::vector<Float_t>  genie_Px;
     std::vector<Float_t>  genie_Py;
     std::vector<Float_t>  genie_Pz;
     std::vector<Float_t>  genie_P;
-    std::vector<Int_t>     genie_status_code;
+    std::vector<Int_t>    genie_status_code;
     std::vector<Float_t>  genie_mass;
-    std::vector<Int_t>     genie_trackID;
-    std::vector<Int_t>     genie_ND;
-    std::vector<Int_t>     genie_mother;
+    std::vector<Int_t>    genie_trackID;
+    std::vector<Int_t>    genie_ND;
+    std::vector<Int_t>    genie_mother;
     
     //cosmic cry information
     Int_t     mcevts_truthcry;    //number of neutrino Int_teractions in the spill
@@ -464,7 +494,9 @@ namespace microboone {
     std::vector<Int_t>    process_primary;
     std::vector<std::string> processname;
     std::vector<Int_t>    MergedId; //geant track segments, which belong to the same particle, get the same
-    
+    std::vector<Int_t>    origin;   ////0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles 
+    std::vector<Int_t>    MCTruthIndex; //this geant particle comes from the neutrino interaction of the _truth variables with this index
+
     // Auxiliary detector variables saved for each geant track
     // This data is saved as a vector (one item per GEANT particle) of C arrays
     // (wrapped in a BoxedArray for technical reasons), one item for each
@@ -510,6 +542,12 @@ namespace microboone {
     /// Returns whether we have Geant data
     bool hasGeantInfo() const { return bits & tdGeant; }
 
+    /// Returns whether we have Flash data
+    bool hasFlashInfo() const { return bits & tdFlash; }
+    
+    /// Returns whether we have Shower data
+    bool hasShowerInfo() const { return bits & tdShower; }
+
     /// Sets the specified bits
     void SetBits(unsigned int setbits, bool unset = false)
       { if (unset) bits &= ~setbits; else bits |= setbits; }
@@ -544,7 +582,7 @@ namespace microboone {
     void ResizeCry(int nPrimaries);
     
     /// Connect this object with a tree
-    void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers);
+    void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers, bool isCosmics);
     
     
     /// Returns the number of trackers for which data structures are allocated
@@ -662,6 +700,7 @@ namespace microboone {
     void analyze(const art::Event& evt);
   //  void beginJob() {}
     void beginSubRun(const art::SubRun& sr);
+    void endSubRun(const art::SubRun& sr);
 
   private:
 
@@ -671,7 +710,7 @@ namespace microboone {
     double bdist(const TVector3& pos);
 
     TTree* fTree;
-
+    TTree* fPOT;
     // event information is huge and dynamic;
     // run information is much smaller and we still store it statically
     // in the event
@@ -687,6 +726,8 @@ namespace microboone {
     std::string fCryGenModuleLabel;
     std::string fG4ModuleLabel;
     std::string fVertexModuleLabel;
+    std::string fShowerModuleLabel;
+    std::string fOpFlashModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
     std::vector<std::string> fParticleIDModuleLabel;
@@ -699,10 +740,15 @@ namespace microboone {
     bool fSaveHitInfo; ///whether to extract and save Hit information
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
-    
+    bool fSaveFlashInfo;  ///whether to extract and save Flash information
+    bool fSaveShowerInfo;  ///whether to extract and save Shower information
+
     std::vector<std::string> fCosmicTaggerAssocLabel;
     std::vector<std::string> fFlashMatchAssocLabel;
 
+    bool isCosmics;      ///< if it contains cosmics
+    bool fSaveCaloCosmics; ///< save calorimetry information for cosmics
+    float fG4minE;         ///< Energy threshold to save g4 particle info
     /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
        
@@ -719,8 +765,10 @@ namespace microboone {
         else {
           fData->SetBits(AnalysisTreeDataStruct::tdHit, !fSaveHitInfo);	
 	  fData->SetBits(AnalysisTreeDataStruct::tdTrack, !fSaveTrackInfo);	
-	  fData->SetBits(AnalysisTreeDataStruct::tdVtx, !fSaveVertexInfo);	  	  	    	  	    	  	    	  
+	  fData->SetBits(AnalysisTreeDataStruct::tdVtx, !fSaveVertexInfo);
 	  fData->SetTrackers(GetNTrackers());
+          fData->SetBits(AnalysisTreeDataStruct::tdFlash, !fSaveFlashInfo);	
+          fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);	
           if (bClearData) fData->Clear();
         }
       } // CreateData()
@@ -729,7 +777,7 @@ namespace microboone {
     void SetAddresses()
       {
         CheckData("SetAddress()"); CheckTree("SetAddress()");
-        fData->SetAddresses(fTree, fTrackModuleLabel);
+        fData->SetAddresses(fTree, fTrackModuleLabel, isCosmics);
       } // SetAddresses()
     
     /// Sets the addresses of all the tree branches of the specified tracking algo,
@@ -743,7 +791,7 @@ namespace microboone {
             << " (" << fData->GetNTrackers() << " available)";
         }
         fData->GetTrackerData(iTracker) \
-          .SetAddresses(fTree, fTrackModuleLabel[iTracker]);
+          .SetAddresses(fTree, fTrackModuleLabel[iTracker], isCosmics);
       } // SetTrackerAddresses()
     
     /// Create the output tree and the data structures, if needed
@@ -851,10 +899,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkorigin.resize(MaxTracks);
   trkpdgtruth.resize(MaxTracks);
   trkefftruth.resize(MaxTracks);
-  trksimIDEenergytruth.resize(MaxTracks);
-  trksimIDExtruth.resize(MaxTracks);
-  trksimIDEytruth.resize(MaxTracks);
-  trksimIDEztruth.resize(MaxTracks);
   trkpurtruth.resize(MaxTracks);
   trkpitchc.resize(MaxTracks);
   ntrkhits.resize(MaxTracks);
@@ -914,10 +958,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
     FillWith(trkorigin[iTrk]  , -1 );
     FillWith(trkpdgtruth[iTrk], -99999 );
     FillWith(trkefftruth[iTrk], -99999.);
-    FillWith(trksimIDEenergytruth[iTrk], -99999.);
-    FillWith(trksimIDExtruth[iTrk], -99999.);
-    FillWith(trksimIDEytruth[iTrk], -99999.);
-    FillWith(trksimIDEztruth[iTrk], -99999.);
     FillWith(trkpurtruth[iTrk], -99999.);
     FillWith(trkpitchc[iTrk]  , -99999.);
     FillWith(ntrkhits[iTrk]   ,  -9999 );
@@ -941,7 +981,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
 
 
 void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
-  TTree* pTree, std::string tracker
+  TTree* pTree, std::string tracker, bool isCosmics
 ) {
   if (MaxTracks == 0) return; // no tracks, no tree!
   
@@ -997,18 +1037,6 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   BranchName = "trkefftruth_" + TrackLabel;
   CreateBranch(BranchName, trkefftruth, BranchName + NTracksIndexStr + "[3]/F");
  
-  BranchName = "trksimIDEenergytruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEenergytruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDExtruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDExtruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDEytruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEytruth, BranchName + NTracksIndexStr + "[3]/F");
-
-  BranchName = "trksimIDEztruth_" + TrackLabel;
-  CreateBranch(BranchName, trksimIDEztruth, BranchName + NTracksIndexStr + "[3]/F");
- 
   BranchName = "trkpurtruth_" + TrackLabel;
   CreateBranch(BranchName, trkpurtruth, BranchName + NTracksIndexStr + "[3]/F");
   
@@ -1018,18 +1046,20 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   BranchName = "ntrkhits_" + TrackLabel;
   CreateBranch(BranchName, ntrkhits, BranchName + NTracksIndexStr + "[3]/S");
   
-  BranchName = "trkdedx_" + TrackLabel;
-  CreateBranch(BranchName, trkdedx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+  if (!isCosmics){
+    BranchName = "trkdedx_" + TrackLabel;
+    CreateBranch(BranchName, trkdedx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
   
-  BranchName = "trkdqdx_" + TrackLabel;
-  CreateBranch(BranchName, trkdqdx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-  
-  BranchName = "trkresrg_" + TrackLabel;
-  CreateBranch(BranchName, trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-  
-  BranchName = "trkxyz_" + TrackLabel;
-  CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
-  
+    BranchName = "trkdqdx_" + TrackLabel;
+    CreateBranch(BranchName, trkdqdx, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    
+    BranchName = "trkresrg_" + TrackLabel;
+    CreateBranch(BranchName, trkresrg, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "/F");
+    
+    BranchName = "trkxyz_" + TrackLabel;
+    CreateBranch(BranchName, trkxyz, BranchName + NTracksIndexStr + "[3]" + MaxTrackHitsIndexStr + "[3]" + "/F");
+  }
+
   BranchName = "trkstartx_" + TrackLabel;
   CreateBranch(BranchName, trkstartx, BranchName + NTracksIndexStr + "/F");
   
@@ -1158,6 +1188,9 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
   std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
   std::fill(hit_endT, hit_endT + sizeof(hit_endT)/sizeof(hit_endT[0]), -99999.);
+  std::fill(hit_trueX, hit_trueX + sizeof(hit_trueX)/sizeof(hit_trueX[0]), -99999.);
+  std::fill(hit_goodnessOfFit, hit_goodnessOfFit + sizeof(hit_goodnessOfFit)/sizeof(hit_goodnessOfFit[0]), -99999.);
+  std::fill(hit_multiplicity, hit_multiplicity + sizeof(hit_multiplicity)/sizeof(hit_multiplicity[0]), -99999.);
   std::fill(hit_trkid, hit_trkid + sizeof(hit_trkid)/sizeof(hit_trkid[0]), -9999);
   std::fill(hit_nelec, hit_nelec + sizeof(hit_nelec)/sizeof(hit_nelec[0]), -99999.);
   std::fill(hit_energy, hit_energy + sizeof(hit_energy)/sizeof(hit_energy[0]), -99999.);
@@ -1167,29 +1200,54 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
     std::fill(vtx[ivtx], vtx[ivtx]+3, -99999.);
   }
 
+  no_flashes = 0;
+  std::fill(flash_time, flash_time + sizeof(flash_time)/sizeof(flash_time[0]), -9999);
+  std::fill(flash_pe, flash_pe + sizeof(flash_pe)/sizeof(flash_pe[0]), -9999);
+  std::fill(flash_ycenter, flash_ycenter + sizeof(flash_ycenter)/sizeof(flash_ycenter[0]), -9999);
+  std::fill(flash_zcenter, flash_zcenter + sizeof(flash_zcenter)/sizeof(flash_zcenter[0]), -9999);
+
+  nshowers = 0;
+  std::fill(showerID, showerID + sizeof(showerID)/sizeof(showerID[0]), -9999);
+  std::fill(shwr_bestplane, shwr_bestplane + sizeof(shwr_bestplane)/sizeof(shwr_bestplane[0]), -9999);
+  std::fill(shwr_length, shwr_length + sizeof(shwr_length)/sizeof(shwr_length[0]), -99999.);
+  std::fill(shwr_startdcosx, shwr_startdcosx + sizeof(shwr_startdcosx)/sizeof(shwr_startdcosx[0]), -99999.);
+  std::fill(shwr_startdcosy, shwr_startdcosy + sizeof(shwr_startdcosy)/sizeof(shwr_startdcosy[0]), -99999.);
+  std::fill(shwr_startdcosz, shwr_startdcosz + sizeof(shwr_startdcosz)/sizeof(shwr_startdcosz[0]), -99999.);
+  std::fill(shwr_startx, shwr_startx + sizeof(shwr_startx)/sizeof(shwr_startx[0]), -99999.);
+  std::fill(shwr_starty, shwr_starty + sizeof(shwr_starty)/sizeof(shwr_starty[0]), -99999.);
+  std::fill(shwr_startz, shwr_startz + sizeof(shwr_startz)/sizeof(shwr_startz[0]), -99999.);
+  for (size_t ishwr = 0; ishwr < kMaxShowers; ++ishwr) {
+     std::fill(shwr_totEng[ishwr], shwr_totEng[ishwr]+3, -99999.);
+     std::fill(shwr_dedx[ishwr], shwr_dedx[ishwr]+3, -99999.);
+     std::fill(shwr_mipEng[ishwr], shwr_mipEng[ishwr]+3, -99999.);
+  }   
+  
+
   mcevts_truth = -99999;
   mcevts_truthcry = -99999;
-  nuPDG_truth = -99999;
-  ccnc_truth = -99999;
-  mode_truth = -99999;
-  enu_truth = -99999;
-  Q2_truth = -99999;
-  W_truth = -99999;
-  hitnuc_truth = -99999;
-  nuvtxx_truth = -99999;
-  nuvtxy_truth = -99999;
-  nuvtxz_truth = -99999;
-  nu_dcosx_truth = -99999;
-  nu_dcosy_truth = -99999;
-  nu_dcosz_truth = -99999;
-  lep_mom_truth = -99999;
-  lep_dcosx_truth = -99999;
-  lep_dcosy_truth = -99999;
-  lep_dcosz_truth = -99999;
-  tpx_flux = -99999;
-  tpy_flux = -99999;
-  tpz_flux = -99999;
-  tptype_flux = -99999;
+  std::fill(nuPDG_truth, nuPDG_truth + sizeof(nuPDG_truth)/sizeof(nuPDG_truth[0]), -99999.);
+  std::fill(ccnc_truth, ccnc_truth + sizeof(ccnc_truth)/sizeof(ccnc_truth[0]), -99999.);
+  std::fill(mode_truth, mode_truth + sizeof(mode_truth)/sizeof(mode_truth[0]), -99999.);
+  std::fill(enu_truth, enu_truth + sizeof(enu_truth)/sizeof(enu_truth[0]), -99999.);
+  std::fill(Q2_truth, Q2_truth + sizeof(Q2_truth)/sizeof(Q2_truth[0]), -99999.);
+  std::fill(W_truth, W_truth + sizeof(W_truth)/sizeof(W_truth[0]), -99999.);
+  std::fill(X_truth, X_truth + sizeof(X_truth)/sizeof(X_truth[0]), -99999.);
+  std::fill(Y_truth, Y_truth + sizeof(Y_truth)/sizeof(Y_truth[0]), -99999.);
+  std::fill(hitnuc_truth, hitnuc_truth + sizeof(hitnuc_truth)/sizeof(hitnuc_truth[0]), -99999.);
+  std::fill(nuvtxx_truth, nuvtxx_truth + sizeof(nuvtxx_truth)/sizeof(nuvtxx_truth[0]), -99999.);
+  std::fill(nuvtxy_truth, nuvtxy_truth + sizeof(nuvtxy_truth)/sizeof(nuvtxy_truth[0]), -99999.);
+  std::fill(nuvtxz_truth, nuvtxz_truth + sizeof(nuvtxz_truth)/sizeof(nuvtxz_truth[0]), -99999.);
+  std::fill(nu_dcosx_truth, nu_dcosx_truth + sizeof(nu_dcosx_truth)/sizeof(nu_dcosx_truth[0]), -99999.);
+  std::fill(nu_dcosy_truth, nu_dcosy_truth + sizeof(nu_dcosy_truth)/sizeof(nu_dcosy_truth[0]), -99999.);
+  std::fill(nu_dcosz_truth, nu_dcosz_truth + sizeof(nu_dcosz_truth)/sizeof(nu_dcosz_truth[0]), -99999.);
+  std::fill(lep_mom_truth, lep_mom_truth + sizeof(lep_mom_truth)/sizeof(lep_mom_truth[0]), -99999.);
+  std::fill(lep_dcosx_truth, lep_dcosx_truth + sizeof(lep_dcosx_truth)/sizeof(lep_dcosx_truth[0]), -99999.);
+  std::fill(lep_dcosy_truth, lep_dcosy_truth + sizeof(lep_dcosy_truth)/sizeof(lep_dcosy_truth[0]), -99999.);
+  std::fill(lep_dcosz_truth, lep_dcosz_truth + sizeof(lep_dcosz_truth)/sizeof(lep_dcosz_truth[0]), -99999.);
+  std::fill(tpx_flux, tpx_flux + sizeof(tpx_flux)/sizeof(tpx_flux[0]), -99999.);
+  std::fill(tpy_flux, tpy_flux + sizeof(tpy_flux)/sizeof(tpy_flux[0]), -99999.);
+  std::fill(tpz_flux, tpz_flux + sizeof(tpz_flux)/sizeof(tpz_flux[0]), -99999.);
+  std::fill(tptype_flux, tptype_flux + sizeof(tptype_flux)/sizeof(tptype_flux[0]), -99999.);
 
   genie_no_primaries = 0;
   cry_no_primaries = 0;
@@ -1233,6 +1291,8 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(process_primary, -99999);
   FillWith(processname, "noname");
   FillWith(MergedId, -99999);
+  FillWith(origin, -99999);
+  FillWith(MCTruthIndex, -99999);
   FillWith(genie_primaries_pdg, -99999);
   FillWith(genie_Eng, -99999.);
   FillWith(genie_Px, -99999.);
@@ -1327,7 +1387,9 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   process_primary.resize(MaxGEANTparticles);
   processname.resize(MaxGEANTparticles);
   MergedId.resize(MaxGEANTparticles);
-  
+  origin.resize(MaxGEANTparticles);
+  MCTruthIndex.resize(MaxGEANTparticles);  
+
   // auxiliary detector structure
   NAuxDets.resize(MaxGEANTparticles);
   AuxDetID.resize(MaxGEANTparticles);
@@ -1361,7 +1423,6 @@ void microboone::AnalysisTreeDataStruct::ResizeGenie(int nPrimaries) {
   genie_trackID.resize(MaxGeniePrimaries);
   genie_ND.resize(MaxGeniePrimaries);
   genie_mother.resize(MaxGeniePrimaries);
-
 } // microboone::AnalysisTreeDataStruct::ResizeGenie()
 
 void microboone::AnalysisTreeDataStruct::ResizeCry(int nPrimaries) {
@@ -1385,7 +1446,8 @@ void microboone::AnalysisTreeDataStruct::ResizeCry(int nPrimaries) {
 
 void microboone::AnalysisTreeDataStruct::SetAddresses(
   TTree* pTree,
-  const std::vector<std::string>& trackers
+  const std::vector<std::string>& trackers,
+  bool isCosmics
 ) {
   BranchCreator CreateBranch(pTree);
 
@@ -1408,14 +1470,43 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
     CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
     CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits]/F");
+    CreateBranch("hit_trueX",hit_trueX,"hit_trueX[no_hits]/F");    
+    CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits]/F");    
+    CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits]/S");    
     CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
-    CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
-    CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
+    if (!isCosmics){
+      CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
+      CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
+    }
   }
 
   if (hasVertexInfo()){
     CreateBranch("nvtx",&nvtx,"nvtx/S");
     CreateBranch("vtx",vtx,"vtx[nvtx][3]/F");
+  }  
+
+  if (hasFlashInfo()){
+    CreateBranch("no_flashes",&no_flashes,"no_flashes/I");
+    CreateBranch("flash_time",flash_time,"flash_time[no_flashes]/F");
+    CreateBranch("flash_pe",flash_pe,"flash_pe[no_flashes]/F");
+    CreateBranch("flash_ycenter",flash_ycenter,"flash_ycenter[no_flashes]/F");
+    CreateBranch("flash_zcenter",flash_zcenter,"flash_zcenter[no_flashes]/F");
+  }
+  
+  if (hasShowerInfo()){
+    CreateBranch("nshowers",&nshowers,"nshowers/S");
+    CreateBranch("showerID",showerID,"showerID[nshowers]/I");
+    CreateBranch("shwr_bestplane",shwr_bestplane,"shwr_bestplane[nshowers]/I");
+    CreateBranch("shwr_length",shwr_length,"shwr_length[nshowers]/F");
+    CreateBranch("shwr_startdcosx",shwr_startdcosx,"shwr_startdcosx[nshowers]/F");
+    CreateBranch("shwr_startdcosy",shwr_startdcosy,"shwr_startdcosy[nshowers]/F");
+    CreateBranch("shwr_startdcosz",shwr_startdcosz,"shwr_startdcosz[nshowers]/F");
+    CreateBranch("shwr_startx",shwr_startx,"shwr_startx[nshowers]/F");
+    CreateBranch("shwr_starty",shwr_starty,"shwr_starty[nshowers]/F");
+    CreateBranch("shwr_startz",shwr_startz,"shwr_startz[nshowers]/F");
+    CreateBranch("shwr_totEng",shwr_totEng,"shwr_totEng[nshowers][3]/F");
+    CreateBranch("shwr_dedx",shwr_dedx,"shwr_dedx[nshowers][3]/F");
+    CreateBranch("shwr_mipEng",shwr_mipEng,"shwr_mipEng[nshowers][3]/F");
   }  
 
   if (hasTrackInfo()){
@@ -1431,34 +1522,36 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 
       // note that if the tracker data has maximum number of tracks 0,
       // nothing is initialized (branches are not even created)
-      TrackData[i].SetAddresses(pTree, TrackLabel);    
+      TrackData[i].SetAddresses(pTree, TrackLabel, isCosmics);    
     } // for trackers
   } 
 
   if (hasGenieInfo()){
     CreateBranch("mcevts_truth",&mcevts_truth,"mcevts_truth/I");
-    CreateBranch("nuPDG_truth",&nuPDG_truth,"nuPDG_truth/I");
-    CreateBranch("ccnc_truth",&ccnc_truth,"ccnc_truth/I");
-    CreateBranch("mode_truth",&mode_truth,"mode_truth/I");
-    CreateBranch("enu_truth",&enu_truth,"enu_truth/F");
-    CreateBranch("Q2_truth",&Q2_truth,"Q2_truth/F");
-    CreateBranch("W_truth",&W_truth,"W_truth/F");
-    CreateBranch("hitnuc_truth",&hitnuc_truth,"hitnuc_truth/I");
-    CreateBranch("nuvtxx_truth",&nuvtxx_truth,"nuvtxx_truth/F");
-    CreateBranch("nuvtxy_truth",&nuvtxy_truth,"nuvtxy_truth/F");
-    CreateBranch("nuvtxz_truth",&nuvtxz_truth,"nuvtxz_truth/F");
-    CreateBranch("nu_dcosx_truth",&nu_dcosx_truth,"nu_dcosx_truth/F");
-    CreateBranch("nu_dcosy_truth",&nu_dcosy_truth,"nu_dcosy_truth/F");
-    CreateBranch("nu_dcosz_truth",&nu_dcosz_truth,"nu_dcosz_truth/F");
-    CreateBranch("lep_mom_truth",&lep_mom_truth,"lep_mom_truth/F");
-    CreateBranch("lep_dcosx_truth",&lep_dcosx_truth,"lep_dcosx_truth/F");
-    CreateBranch("lep_dcosy_truth",&lep_dcosy_truth,"lep_dcosy_truth/F");
-    CreateBranch("lep_dcosz_truth",&lep_dcosz_truth,"lep_dcosz_truth/F");
+    CreateBranch("nuPDG_truth",nuPDG_truth,"nuPDG_truth[mcevts_truth]/I");
+    CreateBranch("ccnc_truth",ccnc_truth,"ccnc_truth[mcevts_truth]/I");
+    CreateBranch("mode_truth",mode_truth,"mode_truth[mcevts_truth]/I");
+    CreateBranch("enu_truth",enu_truth,"enu_truth[mcevts_truth]/F");
+    CreateBranch("Q2_truth",Q2_truth,"Q2_truth[mcevts_truth]/F");
+    CreateBranch("W_truth",W_truth,"W_truth[mcevts_truth]/F");
+    CreateBranch("X_truth",X_truth,"X_truth[mcevts_truth]/F");
+    CreateBranch("Y_truth",Y_truth,"Y_truth[mcevts_truth]/F");
+    CreateBranch("hitnuc_truth",hitnuc_truth,"hitnuc_truth[mcevts_truth]/I");
+    CreateBranch("nuvtxx_truth",nuvtxx_truth,"nuvtxx_truth[mcevts_truth]/F");
+    CreateBranch("nuvtxy_truth",nuvtxy_truth,"nuvtxy_truth[mcevts_truth]/F");
+    CreateBranch("nuvtxz_truth",nuvtxz_truth,"nuvtxz_truth[mcevts_truth]/F");
+    CreateBranch("nu_dcosx_truth",nu_dcosx_truth,"nu_dcosx_truth[mcevts_truth]/F");
+    CreateBranch("nu_dcosy_truth",nu_dcosy_truth,"nu_dcosy_truth[mcevts_truth]/F");
+    CreateBranch("nu_dcosz_truth",nu_dcosz_truth,"nu_dcosz_truth[mcevts_truth]/F");
+    CreateBranch("lep_mom_truth",lep_mom_truth,"lep_mom_truth[mcevts_truth]/F");
+    CreateBranch("lep_dcosx_truth",lep_dcosx_truth,"lep_dcosx_truth[mcevts_truth]/F");
+    CreateBranch("lep_dcosy_truth",lep_dcosy_truth,"lep_dcosy_truth[mcevts_truth]/F");
+    CreateBranch("lep_dcosz_truth",lep_dcosz_truth,"lep_dcosz_truth[mcevts_truth]/F");
 
-    CreateBranch("tpx_flux",&tpx_flux,"tpx_flux/F");
-    CreateBranch("tpy_flux",&tpy_flux,"tpy_flux/F");
-    CreateBranch("tpz_flux",&tpz_flux,"tpz_flux/F");
-    CreateBranch("tptype_flux",&tptype_flux,"tptype_flux/I");
+    CreateBranch("tpx_flux",tpx_flux,"tpx_flux[mcevts_truth]/F");
+    CreateBranch("tpy_flux",tpy_flux,"tpy_flux[mcevts_truth]/F");
+    CreateBranch("tpz_flux",tpz_flux,"tpz_flux[mcevts_truth]/F");
+    CreateBranch("tptype_flux",tptype_flux,"tptype_flux[mcevts_truth]/I");
 
     CreateBranch("genie_no_primaries",&genie_no_primaries,"genie_no_primaries/I");
     CreateBranch("genie_primaries_pdg",genie_primaries_pdg,"genie_primaries_pdg[genie_no_primaries]/I");
@@ -1530,6 +1623,8 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("Mother",Mother,"Mother[geant_list_size]/I");
     CreateBranch("TrackId",TrackId,"TrackId[geant_list_size]/I");
     CreateBranch("MergedId", MergedId, "MergedId[geant_list_size]/I");
+    CreateBranch("origin", origin, "origin[geant_list_size]/I");
+    CreateBranch("MCTruthIndex", MCTruthIndex, "MCTruthIndex[geant_list_size]/I");
     CreateBranch("process_primary",process_primary,"process_primary[geant_list_size]/I");
     CreateBranch("processname", processname);
   }
@@ -1571,7 +1666,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 
 microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   EDAnalyzer(pset),
-  fTree(nullptr), fData(nullptr),
+  fTree(nullptr), fPOT(nullptr), fData(nullptr),
   fDigitModuleLabel         (pset.get< std::string >("DigitModuleLabel")        ),
   fHitsModuleLabel          (pset.get< std::string >("HitsModuleLabel")         ),
   fLArG4ModuleLabel         (pset.get< std::string >("LArGeantModuleLabel")     ),
@@ -1579,7 +1674,9 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
   fCryGenModuleLabel        (pset.get< std::string >("CryGenModuleLabel")       ), 
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
-  fVertexModuleLabel        (pset.get< std::string> ("VertexModuleLabel")       ),
+  fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
+  fShowerModuleLabel        (pset.get< std::string >("ShowerModuleLabel")       ),
+  fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
@@ -1592,8 +1689,13 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveHitInfo	            (pset.get< bool >("SaveHitInfo", false)), 
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
+  fSaveFlashInfo            (pset.get< bool >("SaveFlashInfo", false)),
+  fSaveShowerInfo            (pset.get< bool >("SaveShowerInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
-  fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ) 
+  fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
+  isCosmics(false),
+  fSaveCaloCosmics          (pset.get< bool >("SaveCaloCosmics",false)),
+  fG4minE                   (pset.get< float>("G4minE",0.01))
 {
   if (fSaveAuxDetInfo == true) fSaveGeantInfo = true;
   mf::LogInfo("AnalysisTree") << "Configuration:"
@@ -1628,6 +1730,11 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
     art::ServiceHandle<art::TFileService> tfs;
     fTree = tfs->make<TTree>("anatree","analysis tree");
   }
+  if (!fPOT) {
+    art::ServiceHandle<art::TFileService> tfs;
+    fPOT = tfs->make<TTree>("pottree","pot tree");
+    fPOT->Branch("pot",&SubRunData.pot,"pot/D");
+  }
   CreateData(bClearData);
   SetAddresses();
 } // microboone::AnalysisTree::CreateTree()
@@ -1643,6 +1750,20 @@ void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
     SubRunData.pot=potListHandle->totpot;
   else
     SubRunData.pot=0.;
+
+}
+
+void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
+{
+
+  art::Handle< sumdata::POTSummary > potListHandle;
+  //sr.getByLabel(fPOTModuleLabel,potListHandle);
+
+  if(sr.getByLabel(fPOTModuleLabel,potListHandle))
+    SubRunData.pot=potListHandle->totpot;
+  else
+    SubRunData.pot=0.;
+  if (fPOT) fPOT->Fill();
 
 }
 
@@ -1668,14 +1789,25 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   std::vector<art::Ptr<recob::Vertex> > vtxlist;
   if (evt.getByLabel(fVertexModuleLabel,vtxListHandle))
     art::fill_ptr_vector(vtxlist, vtxListHandle);
+    
+   // * showers 
+  art::Handle< std::vector<recob::Shower> > showerListHandle;
+  std::vector<art::Ptr<recob::Shower> > showerlist;
+  if (evt.getByLabel(fShowerModuleLabel,showerListHandle))
+    art::fill_ptr_vector(showerlist, showerListHandle);   
 
+  // * flashes
+  art::Handle< std::vector<recob::OpFlash> > flashListHandle;
+  std::vector<art::Ptr<recob::OpFlash> > flashlist;
+  if (evt.getByLabel(fOpFlashModuleLabel,flashListHandle))
+    art::fill_ptr_vector(flashlist, flashListHandle);
 
   // * MC truth information
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   std::vector<art::Ptr<simb::MCTruth> > mclist;
   if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
     art::fill_ptr_vector(mclist, mctruthListHandle);
-    
+
   // *MC truth cosmic generator information
   art::Handle< std::vector<simb::MCTruth> > mctruthcryListHandle;
   std::vector<art::Ptr<simb::MCTruth> > mclistcry;
@@ -1695,41 +1827,49 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   int nGeniePrimaries = 0, nGEANTparticles = 0;
   
   art::Ptr<simb::MCTruth> mctruth;
-  int imc = 0;
+
+  
   if (isMC) { //is MC
     // GENIE
     if (!mclist.empty()){//at least one mc record
-      if (fSaveGenieInfo){
+      //if (fSaveGenieInfo){
         //if (mclist[0]->NeutrinoSet()){//is neutrino
         //sometimes there can be multiple neutrino interactions in one spill
         //this is trying to find the primary interaction
         //by looking for the highest energy deposition
-        std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
-        for (size_t i = 0; i<hitlist.size(); i++){
-          //if (hitlist[i]->View() == geo::kV){//collection view
-          std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
-          for (size_t e = 0; e<eveIDs.size(); e++){
-            art::Ptr<simb::MCTruth> ev_mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
-            mctruthemap[ev_mctruth]+=eveIDs[e].energy;
-          }
-        //}
-        }
-        double maxenergy = -1;
-        int imc0 = 0;
-        for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
-          if ((ii->second)>maxenergy){
-            maxenergy = ii->second;
-            mctruth = ii->first;
-            imc = imc0;
-          }
-          imc0++;
-        }
+        //std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
+      static bool isfirsttime = true;
+      if (isfirsttime){
+	for (size_t i = 0; i<hitlist.size(); i++){
+	  //if (hitlist[i]->View() == geo::kV){//collection view
+	  std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
+	  for (size_t e = 0; e<eveIDs.size(); e++){
+	    art::Ptr<simb::MCTruth> ev_mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
+	    //mctruthemap[ev_mctruth]+=eveIDs[e].energy;
+	    if (ev_mctruth->Origin() == simb::kCosmicRay) isCosmics = true;
+	  }
+	    //}
+	}
+	isfirsttime = false;
+	if (fSaveCaloCosmics) isCosmics = false; //override to save calo info
+      }
 
-        imc = 0; //set imc to 0 to solve a confusion for BNB+cosmic files where there are two MCTruth
-        mctruth = mclist[0];
+//        double maxenergy = -1;
+//        int imc0 = 0;
+//        for (std::map<art::Ptr<simb::MCTruth>,double>::iterator ii=mctruthemap.begin(); ii!=mctruthemap.end(); ++ii){
+//          if ((ii->second)>maxenergy){
+//            maxenergy = ii->second;
+//            mctruth = ii->first;
+//            imc = imc0;
+//          }
+//          imc0++;
+//        }
 
-        if (mctruth->NeutrinoSet()) nGeniePrimaries = mctruth->NParticles();
-      } //end (fSaveGenieInfo)
+	  //imc = 0; //set imc to 0 to solve a confusion for BNB+cosmic files where there are two MCTruth
+      mctruth = mclist[0];
+
+      if (mctruth->NeutrinoSet()) nGeniePrimaries = mctruth->NParticles();
+	//} //end (fSaveGenieInfo)
       
       const sim::ParticleList& plist = bt->ParticleList();
       nGEANTparticles = plist.size();
@@ -1755,6 +1895,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   const size_t NTrackers = GetNTrackers(); // number of trackers passed into fTrackModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
   const size_t NVertices = vtxlist.size(); // number of vertices
+  const size_t NShowers  = showerlist.size(); //number of showers
+  const size_t NFlashes  = flashlist.size(); // number of flashes
   // make sure there is the data, the tree and everything;
   CreateTree();
 
@@ -1821,6 +1963,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->hit_ph[i]  = hitlist[i]->PeakAmplitude();
       fData->hit_startT[i] = hitlist[i]->PeakTimeMinusRMS();
       fData->hit_endT[i] = hitlist[i]->PeakTimePlusRMS();
+      fData->hit_goodnessOfFit[i] = hitlist[i]->GoodnessOfFit();
+      fData->hit_multiplicity[i] = hitlist[i]->Multiplicity();
+      //std::vector<double> xyz = bt->HitToXYZ(hitlist[i]);
+      //when the size of simIDEs is zero, the above function throws an exception
+      //and crashes, so check that the simIDEs have non-zero size before 
+      //extracting hit true XYZ from simIDEs
+      std::vector<sim::IDE> ides;
+      bt->HitToSimIDEs(hitlist[i], ides);
+      if (ides.size()>0){
+         std::vector<double> xyz = bt->SimIDEsToXYZ(ides);
+         fData->hit_trueX[i] = xyz[0];
+      } 
+      
       /*
       for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
         art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel[it]);
@@ -1832,7 +1987,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
       */
 
-      if (!evt.isRealData()){
+      if (!evt.isRealData()&&!isCosmics){
          fData -> hit_nelec[i] = 0;
          fData -> hit_energy[i] = 0;
          const sim::SimChannel* chan = 0;
@@ -1883,7 +2038,51 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       for (size_t j = 0; j<3; ++j) fData->vtx[i][j] = xyz[j];
     }
   }// end (fSaveVertexInfo)
-    
+
+  if (fSaveFlashInfo){
+    fData->no_flashes = (int) NFlashes;
+    if (NFlashes > kMaxFlashes) {
+      // got this error? consider increasing kMaxHits
+      // (or ask for a redesign using vectors)
+      mf::LogError("AnalysisTree:limits") << "event has " << NFlashes
+        << " flashes, only kMaxFlashes=" << kMaxFlashes << " stored in tree";
+    }
+    for (size_t i = 0; i < NFlashes && i < kMaxFlashes ; ++i){//loop over hits
+      fData->flash_time[i]       = flashlist[i]->Time();
+      fData->flash_pe[i]         = flashlist[i]->TotalPE();
+      fData->flash_ycenter[i]    = flashlist[i]->YCenter();
+      fData->flash_zcenter[i]    = flashlist[i]->ZCenter();
+    }
+  }
+  
+  if (fSaveShowerInfo){
+    fData->nshowers = NShowers;
+    if (NShowers > kMaxShowers) {
+      // got this error? consider increasing kMaxShowers
+      // (or ask for a redesign using vectors)
+      mf::LogError("AnalysisTree:limits") << "event has " << NShowers
+        << " showers, only kMaxShowers=" << kMaxShowers << " stored in tree";
+    }
+    for (size_t i = 0; i < NShowers && i < kMaxShowers ; ++i){
+      TVector3 dir_start, pos_start;         
+      dir_start = showerlist[i]->Direction();
+      pos_start = showerlist[i]->ShowerStart();
+      
+      fData->showerID[i]        = showerlist[i]->ID();
+      fData->shwr_bestplane[i]  = showerlist[i]->best_plane();
+      fData->shwr_length[i]     = showerlist[i]->Length();
+      fData->shwr_startdcosx[i] = dir_start.X();
+      fData->shwr_startdcosy[i] = dir_start.Y();
+      fData->shwr_startdcosz[i] = dir_start.Z();   
+      fData->shwr_startx[i]     = pos_start.X();
+      fData->shwr_starty[i]     = pos_start.Y();
+      fData->shwr_startz[i]     = pos_start.Z();  
+      for (size_t j = 0; j<3; ++j) fData->shwr_totEng[i][j] = showerlist[i]->Energy()[j];
+      for (size_t j = 0; j<3; ++j) fData->shwr_dedx[i][j]   = showerlist[i]->dEdx()[j];
+      for (size_t j = 0; j<3; ++j) fData->shwr_mipEng[i][j] = showerlist[i]->MIPEnergy()[j];                 
+    }
+  }  
+  
   //track information for multiple trackers
   if (fSaveTrackInfo){
     for (unsigned int iTracker=0; iTracker < NTrackers; ++iTracker){
@@ -2118,17 +2317,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               <<", only "
               << TrackerData.GetMaxHitsPerTrack(iTrk, planenum) << " stored in tree";
           }
-          for(size_t iTrkHit = 0; iTrkHit < NHits && iTrkHit < TrackerData.GetMaxHitsPerTrack(iTrk, planenum); ++iTrkHit) {
-            TrackerData.trkdedx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dEdx())[iTrkHit];
-            TrackerData.trkdqdx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dQdx())[iTrkHit];
-            TrackerData.trkresrg[iTrk][planenum][iTrkHit] = (calos[ical] -> ResidualRange())[iTrkHit];
-            const auto& TrkPos = (calos[ical] -> XYZ())[iTrkHit];
-            auto& TrkXYZ = TrackerData.trkxyz[iTrk][planenum][iTrkHit];
-            TrkXYZ[0] = TrkPos.X();
-            TrkXYZ[1] = TrkPos.Y();
-            TrkXYZ[2] = TrkPos.Z();
-          } // for track hits
-        } // for calorimetry info
+	  if (!isCosmics){
+	    for(size_t iTrkHit = 0; iTrkHit < NHits && iTrkHit < TrackerData.GetMaxHitsPerTrack(iTrk, planenum); ++iTrkHit) {
+	      TrackerData.trkdedx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dEdx())[iTrkHit];
+	      TrackerData.trkdqdx[iTrk][planenum][iTrkHit]  = (calos[ical] -> dQdx())[iTrkHit];
+	      TrackerData.trkresrg[iTrk][planenum][iTrkHit] = (calos[ical] -> ResidualRange())[iTrkHit];
+	      const auto& TrkPos = (calos[ical] -> XYZ())[iTrkHit];
+	      auto& TrkXYZ = TrackerData.trkxyz[iTrk][planenum][iTrkHit];
+	      TrkXYZ[0] = TrkPos.X();
+	      TrkXYZ[1] = TrkPos.Y();
+	      TrkXYZ[2] = TrkPos.Z();
+	    } // for track hits
+	  }
+	} // for calorimetry info
         if(TrackerData.ntrkhits[iTrk][0] > TrackerData.ntrkhits[iTrk][1] && TrackerData.ntrkhits[iTrk][0] > TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 0;
         else if(TrackerData.ntrkhits[iTrk][1] > TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][1] > TrackerData.ntrkhits[iTrk][2]) TrackerData.trkpidbestplane[iTrk] = 1;
         else if(TrackerData.ntrkhits[iTrk][2] > TrackerData.ntrkhits[iTrk][0] && TrackerData.ntrkhits[iTrk][2] > TrackerData.ntrkhits[iTrk][1]) TrackerData.trkpidbestplane[iTrk] = 2;
@@ -2164,10 +2365,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             std::vector<sim::IDE> vide(bt->TrackIDToSimIDE(TrackerData.trkidtruth[iTrk][ipl]));
             for (const sim::IDE& ide: vide) {
                tote += ide.energy;
-               TrackerData.trksimIDEenergytruth[iTrk][ipl] = ide.energy;
-               TrackerData.trksimIDExtruth[iTrk][ipl] = ide.x;
-               TrackerData.trksimIDEytruth[iTrk][ipl] = ide.y;
-               TrackerData.trksimIDEztruth[iTrk][ipl] = ide.z;
             }
             TrackerData.trkpdgtruth[iTrk][ipl] = particle->PdgCode();
             TrackerData.trkefftruth[iTrk][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
@@ -2211,35 +2408,44 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     fData->mcevts_truth = mclist.size();
     if (fData->mcevts_truth > 0){//at least one mc record
     if (fSaveGenieInfo){
-      if (mctruth->NeutrinoSet()){
-        fData->nuPDG_truth = mctruth->GetNeutrino().Nu().PdgCode();
-        fData->ccnc_truth = mctruth->GetNeutrino().CCNC();
-        fData->mode_truth = mctruth->GetNeutrino().Mode();
-        fData->Q2_truth = mctruth->GetNeutrino().QSqr();
-        fData->W_truth = mctruth->GetNeutrino().W();
-        fData->hitnuc_truth = mctruth->GetNeutrino().HitNuc();
-        fData->enu_truth = mctruth->GetNeutrino().Nu().E();
-        fData->nuvtxx_truth = mctruth->GetNeutrino().Nu().Vx();
-        fData->nuvtxy_truth = mctruth->GetNeutrino().Nu().Vy();
-        fData->nuvtxz_truth = mctruth->GetNeutrino().Nu().Vz();
-        if (mctruth->GetNeutrino().Nu().P()){
-          fData->nu_dcosx_truth = mctruth->GetNeutrino().Nu().Px()/mctruth->GetNeutrino().Nu().P();
-          fData->nu_dcosy_truth = mctruth->GetNeutrino().Nu().Py()/mctruth->GetNeutrino().Nu().P();
-          fData->nu_dcosz_truth = mctruth->GetNeutrino().Nu().Pz()/mctruth->GetNeutrino().Nu().P();
-        }
-        fData->lep_mom_truth = mctruth->GetNeutrino().Lepton().P();
-        if (mctruth->GetNeutrino().Lepton().P()){
-          fData->lep_dcosx_truth = mctruth->GetNeutrino().Lepton().Px()/mctruth->GetNeutrino().Lepton().P();
-          fData->lep_dcosy_truth = mctruth->GetNeutrino().Lepton().Py()/mctruth->GetNeutrino().Lepton().P();
-          fData->lep_dcosz_truth = mctruth->GetNeutrino().Lepton().Pz()/mctruth->GetNeutrino().Lepton().P();
-        }
-        //flux information
-        art::Ptr<simb::MCFlux>  mcflux = fluxlist[imc];
-        fData->tpx_flux = mcflux->ftpx;
-        fData->tpy_flux = mcflux->ftpy;
-        fData->tpz_flux = mcflux->ftpz;
-        fData->tptype_flux = mcflux->ftptype;
+      int neutrino_i = 0;
+      for(unsigned int iList = 0; (iList < mclist.size()) && (neutrino_i < kMaxTruth) ; ++iList){
+		if (mclist[iList]->NeutrinoSet()){
+          fData->nuPDG_truth[neutrino_i]  = mclist[iList]->GetNeutrino().Nu().PdgCode();
+          fData->ccnc_truth[neutrino_i]   = mclist[iList]->GetNeutrino().CCNC();
+          fData->mode_truth[neutrino_i]   = mclist[iList]->GetNeutrino().Mode();
+          fData->Q2_truth[neutrino_i]     = mclist[iList]->GetNeutrino().QSqr();
+          fData->W_truth[neutrino_i]      = mclist[iList]->GetNeutrino().W();
+          fData->X_truth[neutrino_i]      = mclist[iList]->GetNeutrino().X();
+          fData->Y_truth[neutrino_i]      = mclist[iList]->GetNeutrino().Y();
+          fData->hitnuc_truth[neutrino_i] = mclist[iList]->GetNeutrino().HitNuc();
+          fData->enu_truth[neutrino_i]    = mclist[iList]->GetNeutrino().Nu().E();
+          fData->nuvtxx_truth[neutrino_i] = mclist[iList]->GetNeutrino().Nu().Vx();
+          fData->nuvtxy_truth[neutrino_i] = mclist[iList]->GetNeutrino().Nu().Vy();
+          fData->nuvtxz_truth[neutrino_i] = mclist[iList]->GetNeutrino().Nu().Vz();
+          if (mclist[iList]->GetNeutrino().Nu().P()){
+            fData->nu_dcosx_truth[neutrino_i] = mclist[iList]->GetNeutrino().Nu().Px()/mclist[iList]->GetNeutrino().Nu().P();
+            fData->nu_dcosy_truth[neutrino_i] = mclist[iList]->GetNeutrino().Nu().Py()/mclist[iList]->GetNeutrino().Nu().P();
+            fData->nu_dcosz_truth[neutrino_i] = mclist[iList]->GetNeutrino().Nu().Pz()/mclist[iList]->GetNeutrino().Nu().P();
+          }
+          fData->lep_mom_truth[neutrino_i] = mclist[iList]->GetNeutrino().Lepton().P();
+          if (mclist[iList]->GetNeutrino().Lepton().P()){
+            fData->lep_dcosx_truth[neutrino_i] = mclist[iList]->GetNeutrino().Lepton().Px()/mclist[iList]->GetNeutrino().Lepton().P();
+            fData->lep_dcosy_truth[neutrino_i] = mclist[iList]->GetNeutrino().Lepton().Py()/mclist[iList]->GetNeutrino().Lepton().P();
+            fData->lep_dcosz_truth[neutrino_i] = mclist[iList]->GetNeutrino().Lepton().Pz()/mclist[iList]->GetNeutrino().Lepton().P();
+          }
 
+          //flux information
+          fData->tpx_flux[neutrino_i]    = fluxlist[iList]->ftpx;
+          fData->tpy_flux[neutrino_i]    = fluxlist[iList]->ftpy;
+          fData->tpz_flux[neutrino_i]    = fluxlist[iList]->ftpz;
+          fData->tptype_flux[neutrino_i] = fluxlist[iList]->ftptype;
+
+          neutrino_i++;
+        }//mclist is NeutrinoSet()
+      }//loop over mclist
+
+      if (mctruth->NeutrinoSet()){
         //genie particles information
         fData->genie_no_primaries = mctruth->NParticles();
 
@@ -2265,85 +2471,97 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_ND[iPart]=part.NumberDaughters();
           fData->genie_mother[iPart]=part.Mother();
         } // for particle
+        const simb::MCNeutrino& nu(mctruth->GetNeutrino());
       } //if neutrino set
     }// end (fSaveGenieInfo)  
 
       //GEANT particles information
       if (fSaveGeantInfo){ 
+
         const sim::ParticleList& plist = bt->ParticleList();
         
         std::string pri("primary");
         int primary=0;
         int active = 0;
-        int geant_particle=0;
+        size_t geant_particle=0;
         sim::ParticleList::const_iterator itPart = plist.begin(),
           pend = plist.end(); // iterator to pairs (track id, particle)
         	  
-        for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart)
-        {
+	// helper map track ID => index
+	std::map<int, size_t> TrackIDtoIndex;
+	std::vector<int> gpdg;
+	std::vector<int> gmother;
+        for(size_t iPart = 0; (iPart < plist.size()) && (itPart != pend); ++iPart){
           const simb::MCParticle* pPart = (itPart++)->second;
           if (!pPart) {
             throw art::Exception(art::errors::LogicError)
               << "GEANT particle #" << iPart << " returned a null pointer";
           }
           
-          ++geant_particle;
-          bool isPrimary = pPart->Process() == pri;
-          if (isPrimary) ++primary;
-          
-          int TrackID = pPart->TrackId();
-
-          TVector3 mcstart, mcend;
-          double plen = length(*pPart, mcstart, mcend);
-
-          bool isActive = plen != 0;
-          if (plen) active++;
-
+          //++geant_particle;
+	  bool isPrimary = pPart->Process() == pri;
+	  int TrackID = pPart->TrackId();
+	  TrackIDtoIndex.emplace(TrackID, iPart);
+	  gpdg.push_back(pPart->PdgCode());
+	  gmother.push_back(pPart->Mother());
           if (iPart < fData->GetMaxGEANTparticles()) {
-            fData->process_primary[iPart] = int(isPrimary);
-            fData->processname[iPart]= pPart->Process();
-            fData->Mother[iPart]=pPart->Mother();
-            fData->TrackId[iPart]=TrackID;
-            fData->pdg[iPart]=pPart->PdgCode();
-            fData->status[iPart] = pPart->StatusCode();
-            fData->Eng[iPart]=pPart->E();
-	    fData->EndE[iPart]=pPart->EndE();
-            fData->Mass[iPart]=pPart->Mass();
-            fData->Px[iPart]=pPart->Px();
-            fData->Py[iPart]=pPart->Py();
-            fData->Pz[iPart]=pPart->Pz();
-            fData->P[iPart]=pPart->Momentum().Vect().Mag();
-            fData->StartPointx[iPart]=pPart->Vx();
-            fData->StartPointy[iPart]=pPart->Vy();
-            fData->StartPointz[iPart]=pPart->Vz();
-            fData->StartT[iPart] = pPart->T();
-            fData->EndPointx[iPart]=pPart->EndPosition()[0];
-            fData->EndPointy[iPart]=pPart->EndPosition()[1];
-            fData->EndPointz[iPart]=pPart->EndPosition()[2];
-            fData->EndT[iPart] = pPart->EndT();
-            fData->theta[iPart] = pPart->Momentum().Theta();
-            fData->phi[iPart] = pPart->Momentum().Phi();
-            fData->theta_xz[iPart] = std::atan2(pPart->Px(), pPart->Pz());
-            fData->theta_yz[iPart] = std::atan2(pPart->Py(), pPart->Pz());
-            fData->pathlen[iPart]  = plen;
-            fData->NumberDaughters[iPart]=pPart->NumberDaughters();
-            fData->inTPCActive[iPart] = int(isActive);
-            if (isActive){	  
-              fData->StartPointx_tpcAV[iPart] = mcstart.X();
-              fData->StartPointy_tpcAV[iPart] = mcstart.Y();
-              fData->StartPointz_tpcAV[iPart] = mcstart.Z();
-              fData->EndPointx_tpcAV[iPart] = mcend.X();
-              fData->EndPointy_tpcAV[iPart] = mcend.Y();
-              fData->EndPointz_tpcAV[iPart] = mcend.Z();
-            }		       
-            
+	    if (pPart->E()<fG4minE&&(!isPrimary)) continue;
+	    if (isPrimary) ++primary;
+	    
+	    TVector3 mcstart, mcend;
+	    double plen = length(*pPart, mcstart, mcend);
+	    
+	    bool isActive = plen != 0;
+	    if (plen) ++active;
+
+	    fData->process_primary[geant_particle] = int(isPrimary);
+	    fData->processname[geant_particle]= pPart->Process();
+	    fData->Mother[geant_particle]=pPart->Mother();
+	    fData->TrackId[geant_particle]=TrackID;
+	    fData->pdg[geant_particle]=pPart->PdgCode();
+	    fData->status[geant_particle] = pPart->StatusCode();
+	    fData->Eng[geant_particle]=pPart->E();
+	    fData->EndE[geant_particle]=pPart->EndE();
+	    fData->Mass[geant_particle]=pPart->Mass();
+	    fData->Px[geant_particle]=pPart->Px();
+	    fData->Py[geant_particle]=pPart->Py();
+	    fData->Pz[geant_particle]=pPart->Pz();
+	    fData->P[geant_particle]=pPart->Momentum().Vect().Mag();
+	    fData->StartPointx[geant_particle]=pPart->Vx();
+	    fData->StartPointy[geant_particle]=pPart->Vy();
+	    fData->StartPointz[geant_particle]=pPart->Vz();
+	    fData->StartT[geant_particle] = pPart->T();
+	    fData->EndPointx[geant_particle]=pPart->EndPosition()[0];
+	    fData->EndPointy[geant_particle]=pPart->EndPosition()[1];
+	    fData->EndPointz[geant_particle]=pPart->EndPosition()[2];
+	    fData->EndT[geant_particle] = pPart->EndT();
+	    fData->theta[geant_particle] = pPart->Momentum().Theta();
+	    fData->phi[geant_particle] = pPart->Momentum().Phi();
+	    fData->theta_xz[geant_particle] = std::atan2(pPart->Px(), pPart->Pz());
+	    fData->theta_yz[geant_particle] = std::atan2(pPart->Py(), pPart->Pz());
+	    fData->pathlen[geant_particle]  = plen;
+	    fData->NumberDaughters[geant_particle]=pPart->NumberDaughters();
+	    fData->inTPCActive[geant_particle] = int(isActive);
+	    art::Ptr<simb::MCTruth> const& mc_truth = bt->ParticleToMCTruth(pPart);
+	    if (mc_truth){
+	      fData->origin[geant_particle] = mc_truth->Origin();
+	      fData->MCTruthIndex[geant_particle] = mc_truth.key();
+	    }
+	    if (isActive){	  
+	      fData->StartPointx_tpcAV[geant_particle] = mcstart.X();
+	      fData->StartPointy_tpcAV[geant_particle] = mcstart.Y();
+	      fData->StartPointz_tpcAV[geant_particle] = mcstart.Z();
+	      fData->EndPointx_tpcAV[geant_particle] = mcend.X();
+	      fData->EndPointy_tpcAV[geant_particle] = mcend.Y();
+	      fData->EndPointz_tpcAV[geant_particle] = mcend.Z();
+	    }		       
             //access auxiliary detector parameters
             if (fSaveAuxDetInfo) {
               unsigned short nAD = 0; // number of cells that particle hit
               
               // find deposit of this particle in each of the detector cells
               for (const sim::AuxDetSimChannel* c: fAuxDetSimChannels) {
-        	
+		
         	// find if this cell has a contribution (IDE) from this particle,
         	// and which one
         	const std::vector<sim::AuxDetIDE>& setOfIDEs = c->AuxDetIDEs();
@@ -2353,108 +2571,105 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         	// - returns if that IDE belongs to the track we are looking for
         	std::vector<sim::AuxDetIDE>::const_iterator iIDE
         	  = std::find_if(
-        	    setOfIDEs.begin(), setOfIDEs.end(),
-        	    [TrackID](const sim::AuxDetIDE& IDE){ return IDE.trackID == TrackID; }
-        	  );
+				 setOfIDEs.begin(), setOfIDEs.end(),
+				 [TrackID](const sim::AuxDetIDE& IDE){ return IDE.trackID == TrackID; }
+				 );
         	if (iIDE == setOfIDEs.end()) continue;
         	
         	// now iIDE points to the energy released by the track #i (TrackID)
-        	
-              // look for IDE with matching trackID
-              // find trackIDs stored in setOfIDEs with the same trackID, but negative,
-              // this is an untracked particle who's energy should be added as deposited by this original trackID
-              float totalE = 0.; // total energy deposited around by the GEANT particle in this cell
-              for(const auto& adtracks: setOfIDEs) {
-                 if( fabs(adtracks.trackID) == TrackID )
-                   totalE += adtracks.energyDeposited;
-              } // for
-              
-              // fill the structure
-              if (nAD < kMaxAuxDets) {
-                fData->AuxDetID[iPart][nAD] = c->AuxDetID();
-                fData->entryX[iPart][nAD]   = iIDE->entryX;
-                fData->entryY[iPart][nAD]   = iIDE->entryY;
-                fData->entryZ[iPart][nAD]   = iIDE->entryZ;
-                fData->entryT[iPart][nAD]   = iIDE->entryT;
-                fData->exitX[iPart][nAD]    = iIDE->exitX;
-                fData->exitY[iPart][nAD]    = iIDE->exitY;
-                fData->exitZ[iPart][nAD]    = iIDE->exitZ;
-                fData->exitT[iPart][nAD]    = iIDE->exitT;
-                fData->exitPx[iPart][nAD]   = iIDE->exitMomentumX;
-                fData->exitPy[iPart][nAD]   = iIDE->exitMomentumY;
-                fData->exitPz[iPart][nAD]   = iIDE->exitMomentumZ;
-                fData->CombinedEnergyDep[iPart][nAD] = totalE;
-              }
-              ++nAD;
-            } // for aux det sim channels
-            fData->NAuxDets[iPart] = nAD; 
-            
-            if (nAD > kMaxAuxDets) {
-              // got this error? consider increasing kMaxAuxDets
-              mf::LogError("AnalysisTree:limits") << "particle #" << iPart
-                << " touches " << nAD << " auxiliary detector cells, only "
-                << kMaxAuxDets << " of them are saved in the tree";
-            } // if too many detector cells
-          } // if (fSaveAuxDetInfo) 
-        }
-        else if (iPart == fData->GetMaxGEANTparticles()) {
-          // got this error? it might be a bug,
-          // since the structure should have enough room for everything
-          mf::LogError("AnalysisTree:limits") << "event has "
-            << plist.size() << " MC particles, only "
-            << fData->GetMaxGEANTparticles() << " will be stored in tree";
-        }     
-      } // for particles
-            
-      fData->geant_list_size_in_tpcAV = active;
-      fData->no_primaries = primary;
-      fData->geant_list_size = geant_particle;
-      
-      LOG_DEBUG("AnalysisTree") << "Counted "
-        << fData->geant_list_size << " GEANT particles ("
-        << fData->geant_list_size_in_tpcAV << " in AV), "
-        << fData->no_primaries << " primaries, "
-        << fData->genie_no_primaries << " GENIE particles";
-      
-      FillWith(fData->MergedId, 0);
+		
+		// look for IDE with matching trackID
+		// find trackIDs stored in setOfIDEs with the same trackID, but negative,
+		// this is an untracked particle who's energy should be added as deposited by this original trackID
+		float totalE = 0.; // total energy deposited around by the GEANT particle in this cell
+		for(const auto& adtracks: setOfIDEs) {
+		  if( fabs(adtracks.trackID) == TrackID )
+		    totalE += adtracks.energyDeposited;
+		} // for
+		
+		// fill the structure
+		if (nAD < kMaxAuxDets) {
+		  fData->AuxDetID[geant_particle][nAD] = c->AuxDetID();
+		  fData->entryX[geant_particle][nAD]   = iIDE->entryX;
+		  fData->entryY[geant_particle][nAD]   = iIDE->entryY;
+		  fData->entryZ[geant_particle][nAD]   = iIDE->entryZ;
+		  fData->entryT[geant_particle][nAD]   = iIDE->entryT;
+		  fData->exitX[geant_particle][nAD]    = iIDE->exitX;
+		  fData->exitY[geant_particle][nAD]    = iIDE->exitY;
+		  fData->exitZ[geant_particle][nAD]    = iIDE->exitZ;
+		  fData->exitT[geant_particle][nAD]    = iIDE->exitT;
+		  fData->exitPx[geant_particle][nAD]   = iIDE->exitMomentumX;
+		  fData->exitPy[geant_particle][nAD]   = iIDE->exitMomentumY;
+		  fData->exitPz[geant_particle][nAD]   = iIDE->exitMomentumZ;
+		  fData->CombinedEnergyDep[geant_particle][nAD] = totalE;
+		}
+		++nAD;
+	      } // for aux det sim channels
+	      fData->NAuxDets[geant_particle] = nAD; 
+	      
+	      if (nAD > kMaxAuxDets) {
+		// got this error? consider increasing kMaxAuxDets
+		mf::LogError("AnalysisTree:limits") 
+		  << "particle #" << iPart
+		  << " touches " << nAD << " auxiliary detector cells, only "
+		  << kMaxAuxDets << " of them are saved in the tree";
+	      } // if too many detector cells
+	    } // if (fSaveAuxDetInfo) 
+	    	    
+	    ++geant_particle;
+	  }
+	  else if (iPart == fData->GetMaxGEANTparticles()) {
+	    // got this error? it might be a bug,
+	    // since the structure should have enough room for everything
+	    mf::LogError("AnalysisTree:limits") << "event has "
+			 << plist.size() << " MC particles, only "
+			 << fData->GetMaxGEANTparticles() << " will be stored in tree";
+	  }     
+	} // for particles
+	
+	fData->geant_list_size_in_tpcAV = active;
+	fData->no_primaries = primary;
+	fData->geant_list_size = geant_particle;
+	fData->processname.resize(geant_particle);
+	LOG_DEBUG("AnalysisTree") 
+	  << "Counted "
+	  << fData->geant_list_size << " GEANT particles ("
+	  << fData->geant_list_size_in_tpcAV << " in AV), "
+	  << fData->no_primaries << " primaries, "
+	  << fData->genie_no_primaries << " GENIE particles";
 
-      // helper map track ID => index
-      std::map<int, size_t> TrackIDtoIndex;
-      const size_t nTrackIDs = fData->TrackId.size();
-      for (size_t index = 0; index < nTrackIDs; ++index)
-        TrackIDtoIndex.emplace(fData->TrackId[index], index);
-      
-      // for each particle, consider all the direct ancestors with the same
-      // PDG ID, and mark them as belonging to the same "group"
-      // (having the same MergedId)
-      int currentMergedId = 1;
-      for(size_t iPart = fData->geant_list_size; iPart-- > 0; ) {
-        // if the particle already belongs to a group, don't bother
-        if (fData->MergedId[iPart]) continue;
-        // the particle starts its own group
-        fData->MergedId[iPart] = currentMergedId;
-        
-        // look in the ancestry, one by one
-        int currentMotherTrackId = fData->Mother[iPart];
-        while(currentMotherTrackId > 0) {
-          // find the mother (we have its track ID in currentMotherTrackId)
-          std::map<int, size_t>::const_iterator iMother
-            = TrackIDtoIndex.find(currentMotherTrackId);
-          if (iMother == TrackIDtoIndex.end()) break; // no mother found
-          size_t currentMotherIndex = iMother->second;
-          // if the mother particle is of a different type,
-          // don't bother with iPart ancestry any further
-          if (fData->pdg[iPart] != fData->pdg[currentMotherIndex]) break;
-          
-          // group the "current mother" (actually, ancestor) with iPart
-          fData->MergedId[currentMotherIndex] = currentMergedId;
-          // then consider the grandmother (one generation earlier)
-          currentMotherTrackId = fData->Mother[currentMotherIndex];
-        } // while ancestry exists
-        ++currentMergedId;
-      } // for merging check
-     } // if (fSaveGeantInfo) 
-            
+	FillWith(fData->MergedId, 0);
+
+	// for each particle, consider all the direct ancestors with the same
+	// PDG ID, and mark them as belonging to the same "group"
+	// (having the same MergedId)
+	/* turn off for now
+	int currentMergedId = 1;
+	for(size_t iPart = 0; iPart < geant_particle; ++iPart){
+	  // if the particle already belongs to a group, don't bother
+	  if (fData->MergedId[iPart]) continue;
+	  // the particle starts its own group
+	  fData->MergedId[iPart] = currentMergedId;
+	  int currentMotherTrackId = fData->Mother[iPart];
+	  while (currentMotherTrackId > 0) {
+	    if (TrackIDtoIndex.find(currentMotherTrackId)==TrackIDtoIndex.end()) break;
+	    size_t gindex = TrackIDtoIndex[currentMotherTrackId];
+	    if (gindex<0||gindex>=plist.size()) break;
+	    // if the mother particle is of a different type,
+	    // don't bother with iPart ancestry any further
+	    if (gpdg[gindex]!=fData->pdg[iPart]) break;
+	    if (TrackIDtoIndex.find(currentMotherTrackId)!=TrackIDtoIndex.end()){
+	      size_t igeantMother = TrackIDtoIndex[currentMotherTrackId];
+	      if (igeantMother>=0&&igeantMother<geant_particle){
+		fData->MergedId[igeantMother] = currentMergedId;
+	      }
+	    }
+	    currentMotherTrackId = gmother[gindex];
+	  }
+	  ++currentMergedId;
+	}// for merging check
+	*/
+      } // if (fSaveGeantInfo) 
     }//if (mcevts_truth)
   }//if (isMC){
   fData->taulife = LArProp->ElectronLifetime();
@@ -2469,7 +2684,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       << "\n - " << fData->no_hits << " hits (" << fData->GetMaxHits() << ")"
       << "\n - " << fData->genie_no_primaries << " genie primaries (" << fData->GetMaxGeniePrimaries() << ")"
       << "\n - " << fData->geant_list_size << " GEANT particles (" << fData->GetMaxGEANTparticles() << "), "
-        << fData->no_primaries << " primaries"
+      << fData->no_primaries << " primaries"
       << "\n - " << fData->geant_list_size_in_tpcAV << " GEANT particles in AV "
       << "\n - " << ((int) fData->kNTracker) << " trackers:"
       ;
@@ -2574,13 +2789,13 @@ double microboone::AnalysisTree::length(const recob::Track& track)
   return result;
 }
 
-// Length of MC particle, trajectory by trajectory.
+// Length of MC particle, trajectory by trajectory (with the manual shifting for x correction)
 double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
 {
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-
+  //art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArProperties> larprop;
   // Get active volume boundary.
   double xmin = 0.;
   double xmax = 2.*geom->DetHalfWidth();
@@ -2588,7 +2803,8 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
   double ymax = geom->DetHalfHeight();
   double zmin = 0.;
   double zmax = geom->DetLength();
-  double vDrift = 160*pow(10,-6);
+  //double vDrift = 160*pow(10,-6);
+  double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
 
   double result = 0.;
   TVector3 disp;
@@ -2624,6 +2840,47 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
   }
   return result;
 }
+
+/*// Length of MC particle, trajectory by trajectory (with out the manual shifting for x correction)
+double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
+{
+  // Get geometry.
+  art::ServiceHandle<geo::Geometry> geom;
+  //art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::LArProperties> larprop;
+  
+  // Get active volume boundary.
+  double xmin = 0.;
+  double xmax = 2.*geom->DetHalfWidth();
+  double ymin = -geom->DetHalfHeight();
+  double ymax = geom->DetHalfHeight();
+  double zmin = 0.;
+  double zmax = geom->DetLength();
+
+  double result = 0.;
+  TVector3 disp;
+  int n = part.NumberTrajectoryPoints();
+  bool first = true;
+
+  for(int i = 0; i < n; ++i) {
+    // check if the particle is inside a TPC
+   double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
+   if (mypos[0] >= xmin && mypos[0] <= xmax && mypos[1] >= ymin && mypos[1] <= ymax && mypos[2] >= zmin && mypos[2] <= zmax){
+     if(first){
+      start = mypos;
+     }
+     else {
+      disp -= mypos;
+      result += disp.Mag();
+     }
+     first = false;
+     disp = mypos;
+     end = mypos;
+   }
+  }
+  return result;
+}*/
+
 
 
 namespace microboone{

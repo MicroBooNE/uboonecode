@@ -40,7 +40,7 @@ microboone_optical_fem_sim:
   PMTTriggerDeadtime:     [   8,   8] # Minimum number of time slices between successive triggers from FEM.
                                       # This an FEM hardware parameter. It is NOT the dead time between
                                       # successive triggers that must be implemented by the Trigger Module.
-
+  TriggerFEMSlot:         [14] # Slot address of PMT FEM used for PMT FEM trigger generation 
   # This parameter generates a large number of histograms for every event.
   # For diagnostic purposes only. Do not turn this parameter on unless you
   # really, REALLY mean it!

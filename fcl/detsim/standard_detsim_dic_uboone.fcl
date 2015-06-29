@@ -1,0 +1,5 @@
+# This version of detsim is for "Dynamic Induced Charge" field response.
+
+#include "standard_detsim_uboone.fcl"
+
+services.user.SignalShapingServiceMicroBooNE: @local::microboone_dic_signalshapingservice

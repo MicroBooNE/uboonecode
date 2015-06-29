@@ -8,6 +8,7 @@ art_make( BASENAME_ONLY
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
+      ${Boost_SYSTEM_LIBRARY}
 			${ROOT_BASIC_LIB_LIST}
           MODULE_LIBRARIES 
 			uboonecode_uboone_Calibrations
@@ -15,8 +16,18 @@ art_make( BASENAME_ONLY
 			CalData
 			Geometry
 			Geometry_service
+			BackTracker_service
+			Simulation
+			RecoBase
+			RecoObjects  
+			RecoAlg
 			Utilities
+			Filters
                         LArFFT_service
+			SignalShapingServiceMicroBooNE_service
+			${SIMULATIONBASE}
+			${LARRECO_LIB}
+			${LARDATA_LIB}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}

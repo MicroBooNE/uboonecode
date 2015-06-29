@@ -1,0 +1,48 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemaker_reco3d_cluster3d: @local::litemaker_base
+
+litemaker_reco3d_cluster3d.out_filename: "larlite_reco3d_cluster3d.root"
+
+litemaker_reco3d_cluster3d.DataLookUpMap:
+{
+  sps:        ["cluster3d"]
+  pcaxis:     ["cluster3d"]
+  vertex:     []
+  track:      ["trackkalmanhitc3d","stitchkalmanhitc3d"]
+  seed:       ["cluster3d"]
+  shower:     []
+  pfpart:     ["cluster3d"]
+  cosmictag:  ["cluster3dpcatag",
+               "stitchkalmanhittagc3d",
+               "trackkalmanhittagc3d"]
+  calo:       ["trackkalmanhitcaloc3d",
+               "stitchkalmanhitcaloc3d"]
+  partid:     ["trackkalmanhitpidc3d",
+               "stitchkalmanhitpidc3d"]
+}
+
+litemaker_reco3d_cluster3d.AssociationLookUpMap:
+{
+  hit:        ["gaushit"]
+  cluster:    ["fuzzycluster"]
+  endpoint2d: []
+  sps:        ["cluster3d"]
+  vertex:     []
+  pcaxis:     ["cluster3d"]
+  track:      ["trackkalmanhitc3d", "stitchkalmanhitc3d"]
+  seed:       ["cluster3d"]
+  shower:     []
+  pfpart:     ["cluster3d"]
+  cosmictag:  ["cluster3dpcatag",
+               "stitchkalmanhittagc3d",
+               "trackkalmanhittagc3d"]
+  calo:       ["trackkalmanhitcaloc3d",
+               "stitchkalmanhitcaloc3d"]
+  partid:     ["trackkalmanhitpidc3d",
+               "stitchkalmanhitpidc3d"]
+}
+
+END_PROLOG
