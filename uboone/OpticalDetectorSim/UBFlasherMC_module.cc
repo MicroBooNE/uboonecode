@@ -233,7 +233,6 @@ namespace opdet {
     double period_ns = (1.0/fPulserRateMHz)*1000.0;
     double led_seq_delay_ns = 100.0;
     double flasher_delay_ns = 125.0;
-    std::cout << fPulserRateMHz << " " << period_ns << " " << led_seq_delay_ns << " " << flasher_delay_ns << " " << fG4StartTime << std::endl;
     
     for(unsigned int ipmt=0; ipmt<geom->NOpDets(); ipmt++) {
       
@@ -258,7 +257,6 @@ namespace opdet {
 	for(size_t photon_index=0; photon_index<nphotons_in_pulse; ++photon_index) {
 	  double t = fRand->Gaus( pulse_start, 0.5 );
 	  photon_time.push_back( t );
-	  std::cout << "pulse (" << ipmt << ", " << ipulse << ", " << pulse_start<< ") t=" << t << std::endl;
 	}
       }//end of pulse loop
       
