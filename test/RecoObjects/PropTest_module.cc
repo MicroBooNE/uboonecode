@@ -73,25 +73,26 @@ namespace trkf
 
       std::shared_ptr<const trkf::Surface> psurf;
       if(isurf < 10) {
-	double x0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
-	double y0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
-	double z0 = 1000.*double(rand()) / double(RAND_MAX);       // (0,1000)
+	double x0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
+	double y0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
+	double z0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
 	double phi = TMath::TwoPi() * double(rand()) / double(RAND_MAX) - TMath::Pi();  // (-pi,pi)
 	psurf = std::shared_ptr<const trkf::Surface>(new trkf::SurfYZLine(x0, y0, z0, phi));
 	surfaces.push_back(psurf);
       }
       else if(isurf < 20) {
-	double y0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
-	double z0 = 1000.*double(rand()) / double(RAND_MAX);       // (0,1000)
+	double x0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
+	double y0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
+	double z0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
 	double phi = TMath::TwoPi() * double(rand()) / double(RAND_MAX) - TMath::Pi();  // (-pi,pi)
-	psurf = std::shared_ptr<const trkf::Surface>(new trkf::SurfYZPlane(y0, z0, phi));
+	psurf = std::shared_ptr<const trkf::Surface>(new trkf::SurfYZPlane(x0, y0, z0, phi));
 	surfaces.push_back(psurf);
       }
       else {
-	double x0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
-	double y0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
-	double z0 = 1000.*double(rand()) / double(RAND_MAX);       // (0,1000)
-	double theta = TMath::Pi() * double(rand()) / double(RAND_MAX);  // (0, pi)
+	double x0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
+	double y0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
+	double z0 = 10.*double(rand()) / double(RAND_MAX) - 5.;  // (-5,5)
+	double theta = std::acos(2. * double(rand()) / double(RAND_MAX) - 1.);  // (0, pi)
 	double phi = TMath::TwoPi() * double(rand()) / double(RAND_MAX) - TMath::Pi();  // (-pi,pi)
 	psurf = std::shared_ptr<const trkf::Surface>(new trkf::SurfXYZPlane(x0, y0, z0, theta, phi));
 	surfaces.push_back(psurf);
@@ -101,8 +102,8 @@ namespace trkf
 
       double u = 100.*double(rand()) / double(RAND_MAX);  // (0,100)
       double v = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50, 50)
-      double dudw = 4.*double(rand()) / double(RAND_MAX) - 2.;  // (-2, 2)
-      double dvdw = 4.*double(rand()) / double(RAND_MAX) - 2.;  // (-2, 2)
+      double dudw = 2.*double(rand()) / double(RAND_MAX) - 1.;  // (-1, 1)
+      double dvdw = 2.*double(rand()) / double(RAND_MAX) - 1.;  // (-1, 1)
       double pinv = 0.9*double(rand()) / double(RAND_MAX) + 0.1;  // (0.1, 1.0)
       trkf::TrackVector vec(5);
       vec(0) = u;
@@ -266,7 +267,7 @@ namespace trkf
 
 	    double dij = (trk1b.getVector()(i) - trk1a.getVector()(i)) / (2.*small);
 	    std::cout << "(" << i << "," << j << "): " << dij << ", " << pm(i,j) << std::endl;
-	    assert(std::abs(dij - pm(i,j)) <= 1.e-5*std::max(std::abs(dij), 1.));
+	    assert(std::abs(dij - pm(i,j)) <= 1.e-4*std::max(std::abs(dij), 1.));
 	  }
 	}
 
@@ -287,7 +288,7 @@ namespace trkf
 	for(int i=0; i<n; ++i) {
 	  assert(std::abs(vec1(i) - vec2(i)) <= 1.e-8);
 	  for(int j=0; j<n; ++j) {
-	    assert(std::abs(err1(i,j) - err2(i,j)) <= 1.e-4);
+	    assert(std::abs(err1(i,j) - err2(i,j)) <= 1.e-4*std::max(std::abs(err1(i,j)), 1.));
 	  }
 	}
       }
@@ -302,8 +303,8 @@ namespace trkf
 
     double z0 = 0.;
     double z1 = 100.;
-    std::shared_ptr<const trkf::SurfYZPlane> psurf0(new trkf::SurfYZPlane(0., z0, 0.));
-    std::shared_ptr<const trkf::SurfYZPlane> psurf1(new trkf::SurfYZPlane(0., z1, 0.));
+    std::shared_ptr<const trkf::SurfYZPlane> psurf0(new trkf::SurfYZPlane(0., 0., z0, 0.));
+    std::shared_ptr<const trkf::SurfYZPlane> psurf1(new trkf::SurfYZPlane(0., 0., z1, 0.));
 
     // Make initial KETrack (muon) with zero error.
 
@@ -334,7 +335,7 @@ namespace trkf
     int nprop = 100;
     for(int iprop=1; iprop <= nprop; ++iprop) {
       double z = z0 + (z1-z0) * double(iprop) / double(nprop);
-      std::shared_ptr<const trkf::SurfYZPlane> psurf(new trkf::SurfYZPlane(0., z, 0.));
+      std::shared_ptr<const trkf::SurfYZPlane> psurf(new trkf::SurfYZPlane(0., 0., z, 0.));
       prop->noise_prop(tre2, psurf, trkf::Propagator::UNKNOWN, false);
       if(iprop == nprop) {
 	std::cout << "\nStep " << iprop << " track: " << std::endl;
