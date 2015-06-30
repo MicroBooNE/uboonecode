@@ -1,4 +1,5 @@
 #include "services_microboone.fcl"
+#include "genie_microboone.fcl" 
 #include "largeantmodules_microboone.fcl"
 #include "singles_microboone.fcl"
 #include "caldata_microboone.fcl"
@@ -81,10 +82,12 @@ physics:
  producers:
  {
    rns:       { module_type: "RandomNumberSaver" }
+   largeant:     @local::microboone_largeant
    optdigitizer: @local::microboone_flasher_sim
    optfem:       @local::microboone_optical_fem_sim
-   triggersim:   @local::ubtrigger_singlep
+   triggersim:   @local::ubtrigger_standard
    pmtreadout:   @local::microboone_optical_dram_readout_sim
+   daq:          @local::microboone_simwire
 
    opflashhigh:  @local::highgain_opflash
    opflashlow:  @local::lowgain_opflash
@@ -92,7 +95,7 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ rns, optdigitizer, optfem, triggersim, pmtreadout ]
+ simulate: [ rns, largeant, optdigitizer, optfem, triggersim, pmtreadout, daq ]
  analyzeIt:  [ ]
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -105,6 +108,11 @@ physics:
  #ie analyzers and output streams.  these all run simultaneously
  end_paths:     [stream1]  
 }
+
+# We need to tell various modules where the beam gate is stored.
+physics.producers.optfem.BeamGateModule: "optdigitizer"
+physics.producers.optfem.VerboseHistograms: false
+physics.producers.triggersim.BeamModName: ["optdigitizer"]
 
 #block to define where the output goes.  if you defined a filter in the physics
 #block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}

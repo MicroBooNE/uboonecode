@@ -23,6 +23,8 @@
 #ifndef UBFlasherMC_module_CC
 #define UBFlasherMC_module_CC
 
+//#define _UBFlasherMC_DEBUG_
+
 // framework
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -101,6 +103,8 @@ namespace opdet {
 
     double fPulserEfficiency; //< fraction of successful pulses (not implemented yet)
 
+    double fPulserDelay_ns;
+
     bool fMakeDebugPlots;
 
     // FLASHER VARIABLES
@@ -109,6 +113,12 @@ namespace opdet {
     int fNumberOfPulseTrains;
 
     FlasherRunMode_t fMode;
+
+    // GATE VARIABLES
+    double fGlobalTimeOffset;             /// The start of a simulated "beam gate".
+    double fRandomTimeOffset;             /// The width of a simulated "beam gate".
+    ::sim::BeamType_t fBeamType;          /// The type of beam
+
 
   };
 
@@ -143,8 +153,14 @@ namespace opdet {
     setupFlasher( pset );
 
     fRand = new TRandom3(10);
+
+    // beam config
+    fBeamType = ::sim::kBNB;
+    fGlobalTimeOffset = pset.get< double >("GlobalTimeOffset",1000.0);
+    fRandomTimeOffset = pset.get< double >("RandomTimeOffset",1600.0);
     
     produces< optdata::ChannelDataGroup >();
+    produces< std::vector<sim::BeamGateInfo> >();
   }
 
   //#################################
@@ -163,6 +179,7 @@ namespace opdet {
     fTTLChannel = pset.get<int>("TTLChannel");
     fTTLMod36Channel = pset.get<int>("TTLMod36Channel");
     fLEDlevels  = pset.get<std::vector<std::string>>("LEDlevelsHex");
+    fPulserDelay_ns = pset.get<double>("PulserDelay_ns",100.0);
     fPulserRateMHz = pset.get<double>("PulserRateMHz",1.0);
     fPulserEfficiency = pset.get<double>("PulserEfficency");
     fHexLevelToPE    = pset.get<double>("HexToPE");
@@ -227,11 +244,23 @@ namespace opdet {
     wfs->SetTimeSlice(clock.Sample());
 
     // ================================================================================================================================
+    // Make gate
+    // trigger board provides gate which forces a readout of the PMTs
+    // for now, we just use the BNB gate
+    std::unique_ptr< std::vector<sim::BeamGateInfo> > gateCollection(new std::vector<sim::BeamGateInfo>);
+    sim::BeamGateInfo trigger(  fG4StartTime + fGlobalTimeOffset, fRandomTimeOffset, fBeamType );
+#ifdef _UBFlasherMC_DEBUG_
+    optdata::TimeSlice_t gateTime = ts->OpticalG4Time2TDC(trigger.Start());
+    std::cout << "Start of Gate: Time slice=" << gateTime << " G4 time=" << trigger.Start() << std::endl;
+#endif
+    gateCollection->push_back( trigger );
+    
+    // ================================================================================================================================
     //
     // Loop over opdets, and make waveforms for each readout channels. process photons, make, then store waveforms
     //
     double period_ns = (1.0/fPulserRateMHz)*1000.0;
-    double led_seq_delay_ns = 100.0;
+    //double led_seq_delay_ns = 100.0;
     double flasher_delay_ns = 125.0;
     
     for(unsigned int ipmt=0; ipmt<geom->NOpDets(); ipmt++) {
@@ -246,17 +275,17 @@ namespace opdet {
 	if ( fMode==kSequence && ipulse%36!=(int)ipmt) 
 	  continue;
 	
-	double pulse_start = fG4StartTime;	  
-	if ( fMode==kBurst )
-	  pulse_start += double(ipulse)*period_ns + flasher_delay_ns;
-	else if ( fMode==kSequence )
-	  pulse_start += double(ipulse)*period_ns + double(ipmt)*led_seq_delay_ns +  flasher_delay_ns;
+	double pulse_start = fG4StartTime + fGlobalTimeOffset + fPulserDelay_ns; // G4time of gate start
+	//if ( fMode==kBurst )
+	pulse_start += double(ipulse)*period_ns + flasher_delay_ns;
+	//else if ( fMode==kSequence )
+	//pulse_start += double(ipulse)*period_ns + double(ipmt)*led_seq_delay_ns +  flasher_delay_ns;
 	
 	unsigned int nphotons_in_pulse = fRand->Poisson( fPElevels[ ipmt ] );
 
 	for(size_t photon_index=0; photon_index<nphotons_in_pulse; ++photon_index) {
-	  double t = fRand->Gaus( pulse_start, 0.5 );
-	  photon_time.push_back( t );
+	  double t = fRand->Gaus( pulse_start, 1.0 );
+	  //photon_time.push_back( pulse_start );
 	}
       }//end of pulse loop
       
@@ -298,28 +327,40 @@ namespace opdet {
     // Handle special readout channels (>= 40)
     //
     std::vector< unsigned int > logicchannels;
-    logicchannels.push_back( (unsigned int)fTTLChannel );      // the driving pulse from external pulser
-    logicchannels.push_back( (unsigned int)fTTLMod36Channel ); // the return Mod36 pulse
+    chanmap->GetLogicChannelList( logicchannels );
+    //logicchannels.push_back( (unsigned int)fTTLChannel );      // the driving pulse from external pulser
+    //logicchannels.push_back( (unsigned int)fTTLMod36Channel ); // the return Mod36 pulse
     
     for ( auto logicch : logicchannels ) {
       unsigned int ch = logicch; 
-      
+      opdet::UBOpticalChannelCategory_t chcat = chanmap->GetChannelCategory( ch );
+
       fLogicGen.SetPedestal( ch_conf->GetFloat( kPedestalMean, ch ), ch_conf->GetFloat( kPedestalSpread, ch ) );
 
       std::vector<double> pulse_times;
-      
-      for (int ipulse=0; ipulse<fNumberOfPulseTrains; ipulse++) {
-	
-	if ( ch==fTTLMod36Channel && ipulse%36!=0)
-	  continue;
-	
-	double pulse_start = fG4StartTime;
-	pulse_start += ipulse*period_ns;
-	
-	pulse_times.push_back( pulse_start );
-	
+      pulse_times.clear();
+
+      // THE FLASHER LOGIC PULSES
+      if ( ch==fTTLMod36Channel || ch==fTTLChannel ) {
+	// Pulser TTL pulse train into TTLChannel
+	// Flasher MOD36 output into TTLMod36Channel
+	for (int ipulse=0; ipulse<fNumberOfPulseTrains; ipulse++) {
+	  
+	  if ( ch==fTTLMod36Channel && ipulse%36!=0)
+	    continue;
+	  
+	  double pulse_start = fG4StartTime + fGlobalTimeOffset + fPulserDelay_ns;
+	  pulse_start += ipulse*period_ns;
+	  
+	  pulse_times.push_back( pulse_start );
+	  
+	}
       }
-      
+      // TRIGGER GATE
+      else if ( (chcat == opdet::BNBLogicPulse ) ) {
+	pulse_times.push_back( trigger.Start() );
+      }//end of if TRIGGER GATE
+
       fLogicGen.SetPulses( pulse_times );
       
       optdata::ChannelData logic_wfm( ch );
@@ -348,6 +389,8 @@ namespace opdet {
     // 
     if(wfs->size())
       evt.put(std::move(wfs));
+    evt.put(std::move(gateCollection));
+
     
     // Make sure to free memory
     fOpticalGen.Reset();
