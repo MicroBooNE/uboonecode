@@ -6,7 +6,7 @@ outputs.out1.fileName: "prodgenie_numi_dirt_nu_uboone_%tc_gen.root"
 
 physics.producers.generator: @local::microboone_genie_simple_numi_dirt
 physics.producers.generator.GlobalTimeOffset: 0.
-physics.producers.generator.RandomTimeOffset: 1600.
+physics.producers.generator.RandomTimeOffset: 9600.
 physics.producers.generator.TopVolume: "volWorld"
 
 services.user.Geometry.Name: "microboonev7_auxdet"
