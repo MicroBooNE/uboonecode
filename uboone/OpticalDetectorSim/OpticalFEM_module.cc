@@ -177,7 +177,10 @@ namespace opdet {
     _gateFrame.clear();
     _gateWindowTime.clear();
 
+    //std::cout << "FillBeamTimingVectors: " << "beam_bnb_delay=" << fm_beamDelayBNB.size() << " ngates=" << numberOfGates << std::endl;
+
     for(size_t gain_index=0; gain_index < fm_beamDelayBNB.size(); ++gain_index){
+
       _beamBeginBin.push_back(std::vector<optdata::TimeSlice_t>(numberOfGates,0));
       _beamEndBin.push_back(std::vector<optdata::TimeSlice_t>(numberOfGates,0));
       _gateFrame.push_back(std::vector<optdata::TimeSlice_t>(numberOfGates,0));
@@ -205,7 +208,10 @@ namespace opdet {
 	optdata::TimeSlice_t gateTime = ts->OpticalG4Time2TDC(beamGateInfo.Start());
 	optdata::TimeSlice_t gateWidth = clock.Ticks(beamGateInfo.Width());
 
-	if(gateTime < readout_start_tdc) continue;
+	if(gateTime < readout_start_tdc) {
+	  //std::cout << "FillBeamTimingVectors: gateTime < readout_start_tdc (" << gateTime << " < " << readout_start_tdc << ")" << std::endl;
+	  continue;
+	}
 
 	// Figure out the first bin we should start to save.
 	//optdata::TimeSlice_t firstSlice = (*channelDataHandle).TimeSlice();
@@ -237,7 +243,12 @@ namespace opdet {
 	    << " ... aborting."
 	    << "\033[00m" << std::endl;
 	
-	beamBeginBin[gateIndex] = ( gateTime + beam_delay - readout_start_tdc);
+	//beamBeginBin[gateIndex] = ( gateTime + beam_delay - readout_start_tdc); // tmw: is this a bug?
+	if ( (int)gateTime-(int)beam_delay-(int)readout_start_tdc<0 )
+	  beamBeginBin[gateIndex] = 0;
+	else
+	  beamBeginBin[gateIndex] = gateTime - beam_delay - readout_start_tdc;
+
 	beamEndBin[gateIndex] = beamBeginBin[gateIndex] + beam_words;
 	if(beamEndBin[gateIndex] > readout_size)
 	  beamEndBin[gateIndex] = readout_size;
@@ -248,7 +259,7 @@ namespace opdet {
 	gateWindowTime[gateIndex] = ( gateTime % clock.FrameTicks() ); 
       
 	LOG_DEBUG("OpticalFEM") 
-	  << "Beam gate #" << gateIndex
+	//std::cout << "Beam gate #" << gateIndex
 	  << " begin beam gate bin to save = " << beamBeginBin[gateIndex]
 	  << "; end beam gate bin to save = " << beamEndBin[gateIndex]
 	  << "; beam gate width = " << gateWidth
@@ -321,6 +332,7 @@ namespace opdet {
 			    firstTDC,
 			    (firstSlice + sizeFirstChannel - 1));
     }
+    //std::cout << "Number of Gates: " << numberOfGates << std::endl;
 
     // Do the same for the vectors that will accumulate the sums of
     // the ADC and multiplicity counts for the PMT trigger processing.
@@ -372,9 +384,9 @@ namespace opdet {
 	case ::opdet::LowGain:
 	  gain_index=0; break;
 	case ::opdet::HighGain:
-	  gain_index=1; break;
 	case ::opdet::LogicChannel:
-	  gain_index=2; break;
+	  gain_index=1; break;
+	  //gain_index=2; break;
 	default:
 	  mf::LogError("OpticalFEM") 
 	    << "Unknown channel data category = " <<  gain_type
@@ -389,14 +401,9 @@ namespace opdet {
 
 	// For each beam gate...
 	for ( size_t gateIndex = 0; 
-	      (gain_type == ::opdet::LowGain || gain_type == ::opdet::HighGain) && gateIndex < numberOfGates; 
+	      //(gain_type == ::opdet::LowGain || gain_type == ::opdet::HighGain) && gateIndex < numberOfGates; 
+	      gateIndex < numberOfGates;
 	      ++gateIndex ) {
-	  mf::LogDebug("OpticalFEM")
-	    << "Writing beam gate channels:"
-	    << " at frame=" << gateFrame[gateIndex]
-	    << " slice="    << gateWindowTime[gateIndex]
-	    << " beginBin=" << beamBeginBin[gateIndex]
-	    << " endBin="   << beamEndBin[gateIndex] << std::endl;
 		  
 	  // Create a new FIFOChannel, copying the channel
 	  // number from the input channel, with length
@@ -413,6 +420,13 @@ namespace opdet {
 			     gateFrame[gateIndex],
 			     channel,
 			     beamEndBin[gateIndex] - beamBeginBin[gateIndex]);
+
+	  mf::LogDebug("OpticalFEM")
+	  //std::cout << "Writing beam gate FIFO entry: chanel=" << channel
+	    << " at frame=" << gateFrame[gateIndex]
+	    << " slice="    << gateWindowTime[gateIndex]
+	    << " beginBin=" << beamBeginBin[gateIndex]
+	    << " endBin="   << beamEndBin[gateIndex] << std::endl;
 	
 	  // Copy the time slices.
 	  for ( optdata::TimeSlice_t t = beamBeginBin[gateIndex]; 
@@ -693,7 +707,7 @@ namespace opdet {
 	      << " max ADC=" << maxADC; 
 	    
 	    // Create a new FIFO channel, copying the channel
-	    // number from the input.
+	    // number from the input: wrong categories.
 	    
 	    optdata::Optical_Category_t category = optdata::kFEMCosmicLowGain;
 	    if ( gain_index == 1 ) category = optdata::kFEMCosmicHighGain;
