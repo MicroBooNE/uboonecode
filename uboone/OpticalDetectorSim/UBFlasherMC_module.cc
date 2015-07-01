@@ -281,12 +281,12 @@ namespace opdet {
 	//else if ( fMode==kSequence )
 	//pulse_start += double(ipulse)*period_ns + double(ipmt)*led_seq_delay_ns +  flasher_delay_ns;
 	
-	unsigned int nphotons_in_pulse = fRand->Poisson( fPElevels[ ipmt ] );
+	//unsigned int nphotons_in_pulse = fRand->Poisson( fPElevels[ ipmt ] );
 
-	for(size_t photon_index=0; photon_index<nphotons_in_pulse; ++photon_index) {
-	  double t = fRand->Gaus( pulse_start, 1.0 );
-	  //photon_time.push_back( pulse_start );
-	}
+	//for(size_t photon_index=0; photon_index<nphotons_in_pulse; ++photon_index) {
+	//t = fRand->Gaus( pulse_start, 1.0 );
+	//photon_time.push_back( pulse_start );
+	//}
       }//end of pulse loop
       
       // send the hits over to the waveform generator
