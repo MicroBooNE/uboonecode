@@ -15,7 +15,7 @@ microboone_pedestalretrievalalg:
     DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg
     DatabaseRetrievalAlg: 
     {
-      DBFolderName: "detpedestals"
+      DBFolderName: "detpedestals_data"
     }
     
     UseDB: false
