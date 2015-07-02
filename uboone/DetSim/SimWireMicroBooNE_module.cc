@@ -311,7 +311,7 @@ namespace detsim {
   {
 
     //update database cache
-    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    fPedestalRetrievalAlg.Update( evt.time().value() );
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fFFT->ReinitializeFFT(fNTimeSamples,fFFT->FFTOptions(),fFFT->FFTFitBins());

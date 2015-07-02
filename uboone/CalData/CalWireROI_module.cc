@@ -284,7 +284,7 @@ namespace caldata {
   {      
   
     //update database cache
-    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    fPedestalRetrievalAlg.Update( evt.time().value() );
   
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;

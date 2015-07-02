@@ -19,8 +19,7 @@ microboone_pedestalretrievalalg:
     }
     
     UseDB: false
-    UseTable: false
-    UseDefault: true
+    UseFile: false
     
     DefaultCollMean: 400.0
     DefaultCollRms:  0.3
