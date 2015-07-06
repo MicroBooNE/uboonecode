@@ -119,8 +119,8 @@ outputs:
 
 physics.producers.opflash.InputModule:                          "optreadout"
 physics.producers.opflash.GenModule:                            "generator"
-physics.producers.opflash.InputLabels:                        [ "FEMBeamHighGain",   "FEMBeamLowGain",
-                                                                "FEMCosmicHighGain", "FEMCosmicLowGain"]
+physics.producers.opflash.InputLabels:                        [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
+                                                                "OpdetCosmicHighGain", "OpdetCosmicLowGain"]
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 
