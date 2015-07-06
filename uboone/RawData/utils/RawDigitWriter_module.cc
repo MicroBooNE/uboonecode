@@ -30,6 +30,7 @@
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
 #include "Filters/ChannelFilter.h"
+#include "Utilities/TimeService.h" // lardata
 // RawDigits
 #include "RawData/raw.h" // raw::Uncompress()
 #include "RawData/RawDigit.h"
@@ -229,6 +230,8 @@ namespace zmqds {
 
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
+    art::ServiceHandle<util::TimeService> ts;
+    std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
     
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
       //std::stringstream ss;
@@ -253,6 +256,9 @@ namespace zmqds {
 	fOpSlot = (int)s;
 	fOpFemCH = (int)f;
 	fTimeStamp = wfm.TimeStamp();
+	fFrame = ts->OpticalClock().Frame( fTimeStamp );
+	fSample = ts->OpticalClock().Sample( fTimeStamp );
+
 	opdetwaveforms.clear();
 	for ( auto &adc : wfm )
 	  opdetwaveforms.push_back( (short)adc );

@@ -14,6 +14,7 @@ microboone_analysistree:
  OpFlashModuleLabel:       "opflash"
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
+ ShowerModuleLabel:        showerrecofuzzy
  POTModuleLabel:           "generator"
  UseBuffers:               false
  SaveAuxDetInfo:           false
