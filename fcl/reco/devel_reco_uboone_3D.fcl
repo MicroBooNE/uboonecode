@@ -16,6 +16,7 @@ process_name: Reco3D
 
 services:
 {
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "reco3D_hist.root" }
   Timing:       {}
