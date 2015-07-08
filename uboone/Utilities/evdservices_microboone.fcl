@@ -9,13 +9,26 @@ microboone_colordrawingopt:                  @local::standard_colordrawingopt
 microboone_colordrawingopt.ColorOrGrayScale: 0
 
 microboone_rawdrawingopt:            @local::standard_rawdrawingopt
-microboone_rawdrawingopt.TotalTicks: 3300
+microboone_rawdrawingopt.TotalTicks: 9600
 
 microboone_recodrawingopt:        @local::standard_recodrawingopt
 microboone_recodrawingopt.CalorimetryAlgorithm: @local::microboone_calorimetryalgmc
 microboone_recodrawingopt.HitModuleLabels:        ["gaushit"]
 microboone_recodrawingopt.ClusterModuleLabels:    ["fuzzycluster"]
-microboone_recodrawingopt.TrackModuleLabels:      ["trackkalmanhit"]
+microboone_recodrawingopt.DrawClusters:   0
+microboone_recodrawingopt.DrawHits:   0
+
+#microboone_recodrawingopt.TrackModuleLabels:      ["trackkalmanhitpandoracosmic"]
+#microboone_recodrawingopt.CosmicTagLabels: ["cosmictaggerkhitpandora"]
+
+#microboone_recodrawingopt.TrackModuleLabels: ["trackkalmanhitpandoraneutrino"]
+#microboone_recodrawingopt.CosmicTagLabels: ["trackkalmanhitpandoraneutrinotag"]
+
+microboone_recodrawingopt.TrackModuleLabels: ["trackkalmanhitpandoracosmic"]
+microboone_recodrawingopt.CosmicTagLabels: ["cosmicpfparticlekhitpandora"]
+
+#microboone_recodrawingopt.TrackModuleLabels: ["trackkalmanhitpandoracosmic"]
+#microboone_recodrawingopt.CosmicTagLabels: ["cosmictaggerkhitpandora"]
 
 microboone_analysisdrawingopt:               @local::standard_analysisdrawingopt
 microboone_analysisdrawingopt.CalorimetryModuleLabels: ["trackkalmanhitcalo"]
