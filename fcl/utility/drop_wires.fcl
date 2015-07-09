@@ -4,6 +4,7 @@ process_name: Drop
 
 services:
 {
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   message:      @local::standard_warning
 }
 

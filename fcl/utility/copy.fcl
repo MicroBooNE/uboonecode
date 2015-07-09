@@ -4,6 +4,7 @@ process_name: Copy
 
 services:
 {
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   message:      @local::standard_warning
   FileCatalogMetadata:  @local::art_file_catalog_mc
 }

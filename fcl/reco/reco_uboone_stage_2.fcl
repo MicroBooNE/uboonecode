@@ -19,6 +19,7 @@ process_name: RecoStage2
 
 services:
 {
+  scheduler:                  { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService:               { fileName: "reco_stage_2_hist.root" }
   Timing:                     {}

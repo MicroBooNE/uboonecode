@@ -27,6 +27,7 @@ process_name: SinglesGen
 
 services:
 {
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "single_espec_hist_uboone.root" }
   Timing:       {}
