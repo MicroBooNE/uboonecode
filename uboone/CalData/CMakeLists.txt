@@ -14,7 +14,7 @@ art_make( BASENAME_ONLY
 			Filters
 			RawData
 			CalibrationDBI_IOVData
-			CalibrationDBI_WebDBI
+			CalibrationDBI_Providers
 			RecoBase
 			RecoBaseArt
 			SignalShapingServiceMicroBooNE_service

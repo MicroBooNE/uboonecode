@@ -2,6 +2,7 @@
 
 BEGIN_PROLOG
 
+
 microboone_databaseretrievalalg: @local::standard_databaseretrievalalg
 microboone_databaseretrievalalg:
 {
@@ -28,5 +29,9 @@ microboone_pedestalretrievalalg:
     DefaultMeanErr:  0.0
     DefaultRmsErr:   0.0
 }
+
+microboone_detpedestalservice: @local::standard_siov_detpedestal_service
+microboone_detpedestalservice.DetPedestalRetrievalAlg: @local::microboone_pedestalretrievalalg
+
 
 END_PROLOG

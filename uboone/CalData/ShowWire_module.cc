@@ -24,7 +24,7 @@
 #include "Geometry/Geometry.h"
 #include "RecoBase/Wire.h"
 #include "RawData/RawDigit.h"
-#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "CalibrationDBI/Providers/DetPedestalRetrievalAlg.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"

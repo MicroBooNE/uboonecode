@@ -43,7 +43,7 @@
 #include "Utilities/LArFFT.h"
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
+#include "CalibrationDBI/Providers/DetPedestalRetrievalAlg.h"
 #include "WaveformPropertiesAlg.h"
 
 /* unused function
