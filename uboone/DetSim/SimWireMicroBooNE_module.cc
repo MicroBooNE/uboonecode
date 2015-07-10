@@ -578,7 +578,6 @@ namespace detsim {
       CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");
       CLHEP::RandGaussQ rGaussPed(engine, 0.0, pedestalRetrievalAlg.PedRms(chan));
       float ped_mean = pedestalRetrievalAlg.PedMean(chan) + rGaussPed.fire();
-      if (chan==47) std::cout<<"PedestalMean47: "<<pedestalRetrievalAlg.PedMean(chan)<<std::endl;
 
       //Generate Noise
       //geo::SigType_t sigtype = geo->SignalType(chan);
