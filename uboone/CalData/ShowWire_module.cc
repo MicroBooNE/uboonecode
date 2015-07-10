@@ -18,13 +18,14 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
-
+#include "CalibrationDBI/Interface/IDetPedestalService.h"
+#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
 #include "SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "Geometry/Geometry.h"
 #include "RecoBase/Wire.h"
 #include "RawData/RawDigit.h"
-#include "CalibrationDBI/Providers/DetPedestalRetrievalAlg.h"
+
 #include "TH1.h"
 #include "TH2.h"
 #include "TF1.h"
@@ -56,8 +57,6 @@ private:
   unsigned int fSinglePulseBuffer;
   raw::ChannelID_t fChannel;
   bool fSaveWaveforms;
-  
-  lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg;
 
   std::string MakeHistName(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
   std::string MakeHistTitle(const char*, const unsigned int, const unsigned int, const unsigned int, const unsigned int);
@@ -90,8 +89,7 @@ private:
 
 cal::ShowWire::ShowWire(fhicl::ParameterSet const & p) 
   :
-  EDAnalyzer(p),
-  fPedestalRetrievalAlg(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"))
+  EDAnalyzer(p)
  // More initializers here.
 {
   this->reconfigure(p);
@@ -110,7 +108,6 @@ void cal::ShowWire::reconfigure(fhicl::ParameterSet const& p){
   fChannel             = p.get<unsigned int>("Channel",7775);
   fSaveWaveforms       = p.get<bool>("SaveWaveforms",true);
   
-  fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
 }
 
 void cal::ShowWire::beginJob(){
@@ -194,8 +191,10 @@ void cal::ShowWire::SetHistogram(TH1F* hist,
 }
 
 void cal::ShowWire::FillWaveforms(recob::Wire const& wire, raw::RawDigit const& rawdigit, TH1F* h_wire, TH1F* h_raw){
-
-  float pedestal = fPedestalRetrievalAlg.PedMean(rawdigit.Channel());
+  
+  //get pedestal conditions
+  const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+  float pedestal = pedestalRetrievalAlg.PedMean(rawdigit.Channel());
 
   size_t begin_iter=0;
   size_t end_iter = rawdigit.Samples();
@@ -217,9 +216,6 @@ void cal::ShowWire::FillWaveforms(recob::Wire const& wire, raw::RawDigit const& 
 void cal::ShowWire::analyze(art::Event const & e)
 {
   // Implementation of required member function here.
-
-  //update database cache
-  fPedestalRetrievalAlg.Update( e.time().value() );
 
   art::Handle< std::vector<recob::Wire> > wireVectorHandle;
   e.getByLabel(fCalDataModuleLabel,wireVectorHandle);
