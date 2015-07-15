@@ -516,9 +516,9 @@ namespace opdet {
       case ::opdet::LowGain:
 	gain_index=0; break;
       case ::opdet::HighGain:
-	gain_index=1; break;
       case ::opdet::LogicChannel:
-	gain_index=2; break;
+	gain_index=1; break;
+	//gain_index=2; break;
       default:
 	mf::LogError("OpticalFEM") 
 	  << "Unknown channel data category = " <<  gain_type
