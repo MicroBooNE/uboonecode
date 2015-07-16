@@ -88,8 +88,9 @@ namespace geo {
   //----------------------------------------------------------------------------
   bool ChannelMapUBooNEAlg::IsValidOpChannel(unsigned int opChannel, unsigned int NOpDets) const {
     auto it=fChannel2pmt.find( opChannel );
-    if ( it!=fChannel2pmt.end() )
+    if ( it!=fChannel2pmt.end() ) {
       return true;
+    }
     return false;
   }
   
