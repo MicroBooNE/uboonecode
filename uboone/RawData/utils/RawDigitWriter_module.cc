@@ -190,6 +190,11 @@ namespace zmqds {
     art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
     evt.getByLabel("daq", digitVecHandle);
 
+    if ( !digitVecHandle.isValid() ) {
+      std::cout << "Missing daq info. skipping." << std::endl;
+      return;
+    }
+
     // Use the handle to get a particular (0th) element of collection.
     art::Ptr<raw::RawDigit> digitVec0(digitVecHandle, 0);
     
@@ -238,6 +243,11 @@ namespace zmqds {
       //ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
 
       evt.getByLabel( "pmtreadout", opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), wfHandle);
+
+      if ( !wfHandle.isValid() ) {
+	std::cout << "Missing pmtreadout/" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) << " info. skipping." << std::endl;
+	return;
+      }
 
       std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
 
