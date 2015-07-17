@@ -2,11 +2,11 @@
 #include "timeservice_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
-process_name: RawConvert
+process_name: Swizzler
 services:
 {
   TFileService: { fileName: "daq_hist.root" }
-  Timing:       {}
+  TimeTracker:       {}
   RandomNumberGenerator: {} 
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
@@ -15,6 +15,22 @@ services:
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
           }
+
+  FileCatalogMetadata: { applicationFamily: "art"
+                         applicationVersion: "v04_16_00"
+                         fileType: "data"
+                         group: "uboone"
+                         runType: "physics"
+                         service_type: "FileCatalogMetadata"
+                        }
+  FileCatalogMetadataMicroBooNE: { FCLName: "swizzle.fcl"
+                                   FCLVersion: "v1.0"
+                                   ProjectName: "Swizzler"
+                                   ProjectStage: "swizzle"
+                                   ProjectVersion: "v04_16_00"
+                                   service_type: "FileCatalogMetadataMicroBooNE"
+            			 }
+
 }
 
 # Database settings
@@ -33,7 +49,7 @@ source:
   fileNames:       []
   module_type:	   LArRawInputSourceUBooNE
   maxEvents:       -1
-  huffmanDecode:   false
+  huffmanDecode:   true
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
@@ -46,7 +62,8 @@ outputs:
   {
    module_type: RootOutput
    fileName:    "larsoft.root" 
-   compressionLevel: 1			    
+   compressionLevel: 1
+   dataTier: "raw"
   }
 }
 
