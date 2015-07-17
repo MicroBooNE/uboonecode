@@ -81,12 +81,14 @@ namespace geo {
   protected:
     unsigned int fNOpDets;
     unsigned int fNReadoutChannels;
+    unsigned int fMaxOpChannel;
     std::set< unsigned int > fReadoutChannelSet;
     std::map< unsigned int, unsigned int > fChannel2pmt;  // readout channel to opdet(pmt) id
     std::map< unsigned int, std::vector< unsigned int > > fPMT2channels; // opdet(pmt) id to readout channel
 
   public:
     unsigned int NOpChannels(unsigned int NOpDets)                        const;
+    unsigned int MaxOpChannel(unsigned int NOpDets)                        const;
     unsigned int NOpHardwareChannels(unsigned int opDet)                  const;
     unsigned int OpChannel(unsigned int detNum, unsigned int channel = 0) const;
     unsigned int OpDetFromOpChannel(unsigned int opChannel)               const;

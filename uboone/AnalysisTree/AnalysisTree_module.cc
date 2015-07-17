@@ -416,9 +416,44 @@ namespace microboone {
     Float_t  lep_dcosz_truth[kMaxTruth]; //lepton dcos z
 
     //flux information
-    Float_t  tpx_flux[kMaxTruth];        //Px of parent particle leaving BNB target
-    Float_t  tpy_flux[kMaxTruth];        //Py of parent particle leaving BNB target
-    Float_t  tpz_flux[kMaxTruth];        //Pz of parent particle leaving BNB target
+    Float_t  vx_flux[kMaxTruth];          //X position of hadron/muon decay (cm)
+    Float_t  vy_flux[kMaxTruth];          //Y position of hadron/muon decay (cm)
+    Float_t  vz_flux[kMaxTruth];          //Z position of hadron/muon decay (cm)
+    Float_t  pdpx_flux[kMaxTruth];        //Parent X momentum at decay point (GeV)
+    Float_t  pdpy_flux[kMaxTruth];        //Parent Y momentum at decay point (GeV)
+    Float_t  pdpz_flux[kMaxTruth];        //Parent Z momentum at decay point (GeV)
+    Float_t  ppdxdz_flux[kMaxTruth];      //Parent dxdz direction at production
+    Float_t  ppdydz_flux[kMaxTruth];      //Parent dydz direction at production
+    Float_t  pppz_flux[kMaxTruth];        //Parent Z momentum at production (GeV)
+    
+    Int_t    ptype_flux[kMaxTruth];        //Parent GEANT code particle ID
+    Float_t  ppvx_flux[kMaxTruth];        //Parent production vertex X (cm)
+    Float_t  ppvy_flux[kMaxTruth];        //Parent production vertex Y (cm)
+    Float_t  ppvz_flux[kMaxTruth];        //Parent production vertex Z (cm)
+    Float_t  muparpx_flux[kMaxTruth];     //Muon neutrino parent production vertex X (cm)
+    Float_t  muparpy_flux[kMaxTruth];     //Muon neutrino parent production vertex Y (cm)
+    Float_t  muparpz_flux[kMaxTruth];     //Muon neutrino parent production vertex Z (cm)
+    Float_t  mupare_flux[kMaxTruth];      //Muon neutrino parent energy (GeV)
+    
+    Int_t    tgen_flux[kMaxTruth];        //Parent generation in cascade. (1 = primary proton, 
+    					  //2=particles produced by proton interaction, 3 = particles 
+					  //produced by interactions of the 2's, ...
+    Int_t    tgptype_flux[kMaxTruth];     //Type of particle that created a particle flying of the target  
+    Float_t  tgppx_flux[kMaxTruth];       //X Momentum of a particle, that created a particle that flies 
+    					  //off the target, at the interaction point. (GeV)
+    Float_t  tgppy_flux[kMaxTruth];       //Y Momentum of a particle, that created a particle that flies  
+					  //off the target, at the interaction point. (GeV)
+    Float_t  tgppz_flux[kMaxTruth];       //Z Momentum of a particle, that created a particle that flies
+					  //off the target, at the interaction point. (GeV)
+    Float_t  tprivx_flux[kMaxTruth];      //Primary particle interaction vertex X (cm)  
+    Float_t  tprivy_flux[kMaxTruth];      //Primary particle interaction vertex Y (cm)  
+    Float_t  tprivz_flux[kMaxTruth];      //Primary particle interaction vertex Z (cm) 
+    Float_t  dk2gen_flux[kMaxTruth];      //distance from decay to ray origin (cm) 
+    Float_t  gen2vtx_flux[kMaxTruth];     //distance from ray origin to event vtx (cm)
+ 
+    Float_t  tpx_flux[kMaxTruth];        //Px of parent particle leaving BNB/NuMI target (GeV)
+    Float_t  tpy_flux[kMaxTruth];        //Py of parent particle leaving BNB/NuMI target (GeV)
+    Float_t  tpz_flux[kMaxTruth];        //Pz of parent particle leaving BNB/NuMI target (GeV)
     Int_t    tptype_flux[kMaxTruth];     //Type of parent particle leaving BNB target
      
     //genie information
@@ -1244,6 +1279,35 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(lep_dcosx_truth, lep_dcosx_truth + sizeof(lep_dcosx_truth)/sizeof(lep_dcosx_truth[0]), -99999.);
   std::fill(lep_dcosy_truth, lep_dcosy_truth + sizeof(lep_dcosy_truth)/sizeof(lep_dcosy_truth[0]), -99999.);
   std::fill(lep_dcosz_truth, lep_dcosz_truth + sizeof(lep_dcosz_truth)/sizeof(lep_dcosz_truth[0]), -99999.);
+
+  //Flux information
+  std::fill(vx_flux, vx_flux + sizeof(vx_flux)/sizeof(vx_flux[0]), -99999.);
+  std::fill(vy_flux, vy_flux + sizeof(vy_flux)/sizeof(vy_flux[0]), -99999.);
+  std::fill(vz_flux, vz_flux + sizeof(vz_flux)/sizeof(vz_flux[0]), -99999.);
+  std::fill(pdpx_flux, pdpx_flux + sizeof(pdpx_flux)/sizeof(pdpx_flux[0]), -99999.);
+  std::fill(pdpy_flux, pdpy_flux + sizeof(pdpy_flux)/sizeof(pdpy_flux[0]), -99999.);
+  std::fill(pdpz_flux, pdpz_flux + sizeof(pdpz_flux)/sizeof(pdpz_flux[0]), -99999.);
+  std::fill(ppdxdz_flux, ppdxdz_flux + sizeof(ppdxdz_flux)/sizeof(ppdxdz_flux[0]), -99999.);
+  std::fill(ppdydz_flux, ppdydz_flux + sizeof(ppdydz_flux)/sizeof(ppdydz_flux[0]), -99999.);
+  std::fill(pppz_flux, pppz_flux + sizeof(pppz_flux)/sizeof(pppz_flux[0]), -99999.);
+  std::fill(ptype_flux, ptype_flux + sizeof(ptype_flux)/sizeof(ptype_flux[0]), -9999);
+  std::fill(ppvx_flux, ppvx_flux + sizeof(ppvx_flux)/sizeof(ppvx_flux[0]), -99999.);
+  std::fill(ppvy_flux, ppvy_flux + sizeof(ppvy_flux)/sizeof(ppvy_flux[0]), -99999.);
+  std::fill(ppvz_flux, ppvz_flux + sizeof(ppvz_flux)/sizeof(ppvz_flux[0]), -99999.);
+  std::fill(muparpx_flux, muparpx_flux + sizeof(muparpx_flux)/sizeof(muparpx_flux[0]), -99999.);
+  std::fill(muparpy_flux, muparpy_flux + sizeof(muparpy_flux)/sizeof(muparpy_flux[0]), -99999.);
+  std::fill(muparpz_flux, muparpz_flux + sizeof(muparpz_flux)/sizeof(muparpz_flux[0]), -99999.);
+  std::fill(mupare_flux, mupare_flux + sizeof(mupare_flux)/sizeof(mupare_flux[0]), -99999.);
+  std::fill(tgen_flux, tgen_flux + sizeof(tgen_flux)/sizeof(tgen_flux[0]), -9999);
+  std::fill(tgptype_flux, tgptype_flux + sizeof(tgptype_flux)/sizeof(tgptype_flux[0]), -9999);
+  std::fill(tgppx_flux, tgppx_flux + sizeof(tgppx_flux)/sizeof(tgppx_flux[0]), -99999.);
+  std::fill(tgppy_flux, tgppy_flux + sizeof(tgppy_flux)/sizeof(tgppy_flux[0]), -99999.);
+  std::fill(tgppz_flux, tgppz_flux + sizeof(tgppz_flux)/sizeof(tgppz_flux[0]), -99999.);
+  std::fill(tprivx_flux, tprivx_flux + sizeof(tprivx_flux)/sizeof(tprivx_flux[0]), -99999.);
+  std::fill(tprivy_flux, tprivy_flux + sizeof(tprivy_flux)/sizeof(tprivy_flux[0]), -99999.);
+  std::fill(tprivz_flux, tprivz_flux + sizeof(tprivz_flux)/sizeof(tprivz_flux[0]), -99999.);
+  std::fill(dk2gen_flux, dk2gen_flux + sizeof(dk2gen_flux)/sizeof(dk2gen_flux[0]), -99999.);
+  std::fill(gen2vtx_flux, gen2vtx_flux + sizeof(gen2vtx_flux)/sizeof(gen2vtx_flux[0]), -99999.);
   std::fill(tpx_flux, tpx_flux + sizeof(tpx_flux)/sizeof(tpx_flux[0]), -99999.);
   std::fill(tpy_flux, tpy_flux + sizeof(tpy_flux)/sizeof(tpy_flux[0]), -99999.);
   std::fill(tpz_flux, tpz_flux + sizeof(tpz_flux)/sizeof(tpz_flux[0]), -99999.);
@@ -1548,6 +1612,33 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("lep_dcosy_truth",lep_dcosy_truth,"lep_dcosy_truth[mcevts_truth]/F");
     CreateBranch("lep_dcosz_truth",lep_dcosz_truth,"lep_dcosz_truth[mcevts_truth]/F");
 
+    CreateBranch("vx_flux",vx_flux,"vx_flux[mcevts_truth]/F");
+    CreateBranch("vy_flux",vy_flux,"vy_flux[mcevts_truth]/F");
+    CreateBranch("vz_flux",vz_flux,"vz_flux[mcevts_truth]/F");
+    CreateBranch("pdpx_flux",pdpx_flux,"pdpx_flux[mcevts_truth]/F");
+    CreateBranch("pdpy_flux",pdpy_flux,"pdpy_flux[mcevts_truth]/F");
+    CreateBranch("pdpz_flux",pdpz_flux,"pdpz_flux[mcevts_truth]/F");
+    CreateBranch("ppdxdz_flux",ppdxdz_flux,"ppdxdz_flux[mcevts_truth]/F");
+    CreateBranch("ppdydz_flux",ppdydz_flux,"ppdydz_flux[mcevts_truth]/F");
+    CreateBranch("pppz_flux",pppz_flux,"pppz_flux[mcevts_truth]/F");
+    CreateBranch("ptype_flux",ptype_flux,"ptype_flux[mcevts_truth]/I");
+    CreateBranch("ppvx_flux",ppvx_flux,"ppvx_flux[mcevts_truth]/F");
+    CreateBranch("ppvy_flux",ppvy_flux,"ppvy_flux[mcevts_truth]/F");
+    CreateBranch("ppvz_flux",ppvz_flux,"ppvz_flux[mcevts_truth]/F");
+    CreateBranch("muparpx_flux",muparpx_flux,"muparpx_flux[mcevts_truth]/F");
+    CreateBranch("muparpy_flux",muparpy_flux,"muparpy_flux[mcevts_truth]/F");
+    CreateBranch("muparpz_flux",muparpz_flux,"muparpz_flux[mcevts_truth]/F");   
+    CreateBranch("mupare_flux",mupare_flux,"mupare_flux[mcevts_truth]/F");
+    CreateBranch("tgen_flux",tgen_flux,"tgen_flux[mcevts_truth]/I");
+    CreateBranch("tgptype_flux",tgptype_flux,"tgptype_flux[mcevts_truth]/I");
+    CreateBranch("tgppx_flux",tgppx_flux,"tgppx_flux[mcevts_truth]/F");
+    CreateBranch("tgppy_flux",tgppy_flux,"tgppy_flux[mcevts_truth]/F");
+    CreateBranch("tgppz_flux",tgppz_flux,"tgppz_flux[mcevts_truth]/F");
+    CreateBranch("tprivx_flux",tprivx_flux,"tprivx_flux[mcevts_truth]/F");
+    CreateBranch("tprivy_flux",tprivy_flux,"tprivy_flux[mcevts_truth]/F");
+    CreateBranch("tprivz_flux",tprivz_flux,"tprivz_flux[mcevts_truth]/F");
+    CreateBranch("dk2gen_flux",dk2gen_flux,"dk2gen_flux[mcevts_truth]/F");
+    CreateBranch("gen2vtx_flux",gen2vtx_flux,"gen2vtx_flux[mcevts_truth]/F");
     CreateBranch("tpx_flux",tpx_flux,"tpx_flux[mcevts_truth]/F");
     CreateBranch("tpy_flux",tpy_flux,"tpy_flux[mcevts_truth]/F");
     CreateBranch("tpz_flux",tpz_flux,"tpz_flux[mcevts_truth]/F");
@@ -2436,11 +2527,41 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           }
 
           //flux information
-          fData->tpx_flux[neutrino_i]    = fluxlist[iList]->ftpx;
+	  fData->vx_flux[neutrino_i]        = fluxlist[iList]->fvx;
+	  fData->vy_flux[neutrino_i]        = fluxlist[iList]->fvy;
+	  fData->vz_flux[neutrino_i]        = fluxlist[iList]->fvz;
+	  fData->pdpx_flux[neutrino_i]      = fluxlist[iList]->fpdpx;
+	  fData->pdpy_flux[neutrino_i]      = fluxlist[iList]->fpdpy;
+	  fData->pdpz_flux[neutrino_i]      = fluxlist[iList]->fpdpz;
+	  fData->ppdxdz_flux[neutrino_i]    = fluxlist[iList]->fppdxdz;
+	  fData->ppdydz_flux[neutrino_i]    = fluxlist[iList]->fppdydz;
+	  fData->pppz_flux[neutrino_i]      = fluxlist[iList]->fpppz;
+	  
+	  fData->ptype_flux[neutrino_i]      = fluxlist[iList]->fptype;
+          fData->ppvx_flux[neutrino_i]       = fluxlist[iList]->fppvx;
+	  fData->ppvy_flux[neutrino_i]       = fluxlist[iList]->fppvy;
+	  fData->ppvz_flux[neutrino_i]       = fluxlist[iList]->fppvz;
+	  fData->muparpx_flux[neutrino_i]    = fluxlist[iList]->fmuparpx;
+	  fData->muparpy_flux[neutrino_i]    = fluxlist[iList]->fmuparpy;
+	  fData->muparpz_flux[neutrino_i]    = fluxlist[iList]->fmuparpz;
+	  fData->mupare_flux[neutrino_i]     = fluxlist[iList]->fmupare;
+	  
+	  fData->tgen_flux[neutrino_i]     = fluxlist[iList]->ftgen;
+	  fData->tgptype_flux[neutrino_i]  = fluxlist[iList]->ftgptype;
+	  fData->tgppx_flux[neutrino_i]    = fluxlist[iList]->ftgppx;
+	  fData->tgppy_flux[neutrino_i]    = fluxlist[iList]->ftgppy;
+	  fData->tgppz_flux[neutrino_i]    = fluxlist[iList]->ftgppz;
+	  fData->tprivx_flux[neutrino_i]   = fluxlist[iList]->ftprivx;
+	  fData->tprivy_flux[neutrino_i]   = fluxlist[iList]->ftprivy;
+	  fData->tprivz_flux[neutrino_i]   = fluxlist[iList]->ftprivz;
+
+	  fData->dk2gen_flux[neutrino_i]   = fluxlist[iList]->fdk2gen;
+	  fData->gen2vtx_flux[neutrino_i]   = fluxlist[iList]->fgen2vtx;
+
+	  fData->tpx_flux[neutrino_i]    = fluxlist[iList]->ftpx;
           fData->tpy_flux[neutrino_i]    = fluxlist[iList]->ftpy;
           fData->tpz_flux[neutrino_i]    = fluxlist[iList]->ftpz;
           fData->tptype_flux[neutrino_i] = fluxlist[iList]->ftptype;
-
           neutrino_i++;
         }//mclist is NeutrinoSet()
       }//loop over mclist

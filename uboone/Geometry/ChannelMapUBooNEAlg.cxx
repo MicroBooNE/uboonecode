@@ -46,6 +46,11 @@ namespace geo {
     return fNReadoutChannels;
   }
 
+  unsigned int ChannelMapUBooNEAlg::MaxOpChannel(unsigned int NOpDets) const
+  {
+    return fMaxOpChannel;
+  }
+
   //----------------------------------------------------------------------------
   unsigned int ChannelMapUBooNEAlg::NOpHardwareChannels(unsigned int opDet) const
   {
@@ -98,6 +103,7 @@ namespace geo {
   void ChannelMapUBooNEAlg::LoadOpticalMapData( fhicl::ParameterSet const& pset ) {
     fNOpDets = pset.get< unsigned int >("numberOfDetectors");
     fNReadoutChannels = 0;    
+    fMaxOpChannel = 0;
     // ----------------------------------------------------------------------
     // map between opdet ID and Readout Channel Number
     for (unsigned int iop=0; iop<fNOpDets; iop++) {
@@ -111,6 +117,8 @@ namespace geo {
 	fChannel2pmt[ *it_ch ] = iop;
 	//std::cout << *it_ch << ",";
 	fNReadoutChannels++;
+	if ( *it_ch > fMaxOpChannel )
+	  fMaxOpChannel = *it_ch;
       }
       //std::cout << "]" << std::endl;
     }

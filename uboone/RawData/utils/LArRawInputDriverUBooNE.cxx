@@ -104,6 +104,7 @@ namespace lris {
     mf::LogInfo(__FUNCTION__)<<"File boundary (processed "<<fEventCounter<<" events)"<<std::endl;
     fCurrentSubRunID.flushSubRun();
     fEventCounter=0;
+    fNumberEventsInFile=0;
     fInputStream.close();
   }
     
@@ -123,44 +124,34 @@ namespace lris {
       throw art::Exception( art::errors::FileReadError )
         << "failed to open input file " << name << std::endl;
     }
-
-    return;
-
+      
     //seek to the end of file, check the end word, check number of events and sizes
     //read in the end of file word first
-    uint16_t end_of_file_marker;
-    fInputStream.seekg( -1*sizeof(uint16_t) , std::ios::end);
-    fInputStream.read( (char*)&end_of_file_marker , sizeof(uint16_t));
-
-    if(end_of_file_marker != 0xe0f0){
-      //throw art::Exception( art::errors::FileReadError )
-      std::cout << "File "<<name<<" has incorrect end of file marker. "<< end_of_file_marker<<std::endl;
+    if (fEventCounter==0) {
+      uint16_t end_of_file_marker;
+      uint32_t nevents;
+      fInputStream.seekg( -1*sizeof(uint16_t) , std::ios::end); //eof marker is 16 bits long so go 16 bits from the end.
+      fInputStream.read( (char*)&end_of_file_marker , sizeof(uint16_t));
+      if(end_of_file_marker != 0xe0f0){ //make sure that it is the correct marker
+	throw art::Exception( art::errors::FileReadError ) 
+	  << "File "<<name<<" has incorrect end of file marker. "<< end_of_file_marker<<std::endl;
+      }
+      
+      fInputStream.seekg( -3*sizeof(uint16_t) , std::ios::end); //need to go 48 bits from the end of the file (16 for eof marker and 32 for nevents
+      fInputStream.read( (char*)&nevents, sizeof(uint32_t)); //read in the 32 bits that should be the event count
+      if (nevents>0 && nevents <1E9) { //make sure that nevents is reasonable
+	mf::LogInfo("")<<"Opened file "<<name<<" with "<< nevents <<" event(s)";
+	fNumberEventsInFile = nevents;
+      } else {
+	throw art::Exception( art::errors::FileReadError )
+	  << "File "<<name<<" has incorrect number of events in trailer. "<< nevents<<std::endl;
+      }
+      
+      fInputStream.seekg(std::ios::beg);
     }
-    fInputStream.seekg(std::ios::beg);
     
     return;
-    /*
-    //get number of events from word at end of file
-    fInputStream.seekg( -1*(sizeof(uint16_t)+sizeof(uint32_t)), std::ios::end);
-    fInputStream.read( (char*)&fNumberOfEvents , sizeof(uint32_t));
 
-    fNumberOfEvents = 10;
-    //now get all of the event sizes, 
-    uint32_t tmp_event_size;
-    std::streampos count_event_size=0;
-    fInputStream.seekg( -1*(sizeof(uint16_t)+(fNumberOfEvents+1)*sizeof(uint32_t)), std::ios::end);
-
-    for(uint32_t i=0; i<fNumberOfEvents; i++){
-      // since we want the beginning, push back the event size before incrementing it
-      fEventLocation.push_back(count_event_size);
-      fInputStream.read( (char*)&tmp_event_size , sizeof(uint32_t));
-      count_event_size += tmp_event_size;
-    }
-    fEventLocation.push_back(count_event_size);
-    fInputStream.seekg(std::ios::beg);
-
-    mf::LogInfo("")<<"Opened file "<<name<<" with "<<fNumberOfEvents<<" event(s)";
-    */
   }
 
 
@@ -194,6 +185,22 @@ namespace lris {
                                          art::SubRunPrincipal* &outSR,
                                          art::EventPrincipal* &outE)
   {
+
+    if (fEventCounter==fNumberEventsInFile) {
+      mf::LogInfo(__FUNCTION__)<<"Already read " << fNumberEventsInFile << " events, so checking end of file..." << std::endl;
+      std::ios::streampos current_position = fInputStream.tellg(); //find out where in the file we're located
+      fInputStream.seekg(0,std::ios::end); //go to the end of the file
+      std::ios::streampos file_length = fInputStream.tellg(); //get the location which will tell the size.
+      fInputStream.seekg(current_position); //put the ifstream back to where it was before
+      if ( ((uint8_t)file_length - (uint8_t)current_position) > (uint8_t)1000 ) {
+	throw art::Exception( art::errors::FileReadError ) << "We processed " << fEventCounter << "events from the file " << 
+	  std::endl << "But there are still " << (file_length - current_position) << " bytes in the file" << std::endl;
+      }
+      mf::LogInfo(__FUNCTION__)<<"Completed reading file and closing output file." << std::endl;
+
+      return false; //tells readNext that you're done reading all of the events in this file.
+    }
+    
     mf::LogInfo(__FUNCTION__)<<"Attempting to read event: "<<fEventCounter<<std::endl;
     // Create empty result, then fill it from current file:
     std::unique_ptr<raw::DAQHeader> daq_header(new raw::DAQHeader);
@@ -420,22 +427,29 @@ namespace lris {
 	    size_t chdsize(0); 
 
 	    //Huffman decoding
-	    if (fHuffmanDecode) {
-              channel.decompress(adclist); // All-in-one call.
-	      uint16_t frailer = channel.getChannelTrailerWord();
-	      if ( adclist.size()<9595 ) {
-		short lachadawin = adclist.at( adclist.size()-1 );
-		std::vector<short> kaxufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
-		for ( auto& it : kaxufix )
-		  adclist.emplace_back( it );
-		//std::cout << "trailer: " << trailer_word << std::endl;
-		//short thecheat = adclist.at( adclist.size()-1 );
-		//while ( adclist.size()<9595 ) {
-		//adclist.push_back( thecheat );
-		//}
-	      }
-	      chdsize = adclist.size();
-            } else {
+	    //if (fHuffmanDecode) {
+	    channel.decompress(adclist); // All-in-one call.
+	    uint16_t frailer = channel.getChannelTrailerWord();
+	    //if ( adclist.size()<9595 ) {
+	    short lachadawin = adclist.at( adclist.size()-1 );
+	    if ( (frailer>>12 != 0x5) || ( (frailer&0xfff) != tpc_channel_number ) ) {
+	      std::vector<short> kaxufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
+	      for ( auto& it : kaxufix )
+		adclist.emplace_back( it );
+	    }
+	      //std::cout << "trailer: " << trailer_word << std::endl;
+	      //short thecheat = adclist.at( adclist.size()-1 );
+	      //while ( adclist.size()<9595 ) {
+	      //adclist.push_back( thecheat );
+	      //}
+	    //}
+	    chdsize = adclist.size();
+	    const static size_t          fAdcList_size = chdsize;
+	    if (fAdcList_size!=chdsize) {
+	      throw art::Exception( art::errors::FileReadError ) << "Unexpected data: Number of words for channel: " << tpc_channel_number << " different than first waveform in the readout. That's really bad!!!" << std::endl;
+	    }
+	      
+            /*} else {
               const ub_RawData& chD = channel.data(); 
 	      // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
 	      // chdsize = chD.size()/sizeof(uint16_t);    
@@ -443,9 +457,9 @@ namespace lris {
               adclist.reserve(chD.size()); // optimize
               for(ub_RawData::const_iterator it = chD.begin(); it!= chD.end(); it++) {
                 adclist.push_back(*it);
-              }
-	      //              chD.decompress();
-            }
+		}
+		//              chD.decompress();
+	      }*/
 	    
 	    //int crate_number = tpc_crate.crateHeader()->crate_number;
 	    util::UBDaqID daqId( crate_number, card.getModule(), tpc_channel_number);
