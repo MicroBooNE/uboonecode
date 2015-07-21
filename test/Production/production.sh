@@ -4,6 +4,10 @@
 
 env > env.txt
 
+# Manually add larpandora to FW_SEARCH_PATH to work around lar-ci bug.
+
+export FW_SEARCH_PATH=${LARPANDORA_DIR}/scripts:$FW_SEARCH_PATH
+
 # This script runs the full mc+reco chain using standard released fcl files.
 
 input=''
