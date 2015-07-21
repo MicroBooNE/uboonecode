@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# Save a copy of the environment (for debugging).
+
+env > env.txt
+
 # This script runs the full mc+reco chain using standard released fcl files.
 
 input=''
