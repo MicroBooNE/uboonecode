@@ -1,5 +1,5 @@
 #include "services_microboone.fcl"
-#include "analysistreemodule.fcl"
+#include "analysistreemodule_microboone.fcl"
 
 process_name: Ana
 

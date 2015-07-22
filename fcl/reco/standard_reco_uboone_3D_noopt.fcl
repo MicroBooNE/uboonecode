@@ -9,7 +9,7 @@
 #include "triggeralgo_service.fcl"
 #include "opticaldetectormodules.fcl"
 #include "photpropservices_microboone.fcl"
-#include "analysistreemodule.fcl"
+#include "analysistreemodule_microboone.fcl"
 
 process_name: Reco3D
 
