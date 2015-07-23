@@ -134,14 +134,14 @@ physics:
          pandoraCosmicKHitcalo,
          pandoraCosmicKHitpid,
          pandoraCosmicKHitPFPart,
-         #pandoraCosmicKHitFlashMatch,
+         pandoraCosmicKHitFlashMatch,
          pandoraCosmicKHitRemoval,
          pandoraNu,
          pandoraNuKHit,
          pandoraNuKHittag,
          pandoraNuKHitcalo,
          pandoraNuKHitpid,
-         #pandoraNuKHitFlashMatch,
+         pandoraNuKHitFlashMatch,
          ###>> Shower reconstruction bats cleanup
          showerrecofuzzy, 
          showerrecopandora
