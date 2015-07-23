@@ -12,6 +12,7 @@ microboone_analysistree:
  TrackModuleLabel:         [ "track3d" ]
  VertexModuleLabel:        "vertex3d"
  OpFlashModuleLabel:       "opflash"
+ MCShowerModuleLabel:      "mcreco" 
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
  ShowerModuleLabel:        showerrecofuzzy
@@ -21,6 +22,7 @@ microboone_analysistree:
  SaveCryInfo:              false
  SaveGenieInfo:            true
  SaveGeantInfo:            true
+ SaveMCShowerInfo:         true 
  SaveHitInfo:              true
  SaveTrackInfo:            true
  SaveVertexInfo:           true

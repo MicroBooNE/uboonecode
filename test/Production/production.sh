@@ -1,5 +1,16 @@
 #! /bin/bash
 
+# Save a copy of the environment (for debugging).
+
+env > env.txt
+
+# Manually add larpandora to FW_SEARCH_PATH to work around pandora build environment bug.
+
+dir=${LARPANDORA_DIR}/LArPandoraInterface/scripts
+if [ -d $dir ]; then
+  export FW_SEARCH_PATH=${dir}:$FW_SEARCH_PATH
+fi
+
 # This script runs the full mc+reco chain using standard released fcl files.
 
 input=''
