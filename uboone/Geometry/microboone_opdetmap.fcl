@@ -4,7 +4,7 @@ microboone_geometry_helper:
 {
  service_provider : UBooNEGeometryHelper
 
- numberOfDetectors: 32       # number of optical detectors, 32 PMTs, 4 acrylic light paddles
+ numberOfDetectors: 36       # number of optical detectors, 32 PMTs, 4 acrylic light paddles
  numberOfHardwareChanels: 4  # number of readout channels per opdet
  
  # OpDet ID (determined by load order in GDML file): name of Optical Detector (P=PMT, L=light guide paddle)

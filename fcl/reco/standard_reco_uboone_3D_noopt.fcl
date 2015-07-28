@@ -9,12 +9,13 @@
 #include "triggeralgo_service.fcl"
 #include "opticaldetectormodules.fcl"
 #include "photpropservices_microboone.fcl"
-#include "analysistreemodule.fcl"
+#include "analysistreemodule_microboone.fcl"
 
 process_name: Reco3D
 
 services:
 {
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "reco3D_hist.root" }
   Timing:       {}

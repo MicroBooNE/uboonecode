@@ -94,6 +94,7 @@ namespace lris {
     std::ifstream                  fInputStream;
     std::vector<std::streampos>    fEventLocation;
     uint32_t                       fEventCounter; 
+    uint32_t                       fNumberEventsInFile;
     bool                           fHuffmanDecode;
     const util::UBChannelMap_t&    fChannelMap;   
     

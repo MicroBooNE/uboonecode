@@ -1,0 +1,54 @@
+#include "opticaldetectormodules.fcl"
+
+BEGIN_PROLOG
+
+microboone_simphotoncounter: @local::standard_simphotoncounter
+microboone_opdigi:           @local::standard_opdigi
+microboone_tracktimeassoc:   @local::standard_tracktimeassoc
+
+microboone_opflash_lowgain:
+{
+   module_type:     "OpFlashFinder"
+   GenModule:       "generator"
+   InputModule:     "pmtreadout"
+   InputLabels:     [ "OpdetBeamLowGain" ]
+   BinWidth:         1   # us | Pulse finding parameters
+   FlashThreshold:   2   # PE
+   HitThreshold:     0.2 # PE
+   WidthTolerance:   0.5 # unitless
+   TrigCoinc:        2.5 # in microseconds!
+   AreaToPE:         false # Use area to calculate number of PEs
+   SPEArea:          1330  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
+   reco_man:         @local::standard_preco_manager
+   algo_threshold:   @local::standard_algo_threshold
+}
+
+microboone_opflash_highgain:
+{
+   module_type:     "OpFlashFinder"
+   GenModule:       "generator"
+   InputModule:     "pmtreadout"
+   InputLabels:     [ "OpdetBeamHighGain" ]
+   BinWidth:         1   # us | Pulse finding parameters
+   FlashThreshold:   2   # PE
+   HitThreshold:     0.2 # PE
+   WidthTolerance:   0.5 # unitless
+   TrigCoinc:        2.5 # in microseconds!
+   AreaToPE:         false # Use area to calculate number of PEs
+   SPEArea:          1330  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
+   reco_man:         @local::standard_preco_manager
+   algo_threshold:   @local::standard_algo_threshold
+}
+
+microboone_opflash: @local::standard_opflash
+microboone_opflash.InputModule: "pmtreadout"
+microboone_opflash.InputLabels: ["OpdetBeamHighGain"]
+
+microboone_opdigiana:        @local::standard_opdigiana
+microboone_opflashana:       @local::standard_opflashana
+
+microboone_simphotoncounteralg: @local::standard_simphotoncounteralg
+microboone_flashhypothesisanaalg: @local::standard_flashhypothesisanaalg
+microboone_flashhypothesisanamodule: @local::standard_flashhypothesisanamodule
+
+END_PROLOG

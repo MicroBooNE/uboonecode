@@ -96,6 +96,8 @@
 
 #include "Geometry/Geometry.h"
 #include "SimulationBase/MCTruth.h"
+#include "MCBase/MCShower.h"
+#include "MCBase/MCStep.h"
 #include "SimulationBase/MCFlux.h"
 #include "Simulation/SimChannel.h"
 #include "Simulation/AuxDetSimChannel.h"
@@ -316,6 +318,7 @@ namespace microboone {
       tdVtx = 0x40,
       tdFlash = 0x80,
       tdShower = 0x100,
+      tdMCshwr = 0x200,
       tdDefault = 0
     }; // DataBits_t
     
@@ -416,9 +419,44 @@ namespace microboone {
     Float_t  lep_dcosz_truth[kMaxTruth]; //lepton dcos z
 
     //flux information
-    Float_t  tpx_flux[kMaxTruth];        //Px of parent particle leaving BNB target
-    Float_t  tpy_flux[kMaxTruth];        //Py of parent particle leaving BNB target
-    Float_t  tpz_flux[kMaxTruth];        //Pz of parent particle leaving BNB target
+    Float_t  vx_flux[kMaxTruth];          //X position of hadron/muon decay (cm)
+    Float_t  vy_flux[kMaxTruth];          //Y position of hadron/muon decay (cm)
+    Float_t  vz_flux[kMaxTruth];          //Z position of hadron/muon decay (cm)
+    Float_t  pdpx_flux[kMaxTruth];        //Parent X momentum at decay point (GeV)
+    Float_t  pdpy_flux[kMaxTruth];        //Parent Y momentum at decay point (GeV)
+    Float_t  pdpz_flux[kMaxTruth];        //Parent Z momentum at decay point (GeV)
+    Float_t  ppdxdz_flux[kMaxTruth];      //Parent dxdz direction at production
+    Float_t  ppdydz_flux[kMaxTruth];      //Parent dydz direction at production
+    Float_t  pppz_flux[kMaxTruth];        //Parent Z momentum at production (GeV)
+    
+    Int_t    ptype_flux[kMaxTruth];        //Parent GEANT code particle ID
+    Float_t  ppvx_flux[kMaxTruth];        //Parent production vertex X (cm)
+    Float_t  ppvy_flux[kMaxTruth];        //Parent production vertex Y (cm)
+    Float_t  ppvz_flux[kMaxTruth];        //Parent production vertex Z (cm)
+    Float_t  muparpx_flux[kMaxTruth];     //Muon neutrino parent production vertex X (cm)
+    Float_t  muparpy_flux[kMaxTruth];     //Muon neutrino parent production vertex Y (cm)
+    Float_t  muparpz_flux[kMaxTruth];     //Muon neutrino parent production vertex Z (cm)
+    Float_t  mupare_flux[kMaxTruth];      //Muon neutrino parent energy (GeV)
+    
+    Int_t    tgen_flux[kMaxTruth];        //Parent generation in cascade. (1 = primary proton, 
+    					  //2=particles produced by proton interaction, 3 = particles 
+					  //produced by interactions of the 2's, ...
+    Int_t    tgptype_flux[kMaxTruth];     //Type of particle that created a particle flying of the target  
+    Float_t  tgppx_flux[kMaxTruth];       //X Momentum of a particle, that created a particle that flies 
+    					  //off the target, at the interaction point. (GeV)
+    Float_t  tgppy_flux[kMaxTruth];       //Y Momentum of a particle, that created a particle that flies  
+					  //off the target, at the interaction point. (GeV)
+    Float_t  tgppz_flux[kMaxTruth];       //Z Momentum of a particle, that created a particle that flies
+					  //off the target, at the interaction point. (GeV)
+    Float_t  tprivx_flux[kMaxTruth];      //Primary particle interaction vertex X (cm)  
+    Float_t  tprivy_flux[kMaxTruth];      //Primary particle interaction vertex Y (cm)  
+    Float_t  tprivz_flux[kMaxTruth];      //Primary particle interaction vertex Z (cm) 
+    Float_t  dk2gen_flux[kMaxTruth];      //distance from decay to ray origin (cm) 
+    Float_t  gen2vtx_flux[kMaxTruth];     //distance from ray origin to event vtx (cm)
+ 
+    Float_t  tpx_flux[kMaxTruth];        //Px of parent particle leaving BNB/NuMI target (GeV)
+    Float_t  tpy_flux[kMaxTruth];        //Py of parent particle leaving BNB/NuMI target (GeV)
+    Float_t  tpz_flux[kMaxTruth];        //Pz of parent particle leaving BNB/NuMI target (GeV)
     Int_t    tptype_flux[kMaxTruth];     //Type of parent particle leaving BNB target
      
     //genie information
@@ -454,7 +492,7 @@ namespace microboone {
     std::vector<Int_t>    cry_ND;
     std::vector<Int_t>    cry_mother;
     
-    //geant information
+    //G4 MC Particle information
     size_t MaxGEANTparticles = 0; ///! how many particles there is currently room for
     Int_t     no_primaries;      //number of primary geant particles
     Int_t     geant_list_size;  //number of all geant particles
@@ -497,6 +535,50 @@ namespace microboone {
     std::vector<Int_t>    origin;   ////0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles 
     std::vector<Int_t>    MCTruthIndex; //this geant particle comes from the neutrino interaction of the _truth variables with this index
 
+    //MC Shower information
+    Int_t     no_mcshowers;                         //number of MC Showers in this event.
+    //MC Shower particle information
+    std::vector<Int_t>       mcshwr_origin;	    //MC Shower origin information.  
+    std::vector<Int_t>       mcshwr_pdg;	    //MC Shower particle PDG code.   
+    std::vector<Int_t>       mcshwr_TrackId;        //MC Shower particle G4 track ID.
+    std::vector<std::string> mcshwr_Process;	    //MC Shower particle's creation process. 
+    std::vector<Float_t>     mcshwr_startX;	    //MC Shower particle G4 startX 
+    std::vector<Float_t>     mcshwr_startY;	    //MC Shower particle G4 startY 
+    std::vector<Float_t>     mcshwr_startZ;	    //MC Shower particle G4 startZ 
+    std::vector<Float_t>     mcshwr_endX;	    //MC Shower particle G4 endX 
+    std::vector<Float_t>     mcshwr_endY;	    //MC Shower particle G4 endY 
+    std::vector<Float_t>     mcshwr_endZ;	    //MC Shower particle G4 endZ 
+    std::vector<Float_t>    mcshwr_CombEngX;	    //MC Shower Combined energy deposition information, Start Point X Position. 
+    std::vector<Float_t>    mcshwr_CombEngY;	    //MC Shower Combined energy deposition information, Start Point Y Position.
+    std::vector<Float_t>    mcshwr_CombEngZ;	    //MC Shower Combined energy deposition information, Start Point Z Position.
+    std::vector<Float_t>     mcshwr_CombEngPx;	    //MC Shower Combined energy deposition information, Momentum X direction.
+    std::vector<Float_t>     mcshwr_CombEngPy;	    //MC Shower Combined energy deposition information, Momentum X direction.
+    std::vector<Float_t>     mcshwr_CombEngPz;	    //MC Shower Combined energy deposition information, Momentum X direction.
+    std::vector<Float_t>     mcshwr_CombEngE;	    //MC Shower Combined energy deposition information, Energy
+    std::vector<Int_t>       mcshwr_isEngDeposited;  //tells whether if this shower deposited energy in the detector or not.
+    						    //yes = 1; no =0;	
+    //MC Shower mother information
+    std::vector<Int_t>       mcshwr_Motherpdg;       //MC Shower's mother PDG code. 
+    std::vector<Int_t>       mcshwr_MotherTrkId;     //MC Shower's mother G4 track ID.
+    std::vector<std::string> mcshwr_MotherProcess;   //MC Shower's mother creation process. 
+    std::vector<Float_t>     mcshwr_MotherstartX;    //MC Shower's mother  G4 startX .
+    std::vector<Float_t>     mcshwr_MotherstartY;    //MC Shower's mother  G4 startY .
+    std::vector<Float_t>     mcshwr_MotherstartZ;    //MC Shower's mother  G4 startZ .
+    std::vector<Float_t>     mcshwr_MotherendX;	     //MC Shower's mother  G4 endX   .
+    std::vector<Float_t>     mcshwr_MotherendY;	     //MC Shower's mother  G4 endY   .
+    std::vector<Float_t>     mcshwr_MotherendZ;	     //MC Shower's mother  G4 endZ   .
+    //MC Shower ancestor information
+    std::vector<Int_t>       mcshwr_Ancestorpdg;       //MC Shower's ancestor PDG code. 
+    std::vector<Int_t>       mcshwr_AncestorTrkId;     //MC Shower's ancestor G4 track ID.
+    std::vector<std::string> mcshwr_AncestorProcess;   //MC Shower's ancestor creation process. 
+    std::vector<Float_t>     mcshwr_AncestorstartX;    //MC Shower's ancestor  G4 startX
+    std::vector<Float_t>     mcshwr_AncestorstartY;    //MC Shower's ancestor  G4 startY
+    std::vector<Float_t>     mcshwr_AncestorstartZ;    //MC Shower's ancestor  G4 startZ
+    std::vector<Float_t>     mcshwr_AncestorendX;      //MC Shower's ancestor  G4 endX  
+    std::vector<Float_t>     mcshwr_AncestorendY;      //MC Shower's ancestor  G4 endY  
+    std::vector<Float_t>     mcshwr_AncestorendZ;      //MC Shower's ancestor  G4 endZ  
+						       
+
     // Auxiliary detector variables saved for each geant track
     // This data is saved as a vector (one item per GEANT particle) of C arrays
     // (wrapped in a BoxedArray for technical reasons), one item for each
@@ -529,6 +611,9 @@ namespace microboone {
     
     /// Returns whether we have Genie data
     bool hasGenieInfo() const { return bits & tdGenie; }
+    
+    /// Returns whether we have MCShower data
+    bool hasMCShowerInfo() const { return bits & tdMCshwr; }
     
     /// Returns whether we have Hit data
     bool hasHitInfo() const { return bits & tdHit; }
@@ -580,6 +665,9 @@ namespace microboone {
     
     /// Resize the data strutcure for Cry primaries
     void ResizeCry(int nPrimaries);
+    
+    /// Resize the data strutcure for  MC Showers
+    void ResizeMCShower(int nMCShowers);
     
     /// Connect this object with a tree
     void SetAddresses(TTree* pTree, const std::vector<std::string>& trackers, bool isCosmics);
@@ -728,6 +816,7 @@ namespace microboone {
     std::string fVertexModuleLabel;
     std::string fShowerModuleLabel;
     std::string fOpFlashModuleLabel;
+    std::string fMCShowerModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
     std::vector<std::string> fParticleIDModuleLabel;
@@ -737,6 +826,7 @@ namespace microboone {
     bool fSaveCryInfo; ///whether to extract and save CRY particle data
     bool fSaveGenieInfo; ///whether to extract and save Genie information
     bool fSaveGeantInfo; ///whether to extract and save Geant information
+    bool fSaveMCShowerInfo; ///whether to extract and save MC Shower information
     bool fSaveHitInfo; ///whether to extract and save Hit information
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
@@ -761,6 +851,7 @@ namespace microboone {
 	  fData->SetBits(AnalysisTreeDataStruct::tdCry, !fSaveCryInfo);	  
 	  fData->SetBits(AnalysisTreeDataStruct::tdGenie, !fSaveGenieInfo);
 	  fData->SetBits(AnalysisTreeDataStruct::tdGeant, !fSaveGeantInfo); 
+	  fData->SetBits(AnalysisTreeDataStruct::tdMCshwr, !fSaveMCShowerInfo); 
         }
         else {
           fData->SetBits(AnalysisTreeDataStruct::tdHit, !fSaveHitInfo);	
@@ -1244,6 +1335,35 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(lep_dcosx_truth, lep_dcosx_truth + sizeof(lep_dcosx_truth)/sizeof(lep_dcosx_truth[0]), -99999.);
   std::fill(lep_dcosy_truth, lep_dcosy_truth + sizeof(lep_dcosy_truth)/sizeof(lep_dcosy_truth[0]), -99999.);
   std::fill(lep_dcosz_truth, lep_dcosz_truth + sizeof(lep_dcosz_truth)/sizeof(lep_dcosz_truth[0]), -99999.);
+
+  //Flux information
+  std::fill(vx_flux, vx_flux + sizeof(vx_flux)/sizeof(vx_flux[0]), -99999.);
+  std::fill(vy_flux, vy_flux + sizeof(vy_flux)/sizeof(vy_flux[0]), -99999.);
+  std::fill(vz_flux, vz_flux + sizeof(vz_flux)/sizeof(vz_flux[0]), -99999.);
+  std::fill(pdpx_flux, pdpx_flux + sizeof(pdpx_flux)/sizeof(pdpx_flux[0]), -99999.);
+  std::fill(pdpy_flux, pdpy_flux + sizeof(pdpy_flux)/sizeof(pdpy_flux[0]), -99999.);
+  std::fill(pdpz_flux, pdpz_flux + sizeof(pdpz_flux)/sizeof(pdpz_flux[0]), -99999.);
+  std::fill(ppdxdz_flux, ppdxdz_flux + sizeof(ppdxdz_flux)/sizeof(ppdxdz_flux[0]), -99999.);
+  std::fill(ppdydz_flux, ppdydz_flux + sizeof(ppdydz_flux)/sizeof(ppdydz_flux[0]), -99999.);
+  std::fill(pppz_flux, pppz_flux + sizeof(pppz_flux)/sizeof(pppz_flux[0]), -99999.);
+  std::fill(ptype_flux, ptype_flux + sizeof(ptype_flux)/sizeof(ptype_flux[0]), -9999);
+  std::fill(ppvx_flux, ppvx_flux + sizeof(ppvx_flux)/sizeof(ppvx_flux[0]), -99999.);
+  std::fill(ppvy_flux, ppvy_flux + sizeof(ppvy_flux)/sizeof(ppvy_flux[0]), -99999.);
+  std::fill(ppvz_flux, ppvz_flux + sizeof(ppvz_flux)/sizeof(ppvz_flux[0]), -99999.);
+  std::fill(muparpx_flux, muparpx_flux + sizeof(muparpx_flux)/sizeof(muparpx_flux[0]), -99999.);
+  std::fill(muparpy_flux, muparpy_flux + sizeof(muparpy_flux)/sizeof(muparpy_flux[0]), -99999.);
+  std::fill(muparpz_flux, muparpz_flux + sizeof(muparpz_flux)/sizeof(muparpz_flux[0]), -99999.);
+  std::fill(mupare_flux, mupare_flux + sizeof(mupare_flux)/sizeof(mupare_flux[0]), -99999.);
+  std::fill(tgen_flux, tgen_flux + sizeof(tgen_flux)/sizeof(tgen_flux[0]), -9999);
+  std::fill(tgptype_flux, tgptype_flux + sizeof(tgptype_flux)/sizeof(tgptype_flux[0]), -9999);
+  std::fill(tgppx_flux, tgppx_flux + sizeof(tgppx_flux)/sizeof(tgppx_flux[0]), -99999.);
+  std::fill(tgppy_flux, tgppy_flux + sizeof(tgppy_flux)/sizeof(tgppy_flux[0]), -99999.);
+  std::fill(tgppz_flux, tgppz_flux + sizeof(tgppz_flux)/sizeof(tgppz_flux[0]), -99999.);
+  std::fill(tprivx_flux, tprivx_flux + sizeof(tprivx_flux)/sizeof(tprivx_flux[0]), -99999.);
+  std::fill(tprivy_flux, tprivy_flux + sizeof(tprivy_flux)/sizeof(tprivy_flux[0]), -99999.);
+  std::fill(tprivz_flux, tprivz_flux + sizeof(tprivz_flux)/sizeof(tprivz_flux[0]), -99999.);
+  std::fill(dk2gen_flux, dk2gen_flux + sizeof(dk2gen_flux)/sizeof(dk2gen_flux[0]), -99999.);
+  std::fill(gen2vtx_flux, gen2vtx_flux + sizeof(gen2vtx_flux)/sizeof(gen2vtx_flux[0]), -99999.);
   std::fill(tpx_flux, tpx_flux + sizeof(tpx_flux)/sizeof(tpx_flux[0]), -99999.);
   std::fill(tpy_flux, tpy_flux + sizeof(tpy_flux)/sizeof(tpy_flux[0]), -99999.);
   std::fill(tpz_flux, tpz_flux + sizeof(tpz_flux)/sizeof(tpz_flux[0]), -99999.);
@@ -1254,6 +1374,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   no_primaries = 0;
   geant_list_size=0;
   geant_list_size_in_tpcAV = 0;
+  no_mcshowers = 0;
   
   FillWith(pdg, -99999);
   FillWith(status, -99999);
@@ -1317,7 +1438,43 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(cry_mass, -99999.);
   FillWith(cry_trackID, -99999);
   FillWith(cry_ND, -99999);
-  FillWith(cry_mother, -99999);
+  FillWith(cry_mother, -99999); 
+  FillWith(mcshwr_origin, -1);   
+  FillWith(mcshwr_pdg, -99999);
+  FillWith(mcshwr_TrackId, -99999);
+  FillWith(mcshwr_Process, "noname");
+  FillWith(mcshwr_startX, -99999.);
+  FillWith(mcshwr_startY, -99999.);
+  FillWith(mcshwr_startZ, -99999.);
+  FillWith(mcshwr_endX, -99999.);
+  FillWith(mcshwr_endY, -99999.);
+  FillWith(mcshwr_endZ, -99999.);
+  FillWith(mcshwr_CombEngX, -99999.);
+  FillWith(mcshwr_CombEngY, -99999.);
+  FillWith(mcshwr_CombEngZ, -99999.);
+  FillWith(mcshwr_CombEngPx, -99999.);
+  FillWith(mcshwr_CombEngPy, -99999.);
+  FillWith(mcshwr_CombEngPz, -99999.);
+  FillWith(mcshwr_CombEngE, -99999.);
+  FillWith(mcshwr_isEngDeposited, -9999);  
+  FillWith(mcshwr_Motherpdg, -99999);
+  FillWith(mcshwr_MotherTrkId, -99999);
+  FillWith(mcshwr_MotherProcess, "noname");
+  FillWith(mcshwr_MotherstartX, -99999.);
+  FillWith(mcshwr_MotherstartY, -99999.);
+  FillWith(mcshwr_MotherstartZ, -99999.);
+  FillWith(mcshwr_MotherendX, -99999.);
+  FillWith(mcshwr_MotherendY, -99999.);
+  FillWith(mcshwr_MotherendZ, -99999.);
+  FillWith(mcshwr_Ancestorpdg, -99999);
+  FillWith(mcshwr_AncestorTrkId, -99999);  
+  FillWith(mcshwr_AncestorProcess, "noname");
+  FillWith(mcshwr_AncestorstartX, -99999.);
+  FillWith(mcshwr_AncestorstartY, -99999.);
+  FillWith(mcshwr_AncestorstartZ, -99999.);
+  FillWith(mcshwr_AncestorendX, -99999.);
+  FillWith(mcshwr_AncestorendY, -99999.);
+  FillWith(mcshwr_AncestorendZ, -99999.);
   
   // auxiliary detector information;
   FillWith(NAuxDets, 0);
@@ -1444,6 +1601,46 @@ void microboone::AnalysisTreeDataStruct::ResizeCry(int nPrimaries) {
 
 } // microboone::AnalysisTreeDataStruct::ResizeCry()
 
+void microboone::AnalysisTreeDataStruct::ResizeMCShower(int nMCShowers) {
+  mcshwr_origin.resize(nMCShowers);		
+  mcshwr_pdg.resize(nMCShowers);		
+  mcshwr_TrackId.resize(nMCShowers); 	
+  mcshwr_Process.resize(nMCShowers); 
+  mcshwr_startX.resize(nMCShowers); 	
+  mcshwr_startY.resize(nMCShowers);	 
+  mcshwr_startZ.resize(nMCShowers);	 
+  mcshwr_endX.resize(nMCShowers);	 
+  mcshwr_endY.resize(nMCShowers);	 
+  mcshwr_endZ.resize(nMCShowers);	 
+  mcshwr_CombEngX.resize(nMCShowers);	 
+  mcshwr_CombEngY.resize(nMCShowers);	 
+  mcshwr_CombEngZ.resize(nMCShowers);	 
+  mcshwr_CombEngPx.resize(nMCShowers);	 
+  mcshwr_CombEngPy.resize(nMCShowers);	 
+  mcshwr_CombEngPz.resize(nMCShowers);	 
+  mcshwr_CombEngE.resize(nMCShowers);
+  mcshwr_isEngDeposited.resize(nMCShowers);	   	
+  mcshwr_Motherpdg.resize(nMCShowers);	
+  mcshwr_MotherTrkId.resize(nMCShowers);	
+  mcshwr_MotherProcess.resize(nMCShowers);
+  mcshwr_MotherstartX.resize(nMCShowers);	 
+  mcshwr_MotherstartY.resize(nMCShowers);	 
+  mcshwr_MotherstartZ.resize(nMCShowers);	 
+  mcshwr_MotherendX.resize(nMCShowers);	 
+  mcshwr_MotherendY.resize(nMCShowers);	 
+  mcshwr_MotherendZ.resize(nMCShowers);	   	
+  mcshwr_Ancestorpdg.resize(nMCShowers);	
+  mcshwr_AncestorTrkId.resize(nMCShowers);	
+  mcshwr_AncestorProcess.resize(nMCShowers); 
+  mcshwr_AncestorstartX.resize(nMCShowers);	 
+  mcshwr_AncestorstartY.resize(nMCShowers);	 
+  mcshwr_AncestorstartZ.resize(nMCShowers);	 
+  mcshwr_AncestorendX.resize(nMCShowers);	 
+  mcshwr_AncestorendY.resize(nMCShowers);	 
+  mcshwr_AncestorendZ.resize(nMCShowers);	 	
+
+} // microboone::AnalysisTreeDataStruct::ResizeMCShower()
+
 void microboone::AnalysisTreeDataStruct::SetAddresses(
   TTree* pTree,
   const std::vector<std::string>& trackers,
@@ -1548,6 +1745,33 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("lep_dcosy_truth",lep_dcosy_truth,"lep_dcosy_truth[mcevts_truth]/F");
     CreateBranch("lep_dcosz_truth",lep_dcosz_truth,"lep_dcosz_truth[mcevts_truth]/F");
 
+    CreateBranch("vx_flux",vx_flux,"vx_flux[mcevts_truth]/F");
+    CreateBranch("vy_flux",vy_flux,"vy_flux[mcevts_truth]/F");
+    CreateBranch("vz_flux",vz_flux,"vz_flux[mcevts_truth]/F");
+    CreateBranch("pdpx_flux",pdpx_flux,"pdpx_flux[mcevts_truth]/F");
+    CreateBranch("pdpy_flux",pdpy_flux,"pdpy_flux[mcevts_truth]/F");
+    CreateBranch("pdpz_flux",pdpz_flux,"pdpz_flux[mcevts_truth]/F");
+    CreateBranch("ppdxdz_flux",ppdxdz_flux,"ppdxdz_flux[mcevts_truth]/F");
+    CreateBranch("ppdydz_flux",ppdydz_flux,"ppdydz_flux[mcevts_truth]/F");
+    CreateBranch("pppz_flux",pppz_flux,"pppz_flux[mcevts_truth]/F");
+    CreateBranch("ptype_flux",ptype_flux,"ptype_flux[mcevts_truth]/I");
+    CreateBranch("ppvx_flux",ppvx_flux,"ppvx_flux[mcevts_truth]/F");
+    CreateBranch("ppvy_flux",ppvy_flux,"ppvy_flux[mcevts_truth]/F");
+    CreateBranch("ppvz_flux",ppvz_flux,"ppvz_flux[mcevts_truth]/F");
+    CreateBranch("muparpx_flux",muparpx_flux,"muparpx_flux[mcevts_truth]/F");
+    CreateBranch("muparpy_flux",muparpy_flux,"muparpy_flux[mcevts_truth]/F");
+    CreateBranch("muparpz_flux",muparpz_flux,"muparpz_flux[mcevts_truth]/F");   
+    CreateBranch("mupare_flux",mupare_flux,"mupare_flux[mcevts_truth]/F");
+    CreateBranch("tgen_flux",tgen_flux,"tgen_flux[mcevts_truth]/I");
+    CreateBranch("tgptype_flux",tgptype_flux,"tgptype_flux[mcevts_truth]/I");
+    CreateBranch("tgppx_flux",tgppx_flux,"tgppx_flux[mcevts_truth]/F");
+    CreateBranch("tgppy_flux",tgppy_flux,"tgppy_flux[mcevts_truth]/F");
+    CreateBranch("tgppz_flux",tgppz_flux,"tgppz_flux[mcevts_truth]/F");
+    CreateBranch("tprivx_flux",tprivx_flux,"tprivx_flux[mcevts_truth]/F");
+    CreateBranch("tprivy_flux",tprivy_flux,"tprivy_flux[mcevts_truth]/F");
+    CreateBranch("tprivz_flux",tprivz_flux,"tprivz_flux[mcevts_truth]/F");
+    CreateBranch("dk2gen_flux",dk2gen_flux,"dk2gen_flux[mcevts_truth]/F");
+    CreateBranch("gen2vtx_flux",gen2vtx_flux,"gen2vtx_flux[mcevts_truth]/F");
     CreateBranch("tpx_flux",tpx_flux,"tpx_flux[mcevts_truth]/F");
     CreateBranch("tpy_flux",tpy_flux,"tpy_flux[mcevts_truth]/F");
     CreateBranch("tpz_flux",tpz_flux,"tpz_flux[mcevts_truth]/F");
@@ -1629,6 +1853,46 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("processname", processname);
   }
 
+  if (hasMCShowerInfo()){
+    CreateBranch("no_mcshowers",&no_mcshowers,"no_mcshowers/I");  
+    CreateBranch("mcshwr_origin",mcshwr_origin,"mcshwr_origin[no_mcshowers]/I");
+    CreateBranch("mcshwr_pdg",mcshwr_pdg,"mcshwr_pdg[no_mcshowers]/I");
+    CreateBranch("mcshwr_TrackId",mcshwr_TrackId,"mcshwr_TrackId[no_mcshowers]/I");
+    CreateBranch("mcshwr_Process",mcshwr_Process);
+    CreateBranch("mcshwr_startX",mcshwr_startX,"mcshwr_startX[no_mcshowers]/F");
+    CreateBranch("mcshwr_startY",mcshwr_startY,"mcshwr_startY[no_mcshowers]/F");
+    CreateBranch("mcshwr_startZ",mcshwr_startZ,"mcshwr_startZ[no_mcshowers]/F");
+    CreateBranch("mcshwr_endX",mcshwr_endX,"mcshwr_endX[no_mcshowers]/F");
+    CreateBranch("mcshwr_endY",mcshwr_endY,"mcshwr_endY[no_mcshowers]/F");
+    CreateBranch("mcshwr_endZ",mcshwr_endZ,"mcshwr_endZ[no_mcshowers]/F");
+    CreateBranch("mcshwr_CombEngX",mcshwr_CombEngX,"mcshwr_CombEngX[no_mcshowers]/F");
+    CreateBranch("mcshwr_CombEngY",mcshwr_CombEngY,"mcshwr_CombEngY[no_mcshowers]/F");
+    CreateBranch("mcshwr_CombEngZ",mcshwr_CombEngZ,"mcshwr_CombEngZ[no_mcshowers]/F");
+    CreateBranch("mcshwr_CombEngPx",mcshwr_CombEngPx,"mcshwr_CombEngPx[no_mcshowers]/F");
+    CreateBranch("mcshwr_CombEngPy",mcshwr_CombEngPy,"mcshwr_CombEngPy[no_mcshowers]/F");
+    CreateBranch("mcshwr_CombEngPz",mcshwr_CombEngPz,"mcshwr_CombEngPz[no_mcshowers]/F");
+    CreateBranch("mcshwr_CombEngE",mcshwr_CombEngE,"mcshwr_CombEngE[no_mcshowers]/F");
+    CreateBranch("mcshwr_isEngDeposited",mcshwr_isEngDeposited,"mcshwr_isEngDeposited[no_mcshowers]/I");
+    CreateBranch("mcshwr_Motherpdg",mcshwr_Motherpdg,"mcshwr_Motherpdg[no_mcshowers]/I");
+    CreateBranch("mcshwr_MotherTrkId",mcshwr_MotherTrkId,"mcshwr_MotherTrkId[no_mcshowers]/I");
+    CreateBranch("mcshwr_MotherProcess",mcshwr_MotherProcess);
+    CreateBranch("mcshwr_MotherstartX",mcshwr_MotherstartX,"mcshwr_MotherstartX[no_mcshowers]/F");
+    CreateBranch("mcshwr_MotherstartY",mcshwr_MotherstartY,"mcshwr_MotherstartY[no_mcshowers]/F");
+    CreateBranch("mcshwr_MotherstartZ",mcshwr_MotherstartZ,"mcshwr_MotherstartZ[no_mcshowers]/F");
+    CreateBranch("mcshwr_MotherendX",mcshwr_MotherendX,"mcshwr_MotherendX[no_mcshowers]/F");
+    CreateBranch("mcshwr_MotherendY",mcshwr_MotherendY,"mcshwr_MotherendY[no_mcshowers]/F");
+    CreateBranch("mcshwr_MotherendZ",mcshwr_MotherendZ,"mcshwr_MotherendZ[no_mcshowers]/F");    
+    CreateBranch("mcshwr_Ancestorpdg",mcshwr_Ancestorpdg,"mcshwr_Ancestorpdg[no_mcshowers]/I");
+    CreateBranch("mcshwr_AncesotorTrkId",mcshwr_AncestorTrkId,"mcshwr_AncestorTrkId[no_mcshowers]/I");
+    CreateBranch("mcshwr_AncesotorProcess",mcshwr_AncestorProcess);   
+    CreateBranch("mcshwr_AncestorstartX",mcshwr_AncestorstartX,"mcshwr_AncestorstartX[no_mcshowers]/F");
+    CreateBranch("mcshwr_AncestorstartY",mcshwr_AncestorstartY,"mcshwr_AncestorstartY[no_mcshowers]/F");
+    CreateBranch("mcshwr_AncestorstartZ",mcshwr_AncestorstartZ,"mcshwr_AncestorstartZ[no_mcshowers]/F");
+    CreateBranch("mcshwr_AncestorendX",mcshwr_AncestorendX,"mcshwr_AncestorendX[no_mcshowers]/F");
+    CreateBranch("mcshwr_AncestorendY",mcshwr_AncestorendY,"mcshwr_AncestorendY[no_mcshowers]/F");
+    CreateBranch("mcshwr_AncestorendZ",mcshwr_AncestorendZ,"mcshwr_AncestorendZ[no_mcshowers]/F");
+  }   
+
   if (hasAuxDetector()) {
     // Geant information is required to fill aux detector information.
     // if fSaveGeantInfo is not set to true, show an error message and quit!
@@ -1677,6 +1941,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
   fShowerModuleLabel        (pset.get< std::string >("ShowerModuleLabel")       ),
   fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
+  fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")      ),  
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
@@ -1686,6 +1951,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveCryInfo              (pset.get< bool >("SaveCryInfo", false)),  
   fSaveGenieInfo	    (pset.get< bool >("SaveGenieInfo", false)), 
   fSaveGeantInfo	    (pset.get< bool >("SaveGeantInfo", false)), 
+  fSaveMCShowerInfo	    (pset.get< bool >("SaveMCShowerInfo", false)), 
   fSaveHitInfo	            (pset.get< bool >("SaveHitInfo", false)), 
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
@@ -1815,7 +2081,15 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     if (evt.getByLabel(fCryGenModuleLabel,mctruthcryListHandle))
       art::fill_ptr_vector(mclistcry, mctruthcryListHandle);
   }       
-    
+  
+  // *MC Shower information
+  art::Handle< std::vector<sim::MCShower> > mcshowerh;
+  evt.getByLabel(fMCShowerModuleLabel, mcshowerh);
+  
+  int nMCShowers = 0;
+  if (fSaveMCShowerInfo)
+  	nMCShowers = mcshowerh->size();
+	
   art::Ptr<simb::MCTruth> mctruthcry;
   int nCryPrimaries = 0;
    
@@ -1888,7 +2162,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (fSaveCryInfo)
     fData->ResizeCry(nCryPrimaries);
   if (fSaveGeantInfo)    
-    fData->ResizeGEANT(nGEANTparticles);
+    fData->ResizeGEANT(nGEANTparticles);  
+  if (fSaveMCShowerInfo)
+    fData->ResizeMCShower(nMCShowers);   
+    
   fData->ClearLocalData(); // don't bother clearing tracker data yet
   
 //  const size_t Nplanes       = 3; // number of wire planes; pretty much constant...
@@ -2436,11 +2713,41 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           }
 
           //flux information
-          fData->tpx_flux[neutrino_i]    = fluxlist[iList]->ftpx;
+	  fData->vx_flux[neutrino_i]        = fluxlist[iList]->fvx;
+	  fData->vy_flux[neutrino_i]        = fluxlist[iList]->fvy;
+	  fData->vz_flux[neutrino_i]        = fluxlist[iList]->fvz;
+	  fData->pdpx_flux[neutrino_i]      = fluxlist[iList]->fpdpx;
+	  fData->pdpy_flux[neutrino_i]      = fluxlist[iList]->fpdpy;
+	  fData->pdpz_flux[neutrino_i]      = fluxlist[iList]->fpdpz;
+	  fData->ppdxdz_flux[neutrino_i]    = fluxlist[iList]->fppdxdz;
+	  fData->ppdydz_flux[neutrino_i]    = fluxlist[iList]->fppdydz;
+	  fData->pppz_flux[neutrino_i]      = fluxlist[iList]->fpppz;
+	  
+	  fData->ptype_flux[neutrino_i]      = fluxlist[iList]->fptype;
+          fData->ppvx_flux[neutrino_i]       = fluxlist[iList]->fppvx;
+	  fData->ppvy_flux[neutrino_i]       = fluxlist[iList]->fppvy;
+	  fData->ppvz_flux[neutrino_i]       = fluxlist[iList]->fppvz;
+	  fData->muparpx_flux[neutrino_i]    = fluxlist[iList]->fmuparpx;
+	  fData->muparpy_flux[neutrino_i]    = fluxlist[iList]->fmuparpy;
+	  fData->muparpz_flux[neutrino_i]    = fluxlist[iList]->fmuparpz;
+	  fData->mupare_flux[neutrino_i]     = fluxlist[iList]->fmupare;
+	  
+	  fData->tgen_flux[neutrino_i]     = fluxlist[iList]->ftgen;
+	  fData->tgptype_flux[neutrino_i]  = fluxlist[iList]->ftgptype;
+	  fData->tgppx_flux[neutrino_i]    = fluxlist[iList]->ftgppx;
+	  fData->tgppy_flux[neutrino_i]    = fluxlist[iList]->ftgppy;
+	  fData->tgppz_flux[neutrino_i]    = fluxlist[iList]->ftgppz;
+	  fData->tprivx_flux[neutrino_i]   = fluxlist[iList]->ftprivx;
+	  fData->tprivy_flux[neutrino_i]   = fluxlist[iList]->ftprivy;
+	  fData->tprivz_flux[neutrino_i]   = fluxlist[iList]->ftprivz;
+
+	  fData->dk2gen_flux[neutrino_i]   = fluxlist[iList]->fdk2gen;
+	  fData->gen2vtx_flux[neutrino_i]   = fluxlist[iList]->fgen2vtx;
+
+	  fData->tpx_flux[neutrino_i]    = fluxlist[iList]->ftpx;
           fData->tpy_flux[neutrino_i]    = fluxlist[iList]->ftpy;
           fData->tpz_flux[neutrino_i]    = fluxlist[iList]->ftpz;
           fData->tptype_flux[neutrino_i] = fluxlist[iList]->ftptype;
-
           neutrino_i++;
         }//mclist is NeutrinoSet()
       }//loop over mclist
@@ -2474,6 +2781,60 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         const simb::MCNeutrino& nu(mctruth->GetNeutrino());
       } //if neutrino set
     }// end (fSaveGenieInfo)  
+
+    //Extract MC Shower information and fill the Shower branches
+    if (fSaveMCShowerInfo){
+       fData->no_mcshowers = nMCShowers;       
+       size_t shwr = 0;
+       for(std::vector<sim::MCShower>::const_iterator imcshwr = mcshowerh->begin();    
+    	 imcshwr != mcshowerh->end(); ++imcshwr) {
+    	  const sim::MCShower& mcshwr = *imcshwr;
+	  fData->mcshwr_origin[shwr]          = mcshwr.Origin();
+    	  fData->mcshwr_pdg[shwr]	      = mcshwr.PdgCode();	   
+    	  fData->mcshwr_TrackId[shwr]	      = mcshwr.TrackID();	   
+    	  fData->mcshwr_Process[shwr]	      = mcshwr.Process();	   
+    	  fData->mcshwr_startX[shwr]          = mcshwr.Start().X();	    
+    	  fData->mcshwr_startY[shwr]          = mcshwr.Start().Y();      	 
+    	  fData->mcshwr_startZ[shwr]          = mcshwr.Start().Z();      	 
+    	  fData->mcshwr_endX[shwr]            = mcshwr.End().X();      	 
+    	  fData->mcshwr_endY[shwr]            = mcshwr.End().Y();      	 
+    	  fData->mcshwr_endZ[shwr]            = mcshwr.End().Z();
+	  if (mcshwr.DetProfile().E()!= 0){   
+	        fData->mcshwr_isEngDeposited[shwr] = 1;	
+    	  	fData->mcshwr_CombEngX[shwr]        = mcshwr.DetProfile().X();      	 
+    	  	fData->mcshwr_CombEngY[shwr]        = mcshwr.DetProfile().Y();       	 
+    	  	fData->mcshwr_CombEngZ[shwr]        = mcshwr.DetProfile().Z();      	 
+    	  	fData->mcshwr_CombEngPx[shwr]       = mcshwr.DetProfile().Px();     	 
+    	  	fData->mcshwr_CombEngPy[shwr]       = mcshwr.DetProfile().Py();       	 
+    	  	fData->mcshwr_CombEngPz[shwr]       = mcshwr.DetProfile().Pz();       	 
+    	  	fData->mcshwr_CombEngE[shwr]        = mcshwr.DetProfile().E();
+	  }
+	  else
+	  	fData->mcshwr_isEngDeposited[shwr] = 0;
+    	  fData->mcshwr_Motherpdg[shwr]       = mcshwr.MotherPdgCode(); 
+    	  fData->mcshwr_MotherTrkId[shwr]     = mcshwr.MotherTrackID();    
+    	  fData->mcshwr_MotherProcess[shwr]   = mcshwr.MotherProcess(); 
+	  fData->mcshwr_MotherstartX[shwr]    = mcshwr.MotherStart().X();     
+    	  fData->mcshwr_MotherstartY[shwr]    = mcshwr.MotherStart().Y();	  
+    	  fData->mcshwr_MotherstartZ[shwr]    = mcshwr.MotherStart().Z();	  
+    	  fData->mcshwr_MotherendX[shwr]      = mcshwr.MotherEnd().X(); 	  
+    	  fData->mcshwr_MotherendY[shwr]      = mcshwr.MotherEnd().Y(); 	  
+    	  fData->mcshwr_MotherendZ[shwr]      = mcshwr.MotherEnd().Z();  
+    	  fData->mcshwr_Ancestorpdg[shwr]     = mcshwr.AncestorPdgCode();  
+    	  fData->mcshwr_AncestorTrkId[shwr]   = mcshwr.AncestorTrackID();  
+    	  fData->mcshwr_AncestorProcess[shwr] = mcshwr.AncestorProcess();
+	  fData->mcshwr_AncestorstartX[shwr]  = mcshwr.AncestorStart().X();	  
+    	  fData->mcshwr_AncestorstartY[shwr]  = mcshwr.AncestorStart().Y();		 
+    	  fData->mcshwr_AncestorstartZ[shwr]  = mcshwr.AncestorStart().Z();		 
+    	  fData->mcshwr_AncestorendX[shwr]    = mcshwr.AncestorEnd().X();	 
+    	  fData->mcshwr_AncestorendY[shwr]    = mcshwr.AncestorEnd().Y();	 
+    	  fData->mcshwr_AncestorendZ[shwr]    = mcshwr.AncestorEnd().Z();
+    	  ++shwr; 
+       }
+       fData->mcshwr_Process.resize(shwr);
+       fData->mcshwr_MotherProcess.resize(shwr);
+       fData->mcshwr_AncestorProcess.resize(shwr);
+    }//End if (fSaveMCShowerInfo){   
 
       //GEANT particles information
       if (fSaveGeantInfo){ 

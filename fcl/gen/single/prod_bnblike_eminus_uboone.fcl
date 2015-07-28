@@ -3,7 +3,7 @@
 process_name: SinglesGen
 
 outputs.out1.fileName: "prod_bnblike_eminus_uboone_%tc_gen.root"
-physics.producers.generator.PDFCode: 11
+physics.producers.generator.PDGCode: 11
 physics.producers.generator.Mass:    0.000510998910
 physics.producers.generator.Time:    0
 physics.producers.generator.MomentumLowerBound: 0.02

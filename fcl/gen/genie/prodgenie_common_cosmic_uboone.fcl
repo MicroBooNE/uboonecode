@@ -6,6 +6,7 @@ process_name: GenieGen
 
 services:
 {
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "genie_hist.root" }
   Timing:       {}

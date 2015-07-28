@@ -30,6 +30,7 @@
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
 #include "Filters/ChannelFilter.h"
+#include "Utilities/TimeService.h" // lardata
 // RawDigits
 #include "RawData/raw.h" // raw::Uncompress()
 #include "RawData/RawDigit.h"
@@ -189,6 +190,11 @@ namespace zmqds {
     art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
     evt.getByLabel("daq", digitVecHandle);
 
+    if ( !digitVecHandle.isValid() ) {
+      std::cout << "Missing daq info. skipping." << std::endl;
+      return;
+    }
+
     // Use the handle to get a particular (0th) element of collection.
     art::Ptr<raw::RawDigit> digitVec0(digitVecHandle, 0);
     
@@ -229,12 +235,19 @@ namespace zmqds {
 
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
+    art::ServiceHandle<util::TimeService> ts;
+    std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
     
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
       //std::stringstream ss;
       //ss << "pmtreadout" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat );
 
       evt.getByLabel( "pmtreadout", opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), wfHandle);
+
+      if ( !wfHandle.isValid() ) {
+	std::cout << "Missing pmtreadout/" << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ) << " info. skipping." << std::endl;
+	return;
+      }
 
       std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
 
@@ -253,6 +266,9 @@ namespace zmqds {
 	fOpSlot = (int)s;
 	fOpFemCH = (int)f;
 	fTimeStamp = wfm.TimeStamp();
+	fFrame = ts->OpticalClock().Frame( fTimeStamp );
+	fSample = ts->OpticalClock().Sample( fTimeStamp );
+
 	opdetwaveforms.clear();
 	for ( auto &adc : wfm )
 	  opdetwaveforms.push_back( (short)adc );

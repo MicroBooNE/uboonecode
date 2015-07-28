@@ -102,7 +102,6 @@ namespace opdet {
     this->reconfigure(parameterSet);
 
     // Describe the data products we can write.
-    //produces< std::vector< optdata::OpticalRawDigit > >(); // deprecated
     registerOpticalData();
 
   }
@@ -167,8 +166,9 @@ namespace opdet {
 
     // Obtain optical clock to be used for sample/frame number generation
     art::ServiceHandle<util::TimeService> ts;
-    ts->preProcessEvent(event);
+    ts->preProcessEvent(event); // sets trigger time
     ::util::ElecClock clock = ts->OpticalClock();
+    //std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
     // geometry and channel map services
     ::art::ServiceHandle<geo::Geometry> geom;
@@ -273,13 +273,19 @@ namespace opdet {
 	  unsigned int data_product_ch_num = fifo_ptr->ChannelNumber();
 	  opdet::UBOpticalChannelCategory_t category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	  auto it_wfarray = pmt_raw_digits.find( category );
-	  double window_timestamp = ts->OpticalClock().Time( fifo_ptr->TimeSlice(), fifo_ptr->Frame() );
+	  double window_timestamp = clock.Time( fifo_ptr->TimeSlice(), fifo_ptr->Frame() );
 
 	  raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, fifo_ptr->size() );
 	  for ( size_t iadc=0; iadc< fifo_ptr->size(); iadc++ )
 	    rd.push_back( fifo_ptr->at(iadc) );
 	  (*it_wfarray).second->emplace_back( rd );
-
+	  // std::cout << "DRAM: Store FIFO from CH=" << data_product_ch_num 
+	  // 	    << " put into " << opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)category ) 
+	  // 	    << " timestamp=" << window_timestamp 
+	  // 	    << " frame=" << fifo_ptr->Frame()
+	  // 	    << " timeslice/sample=" << fifo_ptr->TimeSlice()
+	  // 	    << " size=" << fifo_ptr->size()
+	  // 	    << std::endl;
 	}// if store
       }// loop over FIFO data
 

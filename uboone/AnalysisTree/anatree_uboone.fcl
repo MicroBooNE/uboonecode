@@ -2,7 +2,7 @@
 #include "hitfindermodules_microboone.fcl"
 #include "cluster_microboone.fcl"
 #include "particleid_microboone.fcl"
-#include "analysistreemodule.fcl"
+#include "analysistreemodule_microboone.fcl"
 #include "filters.fcl"
 #include "signalservices_microboone.fcl"
 #include "caldata_microboone.fcl"
@@ -110,6 +110,8 @@ physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit"]
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
 physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
 physics.analyzers.analysistree.ShowerModuleLabel: "showerrecofuzzy"
+physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
+
 
 #physics.analyzers.analysistree.SaveCryInfo: true
 #physics.analyzers.analysistree.SaveGenieInfo: false

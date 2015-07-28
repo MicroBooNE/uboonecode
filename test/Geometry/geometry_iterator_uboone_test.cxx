@@ -8,15 +8,15 @@
  * Boost unit testing environment keeps the arguments secret anyway.
  */
 
+// Boost test libraries; defining this symbol tells boost somehow to generate
+// a main() function; Boost is pulled in by geometry_boost_unit_test_base.h
+#define BOOST_TEST_MODULE GeometryIteratorTestMicroBooNE
+
 // LArSoft libraries
 #include "test/Geometry/geometry_unit_test_uboone.h"
 #include "test/Geometry/geometry_boost_unit_test_base.h"
 #include "test/Geometry/GeometryIteratorTestAlg.h"
 #include "Geometry/ChannelMapStandardAlg.h"
-
-// Boost libraries
-#define BOOST_TEST_MODULE GeometryIteratorTestMicroBooNE
-#include <boost/test/included/unit_test.hpp>
 
 //------------------------------------------------------------------------------
 //---  The test environment

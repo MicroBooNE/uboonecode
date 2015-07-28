@@ -12,13 +12,14 @@
 #include "pandoramodules_microboone.fcl"
 #include "cosmicremovalmodules.fcl"
 #include "triggeralgo_service.fcl"
-#include "opticaldetectormodules.fcl"
+#include "opticaldetectormodules_microboone.fcl"
 #include "photpropservices_microboone.fcl"
 
 process_name: RecoStage2
 
 services:
 {
+  scheduler:                  { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService:               { fileName: "reco_stage_2_hist.root" }
   Timing:                     {}

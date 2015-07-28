@@ -177,7 +177,10 @@ namespace opdet {
     _gateFrame.clear();
     _gateWindowTime.clear();
 
+    //std::cout << "FillBeamTimingVectors: " << "beam_bnb_delay=" << fm_beamDelayBNB.size() << " ngates=" << numberOfGates << std::endl;
+
     for(size_t gain_index=0; gain_index < fm_beamDelayBNB.size(); ++gain_index){
+
       _beamBeginBin.push_back(std::vector<optdata::TimeSlice_t>(numberOfGates,0));
       _beamEndBin.push_back(std::vector<optdata::TimeSlice_t>(numberOfGates,0));
       _gateFrame.push_back(std::vector<optdata::TimeSlice_t>(numberOfGates,0));
@@ -205,7 +208,10 @@ namespace opdet {
 	optdata::TimeSlice_t gateTime = ts->OpticalG4Time2TDC(beamGateInfo.Start());
 	optdata::TimeSlice_t gateWidth = clock.Ticks(beamGateInfo.Width());
 
-	if(gateTime < readout_start_tdc) continue;
+	if(gateTime < readout_start_tdc) {
+	  //std::cout << "FillBeamTimingVectors: gateTime < readout_start_tdc (" << gateTime << " < " << readout_start_tdc << ")" << std::endl;
+	  continue;
+	}
 
 	// Figure out the first bin we should start to save.
 	//optdata::TimeSlice_t firstSlice = (*channelDataHandle).TimeSlice();
@@ -237,7 +243,12 @@ namespace opdet {
 	    << " ... aborting."
 	    << "\033[00m" << std::endl;
 	
-	beamBeginBin[gateIndex] = ( gateTime + beam_delay - readout_start_tdc);
+	//beamBeginBin[gateIndex] = ( gateTime + beam_delay - readout_start_tdc); // tmw: is this a bug?
+	if ( (int)gateTime-(int)beam_delay-(int)readout_start_tdc<0 )
+	  beamBeginBin[gateIndex] = 0;
+	else
+	  beamBeginBin[gateIndex] = gateTime - beam_delay - readout_start_tdc;
+
 	beamEndBin[gateIndex] = beamBeginBin[gateIndex] + beam_words;
 	if(beamEndBin[gateIndex] > readout_size)
 	  beamEndBin[gateIndex] = readout_size;
@@ -248,7 +259,7 @@ namespace opdet {
 	gateWindowTime[gateIndex] = ( gateTime % clock.FrameTicks() ); 
       
 	LOG_DEBUG("OpticalFEM") 
-	  << "Beam gate #" << gateIndex
+	//std::cout << "Beam gate #" << gateIndex
 	  << " begin beam gate bin to save = " << beamBeginBin[gateIndex]
 	  << "; end beam gate bin to save = " << beamEndBin[gateIndex]
 	  << "; beam gate width = " << gateWidth
@@ -321,6 +332,7 @@ namespace opdet {
 			    firstTDC,
 			    (firstSlice + sizeFirstChannel - 1));
     }
+    //std::cout << "Number of Gates: " << numberOfGates << std::endl;
 
     // Do the same for the vectors that will accumulate the sums of
     // the ADC and multiplicity counts for the PMT trigger processing.
@@ -372,9 +384,9 @@ namespace opdet {
 	case ::opdet::LowGain:
 	  gain_index=0; break;
 	case ::opdet::HighGain:
-	  gain_index=1; break;
 	case ::opdet::LogicChannel:
-	  gain_index=2; break;
+	  gain_index=1; break;
+	  //gain_index=2; break;
 	default:
 	  mf::LogError("OpticalFEM") 
 	    << "Unknown channel data category = " <<  gain_type
@@ -389,14 +401,9 @@ namespace opdet {
 
 	// For each beam gate...
 	for ( size_t gateIndex = 0; 
-	      (gain_type == ::opdet::LowGain || gain_type == ::opdet::HighGain) && gateIndex < numberOfGates; 
+	      //(gain_type == ::opdet::LowGain || gain_type == ::opdet::HighGain) && gateIndex < numberOfGates; 
+	      gateIndex < numberOfGates;
 	      ++gateIndex ) {
-	  mf::LogDebug("OpticalFEM")
-	    << "Writing beam gate channels:"
-	    << " at frame=" << gateFrame[gateIndex]
-	    << " slice="    << gateWindowTime[gateIndex]
-	    << " beginBin=" << beamBeginBin[gateIndex]
-	    << " endBin="   << beamEndBin[gateIndex] << std::endl;
 		  
 	  // Create a new FIFOChannel, copying the channel
 	  // number from the input channel, with length
@@ -413,6 +420,13 @@ namespace opdet {
 			     gateFrame[gateIndex],
 			     channel,
 			     beamEndBin[gateIndex] - beamBeginBin[gateIndex]);
+
+	  mf::LogDebug("OpticalFEM")
+	  //std::cout << "Writing beam gate FIFO entry: chanel=" << channel
+	    << " at frame=" << gateFrame[gateIndex]
+	    << " slice="    << gateWindowTime[gateIndex]
+	    << " beginBin=" << beamBeginBin[gateIndex]
+	    << " endBin="   << beamEndBin[gateIndex] << std::endl;
 	
 	  // Copy the time slices.
 	  for ( optdata::TimeSlice_t t = beamBeginBin[gateIndex]; 
@@ -493,29 +507,43 @@ namespace opdet {
     
     // Discriminator processing. Go through each channel in this group.
     for ( auto const& channelData : *channelDataHandle ) {
-      
+      // Get readout channel number
       ::optdata::Channel_t channel = channelData.ChannelNumber();
-      ::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channelData.ChannelNumber());
+      // Get FEM hardware info
+      unsigned int crate, slot, femch;
+      ch_map->GetCrateSlotFEMChFromReadoutChannel(channel,crate,slot,femch);
+      // Get gain type
+      ::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channel);
+      bool is_logic_channel = false;
+      if(gain_type == ::opdet::LogicChannel) {
+	// Logic channel also belong to a specific FEM w/ gain setting.
+	// Our simulation code currently organizes, however, logic channel type
+	// as in the same grouping structure as high & low gain (i.e. cannot be
+	// a logic channel AND high/low gain type). Here we hack to figure out the
+	// gain type. --Kazu July 15 2015
+	unsigned int gain_ref_channel = ch_map->GetChannelNumberFromCrateSlotFEMCh(crate,slot,0);
+	gain_type = ch_map->GetChannelType( gain_ref_channel );
+	is_logic_channel = true;
+      }
       size_t gain_index = 0;
       // Determine the gain category.
-      switch(gain_type) {
+      switch( ::opdet::UBOpticalChannelType_t(gain_type) ) {
       case ::opdet::LowGain:
 	gain_index=0; break;
       case ::opdet::HighGain:
 	gain_index=1; break;
       case ::opdet::LogicChannel:
-	gain_index=2; break;
       default:
+	// If reaching this point, we do not understand the cause and it is an error.
 	mf::LogError("OpticalFEM") 
-	  << "Unknown channel data category = " <<  gain_type
-	  << "; skipping channel data group";
-	continue; // skip to the next ChannelDataGroup
+	  << "Could not find gain setting for a channel: " << channel
+	  << std::endl
+	  << "Corresponding hardware address: Crate = " << crate << " Slot = " << slot << " FEMCh = " << femch
+	  << std::endl;
+	throw cet::exception("OpticalFEM");	
       }
-
+    
       // Fill information for PMT Trigger generation here if relevant
-      unsigned int crate, slot, femch;
-      ch_map->GetCrateSlotFEMChFromReadoutChannel(channel,crate,slot,femch);
-      
       bool slot_for_trigger = false;
       for(auto const& trigger_slot : fm_triggerFEMSlot) {
 	if(slot == (unsigned int)(trigger_slot)) {
@@ -535,7 +563,7 @@ namespace opdet {
 	multiplicitySum1[slot].resize(diffVector.size(),0);
 	multiplicitySum3[slot].resize(diffVector.size(),0);
 	
-	slot_to_gain_index.resize(slot,2);
+	slot_to_gain_index.resize(slot+1,2);
 	slot_to_gain_index[slot] = gain_index;
       }
       
@@ -666,7 +694,7 @@ namespace opdet {
 	      maxADC = std::max( maxADC, diffVector[s] );
 	    
 	    // Save this value for PMT trigger tests IF not logic pulse channel
-	    if( ch_map->GetChannelType( channel )!=::opdet::LogicChannel ) maxADC1.push_back( maxADC );
+	    if( !is_logic_channel ) maxADC1.push_back( maxADC );
 	    
 	    // Go back (if negative) or forward (if positive) from
 	    // the point of the last disc0 firing to start saving
@@ -693,7 +721,7 @@ namespace opdet {
 	      << " max ADC=" << maxADC; 
 	    
 	    // Create a new FIFO channel, copying the channel
-	    // number from the input.
+	    // number from the input: wrong categories.
 	    
 	    optdata::Optical_Category_t category = optdata::kFEMCosmicLowGain;
 	    if ( gain_index == 1 ) category = optdata::kFEMCosmicHighGain;
@@ -790,7 +818,7 @@ namespace opdet {
 	      maxADC = std::max( maxADC, diffVector[s] );
 	    
 	    // Save this value for PMT trigger tests if not logic channel.
-	    if( ch_map->GetChannelType( channel )!=::opdet::LogicChannel ) maxADC3.push_back( maxADC );
+	    if( !is_logic_channel ) maxADC3.push_back( maxADC );
 	    
 	    LOG_DEBUG("OpticalFEM")
 	      << "Disc 3 fires, channel=" << channel
@@ -802,23 +830,21 @@ namespace opdet {
 	  } // disc 3 fired
 	} // inside beam gate and threshold3 satisfied
 
-	if(slot_for_trigger) {
+	if(slot_for_trigger && !is_logic_channel) {
 	  // Accumulate the PMT trigger sums. For each of
 	  // discriminator {1,3}, see if we're within the width of
 	  // that discriminator since the last time it fired. If so,
 	  // sum the max ADC count and add to the multiplicity count.
 	  // Only if this channel is NOT logic pulse channel
-	  if( gain_type == ::opdet::LowGain || gain_type == ::opdet::HighGain ) {
-	    if ( ! fire1.empty ()   &&
-		 slice < fire1.back() + fm_disc1deadtime[gain_index] ) {
-	      maxADCSum1[slot][slice] += maxADC1.back();
-	      ++multiplicitySum1[slot][slice];
-	    }
-	    if ( ! fire3.empty ()   &&
-		 slice < fire3.back() + fm_disc3deadtime[gain_index] ) {
-	      maxADCSum3[slot][slice] += maxADC3.back();
-	      ++multiplicitySum3[slot][slice];
-	    }
+	  if ( ! fire1.empty ()   &&
+	       slice < fire1.back() + fm_disc1deadtime[gain_index] ) {
+	    maxADCSum1[slot][slice] += maxADC1.back();
+	    ++multiplicitySum1[slot][slice];
+	  }
+	  if ( ! fire3.empty ()   &&
+	       slice < fire3.back() + fm_disc3deadtime[gain_index] ) {
+	    maxADCSum3[slot][slice] += maxADC3.back();
+	    ++multiplicitySum3[slot][slice];
 	  }
 	}	
       } // diffVector time slice

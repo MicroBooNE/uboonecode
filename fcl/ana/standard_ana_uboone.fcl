@@ -1,10 +1,11 @@
 #include "services_microboone.fcl"
-#include "analysistreemodule.fcl"
+#include "analysistreemodule_microboone.fcl"
 
 process_name: Ana
 
 services:
 {
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "ana_hist.root" }
   Timing:       {}
@@ -65,4 +66,5 @@ physics.analyzers.analysistree.CosmicScoreThresholds:   [0.0]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
 physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
+physics.analyzers.analysistree.ShowerModuleLabel:               "showerrecofuzzy"
 physics.analyzers.analysistree.SaveCryInfo:                     false

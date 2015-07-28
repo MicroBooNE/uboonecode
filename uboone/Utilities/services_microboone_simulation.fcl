@@ -80,6 +80,7 @@ microboone_detsim_services:                   @local::microboone_detsim_dark_ser
 microboone_detsim_services.UBOpticalChConfig: @local::microboone_optical_ch_config
 microboone_detsim_services.LArProperties.ScintPreScale:        0.01   # Prescale production by 0.01, correct when QE is applied
 microboone_detsim_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
+microboone_detsim_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
                                                                       # MUST match between g4 and detsim
 
 # Define microboone_simulation_services ... (all*) = (1*) + (2) + (2*)
