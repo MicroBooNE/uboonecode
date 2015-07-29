@@ -74,7 +74,7 @@ namespace trkf
       double y0 = 100.*double(rand()) / double(RAND_MAX) - 50.;  // (-50,50)
       double z0 = 1000.*double(rand()) / double(RAND_MAX);       // (0,1000)
       double phi = TMath::TwoPi() * double(rand()) / double(RAND_MAX) - TMath::Pi();  // (-pi,pi)
-      std::shared_ptr<const trkf::Surface> psurf(new trkf::SurfYZPlane(y0, z0, phi));
+      std::shared_ptr<const trkf::Surface> psurf(new trkf::SurfYZPlane(0., y0, z0, phi));
       surfaces.push_back(psurf);
 
       // Make random track vector.
@@ -282,8 +282,8 @@ namespace trkf
 
     double z0 = 0.;
     double z1 = 100.;
-    std::shared_ptr<const trkf::SurfYZPlane> psurf0(new trkf::SurfYZPlane(0., z0, 0.));
-    std::shared_ptr<const trkf::SurfYZPlane> psurf1(new trkf::SurfYZPlane(0., z1, 0.));
+    std::shared_ptr<const trkf::SurfYZPlane> psurf0(new trkf::SurfYZPlane(0., 0., z0, 0.));
+    std::shared_ptr<const trkf::SurfYZPlane> psurf1(new trkf::SurfYZPlane(0., 0., z1, 0.));
 
     // Make initial KETrack (muon) with zero error.
 
@@ -314,7 +314,7 @@ namespace trkf
     int nprop = 100;
     for(int iprop=1; iprop <= nprop; ++iprop) {
       double z = z0 + (z1-z0) * double(iprop) / double(nprop);
-      std::shared_ptr<const trkf::SurfYZPlane> psurf(new trkf::SurfYZPlane(0., z, 0.));
+      std::shared_ptr<const trkf::SurfYZPlane> psurf(new trkf::SurfYZPlane(0., 0., z, 0.));
       prop->noise_prop(tre2, psurf, trkf::Propagator::UNKNOWN, false);
       if(iprop == nprop) {
 	std::cout << "\nStep " << iprop << " track: " << std::endl;
