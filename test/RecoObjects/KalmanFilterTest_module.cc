@@ -11,6 +11,8 @@
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDAnalyzer.h"
 
+#include "Geometry/Geometry.h"
+
 #include "RecoObjects/KHitWireX.h"
 #include "RecoObjects/SurfYZPlane.h"
 #include "RecoObjects/PropYZPlane.h"
@@ -55,6 +57,10 @@ namespace trkf
       abort();
     }
 
+    // Get services.
+
+    art::ServiceHandle<geo::Geometry> geom;
+
     // Make a test track.
 
     std::shared_ptr<const trkf::Surface> psurf(new trkf::SurfYZPlane(0., 1000., 0.));
@@ -87,7 +93,10 @@ namespace trkf
 	channel = 4000 + 100*i;
       else
 	channel = 6000 + 100*i;
-      trkf::KHitWireX hit(channel, 0., 0.);
+      std::vector<geo::WireID> wireids = geom->ChannelToWire(channel);
+      assert(wireids.size() != 0);
+      geo::WireID wireid = wireids[0];
+      trkf::KHitWireX hit(wireid, 0., 0.);
 
       // Propagate track to measurement surface.
 
@@ -95,7 +104,7 @@ namespace trkf
       boost::optional<double> ok = prop.vec_prop(treprop, hit.getMeasSurface(), trkf::Propagator::UNKNOWN, false);
       assert(!!ok);
       double x = treprop.getVector()(0);
-      phits.push_back(std::shared_ptr<const trkf::KHitBase>(new KHitWireX(channel, x, 0.1)));
+      phits.push_back(std::shared_ptr<const trkf::KHitBase>(new KHitWireX(wireid, x, 0.1)));
     }
 
     // Make a new starting track.
