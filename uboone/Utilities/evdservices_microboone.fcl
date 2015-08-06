@@ -76,8 +76,9 @@ microboone_disp:
  LArVoxelCalculator:       @local::microboone_larvoxelcalculator
  InfoTransfer: 		   @local::microboone_infotransfer
  TimeService:              @local::microboone_timeservice
- IDetPedestalService:      @local::microboone_detpedestalservice
+ #IDetPedestalService:      @local::microboone_detpedestalservice
 }
+microboone_disp.IDetPedestalService: @local::microboone_detpedestalservice
 
 #######################################
 

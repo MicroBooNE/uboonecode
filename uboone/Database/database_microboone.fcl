@@ -6,7 +6,7 @@ BEGIN_PROLOG
 microboone_databaseretrievalalg: @local::standard_databaseretrievalalg
 microboone_databaseretrievalalg:
 {
-  DBUrl: "http://dbdata0.fnal.gov:8086/uboonecon_dev/app/"
+  DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
   DBTag: ""
 }
 
