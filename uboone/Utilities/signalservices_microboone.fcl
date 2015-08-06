@@ -26,17 +26,15 @@ microboone_signalshapingservice:
 # Settings for old-style responses (no dynamic induced charge)
 
   NResponses:           [ [1, 1, 1], [1, 1, 1] ]  # number of responses per view, including primary. 1 is current number
-  NActiveResponses:     [ [1, 1, 1], [1, 1, 1]
-  
- ]  # number of active responses per view, including primary. 1 is current number
+  NActiveResponses:     [ [1, 1, 1], [1, 1, 1] ]  # number of active responses per view, including primary. 1 is current number
   CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
   FieldResponseFVersion:  [ "v0.1", "v0.1" ]
   
   DefaultEField:       0.5
   DefaultTemperature: 87.0
 
-  TimeScaleParams:   [ 0.194, 0.806 ] # this does the scaling from full- to half-field
-                                      # good to ~0.2% over the range 1-0.4 in field scale
+  TimeScaleParams:   [ 1.0, 0.806 ] # this does the scaling from full- to half-field
+                                      # good to ~0.2% over the range of the velocity ratio for 1-0.4 in the field
                                       # and <2% between views (calibrated on the Y view)
 
   DeconNorm: 200.

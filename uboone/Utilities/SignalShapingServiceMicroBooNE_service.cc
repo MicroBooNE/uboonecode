@@ -793,16 +793,17 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
   double defaultVelocity = larp->DriftVelocity(fDefaultEField, fDefaultTemperature);
   double thisVelocity    = larp->DriftVelocity( larp->Efield(0), larp->Temperature() );
   double vRatio = defaultVelocity/thisVelocity;
+  double vDiff = vRatio -1.0;
 
   // the time scale params are from a fit to Garfield simulations at different E Fields
   double timeScaleFactor(0);
   double term = 1.;
   for(size_t i = 0;i<fTimeScaleParams.size(); ++i) {
     timeScaleFactor += fTimeScaleParams[i]*term;
-    term *= vRatio;
+    term *= vDiff;
   }
 
-  //std::cout << "Ratio of drift velocities = "<< vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
+  std::cout << "Current E field = " << larp->Efield(0) << " KV/cm, Ratio of drift velocities = " << vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
 
   for(_vw=0; _vw<fNViews; ++_vw) {
     for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
