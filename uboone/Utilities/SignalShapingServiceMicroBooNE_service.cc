@@ -250,6 +250,11 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   // constructor decides if initialized value is a path or an environment variable
   std::string fileNameBase = pset.get<std::string>("FieldResponseFNameBase");
   std::vector<std::string> version      = pset.get<std::vector<std::string> >("FieldResponseFVersion");
+  fDefaultEField                 = pset.get<double>("DefaultEField");
+  fDefaultTemperature            = pset.get<double>("DefaultTemperature");
+
+  fTimeScaleParams               = pset.get<DoubleVec>("TimeScaleParams");
+
   std::string histNameBase = pset.get<std::string>("FieldResponseHNameBase");
   cet::search_path sp("FW_SEARCH_PATH");
 
@@ -763,8 +768,6 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
   art::ServiceHandle<util::DetectorProperties> detprop;
   art::ServiceHandle<util::LArFFT> fft;
 
-  //  int samplingRate = detprop->SamplingRate();
-
   /* This could be a warning, but in principle, there's no reason to restrict the binning
 
    // Operation permitted only if output of rebinning has a larger bin size
@@ -783,9 +786,24 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
   }
 
   // Sampling
-  //int fNPlanes = geo->Nplanes();
-  //
-  //std::cout << "Calculating sampled field responses\n";
+
+  // get the scale factor between the bulk drift velocity used to generate the field response
+  //   and that used for this simulation.
+
+  double defaultVelocity = larp->DriftVelocity(fDefaultEField, fDefaultTemperature);
+  double thisVelocity    = larp->DriftVelocity( larp->Efield(0), larp->Temperature() );
+  double vRatio = defaultVelocity/thisVelocity;
+
+  // the time scale params are from a fit to Garfield simulations at different E Fields
+  double timeScaleFactor(0);
+  double term = 1.;
+  for(size_t i = 0;i<fTimeScaleParams.size(); ++i) {
+    timeScaleFactor += fTimeScaleParams[i]*term;
+    term *= vRatio;
+  }
+
+  //std::cout << "Ratio of drift velocities = "<< vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
+
   for(_vw=0; _vw<fNViews; ++_vw) {
     for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
       const std::vector<double>* pResp = &((fSignalShapingVec[ktype][_vw][_wr]).Response_save());
@@ -793,27 +811,10 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
       size_t nticks_input = pResp->size();
       std::vector<double> InputTime(nticks_input, 0. );
       for (size_t itime = 0; itime < nticks_input; itime++ ) {
-        InputTime[itime] = (1.*itime) * deltaInputTime;
+        InputTime[itime] = (1.*itime) * deltaInputTime*timeScaleFactor;
       }
 
       std::vector<double> SamplingResp(nticks, 0. );
-
-      /*
-       We allow different drift velocities.
-       kDVel is ratio of what was used in LArG4 to field response simulation.
-       If drift velocity used for field response is set to <0, then we assume
-       the same drift velocity as used in LArG4.
-       */
-      double larg4_velocity = larp->DriftVelocity( larp->Efield(_vw), larp->Temperature() );
-      double kDVel = larg4_velocity / fDefaultDriftVelocity.at(_vw);
-
-      // Warning
-      if ( kDVel < 1. )
-        mf::LogInfo("SignalShapingServiceMicroBooNE") << "The drift velocity "
-        << larg4_velocity << "cm/usec is less than the default "
-        << fDefaultDriftVelocity.at(_vw) << "cm/usec!"
-        << " ... (view=" << _vw << ")"
-        << std::endl;
 
       /*
        Linear interpolation...
@@ -823,12 +824,11 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
 
        Also, just taste, but the "==" case is just a special case of the general
        formula... I prefer to leave it general and simplify the code, assuming that
-       it won't be a big effect.
+       it won't be a big hit on the cpu time.
        */
 
       size_t SamplingCount = 0;
 
-      //if(fManualInterpolation) {
       size_t startJ = 1;
       SamplingResp[0] = (*pResp)[0];
       for ( size_t itime = 1; itime < nticks; itime++ ) {
@@ -840,6 +840,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
             //            if(jtime<2&&itime<2) std::cout << itime << " " << jtime << " " << low << " " << up << std::endl;
             double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
             SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor);
+            SamplingResp[itime] /=timeScaleFactor;
             /// VELOCITY-OUT ... comment out kDVel usage here
             //SamplingResp[itime] *= kDVel;
             SamplingCount++;
@@ -856,7 +857,6 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
       //      } else {
       // the idea here would  be to turn the responses into histograms, and let ROOT do the interpolation.
       // The only advantage is that it's standard code.
-      //      }
 
       if(fPrintResponses) {
         std::cout << "Sampled response (ticks) for view " << _vw << " wire " << _wr << std::endl;
