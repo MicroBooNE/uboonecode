@@ -478,10 +478,8 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     art::FindManyP<recob::Wire> fmwire(hitListHandle,evt,fHitsModuleLabel);
      
     int dataSize = fmwire.at(i)[0]->NSignal();
-    int t0 = hit_peakT[i] - 3*(hit_peakT[i]-hit_startT[i]);
-    if (t0<0) t0 = 0;
-    int t1 = hit_peakT[i] + 3*(hit_peakT[i]-hit_startT[i]);
-    if (t1>=dataSize) t1 = dataSize-1;
+    int t0 = 0;
+    int t1 = dataSize-1;
     std::vector<float> signal(fmwire.at(i)[0]->Signal());
     
     wire_pk[i] = -1.0;
@@ -515,10 +513,8 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     short ped = fmrd.at(i)[0]->GetPedestal();
     std::vector<short> rawadc(dataSize);
     raw::Uncompress(fmrd.at(i)[0]->ADCs(), rawadc, fmrd.at(i)[0]->Compression());
-    t0 = hit_peakT[i] - 3*(hit_peakT[i]-hit_startT[i]);
-    if (t0<0) t0 = 0;
-    t1 = hit_peakT[i] + 3*(hit_peakT[i]-hit_startT[i]);
-    if (t1>=dataSize) t1 = dataSize-1;
+    t0 = 0;
+    t1 = dataSize-1;
     hit_pk[i] = -1;
     hit_t[i] = -1;
     for (int j = t0; j<=t1; ++j){
