@@ -331,7 +331,6 @@ constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackMod
 constexpr unsigned short kMaxVertices   = 100;    //max number of 3D vertices
 constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector cells per MC particle
 constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
-constexpr int kMaxShowers    = 1000;   //maximum number of showers
 constexpr int kMaxShowerHits = 10000;  //maximum number of hits on a shower
 constexpr int kMaxTruth      = 10;     //maximum number of neutrino truth interactions
 
