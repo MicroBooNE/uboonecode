@@ -15,9 +15,10 @@ microboone_analysistree:
  MCShowerModuleLabel:      "mcreco" 
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
- ShowerModuleLabel:        showerrecofuzzy
+ ShowerModuleLabel:        ["showerrecofuzzy"]
  POTModuleLabel:           "generator"
  UseBuffers:               false
+ IgnoreMissingShowers:     false
  SaveAuxDetInfo:           false
  SaveCryInfo:              false
  SaveGenieInfo:            true

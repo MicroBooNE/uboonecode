@@ -109,8 +109,9 @@ physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit"]
 
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
 physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
-physics.analyzers.analysistree.ShowerModuleLabel: "showerrecofuzzy"
+physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
 physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
+physics.analyzers.analysistree.IgnoreMissingShowers: false
 
 
 #physics.analyzers.analysistree.SaveCryInfo: true
