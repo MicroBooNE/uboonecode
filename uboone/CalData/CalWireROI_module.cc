@@ -146,6 +146,7 @@ namespace caldata {
     bool fuPlaneRamp;     ///< set true for correct U plane wire response
     int  fSaveWireWF;     ///< Save recob::wire object waveforms
     size_t fEventCount;  ///< count of event processed
+    int  fMaxAllowedChanStatus;
     
     lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
 
@@ -207,17 +208,18 @@ namespace caldata {
     std::vector<unsigned short> uin;    std::vector<unsigned short> vin;
     std::vector<unsigned short> zin;
     
-    fDigitModuleLabel = p.get< std::string >          ("DigitModuleLabel", "daq");
-    fThreshold        = p.get< std::vector<unsigned short> >   ("Threshold");
-    fMinWid           = p.get< unsigned short >       ("MinWid");
-    fMinSep           = p.get< unsigned short >       ("MinSep");
-    uin               = p.get< std::vector<unsigned short> >   ("uPlaneROIPad");
-    vin               = p.get< std::vector<unsigned short> >   ("vPlaneROIPad");
-    zin               = p.get< std::vector<unsigned short> >   ("zPlaneROIPad");
-    fDoBaselineSub    = p.get< bool >                 ("DoBaselineSub");
-    fuPlaneRamp       = p.get< bool >                 ("uPlaneRamp");
-    fFFTSize          = p.get< int  >                 ("FFTSize");
-    fSaveWireWF       = p.get< int >                  ("SaveWireWF");
+    fDigitModuleLabel     = p.get< std::string >                   ("DigitModuleLabel", "daq");
+    fThreshold            = p.get< std::vector<unsigned short> >   ("Threshold");
+    fMinWid               = p.get< unsigned short >                ("MinWid");
+    fMinSep               = p.get< unsigned short >                ("MinSep");
+    uin                   = p.get< std::vector<unsigned short> >   ("uPlaneROIPad");
+    vin                   = p.get< std::vector<unsigned short> >   ("vPlaneROIPad");
+    zin                   = p.get< std::vector<unsigned short> >   ("zPlaneROIPad");
+    fDoBaselineSub        = p.get< bool >                          ("DoBaselineSub");
+    fuPlaneRamp           = p.get< bool >                          ("uPlaneRamp");
+    fFFTSize              = p.get< int  >                          ("FFTSize");
+    fSaveWireWF           = p.get< int >                           ("SaveWireWF");
+    fMaxAllowedChanStatus = p.get< int >                           ("MaxAllowedChannelStatus");
 
     fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
     
@@ -324,7 +326,6 @@ namespace caldata {
 
     //calculated expected deconvoluted noise level at all three planes
     //calculated expected raw noise level at all three planes
-
     
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
@@ -363,7 +364,7 @@ namespace caldata {
       //  minSepPad = fMinSep + fPostROIPad[thePlane];
       
       // skip bad channels
-      if(!chanFilt->BadChannel(channel)) {
+      if(!(chanFilt->GetChannelStatus(channel) > fMaxAllowedChanStatus)) {
         
         // uncompress the data
         raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
@@ -577,11 +578,11 @@ namespace caldata {
 		//if (tempPre > tempPost){
 		flag = 0;
 	      }else{
-		ir++;
-		if (ir<rois.size()){
+//		ir++;
+		if (ir+1<rois.size()){
 		  roiLen += 100;
-		  if (roiLen >= rois[ir].first - roiStart + 1)
-		    roiLen = rois[ir].second - roiStart + 1;
+		  if (roiLen >= rois[ir+1].first - roiStart + 1)
+		    roiLen = rois[++ir].second - roiStart + 1;
 		}else{
 		  roiLen += 100;
 		  if (roiLen>dataSize-roiStart)
