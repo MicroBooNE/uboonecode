@@ -18,6 +18,7 @@ microboone_calroi:
  uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
  FFTSize:     256      # re-initialize FFT service to this size
  SaveWireWF:  0
+ MaxAllowedChannelStatus: 4 # All channels up to this status level are considered
  DoBaselineSub_WaveformPropertiesAlg:   false # subtract baseline after deconvolution?
  
  DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
