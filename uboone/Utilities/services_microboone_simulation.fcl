@@ -92,5 +92,6 @@ microboone_simulation_services.SignalShapingServiceMicroBooNE:  @local::microboo
 microboone_simulation_services.UBOpticalChConfig:               @local::microboone_optical_ch_config
 microboone_simulation_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
 microboone_simulation_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
+microboone_simulation_services.IDetPedestalService:             @local::microboone_detpedestalservice
 
 END_PROLOG
