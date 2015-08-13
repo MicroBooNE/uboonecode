@@ -6,7 +6,7 @@ litemaker_opdigit: @local::litemaker_base
 
 litemaker_opdigit.out_filename: "larlite_opdigit.root"
 
-litemaker_rawdigit.DataLookUpMap:
+litemaker_opdigit.DataLookUpMap:
 {
   opdigit: ["daq"]
 }

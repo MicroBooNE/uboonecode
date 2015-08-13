@@ -26,6 +26,9 @@
 #include "DataFormat/potsummary.h"
 
 // LArSoft includes
+#include "uboone/Geometry/UBOpChannelTypes.h"
+#include "uboone/Geometry/UBOpReadoutMap.h"
+#include "Utilities/TimeService.h"
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
@@ -129,10 +132,15 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
     case ::larlite::data::kEvent:
       break;
     default:
+
       labels = data_pset.get<std::vector<std::string> >(::larlite::data::kDATA_TREE_NAME[i].c_str(),labels);
-      for(auto const& label : labels)
+      std::cout<<::larlite::data::kDATA_TREE_NAME[i].c_str()<<" data product..."<<std::endl;
+      for(auto const& label : labels) {
+	std::cout<<"  --"<<label.c_str()<<std::endl;
 	fAlg.Register(label,(::larlite::data::DataType_t)i);
+      }
       labels.clear();
+
       labels = ass_pset.get<std::vector<std::string> >(::larlite::data::kDATA_TREE_NAME[i].c_str(),labels);
       for(auto const& label : labels)
 	fAlg.AssociationRegister(label,(::larlite::data::DataType_t)i);
@@ -196,6 +204,8 @@ void LiteScanner::analyze(art::Event const & e)
   _mgr.set_id(e.id().run(),
 	      e.id().subRun(),
 	      e.id().event());
+  art::ServiceHandle<util::TimeService> ts;
+  ts->preProcessEvent(e);
   /*
   std::cout<<" Run: " << _mgr.run_id() << " ... "
 	   <<" SubRun: " << _mgr.subrun_id() << " ... "
@@ -361,10 +371,27 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
   auto lite_id = fAlg.ProductID<T>(name_index);
   auto lite_data = _mgr.get_data((::larlite::data::DataType_t)lite_id.first,lite_id.second);
   art::Handle<std::vector<T> > dh;
-  evt.getByLabel(lite_id.second,dh);
-  if(!dh.isValid()) return;
-  
-  fAlg.ScanData(dh,lite_data);
+
+  // All cases except for optical
+  if(lite_id.first != ::larlite::data::kOpDetWaveform) {
+    evt.getByLabel(lite_id.second,dh);
+    if(!dh.isValid()) return;
+    fAlg.ScanData(dh,lite_data);
+  }else{
+    art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
+    art::ServiceHandle<util::TimeService> ts;
+    std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
+
+    for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
+
+      evt.getByLabel(lite_id.second, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), dh);
+
+      if(!dh.isValid()) continue;
+
+      fAlg.ScanData(dh,lite_data);
+
+    }
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
