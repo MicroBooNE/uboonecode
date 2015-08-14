@@ -2,10 +2,11 @@
 
 BEGIN_PROLOG
 
+
 microboone_databaseretrievalalg: @local::standard_databaseretrievalalg
 microboone_databaseretrievalalg:
 {
-  DBUrl: "http://dbdata0.fnal.gov:8086/uboonecon_dev/app/"
+  DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
   DBTag: ""
 }
 
@@ -15,12 +16,11 @@ microboone_pedestalretrievalalg:
     DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg
     DatabaseRetrievalAlg: 
     {
-      DBFolderName: "detpedestals"
+      DBFolderName: "detpedestals_data"
     }
     
     UseDB: false
-    UseTable: false
-    UseDefault: true
+    UseFile: false
     
     DefaultCollMean: 400.0
     DefaultCollRms:  0.3
@@ -29,5 +29,12 @@ microboone_pedestalretrievalalg:
     DefaultMeanErr:  0.0
     DefaultRmsErr:   0.0
 }
+
+microboone_detpedestalservice: 
+{
+  service_provider: UbooneDetPedestalService
+  DetPedestalRetrievalAlg: @local::microboone_pedestalretrievalalg
+}
+
 
 END_PROLOG
