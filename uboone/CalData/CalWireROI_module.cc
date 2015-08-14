@@ -43,8 +43,8 @@
 #include "Utilities/LArFFT.h"
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
-#include "uboone/Database/UBooneIOVTimeStamp.h"
+#include "CalibrationDBI/Interface/IDetPedestalService.h"
+#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
 #include "WaveformPropertiesAlg.h"
 
 /* unused function
@@ -146,9 +146,8 @@ namespace caldata {
     bool fuPlaneRamp;     ///< set true for correct U plane wire response
     int  fSaveWireWF;     ///< Save recob::wire object waveforms
     size_t fEventCount;  ///< count of event processed
+    int  fMaxAllowedChanStatus;
     
-    lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg; ///< For pedestal retrieval
-
     void doDecon(std::vector<float>& holder, 
       raw::ChannelID_t channel, unsigned int thePlane,
       std::vector<std::pair<unsigned int, unsigned int>> rois,
@@ -171,7 +170,6 @@ namespace caldata {
   
   //-------------------------------------------------
   CalWireROI::CalWireROI(fhicl::ParameterSet const& pset):
-    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg")),
     fROIPropertiesAlg(pset.get<fhicl::ParameterSet>("ROIPropertiesAlg"))
   {
     this->reconfigure(pset);
@@ -207,22 +205,21 @@ namespace caldata {
     std::vector<unsigned short> uin;    std::vector<unsigned short> vin;
     std::vector<unsigned short> zin;
     
-    fDigitModuleLabel = p.get< std::string >          ("DigitModuleLabel", "daq");
-    fThreshold        = p.get< std::vector<unsigned short> >   ("Threshold");
-    fMinWid           = p.get< unsigned short >       ("MinWid");
-    fMinSep           = p.get< unsigned short >       ("MinSep");
-    uin               = p.get< std::vector<unsigned short> >   ("uPlaneROIPad");
-    vin               = p.get< std::vector<unsigned short> >   ("vPlaneROIPad");
-    zin               = p.get< std::vector<unsigned short> >   ("zPlaneROIPad");
-    fDoBaselineSub    = p.get< bool >                 ("DoBaselineSub");
-    fuPlaneRamp       = p.get< bool >                 ("uPlaneRamp");
-    fFFTSize          = p.get< int  >                 ("FFTSize");
-    fSaveWireWF       = p.get< int >                  ("SaveWireWF");
+    fDigitModuleLabel     = p.get< std::string >                   ("DigitModuleLabel", "daq");
+    fThreshold            = p.get< std::vector<unsigned short> >   ("Threshold");
+    fMinWid               = p.get< unsigned short >                ("MinWid");
+    fMinSep               = p.get< unsigned short >                ("MinSep");
+    uin                   = p.get< std::vector<unsigned short> >   ("uPlaneROIPad");
+    vin                   = p.get< std::vector<unsigned short> >   ("vPlaneROIPad");
+    zin                   = p.get< std::vector<unsigned short> >   ("zPlaneROIPad");
+    fDoBaselineSub        = p.get< bool >                          ("DoBaselineSub");
+    fuPlaneRamp           = p.get< bool >                          ("uPlaneRamp");
+    fFFTSize              = p.get< int  >                          ("FFTSize");
+    fSaveWireWF           = p.get< int >                           ("SaveWireWF");
+    fMaxAllowedChanStatus = p.get< int >                           ("MaxAllowedChannelStatus");
 
     fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
-    
-    fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
-    
+        
     if(uin.size() != 2 || vin.size() != 2 || zin.size() != 2) {
       throw art::Exception(art::errors::Configuration)
         << "u/v/z plane ROI pad size != 2";
@@ -282,11 +279,9 @@ namespace caldata {
   //////////////////////////////////////////////////////
   void CalWireROI::produce(art::Event& evt)
   {      
-  
-    //update database cache
-    //Temporarily replace with the generic version until time stamp becomes available
-    //fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
-    fPedestalRetrievalAlg.Update( evt );
+    
+    //get pedestal conditions
+    const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
   
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
@@ -324,7 +319,6 @@ namespace caldata {
 
     //calculated expected deconvoluted noise level at all three planes
     //calculated expected raw noise level at all three planes
-
     
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
@@ -363,13 +357,13 @@ namespace caldata {
       //  minSepPad = fMinSep + fPostROIPad[thePlane];
       
       // skip bad channels
-      if(!chanFilt->BadChannel(channel)) {
+      if(!(chanFilt->GetChannelStatus(channel) > fMaxAllowedChanStatus)) {
         
         // uncompress the data
         raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
         // loop over all adc values and subtract the pedestal
 	// When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
-        float pdstl = fPedestalRetrievalAlg.PedMean(channel);
+        float pdstl = pedestalRetrievalAlg.PedMean(channel);
 	//subtract time-offset added in SimWireMicroBooNE_module
 	// Xin, remove the time offset
 	//int time_offset = 0.;//sss->FieldResponseTOffset(channel);
@@ -577,11 +571,11 @@ namespace caldata {
 		//if (tempPre > tempPost){
 		flag = 0;
 	      }else{
-		ir++;
-		if (ir<rois.size()){
+//		ir++;
+		if (ir+1<rois.size()){
 		  roiLen += 100;
-		  if (roiLen >= rois[ir].first - roiStart + 1)
-		    roiLen = rois[ir].second - roiStart + 1;
+		  if (roiLen >= rois[ir+1].first - roiStart + 1)
+		    roiLen = rois[++ir].second - roiStart + 1;
 		}else{
 		  roiLen += 100;
 		  if (roiLen>dataSize-roiStart)

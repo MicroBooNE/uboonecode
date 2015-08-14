@@ -1,0 +1,18 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemaker_rawdigit: @local::litemaker_base
+
+litemaker_rawdigit.out_filename: "larlite_rawdigit.root"
+
+litemaker_rawdigit.DataLookUpMap:
+{
+  rawdigit: ["daq"]
+}
+
+litemaker_rawdigit.AssociationLookUpMap:
+{}
+
+END_PROLOG
+

@@ -19,6 +19,7 @@
 // LArSoft includes
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
+#include "RawData/OpDetWaveform.h"
 #include "RecoBase/Wire.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/OpHit.h"
@@ -169,6 +170,7 @@ namespace larlite {
     std::map<art::Ptr<::sim::MCShower>,     std::pair<size_t,size_t> > fPtrIndex_mcshower;
     std::map<art::Ptr<::sim::MCTrack>,      std::pair<size_t,size_t> > fPtrIndex_mctrack;
     std::map<art::Ptr<::raw::RawDigit>,     std::pair<size_t,size_t> > fPtrIndex_rawdigit;
+    std::map<art::Ptr<::raw::OpDetWaveform>,std::pair<size_t,size_t> > fPtrIndex_opdigit;
     std::map<art::Ptr<::recob::Wire>,       std::pair<size_t,size_t> > fPtrIndex_wire;
     std::map<art::Ptr<::recob::Hit>,        std::pair<size_t,size_t> > fPtrIndex_hit;
     std::map<art::Ptr<::recob::OpHit>,      std::pair<size_t,size_t> > fPtrIndex_ophit;

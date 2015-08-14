@@ -601,7 +601,7 @@ namespace lris {
 	    // also need to go from clock time to time stamp
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( time, frame );
-            raw::OpDetWaveform rd( window_timestamp, channel_number,win_data_size);
+            raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
 
 	    //std::cout << " into ReadoutCH=" << data_product_ch_num << " category=" << opdet::UBOpChannelEnumName( ch_category ) << std::endl;

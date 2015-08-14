@@ -66,5 +66,6 @@ physics.analyzers.analysistree.CosmicScoreThresholds:   [0.0]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
 physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
-physics.analyzers.analysistree.ShowerModuleLabel:               "showerrecofuzzy"
+physics.analyzers.analysistree.ShowerModuleLabel:               ["showerrecofuzzy","showerrecopandora"]
+physics.analyzers.analysistree.IgnoreMissingShowers:            true
 physics.analyzers.analysistree.SaveCryInfo:                     false
