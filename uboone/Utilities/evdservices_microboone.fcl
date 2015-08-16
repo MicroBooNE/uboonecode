@@ -2,6 +2,7 @@
 #include "evdservices_base.fcl"
 #include "services_microboone.fcl"
 #include "trackfinderalgorithms.fcl"
+#include "database_microboone.fcl"
 
 BEGIN_PROLOG
 
@@ -75,7 +76,9 @@ microboone_disp:
  LArVoxelCalculator:       @local::microboone_larvoxelcalculator
  InfoTransfer: 		   @local::microboone_infotransfer
  TimeService:              @local::microboone_timeservice
+ #IDetPedestalService:      @local::microboone_detpedestalservice
 }
+microboone_disp.IDetPedestalService: @local::microboone_detpedestalservice
 
 #######################################
 

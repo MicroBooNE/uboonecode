@@ -7,8 +7,7 @@ art_make( BASENAME_ONLY
                         Filters
                         RawData
                         SignalShapingServiceMicroBooNE_service
-			CalibrationDBI_IOVData
-			CalibrationDBI_WebDBI
+			CalibrationDBI_Providers
                         ${SEEDSERVICE_SERVICE} # artextensions
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}

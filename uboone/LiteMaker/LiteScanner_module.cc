@@ -26,8 +26,12 @@
 #include "DataFormat/potsummary.h"
 
 // LArSoft includes
+#include "uboone/Geometry/UBOpChannelTypes.h"
+#include "uboone/Geometry/UBOpReadoutMap.h"
+#include "Utilities/TimeService.h"
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
+#include "RawData/OpDetWaveform.h"
 #include "RecoBase/Wire.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/OpHit.h"
@@ -128,10 +132,15 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
     case ::larlite::data::kEvent:
       break;
     default:
+
       labels = data_pset.get<std::vector<std::string> >(::larlite::data::kDATA_TREE_NAME[i].c_str(),labels);
-      for(auto const& label : labels)
+      std::cout<<::larlite::data::kDATA_TREE_NAME[i].c_str()<<" data product..."<<std::endl;
+      for(auto const& label : labels) {
+	std::cout<<"  --"<<label.c_str()<<std::endl;
 	fAlg.Register(label,(::larlite::data::DataType_t)i);
+      }
       labels.clear();
+
       labels = ass_pset.get<std::vector<std::string> >(::larlite::data::kDATA_TREE_NAME[i].c_str(),labels);
       for(auto const& label : labels)
 	fAlg.AssociationRegister(label,(::larlite::data::DataType_t)i);
@@ -195,6 +204,8 @@ void LiteScanner::analyze(art::Event const & e)
   _mgr.set_id(e.id().run(),
 	      e.id().subRun(),
 	      e.id().event());
+  art::ServiceHandle<util::TimeService> ts;
+  ts->preProcessEvent(e);
   /*
   std::cout<<" Run: " << _mgr.run_id() << " ... "
 	   <<" SubRun: " << _mgr.subrun_id() << " ... "
@@ -252,6 +263,8 @@ void LiteScanner::analyze(art::Event const & e)
 
       case ::larlite::data::kRawDigit:
 	ScanData<raw::RawDigit>(e,j); break;
+      case ::larlite::data::kOpDetWaveform:
+	ScanData<raw::OpDetWaveform>(e,j); break;
 
       case ::larlite::data::kHit:
 	ScanData<recob::Hit>(e,j); break;
@@ -358,10 +371,27 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
   auto lite_id = fAlg.ProductID<T>(name_index);
   auto lite_data = _mgr.get_data((::larlite::data::DataType_t)lite_id.first,lite_id.second);
   art::Handle<std::vector<T> > dh;
-  evt.getByLabel(lite_id.second,dh);
-  if(!dh.isValid()) return;
-  
-  fAlg.ScanData(dh,lite_data);
+
+  // All cases except for optical
+  if(lite_id.first != ::larlite::data::kOpDetWaveform) {
+    evt.getByLabel(lite_id.second,dh);
+    if(!dh.isValid()) return;
+    fAlg.ScanData(dh,lite_data);
+  }else{
+    art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
+    art::ServiceHandle<util::TimeService> ts;
+    std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
+
+    for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
+
+      evt.getByLabel(lite_id.second, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), dh);
+
+      if(!dh.isValid()) continue;
+
+      fAlg.ScanData(dh,lite_data);
+
+    }
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -415,12 +445,13 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
   case ::larlite::data::kMCParticle:
     fAlg.ScanAssociation<T, simb::MCTruth     > (evt,dh,lite_ass);
     break;
-  case ::larlite::data::kMCFlux:       break;
-  case ::larlite::data::kMCTrajectory: break;
-  case ::larlite::data::kMCNeutrino:   break;
-  case ::larlite::data::kRawDigit:     break;
-  case ::larlite::data::kWire:         break;
-  case ::larlite::data::kHit:          break;
+  case ::larlite::data::kMCFlux:        break;
+  case ::larlite::data::kMCTrajectory:  break;
+  case ::larlite::data::kMCNeutrino:    break;
+  case ::larlite::data::kRawDigit:      break;
+  case ::larlite::data::kOpDetWaveform: break;
+  case ::larlite::data::kWire:          break;
+  case ::larlite::data::kHit:           break;
   case ::larlite::data::kCosmicTag:
     fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);

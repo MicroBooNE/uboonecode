@@ -58,15 +58,22 @@ physics: {
   analyzers: {
     geotest: {
       module_type: "GeometryTest"
-      PrintWires:  true
+      
+      # Tests can be selected individually using a list of strings called
+      # RunTests.
+      # See GeometryTestAlg documentation for specific strings in case new tests
+      # are added.
+      RunTests: [
+        # run the default test suite (actually unnecessary):
+        "@default",
+        # in addition (overriding the default): print wires
+        "+PrintWires"
+      ]
+      
       # wire pitch for planes #0, #1 and #2
       ExpectedWirePitch: [ 0.3, 0.3, 0.3 ]
       # plane pitches (#0 -> #1, #1 -> #2)
       ExpectedWirePitch: [ 0.3, 0.3 ]
-      SkipTests: [
-        # - CheckOverlaps disabled because it takes lot of time
-        "CheckOverlaps"
-      ]
     }
   }
 
