@@ -354,6 +354,7 @@ void microboone::Diffusion::beginJob(){
   fTree->Branch("sim_ch",sim_ch,"sim_ch[no_hits]/D");
   fTree->Branch("sim_rms",sim_rms,"sim_rms[no_hits]/D");
   
+  
   fTree->Branch("nclusters",&nclusters,"nclusters/S");
   fTree->Branch("clusterId", clusterId, "clusterId[nclusters]/S");
   fTree->Branch("clusterView", clusterView, "clusterView[nclusters]/S");
