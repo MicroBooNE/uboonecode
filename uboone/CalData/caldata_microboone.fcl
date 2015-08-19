@@ -82,6 +82,15 @@ microboone_rawdigitandwirecomparisonana:
         }
     }
 }
-    
+
+microboone_rawdigitfilter:
+{
+    module_type:      "RawDigitFilterUBooNE"
+    DigitModuleLabel: "daq"
+    RMSRejectionCut:  [10.,10.,5.]
+    TheChosenWire:    1200
+    MaxPedestalDiff:  10.
+}
+
 
 END_PROLOG
