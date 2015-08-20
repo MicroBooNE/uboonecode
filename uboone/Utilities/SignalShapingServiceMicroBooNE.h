@@ -110,18 +110,14 @@ namespace util {
 
     // Accessors.
 
-    //  double GetASICGain()                                    { return fASICGainInMVPerFC; }
+    //  double GetASICGain()                                  { return fASICGainInMVPerFC; }
     std::vector<DoubleVec> GetNoiseFactVec()                { return fNoiseFactVec; }
     //double GetShapingTime()                                 { return fShapeTimeConst.at(1); }; 
-    std::vector<std::vector<size_t> > GetNResponses()                    { return fNResponses; }
-    std::vector<std::vector<size_t> > GetNActiveResponses()     { return fNActiveResponses; }
+    std::vector<std::vector<size_t> > GetNResponses()       { return fNResponses; }
+    std::vector<std::vector<size_t> > GetNActiveResponses() { return fNActiveResponses; }
 
     std::vector<size_t> GetViewIndex()       { return fViewIndex; }
     //double GetASICGain() { return fASICGainInMVPerFC; }
-    
-      //    std::vector<double> GetNoiseFactInd() { return fNoiseFactInd; }
-      //std::vector<double> GetNoiseFactColl() { return fNoiseFactColl; }
-    
 
     //double GetShapingTime() { return fShapeTimeConst.at(1); }
 
@@ -246,6 +242,12 @@ namespace util {
     bool fGetFilterFromHisto;   		///< Flag that allows to use a filter function from a histogram instead of the functional dependency
 
     std::vector<std::vector<std::vector<TH1F*> > > fFieldResponseHistVec;
+
+    double fDefaultEField;
+    double fDefaultTemperature;
+
+    DoubleVec fTimeScaleParams;
+    
     std::vector<TH1D*> fFilterHistVec;
     
     // Following attributes hold the convolution and deconvolution kernels

@@ -13,7 +13,7 @@ microboone_signalshapingservice:
   NoiseFactVec:         [[ 1.12, 0.86, 0.60, 0.55 ], [ 1.12, 0.86, 0.60, 0.55 ], [ 0.89, 0.66, 0.48, 0.43 ]]
 
   # to turn off noise
-  # NoiseFactVec:         [[ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ]]
+  #NoiseFactVec:         [[ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ]]
 
 
   NViews:                  3
@@ -29,6 +29,14 @@ microboone_signalshapingservice:
   NActiveResponses:     [ [1, 1, 1], [1, 1, 1] ]  # number of active responses per view, including primary. 1 is current number
   CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
   FieldResponseFVersion:  [ "v0.1", "v0.1" ]
+  
+  DefaultEField:       0.5
+  DefaultTemperature: 87.0
+
+  TimeScaleParams:   [ 1.0, 0.806 ] # this does the scaling from full- to half-field
+                                      # good to ~0.2% over the range of the velocity ratio for 1-0.4 in the field
+                                      # and <2% between views (calibrated on the Y view)
+
   DeconNorm: 200.
 
 # Settings for synthesized response, including adjacent wires
