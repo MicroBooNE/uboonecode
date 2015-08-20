@@ -32,6 +32,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "Geometry/Geometry.h"
+#include "Utilities/DetectorProperties.h"
 #include "Utilities/TimeService.h"
 #include "Utilities/SimpleTimeService.h"
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
@@ -63,11 +64,14 @@ public:
 private:
 
     // Fcl parameters.
-    std::string          fDigitModuleLabel;     ///< The full collection of hits
-    float                fTruncMeanFraction;    ///< Fraction for truncated mean
-    std::vector<double>  fRmsRejectionCut;      ///< channel rms cut
-    unsigned int         fTheChosenWire;        ///< For example hist
-    double               fMaxPedestalDiff;      ///< Max pedestal diff to db to warn
+    std::string          fDigitModuleLabel;      ///< The full collection of hits
+    float                fTruncMeanFraction;     ///< Fraction for truncated mean
+    std::vector<double>  fRmsRejectionCut;       ///< channel upper rms cut
+    std::vector<double>  fRmsRejectionCutLow;    ///< channel lower rms cut
+    unsigned int         fTheChosenWire;         ///< For example hist
+    double               fMaxPedestalDiff;       ///< Max pedestal diff to db to warn
+    bool                 fSmoothCorrelatedNoise; ///< Should we smooth the noise?
+    size_t               fNumWiresToGroup;       ///< If smoothing, the number of wires to look at
 
     // Statistics.
     int fNumEvent;        ///< Number of events seen.
@@ -85,8 +89,9 @@ private:
     bool      fFirstEvent;
     
     // Useful services, keep copies for now (we can update during begin run periods)
-    art::ServiceHandle<geo::Geometry>   fGeometry;             ///< pointer to Geometry service
-    const lariov::IDetPedestalProvider& fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
+    art::ServiceHandle<geo::Geometry>            fGeometry;             ///< pointer to Geometry service
+    art::ServiceHandle<util::DetectorProperties> fDetectorProperties;   ///< Detector properties service
+    const lariov::IDetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
 };
 
 DEFINE_ART_MODULE(RawDigitFilterUBooNE)
@@ -125,11 +130,14 @@ RawDigitFilterUBooNE::~RawDigitFilterUBooNE()
 ///
 void RawDigitFilterUBooNE::reconfigure(fhicl::ParameterSet const & pset)
 {
-    fDigitModuleLabel  = pset.get<std::string>        ("DigitModuleLabel",   "daq");
-    fTruncMeanFraction = pset.get<float>              ("TruncMeanFraction",   0.2);
-    fRmsRejectionCut   = pset.get<std::vector<double>>("RMSRejectonCut",      std::vector<double>() = {10.,10.,5.});
-    fTheChosenWire     = pset.get<unsigned int>       ("TheChosenWire",       1200);
-    fMaxPedestalDiff   = pset.get<double>             ("MaxPedestalDiff",      10.);
+    fDigitModuleLabel      = pset.get<std::string>        ("DigitModuleLabel",                                       "daq");
+    fTruncMeanFraction     = pset.get<float>              ("TruncMeanFraction",                                        0.2);
+    fRmsRejectionCut       = pset.get<std::vector<double>>("RMSRejectonCut",      std::vector<double>() = {10.0,10.0, 5.0});
+    fRmsRejectionCutLow    = pset.get<std::vector<double>>("RMSRejectonCutLow",   std::vector<double>() = {0.75,0.75,0.75});
+    fTheChosenWire         = pset.get<unsigned int>       ("TheChosenWire",                                           1200);
+    fMaxPedestalDiff       = pset.get<double>             ("MaxPedestalDiff",                                          10.);
+    fSmoothCorrelatedNoise = pset.get<bool>               ("SmoothCorrelatedNoise",                                   true);
+    fNumWiresToGroup       = pset.get<size_t>             ("NumWiresToGroup",                                           48);
 }
 
 //----------------------------------------------------------------------------
@@ -189,171 +197,319 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
     art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
     event.getByLabel(fDigitModuleLabel, digitVecHandle);
     
-    unsigned int maxChannels = fGeometry->Nchannels();
-    
-    // Commence looping over raw digits
-    for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter)
+    // Require a valid handle
+    if (digitVecHandle.isValid())
     {
-        // get the reference to the current raw::RawDigit
-        art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
-        
-        raw::ChannelID_t channel = digitVec->Channel();
-        
-        bool goodChan(true);
-        
-        // The below try-catch block may no longer be necessary
-        // Decode the channel and make sure we have a valid one
-        std::vector<geo::WireID> wids;
-        try {
-            wids = fGeometry->ChannelToWire(channel);
-        }
-        catch(...)
+        unsigned int maxChannels    = fGeometry->Nchannels();
+        unsigned int maxTimeSamples = fDetectorProperties->NumberTimeSamples();
+    
+        // Ok, to do the correlated noise removal we are going to need a rather impressive data structure...
+        // Because we need to unpack each wire's data, we will need to "explode" it out into a data structure
+        // here... with the good news that we'll release the memory at the end of the module so should not
+        // impact downstream processing (I hope!).
+        // What we are going to do is make a vector over views of vectors over wires of vectors over time samples
+        std::vector<std::vector<raw::RawDigit::ADCvector_t>> rawDataViewWireTimeVec;
+        std::vector<std::vector<float>>                      rawDataViewWireNoiseVec;
+        std::vector<std::vector<float>>                      pedestalViewWireVec;
+        std::vector<std::vector<raw::ChannelID_t>>           channelViewWireVec;
+    
+        // Initialize outer range to number of views
+        rawDataViewWireTimeVec.resize(3);
+        rawDataViewWireNoiseVec.resize(3);
+        pedestalViewWireVec.resize(3);
+        channelViewWireVec.resize(3);
+    
+        // Basic initialization goes here:
+        for(size_t viewIdx = 0; viewIdx < 3; viewIdx++)
         {
-            //std::cout << "===>> Found illegal channel with id: " << channel << std::endl;
-            goodChan = false;
+            // For each view we need to presize the vector to the number of wires
+            rawDataViewWireTimeVec[viewIdx].resize(fGeometry->Nwires(viewIdx));
+            rawDataViewWireNoiseVec[viewIdx].resize(fGeometry->Nwires(viewIdx));
+            pedestalViewWireVec[viewIdx].resize(fGeometry->Nwires(viewIdx));
+            channelViewWireVec[viewIdx].resize(fGeometry->Nwires(viewIdx));
         }
-        
-        if (channel >= maxChannels || !goodChan) continue;
-        
-        // Recover plane and wire in the plane
-        unsigned int view = wids[0].Plane;
-        unsigned int wire = wids[0].Wire;
-        
-        unsigned int dataSize = digitVec->Samples();
-        
-        // vector holding uncompressed adc values
-        std::vector<short> rawadc(dataSize);
-        
-        // And now uncompress
-        raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
-
-        // The strategy for finding the average for a given wire will be to
-        // find the most populated bin and the average using the neighboring bins
-        // To do this we'll use a map with key the bin number and data the count in that bin
-        // Define the map first
-        std::map<short,short> binAdcMap;
-        
-        // Populate the mape
-        for(const auto& adcVal : rawadc)
+    
+        // Commence looping over raw digits
+        for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter)
         {
-            binAdcMap[adcVal]++;
-        }
+            // get the reference to the current raw::RawDigit
+            art::Ptr<raw::RawDigit> digitVec(digitVecHandle, rdIter);
         
-        // Find the max bin
-        short binMax(-1);
-        short binMaxCnt(0);
+            raw::ChannelID_t channel = digitVec->Channel();
         
-        for(const auto& binAdcItr : binAdcMap)
-        {
-            if (binAdcItr.second > binMaxCnt)
-            {
-                binMax    = binAdcItr.first;
-                binMaxCnt = binAdcItr.second;
+            bool goodChan(true);
+        
+            // The below try-catch block may no longer be necessary
+            // Decode the channel and make sure we have a valid one
+            std::vector<geo::WireID> wids;
+            try {
+                wids = fGeometry->ChannelToWire(channel);
             }
-        }
+            catch(...)
+            {
+                //std::cout << "===>> Found illegal channel with id: " << channel << std::endl;
+                goodChan = false;
+            }
         
-        // fill example hists - throw away code
-        if (fFirstEvent && wire == fTheChosenWire)
-        {
+            if (channel >= maxChannels || !goodChan) continue;
+        
+            // Recover plane and wire in the plane
+            unsigned int view = wids[0].Plane;
+            unsigned int wire = wids[0].Wire;
+        
+            unsigned int dataSize = digitVec->Samples();
+            
+            maxTimeSamples = std::min(maxTimeSamples, dataSize);
+        
+            // vector holding uncompressed adc values
+            std::vector<short>& rawadc = rawDataViewWireTimeVec[view][wire];
+        
+            channelViewWireVec[view][wire] = channel;
+        
+            rawadc.resize(maxTimeSamples);
+        
+            // And now uncompress
+            raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
+
+            // The strategy for finding the average for a given wire will be to
+            // find the most populated bin and the average using the neighboring bins
+            // To do this we'll use a map with key the bin number and data the count in that bin
+            // Define the map first
+            std::map<short,short> binAdcMap;
+        
+            // Populate the mape
+            for(const auto& adcVal : rawadc)
+            {
+                binAdcMap[adcVal]++;
+            }
+        
+            // Find the max bin
+            short binMax(-1);
+            short binMaxCnt(0);
+        
             for(const auto& binAdcItr : binAdcMap)
             {
-                fAverageHist[view]->Fill(binAdcItr.first, binAdcItr.second);
+                if (binAdcItr.second > binMaxCnt)
+                {
+                    binMax    = binAdcItr.first;
+                    binMaxCnt = binAdcItr.second;
+                }
             }
-        }
         
-        // Armed with the max bin and its count, now set up to get an average
-        // about this bin. We'll want to cut off at some user defined fraction
-        // of the total bins on the wire
-        int minNumBins = (1. - fTruncMeanFraction) * dataSize - 1;
-        int curBinCnt(binMaxCnt);
-        
-        double peakValue(curBinCnt * binMax);
-        double truncMean(peakValue);
-        
-        short binOffset(1);
-        
-        // This loop to develop the average
-        // In theory, we could also keep the sum of the squares for the rms but I had problems doing
-        // it that way so will loop twice... (potential time savings goes here!)
-        while(curBinCnt < minNumBins)
-        {
-            if (binAdcMap[binMax-binOffset])
+            // fill example hists - throw away code
+            if (fFirstEvent && wire == fTheChosenWire)
             {
-                curBinCnt += binAdcMap[binMax-binOffset];
-                truncMean += double(binAdcMap[binMax-binOffset] * (binMax - binOffset));
+                for(const auto& binAdcItr : binAdcMap)
+                {
+                    fAverageHist[view]->Fill(binAdcItr.first, binAdcItr.second);
+                }
             }
+        
+            // Armed with the max bin and its count, now set up to get an average
+            // about this bin. We'll want to cut off at some user defined fraction
+            // of the total bins on the wire
+            int minNumBins = (1. - fTruncMeanFraction) * dataSize - 1;
+            int curBinCnt(binMaxCnt);
+        
+            double peakValue(curBinCnt * binMax);
+            double truncMean(peakValue);
+        
+            short binOffset(1);
+        
+            // This loop to develop the average
+            // In theory, we could also keep the sum of the squares for the rms but I had problems doing
+            // it that way so will loop twice... (potential time savings goes here!)
+            while(curBinCnt < minNumBins)
+            {
+                if (binAdcMap[binMax-binOffset])
+                {
+                    curBinCnt += binAdcMap[binMax-binOffset];
+                    truncMean += double(binAdcMap[binMax-binOffset] * (binMax - binOffset));
+                }
             
-            if (binAdcMap[binMax+binOffset])
-            {
-                curBinCnt += binAdcMap[binMax+binOffset];
-                truncMean += double(binAdcMap[binMax+binOffset] * (binMax + binOffset));
-            }
+                if (binAdcMap[binMax+binOffset])
+                {
+                    curBinCnt += binAdcMap[binMax+binOffset];
+                    truncMean += double(binAdcMap[binMax+binOffset] * (binMax + binOffset));
+                }
             
-            binOffset++;
-        }
+                binOffset++;
+            }
         
-        truncMean /= double(curBinCnt);
+            truncMean /= double(curBinCnt);
         
-        binOffset  = 1;
+            binOffset  = 1;
         
-        int    rmsBinCnt(binMaxCnt);
-        double rmsVal(double(binMax)-truncMean);
+            int    rmsBinCnt(binMaxCnt);
+            double rmsVal(double(binMax)-truncMean);
         
-        rmsVal *= double(rmsBinCnt) * rmsVal;
+            rmsVal *= double(rmsBinCnt) * rmsVal;
         
-        // Second loop to get the rms
-        while(rmsBinCnt < minNumBins)
-        {
-            if (binAdcMap[binMax-binOffset] > 0)
+            // Second loop to get the rms
+            while(rmsBinCnt < minNumBins)
             {
-                int    binIdx  = binMax - binOffset;
-                int    binCnt  = binAdcMap[binIdx];
-                double binVals = double(binIdx) - truncMean;
+                if (binAdcMap[binMax-binOffset] > 0)
+                {
+                    int    binIdx  = binMax - binOffset;
+                    int    binCnt  = binAdcMap[binIdx];
+                    double binVals = double(binIdx) - truncMean;
                 
-                rmsBinCnt += binCnt;
-                rmsVal    += double(binCnt) * binVals * binVals;
-            }
+                    rmsBinCnt += binCnt;
+                    rmsVal    += double(binCnt) * binVals * binVals;
+                }
             
-            if (binAdcMap[binMax+binOffset] > 0)
-            {
-                int    binIdx  = binMax + binOffset;
-                int    binCnt  = binAdcMap[binIdx];
-                double binVals = double(binIdx) - truncMean;
+                if (binAdcMap[binMax+binOffset] > 0)
+                {
+                    int    binIdx  = binMax + binOffset;
+                    int    binCnt  = binAdcMap[binIdx];
+                    double binVals = double(binIdx) - truncMean;
                 
-                rmsBinCnt += binCnt;
-                rmsVal    += double(binCnt) * binVals * binVals;
+                    rmsBinCnt += binCnt;
+                    rmsVal    += double(binCnt) * binVals * binVals;
+                }
+            
+                binOffset++;
+            }
+        
+            rmsVal = std::sqrt(std::max(0.,rmsVal / double(rmsBinCnt)));
+        
+            rawDataViewWireNoiseVec[view][wire] = rmsVal;
+
+            // Recover the database version of the pedestal
+            float pedestal = fPedestalRetrievalAlg.PedMean(channel);
+        
+            pedestalViewWireVec[view][wire] = pedestal;
+        
+            // Fill some histograms here
+            fAdcCntHist[view]->Fill(curBinCnt, 1.);
+            fAveValHist[view]->Fill(std::max(-29.9, std::min(29.9,truncMean - pedestal)), 1.);
+            fRmsValHist[view]->Fill(std::min(49.9, rmsVal), 1.);
+            fRmsValProf[view]->Fill(wire, rmsVal, 1.);
+            fPedValProf[view]->Fill(wire, truncMean, 1.);
+            fPedValHist[view]->Fill(truncMean, 1.);
+
+            // Output a message is there is significant different to the pedestal
+            if (abs(truncMean - pedestal) > fMaxPedestalDiff)
+            {
+                mf::LogInfo("RawDigitFilterUBooNE") << ">>> Pedestal mismatch, channel: " << channel << ", new value: " << truncMean << ", original: " << pedestal << ", rms: " << rmsVal << std::endl;
             }
             
-            binOffset++;
+            // If not smoothing
+            if (!fSmoothCorrelatedNoise)
+            {
+                // Keep the RawDigit if below our rejection cut
+                if (rmsVal < fRmsRejectionCut[view])
+                {
+                    filteredRawDigit->emplace_back(*digitVec);
+                }
+                else
+                {
+                    mf::LogInfo("RawDigitFilterUBooNE") <<  "--> Rejecting channel for large rms, channel: " << channel << ", rmsVal: " << rmsVal << ", truncMean: " << truncMean << ", pedestal: " << pedestal << std::endl;
+                }
+            }
         }
+    
+        // Try to implement Corey's algorithm here
+        // The basic idea is to try to take groups of wires and find a metric within a given time bin
+        // to use to correct the adc values on the wire
+        // Make sure we want to do this...
+        if (fSmoothCorrelatedNoise)
+        {
+            size_t nWiresPerMotherBoard(fNumWiresToGroup);
+    
+            // Perform the outer loop over views
+            for(size_t viewIdx = 0; viewIdx < 3; viewIdx++)
+            {
+                // How many groups of wires this view?
+                size_t nMotherBoards = fGeometry->Nwires(viewIdx) / nWiresPerMotherBoard;
         
-        rmsVal = std::sqrt(std::max(0.,rmsVal / double(rmsBinCnt)));
+                // Loop over wires in group (probably a motherboard's worth)
+                for(size_t mbIdx = 0; mbIdx < nMotherBoards; mbIdx++)
+                {
+                    // Now we loop over the number of time bins (samples)
+                    for(size_t sampleIdx = 0; sampleIdx < maxTimeSamples; sampleIdx++)
+                    {
+                        // Define a vector for accumulating values...
+                        std::map<short,size_t> adcValuesMap;
+                
+                        // Finally, inside of here we are looping over wires on a motherboard
+                        for(size_t wireIdx = 0; wireIdx < nWiresPerMotherBoard; wireIdx++)
+                        {
+                            // Recover the physical wire
+                            size_t physWireIdx = nWiresPerMotherBoard * mbIdx + wireIdx;
+                    
+                            // If this wire is too noisy, or not enough noisy, reject
+                            double rmsNoise(rawDataViewWireNoiseVec[viewIdx][physWireIdx]);
 
-        // Recover the database version of the pedestal
-        float pedestal = fPedestalRetrievalAlg.PedMean(channel);
-        
-        // Fill some histograms here
-        fAdcCntHist[view]->Fill(curBinCnt, 1.);
-        fAveValHist[view]->Fill(std::max(-29.9, std::min(29.9,truncMean - pedestal)), 1.);
-        fRmsValHist[view]->Fill(std::min(49.9, rmsVal), 1.);
-        fRmsValProf[view]->Fill(wire, rmsVal, 1.);
-        fPedValProf[view]->Fill(wire, truncMean, 1.);
-        fPedValHist[view]->Fill(truncMean, 1.);
-
-        // Output a message is there is significant different to the pedestal
-        if (abs(truncMean - pedestal) > fMaxPedestalDiff)
-        {
-            mf::LogInfo("RawDigitFilterUBooNE") << ">>> Pedestal mismatch, channel: " << channel << ", new value: " << truncMean << ", original: " << pedestal << ", rms: " << rmsVal << std::endl;
-        }
-       
-        // Keep the RawDigit if below our rejection cut
-        if (rmsVal < fRmsRejectionCut[view])
-        {
-            filteredRawDigit->emplace_back(*digitVec);
-        }
-        else
-        {
-            mf::LogInfo("RawDigitFilterUBooNE") <<  "--> Rejecting channel for large rms, channel: " << channel << ", rmsVal: " << rmsVal << ", truncMean: " << truncMean << ", pedestal: " << pedestal << std::endl;
+                            // Don't select "bad" wires, they are lost anyway
+                            // Also, it is pointless to try to include the "ultra low noise" channels (or correct them)
+                            if (rmsNoise > fRmsRejectionCutLow[viewIdx] && rmsNoise < fRmsRejectionCut[viewIdx])
+                            {
+                                float     adcLessPed = float(rawDataViewWireTimeVec[viewIdx][physWireIdx][sampleIdx]) - pedestalViewWireVec[viewIdx][physWireIdx];
+                                short int adcValue   = std::round(10. * adcLessPed);
+                        
+                                // Make a poor man's cut on expected noise so we don't accidently include real pulses
+                                if (fabs(adcLessPed) < 5.*rmsNoise) adcValuesMap[adcValue]++;
+                            }
+                        }
+                
+                        // Guard against an entire MB being bad
+                        if (adcValuesMap.empty())
+                        {
+                            if (sampleIdx > 10) break;
+                            continue;
+                        }
+                
+                        // Find the most probable value
+                        short int maxAdcValue(0);
+                        size_t    maxAdcCnt(0);
+                
+                        for(const auto& adcValItr : adcValuesMap)
+                        {
+                            if (adcValItr.second > maxAdcCnt)
+                            {
+                                maxAdcValue = adcValItr.first;
+                                maxAdcCnt   = adcValItr.second;
+                            }
+                        }
+                
+                        float mostProbableValue = 0.1 * float(maxAdcValue);
+                
+                        // Now run through and apply correction
+                        for(size_t wireIdx = 0; wireIdx < nWiresPerMotherBoard; wireIdx++)
+                        {
+                            size_t physWireIdx = nWiresPerMotherBoard * mbIdx + wireIdx;
+                    
+                            // If this wire is too noisy, or not enough noisy, reject
+                            double rmsNoise(rawDataViewWireNoiseVec[viewIdx][physWireIdx]);
+                    
+                            if (rmsNoise > fRmsRejectionCutLow[viewIdx] && rmsNoise < fRmsRejectionCut[viewIdx])
+                            {
+                                // Probably doesn't matter, but try to get slightly more accuracy by doing float math and rounding
+                                float     newAdcValueFloat = float(rawDataViewWireTimeVec[viewIdx][physWireIdx][sampleIdx]) - mostProbableValue;
+                                short int newAdcValue      = std::round(newAdcValueFloat);
+                        
+                                rawDataViewWireTimeVec[viewIdx][physWireIdx][sampleIdx] = newAdcValue;
+                            }
+                        }
+                    }
+            
+                    // One more pass through to store the good channels
+                    for(size_t wireIdx = 0; wireIdx < nWiresPerMotherBoard; wireIdx++)
+                    {
+                        // Recover the physical wire
+                        size_t physWireIdx = nWiresPerMotherBoard * mbIdx + wireIdx;
+                
+                        // If this wire is too noisy, or not enough noisy, reject
+                        double rmsNoise(rawDataViewWireNoiseVec[viewIdx][physWireIdx]);
+                
+                        if (rmsNoise < fRmsRejectionCut[viewIdx])
+                        {
+                            filteredRawDigit->emplace_back(raw::RawDigit(channelViewWireVec[viewIdx][physWireIdx], maxTimeSamples, rawDataViewWireTimeVec[viewIdx][physWireIdx], raw::kNone));
+                        }
+                    }
+                }
+            }
         }
     }
     

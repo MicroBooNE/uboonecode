@@ -85,11 +85,14 @@ microboone_rawdigitandwirecomparisonana:
 
 microboone_rawdigitfilter:
 {
-    module_type:      "RawDigitFilterUBooNE"
-    DigitModuleLabel: "daq"
-    RMSRejectionCut:  [10.,10.,5.]
-    TheChosenWire:    1200
-    MaxPedestalDiff:  10.
+    module_type:           "RawDigitFilterUBooNE"
+    DigitModuleLabel:      "daq"
+    RMSRejectionCut:       [10.,10.,5.]
+    RMSRejectionCutLow:    [10.,10.,5.]
+    TheChosenWire:         1200
+    MaxPedestalDiff:       10.
+    SmoothCorrelatedNoise: true
+    NumWiresToGroup:       48
 }
 
 
