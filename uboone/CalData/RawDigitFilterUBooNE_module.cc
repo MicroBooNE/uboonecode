@@ -15,6 +15,12 @@
 // TruncMeanFraction     - the fraction of waveform bins to discard when
 //                         computing the means and rms
 // RMSRejectionCut       - vector of maximum allowed rms values to keep channel
+// RMSRejectionCutLow    - vector of lowest allowed rms values to keep channel
+// TheChoseWire          - Wire chosen for "example" hists
+// MaxPedestalDiff       - Baseline difference to pedestal to flag
+// SmoothCorrelatedNoise - Turns on the correlated noise suppression
+// NumWiresToGroup       - When removing correlated noise, # wires to group
+//
 //
 // Created by Tracy Usher (usher@slac.stanford.edu) on August 17, 2015
 //
@@ -71,7 +77,7 @@ private:
     unsigned int         fTheChosenWire;         ///< For example hist
     double               fMaxPedestalDiff;       ///< Max pedestal diff to db to warn
     bool                 fSmoothCorrelatedNoise; ///< Should we smooth the noise?
-    size_t               fNumWiresToGroup;       ///< If smoothing, the number of wires to look at
+    std::vector<size_t>  fNumWiresToGroup;       ///< If smoothing, the number of wires to look at
 
     // Statistics.
     int fNumEvent;        ///< Number of events seen.
@@ -131,13 +137,13 @@ RawDigitFilterUBooNE::~RawDigitFilterUBooNE()
 void RawDigitFilterUBooNE::reconfigure(fhicl::ParameterSet const & pset)
 {
     fDigitModuleLabel      = pset.get<std::string>        ("DigitModuleLabel",                                       "daq");
-    fTruncMeanFraction     = pset.get<float>              ("TruncMeanFraction",                                        0.2);
-    fRmsRejectionCut       = pset.get<std::vector<double>>("RMSRejectonCut",      std::vector<double>() = {10.0,10.0, 5.0});
-    fRmsRejectionCutLow    = pset.get<std::vector<double>>("RMSRejectonCutLow",   std::vector<double>() = {0.75,0.75,0.75});
+    fTruncMeanFraction     = pset.get<float>              ("TruncMeanFraction",                                        0.1);
+    fRmsRejectionCut       = pset.get<std::vector<double>>("RMSRejectonCut",      std::vector<double>() = { 5.0, 5.0, 3.0});
+    fRmsRejectionCutLow    = pset.get<std::vector<double>>("RMSRejectonCutLow",   std::vector<double>() = {0.70,0.70,0.70});
     fTheChosenWire         = pset.get<unsigned int>       ("TheChosenWire",                                           1200);
     fMaxPedestalDiff       = pset.get<double>             ("MaxPedestalDiff",                                          10.);
     fSmoothCorrelatedNoise = pset.get<bool>               ("SmoothCorrelatedNoise",                                   true);
-    fNumWiresToGroup       = pset.get<size_t>             ("NumWiresToGroup",                                           48);
+    fNumWiresToGroup       = pset.get<std::vector<size_t>>("NumWiresToGroup",         std::vector<size_t>() = {48, 48, 96});
 }
 
 //----------------------------------------------------------------------------
@@ -394,18 +400,16 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                 mf::LogInfo("RawDigitFilterUBooNE") << ">>> Pedestal mismatch, channel: " << channel << ", new value: " << truncMean << ", original: " << pedestal << ", rms: " << rmsVal << std::endl;
             }
             
-            // If not smoothing
-            if (!fSmoothCorrelatedNoise)
+            // Keep the RawDigit if below our rejection cut
+            if (rmsVal < fRmsRejectionCut[view])
             {
-                // Keep the RawDigit if below our rejection cut
-                if (rmsVal < fRmsRejectionCut[view])
-                {
-                    filteredRawDigit->emplace_back(*digitVec);
-                }
-                else
-                {
-                    mf::LogInfo("RawDigitFilterUBooNE") <<  "--> Rejecting channel for large rms, channel: " << channel << ", rmsVal: " << rmsVal << ", truncMean: " << truncMean << ", pedestal: " << pedestal << std::endl;
-                }
+                if (!fSmoothCorrelatedNoise) filteredRawDigit->emplace_back(*digitVec);
+            }
+            else
+            {
+                rawadc.clear();
+                
+                mf::LogInfo("RawDigitFilterUBooNE") <<  "--> Rejecting channel for large rms, channel: " << channel << ", rmsVal: " << rmsVal << ", truncMean: " << truncMean << ", pedestal: " << pedestal << std::endl;
             }
         }
     
@@ -415,17 +419,20 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
         // Make sure we want to do this...
         if (fSmoothCorrelatedNoise)
         {
-            size_t nWiresPerMotherBoard(fNumWiresToGroup);
-    
             // Perform the outer loop over views
             for(size_t viewIdx = 0; viewIdx < 3; viewIdx++)
             {
+                size_t nWiresPerMotherBoard(fNumWiresToGroup[viewIdx]);
+                
                 // How many groups of wires this view?
                 size_t nMotherBoards = fGeometry->Nwires(viewIdx) / nWiresPerMotherBoard;
         
                 // Loop over wires in group (probably a motherboard's worth)
                 for(size_t mbIdx = 0; mbIdx < nMotherBoards; mbIdx++)
                 {
+                    // Get wire offset this section
+                    size_t wireBaseOffset = mbIdx * nWiresPerMotherBoard;
+                    
                     // Now we loop over the number of time bins (samples)
                     for(size_t sampleIdx = 0; sampleIdx < maxTimeSamples; sampleIdx++)
                     {
@@ -436,7 +443,10 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                         for(size_t wireIdx = 0; wireIdx < nWiresPerMotherBoard; wireIdx++)
                         {
                             // Recover the physical wire
-                            size_t physWireIdx = nWiresPerMotherBoard * mbIdx + wireIdx;
+                            size_t physWireIdx = wireBaseOffset + wireIdx;
+                            
+                            // If the channel has been marked bad we simply ignore
+                            if (rawDataViewWireTimeVec[viewIdx][physWireIdx].empty()) continue;
                     
                             // If this wire is too noisy, or not enough noisy, reject
                             double rmsNoise(rawDataViewWireNoiseVec[viewIdx][physWireIdx]);
@@ -478,8 +488,11 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                         // Now run through and apply correction
                         for(size_t wireIdx = 0; wireIdx < nWiresPerMotherBoard; wireIdx++)
                         {
-                            size_t physWireIdx = nWiresPerMotherBoard * mbIdx + wireIdx;
-                    
+                            size_t physWireIdx = wireBaseOffset + wireIdx;
+                            
+                            // If the channel has been marked bad we simply ignore
+                            if (rawDataViewWireTimeVec[viewIdx][physWireIdx].empty()) continue;
+                            
                             // If this wire is too noisy, or not enough noisy, reject
                             double rmsNoise(rawDataViewWireNoiseVec[viewIdx][physWireIdx]);
                     
@@ -498,7 +511,10 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                     for(size_t wireIdx = 0; wireIdx < nWiresPerMotherBoard; wireIdx++)
                     {
                         // Recover the physical wire
-                        size_t physWireIdx = nWiresPerMotherBoard * mbIdx + wireIdx;
+                        size_t physWireIdx = wireBaseOffset + wireIdx;
+                        
+                        // If the channel has been marked bad we simply ignore
+                        if (rawDataViewWireTimeVec[viewIdx][physWireIdx].empty()) continue;
                 
                         // If this wire is too noisy, or not enough noisy, reject
                         double rmsNoise(rawDataViewWireNoiseVec[viewIdx][physWireIdx]);
