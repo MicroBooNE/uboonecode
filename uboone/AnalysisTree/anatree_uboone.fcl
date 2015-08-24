@@ -108,7 +108,7 @@ physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["cosmictaggerKHit"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit"]
 
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
-physics.analyzers.analysistree.HitsModuleLabel: "cchit"
+physics.analyzers.analysistree.HitsModuleLabel: "linecluster"
 physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
 physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
 physics.analyzers.analysistree.IgnoreMissingShowers: true
