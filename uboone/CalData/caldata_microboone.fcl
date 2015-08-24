@@ -18,6 +18,7 @@ microboone_calroi:
  uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
  FFTSize:     256      # re-initialize FFT service to this size
  SaveWireWF:  0
+ MaxAllowedChannelStatus: 4 # All channels up to this status level are considered
  DoBaselineSub_WaveformPropertiesAlg:   false # subtract baseline after deconvolution?
  
  DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
@@ -81,6 +82,18 @@ microboone_rawdigitandwirecomparisonana:
         }
     }
 }
-    
+
+microboone_rawdigitfilter:
+{
+    module_type:           "RawDigitFilterUBooNE"
+    DigitModuleLabel:      "daq"
+    RMSRejectionCut:       [10.,10.,5.]
+    RMSRejectionCutLow:    [10.,10.,5.]
+    TheChosenWire:         1200
+    MaxPedestalDiff:       10.
+    SmoothCorrelatedNoise: true
+    NumWiresToGroup:       [48, 48, 96]  # these correspond to observed groupings
+}
+
 
 END_PROLOG

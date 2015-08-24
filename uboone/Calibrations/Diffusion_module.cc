@@ -66,11 +66,13 @@
 #include "TTree.h"
 #include "TTimeStamp.h"
 
-const int kNplanes       = 3;     //number of wire planes
-const int kMaxTrack      = 1000;  //maximum number of tracks
-const int kMaxHits       = 25000; //maximum number of hits;
-const int kMaxPrimaries  = 20000;  //maximum number of primary particles
-const int kMaxTrackHits  = 2000;  //maximum number of hits on a track
+const int kNplanes         = 3;     //number of wire planes
+const int kMaxTrack        = 1000;  //maximum number of tracks
+const int kMaxCluster      = 1500;  //maximum number of tracks
+const int kMaxHits         = 25000; //maximum number of hits;
+const int kMaxPrimaries    = 20000;  //maximum number of primary particles
+const int kMaxTrackHits    = 2000;  //maximum number of hits on a track
+const int kMaxClusterHits  = 2000;  //maximum number of hits on a track
 
 namespace microboone {
    
@@ -119,22 +121,63 @@ namespace microboone {
     Float_t  hit_nelec[kMaxHits];     //hit number of electrons
     Float_t  hit_energy[kMaxHits];       //hit energy
     Short_t  hit_trkid[kMaxHits];      //is this hit associated with a reco track?
-    Int_t hit_pk[kMaxHits];  
-    Int_t hit_t[kMaxHits];  
-    Int_t hit_ch[kMaxHits];  
-    Int_t hit_fwhh[kMaxHits];  
-    Double_t hit_rms[kMaxHits]; 
-    Float_t hit_trueX[kMaxHits];
+    Short_t  hit_clusterid[kMaxHits];  //is this hit associated with a reco cluster?
+    Float_t  hit_trueX[kMaxHits];
+
+    Int_t rawD_pk[kMaxHits];  
+    Int_t rawD_t[kMaxHits];  
+    Int_t rawD_ch[kMaxHits];  
+    Int_t rawD_fwhh[kMaxHits];  
+    Double_t rawD_rms[kMaxHits]; 
     //wire (CalWire) information 
     Double_t wire_pk[kMaxHits];  
     Int_t wire_t[kMaxHits];  
     Double_t wire_ch[kMaxHits];  
     Double_t wire_rms[kMaxHits]; 
     //nelectrons (SimChannel) information
-    Double_t nelec_pk[kMaxHits];  
-    Int_t nelec_tdc[kMaxHits];  
-    Double_t nelec_ch[kMaxHits];  
-    Double_t nelec_rms[kMaxHits]; 
+    Double_t sim_pk[kMaxHits];  
+    Int_t sim_tdc[kMaxHits];  
+    Double_t sim_ch[kMaxHits];  
+    Double_t sim_rms[kMaxHits]; 
+
+    //Cluster Information
+    Short_t nclusters;
+    Short_t clusterId[kMaxCluster];
+    Short_t clusterView[kMaxCluster];
+    Int_t   cluster_isValid[kMaxCluster];
+    Float_t cluster_StartCharge[kMaxCluster];
+    Float_t cluster_StartAngle[kMaxCluster];
+    Float_t cluster_EndCharge[kMaxCluster];
+    Float_t cluster_EndAngle[kMaxCluster];
+    Float_t cluster_Integral[kMaxCluster];
+    Float_t cluster_IntegralAverage[kMaxCluster];
+    Float_t cluster_SummedADC[kMaxCluster];
+    Float_t cluster_SummedADCaverage[kMaxCluster];
+    Float_t cluster_MultipleHitDensity[kMaxCluster];
+    Float_t cluster_Width[kMaxCluster];
+    Short_t cluster_NHits[kMaxCluster];
+    Short_t cluster_StartWire[kMaxCluster];
+    Short_t cluster_StartTick[kMaxCluster];
+    Short_t cluster_EndWire[kMaxCluster];
+    Short_t cluster_EndTick[kMaxCluster];  
+    
+    Short_t  ncluhits[kMaxCluster][kNplanes];
+    
+    Short_t  cluhit_plane[kMaxCluster][kNplanes][kMaxClusterHits];     
+    Short_t  cluhit_wire[kMaxCluster][kNplanes][kMaxClusterHits];      
+    Short_t  cluhit_channel[kMaxCluster][kNplanes][kMaxClusterHits];   
+    Float_t  cluhit_peakT[kMaxCluster][kNplanes][kMaxClusterHits];     
+    Float_t  cluhit_charge[kMaxCluster][kNplanes][kMaxClusterHits];    
+    Float_t  cluhit_ph[kMaxCluster][kNplanes][kMaxClusterHits];        
+    Float_t  cluhit_startT[kMaxCluster][kNplanes][kMaxClusterHits];    
+    Float_t  cluhit_endT[kMaxCluster][kNplanes][kMaxClusterHits];      
+    Float_t  cluhit_starttick[kMaxCluster][kNplanes][kMaxClusterHits];
+    Float_t  cluhit_endtick[kMaxCluster][kNplanes][kMaxClusterHits];
+    Float_t  cluhit_RMS[kMaxCluster][kNplanes][kMaxClusterHits];
+    Float_t  cluhit_nelec[kMaxCluster][kNplanes][kMaxClusterHits];     
+    Float_t  cluhit_energy[kMaxCluster][kNplanes][kMaxClusterHits];    
+    Short_t  cluhit_trkid[kMaxCluster][kNplanes][kMaxClusterHits];     
+    Short_t  cluhit_clusterid[kMaxCluster][kNplanes][kMaxClusterHits]; 
 
     //Track information
     //Track plane data
@@ -227,7 +270,11 @@ namespace microboone {
     std::string fPOTModuleLabel;
     std::string fCalorimetryModuleLabel;
     std::string fParticleIDModuleLabel;
+    std::string fClusterModuleLabel;
     bool  fSaveCaloInfo;
+    bool  fSaveTrackInfo;
+    bool  fSaveClusterInfo;
+    bool  fSaveClusterHitInfo;
     float fG4minE;
   };
 }
@@ -242,9 +289,14 @@ microboone::Diffusion::Diffusion(fhicl::ParameterSet const& pset) :
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
   fCalorimetryModuleLabel   (pset.get< std::string >("CalorimetryModuleLabel")  ),
   fParticleIDModuleLabel    (pset.get< std::string >("ParticleIDModuleLabel")   ),
+  fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")      ),  
   fSaveCaloInfo             (pset.get< bool>("SaveCaloInfo",false)),
+  fSaveTrackInfo            (pset.get< bool>("SaveTrackInfo",false)),  
+  fSaveClusterInfo          (pset.get< bool>("SaveClusterInfo",false)),
+  fSaveClusterHitInfo       (pset.get< bool>("SaveClusterHitInfo",false)),
   fG4minE                   (pset.get< float>("G4minE",0.01))  
 {
+  if (fSaveTrackInfo == false) fSaveCaloInfo = false;
 }
 
 //-------------------------------------------------
@@ -277,26 +329,62 @@ void microboone::Diffusion::beginJob(){
   fTree->Branch("hit_starttick",hit_starttick,"hit_starttick[no_hits]/F");
   fTree->Branch("hit_endtick",hit_endtick,"hit_endtick[no_hits]/F");
   fTree->Branch("hit_RMS",hit_RMS,"hit_RMS[no_hits]/F");
-  
+  fTree->Branch("hit_trueX",hit_trueX,"hit_trueX[no_hits]/F");   
   fTree->Branch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
+  fTree->Branch("hit_clusterid",hit_clusterid,"hit_clusterid[no_hits]/S");
   fTree->Branch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
   fTree->Branch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
-  fTree->Branch("hit_pk",hit_pk,"hit_pk[no_hits]/I");
-  fTree->Branch("hit_t",hit_t,"hit_t[no_hits]/I");
-  fTree->Branch("hit_ch",hit_ch,"hit_ch[no_hits]/I");
-  fTree->Branch("hit_fwhh",hit_fwhh,"hit_fwhh[no_hits]/I");
-  fTree->Branch("hit_rms",hit_rms,"hit_rms[no_hits]/D");
-  fTree->Branch("hit_trueX",hit_trueX,"hit_trueX[no_hits]/F"); 
+
+  fTree->Branch("rawD_pk",rawD_pk,"rawD_pk[no_hits]/I");  
+  fTree->Branch("rawD_t",rawD_t,"rawD_t[no_hits]/I");
+  fTree->Branch("rawD_ch",rawD_ch,"rawD_ch[no_hits]/I");
+  fTree->Branch("rawD_fwhh",rawD_fwhh,"rawD_fwhh[no_hits]/I");
+  fTree->Branch("rawD_rms",rawD_rms,"rawD_rms[no_hits]/D");  
 
   fTree->Branch("wire_pk",wire_pk,"wire_pk[no_hits]/D");
   fTree->Branch("wire_t",wire_t,"wire_t[no_hits]/I");
   fTree->Branch("wire_ch",wire_ch,"wire_ch[no_hits]/D");
   fTree->Branch("wire_rms",wire_rms,"wire_rms[no_hits]/D");
 
-  fTree->Branch("nelec_pk",nelec_pk,"nelec_pk[no_hits]/D");
-  fTree->Branch("nelec_tdc",nelec_tdc,"nelec_tdc[no_hits]/I");
-  fTree->Branch("nelec_ch",nelec_ch,"nelec_ch[no_hits]/D");
-  fTree->Branch("nelec_rms",nelec_rms,"nelec_rms[no_hits]/D");
+  fTree->Branch("sim_pk",sim_pk,"sim_pk[no_hits]/D");
+  fTree->Branch("sim_tdc",sim_tdc,"sim_tdc[no_hits]/I");
+  fTree->Branch("sim_ch",sim_ch,"sim_ch[no_hits]/D");
+  fTree->Branch("sim_rms",sim_rms,"sim_rms[no_hits]/D");
+  
+  
+  fTree->Branch("nclusters",&nclusters,"nclusters/S");
+  fTree->Branch("clusterId", clusterId, "clusterId[nclusters]/S");
+  fTree->Branch("clusterView", clusterView, "clusterView[nclusters]/S");
+  fTree->Branch("cluster_StartCharge", cluster_StartCharge, "cluster_StartCharge[nclusters]/F");
+  fTree->Branch("cluster_StartAngle", cluster_StartAngle, "cluster_StartAngle[nclusters]/F");
+  fTree->Branch("cluster_EndCharge", cluster_EndCharge, "cluster_EndCharge[nclusters]/F");
+  fTree->Branch("cluster_EndAngle", cluster_EndAngle, "cluster_EndAngle[nclusters]/F");
+  fTree->Branch("cluster_Integral", cluster_Integral, "cluster_Integral[nclusters]/F");
+  fTree->Branch("cluster_IntegralAverage", cluster_IntegralAverage, "cluster_IntegralAverage[nclusters]/F");
+  fTree->Branch("cluster_SummedADC", cluster_SummedADC, "cluster_SummedADC[nclusters]/F");
+  fTree->Branch("cluster_SummedADCaverage", cluster_SummedADCaverage, "cluster_SummedADCaverage[nclusters]/F");
+  fTree->Branch("cluster_MultipleHitDensity", cluster_MultipleHitDensity, "cluster_MultipleHitDensity[nclusters]/F");
+  fTree->Branch("cluster_Width", cluster_Width, "cluster_Width[nclusters]/F");
+  fTree->Branch("cluster_NHits", cluster_NHits, "cluster_NHits[nclusters]/S");
+  fTree->Branch("cluster_StartWire", cluster_StartWire, "cluster_StartWire[nclusters]/S");
+  fTree->Branch("cluster_StartTick", cluster_StartTick, "cluster_StartTick[nclusters]/S");
+  fTree->Branch("cluster_EndWire", cluster_EndWire, "cluster_EndWire[nclusters]/S");
+  fTree->Branch("cluster_EndTick", cluster_EndTick, "cluster_EndTick[nclusters]/S");
+  
+  fTree->Branch("ncluhits",&ncluhits,"ncluhits[nclusters][3]/S");
+  if (fSaveClusterHitInfo){
+    fTree->Branch("cluhit_plane",cluhit_plane,"cluhit_plane[nclusters][3][2000]/S");
+    fTree->Branch("cluhit_wire",cluhit_wire,"cluhit_wire[nclusters][3][2000]/S");
+    fTree->Branch("cluhit_channel",cluhit_channel,"cluhit_channel[nclusters][3][2000]/S");
+    fTree->Branch("cluhit_peakT",cluhit_peakT,"cluhit_peakT[nclusters][3][2000]/F");
+    fTree->Branch("cluhit_charge",cluhit_charge,"cluhit_charge[nclusters][3][2000]/F");
+    fTree->Branch("cluhit_ph",cluhit_ph,"cluhit_ph[nclusters][3][2000]/F");
+    fTree->Branch("cluhit_startT",cluhit_startT,"cluhit_startT[nclusters][3][2000]/F");
+    fTree->Branch("cluhit_endT",cluhit_endT,"cluhit_endT[nclusters][3][2000]/F");
+    fTree->Branch("cluhit_starttick",cluhit_starttick,"cluhit_starttick[nclusters][3][2000]/F");
+    fTree->Branch("cluhit_endtick",cluhit_endtick,"cluhit_endtick[nclusters][3][2000]/F");
+    fTree->Branch("cluhit_RMS",cluhit_RMS,"cluhit_RMS[nclusters][3][2000]/F");
+  }  
 
   fTree->Branch("ntracks",&ntracks,"ntracks/S");
   fTree->Branch("trkId", trkId, "trkId[ntracks]/S");
@@ -390,21 +478,34 @@ void microboone::Diffusion::beginSubRun(const art::SubRun& sr)
 void microboone::Diffusion::analyze(const art::Event& evt)
 {  
   ResetVars();
+  
+  bool isMC = !evt.isRealData();
 
   art::Handle< std::vector<recob::Hit> > hitListHandle;
   std::vector<art::Ptr<recob::Hit> > hitlist;
   if (evt.getByLabel(fHitsModuleLabel,hitListHandle))
     art::fill_ptr_vector(hitlist, hitListHandle);
 
+  art::Handle< std::vector<recob::Cluster> > clusterListHandle;
+  std::vector<art::Ptr<recob::Cluster> > clusterlist;
+  if (fSaveClusterInfo){
+      if (evt.getByLabel(fClusterModuleLabel,clusterListHandle))
+      art::fill_ptr_vector(clusterlist, clusterListHandle);
+  }      
+
   art::Handle< std::vector<recob::Track> > trackListHandle;
   std::vector<art::Ptr<recob::Track> > tracklist;
-  if (evt.getByLabel(fTrackModuleLabel,trackListHandle))
-    art::fill_ptr_vector(tracklist, trackListHandle);
+  if (fSaveTrackInfo){
+    if (evt.getByLabel(fTrackModuleLabel,trackListHandle))
+       art::fill_ptr_vector(tracklist, trackListHandle);
+  }     
     
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   std::vector<art::Ptr<simb::MCTruth> > mclist;
-  if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
-    art::fill_ptr_vector(mclist, mctruthListHandle);
+  if (isMC){
+     if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
+        art::fill_ptr_vector(mclist, mctruthListHandle);
+  }  
 
   //services
   art::ServiceHandle<geo::Geometry> geom;  
@@ -412,15 +513,16 @@ void microboone::Diffusion::analyze(const art::Event& evt)
   art::ServiceHandle<util::DetectorProperties> detprop;
   art::ServiceHandle<util::LArProperties> LArProp;
   
-  bool isMC = !evt.isRealData();
-
   //associations
-  art::FindManyP<recob::Track>      fmtk(hitListHandle, evt, fTrackModuleLabel);
-  art::FindManyP<recob::Hit>        fmht(trackListHandle, evt, fTrackModuleLabel);
-  art::FindManyP<anab::Calorimetry> fmcal(trackListHandle, evt, fCalorimetryModuleLabel);
+  if (fSaveTrackInfo){
+    art::FindManyP<recob::Track>      fmtk(hitListHandle, evt, fTrackModuleLabel);
+    art::FindManyP<recob::Hit>        fmht(trackListHandle, evt, fTrackModuleLabel);
+    art::FindManyP<anab::Calorimetry> fmcal(trackListHandle, evt, fCalorimetryModuleLabel);
+  }
   
   std::vector<const sim::SimChannel*> fSimChannels;
-  evt.getView(fLArG4ModuleLabel, fSimChannels);
+  if (isMC)
+     evt.getView(fLArG4ModuleLabel, fSimChannels);
 
   run = evt.run();
   subrun = evt.subRun();
@@ -441,7 +543,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     isdata = 1;
   }
   else isdata = 0;
-
+  
   //hit information
   const size_t NHits     = hitlist.size(); // number of hits
   no_hits=(int) NHits;
@@ -467,21 +569,21 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     //when the size of simIDEs is zero, the above function throws an exception
     //and crashes, so check that the simIDEs have non-zero size before 
     //extracting hit true XYZ from simIDEs
-    std::vector<sim::IDE> ides;
-    bt->HitToSimIDEs(hitlist[i], ides);
-    if (ides.size()>0){
-       std::vector<double> xyz = bt->SimIDEsToXYZ(ides);
-       hit_trueX[i] = xyz[0];
-    } 
+    if (isMC){
+      std::vector<sim::IDE> ides;
+      bt->HitToSimIDEs(hitlist[i], ides);
+      if (ides.size()>0){
+         std::vector<double> xyz = bt->SimIDEsToXYZ(ides);
+         hit_trueX[i] = xyz[0];
+      }
+    }   
     	    
     //Hit to CalWire information	    
     art::FindManyP<recob::Wire> fmwire(hitListHandle,evt,fHitsModuleLabel);
      
     int dataSize = fmwire.at(i)[0]->NSignal();
-    int t0 = hit_peakT[i] - 3*(hit_peakT[i]-hit_startT[i]);
-    if (t0<0) t0 = 0;
-    int t1 = hit_peakT[i] + 3*(hit_peakT[i]-hit_startT[i]);
-    if (t1>=dataSize) t1 = dataSize-1;
+    int t0 = 0;
+    int t1 = dataSize-1;
     std::vector<float> signal(fmwire.at(i)[0]->Signal());
     
     wire_pk[i] = -1.0;
@@ -515,38 +617,36 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     short ped = fmrd.at(i)[0]->GetPedestal();
     std::vector<short> rawadc(dataSize);
     raw::Uncompress(fmrd.at(i)[0]->ADCs(), rawadc, fmrd.at(i)[0]->Compression());
-    t0 = hit_peakT[i] - 3*(hit_peakT[i]-hit_startT[i]);
-    if (t0<0) t0 = 0;
-    t1 = hit_peakT[i] + 3*(hit_peakT[i]-hit_startT[i]);
-    if (t1>=dataSize) t1 = dataSize-1;
-    hit_pk[i] = -1;
-    hit_t[i] = -1;
+    t0 = 0;
+    t1 = dataSize-1;
+    rawD_pk[i] = -1;
+    rawD_t[i] = -1;
     for (int j = t0; j<=t1; ++j){
-      if (rawadc[j]-ped>hit_pk[i]){
-    	hit_pk[i] = rawadc[j]-ped;
-    	hit_t[i] = j;
+      if (rawadc[j]-ped>rawD_pk[i]){
+    	rawD_pk[i] = rawadc[j]-ped;
+    	rawD_t[i] = j;
       }
     }
-    hit_ch[i] = 0;
-    hit_fwhh[i] = 0;
+    rawD_ch[i] = 0;
+    rawD_fwhh[i] = 0;
     mean_t = 0.0;
     mean_t2 = 0.0;
     for (int j = t0; j<=t1; ++j){
-      if (rawadc[j]-ped>=0.5*hit_pk[i]){
-    	++hit_fwhh[i];
+      if (rawadc[j]-ped>=0.5*rawD_pk[i]){
+    	++rawD_fwhh[i];
       }
-      if (rawadc[j]-ped>=0.1*hit_pk[i]){
-    	hit_ch[i] += rawadc[j]-ped;
+      if (rawadc[j]-ped>=0.1*rawD_pk[i]){
+    	rawD_ch[i] += rawadc[j]-ped;
     	mean_t += (double)j*(rawadc[j]-ped);
     	mean_t2 += (double)j*(double)j*(rawadc[j]-ped);
       }
     }
-    mean_t/=hit_ch[i];
-    mean_t2/=hit_ch[i];
-    hit_rms[i] = sqrt(mean_t2-mean_t*mean_t);
+    mean_t/=rawD_ch[i];
+    mean_t2/=rawD_ch[i];
+    rawD_rms[i] = sqrt(mean_t2-mean_t*mean_t);
     
     //Hit to SimChannel information
-    if (!evt.isRealData()){
+    if (isMC){
       hit_nelec[i] = 0;
       hit_energy[i] = 0;
       const sim::SimChannel* chan = 0;
@@ -571,27 +671,27 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     	   }
     	   elec[k] = nelec;
         }
-        nelec_pk[i] = -1;
-        nelec_tdc[i] = -1;
+        sim_pk[i] = -1;
+        sim_tdc[i] = -1;
         for(unsigned int f=0;f<tdcidemap.size();f++){
-    	  if (elec[f]>nelec_pk[i]){
-    	    nelec_pk[i] = elec[f];
-    	    nelec_tdc[i] = tdc[f]; 
+    	  if (elec[f]>sim_pk[i]){
+    	    sim_pk[i] = elec[f];
+    	    sim_tdc[i] = tdc[f]; 
     	  }	    
         }
-        nelec_ch[i] = 0;
+        sim_ch[i] = 0;
     	mean_t = 0;
     	mean_t2 = 0;
     	for (unsigned int f = 0; f<tdcidemap.size();f++){
-    	   if (elec[f]>=0.1*nelec_pk[i]){
-    	       nelec_ch[i]+= elec[f];
+    	   if (elec[f]>=0.1*sim_pk[i]){
+    	       sim_ch[i]+= elec[f];
     	       mean_t+= double(tdc[f])*elec[f];
     	       mean_t2+= double(tdc[f])*double(tdc[f])*elec[f];
     	   }
     	}
-    	mean_t/=nelec_ch[i];
-    	mean_t2/=nelec_ch[i];
-    	nelec_rms[i] = sqrt(mean_t2-mean_t*mean_t);
+    	mean_t/=sim_ch[i];
+    	mean_t2/=sim_ch[i];
+    	sim_rms[i] = sqrt(mean_t2-mean_t*mean_t);
       }
     }
   }     
@@ -609,8 +709,92 @@ void microboone::Diffusion::analyze(const art::Event& evt)
       }
     }
   }
-
+  
+  //In the case of ClusterCrawler or linecluster, use "linecluster or clustercrawler" as HitModuleLabel.
+  //using cchit will not make this association. In the case of gaushit, just use gaushit
+  if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
+    //Find clusters associated with hits
+    art::FindManyP<recob::Cluster> fmcl(hitListHandle,evt,fClusterModuleLabel);
+    for (size_t i = 0; i < NHits && i < kMaxHits ; ++i){//loop over hits
+      if (fmcl.isValid()){
+  	if (fmcl.at(i).size()!=0){
+  	  hit_clusterid[i] = fmcl.at(i)[0]->ID();
+  	}
+  	else
+  	  hit_clusterid[i] = -1;
+      }
+    }
+  }
+  
+  if (fSaveClusterInfo){
+     size_t NClusters = clusterlist.size();
+     nclusters = (int) NClusters;
+     for(unsigned int ic=0; ic<NClusters;++ic){//loop over clusters
+         art::Ptr<recob::Cluster> clusterholder(clusterListHandle, ic);
+	 const recob::Cluster& cluster = *clusterholder;
+	 clusterId[ic] = cluster.ID();
+	 clusterView[ic] = cluster.View();
+	 cluster_isValid[ic] = cluster.isValid();
+	 cluster_StartCharge[ic] = cluster.StartCharge();
+	 cluster_StartAngle[ic] = cluster.StartAngle();
+	 cluster_EndCharge[ic] = cluster.EndCharge();
+	 cluster_EndAngle[ic] = cluster.EndAngle();
+	 cluster_Integral[ic] = cluster.Integral();
+	 cluster_IntegralAverage[ic] = cluster.IntegralAverage();
+	 cluster_SummedADC[ic] = cluster.SummedADC();
+	 cluster_SummedADCaverage[ic] = cluster.SummedADCaverage();
+	 cluster_MultipleHitDensity[ic] = cluster.MultipleHitDensity();
+	 cluster_Width[ic] = cluster.Width();
+	 cluster_NHits[ic] = cluster.NHits();
+	 cluster_StartWire[ic] = cluster.StartWire();
+	 cluster_StartTick[ic] = cluster.StartTick();
+	 cluster_EndWire[ic] = cluster.EndWire();
+	 cluster_EndTick[ic] = cluster.EndTick();
+	 
+	 if (cluster.View() == 0) ncluhits[ic][0] = cluster.NHits();
+         if (cluster.View() == 1) ncluhits[ic][1] = cluster.NHits();
+         if (cluster.View() == 2) ncluhits[ic][2] = cluster.NHits();
+	 	 
+	 if (cluster.NHits() > kMaxClusterHits){
+     	   // if you get this error, you'll have to increase kMaxClusterHits
+     	   mf::LogError("Diffusion:limits")
+     	     << "the " << fClusterModuleLabel << " Cluster #" << ic
+     	     << " has " << cluster.NHits() << " hits on plane #" << cluster.View()
+     	     <<", only "
+     	     << kMaxClusterHits << " stored in tree";
+     	 }
+	 
+	 if (fSaveClusterHitInfo){	 
+	 art::FindManyP<recob::Hit> fmhc(clusterListHandle, evt, fClusterModuleLabel);
+	 if (fmhc.isValid()){
+	     std::vector< art::Ptr<recob::Hit> > cluhits = fmhc.at(ic);
+	     //note:cluhits.size() is same as cluster.NHits() above!
+	     for (Int_t pl=0;pl<3;pl++){
+	        for (Int_t iht = 0; iht<ncluhits[ic][pl]; ++iht){
+		  if (clusterView[ic] == pl){
+		    //std::cout<<ncluhits[ic][pl]<<","<<iht;
+	            cluhit_channel[ic][pl][iht]	= cluhits[iht]->Channel();
+	            cluhit_plane[ic][pl][iht]	= cluhits[iht]->WireID().Plane;
+	            cluhit_wire[ic][pl][iht]	= cluhits[iht]->WireID().Wire;
+	            cluhit_peakT[ic][pl][iht]	= cluhits[iht]->PeakTime();
+	            cluhit_charge[ic][pl][iht]	= cluhits[iht]->Integral();
+	            cluhit_ph[ic][pl][iht]	= cluhits[iht]->PeakAmplitude();
+	            cluhit_startT[ic][pl][iht]	= cluhits[iht]->PeakTimeMinusRMS();
+	            cluhit_endT[ic][pl][iht]	= cluhits[iht]->PeakTimePlusRMS();
+	            cluhit_starttick[ic][pl][iht] = cluhits[iht]->StartTick();
+	            cluhit_endtick[ic][pl][iht]	= cluhits[iht]->EndTick();
+	            cluhit_RMS[ic][pl][iht]	= cluhits[iht]->RMS(); 
+		 }      
+	       } //end loop over cluster hits
+	    }//end loop over planes
+	  }//end fmhc.isValid()  
+	 }//end fSaveClusterHitInfo
+	  
+     }//end loop over clusters
+  }//end fSaveClusterInfo
+	 
   //Track information
+  if (fSaveTrackInfo){
   size_t NTracks = tracklist.size(); 
   ntracks= (int) NTracks;
  
@@ -782,6 +966,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
        }
      }     
   }//end loop over tracks
+  }//if fSaveTrackInfo
 
   //GEANT information
   if (!isdata){//is MC
@@ -861,6 +1046,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
      geant_list_size = geant_particle;
    }//if (mcevts_truth)
   }//if (!isdata) 
+  
   taulife = LArProp->ElectronLifetime();
   fTree->Fill();
 }
@@ -990,23 +1176,66 @@ void microboone::Diffusion::ResetVars(){
     hit_RMS[i] = -99999.;
     hit_nelec[i] = -99999.;
     hit_energy[i] = -99999.;
-    hit_pk[i] = -9999;
-    hit_t[i] = -9999;
-    hit_ch[i] = -9999;
-    hit_fwhh[i] = -9999;
-    hit_rms[i] = -99999.;
     hit_trueX[i] = -99999.;
+    hit_trkid[i] = -9999; 
+    hit_clusterid[i] = -9999;   
+    //
+    rawD_pk[i] = -9999;
+    rawD_t[i] = -9999;
+    rawD_ch[i] = -9999;
+    rawD_fwhh[i] = -9999;
+    rawD_rms[i] = -99999.;
     wire_pk[i] = -99999.;
     wire_t[i] = -9999;
     wire_ch[i] = -99999.;
     wire_rms[i] = -99999.;
-    nelec_pk[i] = -99999.;
-    nelec_tdc[i] = -9999;
-    nelec_ch[i] = -99999.;
-    nelec_rms[i] = -99999.;
-    hit_trkid[i] = -9999;
-    
+    sim_pk[i] = -99999.;
+    sim_tdc[i] = -9999;
+    sim_ch[i] = -99999.;
+    sim_rms[i] = -99999.;
+          
   }
+
+  nclusters=0;
+  for (int i = 0; i<kMaxCluster; ++i){
+    clusterId[i] = -9999;
+    clusterView[i] = -9999;
+    cluster_isValid[i] = -1;
+    cluster_StartCharge[i] = -99999.;
+    cluster_StartAngle[i] = -99999.;
+    cluster_EndCharge[i] = -99999.;
+    cluster_EndAngle[i] = -99999.;
+    cluster_Integral[i] = -99999.;
+    cluster_IntegralAverage[i] = -99999.;
+    cluster_SummedADC[i] = -99999.;
+    cluster_SummedADCaverage[i] = -99999.;
+    cluster_MultipleHitDensity[i] = -99999.;
+    cluster_Width[i] = -99999.;
+    cluster_NHits[i] = -9999;
+    cluster_StartWire[i] = -9999;
+    cluster_StartTick[i] = -9999;
+    cluster_EndWire[i] = -9999;
+    cluster_EndTick[i] = -9999;
+    
+    for (int j = 0; j < kNplanes; ++j){
+      ncluhits[i][j] = -9999;
+      if (fSaveClusterHitInfo){
+        for(int k = 0; k < kMaxClusterHits; k++) {
+    	  cluhit_plane[i][j][k]   = -9999;
+   	  cluhit_wire[i][j][k]    = -9999;
+   	  cluhit_channel[i][j][k] = -9999;
+   	  cluhit_peakT[i][j][k]   = -99999;
+          cluhit_charge[i][j][k]  = -99999;
+          cluhit_ph[i][j][k]      = -99999;
+    	  cluhit_startT[i][j][k]  = -99999.; 
+    	  cluhit_endT[i][j][k]    = -99999.; 
+    	  cluhit_starttick[i][j][k] = -99999.;
+    	  cluhit_endtick[i][j][k]   = -99999.; 
+    	  cluhit_RMS[i][j][k]       = -99999.;
+	}  
+      }	
+    } 
+  }  
 
   ntracks = 0;
   for (int i = 0; i < kMaxTrack; ++i){

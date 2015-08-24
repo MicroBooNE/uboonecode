@@ -3,6 +3,7 @@
 
 #include "DataFormat/event_ass.h"
 #include "DataFormat/sparse_vector.h"
+#include "DataFormat/opdetwaveform.h"
 #include "DataFormat/trigger.h"
 #include "DataFormat/potsummary.h"
 #include "DataFormat/hit.h"
@@ -520,6 +521,29 @@ namespace larlite {
       //fPtrIndex_rawdigit[rawdigit_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(rawdigit_lite);
+    }  
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::raw::OpDetWaveform> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    auto lite_data = (::larlite::event_opdetwaveform*)lite_dh;
+
+    for(size_t i=0; i<dh->size(); i++){
+
+      const art::Ptr<::raw::OpDetWaveform> opdigit_ptr(dh,i);
+      ::larlite::opdetwaveform lite_opdigit;
+      lite_opdigit.SetChannelNumber(opdigit_ptr->ChannelNumber());
+      lite_opdigit.SetTimeStamp(opdigit_ptr->TimeStamp());
+
+      lite_opdigit.reserve((*opdigit_ptr).size());
+      for(auto const& adc : *opdigit_ptr)
+	lite_opdigit.push_back(adc);
+      
+      lite_data->emplace_back(lite_opdigit);
     }  
   }
 
@@ -1080,6 +1104,9 @@ namespace larlite {
   template <> std::map<art::Ptr< ::raw::RawDigit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_rawdigit; }
 
+  template <> std::map<art::Ptr< ::raw::OpDetWaveform>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  { return fPtrIndex_opdigit; }
+
   template <> std::map<art::Ptr< ::recob::Wire>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_wire; }
 
@@ -1153,6 +1180,8 @@ namespace larlite {
   // raw
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::raw::RawDigit> () const
   { return ::larlite::data::kRawDigit; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::raw::OpDetWaveform> () const
+  { return ::larlite::data::kOpDetWaveform; }
   // recob
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::recob::Wire> () const
   { return ::larlite::data::kWire; }

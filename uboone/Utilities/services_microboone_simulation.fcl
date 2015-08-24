@@ -1,4 +1,5 @@
 #include "services_microboone_basic.fcl"
+#include "database_microboone.fcl"
 
 #
 # This file defines a set of service configurations for MicroBooNE simulation.
@@ -47,11 +48,13 @@ microboone_g4_dark_services.LArG4Parameters.UseModBoxRecomb: true
 microboone_detsim_dark_services:                                @local::microboone_basic_services
 microboone_detsim_dark_services.LArFFT:                         @local::microboone_larfft
 microboone_detsim_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+microboone_detsim_dark_services.IDetPedestalService:            @local::microboone_detpedestalservice
 
 # Define microboone_simulation_dark ... (all) = (0) + (1) + (2)
-microboone_simulation_dark_services:                    @local::microboone_g4_dark_services
-microboone_simulation_dark_services.LArFFT:             @local::microboone_larfft
+microboone_simulation_dark_services:                                @local::microboone_g4_dark_services
+microboone_simulation_dark_services.LArFFT:                         @local::microboone_larfft
 microboone_simulation_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+microboone_simulation_dark_services.IDetPedestalService:            @local::microboone_detpedestalservice
 
 #
 # Define optical simulation included ones
@@ -90,5 +93,6 @@ microboone_simulation_services.SignalShapingServiceMicroBooNE:  @local::microboo
 microboone_simulation_services.UBOpticalChConfig:               @local::microboone_optical_ch_config
 microboone_simulation_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
 microboone_simulation_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
+microboone_simulation_services.IDetPedestalService:             @local::microboone_detpedestalservice
 
 END_PROLOG

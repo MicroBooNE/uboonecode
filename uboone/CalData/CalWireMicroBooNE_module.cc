@@ -44,8 +44,8 @@
 #include "Utilities/LArFFT.h"
 #include "Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
-#include "uboone/Database/UBooneIOVTimeStamp.h"
+#include "CalibrationDBI/Interface/IDetPedestalService.h"
+#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
 
 ///creation of calibrated signals on wires
 namespace caldata {
@@ -92,8 +92,6 @@ namespace caldata {
 
     template <class T> void DeconvoluteInducedCharge(size_t firstChannel, std::vector<std::vector<T> >& signal) const; // M. Mooney
 
-    lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg;
-
 
   protected: 
     
@@ -102,8 +100,7 @@ namespace caldata {
   DEFINE_ART_MODULE(CalWireMicroBooNE)
   
   //-------------------------------------------------
-  CalWireMicroBooNE::CalWireMicroBooNE(fhicl::ParameterSet const& pset) :
-    fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"))
+  CalWireMicroBooNE::CalWireMicroBooNE(fhicl::ParameterSet const& pset) 
   {
     this->reconfigure(pset);
 
@@ -132,8 +129,6 @@ namespace caldata {
     
     fSpillName.clear();
     
-    fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
-    
     size_t pos = fDigitModuleLabel.find(":");
     if( pos!=std::string::npos ) {
       fSpillName = fDigitModuleLabel.substr( pos+1 );
@@ -157,8 +152,8 @@ namespace caldata {
   void CalWireMicroBooNE::produce(art::Event& evt)
   {      
 
-    // update the database cache
-    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    //get pedestal conditions
+    const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
 
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
@@ -248,7 +243,7 @@ namespace caldata {
       	  
       	  // loop over all adc values and subtract the pedestal
       	  // When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
-          float pdstl = fPedestalRetrievalAlg.PedMean(channel);
+          float pdstl = pedestalRetrievalAlg.PedMean(channel);
       	  
       	  //David Caratelli
       	  //subtract time-offset added in SImWireMicroBooNE_module
@@ -344,7 +339,7 @@ namespace caldata {
         	
           // loop over all adc values and subtract the pedestal
           // When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
-          float pdstl = fPedestalRetrievalAlg.PedMean(channel);
+          float pdstl = pedestalRetrievalAlg.PedMean(channel);
         	
           //David Caratelli
           //subtract time-offset added in SImWireMicroBooNE_module

@@ -19,6 +19,7 @@ art_make( BASENAME_ONLY
 	   	   Simulation
 		   SimulationBase
 		   Utilities
+		   TimeService_service
 		   RawData
 		   MCBase
 		   SummaryData
@@ -52,6 +53,7 @@ art_make( BASENAME_ONLY
 		   uboonecode_uboone_LiteMaker
 		   Geometry
 		   Geometry_service
+		   TimeService_service
 		   Simulation
 		   SimulationBase
 		   Utilities

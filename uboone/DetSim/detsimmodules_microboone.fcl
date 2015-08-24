@@ -1,5 +1,4 @@
 #include "detsimmodules.fcl"
-#include "database_microboone.fcl"
 
 BEGIN_PROLOG
 
@@ -17,9 +16,7 @@ microboone_simwire:
  GetNoiseFromHisto:   false       #generate noise from histogram of freq-distribution
  GenNoiseInTime:      true        #generate noise in time-domain. Flat freq. distribution. If false then generate in freq. domani
  NoiseFileFname:      "uboone_noise_v0.1.root"
- NoiseHistoName:      "NoiseFreq" 
-       
- DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg   
+ NoiseHistoName:      "NoiseFreq"  
 
 # Expert settings
  Test:                false       #turns on special test case: parameters below               

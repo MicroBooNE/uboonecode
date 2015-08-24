@@ -55,8 +55,8 @@
 #include "Utilities/TimeService.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
-#include "CalibrationDBI/WebDBI/DetPedestalRetrievalAlg.h"
-#include "uboone/Database/UBooneIOVTimeStamp.h"
+#include "CalibrationDBI/Interface/IDetPedestalService.h"
+#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
 
 
 
@@ -115,8 +115,6 @@ namespace detsim {
     std::map< double, int > fShapingTimeOrder;
     std::string fTrigModName;                 ///< Trigger data product producer name
     
-    lariov::DetPedestalRetrievalAlg fPedestalRetrievalAlg;      ///< Pedestal Retrieval algorithm
-    
 
     bool        fTest; // for forcing a test case
     std::vector<sim::SimChannel> fTestSimChannel_v;
@@ -157,7 +155,6 @@ namespace detsim {
   //-------------------------------------------------
   SimWireMicroBooNE::SimWireMicroBooNE(fhicl::ParameterSet const& pset)
   : fNoiseHist(0)
-    , fPedestalRetrievalAlg(pset.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"))
   {
     this->reconfigure(pset);
 
@@ -200,7 +197,6 @@ namespace detsim {
     if(fTestIndex.size() != fTestCharge.size())
       throw cet::exception(__FUNCTION__)<<"# test pulse mismatched: check TestIndex and TestCharge fcl parameters...";
     fSample           = p.get<int                  >("Sample");
-    fPedestalRetrievalAlg.Reconfigure(p.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"));
 
 
     //Map the Shaping Times to the entry position for the noise ADC
@@ -310,8 +306,8 @@ namespace detsim {
   void SimWireMicroBooNE::produce(art::Event& evt)
   {
 
-    //update database cache
-    fPedestalRetrievalAlg.Update( lariov::UBooneIOVTimeStamp(evt) );
+    //get pedestal conditions
+    const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();   
 
     art::ServiceHandle<util::LArFFT> fFFT;
     fFFT->ReinitializeFFT(fNTimeSamples,fFFT->FFTOptions(),fFFT->FFTFitBins());
@@ -578,11 +574,10 @@ namespace detsim {
 
       //Generate Noise:
       //Pedestal determination and random gaussian variation
-      lariov::DetPedestal pedestal = fPedestalRetrievalAlg.Pedestal(chan);
       art::ServiceHandle<art::RandomNumberGenerator> rng;
       CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");
-      CLHEP::RandGaussQ rGaussPed(engine, 0.0, pedestal.PedRms());
-      float ped_mean = pedestal.PedMean() + rGaussPed.fire();
+      CLHEP::RandGaussQ rGaussPed(engine, 0.0, pedestalRetrievalAlg.PedRms(chan));
+      float ped_mean = pedestalRetrievalAlg.PedMean(chan) + rGaussPed.fire();
 
       //Generate Noise
       //geo::SigType_t sigtype = geo->SignalType(chan);

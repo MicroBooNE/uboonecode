@@ -14,6 +14,7 @@
 #include "triggeralgo_service.fcl"
 #include "photpropservices_microboone.fcl"
 
+
 process_name: diffusion
 
 services:
@@ -89,14 +90,20 @@ physics.producers.trackkalmanhitpid.TrackModuleLabel:       "trackkalmanhit"
 physics.producers.trackkalmanhitpid.CalorimetryModuleLabel: "trackkalmanhitcalo"
 
 physics.analyzers.Diffusion.DigitModuleLabel:        "daq"
-physics.analyzers.Diffusion.HitsModuleLabel:         "gaushit"
+#in the case of linecluster of cccluster, use "linecluster or cccluster" as hit modulelabel
+#in the case of gaushit, you can just use gaushit
+physics.analyzers.Diffusion.HitsModuleLabel:         "linecluster"
 physics.analyzers.Diffusion.LArGeantModuleLabel:     "largeant"
 physics.analyzers.Diffusion.GenieGenModuleLabel:     "generator"
 physics.analyzers.Diffusion.TrackModuleLabel:        "trackkalmanhit"
 physics.analyzers.Diffusion.POTModuleLabel:          "generator"
 physics.analyzers.Diffusion.CalorimetryModuleLabel:  "trackkalmanhitcalo"
 physics.analyzers.Diffusion.ParticleIDModuleLabel:   "trackkalmanhitpid"
+physics.analyzers.Diffusion.ClusterModuleLabel:   "linecluster"
 physics.analyzers.Diffusion.SaveCaloInfo: "false"
+physics.analyzers.Diffusion.SaveTrackInfo: "false"
+physics.analyzers.Diffusion.SaveClusterInfo: "true"
+physics.analyzers.Diffusion.SaveClusterHitInfo: "true"
 physics.analyzers.Diffusion.G4minE:   "0.01"
 
 
