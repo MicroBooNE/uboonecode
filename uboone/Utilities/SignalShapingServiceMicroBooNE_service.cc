@@ -803,7 +803,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
     term *= vDiff;
   }
 
-  std::cout << "Current E field = " << larp->Efield(0) << " KV/cm, Ratio of drift velocities = " << vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
+  //std::cout << "Current E field = " << larp->Efield(0) << " KV/cm, Ratio of drift velocities = " << vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
 
   for(_vw=0; _vw<fNViews; ++_vw) {
     for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
