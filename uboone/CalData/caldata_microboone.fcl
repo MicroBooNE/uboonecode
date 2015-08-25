@@ -92,7 +92,7 @@ microboone_rawdigitfilter:
     TheChosenWire:         1200
     MaxPedestalDiff:       10.
     SmoothCorrelatedNoise: true
-    NumWiresToGroup:       48
+    NumWiresToGroup:       [48, 48, 96]  # these correspond to observed groupings
 }
 
 

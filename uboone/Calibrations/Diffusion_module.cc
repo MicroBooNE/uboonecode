@@ -122,8 +122,7 @@ namespace microboone {
     Float_t  hit_energy[kMaxHits];       //hit energy
     Short_t  hit_trkid[kMaxHits];      //is this hit associated with a reco track?
     Short_t  hit_clusterid[kMaxHits];  //is this hit associated with a reco cluster?
-    Float_t hit_trueX[kMaxHits];
-    Int_t hit_ID[kMaxHits]; 
+    Float_t  hit_trueX[kMaxHits];
 
     Int_t rawD_pk[kMaxHits];  
     Int_t rawD_t[kMaxHits];  
@@ -179,7 +178,6 @@ namespace microboone {
     Float_t  cluhit_energy[kMaxCluster][kNplanes][kMaxClusterHits];    
     Short_t  cluhit_trkid[kMaxCluster][kNplanes][kMaxClusterHits];     
     Short_t  cluhit_clusterid[kMaxCluster][kNplanes][kMaxClusterHits]; 
-    Int_t   cluhit_ID[kMaxCluster][kNplanes][kMaxClusterHits]; 
 
     //Track information
     //Track plane data
@@ -331,7 +329,6 @@ void microboone::Diffusion::beginJob(){
   fTree->Branch("hit_starttick",hit_starttick,"hit_starttick[no_hits]/F");
   fTree->Branch("hit_endtick",hit_endtick,"hit_endtick[no_hits]/F");
   fTree->Branch("hit_RMS",hit_RMS,"hit_RMS[no_hits]/F");
-  fTree->Branch("hit_ID",hit_ID,"hit_ID[no_hits]/I");  
   fTree->Branch("hit_trueX",hit_trueX,"hit_trueX[no_hits]/F");   
   fTree->Branch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
   fTree->Branch("hit_clusterid",hit_clusterid,"hit_clusterid[no_hits]/S");
@@ -387,7 +384,6 @@ void microboone::Diffusion::beginJob(){
     fTree->Branch("cluhit_starttick",cluhit_starttick,"cluhit_starttick[nclusters][3][2000]/F");
     fTree->Branch("cluhit_endtick",cluhit_endtick,"cluhit_endtick[nclusters][3][2000]/F");
     fTree->Branch("cluhit_RMS",cluhit_RMS,"cluhit_RMS[nclusters][3][2000]/F");
-    fTree->Branch("cluhit_ID",cluhit_ID,"cluhit_ID[nclusters][3][2000]/I");
   }  
 
   fTree->Branch("ntracks",&ntracks,"ntracks/S");
@@ -569,9 +565,6 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     hit_starttick[i] = hitlist[i]->StartTick();
     hit_endtick[i] = hitlist[i]->EndTick();
     hit_RMS[i] = hitlist[i]->RMS();	
-    //give a unique id to the hit to map to the full hit collection
-    if (hitlist[i]->Channel()>=0 || hitlist[i]->PeakTime()>=0)
-        hit_ID[i]  = (hitlist[i]->Channel() % 200000) * 10000 + (int(std::abs(hitlist[i]->PeakTime())) % 10000);
     //std::vector<double> xyz = bt->HitToXYZ(hitlist[i]);
     //when the size of simIDEs is zero, the above function throws an exception
     //and crashes, so check that the simIDEs have non-zero size before 
@@ -703,7 +696,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     }
   }     
 
-  /*if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
+  if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
     //Find tracks associated with hits
     art::FindManyP<recob::Track> fmtk(hitListHandle,evt,fTrackModuleLabel);
     for (size_t i = 0; i < NHits && i < kMaxHits ; ++i){//loop over hits
@@ -715,15 +708,15 @@ void microboone::Diffusion::analyze(const art::Event& evt)
   	  hit_trkid[i] = -1;
       }
     }
-  }*/
+  }
   
-  //doesn't work for whatever reason!!! will resolve later!
-  /*if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
+  //In the case of ClusterCrawler or linecluster, use "linecluster or clustercrawler" as HitModuleLabel.
+  //using cchit will not make this association. In the case of gaushit, just use gaushit
+  if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
     //Find clusters associated with hits
     art::FindManyP<recob::Cluster> fmcl(hitListHandle,evt,fClusterModuleLabel);
     for (size_t i = 0; i < NHits && i < kMaxHits ; ++i){//loop over hits
       if (fmcl.isValid()){
-        std::cout<<"\n"<<i<<","<<fmcl.at(i).size();
   	if (fmcl.at(i).size()!=0){
   	  hit_clusterid[i] = fmcl.at(i)[0]->ID();
   	}
@@ -731,7 +724,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
   	  hit_clusterid[i] = -1;
       }
     }
-  }*/
+  }
   
   if (fSaveClusterInfo){
      size_t NClusters = clusterlist.size();
@@ -791,9 +784,6 @@ void microboone::Diffusion::analyze(const art::Event& evt)
 	            cluhit_starttick[ic][pl][iht] = cluhits[iht]->StartTick();
 	            cluhit_endtick[ic][pl][iht]	= cluhits[iht]->EndTick();
 	            cluhit_RMS[ic][pl][iht]	= cluhits[iht]->RMS(); 
-		    //give a unique id to the hit to map to the full hit collection
-		    if (cluhits[iht]->Channel() >=0 || cluhits[iht]->PeakTime()>=0)
-		       cluhit_ID[ic][pl][iht]  = (cluhits[iht]->Channel() % 200000) * 10000 + (int(std::abs(cluhits[iht]->PeakTime())) % 10000);
 		 }      
 	       } //end loop over cluster hits
 	    }//end loop over planes
@@ -1189,7 +1179,6 @@ void microboone::Diffusion::ResetVars(){
     hit_trueX[i] = -99999.;
     hit_trkid[i] = -9999; 
     hit_clusterid[i] = -9999;   
-    hit_ID[i] = -9999; 
     //
     rawD_pk[i] = -9999;
     rawD_t[i] = -9999;
@@ -1243,7 +1232,6 @@ void microboone::Diffusion::ResetVars(){
     	  cluhit_starttick[i][j][k] = -99999.;
     	  cluhit_endtick[i][j][k]   = -99999.; 
     	  cluhit_RMS[i][j][k]       = -99999.;
-	  cluhit_ID[i][j][k]       = -9999;
 	}  
       }	
     } 

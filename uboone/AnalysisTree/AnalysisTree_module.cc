@@ -2508,20 +2508,23 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   // * MC truth information
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
   std::vector<art::Ptr<simb::MCTruth> > mclist;
-  if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
-    art::fill_ptr_vector(mclist, mctruthListHandle);
+  if (isMC){
+    if (evt.getByLabel(fGenieGenModuleLabel,mctruthListHandle))
+      art::fill_ptr_vector(mclist, mctruthListHandle);
+  }    
 
   // *MC truth cosmic generator information
   art::Handle< std::vector<simb::MCTruth> > mctruthcryListHandle;
   std::vector<art::Ptr<simb::MCTruth> > mclistcry;
-  if (fSaveCryInfo){
+  if (isMC && fSaveCryInfo){
     if (evt.getByLabel(fCryGenModuleLabel,mctruthcryListHandle))
       art::fill_ptr_vector(mclistcry, mctruthcryListHandle);
   }       
   
   // *MC Shower information
   art::Handle< std::vector<sim::MCShower> > mcshowerh;
-  evt.getByLabel(fMCShowerModuleLabel, mcshowerh);
+  if (isMC)
+    evt.getByLabel(fMCShowerModuleLabel, mcshowerh);
   
   int nMCShowers = 0;
   if (fSaveMCShowerInfo)
@@ -2670,7 +2673,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   }
 
   std::vector<const sim::SimChannel*> fSimChannels;
-  evt.getView(fLArG4ModuleLabel, fSimChannels);
+  if (isMC)
+     evt.getView(fLArG4ModuleLabel, fSimChannels);
 
   fData->run = evt.run();
   fData->subrun = evt.subRun();
@@ -2715,12 +2719,14 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       //when the size of simIDEs is zero, the above function throws an exception
       //and crashes, so check that the simIDEs have non-zero size before 
       //extracting hit true XYZ from simIDEs
-      std::vector<sim::IDE> ides;
-      bt->HitToSimIDEs(hitlist[i], ides);
-      if (ides.size()>0){
-         std::vector<double> xyz = bt->SimIDEsToXYZ(ides);
-         fData->hit_trueX[i] = xyz[0];
-      } 
+      if (isMC){
+        std::vector<sim::IDE> ides;
+        bt->HitToSimIDEs(hitlist[i], ides);
+        if (ides.size()>0){
+          std::vector<double> xyz = bt->SimIDEsToXYZ(ides);
+          fData->hit_trueX[i] = xyz[0];
+        }
+      }	 
       
       /*
       for (unsigned int it=0; it<fTrackModuleLabel.size();++it){
