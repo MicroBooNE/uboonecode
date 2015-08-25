@@ -527,7 +527,20 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                     // One more pass through to store the good channels
                     for (const auto& wireAdcItr : wireToAdcMap)
                     {
+                        // recalculate rms
+                        double rmsVal   = 0.;
+                        double pedestal = pedestalWireVec[wireAdcItr.first];
+                        
+                        for(const auto& adcVal : wireAdcItr.second)
+                        {
+                            double adcLessPed = adcVal - pedestal;
+                            rmsVal += adcLessPed * adcLessPed;
+                        }
+                        
+                        rmsVal = std::sqrt(std::max(0.,rmsVal / double(wireAdcItr.second.size())));
+                        
                         filteredRawDigit->emplace_back(raw::RawDigit(channelViewWireVec[viewIdx][wireAdcItr.first], maxTimeSamples, wireAdcItr.second, raw::kNone));
+                        filteredRawDigit->back().SetPedestal(pedestal,rmsVal);
                     }
                 }
             }
