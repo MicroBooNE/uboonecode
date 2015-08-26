@@ -325,7 +325,7 @@
 #include "TTimeStamp.h"
 
 constexpr int kNplanes       = 3;     //number of wire planes
-constexpr int kMaxHits       = 25000; //maximum number of hits;
+constexpr int kMaxHits       = 40000; //maximum number of hits;
 constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackModuleLabel
 constexpr unsigned short kMaxVertices   = 100;    //max number of 3D vertices
@@ -333,6 +333,7 @@ constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector 
 constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
 constexpr int kMaxShowerHits = 10000;  //maximum number of hits on a shower
 constexpr int kMaxTruth      = 10;     //maximum number of neutrino truth interactions
+constexpr int kMaxClusters   = 1000;   //maximum number of clusters;
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -573,6 +574,7 @@ namespace microboone {
       tdFlash = 0x80,
       tdShower = 0x100,
       tdMCshwr = 0x200,
+      tdCluster = 0x400,
       tdDefault = 0
     }; // DataBits_t
     
@@ -619,10 +621,34 @@ namespace microboone {
     Float_t  hit_nelec[kMaxHits];     //hit number of electrons
     Float_t  hit_energy[kMaxHits];       //hit energy
     Short_t  hit_trkid[kMaxHits];      //is this hit associated with a reco track?
+    Short_t  hit_trkKey[kMaxHits];      //is this hit associated with a reco track,  if so associate a unique track key ID?
+    Short_t  hit_clusterid[kMaxHits];  //is this hit associated with a reco cluster?
+    Short_t  hit_clusterKey[kMaxHits];  //is this hit associated with a reco cluster, if so associate a unique cluster key ID?
 
     // vertex information
     Short_t  nvtx;                     //number of vertices
     Float_t  vtx[kMaxVertices][3];     //vtx[3] 
+    
+    //Cluster Information
+    Short_t nclusters;
+    Short_t clusterId[kMaxClusters];
+    Short_t clusterView[kMaxClusters];
+    Int_t   cluster_isValid[kMaxClusters];
+    Float_t cluster_StartCharge[kMaxClusters];
+    Float_t cluster_StartAngle[kMaxClusters];
+    Float_t cluster_EndCharge[kMaxClusters];
+    Float_t cluster_EndAngle[kMaxClusters];
+    Float_t cluster_Integral[kMaxClusters];
+    Float_t cluster_IntegralAverage[kMaxClusters];
+    Float_t cluster_SummedADC[kMaxClusters];
+    Float_t cluster_SummedADCaverage[kMaxClusters];
+    Float_t cluster_MultipleHitDensity[kMaxClusters];
+    Float_t cluster_Width[kMaxClusters];
+    Short_t cluster_NHits[kMaxClusters];
+    Short_t cluster_StartWire[kMaxClusters];
+    Short_t cluster_StartTick[kMaxClusters];
+    Short_t cluster_EndWire[kMaxClusters];
+    Short_t cluster_EndTick[kMaxClusters];      
     
     // flash information
     Int_t    no_flashes;                //number of flashes
@@ -870,6 +896,9 @@ namespace microboone {
     /// Returns whether we have Vertex data
     bool hasVertexInfo() const { return bits & tdVtx; }
     
+    /// Returns whether we have Cluster data
+    bool hasClusterInfo() const { return bits & tdCluster; }
+    
     /// Returns whether we have Geant data
     bool hasGeantInfo() const { return bits & tdGeant; }
 
@@ -1098,6 +1127,7 @@ namespace microboone {
     std::string fCryGenModuleLabel;
     std::string fG4ModuleLabel;
     std::string fVertexModuleLabel;
+    std::string fClusterModuleLabel;
     std::string fOpFlashModuleLabel;
     std::string fMCShowerModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
@@ -1114,6 +1144,7 @@ namespace microboone {
     bool fSaveHitInfo; ///whether to extract and save Hit information
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
+    bool fSaveClusterInfo;  ///whether to extract and save Shower information
     bool fSaveFlashInfo;  ///whether to extract and save Flash information
     bool fSaveShowerInfo;  ///whether to extract and save Shower information
 
@@ -1147,6 +1178,7 @@ namespace microboone {
           fData->SetBits(AnalysisTreeDataStruct::tdMCshwr, !fSaveMCShowerInfo); 
           fData->SetBits(AnalysisTreeDataStruct::tdHit,    !fSaveHitInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);
+          fData->SetBits(AnalysisTreeDataStruct::tdCluster,!fSaveClusterInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdTrack,  !fSaveTrackInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdVtx,    !fSaveVertexInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fSaveAuxDetInfo);
@@ -1737,6 +1769,9 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_goodnessOfFit, hit_goodnessOfFit + sizeof(hit_goodnessOfFit)/sizeof(hit_goodnessOfFit[0]), -99999.);
   std::fill(hit_multiplicity, hit_multiplicity + sizeof(hit_multiplicity)/sizeof(hit_multiplicity[0]), -99999.);
   std::fill(hit_trkid, hit_trkid + sizeof(hit_trkid)/sizeof(hit_trkid[0]), -9999);
+  std::fill(hit_trkKey, hit_trkKey + sizeof(hit_trkKey)/sizeof(hit_trkKey[0]), -9999);
+  std::fill(hit_clusterid, hit_clusterid + sizeof(hit_clusterid)/sizeof(hit_clusterid[0]), -99999);
+  std::fill(hit_clusterKey, hit_clusterKey + sizeof(hit_clusterKey)/sizeof(hit_clusterKey[0]), -9999);
   std::fill(hit_nelec, hit_nelec + sizeof(hit_nelec)/sizeof(hit_nelec[0]), -99999.);
   std::fill(hit_energy, hit_energy + sizeof(hit_energy)/sizeof(hit_energy[0]), -99999.);
 
@@ -1751,6 +1786,25 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(flash_ycenter, flash_ycenter + sizeof(flash_ycenter)/sizeof(flash_ycenter[0]), -9999);
   std::fill(flash_zcenter, flash_zcenter + sizeof(flash_zcenter)/sizeof(flash_zcenter[0]), -9999);
 
+  nclusters = 0;
+  std::fill(clusterId, clusterId + sizeof(clusterId)/sizeof(clusterId[0]), -9999);
+  std::fill(clusterView, clusterView + sizeof(clusterView)/sizeof(clusterView[0]), -9999);
+  std::fill(cluster_isValid, cluster_isValid + sizeof(cluster_isValid)/sizeof(cluster_isValid[0]), -1);
+  std::fill(cluster_StartCharge, cluster_StartCharge +  sizeof(cluster_StartCharge)/sizeof(cluster_StartCharge[0]), -99999.);
+  std::fill(cluster_StartAngle, cluster_StartAngle + sizeof(cluster_StartAngle)/sizeof(cluster_StartAngle[0]), -99999.);
+  std::fill(cluster_EndCharge, cluster_EndCharge + sizeof(cluster_EndCharge)/sizeof(cluster_EndCharge[0]), -99999.);
+  std::fill(cluster_EndAngle , cluster_EndAngle + sizeof(cluster_EndAngle)/sizeof(cluster_EndAngle[0]), -99999.);
+  std::fill(cluster_Integral , cluster_Integral + sizeof(cluster_Integral)/sizeof(cluster_Integral[0]), -99999.);
+  std::fill(cluster_IntegralAverage, cluster_IntegralAverage + sizeof(cluster_IntegralAverage)/sizeof(cluster_IntegralAverage[0]), -99999.);
+  std::fill(cluster_SummedADC, cluster_SummedADC + sizeof(cluster_SummedADC)/sizeof(cluster_SummedADC[0]), -99999.);
+  std::fill(cluster_SummedADCaverage, cluster_SummedADCaverage + sizeof(cluster_SummedADCaverage)/sizeof(cluster_SummedADCaverage[0]), -99999.);
+  std::fill(cluster_MultipleHitDensity, cluster_MultipleHitDensity + sizeof(cluster_MultipleHitDensity)/sizeof(cluster_MultipleHitDensity[0]), -99999.);
+  std::fill(cluster_Width, cluster_Width + sizeof(cluster_Width)/sizeof(cluster_Width[0]), -99999.);
+  std::fill(cluster_NHits, cluster_NHits + sizeof(cluster_NHits)/sizeof(cluster_NHits[0]), -9999);
+  std::fill(cluster_StartWire, cluster_StartWire + sizeof(cluster_StartWire)/sizeof(cluster_StartWire[0]), -9999);
+  std::fill(cluster_StartTick, cluster_StartTick + sizeof(cluster_StartTick)/sizeof(cluster_StartTick[0]), -9999);
+  std::fill(cluster_EndWire, cluster_EndWire + sizeof(cluster_EndWire)/sizeof(cluster_EndWire[0]), -9999);
+  std::fill(cluster_EndTick, cluster_EndTick + sizeof(cluster_EndTick)/sizeof(cluster_EndTick[0]), -9999);
 
   mcevts_truth = -99999;
   mcevts_truthcry = -99999;
@@ -2124,6 +2178,9 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits]/F");    
     CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits]/S");    
     CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
+    CreateBranch("hit_trkKey",hit_trkKey,"hit_trkKey[no_hits]/S");   
+    CreateBranch("hit_clusterid",hit_clusterid,"hit_clusterid[no_hits]/S");
+    CreateBranch("hit_clusterKey",hit_clusterKey,"hit_clusterKey[no_hits]/S");
     if (!isCosmics){
       CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
       CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
@@ -2134,6 +2191,27 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("nvtx",&nvtx,"nvtx/S");
     CreateBranch("vtx",vtx,"vtx[nvtx][3]/F");
   }  
+  
+  if (hasClusterInfo()){
+     CreateBranch("nclusters",&nclusters,"nclusters/S");
+     CreateBranch("clusterId", clusterId, "clusterId[nclusters]/S");
+     CreateBranch("clusterView", clusterView, "clusterView[nclusters]/S");
+     CreateBranch("cluster_StartCharge", cluster_StartCharge, "cluster_StartCharge[nclusters]/F");
+     CreateBranch("cluster_StartAngle", cluster_StartAngle, "cluster_StartAngle[nclusters]/F");
+     CreateBranch("cluster_EndCharge", cluster_EndCharge, "cluster_EndCharge[nclusters]/F");
+     CreateBranch("cluster_EndAngle", cluster_EndAngle, "cluster_EndAngle[nclusters]/F");
+     CreateBranch("cluster_Integral", cluster_Integral, "cluster_Integral[nclusters]/F");
+     CreateBranch("cluster_IntegralAverage", cluster_IntegralAverage, "cluster_IntegralAverage[nclusters]/F");
+     CreateBranch("cluster_SummedADC", cluster_SummedADC, "cluster_SummedADC[nclusters]/F");
+     CreateBranch("cluster_SummedADCaverage", cluster_SummedADCaverage, "cluster_SummedADCaverage[nclusters]/F");
+     CreateBranch("cluster_MultipleHitDensity", cluster_MultipleHitDensity, "cluster_MultipleHitDensity[nclusters]/F");
+     CreateBranch("cluster_Width", cluster_Width, "cluster_Width[nclusters]/F");
+     CreateBranch("cluster_NHits", cluster_NHits, "cluster_NHits[nclusters]/S");
+     CreateBranch("cluster_StartWire", cluster_StartWire, "cluster_StartWire[nclusters]/S");
+     CreateBranch("cluster_StartTick", cluster_StartTick, "cluster_StartTick[nclusters]/S");
+     CreateBranch("cluster_EndWire", cluster_EndWire, "cluster_EndWire[nclusters]/S");
+     CreateBranch("cluster_EndTick", cluster_EndTick, "cluster_EndTick[nclusters]/S");       
+  }    
 
   if (hasFlashInfo()){
     CreateBranch("no_flashes",&no_flashes,"no_flashes/I");
@@ -2381,8 +2459,9 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fCryGenModuleLabel        (pset.get< std::string >("CryGenModuleLabel")       ), 
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
+  fClusterModuleLabel        (pset.get< std::string >("ClusterModuleLabel")     ),
   fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
-  fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")      ),  
+  fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
@@ -2397,6 +2476,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveHitInfo	            (pset.get< bool >("SaveHitInfo", false)), 
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
+  fSaveClusterInfo	    (pset.get< bool >("SaveClusterInfo", false)),
   fSaveFlashInfo            (pset.get< bool >("SaveFlashInfo", false)),
   fSaveShowerInfo            (pset.get< bool >("SaveShowerInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
@@ -2499,6 +2579,14 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (evt.getByLabel(fVertexModuleLabel,vtxListHandle))
     art::fill_ptr_vector(vtxlist, vtxListHandle);
     
+  art::Handle< std::vector<recob::Cluster> > clusterListHandle;
+  std::vector<art::Ptr<recob::Cluster> > clusterlist;
+  if (fSaveClusterInfo){
+      if (evt.getByLabel(fClusterModuleLabel,clusterListHandle))
+      art::fill_ptr_vector(clusterlist, clusterListHandle);
+  }        
+    
+  std::cout<<"\n"<<fClusterModuleLabel<<","<<fSaveClusterInfo;  
   // * flashes
   art::Handle< std::vector<recob::OpFlash> > flashListHandle;
   std::vector<art::Ptr<recob::OpFlash> > flashlist;
@@ -2527,7 +2615,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     evt.getByLabel(fMCShowerModuleLabel, mcshowerh);
   
   int nMCShowers = 0;
-  if (fSaveMCShowerInfo)
+  if (fSaveMCShowerInfo && mcshowerh.isValid())
   	nMCShowers = mcshowerh->size();
 	
   art::Ptr<simb::MCTruth> mctruthcry;
@@ -2613,6 +2701,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   const size_t NShowerAlgos = GetNShowerAlgos(); // number of shower algorithms into fShowerModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
   const size_t NVertices = vtxlist.size(); // number of vertices
+  const size_t NClusters = clusterlist.size(); //number of clusters
   const size_t NFlashes  = flashlist.size(); // number of flashes
   // make sure there is the data, the tree and everything;
   CreateTree();
@@ -2767,19 +2856,70 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         if (fmtk.isValid()){
 	  if (fmtk.at(i).size()!=0){
 	    fData->hit_trkid[i] = fmtk.at(i)[0]->ID();
+	    fData->hit_trkKey[i] = fmtk.at(i)[0].key();
+
 	  }
 	  else
 	    fData->hit_trkid[i] = -1;
         }
       }
     }
-  }// end (fSaveHitInfo) 
+    
+    //In the case of ClusterCrawler or linecluster, use "linecluster or clustercrawler" as HitModuleLabel.
+    //using cchit will not make this association. In the case of gaushit, just use gaushit
+    //Not initializing clusterID to -1 since some clustering algorithms assign negative IDs!
+    if (evt.getByLabel(fHitsModuleLabel,hitListHandle)){
+      //Find clusters associated with hits
+      art::FindManyP<recob::Cluster> fmcl(hitListHandle,evt,fClusterModuleLabel);
+      for (size_t i = 0; i < NHits && i < kMaxHits ; ++i){//loop over hits
+        if (fmcl.isValid()){
+      	  if (fmcl.at(i).size()!=0){
+  	     fData->hit_clusterid[i] = fmcl.at(i)[0]->ID();
+  	     fData->hit_clusterKey[i] = fmcl.at(i)[0].key();
+  	  }
+        }
+      }
+    }
+  }// end (fSaveHitInfo)
+  
+  if (fSaveClusterInfo){
+     fData->nclusters = (int) NClusters;
+     if (NClusters > kMaxClusters){
+      // got this error? consider increasing kMaxClusters
+      // (or ask for a redesign using vectors)
+      mf::LogError("AnalysisTree:limits") << "event has " << NClusters
+        << " clusters, only kMaxClusters=" << kMaxClusters << " stored in tree";
+    }
+     for(unsigned int ic=0; ic<NClusters;++ic){//loop over clusters
+         art::Ptr<recob::Cluster> clusterholder(clusterListHandle, ic);
+	 const recob::Cluster& cluster = *clusterholder;
+	 fData->clusterId[ic] = cluster.ID();
+	 fData->clusterView[ic] = cluster.View();
+	 fData->cluster_isValid[ic] = cluster.isValid();
+	 fData->cluster_StartCharge[ic] = cluster.StartCharge();
+	 fData->cluster_StartAngle[ic] = cluster.StartAngle();
+	 fData->cluster_EndCharge[ic] = cluster.EndCharge();
+	 fData->cluster_EndAngle[ic] = cluster.EndAngle();
+	 fData->cluster_Integral[ic] = cluster.Integral();
+	 fData->cluster_IntegralAverage[ic] = cluster.IntegralAverage();
+	 fData->cluster_SummedADC[ic] = cluster.SummedADC();
+	 fData->cluster_SummedADCaverage[ic] = cluster.SummedADCaverage();
+	 fData->cluster_MultipleHitDensity[ic] = cluster.MultipleHitDensity();
+	 fData->cluster_Width[ic] = cluster.Width();
+	 fData->cluster_NHits[ic] = cluster.NHits();
+	 fData->cluster_StartWire[ic] = cluster.StartWire();
+	 fData->cluster_StartTick[ic] = cluster.StartTick();
+	 fData->cluster_EndWire[ic] = cluster.EndWire();
+	 fData->cluster_EndTick[ic] = cluster.EndTick();
+     }//end loop over clusters
+  }//end fSaveClusterInfo
+	  
 
   //vertex information
   if (fSaveVertexInfo){
     fData->nvtx = NVertices;
     if (NVertices > kMaxVertices){
-      // got this error? consider increasing kMaxVerticestra
+      // got this error? consider increasing kMaxVertices
       // (or ask for a redesign using vectors)
       mf::LogError("AnalysisTree:limits") << "event has " << NVertices
         << " vertices, only kMaxVertices=" << kMaxVertices << " stored in tree";

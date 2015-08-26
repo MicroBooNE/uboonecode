@@ -11,6 +11,7 @@ microboone_analysistree:
  G4ModuleLabel:            "largeant"
  TrackModuleLabel:         [ "track3d" ]
  VertexModuleLabel:        "vertex3d"
+ ClusterModuleLabel:       "linecluster"
  OpFlashModuleLabel:       "opflash"
  MCShowerModuleLabel:      "mcreco" 
  CalorimetryModuleLabel:   [ "calo" ]
@@ -27,6 +28,7 @@ microboone_analysistree:
  SaveHitInfo:              true
  SaveTrackInfo:            true
  SaveVertexInfo:           true
+ SaveClusterInfo:          true
  SaveFlashInfo:            true
  SaveShowerInfo:           true
  SaveCaloCosmics:          false
