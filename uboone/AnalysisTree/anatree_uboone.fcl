@@ -14,6 +14,7 @@
 #include "pandoramodules.fcl"
 #include "triggeralgo_service.fcl"
 #include "photpropservices_microboone.fcl"
+#include "photoncountert0matching.fcl"
 
  
 
@@ -55,6 +56,7 @@ physics:
   beziercalo:          @local::microboone_beziercalorimetry
   trackkalmanhitpid:  @local::microboone_chi2pid
   beziertrackerpid:  @local::microboone_chi2pid
+  t0match:           @local::standard_photoncountert0matching
   }
  filters:  {} 
  analyzers:{}
@@ -63,6 +65,7 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  #reco: [ trackkalmanhitcalo, beziercalo, trackkalmanhitpid, beziertrackerpid]
  #reco: [trackkalmanhitcalo,trackkalmanhitpid, cosmictaggerKalmanHit]
+ #reco: [t0match]
  ana:  [ analysistree ]
  #ana: []
  
@@ -75,14 +78,17 @@ physics:
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
- #end_paths:     [ stream1, ana ] 
- end_paths:     [  ana ] 
+ end_paths:     [ stream1, ana ] 
+ #end_paths:     [  ana ] 
 }
 
 # define the list of LArSoft modules to run through the simulate path
 
 physics.producers.calo:          @local::microboone_calomc
+
 physics.analyzers.analysistree:  @local::microboone_analysistree
+
+physics.producers.t0match.MatchCriteria: 1
 
 physics.producers.trackkalmanhitcalo.TrackModuleLabel:          "trackkalmanhit"
 #physics.producers.trackkalspscalo.TrackModuleLabel:             "trackkalsps"
@@ -109,6 +115,7 @@ physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit"]
 
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
 physics.analyzers.analysistree.HitsModuleLabel: "linecluster"
+physics.analyzers.analysistree.ClusterModuleLabel: "linecluster"
 physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
 physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
 physics.analyzers.analysistree.IgnoreMissingShowers: true
