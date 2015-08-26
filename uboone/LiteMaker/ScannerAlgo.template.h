@@ -692,10 +692,10 @@ namespace larlite {
       
       art::Ptr<::anab::CosmicTag> tag_ptr(dh,i);
       
-      larlite::cosmictag lite_tag(tag_ptr->endPt1,
-				  tag_ptr->endPt2,
-				  tag_ptr->fCosmicScore,
-				  (::larlite::anab::CosmicTagID_t)(tag_ptr->fCosmicType));
+      larlite::cosmictag lite_tag(tag_ptr->EndPoint1(),
+				  tag_ptr->EndPoint2(),
+				  tag_ptr->CosmicScore(),
+				  (::larlite::anab::CosmicTagID_t)((int)(tag_ptr->CosmicType())));
       
       // store product ptr for association
       //fPtrIndex_cosmictag[tag_ptr] = std::make_pair(lite_data->size(),name_index);
