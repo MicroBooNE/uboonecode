@@ -138,8 +138,8 @@ void RawDigitFilterUBooNE::reconfigure(fhicl::ParameterSet const & pset)
 {
     fDigitModuleLabel      = pset.get<std::string>        ("DigitModuleLabel",                                       "daq");
     fTruncMeanFraction     = pset.get<float>              ("TruncMeanFraction",                                        0.1);
-    fRmsRejectionCut       = pset.get<std::vector<double>>("RMSRejectonCut",      std::vector<double>() = { 5.0, 5.0, 3.0});
-    fRmsRejectionCutLow    = pset.get<std::vector<double>>("RMSRejectonCutLow",   std::vector<double>() = {0.70,0.70,0.70});
+    fRmsRejectionCut       = pset.get<std::vector<double>>("RMSRejectionCut",     std::vector<double>() = { 5.0, 5.0, 3.0});
+    fRmsRejectionCutLow    = pset.get<std::vector<double>>("RMSRejectionCutLow",  std::vector<double>() = {0.70,0.70,0.70});
     fTheChosenWire         = pset.get<unsigned int>       ("TheChosenWire",                                           1200);
     fMaxPedestalDiff       = pset.get<double>             ("MaxPedestalDiff",                                          10.);
     fSmoothCorrelatedNoise = pset.get<bool>               ("SmoothCorrelatedNoise",                                   true);
@@ -527,7 +527,20 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                     // One more pass through to store the good channels
                     for (const auto& wireAdcItr : wireToAdcMap)
                     {
+                        // recalculate rms
+                        double rmsVal   = 0.;
+                        double pedestal = pedestalWireVec[wireAdcItr.first];
+                        
+                        for(const auto& adcVal : wireAdcItr.second)
+                        {
+                            double adcLessPed = adcVal - pedestal;
+                            rmsVal += adcLessPed * adcLessPed;
+                        }
+                        
+                        rmsVal = std::sqrt(std::max(0.,rmsVal / double(wireAdcItr.second.size())));
+                        
                         filteredRawDigit->emplace_back(raw::RawDigit(channelViewWireVec[viewIdx][wireAdcItr.first], maxTimeSamples, wireAdcItr.second, raw::kNone));
+                        filteredRawDigit->back().SetPedestal(pedestal,rmsVal);
                     }
                 }
             }
