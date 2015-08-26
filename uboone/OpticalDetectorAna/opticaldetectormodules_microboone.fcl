@@ -41,12 +41,10 @@ microboone_opflash_highgain:
 }
 
 microboone_opflash: @local::standard_opflash
-microboone_opflash.InputModule: "pmtreadout"
+microboone_opflash.InputModule: "optreadout"
 microboone_opflash.InputLabels: ["OpdetBeamHighGain"]
-microboone_opflash.ChannelMasks: [32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,
-                                  100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,
-                                  116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,
-                                  132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147]
+microboone_opflash.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
+                                  132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147]
 
 microboone_opdigiana:        @local::standard_opdigiana
 microboone_opflashana:       @local::standard_opflashana
