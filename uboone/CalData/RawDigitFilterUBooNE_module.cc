@@ -138,8 +138,8 @@ void RawDigitFilterUBooNE::reconfigure(fhicl::ParameterSet const & pset)
 {
     fDigitModuleLabel      = pset.get<std::string>        ("DigitModuleLabel",                                       "daq");
     fTruncMeanFraction     = pset.get<float>              ("TruncMeanFraction",                                        0.1);
-    fRmsRejectionCut       = pset.get<std::vector<double>>("RMSRejectonCut",      std::vector<double>() = { 5.0, 5.0, 3.0});
-    fRmsRejectionCutLow    = pset.get<std::vector<double>>("RMSRejectonCutLow",   std::vector<double>() = {0.70,0.70,0.70});
+    fRmsRejectionCut       = pset.get<std::vector<double>>("RMSRejectionCut",     std::vector<double>() = { 5.0, 5.0, 3.0});
+    fRmsRejectionCutLow    = pset.get<std::vector<double>>("RMSRejectionCutLow",  std::vector<double>() = {0.70,0.70,0.70});
     fTheChosenWire         = pset.get<unsigned int>       ("TheChosenWire",                                           1200);
     fMaxPedestalDiff       = pset.get<double>             ("MaxPedestalDiff",                                          10.);
     fSmoothCorrelatedNoise = pset.get<bool>               ("SmoothCorrelatedNoise",                                   true);
