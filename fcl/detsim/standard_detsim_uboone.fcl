@@ -35,14 +35,14 @@ physics:
    optdigitizer:   @local::microboone_optical_adc_sim
    optfem:         @local::microboone_optical_fem_sim
    triggersim:     @local::ubtrigger_standard
-   optreadout:     @local::microboone_optical_dram_readout_sim
+   pmtreadout:     @local::microboone_optical_dram_readout_sim
    daq:            @local::microboone_simwire
    rns:            { module_type: "RandomNumberSaver" }
  }
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ rns, optdigitizer, optfem, triggersim, optreadout, daq ]
+ simulate: [ rns, optdigitizer, optfem, triggersim, pmtreadout, daq ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]

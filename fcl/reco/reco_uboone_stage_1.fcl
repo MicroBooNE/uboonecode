@@ -118,7 +118,7 @@ outputs:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.opflash.InputModule:                          "optreadout"
+physics.producers.opflash.InputModule:                          "pmtreadout"
 physics.producers.opflash.GenModule:                            "generator"
 physics.producers.opflash.InputLabels:                        [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
                                                                 "OpdetCosmicHighGain", "OpdetCosmicLowGain"]
