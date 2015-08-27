@@ -1,0 +1,24 @@
+
+#
+# Shaping time and gain settings
+#
+services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 1.0, 1.0, 1.0 ]
+services.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: [ 14.0, 14.0, 14.0 ]
+#
+# Database access for pedestals
+#
+services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
+services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
+services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:        "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+
+# Notes on August 25, 2015
+# According to Leon the three parameters below are:
+# 1) E field for TPC in kV/cm
+# 2) Wire bias U to V in kV/cm
+# 3) Wire bias V to W in kV/cm
+#
+# Note that run 1591 forward, bias is -158 and +23
+# Plane space is 0.3cm
+services.LArProperties.Efield:                             [0.273,0.666,0.8] # 0.273 corresponds to 70 kV
+                                                                                  # 0.195 corresponds to 50 kV
+services.LArProperties.Electronlifetime:                   2.0e03   # Current statement is that electron lifetime is 2 ms
