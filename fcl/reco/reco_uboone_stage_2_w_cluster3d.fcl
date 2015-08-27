@@ -247,6 +247,7 @@ physics.producers.trackkalmanhitcc.ClusterModuleLabel:              "cccluster"
 physics.producers.trackkalmanhitcc.PFParticleModuleLabel:           "cctrack"
 physics.producers.trackkalmanhitcc.UseClusterHits:                  false
 physics.producers.trackkalmanhitcc.UsePFParticleHits:               true
+physics.producers.trackkalmanhitcc.SelfSeed:                        true
 
 physics.producers.stitchkalmanhitcc.TrackModuleLabel:               "trackkalmanhitcc"
 physics.producers.stitchkalmanhitcc.SpptModuleLabel:                "trackkalmanhitcc"
@@ -282,6 +283,7 @@ physics.producers.stitchkalmanhitflashmatchcc.HitModuleLabel:        "cccluster"
 # Pandora related
 physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
 physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
+physics.producers.pandoraCosmicKHit.SelfSeed:                       true
 physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
 physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
 
@@ -311,6 +313,7 @@ physics.producers.pandoraNu.ConfigFile:                             "PandoraSett
 
 physics.producers.pandoraNuKHit.UseClusterHits:                     false
 physics.producers.pandoraNuKHit.UsePFParticleHits:                  true
+physics.producers.pandoraNuKHit.SelfSeed:                           true
 physics.producers.pandoraNuKHit.PFParticleModuleLabel:              "pandoraNu"
 physics.producers.pandoraNuKHit.ClusterModuleLabel:                 "pandoraNu"
 physics.producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
@@ -336,6 +339,7 @@ physics.producers.trackkalmanhitc3d.ClusterModuleLabel:           "cluster3d"
 physics.producers.trackkalmanhitc3d.PFParticleModuleLabel:        "cluster3d"
 physics.producers.trackkalmanhitc3d.UseClusterHits:               false
 physics.producers.trackkalmanhitc3d.UsePFParticleHits:            true
+physics.producers.trackkalmanhitc3d.SelfSeed:                     true
 
 physics.producers.stitchkalmanhitc3d.TrackModuleLabel:            "trackkalmanhitc3d"
 physics.producers.stitchkalmanhitc3d.SpptModuleLabel:             "trackkalmanhitc3d"
