@@ -13,7 +13,7 @@
 #include "mchitmodules.fcl"
 #include "mcreco.fcl"
 
-process_name: RecoStage1
+process_name: RecoDataStage1
 
 services:
 {
@@ -57,11 +57,16 @@ physics:
 
   ### hit-finder producers
   gaushit:             @local::microboone_gaushitfinder
+  cchit:               @local::microboone_clustercrawlerhit
+
+  ### raw digit filter
+  digitfilter:            @local::microboone_rawdigitfilter
 
   ### cluster-finder producers
   fuzzycluster:        @local::microboone_fuzzycluster
   fuzzyclustermerger:  @local::microboone_fuzzyclustermerger
   cccluster:           @local::microboone_clustercrawler
+  linecluster:         @local::microboone_linecluster
   cctrack:             @local::microboone_cctrackmaker
   cluster3d:           @local::microboone_cluster3d
   
@@ -70,23 +75,20 @@ physics:
 
   ### pandora cosmic pass
   pandoraCosmic:       @local::microboone_pandora
-
-  ### mc producers
-  mchitfinder:         @local::standard_mchitfinder
-  mcreco:              @local::standard_mcreco
  }
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
+         digitfilter,
          opflash,
          caldata, 
          gaushit,
-         fuzzycluster, fuzzyclustermerger, cccluster, cluster3d,
+	 cchit,
+         fuzzycluster, fuzzyclustermerger, linecluster, cluster3d,
          cctrack,
          pandoraCosmic,
-         cluster3dpcatag,
-         mchitfinder  #mcreco
+         cluster3dpcatag
          ]
 
  #define the output stream, there could be more than one if using filters 
@@ -115,33 +117,60 @@ outputs:
  }
 }
 
+### Here we include the file giving us run/data dependent overrides
+#include "uboone_data_runSettings.fcl"
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.opflash.InputModule:                          "pmtreadout"
+physics.producers.digitfilter.TruncMeanFraction:                0.1
+physics.producers.digitfilter.NumWiresToGroup:                  [48, 48, 96]
+
+physics.producers.opflash.InputModule:                          "optreadout"
 physics.producers.opflash.GenModule:                            "generator"
 physics.producers.opflash.InputLabels:                        [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
                                                                 "OpdetCosmicHighGain", "OpdetCosmicLowGain"]
 
-physics.producers.caldata.DigitModuleLabel:                     "daq"
+physics.producers.caldata.DigitModuleLabel:                     "digitfilter"
+physics.producers.caldata.MaxAllowedChannelStatus:              1
 
-physics.producers.caldata.DoBaselineSub:                        false
-physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:  true
+#physics.producers.caldata.DoBaselineSub:                         false
+#physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:   true
 
-physics.producers.gaushit.CalDataModuleLabel:                   "caldata"
+physics.producers.gaushit.CalDataModuleLabel:                    "caldata"
+physics.producers.gaushit.MinSig:                                [ 8.0,    8.0,   8.0]
 
-physics.producers.fuzzycluster.HitsModuleLabel:                 "gaushit"
-physics.producers.fuzzycluster.CalDataModuleLabel:              "caldata"
+physics.producers.cchit.CCHitFinderAlg.MaxBumps:                 2
+physics.producers.cchit.CCHitFinderAlg.MinSigInd:                5
+physics.producers.cchit.CCHitFinderAlg.MinRMSInd:                2
+physics.producers.cchit.CCHitFinderAlg.MinSigCol:                5
+physics.producers.cchit.CCHitFinderAlg.MinRMSCol:                2
+physics.producers.cchit.CCHitFinderAlg.ChiSplit:                 100
+physics.producers.cchit.CCHitFinderAlg.MaxXtraHits:              0
 
-physics.producers.cccluster.CalDataModuleLabel:                 "caldata"
-physics.producers.cccluster.CCHitFinderAlg.CalDataModuleLabel:  "caldata"
+physics.producers.linecluster.CCHitFinderAlg.MaxBumps:           2
+physics.producers.linecluster.CCHitFinderAlg.MinSigInd:          5
+physics.producers.linecluster.CCHitFinderAlg.MinRMSInd:          2
+physics.producers.linecluster.CCHitFinderAlg.MinSigCol:          5
+physics.producers.linecluster.CCHitFinderAlg.MinRMSCol:          2
+physics.producers.linecluster.CCHitFinderAlg.ChiSplit:           100
+physics.producers.linecluster.CCHitFinderAlg.MaxXtraHits:        0
 
-physics.producers.pandoraCosmic.GeantModuleLabel:               "largeant"
-physics.producers.pandoraCosmic.HitFinderModuleLabel:           "gaushit"
-physics.producers.pandoraCosmic.ConfigFile:                     "PandoraSettings_MicroBooNE_Cosmic.xml"
+physics.producers.fuzzycluster.HitsModuleLabel:                  "cchit"
+physics.producers.fuzzycluster.CalDataModuleLabel:               "caldata"
 
-physics.producers.cluster3dpcatag.PFParticleModuleLabel:        "cluster3d"
-physics.producers.cluster3dpcatag.PCAxisModuleLabel:            "cluster3d"
+physics.producers.cccluster.CalDataModuleLabel:                  "caldata"
+physics.producers.cccluster.CCHitFinderAlg.CalDataModuleLabel:   "caldata"
+
+physics.producers.cctrack.HitModuleLabel:                        "linecluster"
+physics.producers.cctrack.ClusterModuleLabel:                    "linecluster"
+physics.producers.cctrack.VertexModuleLabel:                     "linecluster"
+
+physics.producers.pandoraCosmic.GeantModuleLabel:                "largeant"
+physics.producers.pandoraCosmic.HitFinderModuleLabel:            "cchit"
+physics.producers.pandoraCosmic.ConfigFile:                      "PandoraSettings_MicroBooNE_Cosmic.xml"
+
+physics.producers.cluster3dpcatag.PFParticleModuleLabel:         "cluster3d"
+physics.producers.cluster3dpcatag.PCAxisModuleLabel:             "cluster3d"
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :
