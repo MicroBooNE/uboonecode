@@ -10,6 +10,8 @@ microboone_databaseretrievalalg:
   DBTag: ""
 }
 
+
+
 microboone_pedestalretrievalalg: @local::standard_pedestalretrievalalg
 microboone_pedestalretrievalalg:
 {
@@ -37,4 +39,25 @@ microboone_detpedestalservice:
 }
 
 
+
+microboone_channelfilter_provider: @local::standard_siov_channelfilter_provider
+microboone_channelfilter_provider:
+{
+  DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg
+  DatabaseRetrievalAlg: 
+  {
+    DBFolderName: "channelstatus_data"
+  }
+
+  UseDB: false
+  UseFile: false
+}
+
+microboone_channelfilter_service:
+{
+  service_provider: SIOVChannelFilterService
+  ChannelFilterProvider: @local::microboone_channelfilter_provider
+  FindNoisyChannels: true
+}
+  
 END_PROLOG
