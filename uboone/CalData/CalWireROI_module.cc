@@ -35,7 +35,6 @@
 // LArSoft libraries
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "Geometry/Geometry.h"
-#include "Filters/ChannelFilter.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
@@ -45,6 +44,9 @@
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
 #include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "CalibrationDBI/Interface/IChannelFilterService.h"
+#include "CalibrationDBI/Interface/IChannelFilterProvider.h"
+
 #include "WaveformPropertiesAlg.h"
 
 /* unused function
@@ -309,7 +311,7 @@ namespace caldata {
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
+    lariov::IChannelFilterProvider chanFilt = art::ServiceHandle<lariov::IChannelFilterService>->GetFilter();
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double DeconNorm = sss->GetDeconNorm();
@@ -337,7 +339,7 @@ namespace caldata {
       channel = digitVec->Channel();
 
       // The following test is meant to be temporary until the "correct" solution is implemented
-      if (chanFilt->GetChannelStatus(channel) == filter::ChannelFilter::NOTPHYSICAL) continue;
+      if (!chanFilt->IsPresent(channel)) continue;
 
       unsigned int dataSize = digitVec->Samples();
       // vector holding uncompressed adc values
@@ -357,7 +359,7 @@ namespace caldata {
       //  minSepPad = fMinSep + fPostROIPad[thePlane];
       
       // skip bad channels
-      if(!(chanFilt->GetChannelStatus(channel) > fMaxAllowedChanStatus)) {
+      if(!(chanFilt->Status(channel) > fMaxAllowedChanStatus)) {
         
           // uncompress the data
           raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
