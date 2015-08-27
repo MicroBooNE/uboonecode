@@ -86,7 +86,7 @@ physics:
          gaushit,
 	 cchit,
          fuzzycluster, fuzzyclustermerger, linecluster, cluster3d,
-         #cctrack,
+         cctrack,
          pandoraCosmic,
          cluster3dpcatag
          ]
