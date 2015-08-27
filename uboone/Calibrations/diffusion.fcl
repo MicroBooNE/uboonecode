@@ -90,7 +90,9 @@ physics.producers.trackkalmanhitpid.TrackModuleLabel:       "trackkalmanhit"
 physics.producers.trackkalmanhitpid.CalorimetryModuleLabel: "trackkalmanhitcalo"
 
 physics.analyzers.Diffusion.DigitModuleLabel:        "daq"
-physics.analyzers.Diffusion.HitsModuleLabel:         "cchit"
+#in the case of linecluster of cccluster, use "linecluster or cccluster" as hit modulelabel
+#in the case of gaushit, you can just use gaushit
+physics.analyzers.Diffusion.HitsModuleLabel:         "linecluster"
 physics.analyzers.Diffusion.LArGeantModuleLabel:     "largeant"
 physics.analyzers.Diffusion.GenieGenModuleLabel:     "generator"
 physics.analyzers.Diffusion.TrackModuleLabel:        "trackkalmanhit"

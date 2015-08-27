@@ -15,7 +15,7 @@
 #include "opticaldetectormodules_microboone.fcl"
 #include "photpropservices_microboone.fcl"
 
-process_name: RecoStage2
+process_name: RecoDataStage2
 
 services:
 {
@@ -206,6 +206,9 @@ outputs:
  }
 }
 
+### Here we include the file giving us run/data dependent overrides
+#include "uboone_data_runSettings.fcl"
+
 ### Here, we overwrite ALL module labels with the ones defined above.
 
 # Fuzzy Cluster related
@@ -242,12 +245,11 @@ physics.producers.stitchkalmanhitflashmatch.FlashModuleLabel:       "opflash"
 physics.producers.stitchkalmanhitflashmatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
 # ClusterCrawler / Track Maker related
-physics.producers.trackkalmanhitcc.HitModuleLabel:                  "cccluster"
-physics.producers.trackkalmanhitcc.ClusterModuleLabel:              "cccluster"
+physics.producers.trackkalmanhitcc.HitModuleLabel:                  "linecluster"
+physics.producers.trackkalmanhitcc.ClusterModuleLabel:              "linecluster"
 physics.producers.trackkalmanhitcc.PFParticleModuleLabel:           "cctrack"
 physics.producers.trackkalmanhitcc.UseClusterHits:                  false
 physics.producers.trackkalmanhitcc.UsePFParticleHits:               true
-physics.producers.trackkalmanhitcc.SelfSeed:                        true
 
 physics.producers.stitchkalmanhitcc.TrackModuleLabel:               "trackkalmanhitcc"
 physics.producers.stitchkalmanhitcc.SpptModuleLabel:                "trackkalmanhitcc"
@@ -264,26 +266,25 @@ physics.producers.trackkalmanhitpidcc.TrackModuleLabel:             "trackkalman
 physics.producers.stitchkalmanhitpidcc.CalorimetryModuleLabel:      "stitchkalmanhitcccalo"
 physics.producers.stitchkalmanhitpidcc.TrackModuleLabel:            "stitchkalmanhitcc"
 
-physics.producers.trackkalmanhittagcc.ClusterModuleLabel:           "cccluster"
+physics.producers.trackkalmanhittagcc.ClusterModuleLabel:           "linecluster"
 physics.producers.trackkalmanhittagcc.TrackModuleLabel:             "trackkalmanhitcc"
 
-physics.producers.stitchkalmanhittagcc.ClusterModuleLabel:          "cccluster"
+physics.producers.stitchkalmanhittagcc.ClusterModuleLabel:          "linecluster"
 physics.producers.stitchkalmanhittagcc.TrackModuleLabel:            "stitchkalmanhitcc"
 
 physics.producers.trackkalmanhitflashmatchcc.TrackModuleLabel:      "trackkalmanhitcc"
 physics.producers.trackkalmanhitflashmatchcc.FlashModuleLabel:      "opflash"
 physics.producers.trackkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
-physics.producers.trackkalmanhitflashmatchcc.HitModuleLabel:        "cccluster"
+physics.producers.trackkalmanhitflashmatchcc.HitModuleLabel:        "linecluster"
 
 physics.producers.stitchkalmanhitflashmatchcc.TrackModuleLabel:      "stitchkalmanhitcc"
 physics.producers.stitchkalmanhitflashmatchcc.FlashModuleLabel:      "opflash"
 physics.producers.stitchkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
-physics.producers.stitchkalmanhitflashmatchcc.HitModuleLabel:        "cccluster"
+physics.producers.stitchkalmanhitflashmatchcc.HitModuleLabel:        "linecluster"
 
 # Pandora related
 physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
 physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
-physics.producers.pandoraCosmicKHit.SelfSeed:                       true
 physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
 physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
 
@@ -313,7 +314,6 @@ physics.producers.pandoraNu.ConfigFile:                             "PandoraSett
 
 physics.producers.pandoraNuKHit.UseClusterHits:                     false
 physics.producers.pandoraNuKHit.UsePFParticleHits:                  true
-physics.producers.pandoraNuKHit.SelfSeed:                           true
 physics.producers.pandoraNuKHit.PFParticleModuleLabel:              "pandoraNu"
 physics.producers.pandoraNuKHit.ClusterModuleLabel:                 "pandoraNu"
 physics.producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
@@ -339,7 +339,6 @@ physics.producers.trackkalmanhitc3d.ClusterModuleLabel:           "cluster3d"
 physics.producers.trackkalmanhitc3d.PFParticleModuleLabel:        "cluster3d"
 physics.producers.trackkalmanhitc3d.UseClusterHits:               false
 physics.producers.trackkalmanhitc3d.UsePFParticleHits:            true
-physics.producers.trackkalmanhitc3d.SelfSeed:                     true
 
 physics.producers.stitchkalmanhitc3d.TrackModuleLabel:            "trackkalmanhitc3d"
 physics.producers.stitchkalmanhitc3d.SpptModuleLabel:             "trackkalmanhitc3d"

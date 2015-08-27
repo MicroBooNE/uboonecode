@@ -87,12 +87,12 @@ microboone_rawdigitfilter:
 {
     module_type:           "RawDigitFilterUBooNE"
     DigitModuleLabel:      "daq"
-    RMSRejectionCut:       [10.,10.,5.]
-    RMSRejectionCutLow:    [10.,10.,5.]
+    RMSRejectionCut:       [10.,10., 5.]
+    RMSRejectionCutLow:    [0.7,0.7,0.7]
     TheChosenWire:         1200
     MaxPedestalDiff:       10.
     SmoothCorrelatedNoise: true
-    NumWiresToGroup:       48
+    NumWiresToGroup:       [48, 48, 96]  # these correspond to observed groupings
 }
 
 
