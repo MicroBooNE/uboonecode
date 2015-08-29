@@ -215,7 +215,7 @@ namespace caldata {
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    lariov::IChannelFilterProvider chanFilt = art::ServiceHandle<lariov::IChannelFilterInterface>->GetFilter();
+    const lariov::IChannelFilterProvider& chanFilt = art::ServiceHandle<lariov::IChannelFilterService>()->GetFilter();
 
     std::vector<float> holder;                // holds signal data
     std::vector<short> rawadc(transformSize);  // vector holding uncompressed adc values
@@ -234,7 +234,7 @@ namespace caldata {
         channel = digitVec->Channel();
       
         // skip bad channels
-        if(!chanFilt->IsBad(channel)) {
+        if(!chanFilt.IsBad(channel)) {
       
           // resize and pad with zeros
       	  holder.resize(transformSize, 0.);

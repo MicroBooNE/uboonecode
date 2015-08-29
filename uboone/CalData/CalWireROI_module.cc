@@ -311,7 +311,7 @@ namespace caldata {
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    lariov::IChannelFilterProvider chanFilt = art::ServiceHandle<lariov::IChannelFilterService>->GetFilter();
+    const lariov::IChannelFilterProvider& chanFilt = art::ServiceHandle<lariov::IChannelFilterService>()->GetFilter();
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double DeconNorm = sss->GetDeconNorm();
@@ -339,7 +339,7 @@ namespace caldata {
       channel = digitVec->Channel();
 
       // The following test is meant to be temporary until the "correct" solution is implemented
-      if (!chanFilt->IsPresent(channel)) continue;
+      if (!chanFilt.IsPresent(channel)) continue;
 
       unsigned int dataSize = digitVec->Samples();
       // vector holding uncompressed adc values
@@ -359,7 +359,7 @@ namespace caldata {
       //  minSepPad = fMinSep + fPostROIPad[thePlane];
       
       // skip bad channels
-      if(!(chanFilt->Status(channel) > fMaxAllowedChanStatus)) {
+      if(!(chanFilt.Status(channel) > fMaxAllowedChanStatus)) {
         
           // uncompress the data
           raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());

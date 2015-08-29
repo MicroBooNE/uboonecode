@@ -9,6 +9,7 @@
 
 #include "CalibrationDBI/Interface/IChannelFilterService.h"
 #include "CalibrationDBI/Interface/IChannelFilterProvider.h"
+#include "CalibrationDBI/IOVData/ChannelStatus.h"
 
 #include <fstream>
 
@@ -33,7 +34,7 @@ void TestCFI::analyze(art::Event const& evt) {
   for (unsigned int i=0; i < geo->Nchannels(); ++i) {
     
     unsigned short status = cp.Status(i);
-    f <<i<<" "<<status<<std::endl;
+    if (status == lariov::kNOISY) f <<i<<" "<<status<<std::endl;
   }
   
   f.close();
