@@ -42,7 +42,7 @@ microboone_channelfilter_provider.DatabaseRetrievalAlg.DBFolderName: "channelsta
 
 microboone_channelfilter_service:
 {
-  service_provider: SIOVChannelFilterService
+  service_provider: UbooneChannelFilterService
   ChannelFilterProvider: @local::microboone_channelfilter_provider
   FindNoisyChannels: true
 }
