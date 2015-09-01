@@ -111,7 +111,9 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_%tc_reco1.root"
+   # Temporarily don't use output template because of ifdh_art bug.
+   #fileName:    "%ifb_%tc_reco1.root"
+   fileName:    "reco1.root"
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
  }
