@@ -160,7 +160,8 @@ namespace util {
     // Calculate response functions.
     // Copied from SimWireMicroBooNE.
 
-
+    void SetTimeScaleFactor();
+    
     void SetFieldResponse(size_t ktype);
     // void SetElectResponse(size_t ktype);
    
@@ -183,9 +184,6 @@ namespace util {
 
     size_t fNPlanes;
     size_t fNViews;
-
-    
-    
 
     // Fcl parameters.
     std::vector<size_t>      fViewIndex;
@@ -214,6 +212,8 @@ namespace util {
     double fFieldBinWidth[2];       ///<  Bin with of the input field response.
 
     DoubleVec f3DCorrectionVec;  ///< correction factor to account for 3D path of electrons, 1 for each plane (default = 1.0)
+
+    double fTimeScaleFactor;
     
     DoubleVec fFieldRespAmpVec;
     std::vector<double> fShapeTimeConst; ///< time constants for exponential shaping

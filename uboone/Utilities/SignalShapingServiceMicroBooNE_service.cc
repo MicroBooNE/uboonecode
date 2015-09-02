@@ -265,6 +265,9 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   for(size_t ktype=0;ktype<2;++ktype) {
     fFieldResponseHistVec[ktype].resize(fNViews);
 
+    // calculate the time scale factor for this event
+    SetTimeScaleFactor();
+
     _vw = 0;
     //std::cout << "Time offsets for kernel set " << ktype << std::endl;
     //std::cout << std::endl;
@@ -292,7 +295,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
         fNFieldBins[ktype] = Xaxis->GetNbins();
 
         // internal time is in nsec
-        fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.*f3DCorrectionVec[_vw];
+        fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
         //fFieldResponseTOffset[ktype].at(_vw) = (resp->GetBinCenter(1) + fCalibResponseTOffset[_vw])*1000.;
 //
 //        double delta = resp->GetXaxis()->GetBinCenter(2) - resp->GetXaxis()->GetBinCenter(1);
@@ -314,6 +317,31 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 //      std::cout << "view " << view << " toffset " << fFieldResponseTOffset[ktype][view] << std::endl;
 //    }
   }
+}
+
+void util::SignalShapingServiceMicroBooNE::SetTimeScaleFactor()
+{
+  // get the scale factor between the bulk drift velocity used to generate the field response
+  //   and that used for this simulation.
+
+  art::ServiceHandle<util::LArProperties> larp;
+
+  double defaultVelocity = larp->DriftVelocity(fDefaultEField, fDefaultTemperature);
+  double thisVelocity    = larp->DriftVelocity( larp->Efield(0), larp->Temperature() );
+  double vRatio = defaultVelocity/thisVelocity;
+  double vDiff = vRatio -1.0;
+
+  fTimeScaleFactor = 0.0;
+  double term = 1.0;
+
+  // the time scale params are from a fit to Garfield simulations at different E Fields
+  for(size_t i = 0;i<fTimeScaleParams.size(); ++i) {
+    fTimeScaleFactor += fTimeScaleParams[i]*term;
+    term *= vDiff;
+  }
+
+  //  std::cout << "Current E field = " << larp->Efield(0) << " KV/cm, Ratio of drift velocities = " << vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
+
 }
 
 //-----------------------------
@@ -364,7 +392,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponseTOffsets(const TH1F* 
   }
 
   //std::cout << "view " << _vw << ", wire " << _wr << ", toffset " << tOffset << std::endl;
-  tOffset *= f3DCorrectionVec[_vw];
+  tOffset *= f3DCorrectionVec[_vw]*fTimeScaleFactor;
   fFieldResponseTOffset[ktype].at(_vw) = (-tOffset+ fCalibResponseTOffset[_vw])*1000.;
 
 }
@@ -787,32 +815,18 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
 
   // Sampling
 
-  // get the scale factor between the bulk drift velocity used to generate the field response
-  //   and that used for this simulation.
-
-  double defaultVelocity = larp->DriftVelocity(fDefaultEField, fDefaultTemperature);
-  double thisVelocity    = larp->DriftVelocity( larp->Efield(0), larp->Temperature() );
-  double vRatio = defaultVelocity/thisVelocity;
-  double vDiff = vRatio -1.0;
-
-  // the time scale params are from a fit to Garfield simulations at different E Fields
-  double timeScaleFactor(0);
-  double term = 1.;
-  for(size_t i = 0;i<fTimeScaleParams.size(); ++i) {
-    timeScaleFactor += fTimeScaleParams[i]*term;
-    term *= vDiff;
-  }
-
-//  std::cout << "Current E field = " << larp->Efield(0) << " KV/cm, Ratio of drift velocities = " << vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
 
   for(_vw=0; _vw<fNViews; ++_vw) {
+
+    double timeFactor = fTimeScaleFactor*f3DCorrectionVec[_wr];
+    double timeFactorInv = 1./timeFactor;
     for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
       const std::vector<double>* pResp = &((fSignalShapingVec[ktype][_vw][_wr]).Response_save());
 
       size_t nticks_input = pResp->size();
       std::vector<double> InputTime(nticks_input, 0. );
       for (size_t itime = 0; itime < nticks_input; itime++ ) {
-        InputTime[itime] = (1.*itime) * deltaInputTime*timeScaleFactor;
+        InputTime[itime] = (1.*itime) * deltaInputTime*timeFactor;
       }
 
       std::vector<double> SamplingResp(nticks, 0. );
@@ -841,7 +855,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
             //            if(jtime<2&&itime<2) std::cout << itime << " " << jtime << " " << low << " " << up << std::endl;
             double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
             SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor);
-            SamplingResp[itime] /=timeScaleFactor;
+            SamplingResp[itime] *= timeFactorInv;
             /// VELOCITY-OUT ... comment out kDVel usage here
             //SamplingResp[itime] *= kDVel;
             SamplingCount++;
