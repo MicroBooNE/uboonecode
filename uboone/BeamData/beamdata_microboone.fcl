@@ -1,0 +1,19 @@
+BEGIN_PROLOG
+
+microboone_beamdata:
+{
+  module_type:    "BeamData"
+  
+  beams: [ "bnb", "numi" ]
+ 
+  bnb:  {
+         merge_time_tolerance: 30 #in ms
+	 sum_devices: [ "E:TOR860", "E:TOR875" ]
+        }
+  numi: {
+         merge_time_tolerance: 100 #in ms
+  	 sum_devices: [ "E:TORTGT" ]
+        }
+}
+
+END_PROLOG
