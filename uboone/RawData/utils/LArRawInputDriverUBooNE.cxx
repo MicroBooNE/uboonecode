@@ -265,7 +265,8 @@ namespace lris {
 
   // =====================================================================
   bool LArRawInputDriverUBooNE::processNextEvent(std::vector<raw::RawDigit>& tpcDigitList,
-                                                 std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
+                                                 std::map< opdet::UBOpticalChannelCategory_t, 
+                                                 std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
@@ -307,7 +308,8 @@ namespace lris {
       // (time_t is a 64 bit word)
 
       uint32_t seconds=global_header.getSeconds();
-      uint32_t nano_seconds=global_header.getNanoSeconds();
+      uint32_t nano_seconds=global_header.getNanoSeconds()+
+	                    global_header.getMicroSeconds()*1000;
       time_t mytime = ((time_t)seconds<<32) | nano_seconds;
 
       //\/      uint32_t subrun_num = global_header->getSubrunNumber();
@@ -662,7 +664,7 @@ namespace lris {
       else {
 	std::cerr << "WARNING: THE BEAM TIME VALUE FOR NOT-(BNB or NUMI) TRIGGERS HAS NOT BEEN SETUP!" << std::endl;
       }
-      
+
       raw::Trigger swiz_trig( trig_data.getTrigNumber(),
 			      trigger_time,
 			      beam_time,

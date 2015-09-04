@@ -6,6 +6,7 @@ cet_find_library( BOOST_DATE_TIME     NAMES boost_date_time     PATHS ENV BOOST_
 
 add_subdirectory(Geometry)
 add_subdirectory(RawData)
+add_subdirectory(BeamData)
 add_subdirectory(Utilities)
 add_subdirectory(Database)
 add_subdirectory(Simulation)
