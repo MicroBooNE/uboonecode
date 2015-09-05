@@ -96,7 +96,7 @@ namespace lris {
     uint32_t                       fEventCounter; 
     uint32_t                       fNumberEventsInFile;
     bool                           fHuffmanDecode;
-    const util::UBChannelMap_t&    fChannelMap;   
+    util::UBChannelMap_t           fChannelMap;   
     
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
