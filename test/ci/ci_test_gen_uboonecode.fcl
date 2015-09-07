@@ -1,0 +1,8 @@
+#include "prod_muminus_0.1-2.0GeV_isotropic_uboone.fcl"
+
+services.user.SeedService.policy: "preDefinedSeed"
+services.user.SeedService.baseSeed: 1234
+services.user.SeedService.generator: 1234
+
+services.RandomNumberGenerator.restoreFrom: "GenRandomSeeds_Ref.dat"
+services.RandomNumberGenerator.saveTo: "GenRandomSeeds.dat"
