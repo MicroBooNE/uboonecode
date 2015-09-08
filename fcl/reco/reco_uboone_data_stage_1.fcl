@@ -112,6 +112,7 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "%ifb_%tc_reco1.root"
+   sam_ignore:  true
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
  }

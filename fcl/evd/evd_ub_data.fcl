@@ -1,0 +1,84 @@
+#include "evdservices_microboone.fcl"
+#include "caldata_microboone.fcl"
+
+
+
+process_name: EVD
+
+services:
+{
+  TFileService:            { fileName: "reco2D_hist_evd.root" }
+#  message:                 @local::evd_message
+  message:                 @local::microboone_message_services_prod_debug
+  			   @table::microboone_disp
+}
+
+
+# Define the services
+
+#Look at the input files
+source:
+{
+  module_type: RootInput
+  fileNames:  [ "data.root" ]
+  maxEvents:   -1       # Number of events to create
+}
+
+outputs:{}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ producers: {
+		### raw digit filter
+  		digitfilter:            @local::microboone_rawdigitfilter
+		
+		### calwire producers
+ 		 caldata:               @local::microboone_calroi
+            }
+
+ filters:{}
+
+ analyzers:
+ {
+  evdisp:{module_type: EVD}
+ }
+
+ reco: [
+         digitfilter,
+	 caldata
+       ]
+ 
+ #list the modules for this path, order matters, filters reject all following items
+ evd: [ evdisp ] 
+
+ #end_path are things that do not modify art::Event, includes analyzers 
+ #and output modules. all items here can be run simultaneously
+ end_paths: [evd]  
+}
+
+
+
+### Here, we overwrite ALL module labels with the ones defined above.
+
+physics.producers.digitfilter.TruncMeanFraction:                 0.1
+physics.producers.digitfilter.NumWiresToGroup:                   [48, 48, 96]
+physics.producers.digitfilter.RMSRejectionCutHi:                 [25,25,25]
+physics.producers.digitfilter.RMSSelectionCut:                   [1.5,1.5,1.0]
+physics.producers.digitfilter.TheChosenWire:                     638
+
+physics.producers.caldata.DigitModuleLabel:                      "digitfilter"
+physics.producers.caldata.MaxAllowedChannelStatus:               1
+
+services.RawDrawingOptions.RawDataLabel: "digitfilter"
+services.RawDrawingOptions.TotalTicks: 9600
+services.RawDrawingOptions.MinimumSignal: 20
+services.RawDrawingOptions.DrawRawDataOrCalibWires: 2
+
+
+# This last include will be overrides for the above
+# must come after definitions are set!
+#include "uboone_data_runSettings.fcl"

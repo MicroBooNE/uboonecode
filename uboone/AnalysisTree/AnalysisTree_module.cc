@@ -630,25 +630,29 @@ namespace microboone {
     Float_t  vtx[kMaxVertices][3];     //vtx[3] 
     
     //Cluster Information
-    Short_t nclusters;
-    Short_t clusterId[kMaxClusters];
-    Short_t clusterView[kMaxClusters];
-    Int_t   cluster_isValid[kMaxClusters];
-    Float_t cluster_StartCharge[kMaxClusters];
-    Float_t cluster_StartAngle[kMaxClusters];
-    Float_t cluster_EndCharge[kMaxClusters];
-    Float_t cluster_EndAngle[kMaxClusters];
-    Float_t cluster_Integral[kMaxClusters];
-    Float_t cluster_IntegralAverage[kMaxClusters];
-    Float_t cluster_SummedADC[kMaxClusters];
-    Float_t cluster_SummedADCaverage[kMaxClusters];
-    Float_t cluster_MultipleHitDensity[kMaxClusters];
-    Float_t cluster_Width[kMaxClusters];
-    Short_t cluster_NHits[kMaxClusters];
-    Short_t cluster_StartWire[kMaxClusters];
-    Short_t cluster_StartTick[kMaxClusters];
-    Short_t cluster_EndWire[kMaxClusters];
-    Short_t cluster_EndTick[kMaxClusters];      
+    Short_t nclusters;				      //number of clusters in a given event
+    Short_t clusterId[kMaxClusters];		      //ID of this cluster	 
+    Short_t clusterView[kMaxClusters];		      //which plane this cluster belongs to	      
+    Int_t   cluster_isValid[kMaxClusters];	      //is this cluster valid? will have a value of -1 if it is not valid
+    Float_t cluster_StartCharge[kMaxClusters];	       //charge on the first wire of the cluster in ADC
+    Float_t cluster_StartAngle[kMaxClusters];	      //starting angle of the cluster
+    Float_t cluster_EndCharge[kMaxClusters];	      //charge on the last wire of the cluster in ADC
+    Float_t cluster_EndAngle[kMaxClusters];	      //ending angle of the cluster
+    Float_t cluster_Integral[kMaxClusters];	      //returns the total charge of the cluster from hit shape in ADC
+    Float_t cluster_IntegralAverage[kMaxClusters];    //average charge of the cluster hits in ADC
+    Float_t cluster_SummedADC[kMaxClusters];	      //total charge of the cluster from signal ADC counts
+    Float_t cluster_SummedADCaverage[kMaxClusters];   //average signal ADC counts of the cluster hits.
+    Float_t cluster_MultipleHitDensity[kMaxClusters]; //Density of wires in the cluster with more than one hit. 
+    Float_t cluster_Width[kMaxClusters];	      //cluster width in ? units
+    Short_t cluster_NHits[kMaxClusters];	      //Number of hits in the cluster
+    Short_t cluster_StartWire[kMaxClusters];	      //wire coordinate of the start of the cluster 
+    Short_t cluster_StartTick[kMaxClusters];	      //tick coordinate of the start of the cluster in time ticks
+    Short_t cluster_EndWire[kMaxClusters];	      //wire coordinate of the end of the cluster
+    Short_t cluster_EndTick[kMaxClusters];            //tick coordinate of the end of the cluster in time ticks    
+    //Cluster cosmic tagging information
+    Short_t cluncosmictags_tagger[kMaxClusters];      //No. of cosmic tags associated to this cluster    
+    Float_t clucosmicscore_tagger[kMaxClusters];      //Cosmic score associated to this cluster. In the case of more than one tag, the first one is associated.    
+    Short_t clucosmictype_tagger[kMaxClusters];       //Cosmic tag type for this cluster.    
     
     // flash information
     Int_t    no_flashes;                //number of flashes
@@ -1135,6 +1139,7 @@ namespace microboone {
     std::vector<std::string> fCalorimetryModuleLabel;
     std::vector<std::string> fParticleIDModuleLabel;
     std::string fPOTModuleLabel;
+    std::string fCosmicClusterTaggerAssocLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)    
     bool fSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
     bool fSaveCryInfo; ///whether to extract and save CRY particle data
@@ -1805,6 +1810,9 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(cluster_StartTick, cluster_StartTick + sizeof(cluster_StartTick)/sizeof(cluster_StartTick[0]), -9999);
   std::fill(cluster_EndWire, cluster_EndWire + sizeof(cluster_EndWire)/sizeof(cluster_EndWire[0]), -9999);
   std::fill(cluster_EndTick, cluster_EndTick + sizeof(cluster_EndTick)/sizeof(cluster_EndTick[0]), -9999);
+  std::fill(cluncosmictags_tagger, cluncosmictags_tagger + sizeof(cluncosmictags_tagger)/sizeof(cluncosmictags_tagger[0]), -9999);
+  std::fill(clucosmicscore_tagger, clucosmicscore_tagger + sizeof(clucosmicscore_tagger)/sizeof(clucosmicscore_tagger[0]), -99999.);
+  std::fill(clucosmictype_tagger , clucosmictype_tagger  + sizeof(clucosmictype_tagger )/sizeof(clucosmictype_tagger [0]), -9999);
 
   mcevts_truth = -99999;
   mcevts_truthcry = -99999;
@@ -2210,7 +2218,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
      CreateBranch("cluster_StartWire", cluster_StartWire, "cluster_StartWire[nclusters]/S");
      CreateBranch("cluster_StartTick", cluster_StartTick, "cluster_StartTick[nclusters]/S");
      CreateBranch("cluster_EndWire", cluster_EndWire, "cluster_EndWire[nclusters]/S");
-     CreateBranch("cluster_EndTick", cluster_EndTick, "cluster_EndTick[nclusters]/S");       
+     CreateBranch("cluster_EndTick", cluster_EndTick, "cluster_EndTick[nclusters]/S");   
+     CreateBranch("cluncosmictags_tagger", cluncosmictags_tagger, "cluncosmictags_tagger[nclusters]/S");   
+     CreateBranch("clucosmicscore_tagger", clucosmicscore_tagger, "clucosmicscore_tagger[nclusters]/F");	 
+     CreateBranch("clucosmictype_tagger", clucosmictype_tagger, "clucosmictype_tagger[nclusters]/S");	 
   }    
 
   if (hasFlashInfo()){
@@ -2466,7 +2477,8 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
-  fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
+  fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")),   
+  fCosmicClusterTaggerAssocLabel (pset.get< std::string >("CosmicClusterTaggerAssocLabel")), 
   fUseBuffer                (pset.get< bool >("UseBuffers", false)),
   fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false)),
   fSaveCryInfo              (pset.get< bool >("SaveCryInfo", false)),  
@@ -2911,6 +2923,18 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	 fData->cluster_StartTick[ic] = cluster.StartTick();
 	 fData->cluster_EndWire[ic] = cluster.EndWire();
 	 fData->cluster_EndTick[ic] = cluster.EndTick();
+	 
+	//Cosmic Tagger information for cluster
+        art::FindManyP<anab::CosmicTag> fmcct(clusterListHandle,evt,fCosmicClusterTaggerAssocLabel);
+        if (fmcct.isValid()){          
+          fData->cluncosmictags_tagger[ic]     = fmcct.at(ic).size();
+          if (fmcct.at(ic).size()>0){
+            if(fmcct.at(ic).size()>1)
+              std::cerr << "\n Warning : more than one cosmic tag per cluster in module! assigning the first tag to the cluster" << fCosmicClusterTaggerAssocLabel;
+            fData->clucosmicscore_tagger[ic] = fmcct.at(ic).at(0)->CosmicScore();
+            fData->clucosmictype_tagger[ic] = fmcct.at(ic).at(0)->CosmicType();
+          }
+        }
      }//end loop over clusters
   }//end fSaveClusterInfo
 	  

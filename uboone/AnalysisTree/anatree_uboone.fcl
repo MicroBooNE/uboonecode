@@ -113,6 +113,8 @@ physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid"]
 physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["cosmictaggerKHit"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit"]
 
+physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
+
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
 physics.analyzers.analysistree.HitsModuleLabel: "linecluster"
 physics.analyzers.analysistree.ClusterModuleLabel: "linecluster"

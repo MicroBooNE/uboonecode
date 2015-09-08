@@ -17,6 +17,9 @@ microboone_analysistree:
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
  ShowerModuleLabel:        ["showerrecofuzzy"]
+ CosmicClusterTaggerAssocLabel: "ccclustertag"
+ CosmicTaggerAssocLabel: ["trackkalmanhit"]
+ FlashMatchAssocLabel:   ["flashTrackMatchkHit"]
  POTModuleLabel:           "generator"
  UseBuffers:               false
  IgnoreMissingShowers:     false
