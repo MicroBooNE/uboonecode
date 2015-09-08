@@ -7,6 +7,7 @@ art_make( BASENAME_ONLY
                         TimeService_service
                         Filters
                         RawData
+			SummaryData
 			${UB_DATA_TYPES}
 			${Boost_SERIALIZATION_LIBRARY}
                         ${SEEDSERVICE_SERVICE} # artextensions

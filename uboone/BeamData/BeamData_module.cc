@@ -14,9 +14,14 @@
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Utilities/InputTag.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "art/Framework/Services/Optional/TFileService.h"
+#include "art/Framework/Services/Optional/TFileDirectory.h"
+
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+#include "SummaryData/POTSummary.h"
 #include "RawData/BeamInfo.h"
 #include "RawData/DAQHeader.h"
 #include "RawData/TriggerData.h"
@@ -25,10 +30,13 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <algorithm>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
 
 #include <memory>
+
+#include "TTree.h"
 
 class BeamData;
 
@@ -46,13 +54,17 @@ public:
 
   // Required functions.
   void beginSubRun(art::SubRun & sr) override;
+  void produce(art::Event & e) override;
   void endSubRun(art::SubRun & sr) override;
   void endJob() override;
-  void produce(art::Event & e) override;
  
   bool nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vector<ub_BeamData> &bd);
-  int compareTime(ub_BeamHeader& bh, art::Event& e, float dt);
-  float getFOM(ub_BeamHeader& bh, ub_BeamData& bd);
+  bool rewindBeamFile(std::string beam, std::streampos nbytes); //goes back one event in the file
+  int compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offsetT);
+  void createBranches(std::string beam);
+  void fillTreeData(std::string beam, ub_BeamHeader& bh, std::vector<ub_BeamData>& bd);
+
+  float getFOM(ub_BeamHeader& bh, std::vector<ub_BeamData>& bd);
 
 private:
 
@@ -60,27 +72,34 @@ private:
   struct BeamConf_t {
     int fBeamID;
     std::ifstream* fBeamStream;
+    std::string fFilePath;
     std::string fFileName;
     std::map<std::string, float> fSums;
-    uint32_t fTotalEventCount;
+    uint32_t fSpillCount;
     uint32_t fMergedEventCount;
+    uint32_t fNonMergedEventCount;
+    float fOffsetT;
     float fDt;
+    bool fWriteBeamData;
+    TTree* fTree;
+    std::map<std::string, float> fTreeVar;
+    std::map<std::string, float*> fTreeArr;
   };
 
   std::vector<std::string> fBeams;
   std::map<std::string, BeamConf_t>  fBeamConf;
-  
-};
+  int fRun;
+  int fSubRun;
+  long long fTimestamp;
+  float fFOM;
 
+};
 
 BeamData::BeamData(fhicl::ParameterSet const & p)
 // :
 // Initialize member data here.
 {
   // Call appropriate produces<>() functions here.
-
-  produces< raw::BeamInfo >();  
-
   fBeams=p.get<std::vector<std::string> >("beams");
   for (uint i=0;i<fBeams.size();i++) {
     fhicl::ParameterSet pbeam=p.get<fhicl::ParameterSet>(fBeams[i]);
@@ -90,39 +109,82 @@ BeamData::BeamData(fhicl::ParameterSet const & p)
     for (auto it=sum_devices.begin();it!=sum_devices.end();it++) {
       bconf.fSums[*it]=0;
     }
+    bconf.fOffsetT=pbeam.get<float>("time_offset");
     bconf.fDt=pbeam.get<float>("merge_time_tolerance");
+    bconf.fFilePath=pbeam.get<std::string>("path_to_beam_file");
+    bconf.fWriteBeamData=pbeam.get<bool>("write_beam_data");
     std::pair<std::string, BeamConf_t> p(fBeams[i],bconf);
     fBeamConf.insert(p);
+  }
+
+  for (auto& it_beamline : fBeamConf) {
+    if (it_beamline.second.fWriteBeamData) {
+      art::ServiceHandle<art::TFileService> tfs;
+      it_beamline.second.fTree = tfs->make<TTree>(it_beamline.first.c_str(),(it_beamline.first+" beam data").c_str());
+      //create branches once the file is open
+    }
+  }
+
+  produces< raw::BeamInfo >();  
+  for (auto& it_beamline : fBeamConf ) {
+    for (auto& it_dev : it_beamline.second.fSums ) {
+      std::string varname=it_beamline.first+it_dev.first;
+      varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
+      produces< sumdata::POTSummary, art::InSubRun >(varname);
+    }
   }
 }
 
 void BeamData::beginSubRun(art::SubRun & sr)
 {
   //load beam file
-
-
+  fRun=sr.run();
+  fSubRun=sr.subRun();
   mf::LogInfo(__FUNCTION__)<<"Open beam files for run "<<sr.run()
 			   <<" subrun "<<sr.subRun();
-  
+  std::stringstream ss;
+  for (int i=0;i<120;i++) ss<<"=";
+  ss<<std::endl;
+  ss<<std::setw(10)<<"Beam"
+    <<std::setw(40)<<"File"
+    <<std::setw(30)<<"Time offset (ms)"
+    <<std::setw(30)<<"Time tolerance (ms)"
+    <<std::setw(10)<<"Found"
+    <<std::endl;
+  for (int i=0;i<120;i++) ss<<"-";
+  ss<<std::endl;  
   for (uint ibeam=0;ibeam<fBeams.size();ibeam++) {
     std::stringstream fname;
     fname<<"beam_"<<fBeams[ibeam]<<"_"
-	 <<std::setfill('0') << std::setw(7) << sr.run()<<"_"
-	 <<std::setfill('0') << std::setw(4) << sr.subRun()<<".dat";
-    mf::LogInfo(__FUNCTION__)<< "Opening beam file " << fname.str();
-    ifstream *fin=new ifstream(fname.str(), std::ios::binary);
-   
+	 <<std::setfill('0') << std::setw(7) << fRun<<"_"
+	 <<std::setfill('0') << std::setw(5) << fSubRun<<".dat";
+    ss<<std::setw(10)<<fBeams[ibeam]
+      <<std::setw(40)<<fname.str()
+      <<std::setw(30)<<fBeamConf[fBeams[ibeam]].fOffsetT
+      <<std::setw(30)<<fBeamConf[fBeams[ibeam]].fDt;
+    ifstream *fin=new ifstream(fBeamConf[fBeams[ibeam]].fFilePath+
+			       fname.str(), 
+			       std::ios::binary);
     if ( !fin->is_open() ) {
-      mf::LogError(__FUNCTION__) <<"Can't open beam file "<<fname.str();
       fBeamConf.erase(fBeams[ibeam]);
       delete fin;
+      ss<<std::setw(10)<<"No";
     } else {      
       fBeamConf[fBeams[ibeam]].fFileName=fname.str();
-      fBeamConf[fBeams[ibeam]].fTotalEventCount=0;
+      fBeamConf[fBeams[ibeam]].fSpillCount=0;
+      fBeamConf[fBeams[ibeam]].fNonMergedEventCount=0;
       fBeamConf[fBeams[ibeam]].fMergedEventCount=0;
       fBeamConf[fBeams[ibeam]].fBeamStream=fin;
+      ss<<std::setw(10)<<"Yes";
     }
+    ss<<std::endl;
   }
+  for (int i=0;i<120;i++) ss<<"=";
+  ss<<std::endl;
+  mf::LogInfo(__FUNCTION__) <<ss.str();
+
+  for (auto& it : fBeamConf) 
+    if (it.second.fWriteBeamData) createBranches(it.first);
 }
 
 void BeamData::endSubRun(art::SubRun & sr)
@@ -135,35 +197,52 @@ void BeamData::endSubRun(art::SubRun & sr)
     ub_BeamHeader bh;
     std::vector<ub_BeamData> bd;
     while (nextBeamEvent(it->first,bh,bd)) {
+      if (fBeamConf[it->first].fWriteBeamData) 
+	fillTreeData(it->first,bh,bd);
       mf::LogInfo(__FUNCTION__)<<bh.debugInfo();
     }
   }
+
+  for (auto& it_beamline : fBeamConf ) {
+    for (auto& it_dev : it_beamline.second.fSums ) {
+      std::unique_ptr<sumdata::POTSummary> pot(new sumdata::POTSummary);    
+      pot->totpot = it_dev.second;
+      pot->totgoodpot = it_dev.second;    
+      std::string varname=it_beamline.first+it_dev.first;
+      varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
+      sr.put(std::move(pot),varname);   
+    }
+  }
+
   for (auto it=fBeamConf.begin();it!=fBeamConf.end();it++) {
     (it->second).fBeamStream->close();
     delete (it->second).fBeamStream;
   }
+  
 }
 
 void BeamData::endJob()
 {
   std::stringstream ss;
-  for (int i=0;i<100;i++) ss<<"=";
+  for (int i=0;i<120;i++) ss<<"=";
   ss<<std::endl;  
   ss<<std::setw(10)<<"Beam"
     <<std::setw(50)<<"File"
-    <<std::setw(20)<<"Merged Events"
-    <<std::setw(20)<<"Total Events"
+    <<std::setw(20)<<"Merged events"
+    <<std::setw(20)<<"Missing beam info"
+    <<std::setw(20)<<"Total spills"
     <<std::endl;
-  for (int i=0;i<100;i++) ss<<"-";
+  for (int i=0;i<120;i++) ss<<"-";
   ss<<std::endl;
   for (auto& it : fBeamConf ) {
     ss<<std::setw(10)<<fBeams[it.second.fBeamID]
       <<std::setw(50)<<it.second.fFileName
       <<std::setw(20)<<it.second.fMergedEventCount
-      <<std::setw(20)<<it.second.fTotalEventCount
+      <<std::setw(20)<<it.second.fNonMergedEventCount
+      <<std::setw(20)<<it.second.fSpillCount
       <<std::endl;
   }
-  for (int i=0;i<100;i++) ss<<"=";
+  for (int i=0;i<120;i++) ss<<"=";
   ss<<std::endl;
   ss<<std::endl;
   for (int i=0;i<60;i++) ss<<"=";
@@ -245,7 +324,7 @@ void BeamData::produce(art::Event & e)
     if (fBeamConf.find("bnb")!=fBeamConf.end() )
       beam_name="bnb";
     else {
-      mf::LogWarning(__FUNCTION__) <<"Found BNB event, but bnb not selected in the fcl file.";
+      mf::LogError(__FUNCTION__) <<"Found BNB event, but bnb not selected in the fcl file of beam file missing.";
       return;
     }
   } else if (trigInfo[0]->TriggerBits() & 0x1000) {
@@ -253,7 +332,7 @@ void BeamData::produce(art::Event & e)
     if (fBeamConf.find("numi")!=fBeamConf.end() )
       beam_name="numi";
     else {
-      mf::LogWarning(__FUNCTION__)<< "Found NuMI event, but numi not selected in the fcl file.";  
+      mf::LogError(__FUNCTION__)<< "Found NuMI event, but numi not selected in the fcl file or beam file missing.";  
       return;
     }
   }
@@ -262,17 +341,18 @@ void BeamData::produce(art::Event & e)
   while ( !ready_for_next_det_event ) {
     ub_BeamHeader bh;
     std::vector<ub_BeamData> bd;
-    ready_for_next_det_event=true;
     if (nextBeamEvent(beam_name,bh,bd)) {
-      int comp=compareTime(bh,e,fBeamConf[beam_name].fDt);
+      int comp=compareTime(bh,e,fBeamConf[beam_name].fDt, fBeamConf[beam_name].fOffsetT);
       switch (comp) {
       case -1:
-	mf::LogDebug(__FUNCTION__)<<"Beam event before";
+	mf::LogInfo(__FUNCTION__)<<"Beam event before";
 	ready_for_next_det_event=false;
+	if (fBeamConf[beam_name].fWriteBeamData) 
+	  fillTreeData(beam_name,bh,bd);
 	break;
       case 0:
-	mf::LogDebug(__FUNCTION__)<<"Found beam match";
-	 fBeamConf[beam_name].fMergedEventCount+=1;
+	mf::LogInfo(__FUNCTION__)<<"Found beam match";
+	fBeamConf[beam_name].fMergedEventCount+=1;
         if (bd.size()>0) {
 	  beam_info->SetRecordType(bh.getRecordType());
 	  beam_info->SetSeconds(bh.getSeconds());
@@ -280,21 +360,25 @@ void BeamData::produce(art::Event & e)
 	  beam_info->SetNumberOfDevices(bh.getNumberOfDevices());
       
 	  for (int i=0;i<bh.getNumberOfDevices();i++) 
-	    beam_info->Set(bd[i].getDeviceName(),bd[i].getData());       
+	    beam_info->Set(bd[i].getDeviceName(),bd[i].getData());
 	}
+	ready_for_next_det_event=true;
+	if (fBeamConf[beam_name].fWriteBeamData) 
+	  fillTreeData(beam_name,bh,bd);
 	break;
       case 1:
-	mf::LogDebug(__FUNCTION__)<<"Beam event after";
-	//rewind beam file
-	fBeamConf[beam_name].fBeamStream->seekg(
-				    fBeamConf[beam_name].fBeamStream->tellg()
-				    -std::streampos(bh.getNumberOfBytesInRecord()));
-	fBeamConf[beam_name].fTotalEventCount-=1;
+	mf::LogInfo(__FUNCTION__)<<"Beam event after";
+	fBeamConf[beam_name].fNonMergedEventCount+=1;
+	rewindBeamFile(beam_name, std::streampos(bh.getNumberOfBytesInRecord()));
+	ready_for_next_det_event=true;
 	break;
       }
+    } else {
+      ready_for_next_det_event=true;
+      fBeamConf[beam_name].fNonMergedEventCount+=1;
     }
   }
-  
+  e.put(std::move(beam_info));
 }
 
 
@@ -319,15 +403,30 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
     }
     std::streampos endpos=file_in->tellg();
     bh.setNumberOfBytesInRecord(endpos-begpos);
+    fBeamConf[beamline].fSpillCount+=1;
   } catch ( ... ) {
-    mf::LogInfo()<<"Reached end of beam file";
+    mf::LogInfo()<<"Reached end of beam file "<<fBeamConf[beamline].fFileName;
     result=false;
   }
-  fBeamConf[beamline].fTotalEventCount+=1;
   return result;
 }
 
-int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt)
+bool BeamData::rewindBeamFile(std::string beam_name, std::streampos nbytes)
+{
+  bool result=true;
+  try {
+	//rewind beam file	
+	fBeamConf[beam_name].fBeamStream->seekg(fBeamConf[beam_name].fBeamStream->tellg()-nbytes);
+	fBeamConf[beam_name].fSpillCount-=1;
+  } catch ( ... ) {
+    mf::LogError()<<"Failed to rewind file "<<fBeamConf[beam_name].fFileName;
+    result=false;
+  }
+
+  return result;
+}
+
+int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offsetT)
 {
   //Return 0 if dettime and beamtime within dt milliseconds
   //       1 if dettime < beamtime 
@@ -353,9 +452,10 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt)
   uint32_t beammsec = bh.getMilliSeconds();
   
   time_t dettime  = time_t(detsec)*1000.+time_t(detmsec);
-  time_t beamtime = time_t(bh.getSeconds())*1000 + time_t(bh.getMilliSeconds())-2390;
+  time_t beamtime = time_t(bh.getSeconds())*1000 + time_t(bh.getMilliSeconds())+time_t(offsetT);
+  
   mf::LogInfo(__FUNCTION__)<<detsec<<"\t"<<detmsec<<"\t"
-			   <<beamsec<<"\t"<<beammsec;
+			   <<beamsec<<"\t"<<beammsec<<"\t"<<offsetT;
   mf::LogInfo(__FUNCTION__)<<dettime<<" - "<<beamtime<<" = "
 			   <<dettime-beamtime;
   int comp=1;
@@ -367,9 +467,86 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt)
   return comp;
 }
 
-float BeamData::getFOM(ub_BeamHeader& bh, ub_BeamData& bd)
+float BeamData::getFOM(ub_BeamHeader& bh, std::vector<ub_BeamData>& bd)
 {
   return 1.0;
+}
+void BeamData::fillTreeData(std::string beam, ub_BeamHeader& bh, std::vector<ub_BeamData>& bd)
+{
+  mf::LogInfo(__FUNCTION__)<<"==========> Writing beam event <==========";
+  fFOM=getFOM(bh,bd);
+  fTimestamp=bh.getSeconds()*1000+bh.getMilliSeconds();
+
+  for (int i=0;i<bh.getNumberOfDevices();i++) {
+    std::string varname=bd[i].getDeviceName();
+    varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
+    if (bd[i].getData().size()==1) {
+      fBeamConf[beam].fTreeVar[varname]=bd[i].getData()[0];
+    } else {
+      for (uint j=0;j<bd[i].getData().size();j++) {
+	fBeamConf[beam].fTreeArr[varname][j]=bd[i].getData()[j];
+      }
+    }
+  }
+  fBeamConf[beam].fTree->Fill();
+}
+
+void BeamData::createBranches(std::string beam) 
+{
+  mf::LogInfo(__FUNCTION__) <<"===> Creating branches for "<<beam;
+
+  //read 10 events and figure out which variables to output
+  //and if a var is an array
+  std::map<std::string, uint> vars;
+  std::vector<std::streampos> rwbyt;
+  for (int iev=0;iev<10;iev++) {
+    ub_BeamHeader bh;
+    std::vector<ub_BeamData> bd;
+    if (nextBeamEvent(beam, bh,bd)) {
+      for (int i=0;i<bh.getNumberOfDevices();i++) {
+	std::string varname=bd[i].getDeviceName();
+	varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
+	std::pair<std::string,uint> p(varname, bd[i].getData().size());
+	vars.insert(p);
+      }    
+      rwbyt.push_back(bh.getNumberOfBytesInRecord());
+    }
+  }
+
+  // This does not work ???
+  //  for (uint i=rwbyt.size()-1;i>=0;i--) {
+  //  rewindBeamFile(beam,rwbyt[i]);
+  // }
+
+  fBeamConf[beam].fBeamStream->clear();
+  fBeamConf[beam].fBeamStream->seekg(0);
+  fBeamConf[beam].fSpillCount=0;
+
+  fBeamConf[beam].fTree->Branch("run",&fRun,"run/I");
+  fBeamConf[beam].fTree->Branch("subrun",&fSubRun,"subrun/I");
+  fBeamConf[beam].fTree->Branch("timestamp",&fTimestamp,"timestamp/L");
+  fBeamConf[beam].fTree->Branch("FOM",&fFOM,"FOM/F");
+
+  mf::LogInfo(__FUNCTION__) <<"Now print the device names";
+  std::stringstream ss;
+  for (auto& it : vars) {
+    // ss<<it.first<<"\t"<<it.second<<std::endl;
+    if (it.second==1) {
+	fBeamConf[beam].fTreeVar[it.first]=-999;
+	ss <<"Creating scalar branch for device "<<it.first.c_str()<<std::endl;
+	fBeamConf[beam].fTree->Branch(it.first.c_str(),&fBeamConf[beam].fTreeVar[it.first],
+				      (it.first+"/F").c_str());
+      } else {
+	float* x=new float[it.second];
+	fBeamConf[beam].fTreeArr[it.first]=x;
+	ss <<"Creating vector branch for device "<<it.first.c_str()<<std::endl;
+	fBeamConf[beam].fTree->Branch(it.first.c_str(),&fBeamConf[beam].fTreeArr[it.first],
+				      (it.first+"["+std::to_string(it.second)+"]/F").c_str());
+      }
+
+  }
+  mf::LogInfo(__FUNCTION__)<<ss.str();
+  
 }
 
 DEFINE_ART_MODULE(BeamData)

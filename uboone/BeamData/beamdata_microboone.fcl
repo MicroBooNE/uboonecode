@@ -7,13 +7,19 @@ microboone_beamdata:
   beams: [ "bnb", "numi" ]
  
   bnb:  {
-         merge_time_tolerance: 30 #in ms
+  	 path_to_beam_file: "./"
+	 time_offset: -2390. #offset between detector and beam clock
+         merge_time_tolerance: 30. #in ms
 	 sum_devices: [ "E:TOR860", "E:TOR875" ]
+	 write_beam_data: true
         }
   numi: {
-         merge_time_tolerance: 100 #in ms
+  	 path_to_beam_file: "./"
+	 time_offset: 0.        
+         merge_time_tolerance: 100. #in ms
   	 sum_devices: [ "E:TORTGT" ]
-        }
+	 write_beam_data: true
+	}
 }
 
 END_PROLOG
