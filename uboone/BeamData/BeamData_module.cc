@@ -59,12 +59,12 @@ public:
   void endJob() override;
  
   bool nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vector<ub_BeamData> &bd);
-  bool rewindBeamFile(std::string beam, std::streampos nbytes); //goes back one event in the file
+  bool rewindBeamFile(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData> &bd); //goes back one event in the file
   int compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offsetT);
   void createBranches(std::string beam);
-  void fillTreeData(std::string beam, ub_BeamHeader& bh, std::vector<ub_BeamData>& bd);
+  void fillTreeData(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd);
 
-  float getFOM(ub_BeamHeader& bh, std::vector<ub_BeamData>& bd);
+  float getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd);
 
 private:
 
@@ -74,13 +74,17 @@ private:
     std::ifstream* fBeamStream;
     std::string fFilePath;
     std::string fFileName;
-    std::map<std::string, float> fSums;
-    uint32_t fSpillCount;
+    std::map<std::string, float> fTotalSums;
+    std::map<std::string, float> fGoodSums;
+    uint32_t fTotalSpillCount;
+    uint32_t fGoodSpillCount;
     uint32_t fMergedEventCount;
     uint32_t fNonMergedEventCount;
     float fOffsetT;
     float fDt;
+    std::string fTriggerMask;
     bool fWriteBeamData;
+    float fFOMcut;
     TTree* fTree;
     std::map<std::string, float> fTreeVar;
     std::map<std::string, float*> fTreeArr;
@@ -107,10 +111,13 @@ BeamData::BeamData(fhicl::ParameterSet const & p)
     bconf.fBeamID=i;
     std::vector<std::string> sum_devices=pbeam.get<std::vector<std::string> >("sum_devices");
     for (auto it=sum_devices.begin();it!=sum_devices.end();it++) {
-      bconf.fSums[*it]=0;
+      bconf.fTotalSums[*it]=0;
+      bconf.fGoodSums[*it]=0;
     }
+    bconf.fTriggerMask=pbeam.get<std::string>("trigger_mask");
     bconf.fOffsetT=pbeam.get<float>("time_offset");
     bconf.fDt=pbeam.get<float>("merge_time_tolerance");
+    bconf.fFOMcut=pbeam.get<float>("FOM_cut");
     bconf.fFilePath=pbeam.get<std::string>("path_to_beam_file");
     bconf.fWriteBeamData=pbeam.get<bool>("write_beam_data");
     std::pair<std::string, BeamConf_t> p(fBeams[i],bconf);
@@ -127,7 +134,7 @@ BeamData::BeamData(fhicl::ParameterSet const & p)
 
   produces< raw::BeamInfo >();  
   for (auto& it_beamline : fBeamConf ) {
-    for (auto& it_dev : it_beamline.second.fSums ) {
+    for (auto& it_dev : it_beamline.second.fTotalSums ) {
       std::string varname=it_beamline.first+it_dev.first;
       varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
       produces< sumdata::POTSummary, art::InSubRun >(varname);
@@ -171,7 +178,8 @@ void BeamData::beginSubRun(art::SubRun & sr)
       ss<<std::setw(10)<<"No";
     } else {      
       fBeamConf[fBeams[ibeam]].fFileName=fname.str();
-      fBeamConf[fBeams[ibeam]].fSpillCount=0;
+      fBeamConf[fBeams[ibeam]].fTotalSpillCount=0;
+      fBeamConf[fBeams[ibeam]].fGoodSpillCount=0;
       fBeamConf[fBeams[ibeam]].fNonMergedEventCount=0;
       fBeamConf[fBeams[ibeam]].fMergedEventCount=0;
       fBeamConf[fBeams[ibeam]].fBeamStream=fin;
@@ -204,10 +212,12 @@ void BeamData::endSubRun(art::SubRun & sr)
   }
 
   for (auto& it_beamline : fBeamConf ) {
-    for (auto& it_dev : it_beamline.second.fSums ) {
+    for (auto& it_dev : it_beamline.second.fTotalSums ) {
       std::unique_ptr<sumdata::POTSummary> pot(new sumdata::POTSummary);    
       pot->totpot = it_dev.second;
-      pot->totgoodpot = it_dev.second;    
+      pot->totgoodpot = it_beamline.second.fGoodSums[it_dev.first];  
+      pot->totspills = it_beamline.second.fTotalSpillCount;
+      pot->goodspills = it_beamline.second.fGoodSpillCount;
       std::string varname=it_beamline.first+it_dev.first;
       varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
       sr.put(std::move(pot),varname);   
@@ -239,7 +249,7 @@ void BeamData::endJob()
       <<std::setw(50)<<it.second.fFileName
       <<std::setw(20)<<it.second.fMergedEventCount
       <<std::setw(20)<<it.second.fNonMergedEventCount
-      <<std::setw(20)<<it.second.fSpillCount
+      <<std::setw(20)<<it.second.fTotalSpillCount
       <<std::endl;
   }
   for (int i=0;i<120;i++) ss<<"=";
@@ -256,7 +266,7 @@ void BeamData::endJob()
   for (auto& it : fBeamConf ) {
     ss<<std::setw(20)<<it.first;
     bool ifirst=true;
-    for (auto& itdev : it.second.fSums) {
+    for (auto& itdev : it.second.fGoodSums) {
       if (!ifirst) ss<<std::setw(20)<<" ";	
       ss<<std::setw(20)<<itdev.first
 	<<std::setw(20)<<itdev.second
@@ -369,7 +379,7 @@ void BeamData::produce(art::Event & e)
       case 1:
 	mf::LogInfo(__FUNCTION__)<<"Beam event after";
 	fBeamConf[beam_name].fNonMergedEventCount+=1;
-	rewindBeamFile(beam_name, std::streampos(bh.getNumberOfBytesInRecord()));
+	rewindBeamFile(beam_name, bh, bd);
 	ready_for_next_det_event=true;
 	break;
       }
@@ -393,17 +403,22 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
     for (uint i=0;i<bh.getNumberOfDevices();i++) {
       ub_BeamData bdata;
       ia_beam>>bdata;
-      for (auto it=fBeamConf[beamline].fSums.begin();
-	   it!=fBeamConf[beamline].fSums.end();it++) {
+      fFOM=getFOM(beamline,bh,bd);
+      for (auto it=fBeamConf[beamline].fTotalSums.begin();
+	   it!=fBeamConf[beamline].fTotalSums.end();it++) {
 	if (bdata.getDeviceName().find(it->first)!=std::string::npos) {
-	  fBeamConf[beamline].fSums[it->first]+=bdata.getData()[0];
+	  fBeamConf[beamline].fTotalSums[it->first]+=bdata.getData()[0];
+	  if (fFOM>fBeamConf[beamline].fFOMcut) 
+	    fBeamConf[beamline].fGoodSums[it->first]+=bdata.getData()[0];
 	}
       }
       bd.push_back(bdata);
     }
     std::streampos endpos=file_in->tellg();
     bh.setNumberOfBytesInRecord(endpos-begpos);
-    fBeamConf[beamline].fSpillCount+=1;
+    fBeamConf[beamline].fTotalSpillCount+=1;
+    if (fFOM>fBeamConf[beamline].fFOMcut) 
+      fBeamConf[beamline].fGoodSpillCount+=1;
   } catch ( ... ) {
     mf::LogInfo()<<"Reached end of beam file "<<fBeamConf[beamline].fFileName;
     result=false;
@@ -411,13 +426,16 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
   return result;
 }
 
-bool BeamData::rewindBeamFile(std::string beam_name, std::streampos nbytes)
+bool BeamData::rewindBeamFile(std::string beam_name, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
 {
   bool result=true;
   try {
-	//rewind beam file	
-	fBeamConf[beam_name].fBeamStream->seekg(fBeamConf[beam_name].fBeamStream->tellg()-nbytes);
-	fBeamConf[beam_name].fSpillCount-=1;
+    //rewind beam file
+    std::streampos nbytes=bh.getNumberOfBytesInRecord();
+    fBeamConf[beam_name].fBeamStream->seekg(fBeamConf[beam_name].fBeamStream->tellg()-nbytes);
+    fBeamConf[beam_name].fTotalSpillCount-=1;
+    if (getFOM(beam_name,bh,bd)>fBeamConf[beam_name].fFOMcut) 
+      fBeamConf[beam_name].fGoodSpillCount-=1;
   } catch ( ... ) {
     mf::LogError()<<"Failed to rewind file "<<fBeamConf[beam_name].fFileName;
     result=false;
@@ -467,14 +485,14 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offs
   return comp;
 }
 
-float BeamData::getFOM(ub_BeamHeader& bh, std::vector<ub_BeamData>& bd)
+float BeamData::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
 {
   return 1.0;
 }
-void BeamData::fillTreeData(std::string beam, ub_BeamHeader& bh, std::vector<ub_BeamData>& bd)
+void BeamData::fillTreeData(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
 {
   mf::LogInfo(__FUNCTION__)<<"==========> Writing beam event <==========";
-  fFOM=getFOM(bh,bd);
+  fFOM=getFOM(beam, bh,bd);
   fTimestamp=bh.getSeconds()*1000+bh.getMilliSeconds();
 
   for (int i=0;i<bh.getNumberOfDevices();i++) {
@@ -520,7 +538,8 @@ void BeamData::createBranches(std::string beam)
 
   fBeamConf[beam].fBeamStream->clear();
   fBeamConf[beam].fBeamStream->seekg(0);
-  fBeamConf[beam].fSpillCount=0;
+  fBeamConf[beam].fTotalSpillCount=0;
+  fBeamConf[beam].fGoodSpillCount=0;
 
   fBeamConf[beam].fTree->Branch("run",&fRun,"run/I");
   fBeamConf[beam].fTree->Branch("subrun",&fSubRun,"subrun/I");
