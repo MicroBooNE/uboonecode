@@ -13,6 +13,7 @@ art_make( BASENAME_ONLY
                         OpticalDetectorData
 			OpticalDetector
                         RawData
+			RecoBase
 			uboone_OpticalDetectorAna
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_SOURCES}

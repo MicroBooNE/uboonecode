@@ -49,16 +49,17 @@ public:
 private:
 
   // Declare member data here.
-  TH1D *_hFlashEff;
-  double _event_ctr;
-  std::vector<double> _flash_ctr_v;
-  std::vector<double> _npe_threshold_v;
-  double _beam_time_diff_low;
-  double _beam_time_diff_high;
-  double _total_pe_threshold;
-  unsigned int _multiplicity_threshold;
-  double _multiplicity_pe_threshold;
-  std::string _flash_module;
+  TH1D *_hFlashEff;                     ///< Flash PE efficiency analysis histogram
+  double _event_ctr;                    ///< A counter for the total number of events processed
+  std::vector<double> _flash_ctr_v;     ///< A total number of flash above specific pe threshold set in _npe_threshold_v
+  std::vector<double> _npe_threshold_v; ///< An array of npe threshold to fill a binned histogram (_hFlashEff)
+  double _beam_time_diff_low;           ///< A lower boundary of time window with which we ask for a time coincident with beam gate
+  double _beam_time_diff_high;          ///< A higher boundary of time window with which we ask for a time coincident with beam gate
+  double _total_pe_threshold;           ///< The minimum number of photo-electrons threshold to pass an event
+  unsigned int _multiplicity_threshold; ///< The minimum number of optical detectors considered to be "hit" to pass an event
+  double _multiplicity_pe_threshold;    ///< A threshold value above which PMT is considered as "hit" for multiplicity condition
+  std::string _flash_module;            ///< recob::OpFlash producer module label
+  bool _verbose;                        ///< Verbosity flag
 };
 
 
@@ -68,6 +69,7 @@ FlashTrigger::FlashTrigger(fhicl::ParameterSet const & p)
 // Initialize member data here.
 {
   // Call appropriate produces<>() functions here.
+  _verbose                   = p.get< bool         > ( "Verbose"                 );
   _flash_module              = p.get< std::string  > ( "OpFlashModule"           );
   _beam_time_diff_low        = p.get< double       > ( "BeamDTLow"               );
   _beam_time_diff_high       = p.get< double       > ( "BeamDTHigh"              );
@@ -82,6 +84,18 @@ FlashTrigger::FlashTrigger(fhicl::ParameterSet const & p)
   }
 
   _flash_ctr_v.resize(_npe_threshold_v.size(),0);
+
+  if(_verbose) {
+    std::cout << "\033[93m" << __PRETTY_FUNCTION__ << "\033[00m" << std::endl
+	      << "  recob::OpFlash module label: " << _flash_module.c_str() << std::endl
+	      << "  DT window w.r.t. beam spill: " << _beam_time_diff_low << " => " << _beam_time_diff_high << std::endl
+	      << "  \033[95mPass condition...\033[00m " << std::endl
+	      << "  0) Flash within DT window with above " << _total_pe_threshold << " p.e." << std::endl
+	      << "  1) Flash within DT window with multiplicity of " << _multiplicity_threshold << " PMT hits with > " 
+	      << _multiplicity_pe_threshold << " p.e." << std::endl
+	      << std::endl;
+  }
+  
 }
 
 bool FlashTrigger::filter(art::Event & e)
@@ -101,7 +115,11 @@ bool FlashTrigger::filter(art::Event & e)
   if(flash_handle.isValid()) {
     for(auto const& flash : *flash_handle) {
       // Check timing
-      if(flash.Time() < _beam_time_diff_low || _beam_time_diff_high < flash.Time()) continue;
+      if(flash.Time() < _beam_time_diff_low || _beam_time_diff_high < flash.Time()) {
+	if(_verbose)
+	  std::cout << "  Skipping a flash @ DT = " << flash.Time() << " [us] " << std::endl;
+	continue;
+      }
 
       // Fill analysis histogram
       auto const npe = flash.TotalPE();
@@ -112,15 +130,22 @@ bool FlashTrigger::filter(art::Event & e)
       }
 
       // Check Total PE level
-      if( npe >= _total_pe_threshold ) pass = true;
+      if( npe >= _total_pe_threshold )
+	pass = true;
       
       // Check multiplicity
       unsigned int mult=0;
       for(size_t i=0; i < geo->NOpDets(); ++i )
 	if(flash.PE(i) >= _multiplicity_pe_threshold) mult+=1;
       
-      if(mult >= _multiplicity_threshold) pass = true;
-      
+      if(mult >= _multiplicity_threshold)
+	pass = true;
+
+      if(pass) {
+	if(_verbose)
+	  std::cout << "  Accepting a flash @ " << flash.Time() << " [us] with " << npe << " [p.e.]" << " ... multiplicity = " << mult << std::endl;
+	break;
+      }
     }
   }
 

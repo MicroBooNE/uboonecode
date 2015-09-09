@@ -4,12 +4,15 @@
 microboone_flashtrigger : {
 
   module_type   : "FlashTrigger"
-  OpFlashModule : "opflash"
-  BeamDTLow     : -0.1
-  BeamDTHigh    :  0.1
-  TotalPEThreshold : 6
-  MultiplicityPEThreshold : 3
-  MultiplicityThreshold   : 1
+  Verbose       : false        # verbosity flag
+  OpFlashModule : "opflash"    # recob::OpFlash producer module name
+  BeamDTLow     : -0.1         # OpFlash timing low boundary in micro-seconds w.r.t. beginning of beam spill
+  BeamDTHigh    :  1.7         # OpFlash timing high boundary in micro-seconds w.r.t. beginning of beam spill
+  TotalPEThreshold : 10        # The minimum number of total photoelectrons from all PMTs in a flash to consider an event as nu candidate
+  MultiplicityPEThreshold : 5  # Number of photo electrons to consider a PMT to be "hit"
+  MultiplicityThreshold   : 10 # The minimum Number of PMTs that are "hit" to consider an event as nu candidate
+
+  # X-axis value for an efficiency analysis histogram. The unit is a number of photoelectrons count
   EffHistPEThresholdArray : [1,5,10,20,40,60,80,100,125,150,175,200,250,300,350,400,450,500,550,600,650,700,750,800,850,900,950,1000]
 
 }
