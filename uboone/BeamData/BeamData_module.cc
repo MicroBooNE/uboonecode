@@ -82,7 +82,7 @@ private:
     uint32_t fNonMergedEventCount;
     float fOffsetT;
     float fDt;
-    std::string fTriggerMask;
+    uint32_t fTriggerMask;
     bool fWriteBeamData;
     float fFOMcut;
     TTree* fTree;
@@ -114,7 +114,7 @@ BeamData::BeamData(fhicl::ParameterSet const & p)
       bconf.fTotalSums[*it]=0;
       bconf.fGoodSums[*it]=0;
     }
-    bconf.fTriggerMask=pbeam.get<std::string>("trigger_mask");
+    bconf.fTriggerMask=pbeam.get<uint32_t>("trigger_mask");
     bconf.fOffsetT=pbeam.get<float>("time_offset");
     bconf.fDt=pbeam.get<float>("merge_time_tolerance");
     bconf.fFOMcut=pbeam.get<float>("FOM_cut");
@@ -200,14 +200,13 @@ void BeamData::endSubRun(art::SubRun & sr)
   //loop over remaining beam events
 
   for (auto it=fBeamConf.begin();it!=fBeamConf.end();it++) {
-    mf::LogInfo(__FUNCTION__) <<"Loop through the remaining "
+    mf::LogDebug(__FUNCTION__) <<"Loop through the remaining "
 			      <<it->first<<" beam events";
     ub_BeamHeader bh;
     std::vector<ub_BeamData> bd;
     while (nextBeamEvent(it->first,bh,bd)) {
       if (fBeamConf[it->first].fWriteBeamData) 
 	fillTreeData(it->first,bh,bd);
-      mf::LogInfo(__FUNCTION__)<<bh.debugInfo();
     }
   }
 
@@ -320,32 +319,18 @@ void BeamData::produce(art::Event & e)
 			    <<trig_union.trig_struct.calib<<"\n"
 			    <<trig_union.trig_struct.phase0<<"\n";
   */
- 
-  //  if (!(trigInfo[0]->TriggerBits() & 0x800) && //gate2
-  if (!(trigInfo[0]->TriggerBits() & 0x200) && //external
-      !(trigInfo[0]->TriggerBits() & 0x1000) ) {
-    mf::LogInfo(__FUNCTION__) << "Non beam event... Skipping.";
+
+  std::string beam_name="";
+  for (auto& it : fBeamConf) {
+    if (trigInfo[0]->TriggerBits() & it.second.fTriggerMask) {
+      beam_name=it.first;
+    }
+  }
+  if (beam_name=="") {
+    mf::LogDebug(__FUNCTION__) << "Trigger not matching any of the beam(s). Skipping beam merging.";
     return;
   }
-  std::string beam_name;
-  //  if (trigInfo[0]->TriggerBits() & 0x800 ) {
-  if (trigInfo[0]->TriggerBits() & 0x200 ) {//actually external
-    mf::LogDebug(__FUNCTION__) <<"Looking for BNB event";
-    if (fBeamConf.find("bnb")!=fBeamConf.end() )
-      beam_name="bnb";
-    else {
-      mf::LogError(__FUNCTION__) <<"Found BNB event, but bnb not selected in the fcl file of beam file missing.";
-      return;
-    }
-  } else if (trigInfo[0]->TriggerBits() & 0x1000) {
-    mf::LogDebug(__FUNCTION__) <<"Looking for NuMI event";
-    if (fBeamConf.find("numi")!=fBeamConf.end() )
-      beam_name="numi";
-    else {
-      mf::LogError(__FUNCTION__)<< "Found NuMI event, but numi not selected in the fcl file or beam file missing.";  
-      return;
-    }
-  }
+  mf::LogDebug(__FUNCTION__) <<"Looking for "<<beam_name<<" event";
 
   bool ready_for_next_det_event=false;
   while ( !ready_for_next_det_event ) {
@@ -355,13 +340,13 @@ void BeamData::produce(art::Event & e)
       int comp=compareTime(bh,e,fBeamConf[beam_name].fDt, fBeamConf[beam_name].fOffsetT);
       switch (comp) {
       case -1:
-	mf::LogInfo(__FUNCTION__)<<"Beam event before";
+	mf::LogDebug(__FUNCTION__)<<"Beam event before";
 	ready_for_next_det_event=false;
 	if (fBeamConf[beam_name].fWriteBeamData) 
 	  fillTreeData(beam_name,bh,bd);
 	break;
       case 0:
-	mf::LogInfo(__FUNCTION__)<<"Found beam match";
+	mf::LogDebug(__FUNCTION__)<<"Found beam match";
 	fBeamConf[beam_name].fMergedEventCount+=1;
         if (bd.size()>0) {
 	  beam_info->SetRecordType(bh.getRecordType());
@@ -377,7 +362,7 @@ void BeamData::produce(art::Event & e)
 	  fillTreeData(beam_name,bh,bd);
 	break;
       case 1:
-	mf::LogInfo(__FUNCTION__)<<"Beam event after";
+	mf::LogDebug(__FUNCTION__)<<"Beam event after";
 	fBeamConf[beam_name].fNonMergedEventCount+=1;
 	rewindBeamFile(beam_name, bh, bd);
 	ready_for_next_det_event=true;
@@ -465,17 +450,10 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offs
    
   uint32_t detsec = uint32_t(dettime64>>32);
   uint32_t detmsec =uint32_t((dettime64 & 0x0000FFFF)/1000);
-  
-  uint32_t beamsec = bh.getSeconds();
-  uint32_t beammsec = bh.getMilliSeconds();
-  
+    
   time_t dettime  = time_t(detsec)*1000.+time_t(detmsec);
   time_t beamtime = time_t(bh.getSeconds())*1000 + time_t(bh.getMilliSeconds())+time_t(offsetT);
   
-  mf::LogInfo(__FUNCTION__)<<detsec<<"\t"<<detmsec<<"\t"
-			   <<beamsec<<"\t"<<beammsec<<"\t"<<offsetT;
-  mf::LogInfo(__FUNCTION__)<<dettime<<" - "<<beamtime<<" = "
-			   <<dettime-beamtime;
   int comp=1;
   if ( dettime>=beamtime && dettime - beamtime < dt ) {comp = 0;}
   else if ( dettime<beamtime && beamtime - dettime < dt ) {comp = 0;}
@@ -489,9 +467,9 @@ float BeamData::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vec
 {
   return 1.0;
 }
+
 void BeamData::fillTreeData(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
 {
-  mf::LogInfo(__FUNCTION__)<<"==========> Writing beam event <==========";
   fFOM=getFOM(beam, bh,bd);
   fTimestamp=bh.getSeconds()*1000+bh.getMilliSeconds();
 
@@ -511,8 +489,6 @@ void BeamData::fillTreeData(std::string beam, const ub_BeamHeader& bh, const std
 
 void BeamData::createBranches(std::string beam) 
 {
-  mf::LogInfo(__FUNCTION__) <<"===> Creating branches for "<<beam;
-
   //read 10 events and figure out which variables to output
   //and if a var is an array
   std::map<std::string, uint> vars;
@@ -546,7 +522,6 @@ void BeamData::createBranches(std::string beam)
   fBeamConf[beam].fTree->Branch("timestamp",&fTimestamp,"timestamp/L");
   fBeamConf[beam].fTree->Branch("FOM",&fFOM,"FOM/F");
 
-  mf::LogInfo(__FUNCTION__) <<"Now print the device names";
   std::stringstream ss;
   for (auto& it : vars) {
     // ss<<it.first<<"\t"<<it.second<<std::endl;
@@ -564,7 +539,7 @@ void BeamData::createBranches(std::string beam)
       }
 
   }
-  mf::LogInfo(__FUNCTION__)<<ss.str();
+  mf::LogDebug(__FUNCTION__)<<ss.str();
   
 }
 
