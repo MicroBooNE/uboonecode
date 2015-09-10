@@ -331,10 +331,7 @@ namespace lris {
   void LArRawInputDriverUBooNE::fillTPCData(ubdaq::ub_EventRecord& event_record,
                                             std::vector<raw::RawDigit>& tpcDigitList)
   {    
-    mf::LogInfo("")<< event_record.LocalHostTime().seb_time_sec << " for now.";
-
-    fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap();
-    mf::LogInfo("")<< "Got this far.";
+    fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap(event_record.LocalHostTime().seb_time_sec);
     // ### Swizzling to get the number of channels...trying the method used in write_read.cpp
     // ### provided by Wes --- About the data:
     // ### The format of the data is in levels: crate, card, channel.
