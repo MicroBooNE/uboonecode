@@ -67,13 +67,12 @@ namespace lris {
     fEventCounter(0),
     fHuffmanDecode(ps.get<bool>("huffmanDecode",false))
   {
-    //mf::LogInfo("")<<"Fetched channel map from DB";
-
     helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
     helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::Trigger>,   art::InEvent>("daq");
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
+    fSwizzlingTime                     = ps.get< int  >("SwizzlingTime", -1);
 
     //if ( fHuffmanDecode )
     tpc_crate_data_t::doDissect(true); // setup for decoding
@@ -331,7 +330,11 @@ namespace lris {
   void LArRawInputDriverUBooNE::fillTPCData(ubdaq::ub_EventRecord& event_record,
                                             std::vector<raw::RawDigit>& tpcDigitList)
   {    
-    fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap(event_record.LocalHostTime().seb_time_sec);
+    //Channel map has changed each time the detector has been re-cabled.
+    //Provide data-taking time as first argument. (integer Epoch seconds) + //3 months in seconds for now.
+    //Optionally recover outdated mappings with swizzling time second arg. (also integer epoch seconds)
+    fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap(event_record.LocalHostTime().seb_time_sec + 7889231, SwizzlingTime); 
+    
     // ### Swizzling to get the number of channels...trying the method used in write_read.cpp
     // ### provided by Wes --- About the data:
     // ### The format of the data is in levels: crate, card, channel.
