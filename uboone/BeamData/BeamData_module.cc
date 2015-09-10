@@ -105,7 +105,7 @@ BeamData::BeamData(fhicl::ParameterSet const & p)
 {
   // Call appropriate produces<>() functions here.
   fBeams=p.get<std::vector<std::string> >("beams");
-  for (uint i=0;i<fBeams.size();i++) {
+  for (unsigned int i=0;i<fBeams.size();i++) {
     fhicl::ParameterSet pbeam=p.get<fhicl::ParameterSet>(fBeams[i]);
     BeamConf_t bconf;
     bconf.fBeamID=i;
@@ -160,7 +160,7 @@ void BeamData::beginSubRun(art::SubRun & sr)
     <<std::endl;
   for (int i=0;i<120;i++) ss<<"-";
   ss<<std::endl;  
-  for (uint ibeam=0;ibeam<fBeams.size();ibeam++) {
+  for (unsigned int ibeam=0;ibeam<fBeams.size();ibeam++) {
     std::stringstream fname;
     fname<<"beam_"<<fBeams[ibeam]<<"_"
 	 <<std::setfill('0') << std::setw(7) << fRun<<"_"
@@ -385,7 +385,7 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
     std::streampos begpos=file_in->tellg();
     boost::archive::binary_iarchive ia_beam(*file_in);
     ia_beam>>bh;
-    for (uint i=0;i<bh.getNumberOfDevices();i++) {
+    for (unsigned int i=0;i<bh.getNumberOfDevices();i++) {
       ub_BeamData bdata;
       ia_beam>>bdata;
       fFOM=getFOM(beamline,bh,bd);
@@ -479,7 +479,7 @@ void BeamData::fillTreeData(std::string beam, const ub_BeamHeader& bh, const std
     if (bd[i].getData().size()==1) {
       fBeamConf[beam].fTreeVar[varname]=bd[i].getData()[0];
     } else {
-      for (uint j=0;j<bd[i].getData().size();j++) {
+      for (unsigned int j=0;j<bd[i].getData().size();j++) {
 	fBeamConf[beam].fTreeArr[varname][j]=bd[i].getData()[j];
       }
     }
@@ -491,7 +491,7 @@ void BeamData::createBranches(std::string beam)
 {
   //read 10 events and figure out which variables to output
   //and if a var is an array
-  std::map<std::string, uint> vars;
+  std::map<std::string, unsigned int> vars;
   std::vector<std::streampos> rwbyt;
   for (int iev=0;iev<10;iev++) {
     ub_BeamHeader bh;
@@ -500,7 +500,7 @@ void BeamData::createBranches(std::string beam)
       for (int i=0;i<bh.getNumberOfDevices();i++) {
 	std::string varname=bd[i].getDeviceName();
 	varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
-	std::pair<std::string,uint> p(varname, bd[i].getData().size());
+	std::pair<std::string,unsigned int> p(varname, bd[i].getData().size());
 	vars.insert(p);
       }    
       rwbyt.push_back(bh.getNumberOfBytesInRecord());
@@ -508,7 +508,7 @@ void BeamData::createBranches(std::string beam)
   }
 
   // This does not work ???
-  //  for (uint i=rwbyt.size()-1;i>=0;i--) {
+  //  for (unsigned int i=rwbyt.size()-1;i>=0;i--) {
   //  rewindBeamFile(beam,rwbyt[i]);
   // }
 
