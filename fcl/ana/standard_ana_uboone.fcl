@@ -57,7 +57,7 @@ outputs:
 physics.analyzers.analysistree:  @local::microboone_analysistree
 physics.analyzers.analysistree.HitsModuleLabel:                 "gaushit"
 physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit","stitchkalmanhit","trackkalmanhitcc","stitchkalmanhitcc","pandoraCosmicKHit","pandoraNuKHit","cctrack","trackkalmanhitc3d","stitchkalmanhitc3d"]
-physics.analyzers.analysistree.VertexModuleLabel:               "cccluster"
+physics.analyzers.analysistree.VertexModuleLabel:               ["cccluster", "pandoraNu", "pandoraCosmic"]
 physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo","stitchkalmanhitcalo","trackkalmanhitcalocc","stitchkalmanhitcalocc","pandoraCosmicKHitcalo","pandoraNuKHitcalo","cctrackcaloDUMMY","trackkalmanhitcaloc3d","stitchkalmanhitcaloc3d"]
 physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","trackkalmanhitpidcc","stitchkalmanhitpidcc","pandoraCosmicKHitpid","pandoraNuKHitpid","cctrackpidDUMMY","trackkalmanhitpidc3d","stitchkalmanhitpidc3d"]
 physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag","stitchkalmanhittag","trackkalmanhittagcc","stitchkalmanhittagcc","pandoraCosmicKHitPFPart","pandoraNuKHittag","cctracktagDUMMY","trackkalmanhittagc3d","stitchkalmanhittagc3d"]
