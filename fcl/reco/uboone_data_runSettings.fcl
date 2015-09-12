@@ -23,3 +23,5 @@ services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:
 # These settings for the change in wire bias 8/13/15
 services.LArProperties.Efield:                             [0.273,0.527,0.790] # 0.273 corresponds to 70 kV
 services.LArProperties.Electronlifetime:                   2.0e03   # Current statement is that electron lifetime is 2 ms
+
+services.TimeService.TrigModuleName:     "daq"
