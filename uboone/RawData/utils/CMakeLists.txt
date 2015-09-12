@@ -1,6 +1,6 @@
 
 # find_ups_product is meant to be called from the top CMakeLists.txt file
-find_ups_product( uboonedaq_datatypes v6_10_00 )
+find_ups_product( uboonedaq_datatypes v6_14_00 )
 
 find_library( UBDut NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LIB} )
 

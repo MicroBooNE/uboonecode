@@ -212,7 +212,7 @@ outputs:
 ### Here, we overwrite ALL module labels with the ones defined above.
 
 # Fuzzy Cluster related
-physics.producers.trackkalmanhit.HitModuleLabel:                    "gaushit"
+physics.producers.trackkalmanhit.HitModuleLabel:                    "cchit"
 physics.producers.trackkalmanhit.ClusterModuleLabel:                "fuzzycluster"
 
 physics.producers.stitchkalmanhit.TrackModuleLabel:                 "trackkalmanhit"
@@ -247,9 +247,9 @@ physics.producers.stitchkalmanhitflashmatch.BeamFlashTrackMatchAlgParams.MakeOut
 # ClusterCrawler / Track Maker related
 physics.producers.trackkalmanhitcc.HitModuleLabel:                  "linecluster"
 physics.producers.trackkalmanhitcc.ClusterModuleLabel:              "linecluster"
-physics.producers.trackkalmanhitcc.PFParticleModuleLabel:           "cctrack"
-physics.producers.trackkalmanhitcc.UseClusterHits:                  false
-physics.producers.trackkalmanhitcc.UsePFParticleHits:               true
+#physics.producers.trackkalmanhitcc.PFParticleModuleLabel:           "cctrack"
+#physics.producers.trackkalmanhitcc.UseClusterHits:                  false
+#physics.producers.trackkalmanhitcc.UsePFParticleHits:               true
 
 physics.producers.stitchkalmanhitcc.TrackModuleLabel:               "trackkalmanhitcc"
 physics.producers.stitchkalmanhitcc.SpptModuleLabel:                "trackkalmanhitcc"
@@ -283,6 +283,7 @@ physics.producers.stitchkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeO
 physics.producers.stitchkalmanhitflashmatchcc.HitModuleLabel:        "linecluster"
 
 # Pandora related
+physics.producers.pandoraCosmicKHit.HitModuleLabel:                 "cchit"
 physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
 physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
 physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
@@ -303,6 +304,7 @@ physics.producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosm
 physics.producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "opflash"
 physics.producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
+physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:        "cchit"
 physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKHitPFPart"]
 physics.producers.pandoraCosmicKHitRemoval.FlashProducerLabel:      "pandoraCosmicKHitFlashMatch"
 physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
@@ -312,6 +314,7 @@ physics.producers.pandoraNu.GeantModuleLabel:                       "largeant"
 physics.producers.pandoraNu.HitFinderModuleLabel:                   "pandoraCosmicKHitRemoval"
 physics.producers.pandoraNu.ConfigFile:                             "PandoraSettings_MicroBooNE_Neutrino.xml"
 
+physics.producers.pandoraNuKHit.HitModuleLabel:                     "pandoraCosmicKHitRemoval"
 physics.producers.pandoraNuKHit.UseClusterHits:                     false
 physics.producers.pandoraNuKHit.UsePFParticleHits:                  true
 physics.producers.pandoraNuKHit.PFParticleModuleLabel:              "pandoraNu"

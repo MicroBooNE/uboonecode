@@ -10,13 +10,16 @@ microboone_analysistree:
  GenieGenModuleLabel:      "generator"
  G4ModuleLabel:            "largeant"
  TrackModuleLabel:         [ "track3d" ]
- VertexModuleLabel:        "vertex3d"
+ VertexModuleLabel:        [ "vertex3d" ]
  ClusterModuleLabel:       "linecluster"
  OpFlashModuleLabel:       "opflash"
  MCShowerModuleLabel:      "mcreco" 
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
  ShowerModuleLabel:        ["showerrecofuzzy"]
+ CosmicClusterTaggerAssocLabel: "ccclustertag"
+ CosmicTaggerAssocLabel: ["trackkalmanhit"]
+ FlashMatchAssocLabel:   ["flashTrackMatchkHit"]
  POTModuleLabel:           "generator"
  UseBuffers:               false
  IgnoreMissingShowers:     false

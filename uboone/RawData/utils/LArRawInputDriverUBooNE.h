@@ -17,6 +17,7 @@
 #include "art/Framework/Principal/EventPrincipal.h"
 #include "art/Persistency/Provenance/SubRunID.h"
 
+#include "datatypes/uboone_data_utils.h"
 #include "datatypes/raw_data_access.h"
 #include <boost/archive/binary_iarchive.hpp>
 #include "datatypes/ub_EventRecord.h"
@@ -70,6 +71,9 @@ namespace lris {
 		  art::SubRunPrincipal* &outSR,
 		  art::EventPrincipal* &outE);
 
+  unsigned int RollOver(unsigned int ref,
+			unsigned int subject,
+			unsigned int nbits);
   private:
     //Other functions
 
