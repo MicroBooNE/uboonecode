@@ -1,0 +1,32 @@
+BEGIN_PROLOG
+
+microboone_beamdata:
+{
+  module_type:    "BeamData"
+  
+  beams: [ "bnb", "numi" ]
+ 
+  bnb:  {
+	 #0x200  external
+	 #0x1000 gate1
+	 #0x800  gate2
+  	 trigger_mask : 0x800
+  	 path_to_beam_file: "./"
+	 time_offset: -2390. #offset between detector and beam clock
+         merge_time_tolerance: 30. #in ms
+	 sum_devices: [ "E:TOR860", "E:TOR875" ]
+	 write_beam_data: true
+	 FOM_cut : 0.98
+        }
+  numi: {
+  	 trigger_mask : 0x1000
+  	 path_to_beam_file: "./"
+	 time_offset: 0.        
+         merge_time_tolerance: 100. #in ms
+  	 sum_devices: [ "E:TORTGT" ]
+	 write_beam_data: true
+	 FOM_cut : 0.98
+	}
+}
+
+END_PROLOG
