@@ -234,7 +234,7 @@ namespace caldata {
         channel = digitVec->Channel();
       
         // skip bad channels
-        if(!chanFilt.IsBad(channel)) {
+        if(chanFilt.IsPresent(channel) && !chanFilt.IsBad(channel)) {
       
           // resize and pad with zeros
       	  holder.resize(transformSize, 0.);

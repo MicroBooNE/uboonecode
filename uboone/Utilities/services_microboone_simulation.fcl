@@ -49,12 +49,14 @@ microboone_detsim_dark_services:                                @local::microboo
 microboone_detsim_dark_services.LArFFT:                         @local::microboone_larfft
 microboone_detsim_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
 microboone_detsim_dark_services.IDetPedestalService:            @local::microboone_detpedestalservice
+microboone_detsim_dark_services.IChannelFilterService:          @local::microboone_channelfilter_service
 
 # Define microboone_simulation_dark ... (all) = (0) + (1) + (2)
 microboone_simulation_dark_services:                                @local::microboone_g4_dark_services
 microboone_simulation_dark_services.LArFFT:                         @local::microboone_larfft
 microboone_simulation_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
 microboone_simulation_dark_services.IDetPedestalService:            @local::microboone_detpedestalservice
+microboone_simulation_dark_services.IChannelFilterService:          @local::microboone_channelfilter_service
 
 #
 # Define optical simulation included ones
@@ -94,5 +96,6 @@ microboone_simulation_services.UBOpticalChConfig:               @local::microboo
 microboone_simulation_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
 microboone_simulation_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
 microboone_simulation_services.IDetPedestalService:             @local::microboone_detpedestalservice
+microboone_simulation_services.IChannelFilterService:           @local::microboone_channelfilter_service
 
 END_PROLOG

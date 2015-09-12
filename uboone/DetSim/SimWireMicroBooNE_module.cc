@@ -82,32 +82,33 @@ namespace detsim {
 
     void GenNoiseInTime(std::vector<float> &noise, double noise_factor) const;
     void GenNoiseInFreq(std::vector<float> &noise, double noise_factor) const;
-    void MakeADCVec(std::vector<unsigned int> const& adc, std::vector<float> const& noise, 
+    void MakeADCVec(std::vector<short>& adc, std::vector<float> const& noise, 
                     std::vector<double> const& charge, float ped_mean) const;
 
-    std::string            fDriftEModuleLabel;///< module making the ionization electrons
-    raw::Compress_t        fCompression;      ///< compression type to use
+    std::string             fDriftEModuleLabel; ///< module making the ionization electrons
+    raw::Compress_t         fCompression;       ///< compression type to use
 
-    double                 fNoiseWidth;       ///< exponential noise width (kHz)
-    double                 fNoiseRand;        ///< fraction of random "wiggle" in noise in freq. spectrum
-    double                 fLowCutoff;        ///< low frequency filter cutoff (kHz)
-    double                 fSampleRate;       ///< sampling rate in ns
+    double                  fNoiseWidth;        ///< exponential noise width (kHz)
+    double                  fNoiseRand;         ///< fraction of random "wiggle" in noise in freq. spectrum
+    double                  fLowCutoff;         ///< low frequency filter cutoff (kHz)
+    double                  fSampleRate;        ///< sampling rate in ns
 
-    size_t                 fNTicks;           ///< number of ticks of the clock    
-    unsigned int           fNTimeSamples;     ///< number of ADC readout samples in all readout frames (per event)                 
+    size_t                  fNTicks;	        ///< number of ticks of the clock    
+    unsigned int            fNTimeSamples;      ///< number of ADC readout samples in all readout frames (per event)	 	   
 
-    TH1D*                  fNoiseDistColl;    ///< distribution of noise counts
-    TH1D*                  fNoiseDistInd;     ///< distribution of noise counts
-    bool fGetNoiseFromHisto;                  ///< if True -> Noise from Histogram of Freq. spectrum
-    bool fGenNoiseInTime;                     ///< if True -> Noise with Gaussian dsitribution in Time-domain
-    bool fGenNoise;                           ///< if True -> Gen Noise. if False -> Skip noise generation entierly
-    std::string fNoiseFileFname;
-    std::string fNoiseHistoName;
-    TH1D*             fNoiseHist;             ///< distribution of noise counts
+    TH1D*                   fNoiseDistColl;     ///< distribution of noise counts
+    TH1D*                   fNoiseDistInd;      ///< distribution of noise counts
+    bool                    fGetNoiseFromHisto; ///< if True -> Noise from Histogram of Freq. spectrum  		 	    
+    bool                    fGenNoiseInTime;    ///< if True -> Noise with Gaussian dsitribution in Time-domain 	 	    
+    bool                    fGenNoise;          ///< if True -> Gen Noise. if False -> Skip noise generation entierly	 	    
+    std::string             fNoiseFileFname;
+    std::string             fNoiseHistoName;
+    TH1D*                   fNoiseHist;         ///< distribution of noise counts
 
     std::map< double, int > fShapingTimeOrder;
-    std::string fTrigModName;                 ///< Trigger data product producer name
+    std::string             fTrigModName;       ///< Trigger data product producer name
     
+    bool                    fSimDeadChannels;   ///< if True, simulate dead channels using the ChannelFilter service.  If false, do not simulate dead channels
 
     bool        fTest; // for forcing a test case
     std::vector<sim::SimChannel> fTestSimChannel_v;
@@ -181,6 +182,7 @@ namespace detsim {
     fGetNoiseFromHisto= p.get< bool                >("GetNoiseFromHisto");
     fGenNoiseInTime   = p.get< bool                >("GenNoiseInTime");
     fGenNoise         = p.get< bool                >("GenNoise");
+    fSimDeadChannels  = p.get< bool                >("SimDeadChannels");
 
     fTrigModName      = p.get< std::string         >("TrigModName");
     fTest             = p.get<bool                 >("Test");
@@ -305,7 +307,7 @@ namespace detsim {
     
     //channel status for simulating dead channels
     const lariov::IChannelFilterProvider& channelFilterProvider
-       = art::ServiceHandle<lariov::IChannelFilterProvider>()->GetFilter();
+       = art::ServiceHandle<lariov::IChannelFilterService>()->GetFilter();
 
     //get the FFT
     art::ServiceHandle<util::LArFFT> fFFT;
@@ -432,7 +434,7 @@ namespace detsim {
         int raw_digit_index =
         ( (t + time_offset) >= 0 ? t+time_offset : (fNTicks + (t+time_offset)) );
 
-        if(raw_digit_index <= 0 || raw_digit_index >= (int)fNTicks)) continue;
+        if(raw_digit_index <= 0 || raw_digit_index >= (int)fNTicks) continue;
 
         // here fill ResponseParams... all the wires!
         for(int wire = -(N_RESPONSES[0][view]-1); wire<(int)N_RESPONSES[0][view]; ++wire) {
@@ -546,8 +548,8 @@ namespace detsim {
 
 
       //If the channel is bad, we can stop here
-      //if you are using the UbooneChannelFilterService, then this removes "dead" and "low noise" channels
-      if (fSimDeadChannels && channelFilterProvider.IsBad(chan)) {
+      //if you are using the UbooneChannelFilterService, then this removes disconnected, "dead", and "low noise" channels
+      if (fSimDeadChannels && (channelFilterProvider.IsBad(chan) || !channelFilterProvider.IsPresent(chan)) ) {
         MakeADCVec(adcvec, noisetmp, chargeWork, ped_mean);
 	raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
         rd.SetPedestal(ped_mean);
@@ -618,7 +620,7 @@ namespace detsim {
       // is still there, although unused; a copy of adcvec will instead have
       // only 5000 items. All 9600 items of adcvec will be recovered for free
       // and used on the next loop.
-      MakeADCVec(advec, noisetmp, chargeWork, ped_mean);
+      MakeADCVec(adcvec, noisetmp, chargeWork, ped_mean);
       raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
       rd.SetPedestal(ped_mean);
       digcol->push_back(std::move(rd)); // we do move the raw digit copy, though
@@ -630,13 +632,13 @@ namespace detsim {
 
 
   //-------------------------------------------------
-  void SimWireMicroBooNE::MakeADCVec(std::vector<short> const& adcvec, std::vector<float> const& noisevec, 
+  void SimWireMicroBooNE::MakeADCVec(std::vector<short>& adcvec, std::vector<float> const& noisevec, 
                                      std::vector<double> const& chargevec, float ped_mean) const {
 
 
     for(unsigned int i = 0; i < fNTimeSamples; ++i) {
 
-       float adcval = noisetmp[i] + chargeWork[i] + ped_mean;
+       float adcval = noisevec[i] + chargevec[i] + ped_mean;
 
       //allow for ADC saturation
       if ( adcval > adcsaturation )
@@ -674,7 +676,7 @@ namespace detsim {
 
 
   //-------------------------------------------------
-  void SimWireMicroBooNE::GenNoiseInFreq(std::vector<float> &noise, noise_factor) const
+  void SimWireMicroBooNE::GenNoiseInFreq(std::vector<float> &noise, double noise_factor) const
   {
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine("noise");

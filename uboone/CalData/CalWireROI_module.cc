@@ -148,7 +148,7 @@ namespace caldata {
     bool fuPlaneRamp;     ///< set true for correct U plane wire response
     int  fSaveWireWF;     ///< Save recob::wire object waveforms
     size_t fEventCount;  ///< count of event processed
-    int  fMaxAllowedChanStatus;
+    int  fMinAllowedChanStatus;
     
     void doDecon(std::vector<float>& holder, 
       raw::ChannelID_t channel, unsigned int thePlane,
@@ -218,7 +218,7 @@ namespace caldata {
     fuPlaneRamp           = p.get< bool >                          ("uPlaneRamp");
     fFFTSize              = p.get< int  >                          ("FFTSize");
     fSaveWireWF           = p.get< int >                           ("SaveWireWF");
-    fMaxAllowedChanStatus = p.get< int >                           ("MaxAllowedChannelStatus");
+    fMinAllowedChanStatus = p.get< int >                           ("MinAllowedChannelStatus");
 
     fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
         
@@ -359,7 +359,7 @@ namespace caldata {
       //  minSepPad = fMinSep + fPostROIPad[thePlane];
       
       // skip bad channels
-      if(!(chanFilt.Status(channel) > fMaxAllowedChanStatus)) {
+      if( chanFilt.Status(channel) >= fMinAllowedChanStatus) {
         
           // uncompress the data
           raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
