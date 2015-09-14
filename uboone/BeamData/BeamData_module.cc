@@ -86,8 +86,8 @@ private:
     bool fWriteBeamData;
     float fFOMcut;
     TTree* fTree;
-    std::map<std::string, float> fTreeVar;
-    std::map<std::string, float*> fTreeArr;
+    std::map<std::string, double> fTreeVar;
+    std::map<std::string, double*> fTreeArr;
   };
 
   std::vector<std::string> fBeams;
@@ -202,14 +202,17 @@ void BeamData::endSubRun(art::SubRun & sr)
   for (auto it=fBeamConf.begin();it!=fBeamConf.end();it++) {
     mf::LogDebug(__FUNCTION__) <<"Loop through the remaining "
 			      <<it->first<<" beam events";
-    ub_BeamHeader bh;
-    std::vector<ub_BeamData> bd;
-    while (nextBeamEvent(it->first,bh,bd)) {
-      if (fBeamConf[it->first].fWriteBeamData) 
-	fillTreeData(it->first,bh,bd);
+    while (true) {
+      ub_BeamHeader bh;
+      std::vector<ub_BeamData> bd;
+      if (nextBeamEvent(it->first,bh,bd)) {
+	if (fBeamConf[it->first].fWriteBeamData) 
+	  fillTreeData(it->first,bh,bd);
+      } else {
+	break;
+      }
     }
   }
-
   for (auto& it_beamline : fBeamConf ) {
     for (auto& it_dev : it_beamline.second.fTotalSums ) {
       std::unique_ptr<sumdata::POTSummary> pot(new sumdata::POTSummary);    
@@ -254,26 +257,30 @@ void BeamData::endJob()
   for (int i=0;i<120;i++) ss<<"=";
   ss<<std::endl;
   ss<<std::endl;
-  for (int i=0;i<60;i++) ss<<"=";
+  for (int i=0;i<100;i++) ss<<"=";
   ss<<std::endl;
   ss<<std::setw(20)<<"Beam"
     <<std::setw(20)<<"Device"
-    <<std::setw(20)<<"Sum"
+    <<std::setw(30)<<"Total Sum (Spills)"
+    <<std::setw(30)<<"Good Sum (Good spills)"
     <<std::endl;
-  for (int i=0;i<60;i++) ss<<"-";
+  for (int i=0;i<100;i++) ss<<"-";
   ss<<std::endl;
   for (auto& it : fBeamConf ) {
     ss<<std::setw(20)<<it.first;
     bool ifirst=true;
-    for (auto& itdev : it.second.fGoodSums) {
+    for (auto& itdev : it.second.fTotalSums) {
       if (!ifirst) ss<<std::setw(20)<<" ";	
       ss<<std::setw(20)<<itdev.first
-	<<std::setw(20)<<itdev.second
+	<<std::setw(20)<<it.second.fTotalSums[itdev.first]
+	<<std::setw(10)<<std::string(" (")+std::to_string(it.second.fTotalSpillCount)+std::string(") ")
+	<<std::setw(20)<<it.second.fGoodSums[itdev.first]
+	<<std::setw(10)<<std::string(" (")+std::to_string(it.second.fGoodSpillCount)+std::string(") ")
 	<<std::endl;
       ifirst=false;
     }      
   }
-  for (int i=0;i<60;i++) ss<<"=";
+  for (int i=0;i<100;i++) ss<<"=";
   ss<<std::endl;
   mf::LogInfo(__FUNCTION__)<<ss.str();
   fBeamConf.clear();
@@ -388,7 +395,10 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
     for (unsigned int i=0;i<bh.getNumberOfDevices();i++) {
       ub_BeamData bdata;
       ia_beam>>bdata;
-      fFOM=getFOM(beamline,bh,bd);
+      bd.push_back(bdata);
+    }
+    fFOM=getFOM(beamline,bh,bd);
+    for (auto& bdata : bd) {
       for (auto it=fBeamConf[beamline].fTotalSums.begin();
 	   it!=fBeamConf[beamline].fTotalSums.end();it++) {
 	if (bdata.getDeviceName().find(it->first)!=std::string::npos) {
@@ -397,7 +407,6 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
 	    fBeamConf[beamline].fGoodSums[it->first]+=bdata.getData()[0];
 	}
       }
-      bd.push_back(bdata);
     }
     std::streampos endpos=file_in->tellg();
     bh.setNumberOfBytesInRecord(endpos-begpos);
@@ -405,7 +414,7 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
     if (fFOM>fBeamConf[beamline].fFOMcut) 
       fBeamConf[beamline].fGoodSpillCount+=1;
   } catch ( ... ) {
-    mf::LogInfo()<<"Reached end of beam file "<<fBeamConf[beamline].fFileName;
+    mf::LogInfo(__FUNCTION__)<<"Reached end of beam file "<<fBeamConf[beamline].fFileName;
     result=false;
   }
   return result;
@@ -418,11 +427,22 @@ bool BeamData::rewindBeamFile(std::string beam_name, const ub_BeamHeader& bh, co
     //rewind beam file
     std::streampos nbytes=bh.getNumberOfBytesInRecord();
     fBeamConf[beam_name].fBeamStream->seekg(fBeamConf[beam_name].fBeamStream->tellg()-nbytes);
+    fFOM=getFOM(beam_name,bh,bd);
+    for (auto& bdata : bd) {
+      for (auto it=fBeamConf[beam_name].fTotalSums.begin();
+	   it!=fBeamConf[beam_name].fTotalSums.end();it++) {
+	if (bdata.getDeviceName().find(it->first)!=std::string::npos) {
+	  fBeamConf[beam_name].fTotalSums[it->first]-=bdata.getData()[0];
+	  if (fFOM>fBeamConf[beam_name].fFOMcut) 
+	    fBeamConf[beam_name].fGoodSums[it->first]-=bdata.getData()[0];
+	}
+      }
+    }
     fBeamConf[beam_name].fTotalSpillCount-=1;
-    if (getFOM(beam_name,bh,bd)>fBeamConf[beam_name].fFOMcut) 
-      fBeamConf[beam_name].fGoodSpillCount-=1;
+    if (fFOM>fBeamConf[beam_name].fFOMcut) 
+      fBeamConf[beam_name].fGoodSpillCount-=1;     
   } catch ( ... ) {
-    mf::LogError()<<"Failed to rewind file "<<fBeamConf[beam_name].fFileName;
+    mf::LogError(__FUNCTION__)<<"Failed to rewind file "<<fBeamConf[beam_name].fFileName;
     result=false;
   }
 
@@ -516,6 +536,14 @@ void BeamData::createBranches(std::string beam)
   fBeamConf[beam].fBeamStream->seekg(0);
   fBeamConf[beam].fTotalSpillCount=0;
   fBeamConf[beam].fGoodSpillCount=0;
+  for (auto it=fBeamConf[beam].fTotalSums.begin();
+       it!=fBeamConf[beam].fTotalSums.end();it++) {
+    it->second=0;
+  }
+  for (auto it=fBeamConf[beam].fGoodSums.begin();
+       it!=fBeamConf[beam].fGoodSums.end();it++) {
+    it->second=0;
+  }
 
   fBeamConf[beam].fTree->Branch("run",&fRun,"run/I");
   fBeamConf[beam].fTree->Branch("subrun",&fSubRun,"subrun/I");
@@ -529,13 +557,13 @@ void BeamData::createBranches(std::string beam)
 	fBeamConf[beam].fTreeVar[it.first]=-999;
 	ss <<"Creating scalar branch for device "<<it.first.c_str()<<std::endl;
 	fBeamConf[beam].fTree->Branch(it.first.c_str(),&fBeamConf[beam].fTreeVar[it.first],
-				      (it.first+"/F").c_str());
+				      (it.first+"/D").c_str());
       } else {
-	float* x=new float[it.second];
+	double* x=new double[it.second];
 	fBeamConf[beam].fTreeArr[it.first]=x;
 	ss <<"Creating vector branch for device "<<it.first.c_str()<<std::endl;
 	fBeamConf[beam].fTree->Branch(it.first.c_str(),&fBeamConf[beam].fTreeArr[it.first],
-				      (it.first+"["+std::to_string(it.second)+"]/F").c_str());
+				      (it.first+"["+std::to_string(it.second)+"]/D").c_str());
       }
 
   }
