@@ -97,7 +97,8 @@ namespace lris {
     uint32_t                       fNumberEventsInFile;
     bool                           fHuffmanDecode;
     util::UBChannelMap_t           fChannelMap;   
-    int                            fSwizzlingTime; //fhicl parameter. "Now," unless set otherwise.
+    int                            fDataTakingTime; //fhicl parameter. Optional to override raw data's internal time stamp.
+    int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
 
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices

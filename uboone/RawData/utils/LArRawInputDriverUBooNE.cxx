@@ -72,6 +72,7 @@ namespace lris {
     helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::Trigger>,   art::InEvent>("daq");
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
+    fDataTakingTime                    = ps.get< int  >("DataTakingTime", -1);
     fSwizzlingTime                     = ps.get< int  >("SwizzlingTime", -1);
 
     //if ( fHuffmanDecode )
@@ -331,9 +332,13 @@ namespace lris {
                                             std::vector<raw::RawDigit>& tpcDigitList)
   {    
     //Channel map has changed each time the detector has been re-cabled.
-    //Provide data-taking time as first argument. (integer Epoch seconds) + //3 months in seconds for now.
-    //Optionally recover outdated mappings with swizzling time second arg. (also integer epoch seconds)
-    fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap(event_record.LocalHostTime().seb_time_sec + 7889231, SwizzlingTime); 
+    //Provide data-taking time as first argument. (integer epoch seconds) 
+    //Optionally recover outdated mappings with 'swizzling time' second arg. (also integer epoch seconds)
+    if (fDataTakingTime == -1)
+      fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap(event_record.LocalHostTime().seb_time_sec, fSwizzlingTime); 
+    else
+      fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap(fDataTakingTime, fSwizzlingTime); 
+
     
     // ### Swizzling to get the number of channels...trying the method used in write_read.cpp
     // ### provided by Wes --- About the data:
