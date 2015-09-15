@@ -96,30 +96,42 @@ microboone::TPCNeutrinoIDFilter::TPCNeutrinoIDFilter(fhicl::ParameterSet const& 
   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")),
   fCosmicTaggerAssocLabel   (pset.get< std::string >("CosmicTaggerAssocLabel"))
 {
-} // microboone::AnalysisTree::AnalysisTree()
+} // microboone::TPCNeutrinoIDFilter::TPCNeutrinoIDFilter()
+
+microboone::TPCNeutrinoIDFilter::~TPCNeutrinoIDFilter()
+{
+  //DestroyData();
+}
 
 void microboone::TPCNeutrinoIDFilter::analyze(const art::Event& evt)
 {
 
+  double trkstartx = 0;
+  double trkstarty = 0;
+  double trkstartz = 0;
+  double trkendx = 0;
+  double trkendy = 0;
+  double trkendz = 0;
+
   // * vertices
-  std::vector< art::Handle< std::vector<recob::Vertex> > > vertexListHandle;
-  std::vector< std::vector<art::Ptr<recob::Vertex> > > vertexlist;
-  if (evt.getByLabel(fVertexModuleLabel,vertexListHandle)) art::fill_ptr_vector(vertexlist, vertexListHandle);
-  }
+  art::Handle< std::vector<recob::Vertex> > vertexListHandle;
+  std::vector< art::Ptr<recob::Vertex> > vertexlist;
+  if (evt.getByLabel(fVertexModuleLabel,vertexListHandle))
+    art::fill_ptr_vector(vertexlist, vertexListHandle);
   
   // * tracks
-  std::vector< art::Handle< std::vector<recob::Track> > > trackListHandle;
-  std::vector< std::vector<art::Ptr<recob::Track> > > tracklist;
-  if (evt.getByLabel(fTrackModuleLabel,trackListHandle)) art::fill_ptr_vector(tracklist, trackListHandle);
+  art::Handle< std::vector<recob::Track> > trackListHandle;
+  std::vector< art::Ptr<recob::Track> > tracklist;
+  if (evt.getByLabel(fTrackModuleLabel,trackListHandle))
+     art::fill_ptr_vector(tracklist, trackListHandle);
 
   size_t NTracks = tracklist.size();
-  ntracks_reco = (int) NTracks;
     
-  for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
+  for(size_t iTrk=0; iTrk < NTracks; ++iTrk) {//loop over tracks
       
      //Cosmic Tagger information
-     art::FindManyP<anab::CosmicTag> fmct(trackListHandle,evt,fCosmicTaggerAssocLabel);
-     if (fmct.isValid()) float cosmicscore = fmct.at(0)->CosmicScore();
+     //art::FindManyP<anab::CosmicTag> fmct(trackListHandle,evt,fCosmicTaggerAssocLabel);
+     //if (fmct.isValid()) float cosmicscore = fmct.at(0)->CosmicScore();
 
      art::Ptr<recob::Track> ptrack(trackListHandle, iTrk);
      const recob::Track& track = *ptrack;
@@ -136,6 +148,7 @@ void microboone::TPCNeutrinoIDFilter::analyze(const art::Event& evt)
            pos.SetXYZ(xyz[0],xyz[1],xyz[2]);
            btrack.GetTrackPoint(1,xyz);
            end.SetXYZ(xyz[0],xyz[1],xyz[2]);
+        }
      }
      else {   //use the normal methods for other kinds of tracks
         ntraj = track.NumberTrajectoryPoints();
@@ -144,17 +157,21 @@ void microboone::TPCNeutrinoIDFilter::analyze(const art::Event& evt)
            end = track.End();
         }
      }
-  
+
+     std::cout << "trajectory points " << ntraj << std::endl;  
      if(ntraj > 0) {
-        double trkstartx = pos.X();
-        double trkstarty = pos.Y();
-        double trkstartz = pos.Z();
-        double trkendx = end.X();
-        double trkendy = end.Y();
-        double trkendz = end.Z();
+        trkstartx = pos.X();
+        trkstarty = pos.Y();
+        trkstartz = pos.Z();
+        trkendx = end.X();
+        trkendy = end.Y();
+        trkendz = end.Z();
      }
+
+     std::cout << trkstartx << "\t" << trkstarty << "\t" << trkstartz << std::endl;
+     std::cout << trkendx << "\t" << trkendy << "\t" << trkendz << std::endl;
   }
-} // microboone::AnalysisTree::analyze()
+} // microboone::TPCNeutrinoIDFilter::analyze()
 
 
 namespace microboone{
