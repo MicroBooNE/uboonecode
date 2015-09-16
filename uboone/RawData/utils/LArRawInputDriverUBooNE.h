@@ -113,6 +113,61 @@ namespace lris {
     // TPC Helper Methods
     std::vector<short> decodeChannelTrailer(unsigned short last_adc, unsigned short data);
     
-  };  // LArRawInputDriverUBooNE
+   //Stuf that Andy added to make fun trigger plots! :)
+   int N_discriminators [40];
+    int discriminatorFrame [40][100];
+    int discriminatorSample [40][100];
+    int discriminatorType [40][100];
+    uint32_t triggerFrame;
+    uint32_t triggerSample;
+    double triggerTime;
+    uint32_t triggerActive;
+    uint32_t triggerBit;
+    
+    uint32_t FEM1triggerFrame ;
+    uint16_t FEM1triggerSample;
+    uint32_t FEM2triggerFrame ;
+    uint16_t FEM2triggerSample;
+    uint32_t FEM3triggerFrame ;
+    uint16_t FEM3triggerSample;
+    uint32_t FEM4triggerFrame ;
+    uint16_t FEM4triggerSample;
+    uint32_t FEM5triggerFrame ;
+    uint16_t FEM5triggerSample;
+    uint32_t FEM6triggerFrame ;
+    uint16_t FEM6triggerSample;
+    uint32_t FEM7triggerFrame ;
+    uint16_t FEM7triggerSample;
+    uint32_t FEM8triggerFrame ;
+    uint16_t FEM8triggerSample;
+
+    uint32_t TPCtriggerFrame;
+    uint32_t TPCtriggerSample;
+    
+    uint32_t ADCwords_crate0;
+    uint32_t ADCwords_crate1;
+    uint32_t ADCwords_crate2;
+    uint32_t ADCwords_crate3;
+    uint32_t ADCwords_crate4;
+    uint32_t ADCwords_crate5;
+    uint32_t ADCwords_crate6;
+    uint32_t ADCwords_crate7;
+    uint32_t ADCwords_crate8;
+    uint32_t ADCwords_crate9;
+    uint32_t NumWords_crate0;
+    uint32_t NumWords_crate1;
+    uint32_t NumWords_crate2;
+    uint32_t NumWords_crate3;
+    uint32_t NumWords_crate4;
+    uint32_t NumWords_crate5;
+    uint32_t NumWords_crate6;
+    uint32_t NumWords_crate7;
+    uint32_t NumWords_crate8;
+    uint32_t NumWords_crate9;
+
+    int event;
+    TTree *tMyTree;
+    
+  };  // LArRawInputDriverUBooNE;
 
 }

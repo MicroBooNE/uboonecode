@@ -42,6 +42,7 @@
 
 //root
 #include "TH1D.h"
+#include "TTree.h"
 
 //other
 #include <libpq-fe.h>
@@ -157,6 +158,63 @@ namespace lris {
         fHistMapBeam.insert(p);
       }
     }
+
+    art::TFileDirectory tfdebugdir = tfs->mkdir( "Debug" );
+    tMyTree = tfdebugdir.make<TTree>("tMyTree", "tree");
+    tMyTree->Branch("event",&event,"event/I");
+    tMyTree->Branch("triggerFrame",&triggerFrame,"triggerFrame/I");
+    tMyTree->Branch("triggerSample",&triggerSample,"triggerSample/I");
+    tMyTree->Branch("triggerTime",&triggerTime,"triggerTime/D");
+    tMyTree->Branch("triggerActive",&triggerActive,"triggerActive/I");
+    tMyTree->Branch("triggerBit",&triggerBit,"triggerBit/I");
+    tMyTree->Branch("FEM1triggerFrame",&FEM1triggerFrame,"FEM1triggerFrame/I");
+    tMyTree->Branch("FEM1triggerSample",&FEM1triggerSample,"FEM1triggerSample/I");
+    tMyTree->Branch("FEM2triggerFrame",&FEM2triggerFrame,"FEM2triggerFrame/I");
+    tMyTree->Branch("FEM2triggerSample",&FEM2triggerSample,"FEM2triggerSample/I");
+    tMyTree->Branch("FEM3triggerFrame",&FEM3triggerFrame,"FEM3triggerFrame/I");
+    tMyTree->Branch("FEM3triggerSample",&FEM3triggerSample,"FEM3triggerSample/I");
+    tMyTree->Branch("FEM4triggerFrame",&FEM4triggerFrame,"FEM4triggerFrame/I");
+    tMyTree->Branch("FEM4triggerSample",&FEM4triggerSample,"FEM4triggerSample/I");
+    tMyTree->Branch("FEM5triggerFrame",&FEM5triggerFrame,"FEM5triggerFrame/I");
+    tMyTree->Branch("FEM5triggerSample",&FEM5triggerSample,"FEM5triggerSample/I");
+    tMyTree->Branch("FEM6triggerFrame",&FEM6triggerFrame,"FEM6triggerFrame/I");
+    tMyTree->Branch("FEM6triggerSample",&FEM6triggerSample,"FEM6triggerSample/I");
+    tMyTree->Branch("FEM7triggerFrame",&FEM7triggerFrame,"FEM7triggerFrame/I");
+    tMyTree->Branch("FEM7triggerSample",&FEM7triggerSample,"FEM7triggerSample/I");
+    tMyTree->Branch("FEM8triggerFrame",&FEM8triggerFrame,"FEM8triggerFrame/I");
+    tMyTree->Branch("FEM8triggerSample",&FEM8triggerSample,"FEM8triggerSample/I");
+
+
+    tMyTree->Branch("TPCtriggerFrame",&TPCtriggerFrame,"TPCtriggerFrame/I");
+    tMyTree->Branch("TPCtriggerSample",&TPCtriggerSample,"TPCtriggerSample/I");
+    tMyTree->Branch("N_discriminators",N_discriminators,"N_discriminators[40]/I");
+    tMyTree->Branch("discriminatorSample",discriminatorSample,"discriminatorSample[40][100]/I");
+    tMyTree->Branch("discriminatorFrame",discriminatorFrame,"discriminatorFrame[40][100]/I");
+    tMyTree->Branch("discriminatorType",discriminatorType,"discriminatorType[40][100]/I");
+
+    tMyTree->Branch("ADCwords_crate0",&ADCwords_crate0,"ADCwords_crate0/I");
+    tMyTree->Branch("ADCwords_crate1",&ADCwords_crate1,"ADCwords_crate1/I");
+    tMyTree->Branch("ADCwords_crate2",&ADCwords_crate2,"ADCwords_crate2/I");
+    tMyTree->Branch("ADCwords_crate3",&ADCwords_crate3,"ADCwords_crate3/I");
+    tMyTree->Branch("ADCwords_crate4",&ADCwords_crate4,"ADCwords_crate4/I");
+    tMyTree->Branch("ADCwords_crate5",&ADCwords_crate5,"ADCwords_crate5/I");
+    tMyTree->Branch("ADCwords_crate6",&ADCwords_crate6,"ADCwords_crate6/I");
+    tMyTree->Branch("ADCwords_crate7",&ADCwords_crate7,"ADCwords_crate7/I");
+    tMyTree->Branch("ADCwords_crate8",&ADCwords_crate8,"ADCwords_crate8/I");
+    tMyTree->Branch("ADCwords_crate9",&ADCwords_crate9,"ADCwords_crate9/I");
+    tMyTree->Branch("NumWords_crate0",&NumWords_crate0,"NumWords_crate0/I");
+    tMyTree->Branch("NumWords_crate1",&NumWords_crate1,"NumWords_crate1/I");
+    tMyTree->Branch("NumWords_crate2",&NumWords_crate2,"NumWords_crate2/I");
+    tMyTree->Branch("NumWords_crate3",&NumWords_crate3,"NumWords_crate3/I");
+    tMyTree->Branch("NumWords_crate4",&NumWords_crate4,"NumWords_crate4/I");
+    tMyTree->Branch("NumWords_crate5",&NumWords_crate5,"NumWords_crate5/I");
+    tMyTree->Branch("NumWords_crate6",&NumWords_crate6,"NumWords_crate6/I");
+    tMyTree->Branch("NumWords_crate7",&NumWords_crate7,"NumWords_crate7/I");
+    tMyTree->Branch("NumWords_crate8",&NumWords_crate8,"NumWords_crate8/I");
+    tMyTree->Branch("NumWords_crate9",&NumWords_crate9,"NumWords_crate9/I");
+
+    event = 0;
+
   }
   
   
@@ -273,6 +331,27 @@ namespace lris {
     for ( unsigned int opdetcat=0; opdetcat<(unsigned int)opdet::NumUBOpticalChannelCategories; opdetcat++ ) {
       pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
     }
+    event  = fEventCounter;
+    NumWords_crate0 = 0;
+    NumWords_crate1 = 0;
+    NumWords_crate2 = 0;
+    NumWords_crate3 = 0;
+    NumWords_crate4 = 0;
+    NumWords_crate5 = 0;
+    NumWords_crate6 = 0;
+    NumWords_crate7 = 0;
+    NumWords_crate8 = 0;
+    NumWords_crate9 = 0;
+    ADCwords_crate0 = 0;
+    ADCwords_crate1 = 0;
+    ADCwords_crate2 = 0;
+    ADCwords_crate3 = 0;
+    ADCwords_crate4 = 0;
+    ADCwords_crate5 = 0;
+    ADCwords_crate6 = 0;
+    ADCwords_crate7 = 0;
+    ADCwords_crate8 = 0;
+    ADCwords_crate9 = 0;
 
     bool res=false;
 
@@ -332,7 +411,7 @@ namespace lris {
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
-  {       
+  {    
     //try {
       boost::archive::binary_iarchive ia(fInputStream); 
       ubdaq::ub_EventRecord event_record;  
@@ -354,6 +433,7 @@ namespace lris {
       return false;
     }
       */  
+    tMyTree->Fill();
     return true;
   }
   
@@ -455,7 +535,39 @@ namespace lris {
 
         //The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
         //object), and technically a trailer (though here it's empty!).
-	//	auto const& tpc_card_header = card.header();   
+	auto const& tpc_card_header = card.header();   
+        //std::cout << "getID() = " << tpc_card_header.getID() << ", getModule() = " << tpc_card_header.getModule() << ", crate_number = " << crate_number <<  std::endl;
+        if (crate_number == 1){
+          NumWords_crate1 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 2){
+          NumWords_crate2 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 3){
+          NumWords_crate3 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 4){
+          NumWords_crate4 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 5){
+          NumWords_crate5 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 6){
+          NumWords_crate6 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 7){
+          NumWords_crate7 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 8){
+          NumWords_crate8 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 9){
+          NumWords_crate9 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 0){
+          NumWords_crate0 += tpc_card_header.getWordCount();
+        }
+
 	//	auto const& tpc_card_trailer = card.trailer(); 
 
         //Of course, you can probe for information in the card header. You'll have to find the appropriate
@@ -504,6 +616,36 @@ namespace lris {
 	       }
 	    */
 	    chdsize = adclist.size();
+        if (crate_number == 1){
+          ADCwords_crate1 += chdsize;
+        }
+        if (crate_number == 2){
+          ADCwords_crate2 += chdsize;
+        }
+        if (crate_number == 3){
+          ADCwords_crate3 += chdsize;
+        }
+        if (crate_number == 4){
+          ADCwords_crate4 += chdsize;
+        }
+        if (crate_number == 5){
+          ADCwords_crate5 += chdsize;
+        }
+        if (crate_number == 6){
+          ADCwords_crate6 += chdsize;
+        }
+        if (crate_number == 7){
+          ADCwords_crate7 += chdsize;
+        }
+        if (crate_number == 8){
+          ADCwords_crate8 += chdsize;
+        }
+        if (crate_number == 9){
+          ADCwords_crate9 += chdsize;
+        }
+        if (crate_number == 0){
+          ADCwords_crate0 += chdsize; 
+        }
 	    const static size_t          fAdcList_size = chdsize;
 	    if (fAdcList_size!=chdsize) {
 	      throw art::Exception( art::errors::FileReadError ) 
@@ -665,6 +807,38 @@ namespace lris {
 	    // also need to go from clock time to time stamp
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( sample, frame );
+            if (card_data.getModule() == 1){
+              FEM1triggerFrame = frame;
+              FEM1triggerSample = sample;
+            }
+            if (card_data.getModule() == 2){
+              FEM2triggerFrame = frame;
+              FEM2triggerSample = sample;
+            }
+            if (card_data.getModule() == 3){
+              FEM3triggerFrame = frame;
+              FEM3triggerSample = sample;
+            }
+            if (card_data.getModule() == 4){
+              FEM4triggerFrame = frame;
+              FEM4triggerSample = sample;
+            }
+            if (card_data.getModule() == 5){
+              FEM5triggerFrame = frame;
+              FEM5triggerSample = sample;
+            }
+            if (card_data.getModule() == 6){
+              FEM6triggerFrame = frame;
+              FEM6triggerSample = sample;
+            }
+            if (card_data.getModule() == 7){
+              FEM7triggerFrame = frame;
+              FEM7triggerSample = sample;
+            }
+            if (card_data.getModule() == 8){
+              FEM8triggerFrame = frame;
+              FEM8triggerSample = sample;
+            }
             raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
 
@@ -724,6 +898,7 @@ namespace lris {
       unsigned int frame = trig_header.getFrame();
       //std::cout << "Trigger frame: " << frame << " ... sample : " << sample_64MHz << std::endl;
       util::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
+
       double trigger_time = trig_clock.Time();
       double beam_time = -1;
       if ( trig_data.Trig_Gate1() || trig_data.Trig_Gate2() ) // 1) NUMI : 2) BNB
@@ -745,6 +920,14 @@ namespace lris {
 			      beam_time,
 			      trig_bits );
       trigInfo.emplace_back( swiz_trig );
+      
+// ANDY STUFF
+      triggerFrame = frame;
+      triggerSample = sample_64MHz;
+      triggerActive = trig_data.Trig_Active();
+      triggerBit = trig_bits; 
+      triggerTime = trigger_time;
+
       
     }
   }
