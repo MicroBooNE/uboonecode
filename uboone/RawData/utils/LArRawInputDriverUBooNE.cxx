@@ -166,7 +166,9 @@ namespace lris {
     tMyTree->Branch("triggerSample",&triggerSample,"triggerSample/I");
     tMyTree->Branch("triggerTime",&triggerTime,"triggerTime/D");
     tMyTree->Branch("triggerActive",&triggerActive,"triggerActive/I");
-    tMyTree->Branch("triggerBit",&triggerBit,"triggerBit/I");
+    tMyTree->Branch("triggerBitBNB",&triggerBitBNB,"triggerBitBNB/I");
+    tMyTree->Branch("triggerBitNuMI",&triggerBitNuMI,"triggerBitNuMI/I");
+    tMyTree->Branch("triggerBitEXT",&triggerBitEXT,"triggerBitEXT/I");
     tMyTree->Branch("FEM1triggerFrame",&FEM1triggerFrame,"FEM1triggerFrame/I");
     tMyTree->Branch("FEM1triggerSample",&FEM1triggerSample,"FEM1triggerSample/I");
     tMyTree->Branch("FEM2triggerFrame",&FEM2triggerFrame,"FEM2triggerFrame/I");
@@ -925,7 +927,9 @@ namespace lris {
       triggerFrame = frame;
       triggerSample = sample_64MHz;
       triggerActive = trig_data.Trig_Active();
-      triggerBit = trig_bits; 
+      triggerBitBNB = trig_data.Trig_Gate2(); 
+      triggerBitNuMI = trig_data.Trig_Gate1(); 
+      triggerBitEXT = trig_data.Trig_EXT(); 
       triggerTime = trigger_time;
 
       

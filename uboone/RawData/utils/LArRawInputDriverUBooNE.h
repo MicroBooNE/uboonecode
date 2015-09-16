@@ -122,7 +122,9 @@ namespace lris {
     uint32_t triggerSample;
     double triggerTime;
     uint32_t triggerActive;
-    uint32_t triggerBit;
+    uint32_t triggerBitBNB;
+    uint32_t triggerBitNuMI;
+    uint32_t triggerBitEXT;
     
     uint32_t FEM1triggerFrame ;
     uint16_t FEM1triggerSample;
