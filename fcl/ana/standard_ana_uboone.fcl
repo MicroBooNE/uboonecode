@@ -62,7 +62,9 @@ physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhit
 physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","trackkalmanhitpidcc","stitchkalmanhitpidcc","pandoraCosmicKHitpid","pandoraNuKHitpid","cctrackpidDUMMY","trackkalmanhitpidc3d","stitchkalmanhitpidc3d"]
 physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag","stitchkalmanhittag","trackkalmanhittagcc","stitchkalmanhittagcc","pandoraCosmicKHitPFPart","pandoraNuKHittag","cctracktagDUMMY","trackkalmanhittagc3d","stitchkalmanhittagc3d"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhitflashmatch","stitchkalmanhitflashmatch","trackkalmanhitflashmatchcc","stitchkalmanhitflashmatchcc","pandoraCosmicKHitFlashMatch","pandoraNuKHitFlashMatch","cctrackflashmatchDUMMY","trackkalmanhitflashmatchc3d","stitchkalmanhitflashmatchc3d"]
-physics.analyzers.analysistree.CosmicScoreThresholds:   [0.0]
+physics.analyzers.analysistree.FlashT0FinderLabel:              ["t0","t0","t0","t0","t0","t0","t0","t0","t0"]
+physics.analyzers.analysistree.MCT0FinderLabel:                 ["mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0"]
+physics.analyzers.analysistree.CosmicScoreThresholds:           [0.0]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
 physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
