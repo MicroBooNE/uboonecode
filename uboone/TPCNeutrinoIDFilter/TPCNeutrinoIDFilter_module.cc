@@ -8,7 +8,7 @@
 
 // Framework includes
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Core/EDAnalyzer.h"
+#include "art/Framework/Core/EDFilter.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Framework/Principal/Handle.h"
@@ -69,42 +69,37 @@
 #include "TTree.h"
 #include "TTimeStamp.h"
 
-namespace microboone {
 
-  class TPCNeutrinoIDFilter : public art::EDAnalyzer {
+class TPCNeutrinoIDFilter;
+class TPCNeutrinoIDFilter : public art::EDFilter {
 
-  public:
+public:
 
-    explicit TPCNeutrinoIDFilter(fhicl::ParameterSet const& pset);
-    virtual ~TPCNeutrinoIDFilter();
+   explicit TPCNeutrinoIDFilter(fhicl::ParameterSet const& pset);
+   virtual ~TPCNeutrinoIDFilter();
 
-    void analyze(const art::Event& evt);
+   bool filter(const art::Event& evt);
 
-  private:
+private:
 
-    std::string fTrackModuleLabel;
-    std::string fVertexModuleLabel;
-    std::string fCosmicTaggerAssocLabel;
+   std::string fTrackModuleLabel;
+   std::string fVertexModuleLabel;
+   std::string fCosmicTaggerAssocLabel;
 
-  }; // class microboone::AnalysisTree
-} // namespace microboone
+}; // class microboone::TPCNeutrinoIDFilter
 
 
-microboone::TPCNeutrinoIDFilter::TPCNeutrinoIDFilter(fhicl::ParameterSet const& pset) :
-  EDAnalyzer(pset),
-  fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")),
-  fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")),
-  fCosmicTaggerAssocLabel   (pset.get< std::string >("CosmicTaggerAssocLabel"))
+TPCNeutrinoIDFilter::TPCNeutrinoIDFilter(fhicl::ParameterSet const& pset) :
+   fTrackModuleLabel         (pset.get< std::string >("TrackModuleLabel")),
+   fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")),
+   fCosmicTaggerAssocLabel   (pset.get< std::string >("CosmicTaggerAssocLabel"))
 {
 } // microboone::TPCNeutrinoIDFilter::TPCNeutrinoIDFilter()
 
-microboone::TPCNeutrinoIDFilter::~TPCNeutrinoIDFilter()
+bool TPCNeutrinoIDFilter::filter(const art::Event& evt)
 {
-  //DestroyData();
-}
 
-void microboone::TPCNeutrinoIDFilter::analyze(const art::Event& evt)
-{
+  bool pass = false;
 
   double trkstartx = 0;
   double trkstarty = 0;
@@ -171,7 +166,10 @@ void microboone::TPCNeutrinoIDFilter::analyze(const art::Event& evt)
      std::cout << trkstartx << "\t" << trkstarty << "\t" << trkstartz << std::endl;
      std::cout << trkendx << "\t" << trkendy << "\t" << trkendz << std::endl;
   }
-} // microboone::TPCNeutrinoIDFilter::analyze()
+
+  return pass;
+
+} // microboone::TPCNeutrinoIDFilter::filter()
 
 
 namespace microboone{
