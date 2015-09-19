@@ -399,6 +399,11 @@ namespace larlite {
 
       lite_mcs.DaughterTrackID( mcs_ptr->DaughterTrackID() );
 
+      lite_mcs.StartDir( mcs_ptr->StartDir() );
+      lite_mcs.dEdx( mcs_ptr->dEdx() );
+      lite_mcs.dQdx( mcs_ptr->dQdx() );
+
+
       //fPtrIndex_mcshower[mcs_ptr] = std::make_pair(lite_data->size(),name_index);
 
       lite_data->push_back(lite_mcs);

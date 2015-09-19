@@ -858,6 +858,10 @@ namespace microboone {
     std::vector<Float_t>     mcshwr_CombEngPy;	    //MC Shower Combined energy deposition information, Momentum X direction.
     std::vector<Float_t>     mcshwr_CombEngPz;	    //MC Shower Combined energy deposition information, Momentum X direction.
     std::vector<Float_t>     mcshwr_CombEngE;	    //MC Shower Combined energy deposition information, Energy
+    std::vector<Float_t>     mcshwr_dEdx;           //MC Shower dEdx, MeV/cm
+    std::vector<Float_t>     mcshwr_StartDirX;      //MC Shower Direction of begining of shower, X direction 
+    std::vector<Float_t>     mcshwr_StartDirY;      //MC Shower Direction of begining of shower, Y direction 
+    std::vector<Float_t>     mcshwr_StartDirZ;      //MC Shower Direction of begining of shower, Z direction 
     std::vector<Int_t>       mcshwr_isEngDeposited;  //tells whether if this shower deposited energy in the detector or not.
     						    //yes = 1; no =0;	
     //MC Shower mother information
@@ -2069,6 +2073,10 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(mcshwr_CombEngPy, -99999.);
   FillWith(mcshwr_CombEngPz, -99999.);
   FillWith(mcshwr_CombEngE, -99999.);
+  FillWith(mcshwr_dEdx, -99999.);
+  FillWith(mcshwr_StartDirX, -99999.);
+  FillWith(mcshwr_StartDirY, -99999.);
+  FillWith(mcshwr_StartDirZ, -99999.);
   FillWith(mcshwr_isEngDeposited, -9999);  
   FillWith(mcshwr_Motherpdg, -99999);
   FillWith(mcshwr_MotherTrkId, -99999);
@@ -2248,6 +2256,10 @@ void microboone::AnalysisTreeDataStruct::ResizeMCShower(int nMCShowers) {
   mcshwr_CombEngPy.resize(nMCShowers);	 
   mcshwr_CombEngPz.resize(nMCShowers);	 
   mcshwr_CombEngE.resize(nMCShowers);
+  mcshwr_dEdx.resize(nMCShowers);
+  mcshwr_StartDirX.resize(nMCShowers);
+  mcshwr_StartDirY.resize(nMCShowers);
+  mcshwr_StartDirZ.resize(nMCShowers);
   mcshwr_isEngDeposited.resize(nMCShowers);	   	
   mcshwr_Motherpdg.resize(nMCShowers);	
   mcshwr_MotherTrkId.resize(nMCShowers);	
@@ -2526,6 +2538,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("mcshwr_CombEngPy",mcshwr_CombEngPy,"mcshwr_CombEngPy[no_mcshowers]/F");
     CreateBranch("mcshwr_CombEngPz",mcshwr_CombEngPz,"mcshwr_CombEngPz[no_mcshowers]/F");
     CreateBranch("mcshwr_CombEngE",mcshwr_CombEngE,"mcshwr_CombEngE[no_mcshowers]/F");
+    CreateBranch("mcshwr_dEdx",mcshwr_dEdx,"mcshwr_dEdx[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirX",mcshwr_StartDirX,"mcshwr_StartDirX[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirY",mcshwr_StartDirY,"mcshwr_StartDirY[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirZ",mcshwr_StartDirZ,"mcshwr_StartDirZ[no_mcshowers]/F");
     CreateBranch("mcshwr_isEngDeposited",mcshwr_isEngDeposited,"mcshwr_isEngDeposited[no_mcshowers]/I");
     CreateBranch("mcshwr_Motherpdg",mcshwr_Motherpdg,"mcshwr_Motherpdg[no_mcshowers]/I");
     CreateBranch("mcshwr_MotherTrkId",mcshwr_MotherTrkId,"mcshwr_MotherTrkId[no_mcshowers]/I");
@@ -3617,6 +3633,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     	  	fData->mcshwr_CombEngPy[shwr]       = mcshwr.DetProfile().Py();       	 
     	  	fData->mcshwr_CombEngPz[shwr]       = mcshwr.DetProfile().Pz();       	 
     	  	fData->mcshwr_CombEngE[shwr]        = mcshwr.DetProfile().E();
+		fData->mcshwr_dEdx[shwr]            = mcshwr.dEdx();
+		fData->mcshwr_StartDirX[shwr]       = mcshwr.StartDir().X();
+		fData->mcshwr_StartDirY[shwr]       = mcshwr.StartDir().Y();
+		fData->mcshwr_StartDirZ[shwr]       = mcshwr.StartDir().Z();
 	  }
 	  else
 	  	fData->mcshwr_isEngDeposited[shwr] = 0;
