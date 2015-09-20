@@ -11,14 +11,14 @@ microboone_opflash_lowgain:
    module_type:     "OpFlashFinder"
    GenModule:       "generator"
    InputModule:     "pmtreadout"
-   InputLabels:     [ "OpdetBeamLowGain" ]
+   InputLabels:     [ "" ]
    BinWidth:         1   # us | Pulse finding parameters
    FlashThreshold:   2   # PE
    HitThreshold:     0.2 # PE
    WidthTolerance:   0.5 # unitless
    TrigCoinc:        2.5 # in microseconds!
    AreaToPE:         false # Use area to calculate number of PEs
-   SPEArea:          1330  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
+   SPEArea:          11.8  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
    algo_threshold:   @local::standard_algo_threshold
 }
@@ -28,23 +28,35 @@ microboone_opflash_highgain:
    module_type:     "OpFlashFinder"
    GenModule:       "generator"
    InputModule:     "pmtreadout"
-   InputLabels:     [ "OpdetBeamHighGain" ]
+   InputLabels:     [ "" ]
    BinWidth:         1   # us | Pulse finding parameters
    FlashThreshold:   2   # PE
    HitThreshold:     0.2 # PE
    WidthTolerance:   0.5 # unitless
    TrigCoinc:        2.5 # in microseconds!
-   AreaToPE:         false # Use area to calculate number of PEs
-   SPEArea:          1330  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
+   AreaToPE:         true # Use area to calculate number of PEs
+   SPEArea:          118  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
    algo_threshold:   @local::standard_algo_threshold
 }
 
-microboone_opflash: @local::standard_opflash
-microboone_opflash.InputModule: "optreadout"
-microboone_opflash.InputLabels: ["OpdetBeamHighGain"]
-microboone_opflash.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
-                                  132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147]
+microboone_opflash_beam_highgain: @local::microboone_opflash_highgain
+microboone_opflash_beam_highgain.InputLabels:  ["OpdetBeamHighGain"]
+microboone_opflash_beam_highgain.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47]
+
+microboone_opflash_beam_lowgain: @local::microboone_opflash_lowgain
+microboone_opflash_beam_lowgain.InputLabels:   ["OpdetBeamLowGain"]
+microboone_opflash_beam_lowgain.ChannelMasks:  [ 132,  133,  134,  135,  136,  137,  138,  139,  140,  141,  142,  143,  144,  145,  146,  147]
+
+microboone_opflash_cosmic_highgain: @local::microboone_opflash_highgain
+microboone_opflash_cosmic_highgain.InputLabels:  ["OpdetCosmicHighGain"]
+microboone_opflash_cosmic_highgain.ChannelMasks: [ 232,  233,  234,  235,  236,  237,  238,  239,  240,  242,  242,  243,  244,  245,  246,  247]
+
+microboone_opflash_cosmic_lowgain: @local::microboone_opflash_lowgain
+microboone_opflash_cosmic_lowgain.InputLabels:  ["OpdetCosmicLowGain"]
+microboone_opflash_cosmic_lowgain.ChannelMasks: [ 332,  333,  334,  335,  336,  337,  338,  339,  340,  342,  342,  343,  344,  345,  346,  347]
+
+microboone_opflash: @local::microboone_opflash_beam_highgain
 
 microboone_opdigiana:        @local::standard_opdigiana
 microboone_opflashana:       @local::standard_opflashana
