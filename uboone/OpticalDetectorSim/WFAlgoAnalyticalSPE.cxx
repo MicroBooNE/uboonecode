@@ -75,7 +75,6 @@ namespace opdet {
 	*/
 	if(func_time>0.4) break;
       }
-      
     }
   }
   
