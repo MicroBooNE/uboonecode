@@ -125,6 +125,8 @@ namespace lris {
     uint32_t triggerBitBNB;
     uint32_t triggerBitNuMI;
     uint32_t triggerBitEXT;
+    uint32_t triggerBitPMTBeam;
+    uint32_t triggerBitPMTCosmic;
     
     uint32_t FEM1triggerFrame ;
     uint16_t FEM1triggerSample;

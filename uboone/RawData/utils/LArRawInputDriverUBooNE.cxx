@@ -169,6 +169,8 @@ namespace lris {
     tMyTree->Branch("triggerBitBNB",&triggerBitBNB,"triggerBitBNB/I");
     tMyTree->Branch("triggerBitNuMI",&triggerBitNuMI,"triggerBitNuMI/I");
     tMyTree->Branch("triggerBitEXT",&triggerBitEXT,"triggerBitEXT/I");
+    tMyTree->Branch("triggerBitPMTBeam",&triggerBitPMTBeam,"triggerBitPMTBeam/I");
+    tMyTree->Branch("triggerBitPMTCosmic",&triggerBitPMTCosmic,"triggerBitPMTCosmic/I");
     tMyTree->Branch("FEM1triggerFrame",&FEM1triggerFrame,"FEM1triggerFrame/I");
     tMyTree->Branch("FEM1triggerSample",&FEM1triggerSample,"FEM1triggerSample/I");
     tMyTree->Branch("FEM2triggerFrame",&FEM2triggerFrame,"FEM2triggerFrame/I");
@@ -423,7 +425,7 @@ namespace lris {
       //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
       
       fillDAQHeaderData(event_record, daqHeader);
-      fillTPCData(event_record, tpcDigitList);
+      //fillTPCData(event_record, tpcDigitList);
       fillPMTData(event_record, pmtDigitList);
       fillBeamData(event_record, beamInfo);
       fillTriggerData(event_record, trigInfo);
@@ -769,6 +771,42 @@ namespace lris {
 	  std::cerr << "Warning PMT card data corrupted! Skipping." << std::endl;
 	  continue;
 	}
+            
+// Frame and sample for trigger
+            uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
+            uint32_t sample = card_data.getTrigSample();
+            if (card_data.getModule() == 1){
+              FEM1triggerFrame = frame;
+              FEM1triggerSample = sample;
+            }
+            if (card_data.getModule() == 2){
+              FEM2triggerFrame = frame;
+              FEM2triggerSample = sample;
+            }
+            if (card_data.getModule() == 3){
+              FEM3triggerFrame = frame;
+              FEM3triggerSample = sample;
+            }
+            if (card_data.getModule() == 4){
+              FEM4triggerFrame = frame;
+              FEM4triggerSample = sample;
+            }
+            if (card_data.getModule() == 5){
+              FEM5triggerFrame = frame;
+              FEM5triggerSample = sample;
+            }
+            if (card_data.getModule() == 6){
+              FEM6triggerFrame = frame;
+              FEM6triggerSample = sample;
+            }
+            if (card_data.getModule() == 7){
+              FEM7triggerFrame = frame;
+              FEM7triggerSample = sample;
+            }
+            if (card_data.getModule() == 8){
+              FEM8triggerFrame = frame;
+              FEM8triggerSample = sample;
+            }
 
 	//        int card_number = card_data.getModule();
         
@@ -809,38 +847,6 @@ namespace lris {
 	    // also need to go from clock time to time stamp
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( sample, frame );
-            if (card_data.getModule() == 1){
-              FEM1triggerFrame = frame;
-              FEM1triggerSample = sample;
-            }
-            if (card_data.getModule() == 2){
-              FEM2triggerFrame = frame;
-              FEM2triggerSample = sample;
-            }
-            if (card_data.getModule() == 3){
-              FEM3triggerFrame = frame;
-              FEM3triggerSample = sample;
-            }
-            if (card_data.getModule() == 4){
-              FEM4triggerFrame = frame;
-              FEM4triggerSample = sample;
-            }
-            if (card_data.getModule() == 5){
-              FEM5triggerFrame = frame;
-              FEM5triggerSample = sample;
-            }
-            if (card_data.getModule() == 6){
-              FEM6triggerFrame = frame;
-              FEM6triggerSample = sample;
-            }
-            if (card_data.getModule() == 7){
-              FEM7triggerFrame = frame;
-              FEM7triggerSample = sample;
-            }
-            if (card_data.getModule() == 8){
-              FEM8triggerFrame = frame;
-              FEM8triggerSample = sample;
-            }
             raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
 
@@ -930,6 +936,8 @@ namespace lris {
       triggerBitBNB = trig_data.Trig_Gate2(); 
       triggerBitNuMI = trig_data.Trig_Gate1(); 
       triggerBitEXT = trig_data.Trig_EXT(); 
+      triggerBitPMTBeam = trig_bits & 0x1;
+      triggerBitPMTCosmic = trig_bits & 0x2;
       triggerTime = trigger_time;
 
       
