@@ -327,7 +327,8 @@ namespace lris {
 
   // =====================================================================
   bool LArRawInputDriverUBooNE::processNextEvent(std::vector<raw::RawDigit>& tpcDigitList,
-                                                 std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
+                                                 std::map< opdet::UBOpticalChannelCategory_t, 
+                                                 std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
@@ -369,7 +370,8 @@ namespace lris {
       // (time_t is a 64 bit word)
 
       uint32_t seconds=global_header.getSeconds();
-      uint32_t nano_seconds=global_header.getNanoSeconds();
+      uint32_t nano_seconds=global_header.getNanoSeconds()+
+	                    global_header.getMicroSeconds()*1000;
       time_t mytime = ((time_t)seconds<<32) | nano_seconds;
 
       //\/      uint32_t subrun_num = global_header->getSubrunNumber();
@@ -489,26 +491,25 @@ namespace lris {
 	    size_t chdsize(0); 
 
 	    //Huffman decoding
-	    //if (fHuffmanDecode) {
+
 	    channel.decompress(adclist); // All-in-one call.
-	    uint16_t frailer = channel.getChannelTrailerWord();
-	    //if ( adclist.size()<9595 ) {
-	    short lachadawin = adclist.at( adclist.size()-1 );
-	    if ( (frailer>>12 != 0x5) || ( (frailer&0xfff) != tpc_channel_number ) ) {
-	      std::vector<short> kaxufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
-	      for ( auto& it : kaxufix )
-		adclist.emplace_back( it );
-	    }
-	      //std::cout << "trailer: " << trailer_word << std::endl;
-	      //short thecheat = adclist.at( adclist.size()-1 );
-	      //while ( adclist.size()<9595 ) {
-	      //adclist.push_back( thecheat );
-	      //}
-	    //}
+	    
+	    /* // Commented out as trailer check is now donw via swizzler
+	       uint16_t frailer = channel.getChannelTrailerWord();
+	       short lachadawin = adclist.at( adclist.size()-1 );
+	       if ( (frailer>>12 != 0x5) || ( (frailer&0xfff) != tpc_channel_number ) ) {
+	       std::vector<short> kazufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
+	       for ( auto& it : kazufix )
+	       adclist.emplace_back( it );
+	       }
+	    */
 	    chdsize = adclist.size();
 	    const static size_t          fAdcList_size = chdsize;
 	    if (fAdcList_size!=chdsize) {
-	      throw art::Exception( art::errors::FileReadError ) << "Unexpected data: Number of words for channel: " << tpc_channel_number << " different than first waveform in the readout. That's really bad!!!" << std::endl;
+	      throw art::Exception( art::errors::FileReadError ) 
+		<< "Unexpected data: Number of words for channel: " 
+		<< tpc_channel_number << " different than first waveform in the readout ("
+		<< fAdcList_size << "!=" << chdsize << ") ... That's really bad!!!" << std::endl;
 	    }
 	      
             /*} else {

@@ -306,7 +306,8 @@
 #include "RecoAlg/TrackMomentumCalculator.h"
 #include "AnalysisBase/CosmicTag.h"
 #include "AnalysisBase/FlashMatch.h"
-	
+#include "AnalysisBase/T0.h"
+
 
 #include <cstddef> // std::ptrdiff_t
 #include <cstring> // std::memcpy()
@@ -451,6 +452,8 @@ namespace microboone {
       TrackData_t<Float_t> trkendy;       // ending y position.
       TrackData_t<Float_t> trkendz;       // ending z position.
       TrackData_t<Float_t> trkendd;       // ending distance to boundary.
+      TrackData_t<Float_t> trkflashT0;   // t0 per track from matching tracks to flashes (in ns)
+      TrackData_t<Float_t> trktrueT0;    // t0 per track from truth information (in ns)    
       TrackData_t<Float_t> trktheta;      // theta.
       TrackData_t<Float_t> trkphi;        // phi.
       TrackData_t<Float_t> trkstartdcosx;
@@ -855,6 +858,10 @@ namespace microboone {
     std::vector<Float_t>     mcshwr_CombEngPy;	    //MC Shower Combined energy deposition information, Momentum X direction.
     std::vector<Float_t>     mcshwr_CombEngPz;	    //MC Shower Combined energy deposition information, Momentum X direction.
     std::vector<Float_t>     mcshwr_CombEngE;	    //MC Shower Combined energy deposition information, Energy
+    std::vector<Float_t>     mcshwr_dEdx;           //MC Shower dEdx, MeV/cm
+    std::vector<Float_t>     mcshwr_StartDirX;      //MC Shower Direction of begining of shower, X direction 
+    std::vector<Float_t>     mcshwr_StartDirY;      //MC Shower Direction of begining of shower, Y direction 
+    std::vector<Float_t>     mcshwr_StartDirZ;      //MC Shower Direction of begining of shower, Z direction 
     std::vector<Int_t>       mcshwr_isEngDeposited;  //tells whether if this shower deposited energy in the detector or not.
     						    //yes = 1; no =0;	
     //MC Shower mother information
@@ -1179,6 +1186,8 @@ namespace microboone {
     std::vector<std::string> fShowerModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
     std::vector<std::string> fParticleIDModuleLabel;
+    std::vector<std::string> fFlashT0FinderLabel;
+    std::vector<std::string> fMCT0FinderLabel;
     std::string fPOTModuleLabel;
     std::string fCosmicClusterTaggerAssocLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)    
@@ -1373,6 +1382,8 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkendy.resize(MaxTracks);
   trkendz.resize(MaxTracks);
   trkendd.resize(MaxTracks);
+  trkflashT0.resize(MaxTracks);  
+  trktrueT0.resize(MaxTracks);  
   trktheta.resize(MaxTracks);
   trkphi.resize(MaxTracks);
   trkstartdcosx.resize(MaxTracks);
@@ -1436,6 +1447,8 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkendy      , -99999.);
   FillWith(trkendz      , -99999.);
   FillWith(trkendd      , -99999.);
+  FillWith(trkflashT0   , -99999.);  
+  FillWith(trktrueT0    , -99999.);  
   FillWith(trktheta     , -99999.);
   FillWith(trkphi       , -99999.);
   FillWith(trkstartdcosx, -99999.);
@@ -1590,6 +1603,12 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkendd_" + TrackLabel;
   CreateBranch(BranchName, trkendd, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkflashT0_" + TrackLabel;
+  CreateBranch(BranchName, trkflashT0, BranchName + NTracksIndexStr + "/F");
+
+  BranchName = "trktrueT0_" + TrackLabel;
+  CreateBranch(BranchName, trktrueT0, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trktheta_" + TrackLabel;
   CreateBranch(BranchName, trktheta, BranchName + NTracksIndexStr + "/F");
@@ -2054,6 +2073,10 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(mcshwr_CombEngPy, -99999.);
   FillWith(mcshwr_CombEngPz, -99999.);
   FillWith(mcshwr_CombEngE, -99999.);
+  FillWith(mcshwr_dEdx, -99999.);
+  FillWith(mcshwr_StartDirX, -99999.);
+  FillWith(mcshwr_StartDirY, -99999.);
+  FillWith(mcshwr_StartDirZ, -99999.);
   FillWith(mcshwr_isEngDeposited, -9999);  
   FillWith(mcshwr_Motherpdg, -99999);
   FillWith(mcshwr_MotherTrkId, -99999);
@@ -2233,6 +2256,10 @@ void microboone::AnalysisTreeDataStruct::ResizeMCShower(int nMCShowers) {
   mcshwr_CombEngPy.resize(nMCShowers);	 
   mcshwr_CombEngPz.resize(nMCShowers);	 
   mcshwr_CombEngE.resize(nMCShowers);
+  mcshwr_dEdx.resize(nMCShowers);
+  mcshwr_StartDirX.resize(nMCShowers);
+  mcshwr_StartDirY.resize(nMCShowers);
+  mcshwr_StartDirZ.resize(nMCShowers);
   mcshwr_isEngDeposited.resize(nMCShowers);	   	
   mcshwr_Motherpdg.resize(nMCShowers);	
   mcshwr_MotherTrkId.resize(nMCShowers);	
@@ -2511,6 +2538,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("mcshwr_CombEngPy",mcshwr_CombEngPy,"mcshwr_CombEngPy[no_mcshowers]/F");
     CreateBranch("mcshwr_CombEngPz",mcshwr_CombEngPz,"mcshwr_CombEngPz[no_mcshowers]/F");
     CreateBranch("mcshwr_CombEngE",mcshwr_CombEngE,"mcshwr_CombEngE[no_mcshowers]/F");
+    CreateBranch("mcshwr_dEdx",mcshwr_dEdx,"mcshwr_dEdx[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirX",mcshwr_StartDirX,"mcshwr_StartDirX[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirY",mcshwr_StartDirY,"mcshwr_StartDirY[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirZ",mcshwr_StartDirZ,"mcshwr_StartDirZ[no_mcshowers]/F");
     CreateBranch("mcshwr_isEngDeposited",mcshwr_isEngDeposited,"mcshwr_isEngDeposited[no_mcshowers]/I");
     CreateBranch("mcshwr_Motherpdg",mcshwr_Motherpdg,"mcshwr_Motherpdg[no_mcshowers]/I");
     CreateBranch("mcshwr_MotherTrkId",mcshwr_MotherTrkId,"mcshwr_MotherTrkId[no_mcshowers]/I");
@@ -2585,6 +2616,8 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
+  fFlashT0FinderLabel       (pset.get< std::vector<std::string> >("FlashT0FinderLabel")   ),
+  fMCT0FinderLabel          (pset.get< std::vector<std::string> >("MCT0FinderLabel")   ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")),   
   fCosmicClusterTaggerAssocLabel (pset.get< std::string >("CosmicClusterTaggerAssocLabel")), 
   fUseBuffer                (pset.get< bool >("UseBuffers", false)),
@@ -2625,6 +2658,16 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
     throw art::Exception(art::errors::Configuration)
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
       << "fParticleIDModuleLabel.size() = "<<fParticleIDModuleLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fFlashT0FinderLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fFlashT0FinderLabel.size() = "<<fFlashT0FinderLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fMCT0FinderLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fMCT0FinderLabel.size() = "<<fMCT0FinderLabel.size();
   }
   if (GetNVertexAlgos() > kMaxVertexAlgos) {
     throw art::Exception(art::errors::Configuration)
@@ -2707,8 +2750,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       art::fill_ptr_vector(clusterlist, clusterListHandle);
   }        
     
-  std::cout<<"\n"<<fClusterModuleLabel<<","<<fSaveClusterInfo;  
-
   // * flashes
   art::Handle< std::vector<recob::OpFlash> > flashListHandle;
   std::vector<art::Ptr<recob::OpFlash> > flashlist;
@@ -3113,6 +3154,26 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
        
       for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
       
+        //save t0 from reconstructed flash track matching for every track
+        art::FindManyP<anab::T0> fmt0(trackListHandle[iTracker],evt,fFlashT0FinderLabel[iTracker]);
+        if (fmt0.isValid()){          
+            if(fmt0.at(iTrk).size()>0){
+	       if(fmt0.at(iTrk).size()>1)
+                    std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fFlashT0FinderLabel[iTracker];
+               TrackerData.trkflashT0[iTrk] = fmt0.at(iTrk).at(0)->Time();
+	    }   
+        }
+	
+	 //save t0 from reconstructed flash track matching for every track
+        art::FindManyP<anab::T0> fmmct0(trackListHandle[iTracker],evt,fMCT0FinderLabel[iTracker]);
+        if (fmmct0.isValid()){          
+            if(fmmct0.at(iTrk).size()>0){
+	       if(fmmct0.at(iTrk).size()>1)
+                    std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the cluster" << fMCT0FinderLabel[iTracker];
+               TrackerData.trktrueT0[iTrk] = fmmct0.at(iTrk).at(0)->Time();
+	    }   
+        }
+        
         //Cosmic Tagger information
         art::FindManyP<anab::CosmicTag> fmct(trackListHandle[iTracker],evt,fCosmicTaggerAssocLabel[iTracker]);
         if (fmct.isValid()){          
@@ -3572,6 +3633,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     	  	fData->mcshwr_CombEngPy[shwr]       = mcshwr.DetProfile().Py();       	 
     	  	fData->mcshwr_CombEngPz[shwr]       = mcshwr.DetProfile().Pz();       	 
     	  	fData->mcshwr_CombEngE[shwr]        = mcshwr.DetProfile().E();
+		fData->mcshwr_dEdx[shwr]            = mcshwr.dEdx();
+		fData->mcshwr_StartDirX[shwr]       = mcshwr.StartDir().X();
+		fData->mcshwr_StartDirY[shwr]       = mcshwr.StartDir().Y();
+		fData->mcshwr_StartDirZ[shwr]       = mcshwr.StartDir().Z();
 	  }
 	  else
 	  	fData->mcshwr_isEngDeposited[shwr] = 0;
