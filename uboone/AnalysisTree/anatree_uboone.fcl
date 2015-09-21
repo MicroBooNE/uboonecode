@@ -88,7 +88,7 @@ physics.producers.calo:          @local::microboone_calomc
 
 physics.analyzers.analysistree:  @local::microboone_analysistree
 
-physics.producers.t0match.MatchCriteria: 1
+#physics.producers.t0match.MatchCriteria: 1
 
 physics.producers.trackkalmanhitcalo.TrackModuleLabel:          "trackkalmanhit"
 #physics.producers.trackkalspscalo.TrackModuleLabel:             "trackkalsps"
@@ -106,12 +106,18 @@ physics.producers.beziertrackerpid.CalorimetryModuleLabel:           "beziercalo
 physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit"]
 physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo"]
 
+physics.analyzers.analysistree.FlashT0FinderLabel: ["t0"]
+physics.analyzers.analysistree.MCT0FinderLabel: ["mct0"]
+
+
 physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "generator"
 physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid"]
 
 physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["cosmictaggerKHit"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit"]
+
+physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
 
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
 physics.analyzers.analysistree.HitsModuleLabel: "linecluster"

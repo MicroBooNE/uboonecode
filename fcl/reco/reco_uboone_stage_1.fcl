@@ -50,7 +50,10 @@ physics:
   rns:                 { module_type: RandomNumberSaver }
 
   ### flash finders
-  opflash:             @local::microboone_opflash
+  opflash          : @local::microboone_opflash_beam_highgain
+  opflashLow       : @local::microboone_opflash_beam_lowgain
+  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
 
   ### calwire producers
   caldata:             @local::microboone_calroi
@@ -80,6 +83,9 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
          opflash,
+         opflashLow,
+         opflashCosmic,
+         opflashCosmicLow,
          caldata, 
          gaushit,
          fuzzycluster, fuzzyclustermerger, cccluster, cluster3d,
@@ -117,11 +123,6 @@ outputs:
 
 
 ### Here, we overwrite ALL module labels with the ones defined above.
-
-physics.producers.opflash.InputModule:                          "pmtreadout"
-physics.producers.opflash.GenModule:                            "generator"
-physics.producers.opflash.InputLabels:                        [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
-                                                                "OpdetCosmicHighGain", "OpdetCosmicLowGain"]
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 

@@ -31,6 +31,29 @@ namespace opdet {
     fInputPhotonTime.clear();
     fInputPhotonTime.reserve(g4time.size());
     for(auto const &v : g4time) fInputPhotonTime.push_back(v);
+    /*
+    double tmin=1e12;
+    double tmax=0;
+    size_t before_npe=0;
+    size_t after_npe=0;
+    size_t early_npe=0;
+    size_t late_npe=0;
+    size_t total_npe=0;
+    for(auto const& v : g4time) {
+      if(tmin > v) tmin = v;
+      if(tmax < v) tmax = v;
+    }
+    tmin -=1;
+    tmax +=1;
+    for(auto const& v : g4time) {
+      if(v < tmin) before_npe ++;
+      if(v > tmin && v < tmin+1000) early_npe++;
+      if(v > tmin+1000 && v < tmax) late_npe++;
+      if(v > tmin && v < tmax) total_npe++;
+      if(v < tmax ) after_npe++;
+    }
+    std::cout<< "Photons: " << total_npe << " ( "<<before_npe<<" => "<<early_npe<<" / "<<late_npe<<" => " <<after_npe<<" ) ... "<<tmin<<" => "<<tmax<<std::endl;
+    */
   }
 
   //--------------------------------------------------------------------------
@@ -81,12 +104,18 @@ namespace opdet {
 
     fSPE.SetT0(ch_conf->GetFloat(kT0,ch),
 	       ch_conf->GetFloat(kT0Spread,ch));
-    
+    /*
+    if(ch<32) 
+      std::cout<<"Gain: "<<ch_conf->GetFloat(kPMTGain,ch)<< " +/- "<< ch_conf->GetFloat(kGainSpread,ch)<<std::endl;
+    */    
     fSPE.SetGain(ch_conf->GetFloat(kPMTGain,ch),
 		 ch_conf->GetFloat(kGainSpread,ch));
     
     // Create combined photon time with QE applied on signal photons
-
+    /*
+    if(ch<32)
+      std::cout<<"Channel: "<<ch<<" #photon: "<<fInputPhotonTime.size()<<std::endl;
+    */
     fPhotonTime.clear();
     fPhotonTime.reserve(fInputPhotonTime.size() + fDarkPhotonTime.size());
     const double qe = ch_conf->GetFloat(kQE,ch);
@@ -97,20 +126,22 @@ namespace opdet {
 
     fSPE.SetPhotons(fPhotonTime);
     fSPE.Process(wfm_tmp,fTimeInfo);
-
     // convert from pe waveform to adc
+    /*
     double gain_ratio = ch_conf->GetFloat(kSplitterGain,ch);
     for(auto &v : wfm_tmp) 
       v *= gain_ratio;
+    */
 
     //
     // Simulate pedestal
     //
     fPED.Reset();
+    //if(ch<32) std::cout<<"Pedestal: "<<ch_conf->GetFloat(kPedestalMean,ch)<<" +/- "<<ch_conf->GetFloat(kPedestalSpread,ch)<<std::endl;
     fPED.SetPedestal(ch_conf->GetFloat(kPedestalMean,ch),
 		     ch_conf->GetFloat(kPedestalSpread,ch));
     fPED.Process(wfm_tmp,fTimeInfo);
-
+    
     // Make sure algorithms did not alter the waveform size
 
     if(wf.size()!=nticks || wfm_tmp.size()!=nticks)

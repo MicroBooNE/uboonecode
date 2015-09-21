@@ -306,7 +306,8 @@
 #include "RecoAlg/TrackMomentumCalculator.h"
 #include "AnalysisBase/CosmicTag.h"
 #include "AnalysisBase/FlashMatch.h"
-	
+#include "AnalysisBase/T0.h"
+
 
 #include <cstddef> // std::ptrdiff_t
 #include <cstring> // std::memcpy()
@@ -328,7 +329,8 @@ constexpr int kNplanes       = 3;     //number of wire planes
 constexpr int kMaxHits       = 40000; //maximum number of hits;
 constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackModuleLabel
-constexpr unsigned short kMaxVertices   = 100;    //max number of 3D vertices
+constexpr int kMaxVertices   = 500;    //max number of 3D vertices
+constexpr int kMaxVertexAlgos = 10;    //max number of vertex algorithms
 constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector cells per MC particle
 constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
 constexpr int kMaxShowerHits = 10000;  //maximum number of hits on a shower
@@ -450,6 +452,8 @@ namespace microboone {
       TrackData_t<Float_t> trkendy;       // ending y position.
       TrackData_t<Float_t> trkendz;       // ending z position.
       TrackData_t<Float_t> trkendd;       // ending distance to boundary.
+      TrackData_t<Float_t> trkflashT0;   // t0 per track from matching tracks to flashes (in ns)
+      TrackData_t<Float_t> trktrueT0;    // t0 per track from truth information (in ns)    
       TrackData_t<Float_t> trktheta;      // theta.
       TrackData_t<Float_t> trkphi;        // phi.
       TrackData_t<Float_t> trkstartdcosx;
@@ -494,7 +498,33 @@ namespace microboone {
       
     }; // class TrackDataStruct
     
-    
+
+
+    //Vertex data struct
+    class VertexDataStruct {
+      public:
+      template <typename T>
+      using VertexData_t = std::vector<T>;
+
+      size_t MaxVertices; ///< maximum number of storable vertices
+
+      Short_t  nvtx;             //number of reconstructed tracks
+      VertexData_t<Float_t> vtxx;     // x position.
+      VertexData_t<Float_t> vtxy;     // y position.
+      VertexData_t<Float_t> vtxz;     // z position.
+
+      VertexDataStruct(): MaxVertices(0) { Clear(); }
+      VertexDataStruct(size_t maxVertices): MaxVertices(maxVertices) { Clear(); }
+      void Clear();
+      void SetMaxVertices(size_t maxVertices)
+        { MaxVertices = maxVertices; Resize(MaxVertices); }
+      void Resize(size_t nVertices);
+      void SetAddresses(TTree* pTree, std::string tracker, bool isCosmics);
+
+      size_t GetMaxVertices() const { return MaxVertices; }
+    }; // class VertexDataStruct 
+
+
     /// Shower algorithm result
     /// 
     /// Can connect to a tree, clear its fields and resize its data.
@@ -570,7 +600,7 @@ namespace microboone {
       tdGeant = 0x08,
       tdHit = 0x10,
       tdTrack = 0x20,
-      tdVtx = 0x40,
+      tdVertex = 0x40,
       tdFlash = 0x80,
       tdShower = 0x100,
       tdMCshwr = 0x200,
@@ -625,30 +655,30 @@ namespace microboone {
     Short_t  hit_clusterid[kMaxHits];  //is this hit associated with a reco cluster?
     Short_t  hit_clusterKey[kMaxHits];  //is this hit associated with a reco cluster, if so associate a unique cluster key ID?
 
-    // vertex information
-    Short_t  nvtx;                     //number of vertices
-    Float_t  vtx[kMaxVertices][3];     //vtx[3] 
-    
     //Cluster Information
-    Short_t nclusters;
-    Short_t clusterId[kMaxClusters];
-    Short_t clusterView[kMaxClusters];
-    Int_t   cluster_isValid[kMaxClusters];
-    Float_t cluster_StartCharge[kMaxClusters];
-    Float_t cluster_StartAngle[kMaxClusters];
-    Float_t cluster_EndCharge[kMaxClusters];
-    Float_t cluster_EndAngle[kMaxClusters];
-    Float_t cluster_Integral[kMaxClusters];
-    Float_t cluster_IntegralAverage[kMaxClusters];
-    Float_t cluster_SummedADC[kMaxClusters];
-    Float_t cluster_SummedADCaverage[kMaxClusters];
-    Float_t cluster_MultipleHitDensity[kMaxClusters];
-    Float_t cluster_Width[kMaxClusters];
-    Short_t cluster_NHits[kMaxClusters];
-    Short_t cluster_StartWire[kMaxClusters];
-    Short_t cluster_StartTick[kMaxClusters];
-    Short_t cluster_EndWire[kMaxClusters];
-    Short_t cluster_EndTick[kMaxClusters];      
+    Short_t nclusters;				      //number of clusters in a given event
+    Short_t clusterId[kMaxClusters];		      //ID of this cluster	 
+    Short_t clusterView[kMaxClusters];		      //which plane this cluster belongs to	      
+    Int_t   cluster_isValid[kMaxClusters];	      //is this cluster valid? will have a value of -1 if it is not valid
+    Float_t cluster_StartCharge[kMaxClusters];	       //charge on the first wire of the cluster in ADC
+    Float_t cluster_StartAngle[kMaxClusters];	      //starting angle of the cluster
+    Float_t cluster_EndCharge[kMaxClusters];	      //charge on the last wire of the cluster in ADC
+    Float_t cluster_EndAngle[kMaxClusters];	      //ending angle of the cluster
+    Float_t cluster_Integral[kMaxClusters];	      //returns the total charge of the cluster from hit shape in ADC
+    Float_t cluster_IntegralAverage[kMaxClusters];    //average charge of the cluster hits in ADC
+    Float_t cluster_SummedADC[kMaxClusters];	      //total charge of the cluster from signal ADC counts
+    Float_t cluster_SummedADCaverage[kMaxClusters];   //average signal ADC counts of the cluster hits.
+    Float_t cluster_MultipleHitDensity[kMaxClusters]; //Density of wires in the cluster with more than one hit. 
+    Float_t cluster_Width[kMaxClusters];	      //cluster width in ? units
+    Short_t cluster_NHits[kMaxClusters];	      //Number of hits in the cluster
+    Short_t cluster_StartWire[kMaxClusters];	      //wire coordinate of the start of the cluster 
+    Short_t cluster_StartTick[kMaxClusters];	      //tick coordinate of the start of the cluster in time ticks
+    Short_t cluster_EndWire[kMaxClusters];	      //wire coordinate of the end of the cluster
+    Short_t cluster_EndTick[kMaxClusters];            //tick coordinate of the end of the cluster in time ticks    
+    //Cluster cosmic tagging information
+    Short_t cluncosmictags_tagger[kMaxClusters];      //No. of cosmic tags associated to this cluster    
+    Float_t clucosmicscore_tagger[kMaxClusters];      //Cosmic score associated to this cluster. In the case of more than one tag, the first one is associated.    
+    Short_t clucosmictype_tagger[kMaxClusters];       //Cosmic tag type for this cluster.    
     
     // flash information
     Int_t    no_flashes;                //number of flashes
@@ -660,6 +690,10 @@ namespace microboone {
     //track information
     Char_t   kNTracker;
     std::vector<TrackDataStruct> TrackData;
+
+    //vertex information
+    Char_t   kNVertexAlgos;
+    std::vector<VertexDataStruct> VertexData;
     
     // shower information
     Char_t   kNShowerAlgos;
@@ -824,6 +858,10 @@ namespace microboone {
     std::vector<Float_t>     mcshwr_CombEngPy;	    //MC Shower Combined energy deposition information, Momentum X direction.
     std::vector<Float_t>     mcshwr_CombEngPz;	    //MC Shower Combined energy deposition information, Momentum X direction.
     std::vector<Float_t>     mcshwr_CombEngE;	    //MC Shower Combined energy deposition information, Energy
+    std::vector<Float_t>     mcshwr_dEdx;           //MC Shower dEdx, MeV/cm
+    std::vector<Float_t>     mcshwr_StartDirX;      //MC Shower Direction of begining of shower, X direction 
+    std::vector<Float_t>     mcshwr_StartDirY;      //MC Shower Direction of begining of shower, Y direction 
+    std::vector<Float_t>     mcshwr_StartDirZ;      //MC Shower Direction of begining of shower, Z direction 
     std::vector<Int_t>       mcshwr_isEngDeposited;  //tells whether if this shower deposited energy in the detector or not.
     						    //yes = 1; no =0;	
     //MC Shower mother information
@@ -894,7 +932,7 @@ namespace microboone {
     bool hasShowerInfo() const { return bits & tdShower; }
     
     /// Returns whether we have Vertex data
-    bool hasVertexInfo() const { return bits & tdVtx; }
+    bool hasVertexInfo() const { return bits & tdVertex; }
     
     /// Returns whether we have Cluster data
     bool hasClusterInfo() const { return bits & tdCluster; }
@@ -910,10 +948,10 @@ namespace microboone {
       { if (unset) bits &= ~setbits; else bits |= setbits; }
       
     /// Constructor; clears all fields
-    AnalysisTreeDataStruct(size_t nTrackers = 0,
+    AnalysisTreeDataStruct(size_t nTrackers = 0, size_t nVertexAlgos = 0,
       std::vector<std::string> const& ShowerAlgos = {}):
       bits(tdDefault) 
-      { SetTrackers(nTrackers); SetShowerAlgos(ShowerAlgos); Clear(); }
+      { SetTrackers(nTrackers); SetVertexAlgos(nVertexAlgos); SetShowerAlgos(ShowerAlgos); Clear(); }
 
     TrackDataStruct& GetTrackerData(size_t iTracker)
       { return TrackData.at(iTracker); }
@@ -925,6 +963,10 @@ namespace microboone {
     ShowerDataStruct const& GetShowerData(size_t iShower) const
       { return ShowerData.at(iShower); }
     
+    VertexDataStruct& GetVertexData(size_t iVertex)
+      { return VertexData.at(iVertex); }
+    const VertexDataStruct& GetVertexData(size_t iVertex) const
+      { return VertexData.at(iVertex); }
     
     /// Clear all fields if this object (not the tracker algorithm data)
     void ClearLocalData();
@@ -935,6 +977,9 @@ namespace microboone {
     
     /// Allocates data structures for the given number of trackers (no Clear())
     void SetTrackers(size_t nTrackers) { TrackData.resize(nTrackers); }
+
+    /// Allocates data structures for the given number of vertex algos (no Clear())
+    void SetVertexAlgos(size_t nVertexAlgos) { VertexData.resize(nVertexAlgos); }
     
     /// Allocates data structures for the given number of trackers (no Clear())
     void SetShowerAlgos(std::vector<std::string> const& ShowerAlgos);
@@ -955,6 +1000,7 @@ namespace microboone {
     void SetAddresses(
       TTree* pTree,
       std::vector<std::string> const& trackers,
+      std::vector<std::string> const& vertexalgos,
       std::vector<std::string> const& showeralgos,
       bool isCosmics
       );
@@ -962,7 +1008,10 @@ namespace microboone {
     
     /// Returns the number of trackers for which data structures are allocated
     size_t GetNTrackers() const { return TrackData.size(); }
-    
+   
+    /// Returns the number of Vertex algos for which data structures are allocated
+    size_t GetNVertexAlgos() const { return VertexData.size(); }
+
     /// Returns the number of trackers for which data structures are allocated
     size_t GetNShowerAlgos() const { return ShowerData.size(); }
     
@@ -971,7 +1020,10 @@ namespace microboone {
     
     /// Returns the number of trackers for which memory is allocated
     size_t GetMaxTrackers() const { return TrackData.capacity(); }
-    
+
+    /// Returns the number of trackers for which memory is allocated
+    size_t GetMaxVertexAlgos() const { return VertexData.capacity(); }
+ 
     /// Returns the number of trackers for which memory is allocated
     size_t GetMaxShowers() const { return ShowerData.capacity(); }
     
@@ -1126,15 +1178,18 @@ namespace microboone {
     std::string fGenieGenModuleLabel;
     std::string fCryGenModuleLabel;
     std::string fG4ModuleLabel;
-    std::string fVertexModuleLabel;
     std::string fClusterModuleLabel;
     std::string fOpFlashModuleLabel;
     std::string fMCShowerModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
+    std::vector<std::string> fVertexModuleLabel;
     std::vector<std::string> fShowerModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
     std::vector<std::string> fParticleIDModuleLabel;
+    std::vector<std::string> fFlashT0FinderLabel;
+    std::vector<std::string> fMCT0FinderLabel;
     std::string fPOTModuleLabel;
+    std::string fCosmicClusterTaggerAssocLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)    
     bool fSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
     bool fSaveCryInfo; ///whether to extract and save CRY particle data
@@ -1158,6 +1213,8 @@ namespace microboone {
     float fG4minE;         ///< Energy threshold to save g4 particle info
     /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
+
+    size_t GetNVertexAlgos() const { return fVertexModuleLabel.size(); }
        
     /// Returns the number of shower algorithms configured
     size_t GetNShowerAlgos() const { return fShowerModuleLabel.size(); }
@@ -1171,7 +1228,7 @@ namespace microboone {
       {
         if (!fData) {
           fData.reset
-            (new AnalysisTreeDataStruct(GetNTrackers(), GetShowerAlgos()));
+            (new AnalysisTreeDataStruct(GetNTrackers(), GetNVertexAlgos(), GetShowerAlgos()));
           fData->SetBits(AnalysisTreeDataStruct::tdCry,    !fSaveCryInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdGenie,  !fSaveGenieInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdGeant,  !fSaveGeantInfo);
@@ -1180,11 +1237,12 @@ namespace microboone {
           fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdCluster,!fSaveClusterInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdTrack,  !fSaveTrackInfo);
-          fData->SetBits(AnalysisTreeDataStruct::tdVtx,    !fSaveVertexInfo);
+          fData->SetBits(AnalysisTreeDataStruct::tdVertex, !fSaveVertexInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fSaveAuxDetInfo);
         }
         else {
           fData->SetTrackers(GetNTrackers());
+          fData->SetVertexAlgos(GetNVertexAlgos());
           fData->SetShowerAlgos(GetShowerAlgos());
           if (bClearData) fData->Clear();
         }
@@ -1195,7 +1253,7 @@ namespace microboone {
       {
         CheckData(__func__); CheckTree(__func__);
         fData->SetAddresses
-          (fTree, fTrackModuleLabel, fShowerModuleLabel, isCosmics);
+          (fTree, fTrackModuleLabel, fVertexModuleLabel, fShowerModuleLabel, isCosmics);
       } // SetAddresses()
     
     /// Sets the addresses of all the tree branches of the specified tracking algo,
@@ -1211,6 +1269,19 @@ namespace microboone {
         fData->GetTrackerData(iTracker)
           .SetAddresses(fTree, fTrackModuleLabel[iTracker], isCosmics);
       } // SetTrackerAddresses()
+
+
+    void SetVertexAddresses(size_t iVertexAlg)
+      {
+        CheckData(__func__); CheckTree(__func__);
+        if (iVertexAlg >= fData->GetNVertexAlgos()) {
+          throw art::Exception(art::errors::LogicError)
+            << "AnalysisTree::SetVertexAddresses(): no vertex alg #" << iVertexAlg
+            << " (" << fData->GetNVertexAlgos() << " available)";
+        }
+        fData->GetVertexData(iVertexAlg)
+          .SetAddresses(fTree, fVertexModuleLabel[iVertexAlg], isCosmics);
+      } // SetVertexAddresses()
     
     /// Sets the addresses of all the tree branches of the specified shower algo,
     /// creating the missing ones
@@ -1311,6 +1382,8 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkendy.resize(MaxTracks);
   trkendz.resize(MaxTracks);
   trkendd.resize(MaxTracks);
+  trkflashT0.resize(MaxTracks);  
+  trktrueT0.resize(MaxTracks);  
   trktheta.resize(MaxTracks);
   trkphi.resize(MaxTracks);
   trkstartdcosx.resize(MaxTracks);
@@ -1374,6 +1447,8 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkendy      , -99999.);
   FillWith(trkendz      , -99999.);
   FillWith(trkendd      , -99999.);
+  FillWith(trkflashT0   , -99999.);  
+  FillWith(trktrueT0    , -99999.);  
   FillWith(trktheta     , -99999.);
   FillWith(trkphi       , -99999.);
   FillWith(trkstartdcosx, -99999.);
@@ -1529,6 +1604,12 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   BranchName = "trkendd_" + TrackLabel;
   CreateBranch(BranchName, trkendd, BranchName + NTracksIndexStr + "/F");
   
+  BranchName = "trkflashT0_" + TrackLabel;
+  CreateBranch(BranchName, trkflashT0, BranchName + NTracksIndexStr + "/F");
+
+  BranchName = "trktrueT0_" + TrackLabel;
+  CreateBranch(BranchName, trktrueT0, BranchName + NTracksIndexStr + "/F");
+  
   BranchName = "trktheta_" + TrackLabel;
   CreateBranch(BranchName, trktheta, BranchName + NTracksIndexStr + "/F");
   
@@ -1605,6 +1686,52 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   CreateBranch(BranchName, trkpidbestplane, BranchName + NTracksIndexStr + "/S");
 
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses()
+
+
+
+void microboone::AnalysisTreeDataStruct::VertexDataStruct::Resize(size_t nVertices)
+{
+  MaxVertices = nVertices;
+
+  vtxx.resize(MaxVertices);
+  vtxy.resize(MaxVertices);
+  vtxz.resize(MaxVertices);
+}
+
+void microboone::AnalysisTreeDataStruct::VertexDataStruct::Clear() {
+  Resize(MaxVertices);
+  nvtx = -9999;
+
+  FillWith(vtxx        , -9999  );
+  FillWith(vtxy        , -9999  );
+  FillWith(vtxz        , -9999  );
+}
+
+void microboone::AnalysisTreeDataStruct::VertexDataStruct::SetAddresses(
+  TTree* pTree, std::string alg, bool isCosmics
+) {
+  if (MaxVertices == 0) return; // no tracks, no tree!
+
+  microboone::AnalysisTreeDataStruct::BranchCreator CreateBranch(pTree);
+
+  AutoResettingStringSteam sstr;
+
+  std::string VertexLabel = alg;
+  std::string BranchName;
+
+  BranchName = "nvtx_" + VertexLabel;
+  CreateBranch(BranchName, &nvtx, BranchName + "/S");
+  std::string NVertexIndexStr = "[" + BranchName + "]";
+
+  BranchName = "vtxx_" + VertexLabel;
+  CreateBranch(BranchName, vtxx, BranchName + NVertexIndexStr + "/F");
+
+  BranchName = "vtxy_" + VertexLabel;
+  CreateBranch(BranchName, vtxy, BranchName + NVertexIndexStr + "/F");
+
+  BranchName = "vtxz_" + VertexLabel;
+  CreateBranch(BranchName, vtxz, BranchName + NVertexIndexStr + "/F");
+}
 
 //------------------------------------------------------------------------------
 //---  AnalysisTreeDataStruct::ShowerDataStruct
@@ -1775,11 +1902,6 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_nelec, hit_nelec + sizeof(hit_nelec)/sizeof(hit_nelec[0]), -99999.);
   std::fill(hit_energy, hit_energy + sizeof(hit_energy)/sizeof(hit_energy[0]), -99999.);
 
-  nvtx = 0;
-  for (size_t ivtx = 0; ivtx < kMaxVertices; ++ivtx) {
-    std::fill(vtx[ivtx], vtx[ivtx]+3, -99999.);
-  }
-
   no_flashes = 0;
   std::fill(flash_time, flash_time + sizeof(flash_time)/sizeof(flash_time[0]), -9999);
   std::fill(flash_pe, flash_pe + sizeof(flash_pe)/sizeof(flash_pe[0]), -9999);
@@ -1805,6 +1927,9 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(cluster_StartTick, cluster_StartTick + sizeof(cluster_StartTick)/sizeof(cluster_StartTick[0]), -9999);
   std::fill(cluster_EndWire, cluster_EndWire + sizeof(cluster_EndWire)/sizeof(cluster_EndWire[0]), -9999);
   std::fill(cluster_EndTick, cluster_EndTick + sizeof(cluster_EndTick)/sizeof(cluster_EndTick[0]), -9999);
+  std::fill(cluncosmictags_tagger, cluncosmictags_tagger + sizeof(cluncosmictags_tagger)/sizeof(cluncosmictags_tagger[0]), -9999);
+  std::fill(clucosmicscore_tagger, clucosmicscore_tagger + sizeof(clucosmicscore_tagger)/sizeof(clucosmicscore_tagger[0]), -99999.);
+  std::fill(clucosmictype_tagger , clucosmictype_tagger  + sizeof(clucosmictype_tagger )/sizeof(clucosmictype_tagger [0]), -9999);
 
   mcevts_truth = -99999;
   mcevts_truthcry = -99999;
@@ -1948,6 +2073,10 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(mcshwr_CombEngPy, -99999.);
   FillWith(mcshwr_CombEngPz, -99999.);
   FillWith(mcshwr_CombEngE, -99999.);
+  FillWith(mcshwr_dEdx, -99999.);
+  FillWith(mcshwr_StartDirX, -99999.);
+  FillWith(mcshwr_StartDirY, -99999.);
+  FillWith(mcshwr_StartDirZ, -99999.);
   FillWith(mcshwr_isEngDeposited, -9999);  
   FillWith(mcshwr_Motherpdg, -99999);
   FillWith(mcshwr_MotherTrkId, -99999);
@@ -1992,6 +2121,8 @@ void microboone::AnalysisTreeDataStruct::Clear() {
   ClearLocalData();
   std::for_each
     (TrackData.begin(), TrackData.end(), std::mem_fn(&TrackDataStruct::Clear));
+  std::for_each
+    (VertexData.begin(), VertexData.end(), std::mem_fn(&VertexDataStruct::Clear));
   std::for_each
     (ShowerData.begin(), ShowerData.end(), std::mem_fn(&ShowerDataStruct::Clear));
 } // microboone::AnalysisTreeDataStruct::Clear()
@@ -2125,6 +2256,10 @@ void microboone::AnalysisTreeDataStruct::ResizeMCShower(int nMCShowers) {
   mcshwr_CombEngPy.resize(nMCShowers);	 
   mcshwr_CombEngPz.resize(nMCShowers);	 
   mcshwr_CombEngE.resize(nMCShowers);
+  mcshwr_dEdx.resize(nMCShowers);
+  mcshwr_StartDirX.resize(nMCShowers);
+  mcshwr_StartDirY.resize(nMCShowers);
+  mcshwr_StartDirZ.resize(nMCShowers);
   mcshwr_isEngDeposited.resize(nMCShowers);	   	
   mcshwr_Motherpdg.resize(nMCShowers);	
   mcshwr_MotherTrkId.resize(nMCShowers);	
@@ -2150,6 +2285,7 @@ void microboone::AnalysisTreeDataStruct::ResizeMCShower(int nMCShowers) {
 void microboone::AnalysisTreeDataStruct::SetAddresses(
   TTree* pTree,
   const std::vector<std::string>& trackers,
+  const std::vector<std::string>& vertexalgos,
   const std::vector<std::string>& showeralgos,
   bool isCosmics
 ) {
@@ -2187,11 +2323,6 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     }
   }
 
-  if (hasVertexInfo()){
-    CreateBranch("nvtx",&nvtx,"nvtx/S");
-    CreateBranch("vtx",vtx,"vtx[nvtx][3]/F");
-  }  
-  
   if (hasClusterInfo()){
      CreateBranch("nclusters",&nclusters,"nclusters/S");
      CreateBranch("clusterId", clusterId, "clusterId[nclusters]/S");
@@ -2210,7 +2341,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
      CreateBranch("cluster_StartWire", cluster_StartWire, "cluster_StartWire[nclusters]/S");
      CreateBranch("cluster_StartTick", cluster_StartTick, "cluster_StartTick[nclusters]/S");
      CreateBranch("cluster_EndWire", cluster_EndWire, "cluster_EndWire[nclusters]/S");
-     CreateBranch("cluster_EndTick", cluster_EndTick, "cluster_EndTick[nclusters]/S");       
+     CreateBranch("cluster_EndTick", cluster_EndTick, "cluster_EndTick[nclusters]/S");   
+     CreateBranch("cluncosmictags_tagger", cluncosmictags_tagger, "cluncosmictags_tagger[nclusters]/S");   
+     CreateBranch("clucosmicscore_tagger", clucosmicscore_tagger, "clucosmicscore_tagger[nclusters]/F");	 
+     CreateBranch("clucosmictype_tagger", clucosmictype_tagger, "clucosmictype_tagger[nclusters]/S");	 
   }    
 
   if (hasFlashInfo()){
@@ -2232,6 +2366,18 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
       TrackData[i].SetAddresses(pTree, TrackLabel, isCosmics);
     } // for trackers
   } 
+
+  if (hasVertexInfo()){
+    kNVertexAlgos = vertexalgos.size();
+    CreateBranch("kNVertexAlgos",&kNVertexAlgos,"kNVertexAlgos/B");
+    for(int i=0; i<kNVertexAlgos; i++){
+      std::string VertexLabel = vertexalgos[i];
+
+        // note that if the tracker data has maximum number of tracks 0,
+        // nothing is initialized (branches are not even created)
+        VertexData[i].SetAddresses(pTree, VertexLabel, isCosmics);
+     } // for trackers
+  }
 
   if (hasShowerInfo()){
     kNShowerAlgos = showeralgos.size();
@@ -2392,6 +2538,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("mcshwr_CombEngPy",mcshwr_CombEngPy,"mcshwr_CombEngPy[no_mcshowers]/F");
     CreateBranch("mcshwr_CombEngPz",mcshwr_CombEngPz,"mcshwr_CombEngPz[no_mcshowers]/F");
     CreateBranch("mcshwr_CombEngE",mcshwr_CombEngE,"mcshwr_CombEngE[no_mcshowers]/F");
+    CreateBranch("mcshwr_dEdx",mcshwr_dEdx,"mcshwr_dEdx[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirX",mcshwr_StartDirX,"mcshwr_StartDirX[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirY",mcshwr_StartDirY,"mcshwr_StartDirY[no_mcshowers]/F");
+    CreateBranch("mcshwr_StartDirZ",mcshwr_StartDirZ,"mcshwr_StartDirZ[no_mcshowers]/F");
     CreateBranch("mcshwr_isEngDeposited",mcshwr_isEngDeposited,"mcshwr_isEngDeposited[no_mcshowers]/I");
     CreateBranch("mcshwr_Motherpdg",mcshwr_Motherpdg,"mcshwr_Motherpdg[no_mcshowers]/I");
     CreateBranch("mcshwr_MotherTrkId",mcshwr_MotherTrkId,"mcshwr_MotherTrkId[no_mcshowers]/I");
@@ -2458,15 +2608,18 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fGenieGenModuleLabel      (pset.get< std::string >("GenieGenModuleLabel")     ),
   fCryGenModuleLabel        (pset.get< std::string >("CryGenModuleLabel")       ), 
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
-  fVertexModuleLabel        (pset.get< std::string >("VertexModuleLabel")       ),
-  fClusterModuleLabel        (pset.get< std::string >("ClusterModuleLabel")     ),
+  fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")     ),
   fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
   fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
+  fVertexModuleLabel        (pset.get< std::vector<std::string> >("VertexModuleLabel")),
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
-  fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")          ),
+  fFlashT0FinderLabel       (pset.get< std::vector<std::string> >("FlashT0FinderLabel")   ),
+  fMCT0FinderLabel          (pset.get< std::vector<std::string> >("MCT0FinderLabel")   ),
+  fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")),   
+  fCosmicClusterTaggerAssocLabel (pset.get< std::string >("CosmicClusterTaggerAssocLabel")), 
   fUseBuffer                (pset.get< bool >("UseBuffers", false)),
   fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false)),
   fSaveCryInfo              (pset.get< bool >("SaveCryInfo", false)),  
@@ -2506,6 +2659,22 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
       << "fParticleIDModuleLabel.size() = "<<fParticleIDModuleLabel.size();
   }
+  if (fTrackModuleLabel.size() != fFlashT0FinderLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fFlashT0FinderLabel.size() = "<<fFlashT0FinderLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fMCT0FinderLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fMCT0FinderLabel.size() = "<<fMCT0FinderLabel.size();
+  }
+  if (GetNVertexAlgos() > kMaxVertexAlgos) {
+    throw art::Exception(art::errors::Configuration)
+      << "AnalysisTree currently supports only up to " << kMaxVertexAlgos
+      << " tracking algorithms, but " << GetNVertexAlgos() << " are specified."
+      << "\nYou can increase kMaxVertexAlgos and recompile.";
+  } // if too many trackers
 } // microboone::AnalysisTree::AnalysisTree()
 
 //-------------------------------------------------
@@ -2573,12 +2742,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (evt.getByLabel(fHitsModuleLabel,hitListHandle))
     art::fill_ptr_vector(hitlist, hitListHandle);
 
-  // * vertices
-  art::Handle< std::vector<recob::Vertex> > vtxListHandle;
-  std::vector<art::Ptr<recob::Vertex> > vtxlist;
-  if (evt.getByLabel(fVertexModuleLabel,vtxListHandle))
-    art::fill_ptr_vector(vtxlist, vtxListHandle);
-    
+  // * clusters
   art::Handle< std::vector<recob::Cluster> > clusterListHandle;
   std::vector<art::Ptr<recob::Cluster> > clusterlist;
   if (fSaveClusterInfo){
@@ -2586,7 +2750,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       art::fill_ptr_vector(clusterlist, clusterListHandle);
   }        
     
-  std::cout<<"\n"<<fClusterModuleLabel<<","<<fSaveClusterInfo;  
   // * flashes
   art::Handle< std::vector<recob::OpFlash> > flashListHandle;
   std::vector<art::Ptr<recob::OpFlash> > flashlist;
@@ -2700,7 +2863,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   const size_t NTrackers = GetNTrackers(); // number of trackers passed into fTrackModuleLabel
   const size_t NShowerAlgos = GetNShowerAlgos(); // number of shower algorithms into fShowerModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
-  const size_t NVertices = vtxlist.size(); // number of vertices
+  const size_t NVertexAlgos = GetNVertexAlgos(); // number of vertex algos
   const size_t NClusters = clusterlist.size(); //number of clusters
   const size_t NFlashes  = flashlist.size(); // number of flashes
   // make sure there is the data, the tree and everything;
@@ -2711,6 +2874,14 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   fData->SubRunData = SubRunData;
 
   fData->isdata = int(!isMC);
+
+  // * vertices
+  std::vector< art::Handle< std::vector<recob::Vertex> > > vertexListHandle(NVertexAlgos);
+  std::vector< std::vector<art::Ptr<recob::Vertex> > > vertexlist(NVertexAlgos);
+  for (unsigned int it = 0; it < NVertexAlgos; ++it){
+     if (evt.getByLabel(fVertexModuleLabel[it],vertexListHandle[it]))
+        art::fill_ptr_vector(vertexlist[it], vertexListHandle[it]);
+  }
   
   // * tracks
   std::vector< art::Handle< std::vector<recob::Track> > > trackListHandle(NTrackers);
@@ -2911,26 +3082,21 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	 fData->cluster_StartTick[ic] = cluster.StartTick();
 	 fData->cluster_EndWire[ic] = cluster.EndWire();
 	 fData->cluster_EndTick[ic] = cluster.EndTick();
+	 
+	//Cosmic Tagger information for cluster
+        art::FindManyP<anab::CosmicTag> fmcct(clusterListHandle,evt,fCosmicClusterTaggerAssocLabel);
+        if (fmcct.isValid()){          
+          fData->cluncosmictags_tagger[ic]     = fmcct.at(ic).size();
+          if (fmcct.at(ic).size()>0){
+            if(fmcct.at(ic).size()>1)
+              std::cerr << "\n Warning : more than one cosmic tag per cluster in module! assigning the first tag to the cluster" << fCosmicClusterTaggerAssocLabel;
+            fData->clucosmicscore_tagger[ic] = fmcct.at(ic).at(0)->CosmicScore();
+            fData->clucosmictype_tagger[ic] = fmcct.at(ic).at(0)->CosmicType();
+          }
+        }
      }//end loop over clusters
   }//end fSaveClusterInfo
 	  
-
-  //vertex information
-  if (fSaveVertexInfo){
-    fData->nvtx = NVertices;
-    if (NVertices > kMaxVertices){
-      // got this error? consider increasing kMaxVertices
-      // (or ask for a redesign using vectors)
-      mf::LogError("AnalysisTree:limits") << "event has " << NVertices
-        << " vertices, only kMaxVertices=" << kMaxVertices << " stored in tree";
-    }
-    for (size_t i = 0; i < NVertices && i < kMaxVertices ; ++i){//loop over hits
-      Double_t xyz[3] = {};
-      vtxlist[i]->XYZ(xyz);
-      for (size_t j = 0; j<3; ++j) fData->vtx[i][j] = xyz[j];
-    }
-  }// end (fSaveVertexInfo)
-
   if (fSaveFlashInfo){
     fData->no_flashes = (int) NFlashes;
     if (NFlashes > kMaxFlashes) {
@@ -2988,6 +3154,26 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
        
       for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
       
+        //save t0 from reconstructed flash track matching for every track
+        art::FindManyP<anab::T0> fmt0(trackListHandle[iTracker],evt,fFlashT0FinderLabel[iTracker]);
+        if (fmt0.isValid()){          
+            if(fmt0.at(iTrk).size()>0){
+	       if(fmt0.at(iTrk).size()>1)
+                    std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fFlashT0FinderLabel[iTracker];
+               TrackerData.trkflashT0[iTrk] = fmt0.at(iTrk).at(0)->Time();
+	    }   
+        }
+	
+	 //save t0 from reconstructed flash track matching for every track
+        art::FindManyP<anab::T0> fmmct0(trackListHandle[iTracker],evt,fMCT0FinderLabel[iTracker]);
+        if (fmmct0.isValid()){          
+            if(fmmct0.at(iTrk).size()>0){
+	       if(fmmct0.at(iTrk).size()>1)
+                    std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the cluster" << fMCT0FinderLabel[iTracker];
+               TrackerData.trktrueT0[iTrk] = fmmct0.at(iTrk).at(0)->Time();
+	    }   
+        }
+        
         //Cosmic Tagger information
         art::FindManyP<anab::CosmicTag> fmct(trackListHandle[iTracker],evt,fCosmicTaggerAssocLabel[iTracker]);
         if (fmct.isValid()){          
@@ -3120,15 +3306,18 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         } // vertices
       } // fmvtx.isValid()
       */
+
+
+      /* //commented out because now have several Vertices
       Float_t minsdist = 10000;
       Float_t minedist = 10000;
-      for (int ivx = 0; ivx < fData->nvtx && ivx < kMaxVertices; ++ivx){
-        Float_t sdist = sqrt(pow(TrackerData.trkstartx[iTrk]-fData->vtx[ivx][0],2)+
-                             pow(TrackerData.trkstarty[iTrk]-fData->vtx[ivx][1],2)+
-                             pow(TrackerData.trkstartz[iTrk]-fData->vtx[ivx][2],2));
-        Float_t edist = sqrt(pow(TrackerData.trkendx[iTrk]-fData->vtx[ivx][0],2)+
-                             pow(TrackerData.trkendy[iTrk]-fData->vtx[ivx][1],2)+
-                             pow(TrackerData.trkendz[iTrk]-fData->vtx[ivx][2],2));
+      for (int ivx = 0; ivx < NVertices && ivx < kMaxVertices; ++ivx){
+        Float_t sdist = sqrt(pow(TrackerData.trkstartx[iTrk]-VertexData.vtxx[ivx],2)+
+                             pow(TrackerData.trkstarty[iTrk]-VertexData.vtxy[ivx],2)+
+                             pow(TrackerData.trkstartz[iTrk]-VertexData.vtxz[ivx],2));
+        Float_t edist = sqrt(pow(TrackerData.trkendx[iTrk]-VertexData.vtxx[ivx],2)+
+                             pow(TrackerData.trkendy[iTrk]-VertexData.vtxy[ivx],2)+
+                             pow(TrackerData.trkendz[iTrk]-VertexData.vtxz[ivx],2));
         if (sdist<minsdist){
           minsdist = sdist;
           if (minsdist<10) TrackerData.trksvtxid[iTrk] = ivx;
@@ -3137,7 +3326,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           minedist = edist;
           if (minedist<10) TrackerData.trkevtxid[iTrk] = ivx;
         }
-      }
+      }*/
+
       // find particle ID info
       art::FindMany<anab::ParticleID> fmpid(trackListHandle[iTracker], evt, fParticleIDModuleLabel[iTracker]);
       if(fmpid.isValid()) {
@@ -3256,6 +3446,41 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   /*trkf::TrackMomentumCalculator trkm;  
   std::cout<<"\t"<<trkm.GetTrackMomentum(200,2212)<<"\t"<<trkm.GetTrackMomentum(-10, 13)<<"\t"<<trkm.GetTrackMomentum(300,-19)<<"\n";
 */
+
+  //Save Vertex information for multiple algorithms
+  if (fSaveVertexInfo){
+    for (unsigned int iVertexAlg=0; iVertexAlg < NVertexAlgos; ++iVertexAlg){
+      AnalysisTreeDataStruct::VertexDataStruct& VertexData = fData->GetVertexData(iVertexAlg);
+
+      size_t NVertices = vertexlist[iVertexAlg].size();
+
+      VertexData.SetMaxVertices(std::max(NVertices, (size_t) 1));
+      VertexData.Clear(); // clear all the data
+
+      VertexData.nvtx = (short) NVertices;
+
+      // now set the tree addresses to the newly allocated memory;
+      // this creates the tree branches in case they are not there yet
+      SetVertexAddresses(iVertexAlg);
+      if (NVertices > VertexData.GetMaxVertices()) {
+         // got this error? it might be a bug,
+         // since we are supposed to have allocated enough space to fit all tracks
+         mf::LogError("AnalysisTree:limits") << "event has " << NVertices
+            << " " << fVertexModuleLabel[iVertexAlg] << " tracks, only "
+            << VertexData.GetMaxVertices() << " stored in tree";
+      }
+
+      for (size_t i = 0; i < NVertices && i < kMaxVertices ; ++i){//loop over hits
+         Double_t xyz[3] = {};
+         vertexlist[iVertexAlg][i] -> XYZ(xyz);
+         VertexData.vtxx[i] = xyz[0];
+         VertexData.vtxy[i] = xyz[1];
+         VertexData.vtxz[i] = xyz[2];
+       }
+     }
+   }
+
+
   //mc truth information
   if (isMC){
     if (fSaveCryInfo){ 
@@ -3408,6 +3633,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     	  	fData->mcshwr_CombEngPy[shwr]       = mcshwr.DetProfile().Py();       	 
     	  	fData->mcshwr_CombEngPz[shwr]       = mcshwr.DetProfile().Pz();       	 
     	  	fData->mcshwr_CombEngE[shwr]        = mcshwr.DetProfile().E();
+		fData->mcshwr_dEdx[shwr]            = mcshwr.dEdx();
+		fData->mcshwr_StartDirX[shwr]       = mcshwr.StartDir().X();
+		fData->mcshwr_StartDirY[shwr]       = mcshwr.StartDir().Y();
+		fData->mcshwr_StartDirZ[shwr]       = mcshwr.StartDir().Z();
 	  }
 	  else
 	  	fData->mcshwr_isEngDeposited[shwr] = 0;
@@ -3669,6 +3898,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       } // for tracks
     } // for trackers
   } // if logging enabled
+
   
   // if we don't use a permanent buffer (which can be huge),
   // delete the current buffer, and we'll create a new one on the next event

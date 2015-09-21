@@ -2,6 +2,7 @@
 #
 # Shaping time and gain settings
 #
+#services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 2.0, 2.0, 2.0 ]
 services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 1.0, 1.0, 1.0 ]
 services.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: [ 14.0, 14.0, 14.0 ]
 #
@@ -19,6 +20,8 @@ services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:
 #
 # Note that run 1591 forward, bias is -158 and +23
 # Plane space is 0.3cm
-services.LArProperties.Efield:                             [0.273,0.666,0.8] # 0.273 corresponds to 70 kV
-                                                                                  # 0.195 corresponds to 50 kV
+# These settings for the change in wire bias 8/13/15
+services.LArProperties.Efield:                             [0.273,0.527,0.790] # 0.273 corresponds to 70 kV
 services.LArProperties.Electronlifetime:                   2.0e03   # Current statement is that electron lifetime is 2 ms
+
+services.TimeService.TrigModuleName:     "daq"
