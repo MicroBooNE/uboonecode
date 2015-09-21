@@ -39,7 +39,7 @@ namespace opdet {
     tmp_float_params.at ( kPedestalSpread ) = pset.get<std::vector< float   > >("PedestalSpread");
     tmp_float_params.at ( kQE             ) = pset.get<std::vector< float   > >("QE");
     tmp_float_params.at ( kPMTGain        ) = pset.get<std::vector< float   > >("PMTGain");
-    tmp_float_params.at ( kSplitterGain   ) = pset.get<std::vector< float   > >("PMTGain");
+    tmp_float_params.at ( kSplitterGain   ) = pset.get<std::vector< float   > >("SplitterGain");
     tmp_float_params.at ( kGainSpread     ) = pset.get<std::vector< float   > >("GainSpread");
     tmp_float_params.at ( kT0             ) = pset.get<std::vector< float   > >("T0");
     tmp_float_params.at ( kT0Spread       ) = pset.get<std::vector< float   > >("T0Spread");

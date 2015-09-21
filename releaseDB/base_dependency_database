@@ -488,7 +488,6 @@ larpandora : larpandora : LArPandoraInterface/LArPandoraHelper.h
 larpandora : larpandora : LArPandoraInterface/LArPandoraParticleCreator.h
 larpandora : larpandora : LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h
 larpandora : larpandora : LArPandoraInterface/MicroBooNETransformationPlugin.h
-larpandora : larpandora : LArPandoraInterface/PFParticleSeed.h
 larpandora : larpandora : LArPandoraInterface/PFParticleStitcher.h
 larpandora : larreco : ClusterFinder/ClusterCreator.h
 larpandora : larreco : RecoAlg/ClusterParamsImportWrapper.h
@@ -911,7 +910,6 @@ uboonecode : larcore : SimpleTypesAndConstants/PhysicalConstants.h
 uboonecode : larcore : SimpleTypesAndConstants/RawTypes.h
 uboonecode : larcore : SimpleTypesAndConstants/geo_types.h
 uboonecode : larcore : SummaryData/POTSummary.h
-uboonecode : larcore : SummaryData/RunData.h
 uboonecode : larcore : test/Geometry/GeometryIteratorLoopTestAlg.h
 uboonecode : larcore : test/Geometry/GeometryIteratorTestAlg.h
 uboonecode : larcore : test/Geometry/GeometryTestAlg.h
@@ -932,7 +930,6 @@ uboonecode : lardata : OpticalDetectorData/OpticalRawDigit.h
 uboonecode : lardata : OpticalDetectorData/OpticalTypes.h
 uboonecode : lardata : OpticalDetectorData/PMTTrigger.h
 uboonecode : lardata : RawData/BeamInfo.h
-uboonecode : lardata : RawData/DAQHeader.h
 uboonecode : lardata : RawData/OpDetWaveform.h
 uboonecode : lardata : RawData/RawDigit.h
 uboonecode : lardata : RawData/TriggerData.h
@@ -1038,7 +1035,6 @@ uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoBase.h
 uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoDigitizedSPE.h
 uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoPedestal.h
 uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoSPEBase.h
-uboonecode : uboonecode : uboone/RawData/utils/LArRawInputDriverUBooNE.h
 uboonecode : uboonecode : uboone/TriggerSim/UBTrigException.h
 uboonecode : uboonecode : uboone/TriggerSim/UBTriggerAlgo.h
 uboonecode : uboonecode : uboone/TriggerSim/UBTriggerTypes.h

@@ -254,9 +254,9 @@ namespace opdet {
 	  beamEndBin[gateIndex] = readout_size;
 	
 	// Compute the frame number of the first slice to be saved. 
-	gateFrame[gateIndex] = ( gateTime / clock.FrameTicks() );
+	gateFrame[gateIndex] = ( beamBeginBin[gateIndex] / clock.FrameTicks() );
 	// The time of the "beginBin[gateIndex]" slice within the gateFrame.
-	gateWindowTime[gateIndex] = ( gateTime % clock.FrameTicks() ); 
+	gateWindowTime[gateIndex] = ( beamBeginBin[gateIndex] % clock.FrameTicks() ); 
       
 	LOG_DEBUG("OpticalFEM") 
 	//std::cout << "Beam gate #" << gateIndex
@@ -422,7 +422,8 @@ namespace opdet {
 			     beamEndBin[gateIndex] - beamBeginBin[gateIndex]);
 
 	  mf::LogDebug("OpticalFEM")
-	  //std::cout << "Writing beam gate FIFO entry: chanel=" << channel
+	  //std::cout
+	    << "Writing beam gate FIFO entry: chanel=" << channel
 	    << " at frame=" << gateFrame[gateIndex]
 	    << " slice="    << gateWindowTime[gateIndex]
 	    << " beginBin=" << beamBeginBin[gateIndex]
@@ -719,7 +720,7 @@ namespace opdet {
 	      << " begin=" << saveSlice
 	      << " end=" << saveSlice+fm_cosmicSlices[gain_index]
 	      << " max ADC=" << maxADC; 
-	    
+
 	    // Create a new FIFO channel, copying the channel
 	    // number from the input: wrong categories.
 	    
@@ -826,6 +827,7 @@ namespace opdet {
 	      << (*channelDataHandle).Frame() + slice / clock.FrameTicks()
 	      << " slice=" << slice % clock.FrameTicks()
 	      << " max ADC=" << maxADC;
+
 	    
 	  } // disc 3 fired
 	} // inside beam gate and threshold3 satisfied
@@ -957,7 +959,7 @@ namespace opdet {
 	    << " max ADC sum=" << maxADCSum1[slot][slice]
 	    << " multiplicity sum=" << multiplicitySum1[slot][slice]
 	    << std::endl;
-	  
+
 	  if (fm_hist) {
 	    // Dump some trigger sums as histograms. 
 	    // Pick some arbitrary display range for the trigger info.
@@ -1021,6 +1023,7 @@ namespace opdet {
 	    << " slice=" << sample
 	    << " max ADC sum=" << maxADCSum3[slot][slice]
 	    << " multiplicity sum=" << multiplicitySum3[slot][slice];
+
 	  if (fm_hist) {
 	    // Dump some trigger sums as histograms. 
 	    // Pick some arbitrary display range for the trigger info.

@@ -19,6 +19,7 @@
 #include "Utilities/TimeService.h"
 #include "Utilities/ElecClock.h" // lardata
 #include "OpticalDetectorData/OpticalTypes.h" // lardata -- I want to move the enums we use back to UBooNE as they are UBooNE-specific
+#include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //ART, ...
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
@@ -57,6 +58,62 @@ namespace ubdaq=gov::fnal::uboone::datatypes;
 // +++ Blatant stealing from LongBo
 namespace lris {
 
+  unsigned int LArRawInputDriverUBooNE::RollOver(unsigned int ref,
+						 unsigned int subject,
+						 unsigned int nbits) 
+  {
+    // Return "ref" which lower "nbits" are replaced by that of "subject"                                      
+    // Takes care of roll over effect.                                                                         
+    // For speed purpose we only accept pre-defined nbits values.                                              
+  
+    unsigned int diff=0; // max diff should be (2^(nbits)-2)/2                                                       
+    unsigned int mask=0; // mask to extract lower nbits from subject ... should be 2^(nbits)-1                       
+    if      (nbits==3) {diff = 3; mask = 0x7;}
+    else if (nbits==4) {diff = 0x7; mask = 0xf;}
+    //else if (nbits==4) {diff = 0x7; mask = 0xf;}                                                             
+    //    else if (nbits==4) {nbits=3; diff = 0x7; mask = 0x7;}                                                
+    else {
+      std::cerr<<"\033[93m<<ERROR>>\033[00m"<<" Only supported for nbits = [3,4]!"<<std::endl;
+      throw std::exception();
+    }
+  
+    subject = ( (ref>>nbits) << nbits) + (subject & mask);
+    //std::cout<<ref<<" : "<<subject<<" : "<<nbits<< " : "<<diff<<std::endl;                                   
+    // If exactly same, return                                                                                 
+    if(subject == ref) return subject;
+  
+    // If subject is bigger than ref by a predefined diff value, inspect difference                            
+    else if ( subject > ref && (subject - ref) > diff) {
+    
+      // Throw an exception if difference is exactly diff+1                                                    
+      if ( (subject - ref) == diff+1 ) {
+	std::cerr<<"\033[93m<<ERROR>>\033[00m"<<Form(" Unexpected diff: ref=%d, subject=%d",ref,subject)<<std::endl;
+	throw std::exception();
+      }
+
+      // Else we have to subtract (mask+1)                                                                     
+      else{
+	//std::cout<<Form("Correcting %d to %d",subject,(subject-(mask+1)))<<std::endl;                        
+	subject = subject - (mask + 1);
+      }
+    
+    }
+    // If subject is smaller than ref by a predefined diff value, inspect difference                           
+    else if ( subject < ref && (ref - subject) > diff) {
+    
+      // Throw an exception if difference is exactly diff+1                                                    
+      if ( (ref - subject) == diff+1 ) {
+	std::cerr<<"\033[93m<<ERROR>>\033[00m"<<Form(" Unexpected diff: ref=%d, subject=%d",ref,subject)<<std::endl;
+	throw std::exception();
+      }
+      else{
+	//std::cout<<Form("Correcting %d to %d",subject,(subject + (mask+1)))<<std::endl;                      
+	subject = subject + (mask + 1);
+      }
+    }
+    return subject;
+  }
+
   // ======================================================================
   LArRawInputDriverUBooNE::LArRawInputDriverUBooNE(fhicl::ParameterSet const & ps, 
                                                    art::ProductRegistryHelper &helper,
@@ -69,6 +126,11 @@ namespace lris {
     fChannelMap( art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap() )
   {
     mf::LogInfo("")<<"Fetched channel map from DB";
+
+    ::peek_at_next_event<ub_TPC_CardData_v6>(false);
+    ::peek_at_next_event<ub_PMT_CardData_v6>(false);
+    ::handle_missing_words<ub_TPC_CardData_v6>(true);
+    ::handle_missing_words<ub_PMT_CardData_v6>(true);
 
     helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
@@ -265,7 +327,8 @@ namespace lris {
 
   // =====================================================================
   bool LArRawInputDriverUBooNE::processNextEvent(std::vector<raw::RawDigit>& tpcDigitList,
-                                                 std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
+                                                 std::map< opdet::UBOpticalChannelCategory_t, 
+                                                 std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
@@ -307,7 +370,8 @@ namespace lris {
       // (time_t is a 64 bit word)
 
       uint32_t seconds=global_header.getSeconds();
-      uint32_t nano_seconds=global_header.getNanoSeconds();
+      uint32_t nano_seconds=global_header.getNanoSeconds()+
+	                    global_header.getMicroSeconds()*1000;
       time_t mytime = ((time_t)seconds<<32) | nano_seconds;
 
       //\/      uint32_t subrun_num = global_header->getSubrunNumber();
@@ -427,26 +491,25 @@ namespace lris {
 	    size_t chdsize(0); 
 
 	    //Huffman decoding
-	    //if (fHuffmanDecode) {
+
 	    channel.decompress(adclist); // All-in-one call.
-	    uint16_t frailer = channel.getChannelTrailerWord();
-	    //if ( adclist.size()<9595 ) {
-	    short lachadawin = adclist.at( adclist.size()-1 );
-	    if ( (frailer>>12 != 0x5) || ( (frailer&0xfff) != tpc_channel_number ) ) {
-	      std::vector<short> kaxufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
-	      for ( auto& it : kaxufix )
-		adclist.emplace_back( it );
-	    }
-	      //std::cout << "trailer: " << trailer_word << std::endl;
-	      //short thecheat = adclist.at( adclist.size()-1 );
-	      //while ( adclist.size()<9595 ) {
-	      //adclist.push_back( thecheat );
-	      //}
-	    //}
+	    
+	    /* // Commented out as trailer check is now donw via swizzler
+	       uint16_t frailer = channel.getChannelTrailerWord();
+	       short lachadawin = adclist.at( adclist.size()-1 );
+	       if ( (frailer>>12 != 0x5) || ( (frailer&0xfff) != tpc_channel_number ) ) {
+	       std::vector<short> kazufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
+	       for ( auto& it : kazufix )
+	       adclist.emplace_back( it );
+	       }
+	    */
 	    chdsize = adclist.size();
 	    const static size_t          fAdcList_size = chdsize;
 	    if (fAdcList_size!=chdsize) {
-	      throw art::Exception( art::errors::FileReadError ) << "Unexpected data: Number of words for channel: " << tpc_channel_number << " different than first waveform in the readout. That's really bad!!!" << std::endl;
+	      throw art::Exception( art::errors::FileReadError ) 
+		<< "Unexpected data: Number of words for channel: " 
+		<< tpc_channel_number << " different than first waveform in the readout ("
+		<< fAdcList_size << "!=" << chdsize << ") ... That's really bad!!!" << std::endl;
 	    }
 	      
             /*} else {
@@ -591,8 +654,9 @@ namespace lris {
             // }
 	    // tmw: In this new scheme, category is no longer needed (5/26/15)
             
-            optdata::TimeSlice_t time=window_header.getSample();
-            optdata::Frame_t frame=window_header.getFrame();
+            uint32_t sample=window_header.getSample();
+	    uint32_t frame =RollOver(card_data.getFrame(),window_header.getFrame(),3);
+	    //std::cout<<" FEM: " << card_data.getFrame() << " ... Channel: " << frame << " ... sample: " << sample << std::endl;
 	    unsigned int data_product_ch_num = ub_pmt_channel_map->GetChannelNumberFromCrateSlotFEMCh( crate_data.crateHeader()->crate_number, card_data.getModule(), channel_number );
 	    //int crate_number = crate_data.crateHeader()->crate_number; 
 	    //std::cout << "fill (CSF): " << crate_number << ", " << card_data.getModule() << ", " << channel_number << " ==> Readout Channel " << data_product_ch_num << std::endl;
@@ -600,7 +664,7 @@ namespace lris {
 	    // here we translate crate/card/daq channel to data product channel number
 	    // also need to go from clock time to time stamp
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
-	    double window_timestamp = timeService->OpticalClock().Time( time, frame );
+	    double window_timestamp = timeService->OpticalClock().Time( sample, frame );
             raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
 
@@ -650,23 +714,36 @@ namespace lris {
     for(auto const& it_trig_map : event_record.getTRIGSEBMap()){
 
       //int seb_num = it_trig_map.first;
-      trig_crate_data_t const& trig_crate = it_trig_map.second;  //  is typedef of ub_Trigger_CrateData_X
-      trig_card_data_t const& trig_data  = trig_crate.getTriggerCardData(); // typedef of ub_Trigger_CardData_X
-      
+      auto const& trig_crate = it_trig_map.second;  //  is typedef of ub_Trigger_CrateData_X
+      auto const& trig_card  = trig_crate.getTriggerCardData(); // typedef of ub_Trigger_CardData_X
+      auto const& trig_header = trig_crate.getTriggerHeader();   // ub_Trigger_HeaderData_X
+      auto const& trig_data   = trig_crate.getTriggerData();     // ub_Trigger_
+
       // Make a trigger clock 
-      util::ElecClock trig_clock = timeService->TriggerClock( trig_data.getSample(), trig_data.getFrame() );
+      unsigned int sample_64MHz = (trig_header.get2MHzSampleNumber() * 32) + (trig_header.get16MHzRemainderNumber() * 4) + trig_data.getPhase();
+      unsigned int frame = trig_header.getFrame();
+      //std::cout << "Trigger frame: " << frame << " ... sample : " << sample_64MHz << std::endl;
+      util::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
       double trigger_time = trig_clock.Time();
-      double beam_time = 0;
-      if ( trig_data.getTriggerData().Trig_Gate1() || trig_data.getTriggerData().Trig_Gate2() ) // 1) NUMI : 2) BNB
+      double beam_time = -1;
+      if ( trig_data.Trig_Gate1() || trig_data.Trig_Gate2() ) // 1) NUMI : 2) BNB
 	beam_time = trigger_time;
-      else {
-	std::cerr << "WARNING: THE BEAM TIME VALUE FOR NOT-(BNB or NUMI) TRIGGERS HAS NOT BEEN SETUP!" << std::endl;
-      }
-      
-      raw::Trigger swiz_trig( trig_data.getTrigNumber(),
+      uint32_t trig_bits = trig_data.getPMTTrigData();
+      if( trig_data.Trig_PC()       ) trig_bits += ( 0x1 << ::trigger::kTriggerPC    ); 
+      if( trig_data.Trig_EXT()      ) trig_bits += ( 0x1 << ::trigger::kTriggerEXT   );
+      if( trig_data.Trig_Active()   ) trig_bits += ( 0x1 << ::trigger::kActive       );
+      if( trig_data.Trig_Gate1()    ) trig_bits += ( 0x1 << ::trigger::kTriggerNuMI  );
+      if( trig_data.Trig_Gate2()    ) trig_bits += ( 0x1 << ::trigger::kTriggerBNB   );
+      if( trig_data.Trig_Veto()     ) trig_bits += ( 0x1 << ::trigger::kVeto         );
+      if( trig_data.Trig_Calib()    ) trig_bits += ( 0x1 << ::trigger::kTriggerCalib );
+      if( trig_data.Trig_GateFake() ) trig_bits += ( 0x1 << ::trigger::kFakeGate     );
+      if( trig_data.Trig_BeamFake() ) trig_bits += ( 0x1 << ::trigger::kFakeBeam     );
+      if( trig_data.Trig_Spare1()   ) trig_bits += ( 0x1 << ::trigger::kSpare        );
+	
+      raw::Trigger swiz_trig( trig_card.getTrigNumber(),
 			      trigger_time,
 			      beam_time,
-			      (uint32_t)trig_data.getTriggerData().trig_data_1 ); // warning casting 16 bit to 32 bit and praying...
+			      trig_bits );
       trigInfo.emplace_back( swiz_trig );
       
     }
