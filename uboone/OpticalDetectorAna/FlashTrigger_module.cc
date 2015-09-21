@@ -23,8 +23,13 @@
 
 #include "RecoBase/OpFlash.h"
 #include "Geometry/Geometry.h"
-
+#include <limits>
+#include <climits>
+#include <TFile.h>
+#include <TString.h>
+#include <TTree.h>
 #include <TH1D.h>
+#include <TGraphErrors.h>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -44,46 +49,87 @@ public:
 
   // Required functions.
   bool filter(art::Event & e) override;
-
+  void endJob();
 
 private:
 
-  // Declare member data here.
-  TH1D *_hFlashEff;                     ///< Flash PE efficiency analysis histogram
-  double _event_ctr;                    ///< A counter for the total number of events processed
-  std::vector<double> _flash_ctr_v;     ///< A total number of flash above specific pe threshold set in _npe_threshold_v
-  std::vector<double> _npe_threshold_v; ///< An array of npe threshold to fill a binned histogram (_hFlashEff)
+  //
+  // Module utility variables
+  //
+  std::string _flash_module; ///< recob::OpFlash producer module label
+  bool        _verbose;      ///< Verbosity flag
+  bool        _disable;      ///< Filter disable (ha-ha!)
+  double      _event_ctr;    ///< A counter for the total number of events processed
+
+  //
+  // Filter parameters: 0) total PE cut or 1) multiplicity cut
+  //
   double _beam_time_diff_low;           ///< A lower boundary of time window with which we ask for a time coincident with beam gate
   double _beam_time_diff_high;          ///< A higher boundary of time window with which we ask for a time coincident with beam gate
   double _total_pe_threshold;           ///< The minimum number of photo-electrons threshold to pass an event
+  bool   _enable_multiplicity_cut;      ///< Boolean to enable/disable multiplicity cut
   unsigned int _multiplicity_threshold; ///< The minimum number of optical detectors considered to be "hit" to pass an event
   double _multiplicity_pe_threshold;    ///< A threshold value above which PMT is considered as "hit" for multiplicity condition
-  std::string _flash_module;            ///< recob::OpFlash producer module label
-  bool _verbose;                        ///< Verbosity flag
+
+  //
+  // OpFlash analysis variables
+  //
+  bool _do_analysis;          ///< Boolean to perform analysis or not
+  std::vector<double> _cut_v; ///< A vector to store cut values
+  std::vector<double> _eff_v; ///< A vector to store efficiencies
+  
+  //
+  // OpFlash output simple tree contents
+  //
+  bool _save_tree;           ///< Boolean to save analysis TTree or not (could be somewhat heavy, KBytes / event)
+  TTree* _flash_tree;        ///< Flash PE efficiency analysis tree, really for an easy numpy conversion
+  unsigned int _run;         ///< Run ID
+  unsigned int _subrun;      ///< SubRun ID
+  unsigned int _event;       ///< Event ID
+  std::vector<double> _pe_v; ///< PE distribution per flash
+  double _pe_total;          ///< Total PE over PMTs
+  double _dt;                ///< Time w.r.t. Trigger
+  unsigned short _nhit;      ///< Total # of hit PMT w/ > 1.0 PE
+  double _fy;                ///< Flash Y position
+  double _fy_err;            ///< Flash Y position error
+  double _fz;                ///< Flash Z position
+  double _fz_err;            ///< Flash Z position error
+
+  //
+  // Attribute functions
+  //
+  void EventClear();             ///< Clear event-wise variables
+  void MakeTree();               ///< Make TTree
+  void ClearAnalysisVariables(); ///< Clear analysis variable (flash-wise)
+  void AnalyzeFlash(const recob::OpFlash& flash); ///< Analyze flash
 };
 
 
 FlashTrigger::FlashTrigger(fhicl::ParameterSet const & p)
-  : _hFlashEff (nullptr)
-  , _event_ctr (0)
+  : _flash_tree(nullptr)
 // Initialize member data here.
 {
   // Call appropriate produces<>() functions here.
+  //
+  // Module utility
+  //
   _verbose                   = p.get< bool         > ( "Verbose"                 );
+  _disable                   = p.get< bool         > ( "DisableFilter"           );
   _flash_module              = p.get< std::string  > ( "OpFlashModule"           );
-  _beam_time_diff_low        = p.get< double       > ( "BeamDTLow"               );
-  _beam_time_diff_high       = p.get< double       > ( "BeamDTHigh"              );
-  _total_pe_threshold        = p.get< double       > ( "TotalPEThreshold"        );
-  _multiplicity_pe_threshold = p.get< double       > ( "MultiplicityPEThreshold" );
-  _multiplicity_threshold    = p.get< unsigned int > ( "MultiplicityThreshold"   );
-  _npe_threshold_v           = p.get< std::vector<double> > ( "EffHistPEThresholdArray" );
-
   if(_flash_module.empty()) {
     std::cerr << "OpFlashModule is empty!" << std::endl;
     throw std::exception();
   }
-
-  _flash_ctr_v.resize(_npe_threshold_v.size(),0);
+  
+  //
+  // Cut values
+  //
+  _beam_time_diff_low        = p.get< double       > ( "BeamDTLow"               );
+  _beam_time_diff_high       = p.get< double       > ( "BeamDTHigh"              );
+  _total_pe_threshold        = p.get< double       > ( "TotalPEThreshold"        );
+  _enable_multiplicity_cut   = p.get< bool         > ( "EnableMultiplicityCut"   );
+  _multiplicity_pe_threshold = p.get< double       > ( "MultiplicityPEThreshold" );
+  _multiplicity_threshold    = p.get< unsigned int > ( "MultiplicityThreshold"   );
 
   if(_verbose) {
     std::cout << "\033[93m" << __PRETTY_FUNCTION__ << "\033[00m" << std::endl
@@ -95,14 +141,112 @@ FlashTrigger::FlashTrigger(fhicl::ParameterSet const & p)
 	      << _multiplicity_pe_threshold << " p.e." << std::endl
 	      << std::endl;
   }
+
+  //
+  // Analysis configuration
+  //
+  _do_analysis = p.get< bool > ( "DoAnalysis" );
+  _save_tree   = p.get< bool > ( "SaveTree"   );
+  if(_do_analysis) {
+    double sep = p.get< double > ( "EfficiencyPlotCutSeparation" );
+    size_t npt = p.get< size_t > ( "EfficiencyPlotNumPoints"     );
+    _cut_v.resize(npt,0);
+    _eff_v.resize(npt,0);
+    for(size_t i=0; i<npt; ++i) {
+      _cut_v[i] = i * sep;
+      _eff_v[i] = 0;
+    }
+  }
+}
+
+void FlashTrigger::MakeTree()
+{
+  art::ServiceHandle<art::TFileService> tfs;
+  _flash_tree = tfs->make<TTree>(Form("opflash_%s_tree",_flash_module.c_str()),"OpFlash Analysis Tree");
   
+  // Instantiate size of pe vector (# of opdet)
+  art::ServiceHandle<geo::Geometry> geom;
+  _pe_v.resize(geom->NOpDets(),0);
+  
+  // Simple type branch
+  _flash_tree->Branch ( "run",      &_run,      "run/i"      );
+  _flash_tree->Branch ( "subrun",   &_subrun,   "subrun/i"   );
+  _flash_tree->Branch ( "event",    &_event,    "event/i"    );
+  _flash_tree->Branch ( "nhit",     &_nhit,     "nhit/s"     );
+  _flash_tree->Branch ( "pe_total", &_pe_total, "pe_total/D" );
+  _flash_tree->Branch ( "dt",       &_dt,       "dt/D"       );
+  _flash_tree->Branch ( "fy",       &_fy,       "fy/D"       );
+  _flash_tree->Branch ( "fy_err",   &_fy_err,   "fy_err/D"   );
+  _flash_tree->Branch ( "fz",       &_fz,       "fz/D"       );
+  _flash_tree->Branch ( "fz_err",   &_fz_err,   "fz_err/D"   );
+  
+  // Object branch
+  _flash_tree->Branch ( "pe_v", "std::vector<double>", &_pe_v);
+}
+
+void FlashTrigger::EventClear()
+{
+  _run = _subrun = _event = 0;
+}
+
+void FlashTrigger::ClearAnalysisVariables()
+{
+  for(auto& v : _pe_v) v = 0;
+  _pe_total = _dt = 0;
+  _fy = _fy_err = _fz = _fz_err = 0;
+  _nhit = 0;
+}
+
+void FlashTrigger::AnalyzeFlash(const recob::OpFlash& flash)
+{
+  ClearAnalysisVariables();
+  
+  // Geometry service
+  art::ServiceHandle<geo::Geometry> geo;
+
+  for(unsigned int opch=0; opch<geo->MaxOpChannel(); ++opch) {
+
+    if(opch>32) continue;
+
+    auto const opdet = geo->OpDetFromOpChannel(opch);
+
+    auto const pe = flash.PE(opch);
+
+    if(pe > 1.) ++_nhit;
+    
+    _pe_v[opdet] += pe;
+
+    _pe_total += pe;
+  }
+
+  _dt = flash.Time();
+  _fy = flash.YCenter();
+  _fz = flash.ZCenter();
+  _fy_err = flash.YWidth();
+  _fz_err = flash.ZWidth();
+
+  if(_flash_tree) _flash_tree->Fill();
 }
 
 bool FlashTrigger::filter(art::Event & e)
 {
-  _event_ctr += 1; // Increment total event ctr
+  //
+  // Analysis preparation
+  //
+  if(_do_analysis || _save_tree) {
 
-  bool pass = false;
+    if(!_flash_tree) MakeTree();
+
+    EventClear();
+  }
+
+  //
+  // Event-wise variable
+  //
+  _run    = e.id().run();
+  _subrun = e.id().subRun();
+  _event  = e.id().event();
+  _event_ctr += 1; // Increment total event ctr
 
   // Retrieve OpFlash
   art::Handle< std::vector< recob::OpFlash > > flash_handle;
@@ -111,9 +255,14 @@ bool FlashTrigger::filter(art::Event & e)
   // Geometry service
   art::ServiceHandle<geo::Geometry> geo;
 
+  bool   pass = false;
+  double flash_min_npe = -1;
   // If valid, perform
   if(flash_handle.isValid()) {
     for(auto const& flash : *flash_handle) {
+      
+      if(_flash_tree) AnalyzeFlash(flash);
+
       // Check timing
       if(flash.Time() < _beam_time_diff_low || _beam_time_diff_high < flash.Time()) {
 	if(_verbose)
@@ -121,13 +270,11 @@ bool FlashTrigger::filter(art::Event & e)
 	continue;
       }
 
-      // Fill analysis histogram
       auto const npe = flash.TotalPE();
 
-      for(size_t thres_index=0; thres_index < _npe_threshold_v.size(); ++thres_index) {
-	auto const& thres = _npe_threshold_v[thres_index];
-	if(npe >= thres) _flash_ctr_v[thres_index] +=1;	
-      }
+      if(flash_min_npe < 0 || npe < flash_min_npe) flash_min_npe = npe;
+
+      if(pass) continue;
 
       // Check Total PE level
       if( npe >= _total_pe_threshold )
@@ -137,33 +284,101 @@ bool FlashTrigger::filter(art::Event & e)
       unsigned int mult=0;
       for(size_t i=0; i < geo->NOpDets(); ++i )
 	if(flash.PE(i) >= _multiplicity_pe_threshold) mult+=1;
-      
-      if(mult >= _multiplicity_threshold)
-	pass = true;
+
+      if(_enable_multiplicity_cut && mult >= _multiplicity_threshold)
+	  pass = true;
 
       if(pass) {
 	if(_verbose)
 	  std::cout << "  Accepting a flash @ " << flash.Time() << " [us] with " << npe << " [p.e.]" << " ... multiplicity = " << mult << std::endl;
-	break;
       }
     }
   }
 
-  if(_flash_ctr_v.size()) {
-    if(!_hFlashEff) {
-      art::ServiceHandle<art::TFileService> tfs;
-      _hFlashEff = tfs->make<TH1D>("hFlashEff","Flash Finding Efficiency; P.E. cut values; Efficiency",
-				   _flash_ctr_v.size(), -0.5, _flash_ctr_v.size()-0.5);
-    }
-    for(size_t index=0; index < _flash_ctr_v.size(); ++index) {
-      
-      if(_flash_ctr_v[index] < 1) _hFlashEff->SetBinContent( index+1, 0);
-      else _hFlashEff->SetBinContent( index+1, (double)(_flash_ctr_v[index]) / (double)(_event_ctr) );
-      
-    }
+  for(size_t i=0; i<_cut_v.size(); ++i) {
+    if(flash_min_npe > _cut_v[i]) _eff_v[i] +=1;
+    else break;
   }
 
+  pass = (_disable ? true : pass);
+  if(_verbose)
+    std::cout << (pass ? "\033[93m PASS \033[00m" : "\033[93m FILTERED \033[00m") << std::endl;
+
   return pass;
+}
+
+void FlashTrigger::endJob()
+{
+
+  if(!_flash_tree) return;
+
+  if(_do_analysis) {
+    std::cout << "\033[93m<" << __PRETTY_FUNCTION__ << ">\033[00m Performing analysis..." << std::endl;
+
+    art::ServiceHandle<art::TFileService> tfs;    
+    //
+    // 1D Efficiency plot against PE cut
+    //
+    double total_events = (double)_event_ctr;
+    std::vector<double> _eff_err_v(_eff_v.size(),0);
+    std::vector<double> _null_v(_eff_v.size(),0);
+    for(size_t i=0; i<_eff_v.size(); ++i) {
+      auto& v = _eff_v[i];
+      _eff_err_v[i] = sqrt(v * (1.-v/total_events)) / total_events;
+      v /= total_events;
+    }    
+
+    TFile* fout = TFile::Open("flash_trigger_ana.root","RECREATE");
+    /*
+    auto gEff = tfs->make<TGraphErrors>(200,
+					&_cut_v[0],&_eff_v[0],
+					&_null_v[0],&_eff_err_v[0]);
+    */
+    auto gEff = new TGraphErrors(200,
+				 &_cut_v[0],&_eff_v[0],
+				 &_null_v[0],&_eff_err_v[0]);
+    gEff->SetName("gEff");
+    gEff->SetTitle("Photo-Electron (P.E.) Cut Efficiency; Cut Value [P.E.]; Events");
+    gEff->SetMarkerSize(1);
+    gEff->SetMarkerStyle(22);
+    gEff->SetMarkerColor(kBlue);
+
+    //
+    // Flash Time distribution
+    //
+    /*
+    auto hFlashTime = tfs->make<TH1D>("hFlashTime",
+				      Form("OpFlash Time Distribution (>%g P.E.); #DeltaT w.r.t. Trigger [#mus];OpFlash Count",
+					   _total_pe_threshold),
+				      800,-3200,3200);
+    auto hFlashTimeZoom = tfs->make<TH1D>("hFlashTimeZoom",
+					  Form("OpFlash Time Distribution (>%g P.E.); #DeltaT w.r.t. Trigger [#mus];OpFlash Count",
+					       _total_pe_threshold),
+					  800,-100,100);
+    */
+    auto hFlashTime = new TH1D("hFlashTime",
+			       Form("OpFlash Time Distribution (>%g P.E.); #DeltaT w.r.t. Trigger [#mus];OpFlash Count",
+				    _total_pe_threshold),
+			       800,-3200,3200);
+    auto hFlashTimeZoom = new TH1D("hFlashTimeZoom",
+				   Form("OpFlash Time Distribution (>%g P.E.); #DeltaT w.r.t. Trigger [#mus];OpFlash Count",
+					_total_pe_threshold),
+				   800,-100,100);
+    _flash_tree->Draw(Form("dt>>%s",hFlashTime->GetName()),
+		      Form("pe_total>%g",_total_pe_threshold));
+
+    _flash_tree->Draw(Form("dt>>%s",hFlashTimeZoom->GetName()),
+		      Form("pe_total>%g",_total_pe_threshold));
+
+    fout->cd();
+    gEff->Write();
+    hFlashTime->Write();
+    hFlashTimeZoom->Write();
+    fout->Close();
+  }
+
+  if(!_save_tree) _flash_tree->Delete("all");
+    
 }
 
 DEFINE_ART_MODULE(FlashTrigger)
