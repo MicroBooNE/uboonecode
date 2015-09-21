@@ -70,9 +70,8 @@ public:
 
 private:
 
-    std::string fTrackModuleLabel;
     std::string fVertexModuleLabel;
-    std::string fCosmicTaggerAssocLabel;
+    std::string fVtxTrackAssnsModuleLabel;
 
     TH1D*       fTotNumTracks;
 };
@@ -106,80 +105,34 @@ void TPCNeutrinoIDFilter::beginRun(const art::Run& run)
 
 void TPCNeutrinoIDFilter::reconfigure(fhicl::ParameterSet const& pset)
 {
-    fTrackModuleLabel       = pset.get< std::string >("TrackModuleLabel",       "trackkalmanhit");
-    fVertexModuleLabel      = pset.get< std::string >("VertexModuleLabel",      "pandoraNu");
-    fCosmicTaggerAssocLabel = pset.get< std::string >("CosmicTaggerAssocLabel", "trackkalmanhittag");
+    fVertexModuleLabel        = pset.get< std::string >("VertexModuleLabel",       "pandoraNu");
+    fVtxTrackAssnsModuleLabel = pset.get< std::string >("VtxTrackAssnModuleLabel", "vertextrackpair");
     
     return;
 }
 
-bool TPCNeutrinoIDFilter::filter(art::Event& evt)
+bool TPCNeutrinoIDFilter::filter(art::Event& event)
 {
     bool pass = false;
 
     // Recover a handle to the collection of vertices
-    art::Handle< std::vector<recob::Vertex> > vertexListHandle;
-  
-    // Recover a handle to the collection of tracks
-    art::Handle< std::vector<recob::Track> > trackListHandle;
+    art::Handle< std::vector<recob::Vertex> > vertexVecHandle;
+    event.getByLabel(fVertexModuleLabel, vertexVecHandle);
     
-    // Make sure there are tracks and vertices before doing more work
-    if (vertexListHandle.isValid() && vertexListHandle->size() > 0 && trackListHandle.isValid() && trackListHandle->size() > 0)
+    if (vertexVecHandle.isValid())
     {
-        double trkstartx = 0;
-        double trkstarty = 0;
-        double trkstartz = 0;
-        double trkendx   = 0;
-        double trkendy   = 0;
-        double trkendz   = 0;
-    
-        // Recover the associations between the tracks above and cosmic tags
-        art::FindManyP<anab::CosmicTag> cosmicAssns(trackListHandle, evt, fCosmicTaggerAssocLabel);
-
-        size_t NTracks = trackListHandle->size();
-    
-        fTotNumTracks->Fill(NTracks);
-    
-        for(size_t iTrk=0; iTrk < trackListHandle->size(); ++iTrk) {//loop over tracks
-      
-            // Recover track pointer from handle
-            art::Ptr<recob::Track> ptrack(trackListHandle, iTrk);
-            const recob::Track& track = *ptrack;
-            
-            //Cosmic Tagger information
-            float cosmicScore = 0.;
-            
-            if (cosmicAssns.isValid()) cosmicScore = cosmicAssns.at(track.ID()).front()->CosmicScore();
-
-            TVector3 pos, end;
-
-            int ntraj = track.NumberTrajectoryPoints();
-      
-            if(ntraj > 0) {
-                pos = track.Vertex();
-                end = track.End();
-            }
-
-            std::cout << "trajectory points " << ntraj << std::endl;
-            if(ntraj > 0) {
-                trkstartx = pos.X();
-                trkstarty = pos.Y();
-                trkstartz = pos.Z();
-                trkendx = end.X();
-                trkendy = end.Y();
-                trkendz = end.Z();
-            }
-
-            std::cout << "Track cosmic score: " << cosmicScore << std::endl;
-            std::cout << trkstartx << "\t" << trkstarty << "\t" << trkstartz << std::endl;
-            std::cout << trkendx << "\t" << trkendy << "\t" << trkendz << std::endl;
+        // Recover associations relating cosmic tags and track
+        art::FindManyP<recob::Track> vertexTrackAssns(vertexVecHandle, event, fVtxTrackAssnsModuleLabel);
         
-            // Just put this here for now to enable testing of the fhicl
+        // First check that we have something
+        if (vertexTrackAssns.isValid() && vertexTrackAssns.size() > 0)
+        {
+            // Actually, the fact that there is a non-empty association vector is good enough for now
             pass = true;
         }
-  }
+    }
 
-  return pass;
+    return pass;
 
 } // microboone::TPCNeutrinoIDFilter::filter()
 
