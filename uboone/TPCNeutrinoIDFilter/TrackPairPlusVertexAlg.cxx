@@ -147,7 +147,7 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                 // Is there a cut at this point?
                 
                 // Now loop over rest of tracks looking for best match
-                for(size_t track2Idx = 0; track2Idx < trackVecHandle->size(); track2Idx++)
+                for(size_t track2Idx = track1Idx+1; track2Idx < trackVecHandle->size(); track2Idx++)
                 {
                     // Still working the art ptrs
                     art::Ptr<recob::Track> track2(trackVecHandle,track2Idx);
