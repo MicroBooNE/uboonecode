@@ -16,6 +16,8 @@ microboone_analysistree:
  MCShowerModuleLabel:      "mcreco" 
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
+ FlashT0FinderLabel:       ["t0"]
+ MCT0FinderLabel:          ["mct0"]
  ShowerModuleLabel:        ["showerrecofuzzy"]
  CosmicClusterTaggerAssocLabel: "ccclustertag"
  CosmicTaggerAssocLabel: ["trackkalmanhit"]

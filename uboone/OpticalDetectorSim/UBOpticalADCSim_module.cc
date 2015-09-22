@@ -190,6 +190,7 @@ namespace opdet {
       
       // transfer the time of each hit (in opdet 'ch') into a vector<double>
       std::vector<double> photon_time;
+
       for(auto const &pmt_index : pmt_indexes.at(ipmt)) {
 	
 	const art::Ptr<sim::SimPhotons> pmt_ptr(pmtHandle,pmt_index);
@@ -199,7 +200,7 @@ namespace opdet {
 	for(size_t photon_index=0; photon_index<pmt_ptr->size(); ++photon_index)
 	  photon_time.push_back(pmt_ptr->at(photon_index).Time);
       }
-      
+      //std::cout<<"INPUT: pmt="<<ipmt<<" # photons="<<photon_time.size()<<std::endl;      
       // send the hits over to the waveform generator
       fOpticalGen.SetPhotons(photon_time);
       
@@ -212,7 +213,29 @@ namespace opdet {
       for (unsigned int ireadout=0; ireadout<geom->NOpHardwareChannels(ipmt); ireadout++) {
 	unsigned int channel_num = geom->OpChannel( ipmt, ireadout );
 	optdata::ChannelData adc_wfm( channel_num );
-	fOpticalGen.GenWaveform(ipmt, adc_wfm );
+	//fOpticalGen.GenWaveform(ipmt, adc_wfm );
+	fOpticalGen.GenWaveform(channel_num, adc_wfm );
+	/*
+	if(channel_num<32) {
+	  double pe=0;
+	  double ped_mean=0;
+	  double max=0;
+	  double min=1e12;
+	  for(auto const& v : adc_wfm) {
+	    ped_mean += v;
+	    if(v > max) max = (double)v;
+	    if(v < min) min = (double)v;
+	  }
+	  ped_mean /= ((double)(adc_wfm.size()));
+	  for(auto const& v : adc_wfm)
+	    if(v > ped_mean + 3) pe += (v - ped_mean);
+
+	  std::cout<<"Digit Ch: "<<channel_num
+		   <<" Pedestal: "<<ped_mean
+		   <<" ... " << min << " => "<<max
+		   <<" PE: "<< pe / 118. << std::endl<<std::endl;
+	}
+	*/
 	wfs->emplace_back( adc_wfm );
       }	
     } // loop over pmts
