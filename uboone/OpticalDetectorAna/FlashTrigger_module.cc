@@ -21,6 +21,8 @@
 
 #include <memory>
 
+#include "SimulationBase/MCParticle.h"
+#include "SimulationBase/MCTruth.h"
 #include "RecoBase/OpFlash.h"
 #include "Geometry/Geometry.h"
 #include <limits>
@@ -57,6 +59,7 @@ private:
   // Module utility variables
   //
   std::string _flash_module; ///< recob::OpFlash producer module label
+  std::string _gen_module;   ///< simb::MCTruth producer module label
   bool        _verbose;      ///< Verbosity flag
   bool        _disable;      ///< Filter disable (ha-ha!)
   double      _event_ctr;    ///< A counter for the total number of events processed
@@ -86,6 +89,9 @@ private:
   unsigned int _run;         ///< Run ID
   unsigned int _subrun;      ///< SubRun ID
   unsigned int _event;       ///< Event ID
+  double _nu_mc_x;           ///< Neutrino MC X position
+  double _nu_mc_y;           ///< Neutrino MC Y position
+  double _nu_mc_z;           ///< Neutrino MC Z position
   std::vector<double> _pe_v; ///< PE distribution per flash
   double _pe_total;          ///< Total PE over PMTs
   double _dt;                ///< Time w.r.t. Trigger
@@ -116,6 +122,7 @@ FlashTrigger::FlashTrigger(fhicl::ParameterSet const & p)
   _verbose                   = p.get< bool         > ( "Verbose"                 );
   _disable                   = p.get< bool         > ( "DisableFilter"           );
   _flash_module              = p.get< std::string  > ( "OpFlashModule"           );
+  _gen_module                = p.get< std::string  > ( "NeutrinoGenerator"       );
   if(_flash_module.empty()) {
     std::cerr << "OpFlashModule is empty!" << std::endl;
     throw std::exception();
@@ -179,7 +186,9 @@ void FlashTrigger::MakeTree()
   _flash_tree->Branch ( "fy_err",   &_fy_err,   "fy_err/D"   );
   _flash_tree->Branch ( "fz",       &_fz,       "fz/D"       );
   _flash_tree->Branch ( "fz_err",   &_fz_err,   "fz_err/D"   );
-  
+  _flash_tree->Branch ( "nu_mc_x",  &_nu_mc_x,  "mc_nu_x/D"  );
+  _flash_tree->Branch ( "nu_mc_y",  &_nu_mc_y,  "mc_nu_y/D"  );
+  _flash_tree->Branch ( "nu_mc_z",  &_nu_mc_z,  "mc_nu_z/D"  );
   // Object branch
   _flash_tree->Branch ( "pe_v", "std::vector<double>", &_pe_v);
 }
@@ -187,6 +196,7 @@ void FlashTrigger::MakeTree()
 void FlashTrigger::EventClear()
 {
   _run = _subrun = _event = 0;
+  _nu_mc_x = _nu_mc_y = _nu_mc_z = std::numeric_limits<double>::max();
 }
 
 void FlashTrigger::ClearAnalysisVariables()
@@ -247,6 +257,32 @@ bool FlashTrigger::filter(art::Event & e)
   _subrun = e.id().subRun();
   _event  = e.id().event();
   _event_ctr += 1; // Increment total event ctr
+
+  // Retrieve Neutrino Info if there is
+  art::Handle< std::vector< simb::MCTruth > > mct_handle;
+  e.getByLabel( _gen_module, mct_handle );
+  if(mct_handle.isValid() && mct_handle->size()) {
+    bool nu_set=false;
+    for(auto const& mct : (*mct_handle)) {
+
+      if(mct.Origin() != simb::kBeamNeutrino) continue;
+      
+      for(size_t part_index=0; part_index<(size_t)(mct.NParticles()); ++part_index) {
+	
+	auto const& part = mct.GetParticle(part_index);
+	
+	if(part.StatusCode() == 1) {
+	  
+	  _nu_mc_x = part.Position(0)[0];
+	  _nu_mc_y = part.Position(0)[1];
+	  _nu_mc_z = part.Position(0)[2];
+	  nu_set=true;
+	  break;
+	}
+      }
+      if(nu_set) break;
+    }
+  }
 
   // Retrieve OpFlash
   art::Handle< std::vector< recob::OpFlash > > flash_handle;
