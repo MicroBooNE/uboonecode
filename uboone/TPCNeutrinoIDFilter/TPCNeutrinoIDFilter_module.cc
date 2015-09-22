@@ -70,10 +70,16 @@ public:
 
 private:
 
-    std::string fVertexModuleLabel;
-    std::string fVtxTrackAssnsModuleLabel;
+    // Need vectors here because we have have several instantiations
+    // of the module running depending on matching
+    std::vector<std::string> fVertexModuleLabelVec;
+    std::vector<std::string> fVtxTrackAssnsModuleLabelVec;
+    
+    // For Cluster2D we only have one version
+    std::string              fCosmicProducerLabel;
+    std::string              fCosmicClusterAssnsLabel;
 
-    TH1D*       fTotNumTracks;
+    TH1D*                    fTotNumTracks;
 };
 
 
@@ -105,8 +111,17 @@ void TPCNeutrinoIDFilter::beginRun(const art::Run& run)
 
 void TPCNeutrinoIDFilter::reconfigure(fhicl::ParameterSet const& pset)
 {
-    fVertexModuleLabel        = pset.get< std::string >("VertexModuleLabel",       "pandoraNu");
-    fVtxTrackAssnsModuleLabel = pset.get< std::string >("VtxTrackAssnModuleLabel", "vertextrackpair");
+    fVertexModuleLabelVec        = pset.get< std::vector<std::string> >("VertexModuleLabelVec",       std::vector<std::string>() ={"pandoraNu"});
+    fVtxTrackAssnsModuleLabelVec = pset.get< std::vector<std::string> >("VtxTrackAssnModuleLabelVec", std::vector<std::string>() ={"neutrinoID"});
+    
+    if (fVertexModuleLabelVec.size() != fVtxTrackAssnsModuleLabelVec.size())
+    {
+        mf::LogError("TPCNeutrinoIDFilter") << "Mismatch between string vector lengths input from fhicl!" << std::endl;
+    }
+    
+    // For cluster 2D approach
+    fCosmicProducerLabel         = pset.get< std::string > ("Cluster2DCosmicProducerLabel", "trackkalmanhittag");
+    fCosmicClusterAssnsLabel     = pset.get< std::string > ("Cluster2DCosmicClusterAssns",  "cluster2D");
     
     return;
 }
@@ -115,20 +130,46 @@ bool TPCNeutrinoIDFilter::filter(art::Event& event)
 {
     bool pass = false;
 
-    // Recover a handle to the collection of vertices
-    art::Handle< std::vector<recob::Vertex> > vertexVecHandle;
-    event.getByLabel(fVertexModuleLabel, vertexVecHandle);
-    
-    if (vertexVecHandle.isValid())
+    // In principle we can have several producers running over various configurations of vertices and tracks.
+    // The output associations we want to check are then encapsuated in the input vectors of strings
+    // So the outer loop is over the indices
+    for(size_t assnIdx = 0; assnIdx < fVertexModuleLabelVec.size(); assnIdx++)
     {
-        // Recover associations relating cosmic tags and track
-        art::FindManyP<recob::Track> vertexTrackAssns(vertexVecHandle, event, fVtxTrackAssnsModuleLabel);
-        
-        // First check that we have something
-        if (vertexTrackAssns.isValid() && vertexTrackAssns.size() > 0)
+        // Recover a handle to the collection of vertices
+        art::Handle< std::vector<recob::Vertex> > vertexVecHandle;
+        event.getByLabel(fVertexModuleLabelVec[assnIdx], vertexVecHandle);
+    
+        if (vertexVecHandle.isValid())
         {
-            // Actually, the fact that there is a non-empty association vector is good enough for now
-            pass = true;
+            // Recover associations relating cosmic tags and track
+            art::FindManyP<recob::Track> vertexTrackAssns(vertexVecHandle, event, fVtxTrackAssnsModuleLabelVec[assnIdx]);
+        
+            // First check that we have something
+            if (vertexTrackAssns.isValid() && vertexTrackAssns.size() > 0 && vertexTrackAssns.at(0).size() > 0)
+            {
+                // Actually, the fact that there is a non-empty association vector is good enough for now
+                pass = true;
+                break;
+            }
+        }
+    }
+    
+    // To check for the 2D cluster ID results we need to get cosmic to cluster associations
+    // For that we need to start with the overall cosmic tag producer module
+    // Fortunately, we only do this if the above failed...
+    if (!pass)
+    {
+        art::Handle<std::vector<anab::CosmicTag>> cosmicVecHandle;
+        event.getByLabel(fCosmicProducerLabel, cosmicVecHandle);
+    
+        if (cosmicVecHandle.isValid())
+        {
+            art::FindManyP<recob::Cluster> cosmicClusterAssns(cosmicVecHandle, event, fCosmicClusterAssnsLabel);
+        
+            if (cosmicClusterAssns.isValid() && cosmicClusterAssns.size() > 0 && cosmicClusterAssns.at(0).size() > 0)
+            {
+                pass = true;
+            }
         }
     }
 

@@ -1,9 +1,10 @@
 /**
- *  @file   NeutrinoIDAlgBase.h
+ *  @file    NeutrinoIDAlgBase.h
  * 
- *  @brief  This is intended to define an interface to all Seed finder algorithms employed
- *          by the 3D clustering
+ *  @brief   This is intended to define an interface to all Seed finder algorithms employed
+ *           by the 3D clustering
  * 
+ *  @authors usher@slac.stanford.edu
  */
 #ifndef NeutrinoIDAlgFactory_h
 #define NeutrinoIDAlgFActory_h

@@ -12,6 +12,7 @@
 
 // The main include
 #include "TPCNeutrinoIDFilter/TrackPairPlusVertexAlg.h"
+
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/FindManyP.h"
@@ -55,11 +56,14 @@ TrackPairPlusVertexAlg::~TrackPairPlusVertexAlg()
     
 void TrackPairPlusVertexAlg::reconfigure(fhicl::ParameterSet const &pset)
 {
-    fTrackModuleLabel        = pset.get<std::string> ("TrackModuleLabel",  "trackkalmanhit");
-    fVertexModuleLabel       = pset.get<std::string> ("VertexModuleLabel", "pandoraNu");
-    fCosmicModuleLabel       = pset.get<std::string> ("CosmicModuleLabel", "trackKalmanHitTag");
-    fCosmicScoreCut          = pset.get<double>      ("CosmicScoreCut",    0.4);
-    fNeutrinoVtxTrackDistCut = pset.get<double>      ("NuVtxTrackDistCut", 100.);
+    // Assume we could be called externally with the top level module's complete parameter set
+    const fhicl::ParameterSet& myPset = pset.get<fhicl::ParameterSet>("TPCTracksPlusVertexAlg");
+    
+    fTrackModuleLabel        = myPset.get<std::string> ("TrackModuleLabel",  "trackkalmanhit");
+    fVertexModuleLabel       = myPset.get<std::string> ("VertexModuleLabel", "pandoraNu");
+    fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel", "trackKalmanHitTag");
+    fCosmicScoreCut          = myPset.get<double>      ("CosmicScoreCut",    0.4);
+    fNeutrinoVtxTrackDistCut = myPset.get<double>      ("NuVtxTrackDistCut", 4.5);
 }
     
 void TrackPairPlusVertexAlg::produces(art::EDProducer* owner)

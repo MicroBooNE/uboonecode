@@ -1,5 +1,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
+// @file:  TPCNeutrinoID_module.cc
+//
+// @brief: Producer module to scan for neutrino candidates in a given event
+//
 // Class:       TPCNeutrinoID
 // Module Type: producer
 // File:        TPCNeutrinoID_module.cc
@@ -11,9 +15,10 @@
 //
 // Configuration parameters:
 //
-// DigitModuleLabel      - the source of the RawDigit collection
+// NeutrinoIDAlgName  - name of algorithm to instantiate for scanning
 //
 //
+// @authors  usher@slac.stanford.edu
 // Collating done by Tracy Usher (usher@slac.stanford.edu) based on work
 // done by the Neutrino ID task force
 //
@@ -55,7 +60,6 @@ private:
 
     // Fcl parameters.
     std::string                                      fNeutrinoIDAlg;        ///< Algorithm used to do the work
-    std::string                                      fTrackModuleLabel;     ///< Producer of input tracks
 
     // Statistics.
     int                                              fNumEvent;             ///< Number of events seen.
@@ -109,8 +113,7 @@ TPCNeutrinoID::~TPCNeutrinoID()
 ///
 void TPCNeutrinoID::reconfigure(fhicl::ParameterSet const & pset)
 {
-    fNeutrinoIDAlg         = pset.get<std::string>        ("NeutrinoIDAlgName", "TrackPairPlusVertexAlg");
-    fTrackModuleLabel      = pset.get<std::string>        ("TrackModuleLabel",  "trackkalmanhit");
+    fNeutrinoIDAlg = pset.get<std::string>("NeutrinoIDAlgName", "TrackPairPlusVertexAlg");
 }
 
 //----------------------------------------------------------------------------

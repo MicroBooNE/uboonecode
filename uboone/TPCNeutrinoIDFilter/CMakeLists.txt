@@ -2,7 +2,7 @@
 
 
 art_make(BASENAME_ONLY
-	LIBRARY_NAME TPCNeutrinoID
+	LIBRARY_NAME TPCNeutrinoIDFilter
 	LIB_LIBRARIES 
 		     RecoBase
 		     AnalysisBase
@@ -12,8 +12,6 @@ art_make(BASENAME_ONLY
 		     LArProperties_service
 		     OpDigiProperties_service
 		     Utilities
-		     CalibrationDBI_IOVData
-		     CalibrationDBI_Providers
 		     ${SIMULATIONBASE}
 		     ${MF_MESSAGELOGGER}
 		     ${MF_UTILITIES}
@@ -23,13 +21,9 @@ art_make(BASENAME_ONLY
 		     ${ROOT_BASIC_LIB_LIST}
 		     ${G4_LIB_LIST}
 	MODULE_LIBRARIES
-                TPCNeutrinoID
-			    RecoAlg
-                Cluster3DAlgs
-			    Simulation
+                TPCNeutrinoIDFilter
 			    RecoObjects
 			    RecoBase
-			    MCBase
 			    Geometry
 			    Geometry_service
 			    PhotonVisibilityService_service
@@ -39,8 +33,6 @@ art_make(BASENAME_ONLY
                 LArProperties_service
 			    DetectorProperties_service
 			    Utilities
-                CalibrationDBI_IOVData
-                CalibrationDBI_Providers
 			    ${MAGNETICFIELD_SERVICE}
 			    ${SIMULATIONBASE}
 			    ${ART_FRAMEWORK_CORE}
