@@ -538,7 +538,7 @@ namespace lris {
         //The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
         //object), and technically a trailer (though here it's empty!).
 	auto const& tpc_card_header = card.header();   
-        //std::cout << "getID() = " << tpc_card_header.getID() << ", getModule() = " << tpc_card_header.getModule() << ", crate_number = " << crate_number <<  std::endl;
+        // Output tree variables - for calculating compression
         if (crate_number == 1){
           NumWords_crate1 += tpc_card_header.getWordCount();
         }
@@ -617,6 +617,7 @@ namespace lris {
 	       adclist.emplace_back( it );
 	       }
 	    */
+        // Output tree variables - for calculating compression
 	    chdsize = adclist.size();
         if (crate_number == 1){
           ADCwords_crate1 += chdsize;
@@ -809,6 +810,8 @@ namespace lris {
 	    // also need to go from clock time to time stamp
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( sample, frame );
+
+        // Filling output tree variables - these don't make so much sense currently
             if (card_data.getModule() == 1){
               FEM1triggerFrame = frame;
               FEM1triggerSample = sample;
@@ -923,7 +926,7 @@ namespace lris {
 			      trig_bits );
       trigInfo.emplace_back( swiz_trig );
       
-// ANDY STUFF
+// Stuff to fill tree
       triggerFrame = frame;
       triggerSample = sample_64MHz;
       triggerActive = trig_data.Trig_Active();
