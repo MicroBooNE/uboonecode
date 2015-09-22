@@ -16,6 +16,9 @@
 #include "Geometry/Geometry.h"
 #include "Utilities/DetectorProperties.h"
 
+// Root includes
+#include "TH1D.h"
+
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 namespace neutrinoid
@@ -45,6 +48,11 @@ public:
     virtual void reconfigure(fhicl::ParameterSet const&);
     
     /**
+     *  @brief Set up for "beginJob" phase if requested
+     */
+    virtual void beginJob(art::ServiceHandle<art::TFileService>&);
+    
+    /**
      *  @brief Each algorithm may have different objects it wants "produced" so use this to
      *         let the top level producer module "know" what it is outputting
      */
@@ -65,6 +73,10 @@ private:
     std::string                fCosmicModuleLabel;       ///< Producer of cosmic track tags
     double                     fCosmicScoreCut;          ///< Cut value for possible cosmic tag scores
     double                     fNeutrinoVtxTrackDistCut; ///< Cut to select neutrino candidate
+    bool                       fDoHists;                 ///< Fill histograms
+    
+    TH1D*                      fMaxDistHists;            ///< maximum distance all triangles
+    TH1D*                      fBestMaxDistHists;        ///< best max dist
     
     art::EDProducer*           fMyProducerModule;        ///< The producer module driving us
     

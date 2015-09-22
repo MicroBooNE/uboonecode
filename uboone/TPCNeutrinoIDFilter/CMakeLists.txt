@@ -12,7 +12,13 @@ art_make(BASENAME_ONLY
 		     LArProperties_service
 		     OpDigiProperties_service
 		     Utilities
-		     ${SIMULATIONBASE}
+		     ${ART_FRAMEWORK_SERVICES_REGISTRY}
+		     ${ART_FRAMEWORK_SERVICES_BASIC}
+		     ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+		     ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
+	             ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
+		     ${ART_PERSISTENCY_COMMON}
+		     ${ART_UTILITIES}
 		     ${MF_MESSAGELOGGER}
 		     ${MF_UTILITIES}
 		     ${FHICLCPP}
@@ -21,16 +27,16 @@ art_make(BASENAME_ONLY
 		     ${ROOT_BASIC_LIB_LIST}
 		     ${G4_LIB_LIST}
 	MODULE_LIBRARIES
-                TPCNeutrinoIDFilter
+			TPCNeutrinoIDFilter
 			    RecoObjects
 			    RecoBase
 			    Geometry
 			    Geometry_service
 			    PhotonVisibilityService_service
-                OpDigiProperties_service
+                	    OpDigiProperties_service
 			    AnalysisAlg
 			    AnalysisBase
-                LArProperties_service
+                	    LArProperties_service
 			    DetectorProperties_service
 			    Utilities
 			    ${MAGNETICFIELD_SERVICE}

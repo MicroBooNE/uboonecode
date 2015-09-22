@@ -141,7 +141,7 @@ bool TPCNeutrinoIDFilter::filter(art::Event& event)
     
         if (vertexVecHandle.isValid())
         {
-            // Recover associations relating cosmic tags and track
+            // Recover associations relating vertices and tracks
             art::FindManyP<recob::Track> vertexTrackAssns(vertexVecHandle, event, fVtxTrackAssnsModuleLabelVec[assnIdx]);
         
             // First check that we have something

@@ -45,6 +45,11 @@ public:
     virtual void reconfigure(fhicl::ParameterSet const&);
     
     /**
+     *  @brief Set up for "beginJob" phase if requested
+     */
+    virtual void beginJob(art::ServiceHandle<art::TFileService>&);
+    
+    /**
      *  @brief Each algorithm may have different objects it wants "produced" so use this to
      *         let the top level producer module "know" what it is outputting
      */

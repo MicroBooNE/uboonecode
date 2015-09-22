@@ -14,7 +14,6 @@
 #include "TPCNeutrinoIDFilter/TrackPairPlusVertexAlg.h"
 
 // Framework Includes
-#include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/FindManyP.h"
 
 // LArSoft includes
@@ -64,6 +63,21 @@ void TrackPairPlusVertexAlg::reconfigure(fhicl::ParameterSet const &pset)
     fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel", "trackKalmanHitTag");
     fCosmicScoreCut          = myPset.get<double>      ("CosmicScoreCut",    0.4);
     fNeutrinoVtxTrackDistCut = myPset.get<double>      ("NuVtxTrackDistCut", 4.5);
+    fDoHists                 = myPset.get<bool>        ("FillHistograms",    true);
+}
+    
+void TrackPairPlusVertexAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs)
+{
+    if (fDoHists)
+    {
+        // Define the histograms. Putting semi-colons around the title
+        // causes it to be displayed as the x-axis label if the histogram
+        // is drawn.
+        fMaxDistHists     = tfs->make<TH1D>("TriangleMaxDist", "Max distance for each triangle found",            2000, 0, 1000);
+        fBestMaxDistHists = tfs->make<TH1D>("TriBestMaxDist",  "Max distance for the best triangle in the event", 2000, 0, 1000);
+    }
+    
+    return;
 }
     
 void TrackPairPlusVertexAlg::produces(art::EDProducer* owner)
@@ -192,6 +206,9 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                     // is it larger?
                     maxDist = std::max(maxDist,track1ToTrack2Dist);
                     
+                    // fill hist if asked
+                    if (fDoHists) fMaxDistHists->Fill(maxDist, 1.);
+                    
                     // Is this the best?
                     if (maxDist < bestDistance)
                     {
@@ -208,6 +225,9 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                 }
             }
         }
+        
+        // Fill hists if asked
+        if (fDoHists) fBestMaxDistHists->Fill(bestDistance, 1.);
         
         // Check to see if we think we have a candidate
         if (bestDistance < fNeutrinoVtxTrackDistCut)

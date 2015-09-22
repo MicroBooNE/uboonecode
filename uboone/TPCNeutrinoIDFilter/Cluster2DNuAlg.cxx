@@ -16,6 +16,7 @@
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/FindManyP.h"
+#include "art/Framework/Services/Optional/TFileService.h"
 
 // LArSoft includes
 #include "Geometry/Geometry.h"
@@ -75,6 +76,8 @@ void Cluster2DNuAlg::reconfigure(fhicl::ParameterSet const &pset)
     fMaximumDistance         = myPset.get<float>       ("MaximumDistance",      10.);
     fMaximumTime             = myPset.get<float>       ("MaximumTime",          30.);
 }
+    
+void Cluster2DNuAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs) {}
     
 void Cluster2DNuAlg::produces(art::EDProducer* owner)
 {
