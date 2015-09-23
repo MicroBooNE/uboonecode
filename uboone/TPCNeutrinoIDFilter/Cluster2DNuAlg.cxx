@@ -11,7 +11,7 @@
  */
 
 // The main include
-#include "TPCNeutrinoIDFilter/Cluster2DNuAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Cluster2DNuAlg.h"
 
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"

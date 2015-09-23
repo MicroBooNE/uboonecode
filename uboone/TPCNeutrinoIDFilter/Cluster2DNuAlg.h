@@ -7,7 +7,7 @@
 #ifndef Cluster2DNuAlg_h
 #define Cluster2DNuAlg_h
 
-#include "TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
+#include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
 
 // LArSoft includes
 #include "Geometry/Geometry.h"

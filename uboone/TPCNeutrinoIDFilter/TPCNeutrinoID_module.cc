@@ -40,7 +40,7 @@
 #include "RecoBase/Vertex.h"
 
 // Includes for the interface to our algorithms and their creator
-#include "TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h"
+#include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h"
 
 class TPCNeutrinoID : public art::EDProducer
 {
