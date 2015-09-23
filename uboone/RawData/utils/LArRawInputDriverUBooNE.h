@@ -145,6 +145,20 @@ namespace lris {
     uint32_t FEM8triggerFrame ;
     uint16_t FEM8triggerSample;
 
+    uint32_t RO_BNBtriggerFrame;
+    uint32_t RO_NuMItriggerFrame;
+    uint32_t RO_EXTtriggerFrame;
+    uint32_t RO_RWMtriggerFrame;
+    uint32_t RO_BNBtriggerSample;
+    uint32_t RO_NuMItriggerSample;
+    uint32_t RO_EXTtriggerSample;
+    uint32_t RO_RWMtriggerSample;
+    
+    uint32_t RO_Gate1Frame;
+    uint32_t RO_Gate1Sample;
+    uint32_t RO_Gate2Frame;
+    uint32_t RO_Gate2Sample;
+
     uint32_t TPCtriggerFrame;
     uint32_t TPCtriggerSample;
     
