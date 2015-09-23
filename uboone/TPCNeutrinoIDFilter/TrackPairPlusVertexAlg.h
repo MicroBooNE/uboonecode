@@ -7,9 +7,6 @@
 #ifndef TrackPairPlusVertexAlg_h
 #define TrackPairPlusVertexAlg_h
 
-// Framework Includes
-#include "fhiclcpp/ParameterSet.h"
-
 #include "TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
 
 // LArSoft includes

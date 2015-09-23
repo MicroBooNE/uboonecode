@@ -7,9 +7,6 @@
 #ifndef Cluster2DNuAlg_h
 #define Cluster2DNuAlg_h
 
-// Framework Includes
-#include "fhiclcpp/ParameterSet.h"
-
 #include "TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
 
 // LArSoft includes
