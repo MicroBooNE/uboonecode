@@ -24,6 +24,7 @@ add_subdirectory(Calibrations)
 add_subdirectory(OpticalDetectorSim)
 add_subdirectory(OpticalDetectorAna)
 add_subdirectory(SpaceCharge)
+add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(DataScanner)
 #add_subdirectory(LiteMaker)
 
