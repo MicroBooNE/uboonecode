@@ -45,4 +45,12 @@ microboone_tpcneutrinoidfilter:
     Cluster2DCosmicClusterAssns:  "cluster2D"
 }
 
+microboone_tpcneutrinoidana:
+{
+    module_type:                  "TPCNeutrinoIDAna"
+    VertexModuleLabelVec:         ["pandoraNu"]
+    VtxTrackAssnModuleLabelVec:   ["vtxPlusTrkPanKal"]
+    FullyQualifiedInputFile:      "/pnfs/uboone/data/uboone/some/path/to/recon/file/recon.root"
+}
+
 END_PROLOG
