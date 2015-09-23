@@ -84,6 +84,7 @@ private:
     // of the module running depending on matching
     std::vector<std::string> fVertexModuleLabelVec;
     std::vector<std::string> fVtxTrackAssnsModuleLabelVec;
+    std::string              fInputFileName;
     
     // Pointers to the histograms we'll create. 
 
@@ -147,6 +148,10 @@ void  TPCNeutrinoIDAna::reconfigure(fhicl::ParameterSet const& pset)
         mf::LogError("TPCNeutrinoIDFilter") << "Mismatch between string vector lengths input from fhicl!" << std::endl;
     }
     
+    // For now require that we input the fully qualified input file name, including full path to file
+    // **TODO** learn how to recover from art framework
+    fInputFileName = pset.get<std::string>("FullyQualifiedInputFile");
+    
     return;
 }
 
@@ -182,6 +187,15 @@ void  TPCNeutrinoIDAna::analyze(const art::Event& event)
                 {
                     const std::vector<art::Ptr<recob::Track>>& trackVec = vertexTrackAssns.at(vtxTrackAssnIdx);
                     
+                    // No tracks, no work
+                    if (trackVec.empty()) continue;
+                    
+                    // Keep track of ranges for each view
+                    size_t maxWireNum[] = {    0,    0,    0};
+                    size_t minWireNum[] = {10000,10000,10000};
+                    size_t maxTicks(0);
+                    size_t minTicks(100000);
+                    
                     //Loop over tracks
                     for(const auto& track : trackVec)
                     {
@@ -191,19 +205,40 @@ void  TPCNeutrinoIDAna::analyze(const art::Event& event)
                         // Geometry routines want to see an array...
                         double trackStartPos[] = {trackStart.X(),trackStart.Y(),trackStart.Z()};
                         double trackEndPos[]   = {trackEnd.X(),  trackEnd.Y(),  trackEnd.Z()};
+
+                        // Starting and ending ticks depend on the x position, we'll use the W plane for reference
+                        size_t startTicks = fDetectorProperties->ConvertXToTicks(trackStartPos[0], 2, 0, 0);
+                        size_t endTicks   = fDetectorProperties->ConvertXToTicks(trackEndPos[0], 2, 0, 0);
+                        size_t loTicks    = std::min(startTicks,endTicks);
+                        size_t hiTicks    = std::max(startTicks,endTicks);
                         
-                        // now loop over views for the construction of the output url
+                        // There is also a per plane offset but only a few ticks so not important here?
+                        maxTicks = std::max(maxTicks,hiTicks);
+                        minTicks = std::min(minTicks,loTicks);
+                        
+                        // now loop over views to get starting/ending wires
                         for(size_t viewIdx = 0; viewIdx < fGeometry->Nviews(); viewIdx++)
                         {
-                            unsigned int startWire  = fGeometry->NearestWire(trackStartPos, viewIdx);
-                            double       startTicks = fDetectorProperties->ConvertXToTicks(trackStartPos[0], int(viewIdx), 0, 0);
-                            unsigned int endWire    = fGeometry->NearestWire(trackEndPos,   viewIdx);
-                            double       endTicks   = fDetectorProperties->ConvertXToTicks(trackEndPos[0], int(viewIdx), 0, 0);
+                            size_t startWire  = fGeometry->NearestWire(trackStartPos, viewIdx);
+                            size_t endWire    = fGeometry->NearestWire(trackEndPos,   viewIdx);
                             
-                            // to compile...
-                            std::cout << startWire << startTicks << endWire << endTicks << std::endl;
+                            size_t lowWire    = std::min(startWire,endWire);
+                            size_t hiWire     = std::max(startWire,endWire);
+                            
+                            maxWireNum[viewIdx] = std::max(maxWireNum[viewIdx],hiWire);
+                            minWireNum[viewIdx] = std::min(minWireNum[viewIdx],lowWire);
                         }
                     }
+                    
+                    // Now that we have scanned through all tracks for this vertex, construct and output the desired url
+                    // Need the maximum range for the wires
+                    size_t maxWireRange = maxWireNum[0] - minWireNum[0];
+                    
+                    maxWireRange = std::max(maxWireRange,maxWireNum[1] - minWireNum[1]);
+                    maxWireRange = std::max(maxWireRange,maxWireNum[2] - minWireNum[2]);
+                    
+                    // Output the url
+                    std::cout << "http://argo-microboone.fnal.gov/#entry=" << fEvent << "&filename=" << fInputFileName << "&t1=" << minTicks << "&t2=" << maxTicks << "&wires=" << maxWireRange << "&plane0=" << minWireNum[0] << "&plane1=" << minWireNum[1] << "&plane2=" << minWireNum[2] << std::endl;
                 }
             }
         }
