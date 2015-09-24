@@ -7,9 +7,9 @@
  */
 
 // Includes for algorithms
-#include "TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h"
-#include "TPCNeutrinoIDFilter/TrackPairPlusVertexAlg.h"
-#include "TPCNeutrinoIDFilter/Cluster2DNuAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h"
+#include "uboone/TPCNeutrinoIDFilter/TrackPairPlusVertexAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Cluster2DNuAlg.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

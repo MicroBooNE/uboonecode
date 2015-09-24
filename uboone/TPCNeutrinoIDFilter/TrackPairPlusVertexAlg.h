@@ -7,7 +7,7 @@
 #ifndef TrackPairPlusVertexAlg_h
 #define TrackPairPlusVertexAlg_h
 
-#include "TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
+#include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
 
 // LArSoft includes
 #include "Geometry/Geometry.h"
