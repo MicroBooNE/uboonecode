@@ -21,6 +21,7 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/FindManyP.h"
+#include "art/Framework/Core/FileBlock.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "cetlib/exception.h"
@@ -74,6 +75,11 @@ public:
     // middle of a job; e.g., if the user changes parameter values in an
     // interactive event display.
     void reconfigure(fhicl::ParameterSet const& pset);
+    
+    // Override the response to input and output fils so we can get the
+    // fully qualified path for argo
+    void respondToOpenInputFile(art::FileBlock const&);
+    void respontToOpenOutputFile(art::FileBlock const&);
 
     // The analysis routine, called once per event. 
     void analyze (const art::Event& evt); 
@@ -152,6 +158,20 @@ void  TPCNeutrinoIDAna::reconfigure(fhicl::ParameterSet const& pset)
     // **TODO** learn how to recover from art framework
     fInputFileName = pset.get<std::string>("FullyQualifiedInputFile");
     
+    return;
+}
+    
+void TPCNeutrinoIDAna::respondToOpenInputFile(art::FileBlock const& fileBlock)
+{
+    // Override the fhicl parameter for the input file name
+    fInputFileName = fileBlock.fileName();
+
+    return;
+}
+    
+void TPCNeutrinoIDAna::respontToOpenOutputFile(art::FileBlock const& fileBlock)
+{
+    // TODO
     return;
 }
 
