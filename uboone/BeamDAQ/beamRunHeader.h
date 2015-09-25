@@ -25,7 +25,7 @@ class beamRunHeader {
   int   fSubRun;
   boost::posix_time::ptime fRunStart;
   boost::posix_time::ptime fRunEnd;
-  std::map<std::string, uint> fCounter; 
+  std::map<std::string, unsigned int> fCounter; 
 
   bool fFinished;
 

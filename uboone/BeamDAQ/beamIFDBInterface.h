@@ -31,7 +31,7 @@ private:
   static size_t writeMemoryCallback(void *cont, size_t size, size_t nmemb, void *userp)
   {
     httpResponse *response = (httpResponse *)userp;
-    for (uint c = 0; c<size*nmemb; c++) {
+    for (unsigned int c = 0; c<size*nmemb; c++) {
       char* buf=(char*) cont;
       (response->memory).push_back(buf[c]);
     }

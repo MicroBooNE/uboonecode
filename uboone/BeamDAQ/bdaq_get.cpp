@@ -69,7 +69,7 @@ int main(int ac, char* av[])
     else 
       fhiclPath.append("./");
 
-    std::cout<<"Going with path= "<<fhiclPath<<std::endl;
+    //    std::cout<<"Going with path= "<<fhiclPath<<std::endl;
     ::putenv(const_cast<char *>(fhiclPath.c_str()));
     
     std::string fhiclFile("BEAMDAQ_CONFIG_FILE=");

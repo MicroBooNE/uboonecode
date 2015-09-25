@@ -40,7 +40,7 @@ beamRun::beamRun()
 
 beamRun::~beamRun()
 {
-  for (uint i=0;i<fBeamLine.size();i++) {
+  for (unsigned int i=0;i<fBeamLine.size();i++) {
     fBundle[fBeamLine[i]].clear();
   }
   fBundle.clear();
@@ -56,7 +56,7 @@ void beamRun::StartRun(beamRunHeader& rh, boost::posix_time::ptime tstart)
 
   mf::LogInfo("") <<"Starting new beam run "<<fRunHeader.fRun<<" subrun "<<fRunHeader.fSubRun<<" on "<<tstart;
   fOut=new ofstream[fBeamLine.size()];
-  for (uint i=0;i<fBeamLine.size();i++) {
+  for (unsigned int i=0;i<fBeamLine.size();i++) {
     stringstream ss;
     ss<<fOutputDirData<<"/beam_"<<fBeamLine[i]<<"_"
       <<setfill('0')<<setw(7)<<fRunHeader.fRun<<"_"
@@ -74,7 +74,7 @@ void beamRun::Update(boost::posix_time::ptime tend)
 {
   static char sbuf[1024];
  
-  for (uint ibeam=0;ibeam<fBeamLine.size();ibeam++) {
+  for (unsigned int ibeam=0;ibeam<fBeamLine.size();ibeam++) {
     bool isdone=false;
     beamdatamap_t data_map;
     ptime last_proc_time=tend-hours(10000);
@@ -87,7 +87,7 @@ void beamRun::Update(boost::posix_time::ptime tend)
       if (microsec_clock::local_time()-t1<milliseconds(fTimeWindowMap[fBeamLine[ibeam]])) endtime="now";
 
       httpResponse* response=new httpResponse();
-      for ( uint i=0;i<fBundle[fBeamLine[ibeam]].size();i++ ) {
+      for ( unsigned int i=0;i<fBundle[fBeamLine[ibeam]].size();i++ ) {
 	if ( (fBundle[fBeamLine[ibeam]][i].find("MWR") == std::string::npos) &&
 	     (fBundle[fBeamLine[ibeam]][i].find("MultiWire") == std::string::npos) ){
 	  sprintf(sbuf, "%s/data?b=%s&t0=%s&t1=%s&f=csv", fIFDBURL.c_str(), fBundle[fBeamLine[ibeam]][i].c_str(),
@@ -137,7 +137,7 @@ void beamRun::EndRun(boost::posix_time::ptime tstop)
     //fRunHeader.fRunEnd will not be written to file anyway)
     Update(tstop+minutes(fIFDBLatency)); 
     bool all_done=true;
-    for (uint i=0;i<fBeamLine.size();i++) {
+    for (unsigned int i=0;i<fBeamLine.size();i++) {
       if (ToPtime(fLastBeamHeader[fBeamLine[i]]) < tstop ) all_done=false;
     }
     //finished if all beamlines already have 
@@ -149,7 +149,7 @@ void beamRun::EndRun(boost::posix_time::ptime tstop)
     sleep(60);
   }
   mf::LogInfo("")<<"Closing beam files.";
-  for (uint i=0;i<fBeamLine.size();i++) {
+  for (unsigned int i=0;i<fBeamLine.size();i++) {
     fOut[i].close();
   }
 
@@ -179,7 +179,7 @@ void beamRun::ProcessResponse(httpResponse* response, beamdatamap_t &data_map, s
   std::map<uint64_t, std::vector<ub_BeamData> > bd_map;
 
   //need to unpack multiwire data, so will append all_rows which will change the size within the loop =P
-  for (uint i=1;i<all_rows.size();i++) {
+  for (unsigned int i=1;i<all_rows.size();i++) {
     //parse single row
     
     //skip rows that are not data (like timestamp,name,units,value(s))
@@ -209,7 +209,7 @@ void beamRun::ProcessResponse(httpResponse* response, beamdatamap_t &data_map, s
     dt.setUnits(row[2]);
     dt.setSeconds(uint32_t(timestamp/1000));
     dt.setMilliSeconds(uint16_t(timestamp-(timestamp/1000)*1000));
-    for (uint j=3;j<row.size();j++) dt.pushData(atof(row[j].c_str()));
+    for (unsigned int j=3;j<row.size();j++) dt.pushData(atof(row[j].c_str()));
     
     if (bd_map.find(timestamp) == bd_map.end() ) {
       std::vector<ub_BeamData> tmp;
@@ -301,7 +301,7 @@ void beamRun::WriteData(std::string beamline, map<ub_BeamHeader, std::vector<ub_
       //    (*fOA[beamline]) << it->first;
       boost::archive::binary_oarchive oa(fOut[ibeamline]);
       oa<<it->first;
-      for (uint i=0;i<it->second.size();i++)  oa<<it->second[i];
+      for (unsigned int i=0;i<it->second.size();i++)  oa<<it->second[i];
 	// (*fOA[beamline])<<it->second[i];
       n++;
     } 

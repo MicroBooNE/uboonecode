@@ -33,7 +33,7 @@ beamDAQConfig::beamDAQConfig()
     fOutputDirData=fPSet.get<std::string>("output_dir_data");
     fOutputDirInfo=fPSet.get<std::string>("output_dir_info");
     fBeamLine=fPSet.get<std::vector<std::string> >("beamlines");
-    for (uint i=0;i<fBeamLine.size();i++) 
+    for (unsigned int i=0;i<fBeamLine.size();i++) 
       fBundle[fBeamLine[i]]=fPSet.get<std::vector<std::string> >(fBeamLine[i]);
       
     fIFDBURL=fPSet.get<std::string>("ifdb_url");
@@ -44,7 +44,7 @@ beamDAQConfig::beamDAQConfig()
     fhicl::ParameterSet eventType=fPSet.get<fhicl::ParameterSet>("event_type");
     
     std::vector<std::string> keys=eventType.get_keys();
-    for (uint i=0;i<keys.size();i++) {
+    for (unsigned int i=0;i<keys.size();i++) {
       int eid=eventType.get<int>(keys[i]);
       std::pair<std::string,int> p(keys[i],eid);
       fEventTypeMap.insert(p);
@@ -52,7 +52,7 @@ beamDAQConfig::beamDAQConfig()
     fhicl::ParameterSet timeWindow=fPSet.get<fhicl::ParameterSet>("time_window");
     
     keys=timeWindow.get_keys();
-    for (uint i=0;i<keys.size();i++) {
+    for (unsigned int i=0;i<keys.size();i++) {
       int tw=timeWindow.get<int>(keys[i]);
       std::pair<std::string,int> p(keys[i],tw);
       fTimeWindowMap.insert(p);

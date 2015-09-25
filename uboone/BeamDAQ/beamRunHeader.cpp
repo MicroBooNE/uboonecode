@@ -11,7 +11,7 @@ std::ostream & operator<<(std::ostream &os, const beamRunHeader &brh)
      <<"START:  " << to_iso_extended_string(brh.fRunStart) << std::endl
      <<"END:    " << to_iso_extended_string(brh.fRunEnd)   << std::endl;
   
-  std::map<std::string, uint>::const_iterator cit=brh.fCounter.begin();
+  std::map<std::string, unsigned int>::const_iterator cit=brh.fCounter.begin();
   while (cit!=brh.fCounter.end() ) {
     os << cit->first<<" events: "<<cit->second<<std::endl;
     cit++;
