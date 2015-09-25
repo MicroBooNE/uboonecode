@@ -3,10 +3,11 @@
 
 microboone_flashtrigger : {
 
-  module_type   : "FlashTrigger"
-  Verbose       : false        # verbosity flag
-  DisableFilter : true         # disable filtering
-  OpFlashModule : "opflash"    # recob::OpFlash producer module name
+  module_type       : "FlashTrigger"
+  Verbose           : false        # verbosity flag
+  DisableFilter     : true         # disable filtering
+  OpFlashModule     : "opflash"    # recob::OpFlash producer module name
+  NeutrinoGenerator : "generator" # simb::MCTruth producer module name
 
   BeamDTLow     : -0.1         # OpFlash timing low boundary in micro-seconds w.r.t. beginning of beam spill
   BeamDTHigh    :  1.7         # OpFlash timing high boundary in micro-seconds w.r.t. beginning of beam spill
