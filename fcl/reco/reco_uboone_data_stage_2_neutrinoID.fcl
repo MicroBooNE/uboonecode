@@ -113,6 +113,10 @@ physics:
   trackkalmanhittagc3d:         @local::microboone_cosmictracktagger
   stitchkalmanhittagc3d:        @local::microboone_cosmictracktagger
 
+  ### cluster-tagging producers
+  fuzzyclustertag:              @local::microboone_cosmicclustertagger
+  lineclustertag:               @local::microboone_cosmicclustertagger
+
   ### flash-matching producers
   trackkalmanhitflashmatch:     @local::microboone_beamflashtrackmatchtagger
   stitchkalmanhitflashmatch:    @local::microboone_beamflashtrackmatchtagger
@@ -171,13 +175,15 @@ physics:
          # stitchkalmanhitcaloc3d,
          # trackkalmanhitpidc3d,
          # stitchkalmanhitpidc3d,
-         trackkalmanhittagc3d #,
+         trackkalmanhittagc3d,
          # stitchkalmanhittagc3d,
          # trackkalmanhitflashmatchc3d,
          # stitchkalmanhitflashmatchc3d,
          ###>> Shower reconstruction bats cleanup
          # showerrecofuzzy, 
-         # showerrecopandora
+         # showerrecopandora,
+         fuzzyclustertag,
+         lineclustertag
          ]
  
  #define the output stream, there could be more than one if using filters 
@@ -214,6 +220,9 @@ outputs:
 # Fuzzy Cluster related
 physics.producers.trackkalmanhit.HitModuleLabel:                    "gaushit"
 physics.producers.trackkalmanhit.ClusterModuleLabel:                "fuzzycluster"
+
+physics.producers.lineclustertag.ClusterModuleLabel:                "linecluster"
+physics.producers.fuzzyclustertag.ClusterModuleLabel:               "fuzzycluster"
 
 physics.producers.stitchkalmanhit.TrackModuleLabel:                 "trackkalmanhit"
 physics.producers.stitchkalmanhit.SpptModuleLabel:                  "trackkalmanhit"
