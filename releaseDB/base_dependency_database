@@ -920,6 +920,7 @@ uboonecode : lardata : AnalysisBase/Calorimetry.h
 uboonecode : lardata : AnalysisBase/CosmicTag.h
 uboonecode : lardata : AnalysisBase/FlashMatch.h
 uboonecode : lardata : AnalysisBase/ParticleID.h
+uboonecode : lardata : AnalysisBase/T0.h
 uboonecode : lardata : MCBase/MCLimits.h
 uboonecode : lardata : MCBase/MCShower.h
 uboonecode : lardata : MCBase/MCStep.h

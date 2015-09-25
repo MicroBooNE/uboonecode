@@ -14,6 +14,9 @@ art_make( BASENAME_ONLY
 			OpticalDetector
                         RawData
 			RecoBase
+			Simulation
+			SimulationBase
+			PhotonPropagation
 			uboone_OpticalDetectorAna
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_SOURCES}
@@ -32,6 +35,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
                         ${ROOT_BASIC_LIB_LIST}
+			${SIMULATIONBASE}
         )							   
 
 install_headers()
