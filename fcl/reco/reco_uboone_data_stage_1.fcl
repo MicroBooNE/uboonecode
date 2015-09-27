@@ -2,6 +2,7 @@
 ##  Stage 1 Reconstruction
 ##
 #include "services_microboone.fcl"
+#include "calibration_microboone.fcl"
 #include "caldata_microboone.fcl"
 #include "hitfindermodules_microboone.fcl"
 #include "cluster_microboone.fcl"
@@ -49,18 +50,21 @@ physics:
   ### random number saver
   rns:                 { module_type: RandomNumberSaver }
 
+  ### filter out the RawDigit noise
+  # -- old version -- digitfilter:            @local::microboone_rawdigitfilter
+  digitfilter:         @local::microboone_noisefilter
+  
   ### flash finders
   opflash:             @local::microboone_opflash
 
   ### calwire producers
   caldata:             @local::microboone_calroi
+  calWireInvert:       @local::microboone_calWireInvert
 
   ### hit-finder producers
   gaushit:             @local::microboone_gaushitfinder
   cchit:               @local::microboone_clustercrawlerhit
-
-  ### raw digit filter
-  digitfilter:            @local::microboone_rawdigitfilter
+  invertedHits:        @local::microboone_gaushitfinder
 
   ### cluster-finder producers
   fuzzycluster:        @local::microboone_fuzzycluster
@@ -82,9 +86,11 @@ physics:
  reco: [ rns,
          digitfilter,
          opflash,
-         caldata, 
+         caldata,
+	     calWireInvert,
          gaushit,
-	 cchit,
+	     invertedHits,
+	     cchit,
          fuzzycluster, fuzzyclustermerger, linecluster, cluster3d,
          cctrack,
          pandoraCosmic,
@@ -112,6 +118,7 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "%ifb_%tc_reco1.root"
+   sam_ignore:  true
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
  }
@@ -122,22 +129,28 @@ outputs:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.digitfilter.TruncMeanFraction:                0.1
-physics.producers.digitfilter.NumWiresToGroup:                  [48, 48, 96]
+# These were the settings for the old RawDigitFilter
+#physics.producers.digitfilter.TruncMeanFraction:                0.1
+#physics.producers.digitfilter.NumWiresToGroup:                  [48, 48, 96]
 
 physics.producers.opflash.InputModule:                          "optreadout"
 physics.producers.opflash.GenModule:                            "generator"
 physics.producers.opflash.InputLabels:                        [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
                                                                 "OpdetCosmicHighGain", "OpdetCosmicLowGain"]
-
+								
 physics.producers.caldata.DigitModuleLabel:                     "digitfilter"
 physics.producers.caldata.MaxAllowedChannelStatus:              1
 
 #physics.producers.caldata.DoBaselineSub:                         false
 #physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:   true
 
+physics.producers.calWireInvert.DigitModuleLabel:               "digitfilter"
+
 physics.producers.gaushit.CalDataModuleLabel:                    "caldata"
 physics.producers.gaushit.MinSig:                                [ 8.0,    8.0,   8.0]
+
+physics.producers.invertedHits.CalDataModuleLabel:               "calWireInvert"
+physics.producers.invertedHits.MinSig:                           [8.0, 8.0, 8.0]
 
 physics.producers.cchit.CCHitFinderAlg.MaxBumps:                 2
 physics.producers.cchit.CCHitFinderAlg.MinSigInd:                5

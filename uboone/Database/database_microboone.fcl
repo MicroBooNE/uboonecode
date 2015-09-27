@@ -31,19 +31,19 @@ microboone_detpedestalservice:
 
 
 
-microboone_channelfilter_provider:
+microboone_channelstatus_provider:
 {
   DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg
   
   UseDB: false
   UseFile: false
 }
-microboone_channelfilter_provider.DatabaseRetrievalAlg.DBFolderName: "channelstatus_data"
+microboone_channelstatus_provider.DatabaseRetrievalAlg.DBFolderName: "channelstatus_data"
 
-microboone_channelfilter_service:
+microboone_channelstatus_service:
 {
-  service_provider: UbooneChannelFilterService
-  ChannelFilterProvider: @local::microboone_channelfilter_provider
+  service_provider: UbooneChannelStatusService
+  ChannelStatusProvider: @local::microboone_channelstatus_provider
   FindNoisyChannels: true
 }
   

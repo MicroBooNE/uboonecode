@@ -44,8 +44,8 @@
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
 #include "CalibrationDBI/Interface/IDetPedestalProvider.h"
-#include "CalibrationDBI/Interface/IChannelFilterService.h"
-#include "CalibrationDBI/Interface/IChannelFilterProvider.h"
+#include "CalibrationDBI/Interface/IChannelStatusService.h"
+#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
 
 #include "WaveformPropertiesAlg.h"
 
@@ -311,7 +311,7 @@ namespace caldata {
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    const lariov::IChannelFilterProvider& chanFilt = art::ServiceHandle<lariov::IChannelFilterService>()->GetFilter();
+    const lariov::IChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::IChannelStatusService>()->GetFilter();
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double DeconNorm = sss->GetDeconNorm();
@@ -340,6 +340,9 @@ namespace caldata {
 
       // The following test is meant to be temporary until the "correct" solution is implemented
       if (!chanFilt.IsPresent(channel)) continue;
+
+      // Testing an idea about rejecting channels
+      if (digitVec->GetPedestal() < 0.) continue;
 
       unsigned int dataSize = digitVec->Samples();
       // vector holding uncompressed adc values
@@ -371,12 +374,10 @@ namespace caldata {
           //int time_offset = 0.;//sss->FieldResponseTOffset(channel);
           unsigned int roiStart = 0;
           
-          double raw_noise = digitVec->GetSigma();
+          double rms_noise = digitVec->GetSigma();
+          double raw_noise = sss->GetRawNoise(channel);
           
-          if (raw_noise < 0.5)
-          {
-              raw_noise = sss->GetRawNoise(channel);
-          }
+          raw_noise = std::max(raw_noise,rms_noise);
 
         // search for ROIs
         for(bin = 1; bin < dataSize; ++bin) {

@@ -1,17 +1,10 @@
 
-include_directories( $ENV{POSTGRESQL_INC} )
-include_directories( $ENV{BOOST_INC} )
-include_directories( $ENV{UBOONEDAQ_DATATYPES_INC} )
+# find_ups_product is meant to be called from the top CMakeLists.txt file
+find_ups_product( uboonedaq_datatypes v6_14_00 )
 
-find_ups_product( postgresql v9_1_5 )
-find_ups_product( uboonedaq_datatypes v6_10_00 )
-find_ups_product( boost v1_57_0 )
-
-cet_find_library( PQ NAMES pq PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
 find_library( UBDut NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LIB} )
 
-cet_find_library( BOOSER NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
-
+#
 simple_plugin( LArRawInputSourceUBooNE
                "source"
 	       uboone_RawData
@@ -53,7 +46,7 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
                         SummaryData
 			${UBDut}
                         ${PQ}
-			${BOOSER}
+			${Boost_SERIALIZATION_LIBRARY}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_SOURCES}
                         ${ART_FRAMEWORK_PRINCIPAL}

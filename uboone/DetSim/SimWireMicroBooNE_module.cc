@@ -57,8 +57,8 @@
 #include "Simulation/sim.h"
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
 #include "CalibrationDBI/Interface/IDetPedestalProvider.h"
-#include "CalibrationDBI/Interface/IChannelFilterService.h"
-#include "CalibrationDBI/Interface/IChannelFilterProvider.h"
+#include "CalibrationDBI/Interface/IChannelStatusService.h"
+#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
 
 
 ///Detector simulation of raw signals on wires
@@ -108,7 +108,7 @@ namespace detsim {
     std::map< double, int > fShapingTimeOrder;
     std::string             fTrigModName;       ///< Trigger data product producer name
     
-    bool                    fSimDeadChannels;   ///< if True, simulate dead channels using the ChannelFilter service.  If false, do not simulate dead channels
+    bool                    fSimDeadChannels;   ///< if True, simulate dead channels using the ChannelStatus service.  If false, do not simulate dead channels
 
     bool        fTest; // for forcing a test case
     std::vector<sim::SimChannel> fTestSimChannel_v;
@@ -306,8 +306,8 @@ namespace detsim {
     CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");   
     
     //channel status for simulating dead channels
-    const lariov::IChannelFilterProvider& channelFilterProvider
-       = art::ServiceHandle<lariov::IChannelFilterService>()->GetFilter();
+    const lariov::IChannelStatusProvider& ChannelStatusProvider
+       = art::ServiceHandle<lariov::IChannelStatusService>()->GetFilter();
 
     //get the FFT
     art::ServiceHandle<util::LArFFT> fFFT;
@@ -548,8 +548,8 @@ namespace detsim {
 
 
       //If the channel is bad, we can stop here
-      //if you are using the UbooneChannelFilterService, then this removes disconnected, "dead", and "low noise" channels
-      if (fSimDeadChannels && (channelFilterProvider.IsBad(chan) || !channelFilterProvider.IsPresent(chan)) ) {
+      //if you are using the UbooneChannelStatusService, then this removes disconnected, "dead", and "low noise" channels
+      if (fSimDeadChannels && (ChannelStatusProvider.IsBad(chan) || !ChannelStatusProvider.IsPresent(chan)) ) {
         MakeADCVec(adcvec, noisetmp, chargeWork, ped_mean);
 	raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
         rd.SetPedestal(ped_mean);

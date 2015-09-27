@@ -81,16 +81,32 @@ microboone_rawdigitandwirecomparisonana:
     }
 }
 
+microboone_calWireInvert:
+{
+    module_type:             "CalWireInvert"
+    DigitModuleLabel:        "daq" #"digitfilter"
+    MinRMSNoise:             [1., 1., 1.]
+    Threshold:               [ 3, 3, 10 ] # abs(threshold) for finding a Region Of Interest
+    uPlaneROIPad:            [ 150, 50 ]  # number of bins to pad both ends of the ROIs
+    vPlaneROIPad:            [ 50, 50 ]   # number of bins to pad both ends of the ROIs
+    zPlaneROIPad:            [ 50, 50 ]   # number of bins to pad both ends of the ROIs
+    SaveWireWF:              0
+    MaxAllowedChannelStatus: 4 # All channels up to this status level are considered
+}
+
 microboone_rawdigitfilter:
 {
     module_type:           "RawDigitFilterUBooNE"
     DigitModuleLabel:      "daq"
-    RMSRejectionCut:       [10.,10., 5.]
+    RMSRejectionCutHi:     [25.,25.,25.]
     RMSRejectionCutLow:    [0.7,0.7,0.7]
+    RMSSelectionCut:       [1.5,1.3,0.7]
     TheChosenWire:         1200
     MaxPedestalDiff:       10.
     SmoothCorrelatedNoise: true
     NumWiresToGroup:       [48, 48, 96]  # these correspond to observed groupings
+    RunFFTInputWires:      false
+    RunFFTCorrectedWires:  false
 }
 
 

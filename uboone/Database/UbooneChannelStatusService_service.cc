@@ -1,12 +1,12 @@
-#ifndef UBOONECHANNELFILTERSERVICE_CC
-#define UBOONECHANNELFILTERSERVICE_CC
+#ifndef UBOONECHANNELSTATUSSERVICE_CC
+#define UBOONECHANNELSTATUSSERVICE_CC
 
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "CalibrationDBI/Interface/IChannelFilterService.h"
-#include "CalibrationDBI/Providers/SIOVChannelFilterProvider.h"
+#include "CalibrationDBI/Interface/IChannelStatusService.h"
+#include "CalibrationDBI/Providers/SIOVChannelStatusProvider.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "Geometry/Geometry.h"
 
@@ -17,33 +17,33 @@
 namespace lariov{
 
   /**
-     \class UbooneChannelFilterService
-     art service implementation of IChannelFilterService.  Implements 
+     \class UbooneChannelStatusService
+     art service implementation of IChannelStatusService.  Implements 
      a channel status retrieval service for database scheme in which 
      all elements in a database folder share a common interval of validity
   */
-  class UbooneChannelFilterService : public IChannelFilterService {
+  class UbooneChannelStatusService : public IChannelStatusService {
   
     public:
     
-      UbooneChannelFilterService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-      ~UbooneChannelFilterService(){}
+      UbooneChannelStatusService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
+      ~UbooneChannelStatusService(){}
       
       void PreProcessEvent(const art::Event& evt); 
      
     private:
     
-      const IChannelFilterProvider& DoGetFilter() const override {
+      const IChannelStatusProvider& DoGetFilter() const override {
         return fProvider;
       }    
       
-      const IChannelFilterProvider* DoGetFilterPtr() const override {
+      const IChannelStatusProvider* DoGetFilterPtr() const override {
         return &fProvider;
       }
       
       void FindNoisyChannels(const art::Event& evt);
     
-      SIOVChannelFilterProvider fProvider;
+      SIOVChannelStatusProvider fProvider;
       bool                fFindNoisyChannels;     ///< Find noisy channels using raw digits
       std::string         fDigitModuleLabel;      ///< The full collection of hits for finding noisy channels
       float               fTruncMeanFraction;     ///< Fraction for truncated mean
@@ -51,13 +51,13 @@ namespace lariov{
   };
 }//end namespace lariov
       
-DECLARE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneChannelFilterService, lariov::IChannelFilterService, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneChannelStatusService, lariov::IChannelStatusService, LEGACY)
       
 
 namespace lariov{
 
-  UbooneChannelFilterService::UbooneChannelFilterService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg) 
-  : fProvider(pset.get<fhicl::ParameterSet>("ChannelFilterProvider"))
+  UbooneChannelStatusService::UbooneChannelStatusService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg) 
+  : fProvider(pset.get<fhicl::ParameterSet>("ChannelStatusProvider"))
   {
     
     fFindNoisyChannels  = pset.get<bool>                ("FindNoisyChannels",   false);
@@ -66,12 +66,12 @@ namespace lariov{
     fRmsCut             = pset.get<std::vector<double> >("RMSRejectionCut",     std::vector<double>() = { 5.0, 5.0, 3.0});
     
     //register callback to update local database cache before each event is processed
-    reg.sPreProcessEvent.watch(this, &UbooneChannelFilterService::PreProcessEvent);
+    reg.sPreProcessEvent.watch(this, &UbooneChannelStatusService::PreProcessEvent);
     
   }
   
   
-  void UbooneChannelFilterService::PreProcessEvent(const art::Event& evt) {
+  void UbooneChannelStatusService::PreProcessEvent(const art::Event& evt) {
     
     //First grab an update from the database
     fProvider.Update(evt.time().value());
@@ -81,7 +81,7 @@ namespace lariov{
   } 
   
   
-  void UbooneChannelFilterService::FindNoisyChannels( art::Event const& evt ) {
+  void UbooneChannelStatusService::FindNoisyChannels( art::Event const& evt ) {
      
      // Read in the digit List object(s).
     art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
@@ -215,6 +215,6 @@ namespace lariov{
 
 }//end namespace lariov
 
-DEFINE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneChannelFilterService, lariov::IChannelFilterService)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneChannelStatusService, lariov::IChannelStatusService)
 
 #endif

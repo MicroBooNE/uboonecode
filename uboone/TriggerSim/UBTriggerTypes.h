@@ -15,7 +15,10 @@ namespace trigger{
     kTriggerBNB   = 11,
     kTriggerNuMI  = 12,
     kVeto         = 13,
-    kTriggerCalib = 14
+    kTriggerCalib = 14,
+    kFakeGate     = 17,
+    kFakeBeam     = 18,
+    kSpare        = 19
   } UBTrigger_t;
 
 
