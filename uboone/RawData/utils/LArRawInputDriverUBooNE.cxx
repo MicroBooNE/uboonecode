@@ -171,22 +171,10 @@ namespace lris {
     tMyTree->Branch("triggerBitEXT",&triggerBitEXT,"triggerBitEXT/I");
     tMyTree->Branch("triggerBitPMTBeam",&triggerBitPMTBeam,"triggerBitPMTBeam/I");
     tMyTree->Branch("triggerBitPMTCosmic",&triggerBitPMTCosmic,"triggerBitPMTCosmic/I");
-    tMyTree->Branch("FEM1triggerFrame",&FEM1triggerFrame,"FEM1triggerFrame/I");
-    tMyTree->Branch("FEM1triggerSample",&FEM1triggerSample,"FEM1triggerSample/I");
-    tMyTree->Branch("FEM2triggerFrame",&FEM2triggerFrame,"FEM2triggerFrame/I");
-    tMyTree->Branch("FEM2triggerSample",&FEM2triggerSample,"FEM2triggerSample/I");
-    tMyTree->Branch("FEM3triggerFrame",&FEM3triggerFrame,"FEM3triggerFrame/I");
-    tMyTree->Branch("FEM3triggerSample",&FEM3triggerSample,"FEM3triggerSample/I");
-    tMyTree->Branch("FEM4triggerFrame",&FEM4triggerFrame,"FEM4triggerFrame/I");
-    tMyTree->Branch("FEM4triggerSample",&FEM4triggerSample,"FEM4triggerSample/I");
     tMyTree->Branch("FEM5triggerFrame",&FEM5triggerFrame,"FEM5triggerFrame/I");
     tMyTree->Branch("FEM5triggerSample",&FEM5triggerSample,"FEM5triggerSample/I");
     tMyTree->Branch("FEM6triggerFrame",&FEM6triggerFrame,"FEM6triggerFrame/I");
     tMyTree->Branch("FEM6triggerSample",&FEM6triggerSample,"FEM6triggerSample/I");
-    tMyTree->Branch("FEM7triggerFrame",&FEM7triggerFrame,"FEM7triggerFrame/I");
-    tMyTree->Branch("FEM7triggerSample",&FEM7triggerSample,"FEM7triggerSample/I");
-    tMyTree->Branch("FEM8triggerFrame",&FEM8triggerFrame,"FEM8triggerFrame/I");
-    tMyTree->Branch("FEM8triggerSample",&FEM8triggerSample,"FEM8triggerSample/I");
 
     tMyTree->Branch("RO_BNBtriggerFrame",&RO_BNBtriggerFrame,"RO_BNBtriggerFrame/I");
     tMyTree->Branch("RO_NuMItriggerFrame",&RO_NuMItriggerFrame,"RO_NuMItriggerFrame/I");
@@ -197,10 +185,10 @@ namespace lris {
     tMyTree->Branch("RO_EXTtriggerSample",&RO_EXTtriggerSample,"RO_EXTtriggerSample/I");
     tMyTree->Branch("RO_RWMtriggerSample",&RO_RWMtriggerSample,"RO_RWMtriggerSample/I");
 
-    tMyTree->Branch("RO_Gate1Frame",&RO_Gate1Frame,"RO_Gate1Frame/I");
-    tMyTree->Branch("RO_Gate1Sample",&RO_Gate1Sample,"RO_Gate1Sample/I");
-    tMyTree->Branch("RO_Gate2Frame",&RO_Gate2Frame,"RO_Gate2Frame/I");
-    tMyTree->Branch("RO_Gate2Sample",&RO_Gate2Sample,"RO_Gate2Sample/I");
+//    tMyTree->Branch("RO_Gate1Frame",&RO_Gate1Frame,"RO_Gate1Frame/I");
+//    tMyTree->Branch("RO_Gate1Sample",&RO_Gate1Sample,"RO_Gate1Sample/I");
+//    tMyTree->Branch("RO_Gate2Frame",&RO_Gate2Frame,"RO_Gate2Frame/I");
+//    tMyTree->Branch("RO_Gate2Sample",&RO_Gate2Sample,"RO_Gate2Sample/I");
 
     tMyTree->Branch("TPCtriggerFrame",&TPCtriggerFrame,"TPCtriggerFrame/I");
     tMyTree->Branch("TPCtriggerSample",&TPCtriggerSample,"TPCtriggerSample/I");
@@ -429,6 +417,21 @@ namespace lris {
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
   {    
+
+     RO_BNBtriggerFrame=-999;
+     RO_BNBtriggerSample=-999;
+     RO_NuMItriggerFrame=-999;
+     RO_NuMItriggerSample=-999;
+     RO_EXTtriggerFrame=-999;
+     RO_EXTtriggerSample=-999;
+     RO_RWMtriggerFrame=-999;
+     RO_RWMtriggerSample=-999;
+
+//     RO_Gate1Frame=-999;
+//     RO_Gate1Sample=-999;
+//     RO_Gate2Frame=-999;
+//     RO_Gate2Sample=-999;
+
     //try {
       boost::archive::binary_iarchive ia(fInputStream); 
       ubdaq::ub_EventRecord event_record;  
@@ -438,7 +441,7 @@ namespace lris {
       //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
       
       fillDAQHeaderData(event_record, daqHeader);
-      //fillTPCData(event_record, tpcDigitList);
+      fillTPCData(event_record, tpcDigitList);
       fillPMTData(event_record, pmtDigitList);
       fillBeamData(event_record, beamInfo);
       fillTriggerData(event_record, trigInfo);
@@ -788,22 +791,6 @@ namespace lris {
 // Frame and sample for trigger
             uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
             uint32_t sample = card_data.getTrigSample();
-            if (card_data.getModule() == 1){
-              FEM1triggerFrame = frame;
-              FEM1triggerSample = sample;
-            }
-            if (card_data.getModule() == 2){
-              FEM2triggerFrame = frame;
-              FEM2triggerSample = sample;
-            }
-            if (card_data.getModule() == 3){
-              FEM3triggerFrame = frame;
-              FEM3triggerSample = sample;
-            }
-            if (card_data.getModule() == 4){
-              FEM4triggerFrame = frame;
-              FEM4triggerSample = sample;
-            }
             if (card_data.getModule() == 5){
               FEM5triggerFrame = frame;
               FEM5triggerSample = sample;
@@ -811,14 +798,6 @@ namespace lris {
             if (card_data.getModule() == 6){
               FEM6triggerFrame = frame;
               FEM6triggerSample = sample;
-            }
-            if (card_data.getModule() == 7){
-              FEM7triggerFrame = frame;
-              FEM7triggerSample = sample;
-            }
-            if (card_data.getModule() == 8){
-              FEM8triggerFrame = frame;
-              FEM8triggerSample = sample;
             }
 
 	//        int card_number = card_data.getModule();
@@ -872,47 +851,56 @@ namespace lris {
               rd.push_back(*it & 0xfff);                
               if(adc_max < rd.back()) adc_max = rd.back();
             }
-            // ANDY STUFF - CHECKING FOR GATE RO
-            if(adc_max>2150) {
+            // Saving trigger readout stream variables to output file
+            if(adc_max>2150) { // logic pulses have high ADC values
 
-            if (channel_number == 39){
-              std::cout << "Found RWM signal!" << std::endl;
-              std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() << std::endl;
-              RO_RWMtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-              RO_RWMtriggerSample = window_header.getSample();
-            }
-            if (channel_number == 38){
-              std::cout << "Found STROBE signal!" << std::endl;
-              std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
-              RO_EXTtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-              RO_EXTtriggerSample = window_header.getSample();
-            }
-            if (channel_number == 37){
-              std::cout << "Found NuMI signal!" << std::endl;
-              std::cout << "NuMI signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
-              RO_NuMItriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-              RO_NuMItriggerSample = window_header.getSample();
-            }
-            if (channel_number == 36){
-              std::cout << "Found BNB signal!" << std::endl;
-              std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
-              RO_BNBtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-              RO_BNBtriggerSample = window_header.getSample();
-            }
-            if (channel_number == 45){
-              std::cout << "Found GATE1 (NuMI) signal!" << std::endl;
-              std::cout << "NuMI gate at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
-              RO_Gate1Frame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-              RO_Gate1Sample = window_header.getSample();
-            }
-            if (channel_number == 46){
-              std::cout << "Found GATE2 (BNB) signal!" << std::endl;
-              std::cout << "BNB gate at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
-              RO_Gate2Frame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-              RO_Gate2Sample = window_header.getSample();
+              if (channel_number == 39){
+//                std::cout << "Found RWM signal!" << std::endl;
+//                std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() << std::endl;
+                RO_RWMtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+                RO_RWMtriggerSample = window_header.getSample();
+//                std::cout << "window size = " << win_data_size << std::endl;
+              }
+              else if (channel_number == 38){
+//                std::cout << "Found STROBE signal!" << std::endl;
+//                std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+                RO_EXTtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+                RO_EXTtriggerSample = window_header.getSample();
+//                std::cout << "window size = " << win_data_size << std::endl;
+              }
+              else if (channel_number == 37){
+//                std::cout << "Found NuMI signal!" << std::endl;
+//                std::cout << "NuMI signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+                RO_NuMItriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+                RO_NuMItriggerSample = window_header.getSample();
+//                std::cout << "window size = " << win_data_size << std::endl;
+              }
+              else if (channel_number == 36){
+//                std::cout << "Found BNB signal!" << std::endl;
+//                std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+                RO_BNBtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+                RO_BNBtriggerSample = window_header.getSample();
+//                std::cout << "window size = " << win_data_size << std::endl;
+              }
+//              else if (channel_number == 46){
+//                std::cout << "Found GATE2 (NuMI) signal!" << std::endl;
+//                std::cout << "NuMI gate at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+//                RO_Gate2Frame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+//                RO_Gate2Sample = window_header.getSample();
+//                std::cout << "window size = " << win_data_size << std::endl;
+//              }
+//              else if (channel_number == 47){
+//                std::cout << "Found GATE1 (BNB) signal!" << std::endl;
+//                std::cout << "BNB gate at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+//                RO_Gate1Frame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+//                RO_Gate1Sample = window_header.getSample();
+//                std::cout << "window size = " << win_data_size << std::endl;
+//              }
+//              else {
+//                std::cout << "channel " << channel_number << ",regular PMT window size = " << win_data_size << std::endl;
+//              }
             }
 
-            }
             pmtDigitList[ch_category]->emplace_back(rd);
           }
         }//<--End channel_pmt_it for loop
@@ -986,7 +974,7 @@ namespace lris {
 			      trig_bits );
       trigInfo.emplace_back( swiz_trig );
       
-// ANDY STUFF
+// variables saving to output tree
       triggerFrame = frame;
       triggerSample = sample_64MHz;
       triggerActive = trig_data.Trig_Active();
@@ -997,10 +985,10 @@ namespace lris {
       triggerBitPMTCosmic = trig_bits & 0x2;
       triggerTime = trigger_time;
       
-      if (triggerBitBNB){std::cout << "BNB Trigger issued" << std::endl;}
-      if (triggerBitNuMI){std::cout << "NuMI Trigger issued" << std::endl;}
-      if (triggerBitEXT){std::cout << "EXT Trigger issued" << std::endl;}
-      std::cout << "trigger frame, sample = " << frame << "," << sample_64MHz << std::endl;
+//      if (triggerBitBNB){std::cout << "BNB Trigger issued" << std::endl;}
+//      if (triggerBitNuMI){std::cout << "NuMI Trigger issued" << std::endl;}
+//      if (triggerBitEXT){std::cout << "EXT Trigger issued" << std::endl;}
+//      std::cout << "trigger frame, sample = " << frame << "," << sample_64MHz << std::endl;
 
       
     }

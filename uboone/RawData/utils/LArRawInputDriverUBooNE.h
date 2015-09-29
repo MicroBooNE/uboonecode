@@ -128,22 +128,10 @@ namespace lris {
     uint32_t triggerBitPMTBeam;
     uint32_t triggerBitPMTCosmic;
     
-    uint32_t FEM1triggerFrame ;
-    uint16_t FEM1triggerSample;
-    uint32_t FEM2triggerFrame ;
-    uint16_t FEM2triggerSample;
-    uint32_t FEM3triggerFrame ;
-    uint16_t FEM3triggerSample;
-    uint32_t FEM4triggerFrame ;
-    uint16_t FEM4triggerSample;
     uint32_t FEM5triggerFrame ;
     uint16_t FEM5triggerSample;
     uint32_t FEM6triggerFrame ;
     uint16_t FEM6triggerSample;
-    uint32_t FEM7triggerFrame ;
-    uint16_t FEM7triggerSample;
-    uint32_t FEM8triggerFrame ;
-    uint16_t FEM8triggerSample;
 
     uint32_t RO_BNBtriggerFrame;
     uint32_t RO_NuMItriggerFrame;
@@ -154,10 +142,10 @@ namespace lris {
     uint32_t RO_EXTtriggerSample;
     uint32_t RO_RWMtriggerSample;
     
-    uint32_t RO_Gate1Frame;
-    uint32_t RO_Gate1Sample;
-    uint32_t RO_Gate2Frame;
-    uint32_t RO_Gate2Sample;
+//    uint32_t RO_Gate1Frame;
+//    uint32_t RO_Gate1Sample;
+//    uint32_t RO_Gate2Frame;
+//    uint32_t RO_Gate2Sample;
 
     uint32_t TPCtriggerFrame;
     uint32_t TPCtriggerSample;
