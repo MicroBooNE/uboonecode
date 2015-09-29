@@ -1,0 +1,22 @@
+
+BEGIN_PROLOG
+
+microboone_noisefilter :
+{
+    module_type:             NoiseFilter
+    RawDigitModuleLabel:     "daq"
+    doChirp :                1
+    doZigZag :               1
+    doSignalFilter :         1
+    doNoisyFilter :          1
+    doWaveFilter :           1
+    doAdaptiveBaseline :     1
+    doFinalNoisyFilter :     1
+    doRemoveFilterFlags :    1
+    saveFilterWF :           1
+    saveNoiseTree :          0
+    saveNoiseTreeWF :        0
+    doTransientNoiseFilter : 0
+}
+
+END_PROLOG

@@ -1,0 +1,27 @@
+
+#BEGIN_PROLOG
+
+microboone_flashtrigger : {
+
+  module_type       : "FlashTrigger"
+  Verbose           : false        # verbosity flag
+  DisableFilter     : true         # disable filtering
+  OpFlashModule     : "opflash"    # recob::OpFlash producer module name
+  NeutrinoGenerator : "generator" # simb::MCTruth producer module name
+
+  BeamDTLow     : -0.1         # OpFlash timing low boundary in micro-seconds w.r.t. beginning of beam spill
+  BeamDTHigh    :  1.7         # OpFlash timing high boundary in micro-seconds w.r.t. beginning of beam spill
+  TotalPEThreshold : 10        # The minimum number of total photoelectrons from all PMTs in a flash to consider an event as nu candidate
+
+  EnableMultiplicityCut : false # Multiplicity cut switch
+  MultiplicityPEThreshold : 5   # Number of photo electrons to consider a PMT to be "hit"
+  MultiplicityThreshold   : 5   # The minimum Number of PMTs that are "hit" to consider an event as nu candidate
+
+  DoAnalysis : true
+  SaveTree   : true
+  EfficiencyPlotCutSeparation : 5
+  EfficiencyPlotNumPoints     : 200
+
+}
+
+#END_PROLOG

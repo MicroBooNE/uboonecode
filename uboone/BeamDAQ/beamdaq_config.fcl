@@ -1,0 +1,50 @@
+//beam data output directory
+output_dir_data : "./"
+// info file output directory
+output_dir_info : "./"
+
+//maximum run length in hours
+max_run_length : 10
+
+//database latency (minutes) 
+ifdb_latency : 5
+
+// list of beamlines; should be an array even if listing only one beamline
+beamlines : [ "bnb", "numi" ]
+//beamlines : [ "bnb" ]
+ 
+// list bundles for each beam; should be array even if listing only one bundle
+bnb : [ "BoosterNeutrinoBeam_read", "BNBShortTerm_read", "BNBMultiWire" ]
+numi : [ "NuMI_Physics_A9" ]
+
+mwr_time_offset : -35
+
+// event types for each beamline
+// should match the definition of event type in datatypes/evttypes.h
+// Assuming this evttype will be available from trigger data and can 
+// be used to merge detector and beam files
+event_type : { bnb : 18 
+	       numi : 19 }
+
+// merge data from devices with timestamp within timewindow 
+// into single event. time given in milliseconds
+time_window : { bnb : 10
+	        numi : 60 }
+
+//IF beam database
+ifdb_url : "http://dbweb0.fnal.gov:8088/ifbeam/data"
+
+//log file setings:
+message_facility : {
+		 debugModules : ["*"]
+		 suppressInfo : []
+
+		 destinations : {
+		 	     LogToFile : {
+	     	 	               type : "file"
+		                   filename : "./beamdaq.log"
+			             append : true
+			          threshold : "DEBUG" //DEBUG, INFO, WARNING and ERROR
+	     		     	        }
+				}
+}
