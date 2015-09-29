@@ -1182,6 +1182,7 @@ namespace microboone {
           fData->SetBits(AnalysisTreeDataStruct::tdGeant,  !fSaveGeantInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdMCshwr, !fSaveMCShowerInfo); 
           fData->SetBits(AnalysisTreeDataStruct::tdHit,    !fSaveHitInfo);
+          fData->SetBits(AnalysisTreeDataStruct::tdFlash,  !fSaveFlashInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdCluster,!fSaveClusterInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdTrack,  !fSaveTrackInfo);
