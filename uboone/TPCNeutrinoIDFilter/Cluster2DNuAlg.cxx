@@ -64,14 +64,16 @@ void Cluster2DNuAlg::reconfigure(fhicl::ParameterSet const &pset)
     fPlaneToCheck            = myPset.get<size_t>      ("PlaneToCheck",         2);
     fMinimumHits             = myPset.get<size_t>      ("MinimumHits",          10);
     fMaxCosmicScore          = myPset.get<float>       ("MaxCosmicScore",       0.4);
-    fMaximumTick             = myPset.get<float>       ("MaximumTick",          6370);
-    fMinimumTick             = myPset.get<float>       ("MinimumTick",          3210);
-    fMaximumWire             = myPset.get<float>       ("MaximumWire",          3420);
-    fMinimumWire             = myPset.get<float>       ("MinimumWire",          5);
+    //fMaximumTick             = myPset.get<float>       ("MaximumTick",          6370);
+    //fMinimumTick             = myPset.get<float>       ("MinimumTick",          3210);
+    //fMaximumWire             = myPset.get<float>       ("MaximumWire",          3420);
+    //fMinimumWire             = myPset.get<float>       ("MinimumWire",          5);
     fMaximumAngle            = myPset.get<float>       ("MaximumAngle",         0.5);
     fMaximumLengthCut        = myPset.get<float>       ("MaximumLengthCut",     200.);
+    fMaximumMatchedLengthCut = myPset.get<float>       ("MaximumMatchedLengthCut",     100.);
     fMaximumLength           = myPset.get<float>       ("MaximumLength",        500.);
     fMinimumDeltaTicks       = myPset.get<float>       ("MinimumDeltaTicks",    30.);
+    fMinimumDeltaWires       = myPset.get<float>       ("MinimumDeltaWires",    30.);
     fMinCandidateClusters    = myPset.get<size_t>      ("MinCandidateClusters", 2);
     fMaximumDistance         = myPset.get<float>       ("MaximumDistance",      10.);
     fMaximumTime             = myPset.get<float>       ("MaximumTime",          30.);
@@ -124,19 +126,21 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                 std::vector<art::Ptr<recob::Hit>> clusterHitVec = clusterHitAssns.at(cluster->ID());
             
                 if (clusterHitVec.size() < fMinimumHits) continue;
-                
+               
+	        /* 
                 // Check start/stop conditions
                 if (cluster->StartTick() < fMinimumTick || cluster->StartTick() > fMaximumTick) continue;
                 if (cluster->EndTick()   < fMinimumTick || cluster->EndTick()   > fMaximumTick) continue;
                 if (cluster->StartWire() < fMinimumWire || cluster->StartWire() > fMaximumWire) continue;
                 if (cluster->EndWire()   < fMinimumWire || cluster->EndWire()   > fMaximumWire) continue;
-                
-                // length angle conditions
+                */ 
+               
+		// length angle conditions
                 float deltaWire = fabs(cluster->StartWire() - cluster->EndWire());
                 float deltaTick = fabs(cluster->StartTick() - cluster->EndTick());
                 
                 if (fabs(cluster->StartAngle()) > fMaximumAngle && deltaWire > fMaximumLengthCut) continue;
-                if (deltaWire < fMaximumLength && deltaTick < fMinimumDeltaTicks)                 continue;
+                if (deltaWire < fMinimumDeltaWires && deltaTick < fMinimumDeltaTicks)             continue;
             
                 // Finally! Check cosmic tag status
                 std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(cluster->ID());
@@ -152,7 +156,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                 goodClusterVec.push_back(cluster);
             }
             
-            // Enought clusters to proceed?
+            // Enough clusters to proceed?
             if (goodClusterVec.size() >= fMinCandidateClusters)
             {
                 int numVtcs(0);
@@ -174,7 +178,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     float deltaWire = fabs(cluster->StartWire() - cluster->EndWire());
 //                    float deltaTick = fabs(cluster->StartTick() - cluster->EndTick());
                     
-                    if(deltaWire > fMaximumLength && cluster->StartWire() < cluster->EndWire())
+                    if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire())
                     {
                         // Starts with StartWire
                         // **** shouldn't this start at clusterIdx + 1 to avoid double counting?
@@ -192,11 +196,17 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                             if((fabs(cluster->StartWire() - cluster2->StartWire()) <= fMaximumDistance) &&
                                (fabs(cluster->StartTick() - cluster2->StartTick()) <= fMaximumTime)       )
                             {
-                                if(cluster2->StartCharge() > cluster->StartCharge())
+                                if(cluster2->StartCharge() > cluster->StartCharge() || deltaWire > fMaximumLength)
                                 {
-                                    float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
+				    if(cluster2->StartWire()<cluster2->EndWire) float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
+                                    else
+				    {
+				        if(cluster2->StartWire()<0) float openangle = fabs(cluster->StartAngle() - (-180+cluster2->StartAngle()));
+				        else float openangle = fabs(cluster->StartAngle() - (180+cluster2->StartAngle()));
+				    } 
+				    float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
                                     
-                                    if(openangle > 0.1 && openangle < 1.35)
+                                    if(openangle > 0.1 && openangle < 1.57)
                                     {
                                         numVtcs++;
                                         clusterPtrVec.push_back(cluster2);
@@ -224,16 +234,24 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                     }
                                 }
                             }
-                            
-/*
-                            else if((fabs(cluster_StartWire[cid1] - cluster_EndWire[cid2]) <= maxDistance) && (fabs(cluster_StartTick[cid1] - cluster_EndTick[cid2]) <= maxTime))
+                            else if((fabs(cluster->StartWire() - cluster2->EndWire()) <= fMaximumDistance) && 
+				    (fabs(cluster->StartTick() - cluster2->EndTick()) <= fMaximumTime))
                             {
-                                if(cluster_EndCharge[cid2]>cluster_StartCharge[cid1])
+                                if(cluster2->EndCharge()>cluster->StartCharge() || deltaWire > fMaximumLength)
                                 {
-                                    Float_t openangle=fabs(cluster_StartAngle[cid1] - cluster_EndAngle[cid2]);
-                                    if(openangle>0.1 && openangle<1.35)
+                                   if(cluster2->StartWire() < cluster2->EndWire())
+				   { 
+				       if(cluster2->EndAngle()<0) float openangle = fabs(cluster->StartAngle() - (-180+cluster2->EndAngle()));
+				       else float openangle = fabs(cluster->StartAngle() - (180+cluster2->EndAngle()));
+				   }
+				   else float openangle = fabs( cluster->StartAngle() - cluster2->EndAngle());
+			 	    Float_t openangle=fabs(cluster_StartAngle[cid1] - cluster_EndAngle[cid2]);
+                                    if(openangle>0.1 && openangle<1.57)
                                     {
                                         numVtcs++;
+                                        clusterPtrVec.push_back(cluster2);
+                                    
+				    /*
                                         Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
                                         Float_t difflen  = fabs(fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) - fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]));
                                         Float_t minangle = std::min(fabs(cluster_StartAngle[cid1]),fabs(cluster_EndAngle[cid2]));
@@ -253,30 +271,43 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         hZLenVAngle_nu  -> Fill(maxzlen,minangle);
                                         hZLenVCharge_nu -> Fill(maxzlen,charge);
                                         myFile << "nu," << ientry << "," << minangle << "," << openangle << "," << charge << "," << maxzlen << "," << totalZ << "," <<difflen <<","<<EvtHitIntensity<<","<<HitIntensity<<std::endl;
-                                    }
+                                    */
+				    }
                                 }
                             }
-*/
                         }
                     } //end startwire
-/*
-                    else if(fabs(cluster_EndWire[cid1] - cluster_StartWire[cid1]) > maxLength && cluster_StartWire[cid1] > cluster_EndWire[cid1])
+
+                    else if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() > cluster->EndWire())
                     {
                         // Starts with EndWire
-                        for(unsigned int k2 = 0; k2 < goodClusts.size(); ++k2)
+                        for(size_t k2 = clusterIdx+1; k2 < goodClusterVec.size(); k2++)
                         {
-                            if(k2 == k1) continue;
-                            int cid2 = goodClusts.at(k2);
-                            if(fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]) > fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1])) continue;
-                            if((fabs(cluster_EndWire[cid1] - cluster_StartWire[cid2]) <= maxDistance) && (fabs(cluster_EndTick[cid1] - cluster_StartTick[cid2]) <= maxTime))
+                            if(k2 == clusterIdx) continue;
+                            
+                            art::Ptr<recob::Cluster>& cluster2 = goodClusterVec.at(k2);
+                            
+                            float deltaWire2 = fabs(cluster2->StartWire() - cluster2->EndWire());
+//                            float deltaTick2 = fabs(cluster2->StartTick() - cluster2->EndTick());
+                            
+                            if(deltaWire2 > deltaWire) continue;
+                            if((fabs(cluster->EndWire() - cluster2->StartWire()) <= fMaximumDistance) && 
+			       (fabs(cluster->EndTick() - cluster2->StartTick()) <= fMaximumTime))
                             {
-                                if(cluster_StartCharge[cid2]>cluster_EndCharge[cid1])
+                                if(cluster2->StartCharge()>cluster->EndCharge() || deltaWire > fMaximumLength)
                                 {
-                                    Float_t openangle=fabs(cluster_EndAngle[cid1] - cluster_StartAngle[cid2]);
-                                    if(openangle>0.1 && openangle<1.35)
+                                    if(cluster2->StartWire() < cluster2->EndWire()) float openangle=fabs(cluster->EndAngle() - cluster2->StartAngle());
+                                    else
+				    {
+				       if(cluster2->StartAngle()<0) float openangle=fabs(cluster->EndAngle() - (-180+cluster2->StartAngle()));
+				       else float openangle=fabs(cluster->EndAngle() - (180+cluster2->StartAngle()));
+                                    }
+		   		    if(openangle>0.1 && openangle<1.57)
                                     {
                                         numVtcs++;
-                                        Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
+                                        clusterPtrVec.push_back(cluster2);
+                        
+			/*              Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
                                         Float_t difflen  = fabs(fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) - fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]));
                                         Float_t minangle = std::min(fabs(cluster_EndAngle[cid1]),fabs(cluster_StartAngle[cid2]));
                                         Float_t charge   = cluster_EndCharge[cid1] + cluster_StartCharge[cid2];
@@ -295,18 +326,26 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         hZLenVAngle_nu  -> Fill(maxzlen,minangle);
                                         hZLenVCharge_nu -> Fill(maxzlen,charge);
                                         myFile << "nu," << ientry << "," << minangle << "," << openangle << "," << charge << "," << maxzlen << "," << totalZ << "," <<difflen <<","<<EvtHitIntensity<<","<<HitIntensity<<std::endl;
-                                    }
+                          */        }
                                 }
                             }
-                            else if((fabs(cluster_EndWire[cid1] - cluster_EndWire[cid2]) <= maxDistance) && (fabs(cluster_EndTick[cid1] - cluster_EndTick[cid2]) <= maxTime))
+                            else if((fabs(cluster->EndWire() - cluster2->EndWire()) <= fMaximumDistance) && 
+				    (fabs(cluster->EndTick() - cluster2->EndTick()) <= fMaximumTime))
                             {
-                                if(cluster_EndCharge[cid2]>cluster_EndCharge[cid1]) 
-                                {
-                                    Float_t openangle=fabs(cluster_EndAngle[cid1] - cluster_EndAngle[cid2]);
-                                    if(openangle>0.1 && openangle<1.35)
+                                if(cluster2->EndCharge()>cluster->EndCharge() || deltaWire > fMaximumLength) 
+                                {   
+				    if(cluster2->StartWire()<cluster2->EndWire())
+				    {
+				        if(cluster2->EndAngle()<0) float openangle=fabs(cluster->EndAngle() -(-180+cluster2->EndAngle()));
+				        else float openangle=fabs(cluster->EndAngle() -(180+cluster2->EndAngle()));
+                                    }
+			  	    else float openangle=fabs(cluster->EndAngle() - cluster2->EndAngle());
+				    if(openangle>0.1 && openangle<1.57)
                                     {
                                         numVtcs++;
-                                        Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
+                                        clusterPtrVec.push_back(cluster2);
+                        
+                                  /*    Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
                                         Float_t difflen  = fabs(fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) - fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]));
                                         Float_t minangle = std::min(fabs(cluster_EndAngle[cid1]),fabs(cluster_EndAngle[cid2]));
                                         Float_t charge   = cluster_EndCharge[cid1] + cluster_EndCharge[cid2];
@@ -325,20 +364,20 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         hZLenVAngle_nu  -> Fill(maxzlen,minangle);
                                         hZLenVCharge_nu -> Fill(maxzlen,charge);
                                         myFile << "nu," << ientry << "," << minangle << "," << openangle << "," << charge << "," << maxzlen << "," << totalZ <<","<<difflen << ","<<EvtHitIntensity<<","<<HitIntensity<<std::endl;
-                                    }
+                               */   }
                                 }
                             }
                         }
                     } //end endwire
-*/
+
                     
                     // Handle the associations as everything related to the original cosmic tag for now
                     // I think we will need a better way going forward...
                     util::CreateAssn(*fMyProducerModule, event, cosmicTag, clusterPtrVec, *cosmicClusterAssociations);
-                }
-            }
-        }
-    }
+                }//end loop over good clusters
+            }//end if num good clusters to proceed
+        }//end make sure valid handles 
+    }//end require valid handle
     
     // Add tracks and associations to event.
     event.put(std::move(cosmicClusterAssociations));

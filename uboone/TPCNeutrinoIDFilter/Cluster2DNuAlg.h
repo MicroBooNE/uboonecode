@@ -71,10 +71,12 @@ private:
     float                      fMinimumTick;             ///< Minimum tick for cluster
     float                      fMaximumWire;             ///< Maximum allowed wire in cluster
     float                      fMinimumWire;             ///< Minimum allowed wire in cluster
-    float                      fMaximumAngle;            ///<
+    float                      fMaximumAngle;            ///< Maximum allowed angle of long clusters
     float                      fMaximumLengthCut;        ///< Maximum length of cluster (in wires)
+    float                      fMaximumMatchedLengthCut; ///< Maximum length of matched long cluster (in wires)
     float                      fMaximumLength;           ///< Minimum length of cluster (in wires)
     float                      fMinimumDeltaTicks;       ///< Minimum time for cluster (in ticks)
+    float                      fMinimumDeltaWires;       ///< Minimum wire for cluster (in wires)
     float                      fMaxCosmicScore;          ///< Maximum allowed cosmic score
     size_t                     fMinCandidateClusters;    ///< Minimum candidate clusters to proceed
     float                      fMaximumDistance;         ///< Maximum distance between 2 clusters
