@@ -64,10 +64,6 @@ void Cluster2DNuAlg::reconfigure(fhicl::ParameterSet const &pset)
     fPlaneToCheck            = myPset.get<size_t>      ("PlaneToCheck",         2);
     fMinimumHits             = myPset.get<size_t>      ("MinimumHits",          10);
     fMaxCosmicScore          = myPset.get<float>       ("MaxCosmicScore",       0.4);
-    //fMaximumTick             = myPset.get<float>       ("MaximumTick",          6370);
-    //fMinimumTick             = myPset.get<float>       ("MinimumTick",          3210);
-    //fMaximumWire             = myPset.get<float>       ("MaximumWire",          3420);
-    //fMinimumWire             = myPset.get<float>       ("MinimumWire",          5);
     fMaximumAngle            = myPset.get<float>       ("MaximumAngle",         0.5);
     fMaximumLengthCut        = myPset.get<float>       ("MaximumLengthCut",     200.);
     fMaximumMatchedLengthCut = myPset.get<float>       ("MaximumMatchedLengthCut",     100.);
@@ -127,15 +123,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
             
                 if (clusterHitVec.size() < fMinimumHits) continue;
                
-	        /* 
-                // Check start/stop conditions
-                if (cluster->StartTick() < fMinimumTick || cluster->StartTick() > fMaximumTick) continue;
-                if (cluster->EndTick()   < fMinimumTick || cluster->EndTick()   > fMaximumTick) continue;
-                if (cluster->StartWire() < fMinimumWire || cluster->StartWire() > fMaximumWire) continue;
-                if (cluster->EndWire()   < fMinimumWire || cluster->EndWire()   > fMaximumWire) continue;
-                */ 
-               
-		// length angle conditions
+                // length angle conditions
                 float deltaWire = fabs(cluster->StartWire() - cluster->EndWire());
                 float deltaTick = fabs(cluster->StartTick() - cluster->EndTick());
                 
@@ -159,212 +147,114 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
             // Enough clusters to proceed?
             if (goodClusterVec.size() >= fMinCandidateClusters)
             {
-                int numVtcs(0);
-                
                 // Loop over the good clusters
-                // Shouldn't this go to one less than the full number of clusters?
-                for(size_t clusterIdx = 0; clusterIdx < goodClusterVec.size()-1; clusterIdx++)
+                for(size_t clusterIdx = 0; clusterIdx < goodClusterVec.size(); clusterIdx++)
                 {
                     art::Ptr<recob::Cluster>& cluster = goodClusterVec.at(clusterIdx);
-                    
-                    // Recover the associated CosmicTag
-                    art::Ptr<anab::CosmicTag> cosmicTag(cosmicAssns.at(cluster->ID()).front());
-                    
+
                     // Container to hold the clusters to associate
                     std::vector<art::Ptr<recob::Cluster>> clusterPtrVec;
                     
-                    clusterPtrVec.push_back(cluster);
-                    
                     float deltaWire = fabs(cluster->StartWire() - cluster->EndWire());
-//                    float deltaTick = fabs(cluster->StartTick() - cluster->EndTick());
                     
                     if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire())
                     {
+                        clusterPtrVec.push_back(cluster);
                         // Starts with StartWire
-                        // **** shouldn't this start at clusterIdx + 1 to avoid double counting?
-                        for(size_t k2 = clusterIdx+1; k2 < goodClusterVec.size(); k2++)
+                        for(size_t k2 = 0; k2 < goodClusterVec.size(); k2++)
                         {
                             if(k2 == clusterIdx) continue;
                             
                             art::Ptr<recob::Cluster>& cluster2 = goodClusterVec.at(k2);
                             
                             float deltaWire2 = fabs(cluster2->StartWire() - cluster2->EndWire());
-//                            float deltaTick2 = fabs(cluster2->StartTick() - cluster2->EndTick());
                             
-                            if(deltaWire2 > deltaWire) continue;
+                            if(deltaWire2 >= deltaWire) continue;
                             
                             if((fabs(cluster->StartWire() - cluster2->StartWire()) <= fMaximumDistance) &&
                                (fabs(cluster->StartTick() - cluster2->StartTick()) <= fMaximumTime)       )
                             {
                                 if(cluster2->StartCharge() > cluster->StartCharge() || deltaWire > fMaximumLength)
                                 {
-				    if(cluster2->StartWire()<cluster2->EndWire) float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
+                                    if(cluster2->StartWire()<cluster2->EndWire) float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
                                     else
-				    {
-				        if(cluster2->StartWire()<0) float openangle = fabs(cluster->StartAngle() - (-180+cluster2->StartAngle()));
-				        else float openangle = fabs(cluster->StartAngle() - (180+cluster2->StartAngle()));
-				    } 
-				    float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
-                                    
+                                    {
+                                        if(cluster2->StartAngle()<0) float openangle = fabs(cluster->StartAngle() - (-180+cluster2->StartAngle()));
+                                        else float openangle = fabs(cluster->StartAngle() - (180+cluster2->StartAngle()));
+                                    } 
+                                    float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
                                     if(openangle > 0.1 && openangle < 1.57)
                                     {
-                                        numVtcs++;
                                         clusterPtrVec.push_back(cluster2);
-/*
-                                        Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
-                                        Float_t difflen  = fabs(fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) - fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]));
-                                        Float_t minangle = std::min(fabs(cluster_StartAngle[cid1]),fabs(cluster_StartAngle[cid2]));
-                                        Float_t charge   = cluster_StartCharge[cid1] + cluster_StartCharge[cid2];
-                                        Float_t totalZ   = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) + fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]);
-                                        Float_t HitIntensity= cluster_StartCharge[cid2];
-                                        Float_t EvtHitIntensity= cluster_Integral[cid2]+cluster_Integral[cid2];
-                                        hOpenAngle_nu   -> Fill(openangle);
-                                        hStartAngle_nu  -> Fill(minangle);
-                                        hStartCharge_nu -> Fill(charge);
-                                        hHitIntensity_nu-> Fill(HitIntensity);
-                                        hHitEvtIntensity_nu-> Fill(EvtHitIntensity);
-                                        hTotalZ_nu      -> Fill(totalZ);
-                                        hMaxLen_nu      -> Fill(maxzlen);
-                                        hDiffLen_nu     -> Fill(difflen);
-                                        hTotalHits_nu   -> Fill(cluster_NHits[cid1] + cluster_NHits[cid2]);
-                                        hZLenVAngle_nu  -> Fill(maxzlen,minangle);
-                                        hZLenVCharge_nu -> Fill(maxzlen,charge);
-                                        myFile << "nu," << ientry << "," << minangle << "," << openangle << "," << charge << "," << maxzlen << "," << totalZ << "," <<difflen <<","<<EvtHitIntensity<<","<<HitIntensity<<std::endl;
- */
                                     }
                                 }
                             }
                             else if((fabs(cluster->StartWire() - cluster2->EndWire()) <= fMaximumDistance) && 
-				    (fabs(cluster->StartTick() - cluster2->EndTick()) <= fMaximumTime))
+                                    (fabs(cluster->StartTick() - cluster2->EndTick()) <= fMaximumTime))
                             {
                                 if(cluster2->EndCharge()>cluster->StartCharge() || deltaWire > fMaximumLength)
                                 {
-                                   if(cluster2->StartWire() < cluster2->EndWire())
-				   { 
-				       if(cluster2->EndAngle()<0) float openangle = fabs(cluster->StartAngle() - (-180+cluster2->EndAngle()));
-				       else float openangle = fabs(cluster->StartAngle() - (180+cluster2->EndAngle()));
-				   }
-				   else float openangle = fabs( cluster->StartAngle() - cluster2->EndAngle());
-			 	    Float_t openangle=fabs(cluster_StartAngle[cid1] - cluster_EndAngle[cid2]);
+                                    if(cluster2->StartWire() < cluster2->EndWire())
+                                    { 
+                                        if(cluster2->EndAngle()<0) float openangle = fabs(cluster->StartAngle() - (-180+cluster2->EndAngle()));
+                                        else float openangle = fabs(cluster->StartAngle() - (180+cluster2->EndAngle()));
+                                    }
+                                    else float openangle = fabs( cluster->StartAngle() - cluster2->EndAngle());
+                                    Float_t openangle=fabs(cluster_StartAngle[cid1] - cluster_EndAngle[cid2]);
                                     if(openangle>0.1 && openangle<1.57)
                                     {
-                                        numVtcs++;
                                         clusterPtrVec.push_back(cluster2);
-                                    
-				    /*
-                                        Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
-                                        Float_t difflen  = fabs(fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) - fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]));
-                                        Float_t minangle = std::min(fabs(cluster_StartAngle[cid1]),fabs(cluster_EndAngle[cid2]));
-                                        Float_t charge   = cluster_StartCharge[cid1] + cluster_EndCharge[cid2];
-                                        Float_t totalZ   = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) + fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]);
-                                        Float_t HitIntensity= cluster_EndCharge[cid2];
-                                        Float_t EvtHitIntensity= cluster_Integral[cid2]+cluster_Integral[cid2];
-                                        hOpenAngle_nu   -> Fill(openangle);
-                                        hStartAngle_nu  -> Fill(minangle);
-                                        hStartCharge_nu -> Fill(charge);
-                                        hHitIntensity_nu-> Fill(HitIntensity);
-                                        hHitEvtIntensity_nu-> Fill(EvtHitIntensity);
-                                        hTotalZ_nu      -> Fill(totalZ);
-                                        hMaxLen_nu      -> Fill(maxzlen);
-                                        hDiffLen_nu     -> Fill(difflen);
-                                        hTotalHits_nu   -> Fill(cluster_NHits[cid1] + cluster_NHits[cid2]);
-                                        hZLenVAngle_nu  -> Fill(maxzlen,minangle);
-                                        hZLenVCharge_nu -> Fill(maxzlen,charge);
-                                        myFile << "nu," << ientry << "," << minangle << "," << openangle << "," << charge << "," << maxzlen << "," << totalZ << "," <<difflen <<","<<EvtHitIntensity<<","<<HitIntensity<<std::endl;
-                                    */
-				    }
+                                    }
                                 }
                             }
                         }
                     } //end startwire
-
                     else if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() > cluster->EndWire())
                     {
+                        clusterPtrVec.push_back(cluster);
+
                         // Starts with EndWire
-                        for(size_t k2 = clusterIdx+1; k2 < goodClusterVec.size(); k2++)
+                        for(size_t k2 = 0; k2 < goodClusterVec.size(); k2++)
                         {
                             if(k2 == clusterIdx) continue;
                             
                             art::Ptr<recob::Cluster>& cluster2 = goodClusterVec.at(k2);
                             
                             float deltaWire2 = fabs(cluster2->StartWire() - cluster2->EndWire());
-//                            float deltaTick2 = fabs(cluster2->StartTick() - cluster2->EndTick());
                             
-                            if(deltaWire2 > deltaWire) continue;
+                            if(deltaWire2 >= deltaWire) continue;
                             if((fabs(cluster->EndWire() - cluster2->StartWire()) <= fMaximumDistance) && 
-			       (fabs(cluster->EndTick() - cluster2->StartTick()) <= fMaximumTime))
+                                (fabs(cluster->EndTick() - cluster2->StartTick()) <= fMaximumTime))
                             {
                                 if(cluster2->StartCharge()>cluster->EndCharge() || deltaWire > fMaximumLength)
                                 {
                                     if(cluster2->StartWire() < cluster2->EndWire()) float openangle=fabs(cluster->EndAngle() - cluster2->StartAngle());
                                     else
-				    {
-				       if(cluster2->StartAngle()<0) float openangle=fabs(cluster->EndAngle() - (-180+cluster2->StartAngle()));
-				       else float openangle=fabs(cluster->EndAngle() - (180+cluster2->StartAngle()));
-                                    }
-		   		    if(openangle>0.1 && openangle<1.57)
                                     {
-                                        numVtcs++;
+                                        if(cluster2->StartAngle()<0) float openangle=fabs(cluster->EndAngle() - (-180+cluster2->StartAngle()));
+                                        else float openangle=fabs(cluster->EndAngle() - (180+cluster2->StartAngle()));
+                                    }
+                                    if(openangle>0.1 && openangle<1.57)
+                                    {
                                         clusterPtrVec.push_back(cluster2);
-                        
-			/*              Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
-                                        Float_t difflen  = fabs(fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) - fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]));
-                                        Float_t minangle = std::min(fabs(cluster_EndAngle[cid1]),fabs(cluster_StartAngle[cid2]));
-                                        Float_t charge   = cluster_EndCharge[cid1] + cluster_StartCharge[cid2];
-                                        Float_t totalZ   = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) + fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]);
-                                        Float_t HitIntensity  =  cluster_StartCharge[cid2];
-                                        Float_t EvtHitIntensity  =  cluster_Integral[cid2]+cluster_Integral[cid2];
-                                        hOpenAngle_nu   -> Fill(openangle);
-                                        hStartAngle_nu  -> Fill(minangle);
-                                        hStartCharge_nu -> Fill(charge);
-                                        hHitIntensity_nu-> Fill(HitIntensity);
-                                        hHitEvtIntensity_nu-> Fill(EvtHitIntensity);
-                                        hTotalZ_nu      -> Fill(totalZ);
-                                        hMaxLen_nu      -> Fill(maxzlen);
-                                        hDiffLen_nu     -> Fill(difflen);
-                                        hTotalHits_nu   -> Fill(cluster_NHits[cid1] + cluster_NHits[cid2]);
-                                        hZLenVAngle_nu  -> Fill(maxzlen,minangle);
-                                        hZLenVCharge_nu -> Fill(maxzlen,charge);
-                                        myFile << "nu," << ientry << "," << minangle << "," << openangle << "," << charge << "," << maxzlen << "," << totalZ << "," <<difflen <<","<<EvtHitIntensity<<","<<HitIntensity<<std::endl;
-                          */        }
+                                    }
                                 }
                             }
                             else if((fabs(cluster->EndWire() - cluster2->EndWire()) <= fMaximumDistance) && 
-				    (fabs(cluster->EndTick() - cluster2->EndTick()) <= fMaximumTime))
+                                    (fabs(cluster->EndTick() - cluster2->EndTick()) <= fMaximumTime))
                             {
                                 if(cluster2->EndCharge()>cluster->EndCharge() || deltaWire > fMaximumLength) 
                                 {   
-				    if(cluster2->StartWire()<cluster2->EndWire())
-				    {
-				        if(cluster2->EndAngle()<0) float openangle=fabs(cluster->EndAngle() -(-180+cluster2->EndAngle()));
-				        else float openangle=fabs(cluster->EndAngle() -(180+cluster2->EndAngle()));
-                                    }
-			  	    else float openangle=fabs(cluster->EndAngle() - cluster2->EndAngle());
-				    if(openangle>0.1 && openangle<1.57)
+                                    if(cluster2->StartWire()<cluster2->EndWire())
                                     {
-                                        numVtcs++;
+                                        if(cluster2->EndAngle()<0) float openangle=fabs(cluster->EndAngle() -(-180+cluster2->EndAngle()));
+                                        else float openangle=fabs(cluster->EndAngle() -(180+cluster2->EndAngle()));
+                                    }
+                                    else float openangle=fabs(cluster->EndAngle() - cluster2->EndAngle());
+                                    if(openangle>0.1 && openangle<1.57)
+                                    {
                                         clusterPtrVec.push_back(cluster2);
-                        
-                                  /*    Int_t   maxzlen  = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]);
-                                        Float_t difflen  = fabs(fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) - fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]));
-                                        Float_t minangle = std::min(fabs(cluster_EndAngle[cid1]),fabs(cluster_EndAngle[cid2]));
-                                        Float_t charge   = cluster_EndCharge[cid1] + cluster_EndCharge[cid2];
-                                        Float_t totalZ   = fabs(cluster_StartWire[cid1] - cluster_EndWire[cid1]) + fabs(cluster_StartWire[cid2] - cluster_EndWire[cid2]);
-                                        Float_t HitIntensity= cluster_EndCharge[cid2];
-                                        Float_t EvtHitIntensity= cluster_Integral[cid2]+cluster_Integral[cid2];
-                                        hOpenAngle_nu   -> Fill(openangle);
-                                        hStartAngle_nu  -> Fill(minangle);
-                                        hStartCharge_nu -> Fill(charge);
-                                        hHitIntensity_nu-> Fill(HitIntensity);
-                                        hHitEvtIntensity_nu-> Fill(EvtHitIntensity);
-                                        hTotalZ_nu      -> Fill(totalZ);
-                                        hMaxLen_nu      -> Fill(maxzlen);
-                                        hDiffLen_nu     -> Fill(difflen);
-                                        hTotalHits_nu   -> Fill(cluster_NHits[cid1] + cluster_NHits[cid2]);
-                                        hZLenVAngle_nu  -> Fill(maxzlen,minangle);
-                                        hZLenVCharge_nu -> Fill(maxzlen,charge);
-                                        myFile << "nu," << ientry << "," << minangle << "," << openangle << "," << charge << "," << maxzlen << "," << totalZ <<","<<difflen << ","<<EvtHitIntensity<<","<<HitIntensity<<std::endl;
-                               */   }
+                                    }
                                 }
                             }
                         }
@@ -373,7 +263,11 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     
                     // Handle the associations as everything related to the original cosmic tag for now
                     // I think we will need a better way going forward...
-                    util::CreateAssn(*fMyProducerModule, event, cosmicTag, clusterPtrVec, *cosmicClusterAssociations);
+                    if(clusterPtrVec.size() > 1)
+                    {
+                        art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
+                        util::CreateAssn(*fMyProducerModule, event, cosmicTag, clusterPtrVec, *cosmicClusterAssociations);
+                    }
                 }//end loop over good clusters
             }//end if num good clusters to proceed
         }//end make sure valid handles 
