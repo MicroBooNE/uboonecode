@@ -488,7 +488,6 @@ larpandora : larpandora : LArPandoraInterface/LArPandoraHelper.h
 larpandora : larpandora : LArPandoraInterface/LArPandoraParticleCreator.h
 larpandora : larpandora : LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h
 larpandora : larpandora : LArPandoraInterface/MicroBooNETransformationPlugin.h
-larpandora : larpandora : LArPandoraInterface/PFParticleSeed.h
 larpandora : larpandora : LArPandoraInterface/PFParticleStitcher.h
 larpandora : larreco : ClusterFinder/ClusterCreator.h
 larpandora : larreco : RecoAlg/ClusterParamsImportWrapper.h
@@ -921,6 +920,7 @@ uboonecode : lardata : AnalysisBase/Calorimetry.h
 uboonecode : lardata : AnalysisBase/CosmicTag.h
 uboonecode : lardata : AnalysisBase/FlashMatch.h
 uboonecode : lardata : AnalysisBase/ParticleID.h
+uboonecode : lardata : AnalysisBase/T0.h
 uboonecode : lardata : MCBase/MCLimits.h
 uboonecode : lardata : MCBase/MCShower.h
 uboonecode : lardata : MCBase/MCStep.h
