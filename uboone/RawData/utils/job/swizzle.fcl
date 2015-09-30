@@ -52,7 +52,6 @@ source:
   huffmanDecode:   true
   swizzleTPC:      false
   swizzlePMT:      false
-  saveOutput:      false
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
