@@ -444,6 +444,9 @@ namespace lris {
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
     fillTriggerData(event_record, trigInfo);
+
+    tMyTree->Fill();
+
     //std::cout<<"Done ProcessNextEvent..."<<std::endl;
     /*
       } catch (...) {
