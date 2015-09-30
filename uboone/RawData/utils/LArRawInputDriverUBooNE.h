@@ -103,6 +103,9 @@ namespace lris {
     util::UBChannelMap_t           fChannelMap;   
     int                            fDataTakingTime; //fhicl parameter. Optional to override raw data's internal time stamp.
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
+    bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data
+    bool                           fSwizzlePMT; //fhicl parameter.  Tells us whether to swizzle the PMT data
+    bool                           fSaveOutput; //fhicl parameter.  Tells us whether to save the LArSoft output file or just run analysis
 
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices

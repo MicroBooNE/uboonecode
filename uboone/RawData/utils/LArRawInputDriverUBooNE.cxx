@@ -138,6 +138,10 @@ namespace lris {
     fDataTakingTime                    = ps.get< int  >("DataTakingTime", -1);
     fSwizzlingTime                     = ps.get< int  >("SwizzlingTime", -1);
 
+    fSwizzleTPC = ps.get<bool>("swizzleTPC",true);
+    fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
+    fSaveOutput = ps.get<bool>("saveOutput",true);
+
     //if ( fHuffmanDecode )
     tpc_crate_data_t::doDissect(true); // setup for decoding
 
@@ -440,10 +444,10 @@ namespace lris {
     //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
       
     fillDAQHeaderData(event_record, daqHeader);
+    fillTriggerData(event_record, trigInfo);
     fillTPCData(event_record, tpcDigitList);
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
-    fillTriggerData(event_record, trigInfo);
 
     tMyTree->Fill();
 
@@ -739,9 +743,10 @@ namespace lris {
 	    sprintf( warn, "Error: Number of ADCs in (crate,slot,channel)=( %d, %d, %d ) does not equal 9595!", crate_number, card.getModule(), tpc_channel_number );
 	    throw std::runtime_error( warn );
 	  }
-	    
-	  raw::RawDigit rd(ch,chdsize,adclist,compression);
-	  tpcDigitList.push_back(rd);
+	  if (fSwizzleTPC){ // here is where we actually fill the output
+  	    raw::RawDigit rd(ch,chdsize,adclist,compression);
+  	    tpcDigitList.push_back(rd);
+          }
 	    
 	  /*
             std::cout << ch << "\t"
@@ -865,14 +870,17 @@ namespace lris {
               FEM6triggerSample = sample;
             }
             raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, win_data_size);
-            rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
+            if (fSwizzlePMT){
+              rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
+            }
 
 	    //std::cout << " into ReadoutCH=" << data_product_ch_num << " category=" << opdet::UBOpChannelEnumName( ch_category ) << std::endl;
 	    short adc_max=0;
-	    
-            for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
-              rd.push_back(*it & 0xfff);                
-              if(adc_max < rd.back()) adc_max = rd.back();
+	    if (fSwizzlePMT){
+              for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
+                rd.push_back(*it & 0xfff);                
+                if(adc_max < rd.back()) adc_max = rd.back();
+              }
             }
             // Saving trigger readout stream variables to output file
             if(adc_max>2150) { // logic pulses have high ADC values
@@ -923,8 +931,9 @@ namespace lris {
 //                std::cout << "channel " << channel_number << ",regular PMT window size = " << win_data_size << std::endl;
 //              }
             }
-
-            pmtDigitList[ch_category]->emplace_back(rd);
+            if (fSwizzlePMT){
+              pmtDigitList[ch_category]->emplace_back(rd);
+            }
           }
         }//<--End channel_pmt_it for loop
       }//<---End card_pmt_it for loop
