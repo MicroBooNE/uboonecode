@@ -148,6 +148,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
             if (goodClusterVec.size() >= fMinCandidateClusters)
             {
                 // Loop over the good clusters
+                float openangle=0;
                 for(size_t clusterIdx = 0; clusterIdx < goodClusterVec.size(); clusterIdx++)
                 {
                     art::Ptr<recob::Cluster>& cluster = goodClusterVec.at(clusterIdx);
@@ -176,13 +177,12 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                             {
                                 if(cluster2->StartCharge() > cluster->StartCharge() || deltaWire > fMaximumLength)
                                 {
-                                    if(cluster2->StartWire()<cluster2->EndWire) float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
+                                    if(cluster2->StartWire()<cluster2->EndWire()) openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
                                     else
                                     {
-                                        if(cluster2->StartAngle()<0) float openangle = fabs(cluster->StartAngle() - (-180+cluster2->StartAngle()));
-                                        else float openangle = fabs(cluster->StartAngle() - (180+cluster2->StartAngle()));
+                                        if(cluster2->StartAngle()<0) openangle = fabs(cluster->StartAngle() - (-180+cluster2->StartAngle()));
+                                        else openangle = fabs(cluster->StartAngle() - (180+cluster2->StartAngle()));
                                     } 
-                                    float openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
                                     if(openangle > 0.1 && openangle < 1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -196,11 +196,10 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                 {
                                     if(cluster2->StartWire() < cluster2->EndWire())
                                     { 
-                                        if(cluster2->EndAngle()<0) float openangle = fabs(cluster->StartAngle() - (-180+cluster2->EndAngle()));
-                                        else float openangle = fabs(cluster->StartAngle() - (180+cluster2->EndAngle()));
+                                        if(cluster2->EndAngle()<0) openangle = fabs(cluster->StartAngle() - (-180+cluster2->EndAngle()));
+                                        else openangle = fabs(cluster->StartAngle() - (180+cluster2->EndAngle()));
                                     }
-                                    else float openangle = fabs( cluster->StartAngle() - cluster2->EndAngle());
-                                    Float_t openangle=fabs(cluster_StartAngle[cid1] - cluster_EndAngle[cid2]);
+                                    else openangle = fabs( cluster->StartAngle() - cluster2->EndAngle());
                                     if(openangle>0.1 && openangle<1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -228,11 +227,11 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                             {
                                 if(cluster2->StartCharge()>cluster->EndCharge() || deltaWire > fMaximumLength)
                                 {
-                                    if(cluster2->StartWire() < cluster2->EndWire()) float openangle=fabs(cluster->EndAngle() - cluster2->StartAngle());
+                                    if(cluster2->StartWire() < cluster2->EndWire()) openangle=fabs(cluster->EndAngle() - cluster2->StartAngle());
                                     else
                                     {
-                                        if(cluster2->StartAngle()<0) float openangle=fabs(cluster->EndAngle() - (-180+cluster2->StartAngle()));
-                                        else float openangle=fabs(cluster->EndAngle() - (180+cluster2->StartAngle()));
+                                        if(cluster2->StartAngle()<0) openangle=fabs(cluster->EndAngle() - (-180+cluster2->StartAngle()));
+                                        else openangle=fabs(cluster->EndAngle() - (180+cluster2->StartAngle()));
                                     }
                                     if(openangle>0.1 && openangle<1.57)
                                     {
@@ -247,10 +246,10 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                 {   
                                     if(cluster2->StartWire()<cluster2->EndWire())
                                     {
-                                        if(cluster2->EndAngle()<0) float openangle=fabs(cluster->EndAngle() -(-180+cluster2->EndAngle()));
-                                        else float openangle=fabs(cluster->EndAngle() -(180+cluster2->EndAngle()));
+                                        if(cluster2->EndAngle()<0) openangle=fabs(cluster->EndAngle() -(-180+cluster2->EndAngle()));
+                                        else openangle=fabs(cluster->EndAngle() -(180+cluster2->EndAngle()));
                                     }
-                                    else float openangle=fabs(cluster->EndAngle() - cluster2->EndAngle());
+                                    else openangle=fabs(cluster->EndAngle() - cluster2->EndAngle());
                                     if(openangle>0.1 && openangle<1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -265,8 +264,12 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     // I think we will need a better way going forward...
                     if(clusterPtrVec.size() > 1)
                     {
-                        art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
-                        util::CreateAssn(*fMyProducerModule, event, cosmicTag, clusterPtrVec, *cosmicClusterAssociations);
+                	std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(cluster->ID());
+                	if (!cosmicVec.empty())
+                	{
+                            art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
+                            util::CreateAssn(*fMyProducerModule, event, cosmicTag, clusterPtrVec, *cosmicClusterAssociations);
+			}
                     }
                 }//end loop over good clusters
             }//end if num good clusters to proceed
