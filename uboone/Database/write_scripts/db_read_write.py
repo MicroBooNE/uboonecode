@@ -104,7 +104,7 @@ def main():
   #
   #-----------------------------------------------------
   
-  host   = 'ifdb01.fnal.gov'
+  host   = 'ifdb04.fnal.gov'
   port   = '5437'
   dbname = 'microboone_dev'
   user   = os.environ['USER']
