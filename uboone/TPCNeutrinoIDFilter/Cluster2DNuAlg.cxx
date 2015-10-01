@@ -119,7 +119,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                 if (cluster->View() != fPlaneToCheck) continue;
             
                 // Make sure we have enough hits
-                std::vector<art::Ptr<recob::Hit>> clusterHitVec = clusterHitAssns.at(cluster->ID());
+                std::vector<art::Ptr<recob::Hit>> clusterHitVec = clusterHitAssns.at(cluster.key());
             
                 if (clusterHitVec.size() < fMinimumHits) continue;
                
@@ -131,7 +131,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                 if (deltaWire < fMinimumDeltaWires && deltaTick < fMinimumDeltaTicks)             continue;
             
                 // Finally! Check cosmic tag status
-                std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(cluster->ID());
+                std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(cluster.key());
                 
                 if (!cosmicVec.empty())
                 {
@@ -264,7 +264,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     // I think we will need a better way going forward...
                     if(clusterPtrVec.size() > 1)
                     {
-                	std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(cluster->ID());
+                	std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(cluster.key());
                 	if (!cosmicVec.empty())
                 	{
                             art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());

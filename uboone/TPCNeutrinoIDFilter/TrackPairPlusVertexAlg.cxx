@@ -137,7 +137,7 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                 // There are other/better ways to handle this but I think this covers worst case scenario
                 if (cosmicAssns.isValid() && cosmicAssns.size() > 0)
                 {
-                    std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(track1->ID());
+                    std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(track1.key());
                     
                     if (!cosmicVec.empty())
                     {
@@ -173,7 +173,7 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                     // Check cosmic ray tags again
                     if (cosmicAssns.isValid() && cosmicAssns.size() > 0)
                     {
-                        std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(track2->ID());
+                        std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(track2.key());
                         
                         if (!cosmicVec.empty())
                         {
