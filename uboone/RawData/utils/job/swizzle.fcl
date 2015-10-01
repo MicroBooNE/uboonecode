@@ -5,8 +5,7 @@
 process_name: Swizzler
 services:
 {
-  #TFileService: { fileName: "daq_hist.root" }
-  TFileService: { fileName: "daq_hist_2952.root" }
+  TFileService: { fileName: "daq_hist.root" }
   Timing:       {}
   RandomNumberGenerator: {} 
   user: {
@@ -71,8 +70,8 @@ outputs:
 
 physics:
 {
- stream1:   [ out1 ]
- #stream1:   [ ]
+ #stream1:   [ out1 ] ## commented out to avoid writing output file - this is not desirable for production!
+ stream1:   [ ]
  end_paths: [ stream1 ]
 }
 

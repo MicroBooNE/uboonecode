@@ -178,6 +178,8 @@ namespace lris {
     tMyTree->Branch("FEM5triggerSample",&FEM5triggerSample,"FEM5triggerSample/I");
     tMyTree->Branch("FEM6triggerFrame",&FEM6triggerFrame,"FEM6triggerFrame/I");
     tMyTree->Branch("FEM6triggerSample",&FEM6triggerSample,"FEM6triggerSample/I");
+    tMyTree->Branch("FEM5triggerTime",&FEM5triggerTime,"FEM5triggerTime/D");
+    tMyTree->Branch("FEM6triggerTime",&FEM6triggerTime,"FEM6triggerTime/D");
 
     tMyTree->Branch("RO_BNBtriggerFrame",&RO_BNBtriggerFrame,"RO_BNBtriggerFrame/I");
     tMyTree->Branch("RO_NuMItriggerFrame",&RO_NuMItriggerFrame,"RO_NuMItriggerFrame/I");
@@ -187,6 +189,10 @@ namespace lris {
     tMyTree->Branch("RO_NuMItriggerSample",&RO_NuMItriggerSample,"RO_NuMItriggerSample/I");
     tMyTree->Branch("RO_EXTtriggerSample",&RO_EXTtriggerSample,"RO_EXTtriggerSample/I");
     tMyTree->Branch("RO_RWMtriggerSample",&RO_RWMtriggerSample,"RO_RWMtriggerSample/I");
+    tMyTree->Branch("RO_BNBtriggerTime",&RO_BNBtriggerTime,"RO_BNBtriggerTime/D");
+    tMyTree->Branch("RO_NuMItriggerTime",&RO_NuMItriggerTime,"RO_NuMItriggerTime/D");
+    tMyTree->Branch("RO_EXTtriggerTime",&RO_EXTtriggerTime,"RO_EXTtriggerTime/D");
+    tMyTree->Branch("RO_RWMtriggerTime",&RO_RWMtriggerTime,"RO_RWMtriggerTime/D");
 
 //    tMyTree->Branch("RO_Gate1Frame",&RO_Gate1Frame,"RO_Gate1Frame/I");
 //    tMyTree->Branch("RO_Gate1Sample",&RO_Gate1Sample,"RO_Gate1Sample/I");
@@ -420,7 +426,10 @@ namespace lris {
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
   {    
-
+     FEM5triggerSample=-999;
+     FEM6triggerSample=-999;
+     FEM5triggerFrame=-999;
+     FEM6triggerFrame=-999;
      RO_BNBtriggerFrame=-999;
      RO_BNBtriggerSample=-999;
      RO_NuMItriggerFrame=-999;
@@ -809,15 +818,17 @@ namespace lris {
 // Frame and sample for trigger
             uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
             uint32_t sample = card_data.getTrigSample();
+//         Filling output tree variables
             if (card_data.getModule() == 5){
               FEM5triggerFrame = frame;
               FEM5triggerSample = sample;
+              FEM5triggerTime = timeService->OpticalClock().Time( sample, frame );
             }
             if (card_data.getModule() == 6){
               FEM6triggerFrame = frame;
               FEM6triggerSample = sample;
+              FEM6triggerTime = timeService->OpticalClock().Time( sample, frame );
             }
-
 	//        int card_number = card_data.getModule();
         
         // nathaniel's version of datatypes:
@@ -860,27 +871,14 @@ namespace lris {
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( sample, frame );
 
-        // Filling output tree variables - these don't make so much sense currently
-            if (card_data.getModule() == 5){
-              FEM5triggerFrame = frame;
-              FEM5triggerSample = sample;
-            }
-            if (card_data.getModule() == 6){
-              FEM6triggerFrame = frame;
-              FEM6triggerSample = sample;
-            }
             raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, win_data_size);
-            if (fSwizzlePMT){
-              rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
-            }
+            rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
 
 	    //std::cout << " into ReadoutCH=" << data_product_ch_num << " category=" << opdet::UBOpChannelEnumName( ch_category ) << std::endl;
 	    short adc_max=0;
-	    if (fSwizzlePMT){
-              for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
-                rd.push_back(*it & 0xfff);                
-                if(adc_max < rd.back()) adc_max = rd.back();
-              }
+            for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
+              rd.push_back(*it & 0xfff);                
+              if(adc_max < rd.back()) adc_max = rd.back();
             }
             // Saving trigger readout stream variables to output file
             if(adc_max>2150) { // logic pulses have high ADC values
@@ -890,6 +888,7 @@ namespace lris {
 //                std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() << std::endl;
                 RO_RWMtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
                 RO_RWMtriggerSample = window_header.getSample();
+                RO_RWMtriggerTime = timeService->OpticalClock().Time( RO_RWMtriggerSample, RO_RWMtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 38){
@@ -897,6 +896,7 @@ namespace lris {
 //                std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
                 RO_EXTtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
                 RO_EXTtriggerSample = window_header.getSample();
+                RO_EXTtriggerTime = timeService->OpticalClock().Time( RO_EXTtriggerSample, RO_EXTtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 37){
@@ -904,6 +904,7 @@ namespace lris {
 //                std::cout << "NuMI signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
                 RO_NuMItriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
                 RO_NuMItriggerSample = window_header.getSample();
+                RO_NuMItriggerTime = timeService->OpticalClock().Time( RO_NuMItriggerSample, RO_NuMItriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 36){
@@ -911,6 +912,7 @@ namespace lris {
 //                std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
                 RO_BNBtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
                 RO_BNBtriggerSample = window_header.getSample();
+                RO_BNBtriggerTime = timeService->OpticalClock().Time( RO_BNBtriggerSample, RO_BNBtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
 //              else if (channel_number == 46){
