@@ -27,7 +27,7 @@ void TestCFI::analyze(art::Event const& evt) {
   
   art::ServiceHandle<geo::Geometry> geo;
   art::ServiceHandle<lariov::IChannelStatusService> cf; 
-  const lariov::IChannelStatusProvider& cp = cf->GetFilter();
+  const lariov::IChannelStatusProvider& cp = cf->GetProvider();
   
   std::ofstream f("channelStatus.txt",std::ofstream::out);
   
