@@ -100,8 +100,13 @@ namespace lris {
     uint32_t                       fEventCounter; 
     uint32_t                       fNumberEventsInFile;
     bool                           fHuffmanDecode;
-    const util::UBChannelMap_t&    fChannelMap;   
-    
+    util::UBChannelMap_t           fChannelMap;   
+    int                            fDataTakingTime; //fhicl parameter. Optional to override raw data's internal time stamp.
+    int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
+    bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data
+    bool                           fSwizzlePMT; //fhicl parameter.  Tells us whether to swizzle the PMT data
+    bool                           fSaveOutput; //fhicl parameter.  Tells us whether to save the LArSoft output file or just run analysis
+
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
 
@@ -113,6 +118,73 @@ namespace lris {
     // TPC Helper Methods
     std::vector<short> decodeChannelTrailer(unsigned short last_adc, unsigned short data);
     
-  };  // LArRawInputDriverUBooNE
+   //Stuf that Andy added to make fun trigger plots! :)
+   int N_discriminators [40];
+    int discriminatorFrame [40][100];
+    int discriminatorSample [40][100];
+    int discriminatorType [40][100];
+    uint32_t triggerFrame;
+    uint32_t triggerSample;
+    double triggerTime;
+    uint32_t triggerActive;
+    uint32_t triggerBitBNB;
+    uint32_t triggerBitNuMI;
+    uint32_t triggerBitEXT;
+    uint32_t triggerBitPMTBeam;
+    uint32_t triggerBitPMTCosmic;
+    
+    uint32_t FEM5triggerFrame ;
+    uint32_t FEM5triggerSample;
+    uint32_t FEM6triggerFrame ;
+    uint32_t FEM6triggerSample;
+    double FEM5triggerTime;
+    double FEM6triggerTime;
+
+    uint32_t RO_BNBtriggerFrame;
+    uint32_t RO_NuMItriggerFrame;
+    uint32_t RO_EXTtriggerFrame;
+    uint32_t RO_RWMtriggerFrame;
+    uint32_t RO_BNBtriggerSample;
+    uint32_t RO_NuMItriggerSample;
+    uint32_t RO_EXTtriggerSample;
+    uint32_t RO_RWMtriggerSample;
+    double RO_BNBtriggerTime;
+    double RO_NuMItriggerTime;
+    double RO_EXTtriggerTime;
+    double RO_RWMtriggerTime;
+    
+//    uint32_t RO_Gate1Frame;
+//    uint32_t RO_Gate1Sample;
+//    uint32_t RO_Gate2Frame;
+//    uint32_t RO_Gate2Sample;
+
+    uint32_t TPCtriggerFrame;
+    uint32_t TPCtriggerSample;
+    
+    uint32_t ADCwords_crate0;
+    uint32_t ADCwords_crate1;
+    uint32_t ADCwords_crate2;
+    uint32_t ADCwords_crate3;
+    uint32_t ADCwords_crate4;
+    uint32_t ADCwords_crate5;
+    uint32_t ADCwords_crate6;
+    uint32_t ADCwords_crate7;
+    uint32_t ADCwords_crate8;
+    uint32_t ADCwords_crate9;
+    uint32_t NumWords_crate0;
+    uint32_t NumWords_crate1;
+    uint32_t NumWords_crate2;
+    uint32_t NumWords_crate3;
+    uint32_t NumWords_crate4;
+    uint32_t NumWords_crate5;
+    uint32_t NumWords_crate6;
+    uint32_t NumWords_crate7;
+    uint32_t NumWords_crate8;
+    uint32_t NumWords_crate9;
+
+    int event;
+    TTree *tMyTree;
+    
+  };  // LArRawInputDriverUBooNE;
 
 }

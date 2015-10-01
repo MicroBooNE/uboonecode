@@ -42,6 +42,7 @@
 
 //root
 #include "TH1D.h"
+#include "TTree.h"
 
 //other
 #include <libpq-fe.h>
@@ -122,11 +123,8 @@ namespace lris {
     fSourceHelper(pm),
     fCurrentSubRunID(),
     fEventCounter(0),
-    fHuffmanDecode(ps.get<bool>("huffmanDecode",false)),
-    fChannelMap( art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap() )
+    fHuffmanDecode(ps.get<bool>("huffmanDecode",false))
   {
-    mf::LogInfo("")<<"Fetched channel map from DB";
-
     ::peek_at_next_event<ub_TPC_CardData_v6>(false);
     ::peek_at_next_event<ub_PMT_CardData_v6>(false);
     ::handle_missing_words<ub_TPC_CardData_v6>(true);
@@ -137,6 +135,12 @@ namespace lris {
     helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
     helper.reconstitutes<std::vector<raw::Trigger>,   art::InEvent>("daq");
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
+    fDataTakingTime                    = ps.get< int  >("DataTakingTime", -1);
+    fSwizzlingTime                     = ps.get< int  >("SwizzlingTime", -1);
+
+    fSwizzleTPC = ps.get<bool>("swizzleTPC",true);
+    fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
+    fSaveOutput = ps.get<bool>("saveOutput",true);
 
     //if ( fHuffmanDecode )
     tpc_crate_data_t::doDissect(true); // setup for decoding
@@ -152,11 +156,79 @@ namespace lris {
         mf::LogWarning("") << "Bad definition in fhicl file for histogram "<<hist.at(0)<<". Ignoring it.";
       else {
         TH1D* h=tfbeamdir.make<TH1D>(hist[0].c_str(),hist[0].c_str(),
-                                      atoi(hist[1].c_str()),atof(hist[2].c_str()),atof(hist[3].c_str()));
+				     atoi(hist[1].c_str()),atof(hist[2].c_str()),atof(hist[3].c_str()));
         std::pair<std::string, TH1D*> p(hist[0],h);
         fHistMapBeam.insert(p);
       }
     }
+
+    art::TFileDirectory tfdebugdir = tfs->mkdir( "Debug" );
+    tMyTree = tfdebugdir.make<TTree>("tMyTree", "tree");
+    tMyTree->Branch("event",&event,"event/I");
+    tMyTree->Branch("triggerFrame",&triggerFrame,"triggerFrame/I");
+    tMyTree->Branch("triggerSample",&triggerSample,"triggerSample/I");
+    tMyTree->Branch("triggerTime",&triggerTime,"triggerTime/D");
+    tMyTree->Branch("triggerActive",&triggerActive,"triggerActive/I");
+    tMyTree->Branch("triggerBitBNB",&triggerBitBNB,"triggerBitBNB/I");
+    tMyTree->Branch("triggerBitNuMI",&triggerBitNuMI,"triggerBitNuMI/I");
+    tMyTree->Branch("triggerBitEXT",&triggerBitEXT,"triggerBitEXT/I");
+    tMyTree->Branch("triggerBitPMTBeam",&triggerBitPMTBeam,"triggerBitPMTBeam/I");
+    tMyTree->Branch("triggerBitPMTCosmic",&triggerBitPMTCosmic,"triggerBitPMTCosmic/I");
+    tMyTree->Branch("FEM5triggerFrame",&FEM5triggerFrame,"FEM5triggerFrame/I");
+    tMyTree->Branch("FEM5triggerSample",&FEM5triggerSample,"FEM5triggerSample/I");
+    tMyTree->Branch("FEM6triggerFrame",&FEM6triggerFrame,"FEM6triggerFrame/I");
+    tMyTree->Branch("FEM6triggerSample",&FEM6triggerSample,"FEM6triggerSample/I");
+    tMyTree->Branch("FEM5triggerTime",&FEM5triggerTime,"FEM5triggerTime/D");
+    tMyTree->Branch("FEM6triggerTime",&FEM6triggerTime,"FEM6triggerTime/D");
+
+    tMyTree->Branch("RO_BNBtriggerFrame",&RO_BNBtriggerFrame,"RO_BNBtriggerFrame/I");
+    tMyTree->Branch("RO_NuMItriggerFrame",&RO_NuMItriggerFrame,"RO_NuMItriggerFrame/I");
+    tMyTree->Branch("RO_EXTtriggerFrame",&RO_EXTtriggerFrame,"RO_EXTtriggerFrame/I");
+    tMyTree->Branch("RO_RWMtriggerFrame",&RO_RWMtriggerFrame,"RO_RWMtriggerFrame/I");
+    tMyTree->Branch("RO_BNBtriggerSample",&RO_BNBtriggerSample,"RO_BNBtriggerSample/I");
+    tMyTree->Branch("RO_NuMItriggerSample",&RO_NuMItriggerSample,"RO_NuMItriggerSample/I");
+    tMyTree->Branch("RO_EXTtriggerSample",&RO_EXTtriggerSample,"RO_EXTtriggerSample/I");
+    tMyTree->Branch("RO_RWMtriggerSample",&RO_RWMtriggerSample,"RO_RWMtriggerSample/I");
+    tMyTree->Branch("RO_BNBtriggerTime",&RO_BNBtriggerTime,"RO_BNBtriggerTime/D");
+    tMyTree->Branch("RO_NuMItriggerTime",&RO_NuMItriggerTime,"RO_NuMItriggerTime/D");
+    tMyTree->Branch("RO_EXTtriggerTime",&RO_EXTtriggerTime,"RO_EXTtriggerTime/D");
+    tMyTree->Branch("RO_RWMtriggerTime",&RO_RWMtriggerTime,"RO_RWMtriggerTime/D");
+
+//    tMyTree->Branch("RO_Gate1Frame",&RO_Gate1Frame,"RO_Gate1Frame/I");
+//    tMyTree->Branch("RO_Gate1Sample",&RO_Gate1Sample,"RO_Gate1Sample/I");
+//    tMyTree->Branch("RO_Gate2Frame",&RO_Gate2Frame,"RO_Gate2Frame/I");
+//    tMyTree->Branch("RO_Gate2Sample",&RO_Gate2Sample,"RO_Gate2Sample/I");
+
+    tMyTree->Branch("TPCtriggerFrame",&TPCtriggerFrame,"TPCtriggerFrame/I");
+    tMyTree->Branch("TPCtriggerSample",&TPCtriggerSample,"TPCtriggerSample/I");
+    tMyTree->Branch("N_discriminators",N_discriminators,"N_discriminators[40]/I");
+    tMyTree->Branch("discriminatorSample",discriminatorSample,"discriminatorSample[40][100]/I");
+    tMyTree->Branch("discriminatorFrame",discriminatorFrame,"discriminatorFrame[40][100]/I");
+    tMyTree->Branch("discriminatorType",discriminatorType,"discriminatorType[40][100]/I");
+
+    tMyTree->Branch("ADCwords_crate0",&ADCwords_crate0,"ADCwords_crate0/I");
+    tMyTree->Branch("ADCwords_crate1",&ADCwords_crate1,"ADCwords_crate1/I");
+    tMyTree->Branch("ADCwords_crate2",&ADCwords_crate2,"ADCwords_crate2/I");
+    tMyTree->Branch("ADCwords_crate3",&ADCwords_crate3,"ADCwords_crate3/I");
+    tMyTree->Branch("ADCwords_crate4",&ADCwords_crate4,"ADCwords_crate4/I");
+    tMyTree->Branch("ADCwords_crate5",&ADCwords_crate5,"ADCwords_crate5/I");
+    tMyTree->Branch("ADCwords_crate6",&ADCwords_crate6,"ADCwords_crate6/I");
+    tMyTree->Branch("ADCwords_crate7",&ADCwords_crate7,"ADCwords_crate7/I");
+    tMyTree->Branch("ADCwords_crate8",&ADCwords_crate8,"ADCwords_crate8/I");
+    tMyTree->Branch("ADCwords_crate9",&ADCwords_crate9,"ADCwords_crate9/I");
+    tMyTree->Branch("NumWords_crate0",&NumWords_crate0,"NumWords_crate0/I");
+    tMyTree->Branch("NumWords_crate1",&NumWords_crate1,"NumWords_crate1/I");
+    tMyTree->Branch("NumWords_crate2",&NumWords_crate2,"NumWords_crate2/I");
+    tMyTree->Branch("NumWords_crate3",&NumWords_crate3,"NumWords_crate3/I");
+    tMyTree->Branch("NumWords_crate4",&NumWords_crate4,"NumWords_crate4/I");
+    tMyTree->Branch("NumWords_crate5",&NumWords_crate5,"NumWords_crate5/I");
+    tMyTree->Branch("NumWords_crate6",&NumWords_crate6,"NumWords_crate6/I");
+    tMyTree->Branch("NumWords_crate7",&NumWords_crate7,"NumWords_crate7/I");
+    tMyTree->Branch("NumWords_crate8",&NumWords_crate8,"NumWords_crate8/I");
+    tMyTree->Branch("NumWords_crate9",&NumWords_crate9,"NumWords_crate9/I");
+
+    event = 0;
+
   }
   
   
@@ -273,6 +345,27 @@ namespace lris {
     for ( unsigned int opdetcat=0; opdetcat<(unsigned int)opdet::NumUBOpticalChannelCategories; opdetcat++ ) {
       pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
     }
+    event  = fEventCounter;
+    NumWords_crate0 = 0;
+    NumWords_crate1 = 0;
+    NumWords_crate2 = 0;
+    NumWords_crate3 = 0;
+    NumWords_crate4 = 0;
+    NumWords_crate5 = 0;
+    NumWords_crate6 = 0;
+    NumWords_crate7 = 0;
+    NumWords_crate8 = 0;
+    NumWords_crate9 = 0;
+    ADCwords_crate0 = 0;
+    ADCwords_crate1 = 0;
+    ADCwords_crate2 = 0;
+    ADCwords_crate3 = 0;
+    ADCwords_crate4 = 0;
+    ADCwords_crate5 = 0;
+    ADCwords_crate6 = 0;
+    ADCwords_crate7 = 0;
+    ADCwords_crate8 = 0;
+    ADCwords_crate9 = 0;
 
     bool res=false;
 
@@ -293,10 +386,10 @@ namespace lris {
         fCurrentSubRunID = newID;        
       }
       /*
-      std::cout<<"\033[93mAbout to make a principal for run: " << fCurrentSubRunID.run()
-	       <<" subrun: " << fCurrentSubRunID.subRun()
-	       <<" event: " << daq_header->GetEvent()
-	       <<"\033[00m"<< std::endl;
+	std::cout<<"\033[93mAbout to make a principal for run: " << fCurrentSubRunID.run()
+	<<" subrun: " << fCurrentSubRunID.subRun()
+	<<" event: " << daq_header->GetEvent()
+	<<"\033[00m"<< std::endl;
       */
       outE = fSourceHelper.makeEventPrincipal(fCurrentSubRunID.run(),
 					      fCurrentSubRunID.subRun(),
@@ -327,32 +420,54 @@ namespace lris {
 
   // =====================================================================
   bool LArRawInputDriverUBooNE::processNextEvent(std::vector<raw::RawDigit>& tpcDigitList,
-                                                 std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
+                                                 std::map< opdet::UBOpticalChannelCategory_t, 
+                                                 std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
-  {       
+  {    
+     FEM5triggerSample=-999;
+     FEM6triggerSample=-999;
+     FEM5triggerFrame=-999;
+     FEM6triggerFrame=-999;
+     RO_BNBtriggerFrame=-999;
+     RO_BNBtriggerSample=-999;
+     RO_NuMItriggerFrame=-999;
+     RO_NuMItriggerSample=-999;
+     RO_EXTtriggerFrame=-999;
+     RO_EXTtriggerSample=-999;
+     RO_RWMtriggerFrame=-999;
+     RO_RWMtriggerSample=-999;
+
+//     RO_Gate1Frame=-999;
+//     RO_Gate1Sample=-999;
+//     RO_Gate2Frame=-999;
+//     RO_Gate2Sample=-999;
+
     //try {
-      boost::archive::binary_iarchive ia(fInputStream); 
-      ubdaq::ub_EventRecord event_record;  
-      ia >> event_record;
-      //std::cout<<event_record.debugInfo()<<std::endl;
-      //set granularity 
-      //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
+    boost::archive::binary_iarchive ia(fInputStream); 
+    ubdaq::ub_EventRecord event_record;  
+    ia >> event_record;
+    //std::cout<<event_record.debugInfo()<<std::endl;
+    //set granularity 
+    //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
       
-      fillDAQHeaderData(event_record, daqHeader);
-      fillTPCData(event_record, tpcDigitList);
-      fillPMTData(event_record, pmtDigitList);
-      fillBeamData(event_record, beamInfo);
-      fillTriggerData(event_record, trigInfo);
-      //std::cout<<"Done ProcessNextEvent..."<<std::endl;
-      /*
-    } catch (...) {
+    fillDAQHeaderData(event_record, daqHeader);
+    fillTriggerData(event_record, trigInfo);
+    fillTPCData(event_record, tpcDigitList);
+    fillPMTData(event_record, pmtDigitList);
+    fillBeamData(event_record, beamInfo);
+
+    tMyTree->Fill();
+
+    //std::cout<<"Done ProcessNextEvent..."<<std::endl;
+    /*
+      } catch (...) {
       //throw art::Exception( art::errors::FileReadError )
       std::cout<< "\033[93mFailed to read the event.\033[00m\n"<< std::endl;
       return false;
-    }
-      */  
+      }
+    */  
     return true;
   }
   
@@ -360,55 +475,65 @@ namespace lris {
   void LArRawInputDriverUBooNE::fillDAQHeaderData(ubdaq::ub_EventRecord& event_record,
                                                   raw::DAQHeader& daqHeader)
   {
-      ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
+    ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
       
-      // art::Timestamp is an unsigned long long. The conventional 
-      // use is for the upper 32 bits to have the seconds since 1970 epoch 
-      // and the lower 32 bits to be the number of nanoseconds within the 
-      // current second.
-      // (time_t is a 64 bit word)
+    // art::Timestamp is an unsigned long long. The conventional 
+    // use is for the upper 32 bits to have the seconds since 1970 epoch 
+    // and the lower 32 bits to be the number of nanoseconds within the 
+    // current second.
+    // (time_t is a 64 bit word)
 
       uint32_t seconds=global_header.getSeconds();
-      uint32_t nano_seconds=global_header.getNanoSeconds();
+      uint32_t nano_seconds=global_header.getNanoSeconds()+
+	                    global_header.getMicroSeconds()*1000;
       time_t mytime = ((time_t)seconds<<32) | nano_seconds;
 
-      //\/      uint32_t subrun_num = global_header->getSubrunNumber();
+    //\/      uint32_t subrun_num = global_header->getSubrunNumber();
       
-      daqHeader.SetStatus(1);
-      daqHeader.SetFileFormat(global_header.getRecordType());
-      daqHeader.SetSoftwareVersion(global_header.DAQ_version_number);
-      daqHeader.SetRun(global_header.getRunNumber());
-      daqHeader.SetSubRun(global_header.getSubrunNumber());
+    daqHeader.SetStatus(1);
+    daqHeader.SetFileFormat(global_header.getRecordType());
+    daqHeader.SetSoftwareVersion(global_header.DAQ_version_number);
+    daqHeader.SetRun(global_header.getRunNumber());
+    daqHeader.SetSubRun(global_header.getSubrunNumber());
       
-      //\/ Add the subRun number too!
-      daqHeader.SetEvent(global_header.getEventNumber()+1);
-      daqHeader.SetTimeStamp(mytime);
+    //\/ Add the subRun number too!
+    daqHeader.SetEvent(global_header.getEventNumber()+1);
+    daqHeader.SetTimeStamp(mytime);
 
-      /// \todo: What is the "fixed word" ? Leaving it unset for now
-      /// \todo: What is the "spare word" ? Leaving it unset for now
-      //daqHeader.SetFixedWord(h1.header);
-      //daqHeader.SetSpareWord(h1.spare);
+    /// \todo: What is the "fixed word" ? Leaving it unset for now
+    /// \todo: What is the "spare word" ? Leaving it unset for now
+    //daqHeader.SetFixedWord(h1.header);
+    //daqHeader.SetSpareWord(h1.spare);
   }
 
   // =====================================================================
   void LArRawInputDriverUBooNE::fillTPCData(ubdaq::ub_EventRecord& event_record,
                                             std::vector<raw::RawDigit>& tpcDigitList)
   {    
-      // ### Swizzling to get the number of channels...trying the method used in write_read.cpp
-      // ### provided by Wes --- About the data:
-      // ### The format of the data is in levels: crate, card, channel.
-      // ### Level 1: The event record contains a map of (crateHeader,crateData) pairs.
-      // ### Level 2: Each crateData object may contain a map of (cardHeader,cardData) pairs.
-      // ### Level 3: Each cardData object may contain a map of (int,channelData) pairs. The int
-      // ### is the channel number.
+    //Channel map has changed each time the detector has been re-cabled.
+    //Provide data-taking time as first argument. (integer epoch seconds) 
+    //Optionally recover outdated mappings with 'swizzling time' second arg. (also integer epoch seconds)
+    if (fDataTakingTime == -1)
+      fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap(event_record.LocalHostTime().seb_time_sec, fSwizzlingTime); 
+    else
+      fChannelMap = art::ServiceHandle<util::DatabaseUtil>()->GetUBChannelMap(fDataTakingTime, fSwizzlingTime); 
+
+    
+    // ### Swizzling to get the number of channels...trying the method used in write_read.cpp
+    // ### provided by Wes --- About the data:
+    // ### The format of the data is in levels: crate, card, channel.
+    // ### Level 1: The event record contains a map of (crateHeader,crateData) pairs.
+    // ### Level 2: Each crateData object may contain a map of (cardHeader,cardData) pairs.
+    // ### Level 3: Each cardData object may contain a map of (int,channelData) pairs. The int
+    // ### is the channel number.
       
-      //get the seb map, and do a loop over all sebs/crates
+    //get the seb map, and do a loop over all sebs/crates
 
     for( auto const& seb_it : event_record.getTPCSEBMap()) {    // I think auto should be tpc_map_t::const_iterator  -NJT
 
           
-        //get the crateHeader/crateData objects
-      //        ubdaq::crateHeader crate_header = seb_it->first;
+      //get the crateHeader/crateData objects
+      // ubdaq::crateHeader crate_header = seb_it->first;
       //        ubdaq::crateData crate_data = seb_it->second;
       //      int tpc_seb_num = seb_it.first;
       tpc_crate_data_t const& tpc_crate = seb_it.second; // (ub_TPC_CrateData_v6)
@@ -420,16 +545,16 @@ namespace lris {
 	continue;
       }
 
-        // Get Time information:
-        //uint32_t sebTSec = crate_header.getSebTimeSec();
-        //std::cout << "Seb Time (sec) : " << sebTSec << std::endl;
-        //crate_header_t crHeader = crate_header.getCrateHeader();
-        // GPStime in UNIX second/micro/nano info
-        //gps_time_t GPStime = crHeader.gps_time;
-        // DAQtime is time of last update of GPS time (in frame, sample, div)
-        //tbclkub_t  DAQtime = crHeader.daqClock_time;
-        //std::cout << "GPS Time seconds: " << GPStime.second << std::endl;
-        //std::cout << "DAQ Frame: " << DAQtime.frame << "\tSample: " << DAQtime.sample << std::endl;
+      // Get Time information:
+      //uint32_t sebTSec = crate_header.getSebTimeSec();
+      //std::cout << "Seb Time (sec) : " << sebTSec << std::endl;
+      //jmsj crate_header_t crHeader = crate_header.getCrateHeader();
+      // GPStime in UNIX second/micro/nano info
+      //jmsjgps_time_t GPStime = crHeader.gps_time;
+      // DAQtime is time of last update of GPS time (in frame, sample, div)
+      //tbclkub_t  DAQtime = crHeader.daqClock_time;
+      //std::cout << "GPS Time seconds: " << GPStime.second << std::endl;
+      //std::cout << "DAQ Frame: " << DAQtime.frame << "\tSample: " << DAQtime.sample << std::endl;
 
       //      auto const& tpc_crate_header = tpc_crate.header();    
       //      auto const& tpc_crate_trailer = tpc_crate.trailer();  
@@ -453,7 +578,39 @@ namespace lris {
 
         //The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
         //object), and technically a trailer (though here it's empty!).
-	//	auto const& tpc_card_header = card.header();   
+	auto const& tpc_card_header = card.header();   
+        // Output tree variables - for calculating compression
+        if (crate_number == 1){
+          NumWords_crate1 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 2){
+          NumWords_crate2 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 3){
+          NumWords_crate3 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 4){
+          NumWords_crate4 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 5){
+          NumWords_crate5 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 6){
+          NumWords_crate6 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 7){
+          NumWords_crate7 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 8){
+          NumWords_crate8 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 9){
+          NumWords_crate9 += tpc_card_header.getWordCount();
+        }
+        if (crate_number == 0){
+          NumWords_crate0 += tpc_card_header.getWordCount();
+        }
+
 	//	auto const& tpc_card_trailer = card.trailer(); 
 
         //Of course, you can probe for information in the card header. You'll have to find the appropriate
@@ -489,103 +646,136 @@ namespace lris {
 	    size_t chdsize(0); 
 
 	    //Huffman decoding
-	    //if (fHuffmanDecode) {
+
 	    channel.decompress(adclist); // All-in-one call.
-	    uint16_t frailer = channel.getChannelTrailerWord();
-	    //if ( adclist.size()<9595 ) {
-	    short lachadawin = adclist.at( adclist.size()-1 );
-	    if ( (frailer>>12 != 0x5) || ( (frailer&0xfff) != tpc_channel_number ) ) {
-	      std::vector<short> kaxufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
-	      for ( auto& it : kaxufix )
-		adclist.emplace_back( it );
-	    }
-	      //std::cout << "trailer: " << trailer_word << std::endl;
-	      //short thecheat = adclist.at( adclist.size()-1 );
-	      //while ( adclist.size()<9595 ) {
-	      //adclist.push_back( thecheat );
-	      //}
-	    //}
+	    
+	    /* // Commented out as trailer check is now donw via swizzler
+	       uint16_t frailer = channel.getChannelTrailerWord();
+	       short lachadawin = adclist.at( adclist.size()-1 );
+	       if ( (frailer>>12 != 0x5) || ( (frailer&0xfff) != tpc_channel_number ) ) {
+	       std::vector<short> kazufix = decodeChannelTrailer( (unsigned short)lachadawin, (unsigned short)frailer );
+	       for ( auto& it : kazufix )
+	       adclist.emplace_back( it );
+	       }
+	    */
+        // Output tree variables - for calculating compression
 	    chdsize = adclist.size();
+        if (crate_number == 1){
+          ADCwords_crate1 += chdsize;
+        }
+        if (crate_number == 2){
+          ADCwords_crate2 += chdsize;
+        }
+        if (crate_number == 3){
+          ADCwords_crate3 += chdsize;
+        }
+        if (crate_number == 4){
+          ADCwords_crate4 += chdsize;
+        }
+        if (crate_number == 5){
+          ADCwords_crate5 += chdsize;
+        }
+        if (crate_number == 6){
+          ADCwords_crate6 += chdsize;
+        }
+        if (crate_number == 7){
+          ADCwords_crate7 += chdsize;
+        }
+        if (crate_number == 8){
+          ADCwords_crate8 += chdsize;
+        }
+        if (crate_number == 9){
+          ADCwords_crate9 += chdsize;
+        }
+        if (crate_number == 0){
+          ADCwords_crate0 += chdsize; 
+        }
 	    const static size_t          fAdcList_size = chdsize;
 	    if (fAdcList_size!=chdsize) {
-	      throw art::Exception( art::errors::FileReadError ) << "Unexpected data: Number of words for channel: " << tpc_channel_number << " different than first waveform in the readout. That's really bad!!!" << std::endl;
+	      throw art::Exception( art::errors::FileReadError ) 
+		<< "Unexpected data: Number of words for channel: " 
+		<< tpc_channel_number << " different than first waveform in the readout ("
+		<< fAdcList_size << "!=" << chdsize << ") ... That's really bad!!!" << std::endl;
 	    }
 	      
-            /*} else {
-              const ub_RawData& chD = channel.data(); 
-	      // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
-	      // chdsize = chD.size()/sizeof(uint16_t);    
-	      chdsize = chD.size();
-              adclist.reserve(chD.size()); // optimize
-              for(ub_RawData::const_iterator it = chD.begin(); it!= chD.end(); it++) {
-                adclist.push_back(*it);
-		}
-		//              chD.decompress();
-	      }*/
-	    
-	    //int crate_number = tpc_crate.crateHeader()->crate_number;
-	    util::UBDaqID daqId( crate_number, card.getModule(), tpc_channel_number);
-
-            int ch=0;
-	    auto it_chsearch = fChannelMap.find(daqId);
-            if ( it_chsearch!=fChannelMap.end() ){
-              ch=(*it_chsearch).second;
-	      //              fChannelMap[daqId];
-              //              wire=fWireMap[daqId];
-              //              pl=fPlaneMap[daqId];
-            }
-	    else {
-	      if ( ( crate_number==1 && card.getModule()==8 && (tpc_channel_number>=32 && tpc_channel_number<64) ) ||
-		   ( crate_number==9 && card.getModule()==5 && (tpc_channel_number>=32 && tpc_channel_number<64) ) ) {
-		// As of 6/22/2016: We expect these FEM channels to have no database entry.
-		continue; // do not write to data product
-	      }
-	      else {
-		// unexpected channels are missing. throw.
-		char warn[256];
-		sprintf( warn, "Warning DAQ ID not found ( %d, %d, %d )!", crate_number, card.getModule(), tpc_channel_number );
-		throw std::runtime_error( warn );
-	      }
+	  /*} else {
+	    const ub_RawData& chD = channel.data(); 
+	    // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
+	    // chdsize = chD.size()/sizeof(uint16_t);    
+	    chdsize = chD.size();
+	    adclist.reserve(chD.size()); // optimize
+	    for(ub_RawData::const_iterator it = chD.begin(); it!= chD.end(); it++) {
+	    adclist.push_back(*it);
 	    }
-            //\todo fix this once there is a proper channel table
-            // else{
-            //   //continue;
-            //   ch=10000*tpc_crate.crateHeader()->crate_number
-            //     +100*card.getModule()
-            //     +tpc_channel_number;
-            // }
+	    //              chD.decompress();
+	    }*/
+	    
+	  //int crate_number = tpc_crate.crateHeader()->crate_number;
+	  util::UBDaqID daqId( crate_number, card.getModule(), tpc_channel_number);
 
-            //if (int(ch) >= 8254)
-            // continue;
-            //raw::Compress_t compression=raw::kHuffman;
-            //if (fHuffmanDecode) compression=raw::kNone;
-	    raw::Compress_t compression=raw::kNone; // as of June 19,2015 compression not used by the DAQ. Data stored is uncompressed.
-	    if ( adclist.size()!=9595 ) {
+	  int ch=0;
+	  auto it_chsearch = fChannelMap.find(daqId);
+	  if ( it_chsearch!=fChannelMap.end() ){
+	    ch=(*it_chsearch).second;
+	    //              fChannelMap[daqId];
+	    //              wire=fWireMap[daqId];
+	    //              pl=fPlaneMap[daqId];
+	  }
+	  else {
+	    if ( ( crate_number==1 && card.getModule()==8 && (tpc_channel_number>=32 && tpc_channel_number<64) ) ||
+		 ( crate_number==9 && card.getModule()==5 && (tpc_channel_number>=32 && tpc_channel_number<64) ) ) {
+	      // As of 6/22/2016: We expect these FEM channels to have no database entry.
+	      continue; // do not write to data product
+	    }
+	    else {
+	      // unexpected channels are missing. throw.
 	      char warn[256];
-	      sprintf( warn, "Error: Number of ADCs in (crate,slot,channel)=( %d, %d, %d ) does not equal 9595!", crate_number, card.getModule(), tpc_channel_number );
+	      sprintf( warn, "Warning DAQ ID not found ( %d, %d, %d )!", crate_number, card.getModule(), tpc_channel_number );
 	      throw std::runtime_error( warn );
 	    }
-	    
-            raw::RawDigit rd(ch,chdsize,adclist,compression);
-            tpcDigitList.push_back(rd);
-	    
-            /*
-            std::cout << ch << "\t"
-                      << int(crate_header.getCrateNumber()) << "\t" 
-                      << card_header.getModule() << "\t"
-		      << channel_number << "\t"
-                      << rms << std::endl;
-            */
+	  }
+	  //\todo fix this once there is a proper channel table
+	  // else{
+	  //   //continue;
+	  //   ch=10000*tpc_crate.crateHeader()->crate_number
+	  //     +100*card.getModule()
+	  //     +tpc_channel_number;
+	  // }
 
-          }//<--End channel_it for loop
-        }//<---End card_it for loop
-      }//<---End seb_it for loop
+	  //if (int(ch) >= 8254)
+	  // continue;
+	  //raw::Compress_t compression=raw::kHuffman;
+	  //if (fHuffmanDecode) compression=raw::kNone;
+	  raw::Compress_t compression=raw::kNone; // as of June 19,2015 compression not used by the DAQ. Data stored is uncompressed.
+	  if ( adclist.size()!=9595 ) {
+	    char warn[256];
+	    sprintf( warn, "Error: Number of ADCs in (crate,slot,channel)=( %d, %d, %d ) does not equal 9595!", crate_number, card.getModule(), tpc_channel_number );
+	    throw std::runtime_error( warn );
+	  }
+	  if (fSwizzleTPC){ // here is where we actually fill the output
+  	    raw::RawDigit rd(ch,chdsize,adclist,compression);
+  	    tpcDigitList.push_back(rd);
+          }
+	    
+	  /*
+            std::cout << ch << "\t"
+	    << int(crate_header.getCrateNumber()) << "\t" 
+	    << card_header.getModule() << "\t"
+	    << channel_number << "\t"
+	    << rms << std::endl;
+	  */
+
+	}//<--End channel_it for loop
+      }//<---End card_it for loop
+    }//<---End seb_it for loop
 
     if ( tpcDigitList.size()!=8256 ) {
       char warn[256];
       sprintf( warn, "Error: Number of channels saved (%d) did not match the expectation (8256)!", (int)tpcDigitList.size() );
       //throw std::runtime_error( warn );
     }
+
+    mf::LogInfo("")<< "Got to end of fillTPCData().";
   }
 
   // =====================================================================
@@ -594,7 +784,7 @@ namespace lris {
   {
     //fill PMT data
 
-      // MODIFIED by Nathaniel Sat May 16, to use my new version of datatypes (v6_08, on branch master)
+    // MODIFIED by Nathaniel Sat May 16, to use my new version of datatypes (v6_08, on branch master)
     
     //crate -> card -> channel -> window
 
@@ -624,7 +814,21 @@ namespace lris {
 	  std::cerr << "Warning PMT card data corrupted! Skipping." << std::endl;
 	  continue;
 	}
-
+            
+// Frame and sample for trigger
+            uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
+            uint32_t sample = card_data.getTrigSample();
+//         Filling output tree variables
+            if (card_data.getModule() == 5){
+              FEM5triggerFrame = frame;
+              FEM5triggerSample = sample;
+              FEM5triggerTime = timeService->OpticalClock().Time( sample, frame );
+            }
+            if (card_data.getModule() == 6){
+              FEM6triggerFrame = frame;
+              FEM6triggerSample = sample;
+              FEM6triggerTime = timeService->OpticalClock().Time( sample, frame );
+            }
 	//        int card_number = card_data.getModule();
         
         // nathaniel's version of datatypes:
@@ -643,6 +847,8 @@ namespace lris {
             const auto& window_header = window.header();    // auto here is ub_PMT_WindowHeader_v6
             const ub_RawData& window_data = window.data();
             size_t win_data_size=window_data.size();
+
+
             
             // //\todo check category, time & frame
             // optdata::Optical_Category_t category = optdata::kUndefined;
@@ -664,16 +870,72 @@ namespace lris {
 	    // also need to go from clock time to time stamp
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( sample, frame );
+
             raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
 
 	    //std::cout << " into ReadoutCH=" << data_product_ch_num << " category=" << opdet::UBOpChannelEnumName( ch_category ) << std::endl;
-	    
-	    
+	    short adc_max=0;
             for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
               rd.push_back(*it & 0xfff);                
+              if(adc_max < rd.back()) adc_max = rd.back();
             }
-            pmtDigitList[ch_category]->emplace_back(rd);
+            // Saving trigger readout stream variables to output file
+            if(adc_max>2150) { // logic pulses have high ADC values
+
+              if (channel_number == 39){
+//                std::cout << "Found RWM signal!" << std::endl;
+//                std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() << std::endl;
+                RO_RWMtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+                RO_RWMtriggerSample = window_header.getSample();
+                RO_RWMtriggerTime = timeService->OpticalClock().Time( RO_RWMtriggerSample, RO_RWMtriggerFrame);
+//                std::cout << "window size = " << win_data_size << std::endl;
+              }
+              else if (channel_number == 38){
+//                std::cout << "Found STROBE signal!" << std::endl;
+//                std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+                RO_EXTtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+                RO_EXTtriggerSample = window_header.getSample();
+                RO_EXTtriggerTime = timeService->OpticalClock().Time( RO_EXTtriggerSample, RO_EXTtriggerFrame);
+//                std::cout << "window size = " << win_data_size << std::endl;
+              }
+              else if (channel_number == 37){
+//                std::cout << "Found NuMI signal!" << std::endl;
+//                std::cout << "NuMI signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+                RO_NuMItriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+                RO_NuMItriggerSample = window_header.getSample();
+                RO_NuMItriggerTime = timeService->OpticalClock().Time( RO_NuMItriggerSample, RO_NuMItriggerFrame);
+//                std::cout << "window size = " << win_data_size << std::endl;
+              }
+              else if (channel_number == 36){
+//                std::cout << "Found BNB signal!" << std::endl;
+//                std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+                RO_BNBtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+                RO_BNBtriggerSample = window_header.getSample();
+                RO_BNBtriggerTime = timeService->OpticalClock().Time( RO_BNBtriggerSample, RO_BNBtriggerFrame);
+//                std::cout << "window size = " << win_data_size << std::endl;
+              }
+//              else if (channel_number == 46){
+//                std::cout << "Found GATE2 (NuMI) signal!" << std::endl;
+//                std::cout << "NuMI gate at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+//                RO_Gate2Frame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+//                RO_Gate2Sample = window_header.getSample();
+//                std::cout << "window size = " << win_data_size << std::endl;
+//              }
+//              else if (channel_number == 47){
+//                std::cout << "Found GATE1 (BNB) signal!" << std::endl;
+//                std::cout << "BNB gate at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+//                RO_Gate1Frame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
+//                RO_Gate1Sample = window_header.getSample();
+//                std::cout << "window size = " << win_data_size << std::endl;
+//              }
+//              else {
+//                std::cout << "channel " << channel_number << ",regular PMT window size = " << win_data_size << std::endl;
+//              }
+            }
+            if (fSwizzlePMT){
+              pmtDigitList[ch_category]->emplace_back(rd);
+            }
           }
         }//<--End channel_pmt_it for loop
       }//<---End card_pmt_it for loop
@@ -686,20 +948,20 @@ namespace lris {
                                              raw::BeamInfo& beamInfo)
   {
     /*
-        ubdaq::ub_BeamHeader bh=event_record.getBeamHeader();
-    std::vector<ubdaq::ub_BeamData> bdv=event_record.getBeamDataVector();
-    if (bdv.size()>0) {
+      ubdaq::ub_BeamHeader bh=event_record.getBeamHeader();
+      std::vector<ubdaq::ub_BeamData> bdv=event_record.getBeamDataVector();
+      if (bdv.size()>0) {
       beamInfo.SetRecordType(bh.getRecordType());
       beamInfo.SetSeconds(bh.getSeconds());
       beamInfo.SetMilliSeconds(bh.getMilliSeconds());
       beamInfo.SetNumberOfDevices(bh.getNumberOfDevices());
       
       for (int i=0;i<bh.getNumberOfDevices();i++) {
-        beamInfo.Set(bdv[i].getDeviceName(),bdv[i].getData());
-        if (fHistMapBeam.find(bdv[i].getDeviceName())!=fHistMapBeam.end()) 
-          fHistMapBeam[bdv[i].getDeviceName()]->Fill(bdv[i].getData()[0]);
+      beamInfo.Set(bdv[i].getDeviceName(),bdv[i].getData());
+      if (fHistMapBeam.find(bdv[i].getDeviceName())!=fHistMapBeam.end()) 
+      fHistMapBeam[bdv[i].getDeviceName()]->Fill(bdv[i].getData()[0]);
       }
-    }
+      }
     */
   }
 
@@ -723,6 +985,7 @@ namespace lris {
       unsigned int frame = trig_header.getFrame();
       //std::cout << "Trigger frame: " << frame << " ... sample : " << sample_64MHz << std::endl;
       util::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
+
       double trigger_time = trig_clock.Time();
       double beam_time = -1;
       if ( trig_data.Trig_Gate1() || trig_data.Trig_Gate2() ) // 1) NUMI : 2) BNB
@@ -744,6 +1007,23 @@ namespace lris {
 			      beam_time,
 			      trig_bits );
       trigInfo.emplace_back( swiz_trig );
+      
+// variables saving to output tree
+      triggerFrame = frame;
+      triggerSample = sample_64MHz;
+      triggerActive = trig_data.Trig_Active();
+      triggerBitBNB = trig_data.Trig_Gate2(); 
+      triggerBitNuMI = trig_data.Trig_Gate1(); 
+      triggerBitEXT = trig_data.Trig_EXT(); 
+      triggerBitPMTBeam = trig_bits & 0x1;
+      triggerBitPMTCosmic = trig_bits & 0x2;
+      triggerTime = trigger_time;
+      
+//      if (triggerBitBNB){std::cout << "BNB Trigger issued" << std::endl;}
+//      if (triggerBitNuMI){std::cout << "NuMI Trigger issued" << std::endl;}
+//      if (triggerBitEXT){std::cout << "EXT Trigger issued" << std::endl;}
+//      std::cout << "trigger frame, sample = " << frame << "," << sample_64MHz << std::endl;
+
       
     }
   }
