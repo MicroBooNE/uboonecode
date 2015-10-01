@@ -13,6 +13,9 @@
 // The main include
 #include "uboone/TPCNeutrinoIDFilter/Cluster2DNuAlg.h"
 
+// ROOT Includes
+#include "TMath.h"
+
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/FindManyP.h"
@@ -180,8 +183,8 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                     if(cluster2->StartWire()<cluster2->EndWire()) openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
                                     else
                                     {
-                                        if(cluster2->StartAngle()<0) openangle = fabs(cluster->StartAngle() - (-180+cluster2->StartAngle()));
-                                        else openangle = fabs(cluster->StartAngle() - (180+cluster2->StartAngle()));
+                                        if(cluster2->StartAngle()<0) openangle = fabs(cluster->StartAngle() - ((-1.)*TMath::Pi()+cluster2->StartAngle()));
+                                        else openangle = fabs(cluster->StartAngle() - (TMath::Pi()+cluster2->StartAngle()));
                                     } 
                                     if(openangle > 0.1 && openangle < 1.57)
                                     {
@@ -196,8 +199,8 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                 {
                                     if(cluster2->StartWire() < cluster2->EndWire())
                                     { 
-                                        if(cluster2->EndAngle()<0) openangle = fabs(cluster->StartAngle() - (-180+cluster2->EndAngle()));
-                                        else openangle = fabs(cluster->StartAngle() - (180+cluster2->EndAngle()));
+                                        if(cluster2->EndAngle()<0) openangle = fabs(cluster->StartAngle() - ((-1.)*TMath::Pi()+cluster2->EndAngle()));
+                                        else openangle = fabs(cluster->StartAngle() - (TMath::Pi()+cluster2->EndAngle()));
                                     }
                                     else openangle = fabs( cluster->StartAngle() - cluster2->EndAngle());
                                     if(openangle>0.1 && openangle<1.57)
@@ -230,8 +233,8 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                     if(cluster2->StartWire() < cluster2->EndWire()) openangle=fabs(cluster->EndAngle() - cluster2->StartAngle());
                                     else
                                     {
-                                        if(cluster2->StartAngle()<0) openangle=fabs(cluster->EndAngle() - (-180+cluster2->StartAngle()));
-                                        else openangle=fabs(cluster->EndAngle() - (180+cluster2->StartAngle()));
+                                        if(cluster2->StartAngle()<0) openangle=fabs(cluster->EndAngle() - ((-1.)*TMath::Pi()+cluster2->StartAngle()));
+                                        else openangle=fabs(cluster->EndAngle() - (TMath::Pi()+cluster2->StartAngle()));
                                     }
                                     if(openangle>0.1 && openangle<1.57)
                                     {
@@ -246,8 +249,8 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                 {   
                                     if(cluster2->StartWire()<cluster2->EndWire())
                                     {
-                                        if(cluster2->EndAngle()<0) openangle=fabs(cluster->EndAngle() -(-180+cluster2->EndAngle()));
-                                        else openangle=fabs(cluster->EndAngle() -(180+cluster2->EndAngle()));
+                                        if(cluster2->EndAngle()<0) openangle=fabs(cluster->EndAngle() -((-1.)*TMath::Pi()+cluster2->EndAngle()));
+                                        else openangle=fabs(cluster->EndAngle() -(TMath::Pi()+cluster2->EndAngle()));
                                     }
                                     else openangle=fabs(cluster->EndAngle() - cluster2->EndAngle());
                                     if(openangle>0.1 && openangle<1.57)
