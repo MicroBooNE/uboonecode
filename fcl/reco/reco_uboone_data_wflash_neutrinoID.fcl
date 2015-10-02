@@ -16,6 +16,8 @@
 #include "triggeralgo_service.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "flashfilter_microboone.fcl"
+#include "tpcneutrinoidfiltermodule_microboone.fcl"
+#include "tpcneutrinoidfilter_microboone.fcl"
 
 process_name: RecoDataNeutrinoIDWFlash
 
@@ -57,29 +59,29 @@ physics:
   # -- old version -- digitfilter:            @local::microboone_rawdigitfilter
   
   ### Noise filter does not really work, use rawdigitfilter
-  digitfilter:         @local::microboone_rawdigitfilter
-  # digitfilter:         @local::microboone_noisefilter
+  digitfilter:                  @local::microboone_rawdigitfilter
+  # digitfilter:                @local::microboone_noisefilter
   
   ### flash finders
-  opflash          : @local::microboone_opflash_beam_highgain
-  opflashLow       : @local::microboone_opflash_beam_lowgain
-  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
-  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  opflash          :            @local::microboone_opflash_beam_highgain
+  opflashLow       :            @local::microboone_opflash_beam_lowgain
+  opflashCosmic    :            @local::microboone_opflash_cosmic_highgain
+  opflashCosmicLow :            @local::microboone_opflash_cosmic_lowgain
 
   ### calwire producers
-  caldata:             @local::microboone_calroi
+  caldata:                      @local::microboone_calroi
 
   ### hit-finder producers
-  gaushit:             @local::microboone_gaushitfinder
+  gaushit:                      @local::microboone_gaushitfinder
   cchit:                        @local::microboone_clustercrawlerhit
 
   ### cluster-finder producers
-  fuzzycluster:        @local::microboone_fuzzycluster
-  fuzzyclustermerger:  @local::microboone_fuzzyclustermerger
-  linecluster:         @local::microboone_linecluster
+  fuzzycluster:                 @local::microboone_fuzzycluster
+  fuzzyclustermerger:           @local::microboone_fuzzyclustermerger
+  linecluster:                  @local::microboone_linecluster
 
   ### pandora cosmic pass
-  pandoraCosmic:       @local::microboone_pandora
+  pandoraCosmic:                @local::microboone_pandora
 
   ### pandora neutrino pass
   pandoraNu:                    @local::microboone_pandora
@@ -141,20 +143,28 @@ physics:
   stitchkalmanhitflashmatch:    @local::microboone_beamflashtrackmatchtagger
   trackkalmanhitflashmatchcc:   @local::microboone_beamflashtrackmatchtagger
   stitchkalmanhitflashmatchcc:  @local::microboone_beamflashtrackmatchtagger
+
+  ### Neutrino ID
+  vtx2trackPanKal :             @local::microboone_tpcNeutrinoID
+  vtx2trackLineKal :            @local::microboone_tpcNeutrinoID
+  vtx2trackLinePan :            @local::microboone_tpcNeutrinoID
  }
 
  filters:
- { flashtrigger : @local::microboone_flashtrigger }
+ { 
+  flashtrigger :                @local::microboone_flashtrigger 
+  tpcneutrinoidfilter :         @local::microboone_tpcneutrinoidfilter
+ }
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
          digitfilter,
-         opflash,
-         opflashLow,
-         opflashCosmic,
-         opflashCosmicLow,
-         flashtrigger,
+         #opflash,
+         #opflashLow,
+         #opflashCosmic,
+         #opflashCosmicLow,
+         #flashtrigger,
          caldata,
          gaushit,
 	 cchit,
@@ -202,7 +212,11 @@ physics:
          # showerrecofuzzy, 
          # showerrecopandora,
          fuzzyclustertag,
-         lineclustertag
+         lineclustertag,
+         vtx2trackPanKal, 
+         vtx2trackLinePan, 
+         vtx2trackLineKal, 
+         tpcneutrinoidfilter
          ]
 
  #define the output stream, there could be more than one if using filters 
@@ -260,15 +274,47 @@ physics.producers.cchit.CCHitFinderAlg.MaxXtraHits:                 0
 #physics.producers.linecluster.ClusterCrawlerAlg.NumPass:            2
 #physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [20, 8,  3]
 
-#This is copied from reco data stage 1 and it running. But I (Anne) am not sure if this is correct settings.
-physics.producers.linecluster.CCHitFinderAlg.MaxBumps:           2
-physics.producers.linecluster.CCHitFinderAlg.MinSigInd:          5
-physics.producers.linecluster.CCHitFinderAlg.MinRMSInd:          2
-physics.producers.linecluster.CCHitFinderAlg.MinSigCol:          5
-physics.producers.linecluster.CCHitFinderAlg.MinRMSCol:          2
-physics.producers.linecluster.CCHitFinderAlg.ChiSplit:           100
-physics.producers.linecluster.CCHitFinderAlg.MaxXtraHits:        0
-
+#This is copied from a fcl file from Bruce
+physics.producers.linecluster.ClusterCrawlerAlg:
+{
+  NumPass:              3  # number of passes through the hit list. 0 = no cluster reco
+  MaxHitsFit:           [ 100,  8, 4 ] # number of hits fitted to a line
+  MinHits:              [ 50,  8, 3 ] # minimum size of a cluster
+  NHitsAve:             [ 2,  2, 0 ] # number of hits to find the average charge and width
+  # at the end of the cluster. NHitsAve should be 1 or 2
+  ChgCut:               [ 6, 6, .8 ] # max fractional hit charge difference for adding hits
+  ChiCut:               [ 10., 10., 10. ] # stop adding hits to clusters if ChiCut is reached
+  MaxWirSkip:           [ 80, 8, 2 ] # max number of wires to skip without adding a hit
+  MinWirAfterSkip:      [ 2, 2, 1 ] # min reqd number of consecutive wires with a hit after a skip
+  KinkChiRat:           [ 1.2, 1.2, 0. ] # Max consecutive chisq increase for the last 3 hits on the cluster
+  KinkAngCut:           [ 1.0, 1.0, 0.4 ] # kink angle cut (radians) used to follow and merge
+  DoMerge:              [ false, true, true ] # run cluster merging code?
+  TimeDelta:            [ 2., 3., 10. ] # max time difference for cluster merging
+  MergeChgCut:          [ 6, 6, 0.8 ] # max charge ratio for cluster merging
+  FindVertices:         [ false, true, true ]  # make 2D vertices after clustering?
+  LACrawl:              [ true, true, true ]  # crawl Large Angle clusters?
+  LAClusAngleCut:       60 # Large cluster angle cut (0 < 90 degrees). <0 to turn off
+  LAClusMaxHitsFit:     10 #
+  MinHitFrac:          0.6 # Drop clusters having < (#hits/#wires)
+  MinAmp:               10 # Min hit signal amplitude for merging
+  ChgNearWindow:        40 # #of ticks for summing charge near a cluster
+  ChgNearCut:          1.5 # Cluster end is shower-like if (nearby chg)/(cls chg)> cut
+  HitMergeChiCut:      2.5 # Merge cluster hit-multiplets if the separation chisq
+  # is < cut. Set < 0 for no merging
+  MergeOverlapAngCut:  0.1 # Set <= 0 to turn off overlapping cluster merging
+  ChkClusterDS:       true # Check reconstruction at DS end of clusters?
+  VtxClusterSplit:    true # Split clusters that cross vertices
+  FindStarVertices:   true # Find vertices with a star topology
+  HitErrFac:           0.4 # hit time error for fitting = fHitErrFac * (hit width)
+  AllowNoHitWire:       80 # Allow skipping N wires w no hits (if poor purity)
+  Vertex2DCut:          10 # Max equiv dTick cut for attaching a cluster to a vtx
+  Vertex3DCut:           3 # 2D vtx -> 3D vtx matching cut (chisq)
+  HammerCluster:      true # look for hammer type clusters
+  DebugPlane:          -1  # print info only in this plane
+  DebugWire:            0  # set to the Begin Wire and Hit of a cluster to print
+  DebugHit:             0  # out detailed information while crawling
+  uBCode:            true  # use MicroBooNE-specific code
+}
 physics.producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
 
@@ -414,6 +460,27 @@ physics.producers.pandoraNuKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsi
 
 physics.producers.showerrecofuzzy.InputProducer:                    "fuzzyclustermerger"
 physics.producers.showerrecopandora.InputProducer:                  "pandoraNu"
+
+physics.producers.vtx2trackPanKal.NeutrinoIDAlgName:                "TrackPairPlusVertexAlg"
+physics.producers.vtx2trackPanKal.TrackModuleLabel:                 "trackkalmanhit"
+physics.producers.vtx2trackPanKal.VertexModuleLabel:                "pandoraNu"
+physics.producers.vtx2trackPanKal.CosmicScoreCut:                   0.4
+physics.producers.vtx2trackPanKal.NuVtxTrackDistCut:                4.5
+
+physics.producers.vtx2trackLinePan.NeutrinoIDAlgName:               "TrackPairPlusVertexAlg"
+physics.producers.vtx2trackLinePan.TrackModuleLabel:                "pandoraNuKHit"
+physics.producers.vtx2trackLinePan.VertexModuleLabel:               "linecluster"
+physics.producers.vtx2trackLinePan.CosmicScoreCut:                  0.4
+physics.producers.vtx2trackLinePan.NuVtxTrackDistCut:               5.0
+
+physics.producers.vtx2trackLineKal.NeutrinoIDAlgName:               "TrackPairPlusVertexAlg"
+physics.producers.vtx2trackLineKal.TrackModuleLabel:                "trackkalmanhit"
+physics.producers.vtx2trackLineKal.VertexModuleLabel:               "linecluster"
+physics.producers.vtx2trackLineKal.CosmicScoreCut:                  0.4
+physics.producers.vtx2trackLineKal.NuVtxTrackDistCut:               3.0
+
+physics.filters.tpcneutrinoidfilter.VertexModuleLabelVec:          ["pandoraNu", "linecluster", "linecluster"]
+physics.filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:    ["vtx2trackPanKal", "vtx2trackLinePan", "vtx2trackLineKal"]
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :
