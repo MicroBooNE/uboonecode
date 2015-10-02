@@ -256,8 +256,18 @@ physics.producers.cchit.CCHitFinderAlg.MinRMS:                      [1, 1, 1]
 physics.producers.cchit.CCHitFinderAlg.ChiSplit:                    100
 physics.producers.cchit.CCHitFinderAlg.MaxXtraHits:                 0
 
-physics.producers.linecluster.ClusterCrawlerAlg.NumPass:            2
-physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [20, 8,  3]
+#This is what we originally had, but it is not running at the moment
+#physics.producers.linecluster.ClusterCrawlerAlg.NumPass:            2
+#physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [20, 8,  3]
+
+#This is copied from reco data stage 1 and it running. But I (Anne) am not sure if this is correct settings.
+physics.producers.linecluster.CCHitFinderAlg.MaxBumps:           2
+physics.producers.linecluster.CCHitFinderAlg.MinSigInd:          5
+physics.producers.linecluster.CCHitFinderAlg.MinRMSInd:          2
+physics.producers.linecluster.CCHitFinderAlg.MinSigCol:          5
+physics.producers.linecluster.CCHitFinderAlg.MinRMSCol:          2
+physics.producers.linecluster.CCHitFinderAlg.ChiSplit:           100
+physics.producers.linecluster.CCHitFinderAlg.MaxXtraHits:        0
 
 physics.producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
