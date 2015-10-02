@@ -252,9 +252,6 @@ outputs:
 ### Here we include the file giving us run/data dependent overrides
 #include "uboone_data_runSettings.fcl"
 
-# Set the shaping time 
-services.SignalShapingServiceMicroBooNE.ShapeTimeConst: [2.0, 2.0, 2.0]
-
 ### Here, we overwrite ALL module labels with the ones defined above.
 
 physics.producers.caldata.DigitModuleLabel:                         "digitfilter"
@@ -495,6 +492,16 @@ services.message.destinations :
      categories:
      {
        ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
        {
          limit: 0
          reportEvery: 0
