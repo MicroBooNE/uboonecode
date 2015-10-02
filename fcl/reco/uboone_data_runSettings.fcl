@@ -2,8 +2,8 @@
 #
 # Shaping time and gain settings
 #
-#services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 2.0, 2.0, 2.0 ]
-services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 1.0, 1.0, 1.0 ]
+services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 2.0, 2.0, 2.0 ]
+#services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 1.0, 1.0, 1.0 ]
 services.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: [ 14.0, 14.0, 14.0 ]
 #
 # Database access for pedestals
