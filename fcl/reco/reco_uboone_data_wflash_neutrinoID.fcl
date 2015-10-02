@@ -18,7 +18,6 @@
 #include "triggeralgo_service.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "flashfilter_microboone.fcl"
-#include "tpcneutrinoidfiltermodule_microboone.fcl"
 #include "tpcneutrinoidfilter_microboone.fcl"
 
 process_name: RecoDataNeutrinoIDWFlash
@@ -269,51 +268,19 @@ physics.producers.cchit.CCHitFinderAlg.MinRMS:                      [1, 1, 1]
 physics.producers.cchit.CCHitFinderAlg.ChiSplit:                    100
 physics.producers.cchit.CCHitFinderAlg.MaxXtraHits:                 0
 
-#This is what we originally had, but it is not running at the moment
-#physics.producers.linecluster.ClusterCrawlerAlg.NumPass:            2
-#physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [20, 8,  3]
+#This is from a fcl file from Bruce but with only the actual overrides here (to avoid confusion)
+physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [ 2,  2, 0 ]      # number of hits to find the average charge and width
+                                                                                        # at the end of the cluster. NHitsAve should be 1 or 2
+physics.producers.linecluster.ClusterCrawlerAlg.ChgCut:             [ 6, 6, .8 ]      # max fractional hit charge difference for adding hits
+physics.producers.linecluster.ClusterCrawlerAlg.ChiCut:             [ 10., 10., 10. ] # stop adding hits to clusters if ChiCut is reached
+physics.producers.linecluster.ClusterCrawlerAlg.MaxWirSkip:         [ 80, 8, 2 ]      # max number of wires to skip without adding a hit
+physics.producers.linecluster.ClusterCrawlerAlg.KinkAngCut:         [ 1.0, 1.0, 0.4 ] # kink angle cut (radians) used to follow and merge
+physics.producers.linecluster.ClusterCrawlerAlg.MergeChgCut:        [ 6, 6, 0.8 ]     # max charge ratio for cluster merging
+physics.producers.linecluster.ClusterCrawlerAlg.HitMergeChiCut:     2.5               # Merge cluster hit-multiplets if the separation chisq
+                                                                                        # is < cut. Set < 0 for no merging
+physics.producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire:     80                # Allow skipping N wires w no hits (if poor purity)
+physics.producers.linecluster.ClusterCrawlerAlg.uBCode:             true              # use MicroBooNE-specific code
 
-#This is copied from a fcl file from Bruce
-physics.producers.linecluster.ClusterCrawlerAlg:
-{
-  NumPass:              3  # number of passes through the hit list. 0 = no cluster reco
-  MaxHitsFit:           [ 100,  8, 4 ] # number of hits fitted to a line
-  MinHits:              [ 50,  8, 3 ] # minimum size of a cluster
-  NHitsAve:             [ 2,  2, 0 ] # number of hits to find the average charge and width
-  # at the end of the cluster. NHitsAve should be 1 or 2
-  ChgCut:               [ 6, 6, .8 ] # max fractional hit charge difference for adding hits
-  ChiCut:               [ 10., 10., 10. ] # stop adding hits to clusters if ChiCut is reached
-  MaxWirSkip:           [ 80, 8, 2 ] # max number of wires to skip without adding a hit
-  MinWirAfterSkip:      [ 2, 2, 1 ] # min reqd number of consecutive wires with a hit after a skip
-  KinkChiRat:           [ 1.2, 1.2, 0. ] # Max consecutive chisq increase for the last 3 hits on the cluster
-  KinkAngCut:           [ 1.0, 1.0, 0.4 ] # kink angle cut (radians) used to follow and merge
-  DoMerge:              [ false, true, true ] # run cluster merging code?
-  TimeDelta:            [ 2., 3., 10. ] # max time difference for cluster merging
-  MergeChgCut:          [ 6, 6, 0.8 ] # max charge ratio for cluster merging
-  FindVertices:         [ false, true, true ]  # make 2D vertices after clustering?
-  LACrawl:              [ true, true, true ]  # crawl Large Angle clusters?
-  LAClusAngleCut:       60 # Large cluster angle cut (0 < 90 degrees). <0 to turn off
-  LAClusMaxHitsFit:     10 #
-  MinHitFrac:          0.6 # Drop clusters having < (#hits/#wires)
-  MinAmp:               10 # Min hit signal amplitude for merging
-  ChgNearWindow:        40 # #of ticks for summing charge near a cluster
-  ChgNearCut:          1.5 # Cluster end is shower-like if (nearby chg)/(cls chg)> cut
-  HitMergeChiCut:      2.5 # Merge cluster hit-multiplets if the separation chisq
-  # is < cut. Set < 0 for no merging
-  MergeOverlapAngCut:  0.1 # Set <= 0 to turn off overlapping cluster merging
-  ChkClusterDS:       true # Check reconstruction at DS end of clusters?
-  VtxClusterSplit:    true # Split clusters that cross vertices
-  FindStarVertices:   true # Find vertices with a star topology
-  HitErrFac:           0.4 # hit time error for fitting = fHitErrFac * (hit width)
-  AllowNoHitWire:       80 # Allow skipping N wires w no hits (if poor purity)
-  Vertex2DCut:          10 # Max equiv dTick cut for attaching a cluster to a vtx
-  Vertex3DCut:           3 # 2D vtx -> 3D vtx matching cut (chisq)
-  HammerCluster:      true # look for hammer type clusters
-  DebugPlane:          -1  # print info only in this plane
-  DebugWire:            0  # set to the Begin Wire and Hit of a cluster to print
-  DebugHit:             0  # out detailed information while crawling
-  uBCode:            true  # use MicroBooNE-specific code
-}
 physics.producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
 
