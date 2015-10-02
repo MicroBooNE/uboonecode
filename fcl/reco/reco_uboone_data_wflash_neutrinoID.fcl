@@ -253,200 +253,202 @@ outputs:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.caldata.DigitModuleLabel:                         "digitfilter"
-physics.producers.caldata.MaxAllowedChannelStatus:                  1
+physics.producers.caldata.DigitModuleLabel:                                "digitfilter"
+physics.producers.caldata.MaxAllowedChannelStatus:                         1
 
-#physics.producers.caldata.DoBaselineSub:                           false
-#physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:     true
+#physics.producers.caldata.DoBaselineSub:                                  false
+#physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:            true
 
-physics.producers.gaushit.CalDataModuleLabel:                       "caldata"
-physics.producers.gaushit.MinSig:                                   [ 8.0,    8.0,   8.0]
+physics.producers.gaushit.CalDataModuleLabel:                              "caldata"
+physics.producers.gaushit.MinSig:                                          [ 8.0,    8.0,   8.0]
 
-physics.producers.cchit.CCHitFinderAlg.MaxBumps:                    5
-physics.producers.cchit.CCHitFinderAlg.MinPeak:                     [8, 8, 8]
-physics.producers.cchit.CCHitFinderAlg.MinRMS:                      [1, 1, 1]
-physics.producers.cchit.CCHitFinderAlg.ChiSplit:                    100
-physics.producers.cchit.CCHitFinderAlg.MaxXtraHits:                 0
+physics.producers.cchit.CCHitFinderAlg.MaxBumps:                           5
+physics.producers.cchit.CCHitFinderAlg.MinPeak:                            [8, 8, 8]
+physics.producers.cchit.CCHitFinderAlg.MinRMS:                             [1, 1, 1]
+physics.producers.cchit.CCHitFinderAlg.ChiSplit:                           100
+physics.producers.cchit.CCHitFinderAlg.MaxXtraHits:                        0
 
 #This is from a fcl file from Bruce but with only the actual overrides here (to avoid confusion)
-physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [ 2,  2, 0 ]      # number of hits to find the average charge and width
-                                                                                        # at the end of the cluster. NHitsAve should be 1 or 2
-physics.producers.linecluster.ClusterCrawlerAlg.ChgCut:             [ 6, 6, .8 ]      # max fractional hit charge difference for adding hits
-physics.producers.linecluster.ClusterCrawlerAlg.ChiCut:             [ 10., 10., 10. ] # stop adding hits to clusters if ChiCut is reached
-physics.producers.linecluster.ClusterCrawlerAlg.MaxWirSkip:         [ 80, 8, 2 ]      # max number of wires to skip without adding a hit
-physics.producers.linecluster.ClusterCrawlerAlg.KinkAngCut:         [ 1.0, 1.0, 0.4 ] # kink angle cut (radians) used to follow and merge
-physics.producers.linecluster.ClusterCrawlerAlg.MergeChgCut:        [ 6, 6, 0.8 ]     # max charge ratio for cluster merging
-physics.producers.linecluster.ClusterCrawlerAlg.HitMergeChiCut:     2.5               # Merge cluster hit-multiplets if the separation chisq
-                                                                                        # is < cut. Set < 0 for no merging
-physics.producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire:     80                # Allow skipping N wires w no hits (if poor purity)
-physics.producers.linecluster.ClusterCrawlerAlg.uBCode:             true              # use MicroBooNE-specific code
+physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:                  [ 2,  2, 0 ]      # number of hits to find the average charge and width
+                                                                                             # at the end of the cluster. NHitsAve should be 1 or 2
+physics.producers.linecluster.ClusterCrawlerAlg.ChgCut:                    [ 6, 6, .8 ]      # max fractional hit charge difference for adding hits
+physics.producers.linecluster.ClusterCrawlerAlg.ChiCut:                    [ 10., 10., 10. ] # stop adding hits to clusters if ChiCut is reached
+physics.producers.linecluster.ClusterCrawlerAlg.MaxWirSkip:                [ 80, 8, 2 ]      # max number of wires to skip without adding a hit
+physics.producers.linecluster.ClusterCrawlerAlg.KinkAngCut:                [ 1.0, 1.0, 0.4 ] # kink angle cut (radians) used to follow and merge
+physics.producers.linecluster.ClusterCrawlerAlg.MergeChgCut:               [ 6, 6, 0.8 ]     # max charge ratio for cluster merging
+physics.producers.linecluster.ClusterCrawlerAlg.HitMergeChiCut:            2.5               # Merge cluster hit-multiplets if the separation chisq
+                                                                                             # is < cut. Set < 0 for no merging
+physics.producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire:            80                # Allow skipping N wires w no hits (if poor purity)
+physics.producers.linecluster.ClusterCrawlerAlg.uBCode:                    true              # use MicroBooNE-specific code
 
-physics.producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
-physics.producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
+physics.producers.fuzzycluster.HitsModuleLabel:                            "gaushit"
+physics.producers.fuzzycluster.CalDataModuleLabel:                         "caldata"
 
-physics.producers.pandoraCosmic.GeantModuleLabel:                   "largeant"
-physics.producers.pandoraCosmic.HitFinderModuleLabel:               "gaushit"
-physics.producers.pandoraCosmic.ConfigFile:                         "PandoraSettings_MicroBooNE_Cosmic.xml"
+physics.producers.pandoraCosmic.GeantModuleLabel:                          "largeant"
+physics.producers.pandoraCosmic.HitFinderModuleLabel:                      "gaushit"
+physics.producers.pandoraCosmic.ConfigFile:                                "PandoraSettings_MicroBooNE_Cosmic.xml"
 # Fuzzy Cluster related
-physics.producers.trackkalmanhit.HitModuleLabel:                    "gaushit"
-physics.producers.trackkalmanhit.ClusterModuleLabel:                "fuzzycluster"
+physics.producers.trackkalmanhit.HitModuleLabel:                           "gaushit"
+physics.producers.trackkalmanhit.ClusterModuleLabel:                       "fuzzycluster"
 
-physics.producers.lineclustertag.ClusterModuleLabel:                "linecluster"
-physics.producers.fuzzyclustertag.ClusterModuleLabel:               "fuzzycluster"
+physics.producers.lineclustertag.ClusterModuleLabel:                       "linecluster"
+physics.producers.fuzzyclustertag.ClusterModuleLabel:                      "fuzzycluster"
 
-physics.producers.stitchkalmanhit.TrackModuleLabel:                 "trackkalmanhit"
-physics.producers.stitchkalmanhit.SpptModuleLabel:                  "trackkalmanhit"
+physics.producers.stitchkalmanhit.TrackModuleLabel:                        "trackkalmanhit"
+physics.producers.stitchkalmanhit.SpptModuleLabel:                         "trackkalmanhit"
 
-physics.producers.trackkalmanhitcalo.TrackModuleLabel:              "trackkalmanhit"
-physics.producers.trackkalmanhitcalo.SpacePointModuleLabel:         "trackkalmanhit"
+physics.producers.trackkalmanhitcalo.TrackModuleLabel:                     "trackkalmanhit"
+physics.producers.trackkalmanhitcalo.SpacePointModuleLabel:                "trackkalmanhit"
 
-physics.producers.stitchkalmanhitcalo.TrackModuleLabel:             "stitchkalmanhit"
-physics.producers.stitchkalmanhitcalo.SpacePointModuleLabel:        "trackkalmanhit"
+physics.producers.stitchkalmanhitcalo.TrackModuleLabel:                    "stitchkalmanhit"
+physics.producers.stitchkalmanhitcalo.SpacePointModuleLabel:               "trackkalmanhit"
 
-physics.producers.trackkalmanhitpid.CalorimetryModuleLabel:         "trackkalmanhitcalo"
-physics.producers.trackkalmanhitpid.TrackModuleLabel:               "trackkalmanhit"
+physics.producers.trackkalmanhitpid.CalorimetryModuleLabel:                "trackkalmanhitcalo"
+physics.producers.trackkalmanhitpid.TrackModuleLabel:                      "trackkalmanhit"
 
-physics.producers.stitchkalmanhitpid.CalorimetryModuleLabel:        "stitchkalmanhitcalo"
-physics.producers.stitchkalmanhitpid.TrackModuleLabel:              "stitchkalmanhit"
+physics.producers.stitchkalmanhitpid.CalorimetryModuleLabel:               "stitchkalmanhitcalo"
+physics.producers.stitchkalmanhitpid.TrackModuleLabel:                     "stitchkalmanhit"
 
-physics.producers.trackkalmanhittag.ClusterModuleLabel:             "fuzzycluster"
-physics.producers.trackkalmanhittag.TrackModuleLabel:               "trackkalmanhit"
-physics.producers.trackkalmanhittag.TPCXBoundary:                   10
-physics.producers.trackkalmanhittag.TPCYBoundary:                   10
-physics.producers.trackkalmanhittag.TPCZBoundary:                   10
+physics.producers.trackkalmanhittag.ClusterModuleLabel:                    "fuzzycluster"
+physics.producers.trackkalmanhittag.TrackModuleLabel:                      "trackkalmanhit"
+physics.producers.trackkalmanhittag.TPCXBoundary:                          10
+physics.producers.trackkalmanhittag.TPCYBoundary:                          10
+physics.producers.trackkalmanhittag.TPCZBoundary:                          10
 
-physics.producers.stitchkalmanhittag.ClusterModuleLabel:            "fuzzycluster"
-physics.producers.stitchkalmanhittag.TrackModuleLabel:              "stitchkalmanhit"
+physics.producers.stitchkalmanhittag.ClusterModuleLabel:                   "fuzzycluster"
+physics.producers.stitchkalmanhittag.TrackModuleLabel:                     "stitchkalmanhit"
 
-physics.producers.trackkalmanhitflashmatch.TrackModuleLabel:        "trackkalmanhit"
-physics.producers.trackkalmanhitflashmatch.FlashModuleLabel:        "opflash"
+physics.producers.trackkalmanhitflashmatch.TrackModuleLabel:               "trackkalmanhit"
+physics.producers.trackkalmanhitflashmatch.FlashModuleLabel:               "opflash"
 physics.producers.trackkalmanhitflashmatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
-physics.producers.stitchkalmanhitflashmatch.TrackModuleLabel:       "stitchkalmanhit"
-physics.producers.stitchkalmanhitflashmatch.FlashModuleLabel:       "opflash"
+physics.producers.stitchkalmanhitflashmatch.TrackModuleLabel:              "stitchkalmanhit"
+physics.producers.stitchkalmanhitflashmatch.FlashModuleLabel:              "opflash"
 physics.producers.stitchkalmanhitflashmatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
 # ClusterCrawler / Track Maker related
-physics.producers.trackkalmanhitcc.HitModuleLabel:                  "linecluster"
-physics.producers.trackkalmanhitcc.ClusterModuleLabel:              "linecluster"
-#physics.producers.trackkalmanhitcc.PFParticleModuleLabel:           "cctrack"
-#physics.producers.trackkalmanhitcc.UseClusterHits:                  false
-#physics.producers.trackkalmanhitcc.UsePFParticleHits:               true
+physics.producers.trackkalmanhitcc.HitModuleLabel:                          "linecluster"
+physics.producers.trackkalmanhitcc.ClusterModuleLabel:                      "linecluster"
+#physics.producers.trackkalmanhitcc.PFParticleModuleLabel:                  "cctrack"
+#physics.producers.trackkalmanhitcc.UseClusterHits:                         false
+#physics.producers.trackkalmanhitcc.UsePFParticleHits:                      true
 
-physics.producers.stitchkalmanhitcc.TrackModuleLabel:               "trackkalmanhitcc"
-physics.producers.stitchkalmanhitcc.SpptModuleLabel:                "trackkalmanhitcc"
+physics.producers.stitchkalmanhitcc.TrackModuleLabel:                       "trackkalmanhitcc"
+physics.producers.stitchkalmanhitcc.SpptModuleLabel:                        "trackkalmanhitcc"
 
-physics.producers.trackkalmanhitcalocc.TrackModuleLabel:            "trackkalmanhitcc"
-physics.producers.trackkalmanhitcalocc.SpacePointModuleLabel:       "trackkalmanhitcc"
+physics.producers.trackkalmanhitcalocc.TrackModuleLabel:                    "trackkalmanhitcc"
+physics.producers.trackkalmanhitcalocc.SpacePointModuleLabel:               "trackkalmanhitcc"
  
-physics.producers.stitchkalmanhitcalocc.TrackModuleLabel:           "stitchkalmanhitcc"
-physics.producers.stitchkalmanhitcalocc.SpacePointModuleLabel:      "trackkalmanhitcc"
+physics.producers.stitchkalmanhitcalocc.TrackModuleLabel:                   "stitchkalmanhitcc"
+physics.producers.stitchkalmanhitcalocc.SpacePointModuleLabel:              "trackkalmanhitcc"
 
-physics.producers.trackkalmanhitpidcc.CalorimetryModuleLabel:       "trackkalmanhitcalocc"
-physics.producers.trackkalmanhitpidcc.TrackModuleLabel:             "trackkalmanhitcc"
+physics.producers.trackkalmanhitpidcc.CalorimetryModuleLabel:               "trackkalmanhitcalocc"
+physics.producers.trackkalmanhitpidcc.TrackModuleLabel:                     "trackkalmanhitcc"
 
-physics.producers.stitchkalmanhitpidcc.CalorimetryModuleLabel:      "stitchkalmanhitcccalo"
-physics.producers.stitchkalmanhitpidcc.TrackModuleLabel:            "stitchkalmanhitcc"
+physics.producers.stitchkalmanhitpidcc.CalorimetryModuleLabel:              "stitchkalmanhitcccalo"
+physics.producers.stitchkalmanhitpidcc.TrackModuleLabel:                    "stitchkalmanhitcc"
 
-physics.producers.trackkalmanhittagcc.ClusterModuleLabel:           "linecluster"
-physics.producers.trackkalmanhittagcc.TrackModuleLabel:             "trackkalmanhitcc"
-physics.producers.trackkalmanhittagcc.TPCXBoundary:                   10
-physics.producers.trackkalmanhittagcc.TPCYBoundary:                   10
-physics.producers.trackkalmanhittagcc.TPCZBoundary:                   10
+physics.producers.trackkalmanhittagcc.ClusterModuleLabel:                   "linecluster"
+physics.producers.trackkalmanhittagcc.TrackModuleLabel:                     "trackkalmanhitcc"
+physics.producers.trackkalmanhittagcc.TPCXBoundary:                         10
+physics.producers.trackkalmanhittagcc.TPCYBoundary:                         10
+physics.producers.trackkalmanhittagcc.TPCZBoundary:                         10
 
-physics.producers.stitchkalmanhittagcc.ClusterModuleLabel:          "linecluster"
-physics.producers.stitchkalmanhittagcc.TrackModuleLabel:            "stitchkalmanhitcc"
+physics.producers.stitchkalmanhittagcc.ClusterModuleLabel:                  "linecluster"
+physics.producers.stitchkalmanhittagcc.TrackModuleLabel:                    "stitchkalmanhitcc"
 
-physics.producers.trackkalmanhitflashmatchcc.TrackModuleLabel:      "trackkalmanhitcc"
-physics.producers.trackkalmanhitflashmatchcc.FlashModuleLabel:      "opflash"
+physics.producers.trackkalmanhitflashmatchcc.TrackModuleLabel:              "trackkalmanhitcc"
+physics.producers.trackkalmanhitflashmatchcc.FlashModuleLabel:              "opflash"
 physics.producers.trackkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
-physics.producers.trackkalmanhitflashmatchcc.HitModuleLabel:        "linecluster"
+physics.producers.trackkalmanhitflashmatchcc.HitModuleLabel:                "linecluster"
 
-physics.producers.stitchkalmanhitflashmatchcc.TrackModuleLabel:      "stitchkalmanhitcc"
-physics.producers.stitchkalmanhitflashmatchcc.FlashModuleLabel:      "opflash"
+physics.producers.stitchkalmanhitflashmatchcc.TrackModuleLabel:             "stitchkalmanhitcc"
+physics.producers.stitchkalmanhitflashmatchcc.FlashModuleLabel:             "opflash"
 physics.producers.stitchkalmanhitflashmatchcc.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
-physics.producers.stitchkalmanhitflashmatchcc.HitModuleLabel:        "linecluster"
+physics.producers.stitchkalmanhitflashmatchcc.HitModuleLabel:                "linecluster"
 
 # Pandora related
-physics.producers.pandoraCosmicKHit.HitModuleLabel:                 "gaushit"
-physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
-physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
-physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
-physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
+physics.producers.pandoraCosmicKHit.HitModuleLabel:                          "gaushit"
+physics.producers.pandoraCosmicKHit.UseClusterHits:                          false
+physics.producers.pandoraCosmicKHit.UsePFParticleHits:                       true
+physics.producers.pandoraCosmicKHit.ClusterModuleLabel:                      "pandoraCosmic"
+physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:                   "pandoraCosmic"
 
-physics.producers.pandoraCosmicKHittag.TrackModuleLabel:            "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHittag.TrackModuleLabel:                     "pandoraCosmicKHit"
 
-physics.producers.pandoraCosmicKHitcalo.TrackModuleLabel:           "pandoraCosmicKHit"
-physics.producers.pandoraCosmicKHitcalo.SpacePointModuleLabel:      "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitcalo.TrackModuleLabel:                    "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitcalo.SpacePointModuleLabel:               "pandoraCosmicKHit"
 
-physics.producers.pandoraCosmicKHitpid.CalorimetryModuleLabel:      "pandoraCosmicKHitcalo"
-physics.producers.pandoraCosmicKHitpid.TrackModuleLabel:            "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitpid.CalorimetryModuleLabel:               "pandoraCosmicKHitcalo"
+physics.producers.pandoraCosmicKHitpid.TrackModuleLabel:                     "pandoraCosmicKHit"
 
-physics.producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:    "pandoraCosmic"
-physics.producers.pandoraCosmicKHitPFPart.TrackModuleLabel:         "pandoraCosmicKHit"
-physics.producers.pandoraCosmicKHitPFPart.TPCXBoundary:                   10
-physics.producers.pandoraCosmicKHitPFPart.TPCYBoundary:                   10
-physics.producers.pandoraCosmicKHitPFPart.TPCZBoundary:                   10
+physics.producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:             "pandoraCosmic"
+physics.producers.pandoraCosmicKHitPFPart.TrackModuleLabel:                  "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitPFPart.TPCXBoundary:                      10
+physics.producers.pandoraCosmicKHitPFPart.TPCYBoundary:                      10
+physics.producers.pandoraCosmicKHitPFPart.TPCZBoundary:                      10
 
-physics.producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosmicKHit"
-physics.producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "opflash"
+physics.producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:              "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:              "opflash"
 physics.producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
-physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:        "gaushit"
-physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKHitPFPart"]
-physics.producers.pandoraCosmicKHitRemoval.FlashProducerLabel:      "pandoraCosmicKHitFlashMatch"
-physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
-physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabel:      "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:                 "gaushit"
+physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:             ["pandoraCosmicKHitPFPart"]
+physics.producers.pandoraCosmicKHitRemoval.FlashProducerLabel:               "pandoraCosmicKHitFlashMatch"
+physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel:          "pandoraCosmic"
+physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabel:               "pandoraCosmicKHit"
 
-physics.producers.pandoraNu.GeantModuleLabel:                       "largeant"
-physics.producers.pandoraNu.HitFinderModuleLabel:                   "pandoraCosmicKHitRemoval"
-physics.producers.pandoraNu.ConfigFile:                             "PandoraSettings_MicroBooNE_Neutrino.xml"
+physics.producers.pandoraNu.GeantModuleLabel:                                "largeant"
+physics.producers.pandoraNu.HitFinderModuleLabel:                            "pandoraCosmicKHitRemoval"
+physics.producers.pandoraNu.ConfigFile:                                      "PandoraSettings_MicroBooNE_Neutrino.xml"
 
-physics.producers.pandoraNuKHit.HitModuleLabel:                     "pandoraCosmicKHitRemoval"
-physics.producers.pandoraNuKHit.UseClusterHits:                     false
-physics.producers.pandoraNuKHit.UsePFParticleHits:                  true
-physics.producers.pandoraNuKHit.PFParticleModuleLabel:              "pandoraNu"
-physics.producers.pandoraNuKHit.ClusterModuleLabel:                 "pandoraNu"
-physics.producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
+physics.producers.pandoraNuKHit.HitModuleLabel:                              "pandoraCosmicKHitRemoval"
+physics.producers.pandoraNuKHit.UseClusterHits:                              false
+physics.producers.pandoraNuKHit.UsePFParticleHits:                           true
+physics.producers.pandoraNuKHit.PFParticleModuleLabel:                       "pandoraNu"
+physics.producers.pandoraNuKHit.ClusterModuleLabel:                          "pandoraNu"
+physics.producers.pandoraNuKHit.HitFinderModuleLabel:                        "pandoraCosmicKHitRemoval"
 
-physics.producers.pandoraNuKHittag.TrackModuleLabel:                "pandoraNuKHit"
-physics.producers.pandoraNuKHittag.TPCXBoundary:                   10
-physics.producers.pandoraNuKHittag.TPCYBoundary:                   10
-physics.producers.pandoraNuKHittag.TPCZBoundary:                   10
+physics.producers.pandoraNuKHittag.TrackModuleLabel:                         "pandoraNuKHit"
+physics.producers.pandoraNuKHittag.TPCXBoundary:                             10
+physics.producers.pandoraNuKHittag.TPCYBoundary:                             10
+physics.producers.pandoraNuKHittag.TPCZBoundary:                             10
 
-physics.producers.pandoraNuKHitcalo.TrackModuleLabel:               "pandoraNuKHit"
-physics.producers.pandoraNuKHitcalo.SpacePointModuleLabel:          "pandoraNuKHit"
+physics.producers.pandoraNuKHitcalo.TrackModuleLabel:                        "pandoraNuKHit"
+physics.producers.pandoraNuKHitcalo.SpacePointModuleLabel:                   "pandoraNuKHit"
 
-physics.producers.pandoraNuKHitpid.CalorimetryModuleLabel:          "pandoraNuKHitcalo"
-physics.producers.pandoraNuKHitpid.TrackModuleLabel:                "pandoraNuKHit"
+physics.producers.pandoraNuKHitpid.CalorimetryModuleLabel:                   "pandoraNuKHitcalo"
+physics.producers.pandoraNuKHitpid.TrackModuleLabel:                         "pandoraNuKHit"
 
-physics.producers.pandoraNuKHitFlashMatch.TrackModuleLabel:         "pandoraNuKHit"
-physics.producers.pandoraNuKHitFlashMatch.FlashModuleLabel:         "opflash"
+physics.producers.pandoraNuKHitFlashMatch.TrackModuleLabel:                  "pandoraNuKHit"
+physics.producers.pandoraNuKHitFlashMatch.FlashModuleLabel:                  "opflash"
 physics.producers.pandoraNuKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
-physics.producers.showerrecofuzzy.InputProducer:                    "fuzzyclustermerger"
-physics.producers.showerrecopandora.InputProducer:                  "pandoraNu"
+physics.producers.showerrecofuzzy.InputProducer:                             "fuzzyclustermerger"
+physics.producers.showerrecopandora.InputProducer:                           "pandoraNu"
 
-physics.producers.vtx2trackPanKal.NeutrinoIDAlgName:                "TrackPairPlusVertexAlg"
-physics.producers.vtx2trackPanKal.TrackModuleLabel:                 "trackkalmanhit"
-physics.producers.vtx2trackPanKal.VertexModuleLabel:                "pandoraNu"
-physics.producers.vtx2trackPanKal.CosmicScoreCut:                   0.4
-physics.producers.vtx2trackPanKal.NuVtxTrackDistCut:                4.5
+physics.producers.vtx2trackPanKal.TPCTracksPlusVertexAlg.NeutrinoIDAlgName:  "TrackPairPlusVertexAlg"
+physics.producers.vtx2trackPanKal.TPCTracksPlusVertexAlg.TrackModuleLabel:   "trackkalmanhit"
+physics.producers.vtx2trackPanKal.TPCTracksPlusVertexAlg.VertexModuleLabel:  "pandoraNu"
+physics.producers.vtx2trackPanKal.TPCTracksPlusVertexAlg.CosmicModuleLabel:  "trackkalmanhittag"
+physics.producers.vtx2trackPanKal.TPCTracksPlusVertexAlg.CosmicScoreCut:     0.4
+physics.producers.vtx2trackPanKal.TPCTracksPlusVertexAlg.NuVtxTrackDistCut:  4.5
 
-physics.producers.vtx2trackLinePan.NeutrinoIDAlgName:               "TrackPairPlusVertexAlg"
-physics.producers.vtx2trackLinePan.TrackModuleLabel:                "pandoraNuKHit"
-physics.producers.vtx2trackLinePan.VertexModuleLabel:               "linecluster"
-physics.producers.vtx2trackLinePan.CosmicScoreCut:                  0.4
-physics.producers.vtx2trackLinePan.NuVtxTrackDistCut:               5.0
+physics.producers.vtx2trackLinePan.TPCTracksPlusVertexAlg.NeutrinoIDAlgName: "TrackPairPlusVertexAlg"
+physics.producers.vtx2trackLinePan.TPCTracksPlusVertexAlg.TrackModuleLabel:  "pandoraNuKHit"
+physics.producers.vtx2trackLinePan.TPCTracksPlusVertexAlg.VertexModuleLabel: "linecluster"
+physics.producers.vtx2trackLinePan.TPCTracksPlusVertexAlg.CosmicModuleLabel: "pandoraNuKHittag"
+physics.producers.vtx2trackLinePan.TPCTracksPlusVertexAlg.CosmicScoreCut:    0.4
+physics.producers.vtx2trackLinePan.TPCTracksPlusVertexAlg.NuVtxTrackDistCut: 5.0
 
-physics.producers.vtx2trackLineKal.NeutrinoIDAlgName:               "TrackPairPlusVertexAlg"
-physics.producers.vtx2trackLineKal.TrackModuleLabel:                "trackkalmanhit"
-physics.producers.vtx2trackLineKal.VertexModuleLabel:               "linecluster"
-physics.producers.vtx2trackLineKal.CosmicScoreCut:                  0.4
-physics.producers.vtx2trackLineKal.NuVtxTrackDistCut:               3.0
+physics.producers.vtx2trackLineKal.TPCTracksPlusVertexAlg.NeutrinoIDAlgName: "TrackPairPlusVertexAlg"
+physics.producers.vtx2trackLineKal.TPCTracksPlusVertexAlg.TrackModuleLabel:  "trackkalmanhit"
+physics.producers.vtx2trackLineKal.TPCTracksPlusVertexAlg.VertexModuleLabel: "linecluster"
+physics.producers.vtx2trackLineKal.TPCTracksPlusVertexAlg.CosmicModuleLabel: "trackkalmanhittag"
+physics.producers.vtx2trackLineKal.TPCTracksPlusVertexAlg.CosmicScoreCut:    0.4
 
-physics.filters.tpcneutrinoidfilter.VertexModuleLabelVec:          ["pandoraNu", "linecluster", "linecluster"]
-physics.filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:    ["vtx2trackPanKal", "vtx2trackLinePan", "vtx2trackLineKal"]
+physics.filters.tpcneutrinoidfilter.VertexModuleLabelVec:                    ["pandoraNu", "linecluster", "linecluster"]
+physics.filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:              ["vtx2trackPanKal", "vtx2trackLinePan", "vtx2trackLineKal"]
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :
