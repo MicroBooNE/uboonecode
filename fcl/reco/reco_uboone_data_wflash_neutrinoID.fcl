@@ -61,13 +61,17 @@ physics:
   # digitfilter:         @local::microboone_noisefilter
   
   ### flash finders
-  opflash:             @local::microboone_opflash
+  opflash          : @local::microboone_opflash_beam_highgain
+  opflashLow       : @local::microboone_opflash_beam_lowgain
+  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
 
   ### calwire producers
   caldata:             @local::microboone_calroi
 
   ### hit-finder producers
   gaushit:             @local::microboone_gaushitfinder
+  cchit:                        @local::microboone_clustercrawlerhit
 
   ### cluster-finder producers
   fuzzycluster:        @local::microboone_fuzzycluster
@@ -147,9 +151,13 @@ physics:
  reco: [ rns,
          digitfilter,
          opflash,
+         opflashLow,
+         opflashCosmic,
+         opflashCosmicLow,
          flashtrigger,
          caldata,
          gaushit,
+	 cchit,
          ###>> fuzzy cluster up to bat first
 	 fuzzycluster,
 	 fuzzyclustermerger,
@@ -233,34 +241,30 @@ services.SignalShapingServiceMicroBooNE.ShapeTimeConst: [2.0, 2.0, 2.0]
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.opflash.InputModule:                          "optreadout"
-physics.producers.opflash.GenModule:                            "generator"
-physics.producers.opflash.InputLabels:                        [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
-                                                                "OpdetCosmicHighGain", "OpdetCosmicLowGain"]
+physics.producers.caldata.DigitModuleLabel:                         "digitfilter"
+physics.producers.caldata.MaxAllowedChannelStatus:                  1
 
-physics.producers.caldata.DigitModuleLabel:                     "digitfilter"
-physics.producers.caldata.MaxAllowedChannelStatus:              1
+#physics.producers.caldata.DoBaselineSub:                           false
+#physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:     true
 
-#physics.producers.caldata.DoBaselineSub:                         false
-#physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:   true
+physics.producers.gaushit.CalDataModuleLabel:                       "caldata"
+physics.producers.gaushit.MinSig:                                   [ 8.0,    8.0,   8.0]
 
-physics.producers.gaushit.CalDataModuleLabel:                    "caldata"
-physics.producers.gaushit.MinSig:                                [ 8.0,    8.0,   8.0]
+physics.producers.cchit.CCHitFinderAlg.MaxBumps:                    5
+physics.producers.cchit.CCHitFinderAlg.MinPeak:                     [8, 8, 8]
+physics.producers.cchit.CCHitFinderAlg.MinRMS:                      [1, 1, 1]
+physics.producers.cchit.CCHitFinderAlg.ChiSplit:                    100
+physics.producers.cchit.CCHitFinderAlg.MaxXtraHits:                 0
 
-physics.producers.linecluster.CCHitFinderAlg.MaxBumps:           2
-physics.producers.linecluster.CCHitFinderAlg.MinSigInd:          5
-physics.producers.linecluster.CCHitFinderAlg.MinRMSInd:          2
-physics.producers.linecluster.CCHitFinderAlg.MinSigCol:          5
-physics.producers.linecluster.CCHitFinderAlg.MinRMSCol:          2
-physics.producers.linecluster.CCHitFinderAlg.ChiSplit:           100
-physics.producers.linecluster.CCHitFinderAlg.MaxXtraHits:        0
+physics.producers.linecluster.ClusterCrawlerAlg.NumPass:            2
+physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [20, 8,  3]
 
-physics.producers.fuzzycluster.HitsModuleLabel:                  "gaushit"
-physics.producers.fuzzycluster.CalDataModuleLabel:               "caldata"
+physics.producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
+physics.producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
 
-physics.producers.pandoraCosmic.GeantModuleLabel:                "largeant"
-physics.producers.pandoraCosmic.HitFinderModuleLabel:            "gaushit"
-physics.producers.pandoraCosmic.ConfigFile:                      "PandoraSettings_MicroBooNE_Cosmic.xml"
+physics.producers.pandoraCosmic.GeantModuleLabel:                   "largeant"
+physics.producers.pandoraCosmic.HitFinderModuleLabel:               "gaushit"
+physics.producers.pandoraCosmic.ConfigFile:                         "PandoraSettings_MicroBooNE_Cosmic.xml"
 # Fuzzy Cluster related
 physics.producers.trackkalmanhit.HitModuleLabel:                    "gaushit"
 physics.producers.trackkalmanhit.ClusterModuleLabel:                "fuzzycluster"
