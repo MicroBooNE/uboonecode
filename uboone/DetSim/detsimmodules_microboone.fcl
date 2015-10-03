@@ -10,7 +10,8 @@ microboone_simwire:
  NoiseWidth:          62.4        #Exponential Noise width (kHz)
  NoiseRand:           0.1         #frac of randomness of noise freq-spec
  LowCutoff:           7.5         #Low frequency filter cutoff (kHz)
- CompressionType:     "none"      #could also be none		
+ CompressionType:     "none"      #could also be none	
+ SimDeadChannels:     false	
  
  GenNoise:            true        #gen noise...if false function not called
  GetNoiseFromHisto:   false       #generate noise from histogram of freq-distribution

@@ -36,7 +36,6 @@
 // LArSoft libraries
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "Geometry/Geometry.h"
-#include "Filters/ChannelFilter.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
@@ -46,6 +45,8 @@
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
 #include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "CalibrationDBI/Interface/IChannelStatusService.h"
+#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
 
 ///creation of calibrated signals on wires
 namespace caldata {
@@ -214,7 +215,7 @@ namespace caldata {
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
+    const lariov::IChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::IChannelStatusService>()->GetFilter();
 
     std::vector<float> holder;                // holds signal data
     std::vector<short> rawadc(transformSize);  // vector holding uncompressed adc values
@@ -233,7 +234,7 @@ namespace caldata {
         channel = digitVec->Channel();
       
         // skip bad channels
-        if(!chanFilt->BadChannel(channel)) {
+        if(chanFilt.IsPresent(channel) && !chanFilt.IsBad(channel)) {
       
           // resize and pad with zeros
       	  holder.resize(transformSize, 0.);
