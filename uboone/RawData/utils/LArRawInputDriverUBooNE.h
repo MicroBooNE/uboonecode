@@ -103,6 +103,9 @@ namespace lris {
     util::UBChannelMap_t           fChannelMap;   
     int                            fDataTakingTime; //fhicl parameter. Optional to override raw data's internal time stamp.
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
+    bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data
+    bool                           fSwizzlePMT; //fhicl parameter.  Tells us whether to swizzle the PMT data
+    bool                           fSaveOutput; //fhicl parameter.  Tells us whether to save the LArSoft output file or just run analysis
 
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
@@ -127,23 +130,33 @@ namespace lris {
     uint32_t triggerBitBNB;
     uint32_t triggerBitNuMI;
     uint32_t triggerBitEXT;
+    uint32_t triggerBitPMTBeam;
+    uint32_t triggerBitPMTCosmic;
     
-    uint32_t FEM1triggerFrame ;
-    uint16_t FEM1triggerSample;
-    uint32_t FEM2triggerFrame ;
-    uint16_t FEM2triggerSample;
-    uint32_t FEM3triggerFrame ;
-    uint16_t FEM3triggerSample;
-    uint32_t FEM4triggerFrame ;
-    uint16_t FEM4triggerSample;
     uint32_t FEM5triggerFrame ;
-    uint16_t FEM5triggerSample;
+    uint32_t FEM5triggerSample;
     uint32_t FEM6triggerFrame ;
-    uint16_t FEM6triggerSample;
-    uint32_t FEM7triggerFrame ;
-    uint16_t FEM7triggerSample;
-    uint32_t FEM8triggerFrame ;
-    uint16_t FEM8triggerSample;
+    uint32_t FEM6triggerSample;
+    double FEM5triggerTime;
+    double FEM6triggerTime;
+
+    uint32_t RO_BNBtriggerFrame;
+    uint32_t RO_NuMItriggerFrame;
+    uint32_t RO_EXTtriggerFrame;
+    uint32_t RO_RWMtriggerFrame;
+    uint32_t RO_BNBtriggerSample;
+    uint32_t RO_NuMItriggerSample;
+    uint32_t RO_EXTtriggerSample;
+    uint32_t RO_RWMtriggerSample;
+    double RO_BNBtriggerTime;
+    double RO_NuMItriggerTime;
+    double RO_EXTtriggerTime;
+    double RO_RWMtriggerTime;
+    
+//    uint32_t RO_Gate1Frame;
+//    uint32_t RO_Gate1Sample;
+//    uint32_t RO_Gate2Frame;
+//    uint32_t RO_Gate2Sample;
 
     uint32_t TPCtriggerFrame;
     uint32_t TPCtriggerSample;
