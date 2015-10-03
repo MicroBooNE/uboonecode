@@ -18,11 +18,13 @@ microboone_services_reco:                                @local::microboone_basi
 microboone_services_reco.LArFFT:                         @local::microboone_larfft
 microboone_services_reco.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
 microboone_services_reco.IDetPedestalService:            @local::microboone_detpedestalservice
+microboone_services_reco.IChannelStatusService:          @local::microboone_channelstatus_service
 microboone_services_reco.MemoryPeakReporter: {}
 
 # Define microboone_full_services ... this includes ALL services and we don't care about resource usage!
 microboone_full_services:                           @local::microboone_simulation_services
 microboone_full_services.BackTracker:               @local::microboone_backtracker
+microboone_full_services.IChannelStatusService:     @local::microboone_channelstatus_service
 microboone_full_services.MemoryPeakReporter: {}
 
 microboone_message_services:
