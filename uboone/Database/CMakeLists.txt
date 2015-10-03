@@ -3,6 +3,7 @@ art_make( BASENAME_ONLY
 	                    CalibrationDBI_IOVData
 			    ${ART_FRAMEWORK_SERVICES_REGISTRY}
 			    ${FHICLCPP}
+			    ${ROOT_BASIC_LIB_LIST}
 )
 
 install_headers()
