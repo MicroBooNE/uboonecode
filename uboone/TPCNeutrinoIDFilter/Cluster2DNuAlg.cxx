@@ -1,13 +1,17 @@
 /**
  *  @file   Cluster2DNuAlg.cxx
  * 
- *  @brief  Implementation of the Track/Vertex Neutrino ID alg
- *          This module outputs associations between vertices
- *          and tracks that are found to be within the cut value
+ *  @brief  Implementation of the 2DCluster Neutrino ID alg
+ *          This module outputs associations between cosmicTag 
+ *          and clusters that are found after all cuts have been 
+ *          implemented. 
+ *
  *
  *  Original implementation September 20, 2015 by usher@slac.stanford.edu
  *  This is based on work by Anne Schukraft (aschu@fnal.gov) and her
  *  Neutrino ID task force
+ *
+ *  Updated by Jessica Esquivel (jeesquiv@syr.edu) and Katherine Woodruff (kwoodruf@nmsu.edu)
  */
 
 // The main include
@@ -42,6 +46,7 @@ namespace neutrinoid {
 
 Cluster2DNuAlg::Cluster2DNuAlg(fhicl::ParameterSet const &pset) : fMyProducerModule(0)
 {
+    mf::LogInfo("Cluster2DNuAlg")<<"constructer"<<std::endl; 
     this->reconfigure(pset);
     
     art::ServiceHandle<geo::Geometry>            geometry;
@@ -59,11 +64,14 @@ Cluster2DNuAlg::~Cluster2DNuAlg()
     
 void Cluster2DNuAlg::reconfigure(fhicl::ParameterSet const &pset)
 {
+    mf::LogInfo("Cluster2DNuAlg")<< "in fhicl parameter set"<<std::endl; 
     // Assume we could be called externally with the top level module's complete parameter set
     const fhicl::ParameterSet& myPset = pset.get<fhicl::ParameterSet>("TPCCluster2DNuAlg");
     
-    fClusterModuleLabel      = myPset.get<std::string> ("ClusterModuleLabel",   "fuzzycluster");
-    fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel",    "trackKalmanHitTag");
+    //fClusterModuleLabel      = myPset.get<std::string> ("ClusterModuleLabel",   "fuzzycluster");
+    //fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel",    "trackKalmanHitTag");
+    fClusterModuleLabel      = myPset.get<std::string> ("ClusterModuleLabel",   "cccluster");
+    fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel",    "ccclusterTag");
     fPlaneToCheck            = myPset.get<size_t>      ("PlaneToCheck",         2);
     fMinimumHits             = myPset.get<size_t>      ("MinimumHits",          10);
     fMaxCosmicScore          = myPset.get<float>       ("MaxCosmicScore",       0.4);
@@ -82,8 +90,10 @@ void Cluster2DNuAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs) {}
     
 void Cluster2DNuAlg::produces(art::EDProducer* owner)
 {
+    mf::LogInfo("Cluster2DNuAlg") <<"in producer"<<std::endl; 
     fMyProducerModule = owner;
-    fMyProducerModule->produces< art::Assns<anab::CosmicTag, recob::Cluster> >();
+    //fMyProducerModule->produces< std::vector<recob::Cluster> > clustcol(new std::vector<recob::Cluster>); 
+    fMyProducerModule->produces< art::Assns <anab::CosmicTag, recob::Cluster> >();
 }
 
     
@@ -92,7 +102,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
     // Agreed convention is to ALWAYS output to the event store so get a pointer to our collection
     std::unique_ptr<art::Assns<anab::CosmicTag, recob::Cluster> > cosmicClusterAssociations(new art::Assns<anab::CosmicTag, recob::Cluster>);
     
-    // Recover the hanles to the cluster collection we want to analyze.
+    // Recover the handles to the cluster collection we want to analyze.
     art::Handle< std::vector<recob::Cluster> > clusterVecHandle;
     
     event.getByLabel(fClusterModuleLabel, clusterVecHandle);
@@ -114,6 +124,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
             std::vector<art::Ptr<recob::Cluster>> goodClusterVec;
         
             // Loop over input clusters
+             mf::LogInfo("Cluster2DNuAlg") <<"Valid Cluster Handle"<<std::endl; 
             for(size_t clusterIdx = 0; clusterIdx < clusterVecHandle->size(); clusterIdx++)
             {
                 art::Ptr<recob::Cluster> cluster(clusterVecHandle,clusterIdx);
@@ -150,6 +161,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
             // Enough clusters to proceed?
             if (goodClusterVec.size() >= fMinCandidateClusters)
             {
+                mf::LogInfo("Cluster2DNuAlg")  <<"good cluster size: "<<goodClusterVec.size()<<std::endl;
                 // Loop over the good clusters
                 float openangle=0;
                 for(size_t clusterIdx = 0; clusterIdx < goodClusterVec.size(); clusterIdx++)
@@ -186,6 +198,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         if(cluster2->StartAngle()<0) openangle = fabs(cluster->StartAngle() - ((-1.)*TMath::Pi()+cluster2->StartAngle()));
                                         else openangle = fabs(cluster->StartAngle() - (TMath::Pi()+cluster2->StartAngle()));
                                     } 
+                		    mf::LogInfo("Cluster2DNuAlg")  <<"open angle: "<<openangle<<std::endl;
                                     if(openangle > 0.1 && openangle < 1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -203,6 +216,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         else openangle = fabs(cluster->StartAngle() - (TMath::Pi()+cluster2->EndAngle()));
                                     }
                                     else openangle = fabs( cluster->StartAngle() - cluster2->EndAngle());
+                		    mf::LogInfo("Cluster2DNuAlg")  <<"open angle: "<<openangle<<std::endl;
                                     if(openangle>0.1 && openangle<1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -236,6 +250,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         if(cluster2->StartAngle()<0) openangle=fabs(cluster->EndAngle() - ((-1.)*TMath::Pi()+cluster2->StartAngle()));
                                         else openangle=fabs(cluster->EndAngle() - (TMath::Pi()+cluster2->StartAngle()));
                                     }
+                		    mf::LogInfo("Cluster2DNuAlg")  <<"open angle: "<<openangle<<std::endl;
                                     if(openangle>0.1 && openangle<1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -253,6 +268,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         else openangle=fabs(cluster->EndAngle() -(TMath::Pi()+cluster2->EndAngle()));
                                     }
                                     else openangle=fabs(cluster->EndAngle() - cluster2->EndAngle());
+                		    mf::LogInfo("Cluster2DNuAlg")  <<"open angle: "<<openangle<<std::endl;
                                     if(openangle>0.1 && openangle<1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -267,11 +283,15 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     // I think we will need a better way going forward...
                     if(clusterPtrVec.size() > 1)
                     {
+			//clustcol->push_back(clusterPtrVec);
                 	std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(cluster.key());
                 	if (!cosmicVec.empty())
                 	{
                             art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
                             util::CreateAssn(*fMyProducerModule, event, cosmicTag, clusterPtrVec, *cosmicClusterAssociations);
+                	     mf::LogInfo("Cluster2DNuAlg")  <<"output>>  CosmicTag->CosmicScore: "<<cosmicTag->CosmicScore()<<" ClusterPtrVec.size: "<<clusterPtrVec.size()<<std::endl;
+                	                                    
+				
 			}
                     }
                 }//end loop over good clusters
@@ -279,8 +299,9 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
         }//end make sure valid handles 
     }//end require valid handle
     
-    // Add tracks and associations to event.
+    // Add clusters and associations to event.
     event.put(std::move(cosmicClusterAssociations));
+   // event.put(std::move(clustcol));
     
     return true;
 }
