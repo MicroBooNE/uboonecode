@@ -149,6 +149,7 @@ physics:
   vtx2trackPanKal :             @local::microboone_tpcNeutrinoID
   vtx2trackLineKal :            @local::microboone_tpcNeutrinoID
   vtx2trackLinePan :            @local::microboone_tpcNeutrinoID
+  cluster2D :                   @local::microboone_tpcNeutrinoID
  }
 
  filters:
@@ -216,7 +217,8 @@ physics:
          lineclustertag,
          vtx2trackPanKal, 
          vtx2trackLinePan, 
-         vtx2trackLineKal, 
+         vtx2trackLineKal,
+         cluster2D,
          tpcneutrinoidfilter
          ]
 
@@ -447,8 +449,14 @@ physics.producers.vtx2trackLineKal.TPCTracksPlusVertexAlg.VertexModuleLabel: "li
 physics.producers.vtx2trackLineKal.TPCTracksPlusVertexAlg.CosmicModuleLabel: "trackkalmanhittag"
 physics.producers.vtx2trackLineKal.TPCTracksPlusVertexAlg.CosmicScoreCut:    0.4
 
+physics.producers.cluster2D.NeutrinoIDAlgName:                               "Cluster2DNuAlg"
+physics.producers.cluster2D.TPCCluster2DNuAlg.ClusterModuleLabel:            "linecluster"
+physics.producers.cluster2D.TPCCluster2DNuAlg.CosmicModuleLabel:             "lineclustertag"
+
 physics.filters.tpcneutrinoidfilter.VertexModuleLabelVec:                    ["pandoraNu", "linecluster", "linecluster"]
 physics.filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:              ["vtx2trackPanKal", "vtx2trackLinePan", "vtx2trackLineKal"]
+physics.filters.tpcneutrinoidfilter.Cluster2DCosmicProducerLabel:            "lineclustertag"
+physics.filters.tpcneutrinoidfilter.Cluster2DCosmicClusterAssns:             "cluster2D"
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :
