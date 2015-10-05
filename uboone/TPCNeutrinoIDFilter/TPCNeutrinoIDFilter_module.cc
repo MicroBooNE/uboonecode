@@ -145,11 +145,18 @@ bool TPCNeutrinoIDFilter::filter(art::Event& event)
             art::FindManyP<recob::Track> vertexTrackAssns(vertexVecHandle, event, fVtxTrackAssnsModuleLabelVec[assnIdx]);
         
             // First check that we have something
-            if (vertexTrackAssns.isValid() && vertexTrackAssns.size() > 0 && vertexTrackAssns.at(0).size() > 0)
+            if (vertexTrackAssns.isValid() && vertexTrackAssns.size() > 0)
             {
-                // Actually, the fact that there is a non-empty association vector is good enough for now
-                pass = true;
-                break;
+                // Look for the first valid association
+                for (size_t vtxIdx = 0; vtxIdx < vertexVecHandle->size(); vtxIdx++)
+                {
+                    if (vertexTrackAssns.at(vtxIdx).size() > 0)
+                    {
+                        // Actually, the fact that there is a non-empty association vector is good enough for now
+                        pass = true;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -166,9 +173,16 @@ bool TPCNeutrinoIDFilter::filter(art::Event& event)
         {
             art::FindManyP<recob::Cluster> cosmicClusterAssns(cosmicVecHandle, event, fCosmicClusterAssnsLabel);
         
-            if (cosmicClusterAssns.isValid() && cosmicClusterAssns.size() > 0 && cosmicClusterAssns.at(0).size() > 0)
+            if (cosmicClusterAssns.isValid() && cosmicClusterAssns.size() > 0)
             {
-                pass = true;
+                for(size_t tagIdx = 0; tagIdx < cosmicVecHandle->size(); tagIdx++)
+                {
+                    if (cosmicClusterAssns.at(tagIdx).size() > 0)
+                    {
+                        pass = true;
+                        break;
+                    }
+                }
             }
         }
     }

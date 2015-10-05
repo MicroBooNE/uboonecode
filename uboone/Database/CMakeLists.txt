@@ -13,6 +13,7 @@ art_make( BASENAME_ONLY
                             ${ART_PERSISTENCY_PROVENANCE}
 			    ${ART_UTILITIES}
 			    ${FHICLCPP}
+			    ${ROOT_BASIC_LIB_LIST}
 )
 
 install_headers()

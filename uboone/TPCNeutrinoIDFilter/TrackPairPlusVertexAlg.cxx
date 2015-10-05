@@ -100,8 +100,12 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
     event.getByLabel(fVertexModuleLabel, vertexVecHandle);
     event.getByLabel(fTrackModuleLabel,  trackVecHandle);
     
+    size_t nTracks = trackVecHandle->size();
+    
+    std::cout << nTracks << std::endl;
+    
     // Require valid handles, otherwise nothing to do
-    if (vertexVecHandle.isValid() && trackVecHandle.isValid())
+    if (vertexVecHandle.isValid() && vertexVecHandle->size() > 0 && trackVecHandle.isValid() && trackVecHandle->size() > 0)
     {
         // Recover associations relating cosmic tags and track
         art::FindManyP<anab::CosmicTag> cosmicAssns(trackVecHandle, event, fCosmicModuleLabel);
