@@ -46,7 +46,6 @@ namespace neutrinoid {
 
 Cluster2DNuAlg::Cluster2DNuAlg(fhicl::ParameterSet const &pset) : fMyProducerModule(0)
 {
-    mf::LogInfo("Cluster2DNuAlg")<<"constructer"<<std::endl; 
     this->reconfigure(pset);
     
     art::ServiceHandle<geo::Geometry>            geometry;
@@ -64,7 +63,6 @@ Cluster2DNuAlg::~Cluster2DNuAlg()
     
 void Cluster2DNuAlg::reconfigure(fhicl::ParameterSet const &pset)
 {
-    mf::LogInfo("Cluster2DNuAlg")<< "in fhicl parameter set"<<std::endl; 
     // Assume we could be called externally with the top level module's complete parameter set
     const fhicl::ParameterSet& myPset = pset.get<fhicl::ParameterSet>("TPCCluster2DNuAlg");
     
@@ -90,9 +88,7 @@ void Cluster2DNuAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs) {}
     
 void Cluster2DNuAlg::produces(art::EDProducer* owner)
 {
-    mf::LogInfo("Cluster2DNuAlg") <<"in producer"<<std::endl; 
     fMyProducerModule = owner;
-    //fMyProducerModule->produces< std::vector<recob::Cluster> > clustcol(new std::vector<recob::Cluster>); 
     fMyProducerModule->produces< art::Assns <anab::CosmicTag, recob::Cluster> >();
 }
 
@@ -124,7 +120,6 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
             std::vector<art::Ptr<recob::Cluster>> goodClusterVec;
         
             // Loop over input clusters
-             mf::LogInfo("Cluster2DNuAlg") <<"Valid Cluster Handle"<<std::endl; 
             for(size_t clusterIdx = 0; clusterIdx < clusterVecHandle->size(); clusterIdx++)
             {
                 art::Ptr<recob::Cluster> cluster(clusterVecHandle,clusterIdx);
@@ -161,7 +156,6 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
             // Enough clusters to proceed?
             if (goodClusterVec.size() >= fMinCandidateClusters)
             {
-                mf::LogInfo("Cluster2DNuAlg")  <<"good cluster size: "<<goodClusterVec.size()<<std::endl;
                 // Loop over the good clusters
                 float openangle=0;
                 for(size_t clusterIdx = 0; clusterIdx < goodClusterVec.size(); clusterIdx++)
@@ -176,7 +170,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire())
                     {
                         clusterPtrVec.push_back(cluster);
-                        // Starts with StartWire
+                        // first cluster is greater than maximum length and  starts with StartWire?
                         for(size_t k2 = 0; k2 < goodClusterVec.size(); k2++)
                         {
                             if(k2 == clusterIdx) continue;
@@ -189,16 +183,17 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                             
                             if((fabs(cluster->StartWire() - cluster2->StartWire()) <= fMaximumDistance) &&
                                (fabs(cluster->StartTick() - cluster2->StartTick()) <= fMaximumTime)       )
-                            {
+                            {   
+				// Vertex found if two clusters are within fMaximumDistance and  fMaximumTime
                                 if(cluster2->StartCharge() > cluster->StartCharge() || deltaWire > fMaximumLength)
                                 {
+				    // StartCharge of short cluster must be greater than StartChage of long cluster OR long cluster must be greater than fMaximumLength 
                                     if(cluster2->StartWire()<cluster2->EndWire()) openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
                                     else
                                     {
                                         if(cluster2->StartAngle()<0) openangle = fabs(cluster->StartAngle() - ((-1.)*TMath::Pi()+cluster2->StartAngle()));
                                         else openangle = fabs(cluster->StartAngle() - (TMath::Pi()+cluster2->StartAngle()));
                                     } 
-                		    mf::LogInfo("Cluster2DNuAlg")  <<"open angle: "<<openangle<<std::endl;
                                     if(openangle > 0.1 && openangle < 1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -216,14 +211,13 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         else openangle = fabs(cluster->StartAngle() - (TMath::Pi()+cluster2->EndAngle()));
                                     }
                                     else openangle = fabs( cluster->StartAngle() - cluster2->EndAngle());
-                		    mf::LogInfo("Cluster2DNuAlg")  <<"open angle: "<<openangle<<std::endl;
                                     if(openangle>0.1 && openangle<1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
                                     }
                                 }
                             }
-                        }
+                        } 
                     } //end startwire
                     else if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() > cluster->EndWire())
                     {
@@ -250,7 +244,6 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         if(cluster2->StartAngle()<0) openangle=fabs(cluster->EndAngle() - ((-1.)*TMath::Pi()+cluster2->StartAngle()));
                                         else openangle=fabs(cluster->EndAngle() - (TMath::Pi()+cluster2->StartAngle()));
                                     }
-                		    mf::LogInfo("Cluster2DNuAlg")  <<"open angle: "<<openangle<<std::endl;
                                     if(openangle>0.1 && openangle<1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -268,7 +261,6 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                         else openangle=fabs(cluster->EndAngle() -(TMath::Pi()+cluster2->EndAngle()));
                                     }
                                     else openangle=fabs(cluster->EndAngle() - cluster2->EndAngle());
-                		    mf::LogInfo("Cluster2DNuAlg")  <<"open angle: "<<openangle<<std::endl;
                                     if(openangle>0.1 && openangle<1.57)
                                     {
                                         clusterPtrVec.push_back(cluster2);
@@ -283,13 +275,11 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     // I think we will need a better way going forward...
                     if(clusterPtrVec.size() > 1)
                     {
-			//clustcol->push_back(clusterPtrVec);
                 	std::vector<art::Ptr<anab::CosmicTag> > cosmicVec = cosmicAssns.at(cluster.key());
                 	if (!cosmicVec.empty())
                 	{
                             art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
                             util::CreateAssn(*fMyProducerModule, event, cosmicTag, clusterPtrVec, *cosmicClusterAssociations);
-                	     mf::LogInfo("Cluster2DNuAlg")  <<"output>>  CosmicTag->CosmicScore: "<<cosmicTag->CosmicScore()<<" ClusterPtrVec.size: "<<clusterPtrVec.size()<<std::endl;
                 	                                    
 				
 			}
@@ -301,7 +291,6 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
     
     // Add clusters and associations to event.
     event.put(std::move(cosmicClusterAssociations));
-   // event.put(std::move(clustcol));
     
     return true;
 }

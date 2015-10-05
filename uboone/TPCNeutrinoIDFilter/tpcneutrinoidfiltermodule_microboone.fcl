@@ -5,8 +5,7 @@ microboone_tpcneutrinoidfilter:
  module_type:              "TPCNeutrinoIDFilter"
  TrackModuleLabel:         "trackkalmanhit"
  VertexModuleLabel:        "pandoraNu"
- #CosmicTaggerAssocLabel:   "trackkalmanhit"
- CosmicTaggerAssocLabel:   "ccclustertag"
+ CosmicTaggerAssocLabel:   "trackkalmanhit"
 }
 
 END_PROLOG
