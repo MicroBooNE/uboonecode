@@ -1,9 +1,11 @@
 # find_ups_product is meant to be called from the top CMakeLists.txt file
 
 add_subdirectory( cfdiscriminator_algo )
+add_subdirectory( subevent_algo )
 
 simple_plugin( SubEventBuilder "module"
 	       uboone_cfdiscriminator
+	       uboone_subeventalgo
                ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
                ${ART_FRAMEWORK_PRINCIPAL}

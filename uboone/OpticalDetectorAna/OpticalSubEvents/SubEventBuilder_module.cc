@@ -19,7 +19,11 @@
 
 #include <memory>
 
-#include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/CFDFire.hh"
+#include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEvent.hh"
+#include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEventList.hh"
+#include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEventModule.hh"
+#include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEventModConfig.hh"
+#include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/WaveformData.hh"
 
 class SubEventBuilder;
 
