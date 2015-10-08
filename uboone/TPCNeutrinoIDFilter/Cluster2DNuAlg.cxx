@@ -66,10 +66,8 @@ void Cluster2DNuAlg::reconfigure(fhicl::ParameterSet const &pset)
     // Assume we could be called externally with the top level module's complete parameter set
     const fhicl::ParameterSet& myPset = pset.get<fhicl::ParameterSet>("TPCCluster2DNuAlg");
     
-    //fClusterModuleLabel      = myPset.get<std::string> ("ClusterModuleLabel",   "fuzzycluster");
-    //fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel",    "trackKalmanHitTag");
-    fClusterModuleLabel      = myPset.get<std::string> ("ClusterModuleLabel",   "cccluster");
-    fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel",    "ccclusterTag");
+    fClusterModuleLabel      = myPset.get<std::string> ("ClusterModuleLabel",   "fuzzycluster");
+    fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel",    "fuzzyclusterTag");
     fPlaneToCheck            = myPset.get<size_t>      ("PlaneToCheck",         2);
     fMinimumHits             = myPset.get<size_t>      ("MinimumHits",          10);
     fMaxCosmicScore          = myPset.get<float>       ("MaxCosmicScore",       0.4);
@@ -89,18 +87,27 @@ void Cluster2DNuAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs) {}
 void Cluster2DNuAlg::produces(art::EDProducer* owner)
 {
     fMyProducerModule = owner;
+    fMyProducerModule->produces< std::vector<anab::CosmicTag> >();
+    fMyProducerModule->produces< std::vector<recob::Cluster> >();
     fMyProducerModule->produces< art::Assns <anab::CosmicTag, recob::Cluster> >();
+    //fMyProducerModule->produces< art::Assns <recob::Cluster, recob::Cluster> >();
 }
 
     
 bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
 {
     // Agreed convention is to ALWAYS output to the event store so get a pointer to our collection
+    //std::unique_ptr<std::vector<recob::Cluster> > clusterPtrVec(new std::vector<recob::Cluster>);
+    //std::unique_ptr<std::vector<anab::CosmicTag> > cosmiccol(new std::vector<anab::CosmicTag>);
+    //std::vector<anab::CosmicTag>  cosmicTagPtrVec(new art::Ptr<anab::CosmicTag>);
+    //std::vector<recob::Cluster>  clusterPtrVec(new art::Ptr<recob::Cluster>);
     std::unique_ptr<art::Assns<anab::CosmicTag, recob::Cluster> > cosmicClusterAssociations(new art::Assns<anab::CosmicTag, recob::Cluster>);
-    
+//    std::unique_ptr<art::Assns<recob::Cluster, recob::Cluster> > cosmicClusterAssociations(new art::Assns<recob::Cluster, recob::Cluster>);
+ 
     // Recover the handles to the cluster collection we want to analyze.
     art::Handle< std::vector<recob::Cluster> > clusterVecHandle;
     
+    std::vector<art::Ptr<recob::Hit>> clusterHitVec;
     event.getByLabel(fClusterModuleLabel, clusterVecHandle);
     
     // Require valid handle, otherwise nothing to do
@@ -145,7 +152,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                 if (!cosmicVec.empty())
                 {
                     art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
-                    
+                    //cosmiccol->push_back(cosmicTag->CosmicScore()); 
                     if (cosmicTag->CosmicScore() >= fMaxCosmicScore) continue;
                 }
                 
@@ -164,7 +171,6 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
 
                     // Container to hold the clusters to associate
                     std::vector<art::Ptr<recob::Cluster>> clusterPtrVec;
-                    
                     float deltaWire = fabs(cluster->StartWire() - cluster->EndWire());
                     
                     if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire())
@@ -291,6 +297,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
     
     // Add clusters and associations to event.
     event.put(std::move(cosmicClusterAssociations));
+    //event.put(std::move(clusterPtrVec));
     
     return true;
 }

@@ -11,7 +11,7 @@ microboone_tpcTracksPlusVtxAlg:
 microboone_tpcCluster2DNuAlg:
 {
     ClusterModuleLabel:         "fuzzycluster"
-    CosmicModuleLabel:          "trackKalmanHitTag"
+    CosmicModuleLabel:          "fuzzyclusterTag"
     PlaneToCheck:               2
     MinimumHits:                10
     MaxCosmicScore:             0.4
@@ -43,7 +43,7 @@ microboone_tpcneutrinoidfilter:
     module_type:                  "TPCNeutrinoIDFilter"
     VertexModuleLabelVec:         ["pandoraNu"]
     VtxTrackAssnModuleLabelVec:   ["vtxPlusTrkPanKal"]
-    Cluster2DCosmicProducerLabel: "trackkalmanhittag"
+    Cluster2DCosmicProducerLabel: "fuzzyclustertag"
     Cluster2DCosmicClusterAssns:  "cluster2D"
 }
 
