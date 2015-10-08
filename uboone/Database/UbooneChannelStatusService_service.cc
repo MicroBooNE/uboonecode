@@ -12,7 +12,6 @@
 
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
-#include "Utilities/DetectorProperties.h"
 
 namespace lariov{
 
@@ -91,7 +90,6 @@ namespace lariov{
     if (!digitVecHandle.isValid()) return;
 
     art::ServiceHandle<geo::Geometry > geo;
-    art::ServiceHandle<util::DetectorProperties> detectorProperties;
 
     // Loop over raw digits, calculate the baseline rms of each one, and 
     // declare a channel noisy if its rms is above user-defined threshold 
