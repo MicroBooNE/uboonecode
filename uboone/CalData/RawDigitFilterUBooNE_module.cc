@@ -586,10 +586,11 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                         // recalculate rms
                         double rmsVal   = 0.;
                         double pedestal = pedestalWireVec[wireAdcItr.first];
+                        double pedCor   = pedCorWireVec[wireAdcItr.first];
                         
                         for(const auto& adcVal : wireAdcItr.second)
                         {
-                            double adcLessPed = adcVal - pedestal;
+                            double adcLessPed = adcVal - pedestal + pedCor;
                             rmsVal += adcLessPed * adcLessPed;
                         }
                         
