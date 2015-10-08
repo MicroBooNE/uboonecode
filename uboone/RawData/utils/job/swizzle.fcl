@@ -49,8 +49,13 @@ source:
   module_type:	   LArRawInputSourceUBooNE
   maxEvents:       -1
   huffmanDecode:   true
-  swizzleTPC:      false
-  swizzlePMT:      false
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTriggerType: ALL ## This is the only option that works currently!
+#  swizzleTriggerType: BNB
+#  swizzleTriggerType: EXT
+#  swizzleTriggerType: NuMI
+#  swizzleTriggerType: CALIB
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
@@ -70,8 +75,8 @@ outputs:
 
 physics:
 {
- #stream1:   [ out1 ] ## commented out to avoid writing output file - this is not desirable for production!
- stream1:   [ ]
+ stream1:   [ out1 ] ## commented out to avoid writing output file - this is not desirable for production!
+ #stream1:   [ ]
  end_paths: [ stream1 ]
 }
 

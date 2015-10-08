@@ -10,7 +10,6 @@ if len(sys.argv) < 2:
  runNumbers = [2365]
  runNumbers = [2704]
  runNumbers = [2952]
-# runNumbers = ["RWMcheck"]
 else:
   ### How to actually do it - USAGE: python makeSwizzlerPlots.py 100 101 102... etc (100..102 are run numbers)
   runNumbers = []
@@ -61,6 +60,7 @@ for runNumber in runNumbers:
 
   
   for event in tree:
+    
     #print lastFrame
     if lastFrame < 0:
       firstEventTime = event.triggerTime/1e6
@@ -238,6 +238,8 @@ for runNumber in runNumbers:
 
   hSampleDiffbetweenRWMAndBNBTrig = ROOT.TH1D("sample diff from trigger BNB to RWM","sample diff from trigger BNB to RWM",1600,-96000,96000)
   hFrameDiffbetweenRWMAndBNBTrig = ROOT.TH1D("frame diff from trigger BNB to RWM","frame diff from trigger BNB to RWM",40,-20,20)
+
+  hTimeDiffTriggerToWaveForm = ROOT.TH1D("waveform time - trigger time","waveform time - trigger time",64,-3200,4800)
   
 
   for event in tree:
@@ -247,7 +249,16 @@ for runNumber in runNumbers:
     FEM5triggerSample = event.FEM5triggerSample
     FEM6triggerFrame = event.FEM6triggerFrame
     FEM6triggerSample = event.FEM6triggerSample
-    
+
+    for i in xrange(event.N_PMT_waveforms - 1):
+      if event.PMT_waveform_times[i] > 1e-200 and event.PMT_waveform_times[i] < 1e50:
+      #print event.PMT_waveform_times[i], event.triggerTime
+        hTimeDiffTriggerToWaveForm.Fill( event.PMT_waveform_times[i] - event.triggerTime )
+        if event.PMT_waveform_times[i] - event.triggerTime > 4800:
+          print "Overflow!", event.PMT_waveform_times[i] - event.triggerTime, event.PMT_waveform_times[i]
+        if event.PMT_waveform_times[i] - event.triggerTime < -3200:
+          print "Underflow!", event.PMT_waveform_times[i] - event.triggerTime, event.PMT_waveform_times[i]
+
 #    if event.triggerBitBNB:
 #      print "trigger time - RO time", event.triggerTime - event.RO_BNBtriggerTime
 #      print event.triggerTime, event.RO_BNBtriggerTime
@@ -279,14 +290,67 @@ for runNumber in runNumbers:
   
   #  hFrameDiff.Fill(FEM6triggerFrame - triggerFrame)
   #  hSampleDiff.Fill(FEM6triggerSample - triggerSample)
+    referenceFrame = FEM5triggerFrame
+    referenceSample = FEM5triggerSample
+    if FEM5triggerFrame != referenceFrame:
+      print "Frames don't agree! (PMT FEM5)", FEM5triggerFrame, referenceFrame
+    if FEM6triggerFrame != referenceFrame:
+      print "Frames don't agree! (PMT FEM6)", FEM6triggerFrame, referenceFrame
+    if event.TPC1triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC1)", event.TPC1triggerFrame, referenceFrame
+    if event.TPC2triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC2)", event.TPC2triggerFrame, referenceFrame
+    if event.TPC3triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC3)", event.TPC3triggerFrame, referenceFrame
+    if event.TPC4triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC4)", event.TPC4triggerFrame, referenceFrame
+    if event.TPC5triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC5)", event.TPC5triggerFrame, referenceFrame
+    if event.TPC6triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC6)", event.TPC6triggerFrame, referenceFrame
+    if event.TPC7triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC7)", event.TPC7triggerFrame, referenceFrame
+    if event.TPC8triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC8)", event.TPC8triggerFrame, referenceFrame
+    if event.TPC9triggerFrame != referenceFrame:
+      print "Frames don't agree! (TPC9)", event.TPC9triggerFrame, referenceFrame
+    if FEM5triggerSample != referenceSample:
+      print "Samples don't agree! (PMT FEM5)", FEM5triggerSample, referenceSample
+    if FEM6triggerSample != referenceSample:
+      print "Samples don't agree! (PMT FEM6)", FEM6triggerSample, referenceSample
+    if event.TPC1triggerSample != referenceSample:
+      print "Samples don't agree! (TPC1)", event.TPC1triggerSample, referenceSample
+    if event.TPC2triggerSample != referenceSample:
+      print "Samples don't agree! (TPC2)", event.TPC2triggerSample, referenceSample
+    if event.TPC3triggerSample != referenceSample:
+      print "Samples don't agree! (TPC3)", event.TPC3triggerSample, referenceSample
+    if event.TPC4triggerSample != referenceSample:
+      print "Samples don't agree! (TPC4)", event.TPC4triggerSample, referenceSample
+    if event.TPC5triggerSample != referenceSample:
+      print "Samples don't agree! (TPC5)", event.TPC5triggerSample, referenceSample
+    if event.TPC6triggerSample != referenceSample:
+      print "Samples don't agree! (TPC6)", event.TPC6triggerSample, referenceSample
+    if event.TPC7triggerSample != referenceSample:
+      print "Samples don't agree! (TPC7)", event.TPC7triggerSample, referenceSample
+    if event.TPC8triggerSample != referenceSample:
+      print "Samples don't agree! (TPC8)", event.TPC8triggerSample, referenceSample
+    if event.TPC9triggerSample != referenceSample:
+      print "Samples don't agree! (TPC9)", event.TPC9triggerSample, referenceSample
+
+
+#    if FEM5triggerFrame != FEM6triggerFrame:
+#      print "FEM trigger frames don't agree!", FEM5triggerFrame, FEM6triggerFrame
+#      print "triggerSample = ", triggerSample
+#    if FEM5triggerSample != FEM6triggerSample:
+#      print "FEM trigger samples don't agree!", FEM5triggerSample, FEM6triggerSample
+#      print "triggerSample = ", triggerSample
+
+  hTimeDiffTriggerToWaveForm.Draw()
+  if save:
+    canv.SaveAs("plots/PMT_flash_dtFromTrigger"+str(runNumber)+".eps")
+  else:
+    raw_input()
   
-    if FEM5triggerFrame != FEM6triggerFrame:
-      print "FEM trigger frames don't agree!", FEM5triggerFrame, FEM6triggerFrame
-      print "triggerSample = ", triggerSample
-    if FEM5triggerSample != FEM6triggerSample:
-      print "FEM trigger samples don't agree!", FEM5triggerSample, FEM6triggerSample
-      print "triggerSample = ", triggerSample
- 
   hFrameDiffbetweenROAndBNBTrig.Draw()
   if save:
     canv.SaveAs("plots/ROtoTrigFrameDiffBNB"+str(runNumber)+".eps")
