@@ -1,0 +1,93 @@
+Global Monitor Test System
+--------------------------
+18-Oct-2002	Harrison B. Prosper
+
+(A) 	Introduction
+	------------
+
+In order to make it possible to test the Global Monitor System independently
+of the existence of a global run, I have developed a test system that mimics
+the operations in the real system. At the heart of the test system is the
+newly developed job control script GMjob.py, which resides in the scripts
+directory of the global_mon package. GMjob.py script is intended to replace 
+the six shell scripts that are currently used to launch the six GM jobs, three
+for Trigger Examine and three for Physics Examine. The GMjob.py script is
+configured using a Job Description File, an example of which is shown below.
+
+#---------------------------------------------------------------------------
+# File:		GMhisto.jdf
+# Description:	Job Description File for Trigger Examine
+# Created:	18-Oct-2002 Harrison B. Prosper
+#---------------------------------------------------------------------------
+USER	= 'd0gm'			# User name under which to run prog.
+HOST	= 'd0ol33'			# Host on which program is to be run
+TITLE   = 'GMhisto'			# Window title
+DISPLAY = 'd0ol33.fnal.gov:0.2'		
+
+# rund0exe parameters
+
+PROGRAM	= 'gmtuple'
+PACKAGE	= 'global_mon'
+RCP	= 'GM.rcp'
+OUTDIR	= 'tuple'
+ROOTFILE= 'tuple.root'
+
+# Histogrammer
+
+MACRO		= 'global_mon/test/GMhisto.C'	# Histogramming macro
+HISTFILE	= 'histo.root'
+MINFILESIZE	= 1	# Minimum file size in Kbytes before starting macro
+WAITTIME	= 10	# Repetition period
+
+# Browser
+
+CONFIGFILE	= 'global_mon/test/GMhisto.cfg'
+
+
+The test system, using GMjob.py and GMhisto.jdf, runs a program called gmtuple
+that creates an updating root-tuple called tuple.root in the directory
+
+	$GM_RELEASE_DIR
+
+The creation of tuple.root is akin to the creation of d0_analyze.root. GMjob.py
+then runs a histogrammer called GMhisto.C that creates updating histograms in 
+the file histo.root in the development area
+
+	$GM_RELEASE_DIR
+
+
+Finally, an executable version of gmbrowser is run to view the histograms. 
+
+(B) 	Brief Description of New Elements of global_mon
+ 	-----------------------------------------------
+
+The global_mon package is in the development area $GM_RELEASE_DIR/global_mon.
+The package contains:
+
+	1. gmbrowser	An executable version of GM.cpp
+
+	2. gmtuple	A program to create a simple updating root-tuple
+			in $GM_RELEASE_DIR/tuple called tuple.root
+
+	3. GMhisto.C	A histogramming macro that creates 4 simple updating
+			histograms from tuple.root, in the file histo.root
+
+	4. GMhisto.jdf	An example of a Job Description File that controls the
+			script GMjob.py that launches the specified GM jobs
+
+				a. The root-tuple maker
+				b. The histogrammer
+				c. The browser
+
+	5. GMhisto.cfg	An example of a GM browser configuration file
+
+The files GMhisto.* are in global_mon/test.
+
+
+(C) 	Running Test System
+	-------------------
+
+	cd /online/examines/GMdevel		# Go to release area 
+	source global_mon/test/gmtest.sh	# Launch test
+
+

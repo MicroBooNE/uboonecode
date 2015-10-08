@@ -1,0 +1,331 @@
+Setting up gmbrowser
+--------------------
+
+  Root: Currently we are using Root v3_05_07a. To set up this version do:
+
+  setup root v3_05_07a -q GCC_3_1:exception:opt:thread
+
+
+  Before running gmbrowser, you will need to create a few configuration
+  files and set up some environment variables.
+
+  - GM_ICON_DIR
+    points to a directory containing icon files used by gmbrowser.
+    If this environment variable is not set, a warning message is
+    written by gmbrowser and a few buttons will not be available.
+    However, you will be able to run gmbrowser even if this variable
+    is not set.
+
+    setenv GM_ICON_DIR /home/d0gm/global_mon/icons
+
+  - Create a configuration file (i.e. TrigEx.cfg).
+    See below.
+
+  - $HOME/.GMBrowser
+    Contains some start up preferences. This file is not necessary
+    but will set defaults if it exists.
+
+
+Configuration File Format
+-------------------------
+
+  gmbrowser uses a configuration file to tell it where to find
+  various files, and which histograms to put on a given page.
+  An example configuration file is included at the end of this 
+  document.
+
+  Comments: Comments can be included at any point within the configuration
+            file. They are preceded by the pound sign (#).
+
+  Line Length: The current version of gmbrowser supports line lengths
+               up to 255 characters. 
+
+  Multiple Files: You can now access multiple .root files with gmbrowser.
+                  Just include more than one "Root.File:" directive. The
+                  format for multiple files is as follows. A maximum of
+                  5 file+ref file pairs are allowed.
+
+     Root.File:  file1.root
+     Page.Title: page1
+     Page.Division: 2 2
+       h1 /  h1 title 
+       h2 /  h2 title
+       h3 /  h3 title
+       h4 /  h4 title
+
+     Root.File:  file2.root
+     Page.Title: page2
+     Page.Division: 1 1
+       h5 / h5 title
+
+  Commands
+  --------
+
+  Root.File: <File Name>
+    - Name of the .root file to be read by gmbrowser.
+
+  Root.File.Add: <File Name>
+    - This allows one to sum together multiple .root files for 
+      increased statistics.
+      For example:
+
+      Root.File:     TrigEx.root
+      Root.File.Add: TrigEx2.root
+      Root.File.Add: TrigEx3.root
+
+      This will sum the histograms from the three files listed before
+      plotting a given histogram.
+
+  Root.File.Ref: <File Name>
+    - Name of .root file containing reference histograms.
+
+  WWW.Dir: <Path Name>
+    - Name of directory to store .gif files for displaying
+      on web server.
+
+  Load.Dir: <Path Name>
+    - Directory containing the configuration files. (i.e. TrigEx.cfg)
+      This is only necessary if you want to be able to read in 
+      a new configuration file while gmbrowser is running.
+
+  Save.Dir: <Path Name>
+    - Directory where .jpg, .ps and .eps files are written.
+
+  Update.On: <0/1>
+    - Turns on(1) or off(0) the automatic updating (i.e. rereading of
+      the .root files). This feature is useful if the input .root file
+      is being updated and you want to see an updated plot. By default
+      Updating is turned off when gmbrowser starts.
+
+  Debug.On: <0/1>
+    - Turns on(1) or off(0) debugging statements. This option prints out
+      a large amount of output. So, only use it if you are having a
+      problem with gmbrowser.
+
+  Cycle.On: <0/1>
+    - Turns on(1) or off(0) the cycling through of each defined page
+      of histograms. When cycling is on, a postscript file of each page
+      is generated after the page is drawn. By default, cycling is turned
+      off when gmbrowser is started.
+
+  Update.Period: <number>
+    - Number of seconds between updates if updating is enabled.
+
+  Cycle.Period: <number>
+    - Number of seconds each page is displayed when cycling is
+      turned on.
+
+  Cycle.Plots: <0/1>
+    - Turn off or on the generation of plots whenever the cycle option
+      is chosen. This will generate .gif plots in the WWW.Dir and .ps
+      plots in the Save.Dir areas. Default is on.
+
+  TotalEvent.Hist: <histogram name>
+    - Name of a histogram used to determine the total number of events 
+      contained in the roottuple. gmbrowser gets the number of entries from
+      this histogram and displays it at the bottom of the canvas.
+
+  Histogram page definitions
+  --------------------------
+    Page.Title: <Name>
+      - Title for a given page of histograms.
+
+    Page.HelpFile: <Name>
+      - Name of file containing a description of the plots on this page.
+        This is just a text file which should contain useful information
+        about the plots.
+
+    Page.Macro.File: <Name>
+      - Name of a file containing macros. If a macro is defined, then
+        one should not use the Page.Division and histogram definition
+        directives.
+      - The file name should include the path to the macro file. It can
+        either be the absolute path, or the relative path from where
+        the executable is run.
+      - An example macro can be found in $GMBROWSER_dir/gmbrowser/macros.
+
+    Page.Macro.Func: <Name>
+      - Name of the macro routine to be executed. This directive should
+        follow the Page.Macro.File directive. 
+      - <Name> should just be the name. i.e. myfunc
+        Do NOT include the parentheses (i.e. myfunc()).
+      - The definition of myfunc should include the canvas, and pointers
+        to the data and reference histograms.
+        
+        void myfunc(TCanvas *c1, TFile *data, TFile *ref)
+
+    Page.Division: <nx> <ny>
+      - Division of histogram page (i.e. nx by ny).
+      - Useful divisions are (1 1), (2 2) (2 3).
+      - Following the Page.Division command are the list of
+        histograms for this page. Be sure to have no more than
+        (nx) X (ny) histograms listed.
+
+    Page.ShowRunNumber: <0/1>
+      - Turns off/on option to show run number in given page.
+
+    <hist name> | <title> [| <option>]
+      - histogram name is the name associated with each histogram
+        (i.e. TH1F(hist_name, title, nbins, low, high) ).
+      - title is the title that you want to include for this histogram.
+      - options:
+         * You can include one or more of the following options on a line:
+         * The options should be separated by spaces
+         * lego, surf,  or any TH1(2)->SetOption(option) 
+         * logx - Use logarithmic x axis
+         * logy - Use logarithmic y axis
+         * logz - Use logarithmic z axis
+         * limits(<ymin>:<ymax>) - Fix the min and max for the y axis.
+                                 - Be sure there are no spaces 
+                                 - i.e. limits(0:500)
+                                 - if the maximum value is set to zero, then
+                                   the maximum will float while the minimum
+                                   will be set to the ymin value.
+         * stats(mode)           - Change appearance of statistics box
+                                 - mode has form used in
+                                   gStyle->SetOptStat(1111)
+         * lwid(width)           - Set the histogram line width (in pixels)
+                                   minimum number is 1.
+         * config(<file.cfg>)    - Associates a new configuration file with
+                                   the named histogram. When the user double
+                                   clicks on the displayed histogram, the new
+                                   configuration file is read in and gmbrowser
+                                   pages are updated. To return to the previous
+                                   configuration file, click on the "Previous
+                                   Config" button.
+         * noscale - Doesn't rescale the reference histogram to the
+                    displayed histogram.
+         * noKolfit - Don't perform the Kolmogorov test between the
+                      reference and displayed histogram.
+         * noRef - turn off displaying of reference histogram.
+         * Any of the histogram options:
+           i.e. H B C E E0 E1 E2 E3 E4 L P (for 1D plots)
+                BOX COL etc. (for 2D plots)
+
+    Example:
+  
+       h_electrons_N  |  Number of L3 electrons  | logy limits(0.1:5000)
+
+Options available for .GMBrowser file.
+-------------------------------------
+  Printer.Command <command>
+    - Sets command for printing. Default is "lpr -P".
+  Printer <name>
+    - Sets name of printer. Default is "ps5".
+  Canvas.Color <number>
+    - Sets color of canvas. Default is 42.
+  Update <yes/no>
+    - Turns on automatic rereading of .root files.
+  Cycle <yes/no>
+    - Turns on automatic cycling through histogram pages.
+
+
+Starting gmbrowser
+------------------
+
+  setup D0RunII <version> 
+
+  gmbrowser <Configuration File> <Title>
+
+  Example:  gmbrowser TrigEx.cfg Trigger
+  
+  Title can be any character string. The current version of is stored
+  in ~d0gm/bin in the online cluster. 
+
+  NOTE: Because gmbrowser is linked to shared libraries, you have to 
+  be sure to use the same version of root as the one that gmbrowser was
+  linked to. Currently this is version p13.06.00.
+
+
+Running gmbrowser
+-----------------
+
+  Once gmbrowser starts you should see a display that contains a histogram
+  window on the right and a tabbed list of histogram pages on the left.
+  You can switch to any page by clicking on the appropriate page name
+  in the tabbed list. The usual root features for histogram are available.
+  i.e. resizing, moving labels, etc.
+
+  If any of the three features (cycling, autosaving and updating) are
+  enabled, then the tabs in the upper right with be green. You can
+  toggle the behavior by clicking on one of these buttons.
+
+  To save a copy of a given plot, choose "Save as [.jpg, .gif, .ps]" 
+  from the "File" menu.  The output file will be written to the "Save" 
+  directory specified in the configuration file.
+
+ ----------------------------
+| Example configuration file |
+ ----------------------------
+
+#-------------------------------------------------------------------------
+# File:		TrigEx.cfg
+# Description:	Configuration file for Global Monitor Histogram Browser
+#               for Trigger Examine
+# Created:	08-Oct-2002 Pushpa Bhat
+#		12-Oct-2002 HBP move printer config to $HOME/.GMBrowser
+#				Add WWW.Dir etc.
+#               23-Nov-2002 Pushpa  Add MET plots
+#               10-Dec-2002 ECC - Remove muon plots and add EM_HI_F0 plots.
+#               07-Jan-2003 PB  Add AUTOSAVE parameters
+# 
+#-------------------------------------------------------------------------
+# !!!!!!!!! Important: Lines can not be longer than 80 characters.
+# Configuration files
+Load.Dir:	$GM_SCRIPTS_DIR
+
+# Plots etc.
+Save.Dir:	.
+WWW.Dir:	/mnt/www/htdocs/groups/gm/TrigEx
+
+Root.File:	http://kaon1.physics.arizona.edu/~elliott/TrigEx.root
+Root.File.Ref:	http://kaon1.physics.arizona.edu/~elliott/TrigEx_ref.root 
+
+Update.Period:	3	# seconds
+Cycle.Period:	10	# seconds
+
+AutoSave.Period:        300      # seconds
+AutoSave.On:             1
+
+Page.Title:    L1 Muon Triggers
+Page.Helpfile: $GM_HELP_DIR/L1Muon.hlp
+Page.Division: 2 2
+	L1Mu_ScintTrigs	| L1 Muon Scintillator Triggers
+	L1Mu_WireTrigs  | L1 Muon Wire Triggers
+	L1Mu_BOTTrigs  | L1 Muon Beginning of Turn Triggers
+
+Page.Title:    L2 global Jets
+Page.Division: 3 2
+	h_N_L2jets   | number of L2 jets
+	h_Pt_L2jets  | pt of L2 jets
+	h_Eta_L2jets | eta of L2 jets
+	h_Phi_L2jets | Phi of L2 jets
+	h_EtaPhi_L2jets | eta vs. phi of L2 jets
+
+Page.Title:    L2 global EM Objects 1
+Page.Division: 3 2
+	h_N_L2emobjects | Number of L2 EM objects
+	h_Pt_L2emobjects     | L2 EM objects Pt
+	h_Eta_L2emobjects    | L2 EM objects Eta
+	h_Phi_L2emobjects    | L2 EM objects Phi
+	h_EtaPhi_L2emobjects | L2 EM objects Eta vs Phi
+
+Page.Title:    L2 global EM Objects 2
+Page.Division: 1 2
+	h_Iso_L2emobjects    | L2 EM objects Iso
+	h_EMFrac_L2emobjects | L2 EM objects Emfraction
+
+Page.Title:   Macro Test
+Page.Macro.File: test.C
+Page.Macro.Func: myfunc
+
+ -------------------------
+| Example .GMBrowser file |
+ -------------------------
+
+Created:	        Fri Oct 11 00:37:52 2002
+Printer.Command:        flpr -q
+Printer:                dab1_hp8000
+Canvas.Color:           42
+Update:                 yes
+Cycle:                  yes

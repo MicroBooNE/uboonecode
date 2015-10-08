@@ -1,0 +1,9 @@
+Feb. 25, 2004
+E. Cheu
+
+To make gmbrowser do the following:
+
+  make -f Makefile
+
+Currently, gmake and SRT tools don't work. On clued0, add
+-ldl to LIBS line
