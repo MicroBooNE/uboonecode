@@ -35,7 +35,6 @@
 // LArSoft libraries
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "Geometry/Geometry.h"
-#include "Filters/ChannelFilter.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RecoBase/Wire.h"
@@ -45,6 +44,9 @@
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
 #include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "CalibrationDBI/Interface/IChannelStatusService.h"
+#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+
 #include "WaveformPropertiesAlg.h"
 
 /* unused function
@@ -146,7 +148,7 @@ namespace caldata {
     bool fuPlaneRamp;     ///< set true for correct U plane wire response
     int  fSaveWireWF;     ///< Save recob::wire object waveforms
     size_t fEventCount;  ///< count of event processed
-    int  fMaxAllowedChanStatus;
+    int  fMinAllowedChanStatus;
     
     void doDecon(std::vector<float>& holder, 
       raw::ChannelID_t channel, unsigned int thePlane,
@@ -216,7 +218,7 @@ namespace caldata {
     fuPlaneRamp           = p.get< bool >                          ("uPlaneRamp");
     fFFTSize              = p.get< int  >                          ("FFTSize");
     fSaveWireWF           = p.get< int >                           ("SaveWireWF");
-    fMaxAllowedChanStatus = p.get< int >                           ("MaxAllowedChannelStatus");
+    fMinAllowedChanStatus = p.get< int >                           ("MinAllowedChannelStatus");
 
     fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
         
@@ -309,7 +311,7 @@ namespace caldata {
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    std::unique_ptr<filter::ChannelFilter> chanFilt(new filter::ChannelFilter());
+    const lariov::IChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::IChannelStatusService>()->GetFilter();
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double DeconNorm = sss->GetDeconNorm();
@@ -337,8 +339,8 @@ namespace caldata {
       channel = digitVec->Channel();
 
       // The following test is meant to be temporary until the "correct" solution is implemented
-      if (chanFilt->GetChannelStatus(channel) == filter::ChannelFilter::NOTPHYSICAL) continue;
-        
+      if (!chanFilt.IsPresent(channel)) continue;
+
       // Testing an idea about rejecting channels
       if (digitVec->GetPedestal() < 0.) continue;
 
@@ -360,7 +362,7 @@ namespace caldata {
       //  minSepPad = fMinSep + fPostROIPad[thePlane];
       
       // skip bad channels
-      if(!(chanFilt->GetChannelStatus(channel) > fMaxAllowedChanStatus)) {
+      if( chanFilt.Status(channel) >= fMinAllowedChanStatus) {
         
           // uncompress the data
           raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());

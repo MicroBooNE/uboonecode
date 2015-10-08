@@ -52,13 +52,13 @@ physics:
 
   ### filter out the RawDigit noise
   # -- old version -- digitfilter:            @local::microboone_rawdigitfilter
-  digitfilter:         @local::microboone_noisefilter
+  
+  ### Noise filter does not really work, use rawdigitfilter
+  digitfilter:         @local::microboone_rawdigitfilter
+  # digitfilter:         @local::microboone_noisefilter
   
   ### flash finders
-  opflash          : @local::microboone_opflash_beam_highgain
-  opflashLow       : @local::microboone_opflash_beam_lowgain
-  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
-  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  opflash:             @local::microboone_opflash
 
   ### calwire producers
   caldata:             @local::microboone_calroi
@@ -89,9 +89,6 @@ physics:
  reco: [ rns,
          digitfilter,
          opflash,
-         opflashLow,
-         opflashCosmic,
-         opflashCosmicLow,
          caldata,
 	     calWireInvert,
          gaushit,
@@ -136,9 +133,14 @@ outputs:
 ### Here, we overwrite ALL module labels with the ones defined above.
 
 # These were the settings for the old RawDigitFilter
-#physics.producers.digitfilter.TruncMeanFraction:                0.1
-#physics.producers.digitfilter.NumWiresToGroup:                  [48, 48, 96]
+physics.producers.digitfilter.TruncMeanFraction:                0.1
+physics.producers.digitfilter.NumWiresToGroup:                  [48, 48, 96]
 
+physics.producers.opflash.InputModule:                          "optreadout"
+physics.producers.opflash.GenModule:                            "generator"
+physics.producers.opflash.InputLabels:                        [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
+                                                                "OpdetCosmicHighGain", "OpdetCosmicLowGain"]
+								
 physics.producers.caldata.DigitModuleLabel:                     "digitfilter"
 physics.producers.caldata.MaxAllowedChannelStatus:              1
 
@@ -169,7 +171,7 @@ physics.producers.linecluster.CCHitFinderAlg.MinRMSCol:          2
 physics.producers.linecluster.CCHitFinderAlg.ChiSplit:           100
 physics.producers.linecluster.CCHitFinderAlg.MaxXtraHits:        0
 
-physics.producers.fuzzycluster.HitsModuleLabel:                  "cchit"
+physics.producers.fuzzycluster.HitsModuleLabel:                  "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:               "caldata"
 
 physics.producers.cccluster.CalDataModuleLabel:                  "caldata"
@@ -180,11 +182,20 @@ physics.producers.cctrack.ClusterModuleLabel:                    "linecluster"
 physics.producers.cctrack.VertexModuleLabel:                     "linecluster"
 
 physics.producers.pandoraCosmic.GeantModuleLabel:                "largeant"
-physics.producers.pandoraCosmic.HitFinderModuleLabel:            "cchit"
+physics.producers.pandoraCosmic.HitFinderModuleLabel:            "gaushit"
 physics.producers.pandoraCosmic.ConfigFile:                      "PandoraSettings_MicroBooNE_Cosmic.xml"
 
 physics.producers.cluster3dpcatag.PFParticleModuleLabel:         "cluster3d"
 physics.producers.cluster3dpcatag.PCAxisModuleLabel:             "cluster3d"
+physics.producers.cluster3dpcatag.TPCXBoundary:                  10
+physics.producers.cluster3dpcatag.TPCYBoundary:                  10
+physics.producers.cluster3dpcatag.TPCZBoundary:                  10
+
+# Set the shaping time 
+services.SignalShapingServiceMicroBooNE.ShapeTimeConst: [2.0, 2.0, 2.0]
+
+
+
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :

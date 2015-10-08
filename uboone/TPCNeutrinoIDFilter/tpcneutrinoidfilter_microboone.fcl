@@ -1,0 +1,58 @@
+BEGIN_PROLOG
+
+microboone_tpcTracksPlusVtxAlg:
+{
+    TrackModuleLabel:           "trackkalmanhit"
+    CosmicModuleLabel:          "pandoraNu"
+    CosmicScoreCut:             0.4
+    NuVtxTrackDistCut:          4.5
+}
+
+microboone_tpcCluster2DNuAlg:
+{
+    ClusterModuleLabel:         "fuzzycluster"
+    CosmicModuleLabel:          "fuzzyclusterTag"
+    PlaneToCheck:               2
+    MinimumHits:                10
+    MaxCosmicScore:             0.4
+    MaximumTick:                6370
+    MinimumTick:                3210
+    MaximumWire:                3420
+    MinimumWire:                5
+    MaximumAngle:               0.5
+    MaximumMatchedLengthCut:    100.
+    MaximumLengthCut:           200.
+    MaximumLength:              500.
+    MinimumDeltaWires:          30.
+    MinimumDeltaTicks:          30.
+    MinCandidateClusters:       2
+    MaximumDistance:            10.
+    MaximumTime:                30.
+}
+
+microboone_tpcNeutrinoID:
+{
+    module_type:                "TPCNeutrinoID"
+    NeutrinoIDAlgName:          "TrackPairPlusVertexAlg"
+    TPCTracksPlusVertexAlg:     @local::microboone_tpcTracksPlusVtxAlg
+    TPCCluster2DNuAlg:          @local::microboone_tpcCluster2DNuAlg
+}
+
+microboone_tpcneutrinoidfilter:
+{ 
+    module_type:                  "TPCNeutrinoIDFilter"
+    VertexModuleLabelVec:         ["pandoraNu"]
+    VtxTrackAssnModuleLabelVec:   ["vtxPlusTrkPanKal"]
+    Cluster2DCosmicProducerLabel: "fuzzyclustertag"
+    Cluster2DCosmicClusterAssns:  "cluster2D"
+}
+
+microboone_tpcneutrinoidana:
+{
+    module_type:                  "TPCNeutrinoIDAna"
+    VertexModuleLabelVec:         ["pandoraNu"]
+    VtxTrackAssnModuleLabelVec:   ["vtxPlusTrkPanKal"]
+    FullyQualifiedInputFile:      "/pnfs/uboone/data/uboone/some/path/to/recon/file/recon.root"
+}
+
+END_PROLOG
