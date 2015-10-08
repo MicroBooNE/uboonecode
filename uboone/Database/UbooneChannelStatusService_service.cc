@@ -63,7 +63,7 @@ namespace lariov{
     fFindNoisyChannels  = pset.get<bool>                ("FindNoisyChannels",   false);
     fDigitModuleLabel   = pset.get<std::string>         ("DigitModuleLabel",    "daq");
     fTruncMeanFraction  = pset.get<float>               ("TruncMeanFraction",   0.1);
-    fRmsCut             = pset.get<std::vector<double> >("RMSRejectionCut",     std::vector<double>() = { 5.0, 5.0, 3.0});
+    fRmsCut             = pset.get<std::vector<double> >("RMSRejectionCut",     std::vector<double>() = { 20.0, 20.0, 10.0});
     
     //register callback to update local database cache before each event is processed
     reg.sPreProcessEvent.watch(this, &UbooneChannelStatusService::PreProcessEvent);

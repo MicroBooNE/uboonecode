@@ -44,7 +44,7 @@ microboone_channelstatus_service:
 {
   service_provider: UbooneChannelStatusService
   ChannelStatusProvider: @local::microboone_channelstatus_provider
-  FindNoisyChannels: true
+  FindNoisyChannels: false
 }
   
 END_PROLOG
