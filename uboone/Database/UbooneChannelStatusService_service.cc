@@ -92,7 +92,6 @@ namespace lariov{
 
     art::ServiceHandle<geo::Geometry > geo;
     art::ServiceHandle<util::DetectorProperties> detectorProperties;
-    unsigned int maxTimeSamples = detectorProperties->NumberTimeSamples();
 
     // Loop over raw digits, calculate the baseline rms of each one, and 
     // declare a channel noisy if its rms is above user-defined threshold 
@@ -105,12 +104,11 @@ namespace lariov{
       if (fProvider.IsBad(channel) || !fProvider.IsPresent(channel)) continue;
 
       unsigned int dataSize = digitVec->Samples();
-      maxTimeSamples = std::min(maxTimeSamples, dataSize);
 
 
       // vector holding uncompressed adc values
       std::vector<short> rawadc;
-      rawadc.resize(maxTimeSamples);
+      rawadc.resize(dataSize);
       raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
 
 
