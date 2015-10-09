@@ -8,14 +8,17 @@ namespace subevent {
 
   typedef std::vector< Flash >::iterator FlashListIter;
 
-  class FlashList : public TObject { 
+  //class FlashList : public TObject { 
+  class FlashList { 
 
   public:
     FlashList();
     ~FlashList();
     
 #ifndef __CINT__ // hide from rootcint
+#ifndef __GCCXML__
     int add( Flash&& opflash );
+#endif
 #endif
     Flash& get( int i );
     FlashListIter begin();
@@ -52,7 +55,7 @@ namespace subevent {
 
     
   public:
-    ClassDef( FlashList, 1 )
+    //ClassDef( FlashList, 1 )
   };
 
 }

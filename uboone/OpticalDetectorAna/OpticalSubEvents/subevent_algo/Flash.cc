@@ -2,7 +2,7 @@
 #include <iostream>
 #include <algorithm>
 
-ClassImp( subevent::Flash )
+//ClassImp( subevent::Flash )
 
 namespace subevent {
 
@@ -10,6 +10,8 @@ namespace subevent {
     area( 0.0 ), area30( 0.0 ), fcomp_gausintegral( 0.0 )
   {
     claimed = false;
+    expectation.clear();
+    waveform.clear();
   }
 
   Flash::Flash( int ch_, int tstart_, int tend_, int tmax_, float maxamp_, std::vector< double >& expectation_, std::vector< double >& waveform_ ) :
@@ -31,7 +33,11 @@ namespace subevent {
     storeExpectation( orig.expectation );
   }
 
-  Flash::~Flash() {}
+  Flash::~Flash() {
+    std::cout << "destroying "<< this << std::endl;
+    expectation.clear();
+    waveform.clear();
+  }
 
   void Flash::storeWaveform( const std::vector< double >& waveform_ ) {
     waveform.clear();

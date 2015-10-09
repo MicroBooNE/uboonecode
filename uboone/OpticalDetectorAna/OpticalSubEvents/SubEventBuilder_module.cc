@@ -18,6 +18,13 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <memory>
+#include <set>
+#include <map>
+#include <vector>
+#include <iostream>
+
+// LArSoft
+#include "RawData/OpDetWaveform.h"
 
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEvent.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEventList.hh"
@@ -46,7 +53,12 @@ public:
 private:
 
   // Declare member data here.
+  std::string fOpDetInputModule;
+  subevent::SubEventModConfig fConfig;
 
+  bool prepWaveforms( art::Event& event, subevent::WaveformData& wfms );
+  bool gatherWaveforms( art::Event& event, subevent::WaveformData& wfms );
+  void baselineCorrectWaveforms( subevent::WaveformData& wfms );
 };
 
 
@@ -54,6 +66,30 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
 // :
 // Initialize member data here.
 {
+
+  fOpDetInputModule           = p.get<std::string>( "inputModule");
+  fConfig.cfdconfig.threshold = p.get<int>( "threshold" );
+  fConfig.cfdconfig.deadtime  = p.get<int>( "deadtime" );
+  fConfig.cfdconfig.delay     = p.get<int>( "delay" );
+  fConfig.cfdconfig.width     = p.get<int>( "width" );
+  fConfig.cfdconfig.gate      = p.get<int>( "gate" );
+  fConfig.fastfraction        = p.get<double>( "fastfraction", 0.5 );
+  fConfig.slowfraction        = p.get<double>( "slowfraction", 0.5 );
+  fConfig.fastconst_ns        = p.get<double>( "fastconst_ns", 6.0 );
+  fConfig.slowconst_ns        = p.get<double>( "slowconst_ns", 1600.0 );
+  fConfig.pedsamples          = p.get<int>( "pedsamples", 100 );
+  fConfig.npresamples         = p.get<int>( "npresamples", 5 );
+  fConfig.maxchflashes        = p.get<int>( "maxchflashes", 30 );
+  fConfig.pedmaxvar           = p.get<double>( "pedmaxvar", 1.0 );
+  fConfig.spe_sigma           = p.get< double >( "spe_sigma", 15.625*4.0 );
+  fConfig.hgslot              = p.get<int>( "hgslot", 5 );
+  fConfig.lgslot              = p.get<int>( "lgslot", 6 );
+  fConfig.flashgate           = p.get<int>( "flashgate", 10 );
+  fConfig.maxsubeventloops    = p.get<int>( "maxsubeventloops", 50 );
+  fConfig.ampthresh           = p.get<double>( "ampthresh" );
+  fConfig.hitthresh           = p.get<int>( "hitthresh" );
+  fConfig.nspersample         = p.get<double>( "nspersample", 15.625 );
+
   // Call appropriate produces<>() functions here.
   produces< std::vector< subevent::SubEvent > >();
 }
@@ -61,22 +97,135 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
 void SubEventBuilder::produce(art::Event & e)
 {
   // Implementation of required member function here.
+
+  // test
+  subevent::Flash* aflash = new subevent::Flash();
+  delete aflash;
+  std::cout << "passed simple flash test" << std::endl;
+  
+
+  // get waveforms and prep them
+  subevent::WaveformData wfms;
+  bool ok = prepWaveforms( e, wfms );
+  if (!ok) {
+    std::cout << "trouble loading waveforms!" << std::endl;
+    return;
+  }
+  subevent::SubEventList subevents;
+
+  // hack: make spe calibration table
+  std::map< int, double > pmtspemap;
+  for (int i=0; i<36; i++)
+    pmtspemap[i] = 20.0;
+  
+  // Find subevents
+  formSubEvents( wfms, fConfig, pmtspemap, subevents );
+  std::cout << "subevents formed. now store in event." << std::endl;
+  
+  // transfer subevents to the event
+  std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
+  for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
+    subeventvec->emplace_back( *it );
+  }
+  e.put( std::move( subeventvec ) );
   
 }
 
-void SubEventBuilder::prepWaveforms( art::Event& e, WaveformData& wfms ) {
+bool SubEventBuilder::prepWaveforms( art::Event& event, subevent::WaveformData& wfms ) {
+  bool ok = gatherWaveforms( event, wfms );
+  //baselineCorrectWaveforms( wfms );
+  return ok;
+}
+
+bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData& wfms ) {
+
+  art::Handle< std::vector< raw::OpDetWaveform > > hgwfmHandle;
+  bool loadedhg = event.getByLabel( fOpDetInputModule, "OpdetBeamHighGain", hgwfmHandle );
   
-  art::Handle< raw::OpDetWaveform > hgwfmHandle;
-  event.getByLabel( opdetHandle, fOpDetInputModule, "OpdetBeamHighGain" );
-  
-  art::Handle< raw::OpDetWaveform > lgwfmHandle;
-  event.getByLabel( opdetHandle, fOpDetInputModule, "OpdetBeamLowGain" );
+  art::Handle< std::vector< raw::OpDetWaveform > > lgwfmHandle;
+  bool loadedlg = event.getByLabel( fOpDetInputModule, "OpdetBeamLowGain", lgwfmHandle );
+
+  if ( !loadedhg || !loadedlg ) {
+    std::cout << "Could not load optdet waveforms!" << std::endl;
+    return false;
+  }
+
+  std::vector< double > wfmstore;
+  std::set< int > use_lowgain_wfm;
 
   for ( auto const& opdetData: (*hgwfmHandle) ) {
-    optdata::Channel_t channel = opdetData.
-  }
-  
+    if ( opdetData.size()<600 ) {
+      std::cout << "skipping cosmic window: " << opdetData.size() << std::endl;
+      continue; // skip cosmic windows
+    }
+    raw::Channel_t channel = opdetData.ChannelNumber();
+    wfmstore.clear();
 
+    if ( wfmstore.size() != opdetData.size() ) {
+      wfmstore.reserve( opdetData.size() );
+    }
+
+    bool marked_for_lg = false;
+    double adcmax = 0.0;
+    std::cout << " ch " << channel << ": ";
+    for ( auto adc: opdetData ) {
+      if ( !marked_for_lg && adc>4090 ) {
+	marked_for_lg = true;
+	use_lowgain_wfm.insert( (int)channel );
+      }
+      wfmstore.push_back( (double)adc );
+      //std::cout << adc << " ";
+      if ( adcmax < (double)adc )
+	adcmax = (double)adc;
+    }
+    //std::cout << std::endl;
+    std::cout << "  adc max: " << adcmax << std::endl;
+    wfms.set( (int)channel, wfmstore );
+  }
+
+  if ( use_lowgain_wfm.size() > 0 ) {
+    for ( auto const& opdetData: (*lgwfmHandle) ) {
+      if ( opdetData.size()<600 )
+	continue; // skip cosmic windows
+      raw::Channel_t channel = opdetData.ChannelNumber();
+      if ( use_lowgain_wfm.find( (int)channel )!=use_lowgain_wfm.end() ) {
+	// marked to replace hg
+	wfmstore.clear();
+	for ( auto adc: opdetData ) {
+	  wfmstore.push_back( (double)adc );
+	}
+	wfms.set( (int)channel, wfmstore );
+      }// if marked for lg replacement
+    }// loop over lowgain waveforms
+  } // if replacements necessary
+
+  return true;
+}
+
+void SubEventBuilder::baselineCorrectWaveforms( subevent::WaveformData& wfms ) {
+  double RC = 50000.0; // ns
+  double f = exp( -15.625/RC );
+  std::vector< double > qcap;
+
+  
+  for ( subevent::ChannelSetIter itch=wfms.chbegin(); itch!=wfms.chend(); itch++ ) {
+
+    // calc charge on capacitor
+    qcap.clear();
+    if ( qcap.size()!=wfms.get( *itch ).size() )
+      qcap.reserve( wfms.get( *itch ).size() );
+    qcap.push_back( 0.0 );
+    for ( unsigned int tdc=1; tdc<wfms.get( *itch ).size(); tdc++ ) {
+      double adc = wfms.get( *itch ).at( tdc );
+      double q = 50.0*adc/RC + f*qcap.at( tdc-1 );
+      qcap.push_back ( q );
+    }
+    
+    // subtract correction
+    for ( unsigned int tdc=0; tdc<wfms.get( *itch ).size(); tdc++ ) {
+      wfms.get( *itch ).at( tdc ) -= qcap.at( tdc );
+    }
+  }
 }
 
 DEFINE_ART_MODULE(SubEventBuilder)

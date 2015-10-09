@@ -64,10 +64,11 @@ namespace subevent {
     opflash.storeExpectation(  subexp );
 
     // for debug
-    //std::cout << "return opflash: " << opflash.ch << " " << opflash.tstart << " " << opflash.tend << " " << opflash.tmax << " " << opflash.maxamp << std::endl;
-    //for ( int i=0; i<expectation.size(); i++)
-    //std::cout << expectation.at(i) << " ";
-    //std::cout << std::endl;
+    std::cout << "return opflash: " << opflash.ch << " " << opflash.tstart << " " << opflash.tend << " " << opflash.tmax << " " << opflash.maxamp << std::endl;
+    std::cout << " expectation of flash: ";
+    for ( int i=0; i<(int)expectation.size(); i++)
+    std::cout << expectation.at(i) << " ";
+    std::cout << std::endl;
 
     return 1;
   }
@@ -93,9 +94,9 @@ namespace subevent {
     double sig = 0.0;
     double thresh = 0.0;
     double chped = 0.;
-//     for (int i=0; i<5; i++)
-//       chped += waveform.at(i);
-//     chped /= 5.0;
+    for (int i=0; i<5; i++)
+      chped += waveform.at(i);
+    chped /= 5.0;
     
     //flashes.clear();
 
@@ -171,12 +172,18 @@ namespace subevent {
     std::cout << "  total flashes: " << flashes.size() << std::endl;
 
     int nloops = 0;
-    while ( nloops < config.maxsubeventloops ) {
+    ChannelSetIter itch=wfms.chbegin();
+    int nsamples = wfms.get( *itch ).size();
+    std::vector< double > peacc( nsamples, 0.0 );
+    std::vector< double > hitacc( nsamples, 0.0 );
 
+    while ( nloops < config.maxsubeventloops ) {
+      std::cout << " start subevent search: loop#" << nloops << std::endl;
 
       // accumulators: the summed pulse height and the number of hits
-      std::vector< double > peacc( wfms.get(0).size(), 0.0 );
-      std::vector< double > hitacc( wfms.get(0).size(), 0.0 );
+      // use first entry to set size
+      peacc.assign( nsamples, 0.0 );
+      hitacc.assign( nsamples, 0.0 );
       
       fillFlashAccumulators( flashes, pmtspemap, config, peacc, hitacc );
 
@@ -223,10 +230,11 @@ namespace subevent {
 	    newsubevent.totpe += (*iflash).area; // HACK
 	    newsubevent.sumflash30 += ((*iflash).area30); // HACK
 	    newsubevent.sumfcomp_gausintegral += (*iflash).fcomp_gausintegral; // HACK
-	    Flash copyflash( (*iflash ) );
-	    copyflash.claimed = true;
 	    (*iflash).claimed = true;
-	    newsubevent.flashes.add( std::move(copyflash) ); 
+	    //Flash copyflash( (*iflash ) );
+	    //Flash empty;
+	    //std::swap( empty, (*iflash) );
+	    //newsubevent.flashes.add( std::move(empty) ); 
 	    nclaimed++;
 	  }
 
@@ -244,7 +252,15 @@ namespace subevent {
 
       nloops += 1;
     }//end of while loop
-
+    
+    std::cout << " end of formsubevents. found " << subevents.size() << std::endl;
+    std::cout << "Clean up peacc.." << std::endl;
+    peacc.clear();
+    std::cout << "Clean up hitacc.." << std::endl;
+    hitacc.clear();
+    std::cout << "Clean up flashes.." << std::endl;
+    flashes.clear();
+    std::cout << "returning ..." << std::endl;
   }
 
 }

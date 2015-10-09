@@ -16,7 +16,9 @@ namespace subevent {
     ~SubEventList();
 
 #ifndef __CINT__    
+#ifndef __GCCXML__
     int add( SubEvent&& opflash );
+#endif
 #endif
     SubEvent& get( int i );
     SubEventListIter begin();

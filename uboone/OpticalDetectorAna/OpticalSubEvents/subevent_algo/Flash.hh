@@ -1,11 +1,12 @@
 #ifndef __FLASH_HH__
 #define __FLASH_HH__
 
-#include "TObject.h"
+//#include "TObject.h"
 #include <vector>
 
 namespace subevent {
-  class Flash : public TObject {
+  //class Flash : public TObject {
+  class Flash {
 
   public:
     
@@ -29,7 +30,7 @@ namespace subevent {
     std::vector< double > expectation;
     std::vector< double > waveform;
 
-    ClassDef( Flash, 1 );
+    //ClassDef( Flash, 1 );
   };
 
 }

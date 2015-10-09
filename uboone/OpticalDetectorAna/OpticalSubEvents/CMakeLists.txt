@@ -5,7 +5,6 @@
 
 
 art_make( LIBRARY_NAME OpticalSubEvents
-	  DICT_LIBRARIES uboone_subeventalgodict
 	  SUBDIRS cfdiscriminator_algo subevent_algo	  
 	  EXCLUDE SubEventBuilder_module.cc
 	  LIB_LIBRARIES ${ART_FRAMEWORK_CORE} 
@@ -23,6 +22,7 @@ art_make( LIBRARY_NAME OpticalSubEvents
 
 simple_plugin( SubEventBuilder "module"
 	       OpticalSubEvents
+	       uboone_OpticalDetectorAna_OpticalSubEvents_dict
                ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
                ${ART_FRAMEWORK_PRINCIPAL}
