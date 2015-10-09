@@ -39,6 +39,7 @@ namespace larlite {
     fPtrIndex_hit.clear();
     fPtrIndex_ophit.clear();
     fPtrIndex_opflash.clear();
+    fPtrIndex_trigger.clear();
     fPtrIndex_cluster.clear();
     fPtrIndex_shower.clear();
     fPtrIndex_vertex.clear();
