@@ -32,11 +32,11 @@ namespace lariov{
      
     private:
     
-      const IChannelStatusProvider& DoGetFilter() const override {
+      const IChannelStatusProvider& DoGetProvider() const override {
         return fProvider;
       }    
       
-      const IChannelStatusProvider* DoGetFilterPtr() const override {
+      const IChannelStatusProvider* DoGetProviderPtr() const override {
         return &fProvider;
       }
       
