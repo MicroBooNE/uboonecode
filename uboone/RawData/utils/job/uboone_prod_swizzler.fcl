@@ -2,34 +2,30 @@
 #include "timeservice_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
 process_name: Swizzler
 services:
 {
+  scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "daq_hist.root" }
-  Timing:       {}
+  TimeTracker:       {}
   RandomNumberGenerator: {} 
+  FileCatalogMetadata:    @local::art_file_catalog_data
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
-	  UBOpReadoutMap:           @local::microboone_opreadoutmap
+	  UBOpReadoutMap:         @local::microboone_opreadoutmap
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
           }
-  FileCatalogMetadata: { applicationFamily: "art"
-                         applicationVersion: "vxx_yy_zz"
-                         fileType: "data"
-                         group: "uboone"
-                         runType: "physics"
-                         service_type: "FileCatalogMetadata"
-                        }
-  FileCatalogMetadataMicroBooNE: { FCLName: "swizzle.fcl"
-                                   FCLVersion: "v1.0"
-                                   ProjectName: "Swizzler"
-                                   ProjectStage: "swizzle"
-                                   ProjectVersion: "vxx_yy_zz"
-                                   service_type: "FileCatalogMetadataMicroBooNE"
-            			 }
+}
 
+microboone_tfile_metadata:
+{
+  JSONFileName:          "daq_hist.root.json"
+  GenerateTFileMetadata: false
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
 }
 
 # Database settings
@@ -37,11 +33,11 @@ services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
 services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
 services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
 services.user.DatabaseUtil.Port:          5436
-#services.user.DatabaseUtil.PassFileName:  "crap.log"  # name of password file. searched for using env var FW_SEARCH_PATH
 services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
 services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: true
 services.user.DatabaseUtil.TableName: "main_run"
+
 
 source:
 {
@@ -49,13 +45,6 @@ source:
   module_type:	   LArRawInputSourceUBooNE
   maxEvents:       -1
   huffmanDecode:   true
-  swizzleTPC:      true
-  swizzlePMT:      true
-  swizzleTriggerType: ALL ## This is the only option that works currently!
-#  swizzleTriggerType: BNB
-#  swizzleTriggerType: EXT
-#  swizzleTriggerType: NuMI
-#  swizzleTriggerType: CALIB
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
@@ -67,16 +56,16 @@ outputs:
  out1:
   {
    module_type: RootOutput
-   fileName:    "larsoft.root" 
-   compressionLevel: 3
+   fileName: "%ifb_%tc.root"
    dataTier: "raw"
+   compressionLevel: 3
   }
 }
 
 physics:
 {
- stream1:   [ out1 ] ## commented out to avoid writing output file - this is not desirable for production!
- #stream1:   [ ]
+ stream1:   [ out1 ]
  end_paths: [ stream1 ]
 }
+
 

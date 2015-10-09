@@ -307,7 +307,7 @@ namespace detsim {
     
     //channel status for simulating dead channels
     const lariov::IChannelStatusProvider& ChannelStatusProvider
-       = art::ServiceHandle<lariov::IChannelStatusService>()->GetFilter();
+       = art::ServiceHandle<lariov::IChannelStatusService>()->GetProvider();
 
     //get the FFT
     art::ServiceHandle<util::LArFFT> fFFT;

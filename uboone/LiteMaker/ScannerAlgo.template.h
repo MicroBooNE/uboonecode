@@ -548,6 +548,26 @@ namespace larlite {
     }  
   }
 
+
+  template <>
+    void ScannerAlgo::ScanData(art::Handle< std::vector<::raw::Trigger> > const &dh,
+			       ::larlite::event_base* lite_dh)
+    { 
+      
+      //fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+      //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+      auto lite_data = (::larlite::trigger*)lite_dh;
+      
+      if (dh->size() == 0)
+	return;
+      const art::Ptr<::raw::Trigger> trigger_ptr(dh,0);
+      lite_data->TriggerNumber(trigger_ptr->TriggerNumber());
+      lite_data->TriggerTime(trigger_ptr->TriggerTime());
+      lite_data->BeamGateTime(trigger_ptr->BeamGateTime());
+      lite_data->TriggerBits(trigger_ptr->TriggerBits());
+      
+    }
+  
   template <>
   void ScannerAlgo::ScanData(art::Handle<std::vector< ::recob::Wire> > const &dh,
 			     ::larlite::event_base* lite_dh)
@@ -1108,6 +1128,9 @@ namespace larlite {
   template <> std::map<art::Ptr< ::raw::OpDetWaveform>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_opdigit; }
 
+  template <> std::map<art::Ptr< ::raw::Trigger>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  { return fPtrIndex_trigger; }
+
   template <> std::map<art::Ptr< ::recob::Wire>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_wire; }
 
@@ -1183,6 +1206,8 @@ namespace larlite {
   { return ::larlite::data::kRawDigit; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::raw::OpDetWaveform> () const
   { return ::larlite::data::kOpDetWaveform; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::raw::Trigger> () const
+  { return ::larlite::data::kTrigger; }
   // recob
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::recob::Wire> () const
   { return ::larlite::data::kWire; }

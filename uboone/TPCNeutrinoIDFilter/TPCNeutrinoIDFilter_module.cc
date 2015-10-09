@@ -80,6 +80,7 @@ private:
     std::string              fCosmicClusterAssnsLabel;
 
     TH1D*                    fTotNumTracks;
+    TH1D*                    fTotNumClusters;
 };
 
 
@@ -97,6 +98,7 @@ void TPCNeutrinoIDFilter::beginJob()
     art::ServiceHandle<art::TFileService> tfs;
     
     fTotNumTracks = tfs->make<TH1D>("TotNumTracks", ";# Tracks", 50, 0., 50.);
+    fTotNumClusters = tfs->make<TH1D>("TotNumClusters", ";# Clusters", 50, 0., 1000);
 }
 
 void TPCNeutrinoIDFilter::endJob()
@@ -120,7 +122,7 @@ void TPCNeutrinoIDFilter::reconfigure(fhicl::ParameterSet const& pset)
     }
     
     // For cluster 2D approach
-    fCosmicProducerLabel         = pset.get< std::string > ("Cluster2DCosmicProducerLabel", "trackkalmanhittag");
+    fCosmicProducerLabel         = pset.get< std::string > ("Cluster2DCosmicProducerLabel", "ccclustertag");
     fCosmicClusterAssnsLabel     = pset.get< std::string > ("Cluster2DCosmicClusterAssns",  "cluster2D");
     
     return;
@@ -145,11 +147,18 @@ bool TPCNeutrinoIDFilter::filter(art::Event& event)
             art::FindManyP<recob::Track> vertexTrackAssns(vertexVecHandle, event, fVtxTrackAssnsModuleLabelVec[assnIdx]);
         
             // First check that we have something
-            if (vertexTrackAssns.isValid() && vertexTrackAssns.size() > 0 && vertexTrackAssns.at(0).size() > 0)
+            if (vertexTrackAssns.isValid() && vertexTrackAssns.size() > 0)
             {
-                // Actually, the fact that there is a non-empty association vector is good enough for now
-                pass = true;
-                break;
+                // Look for the first valid association
+                for (size_t vtxIdx = 0; vtxIdx < vertexVecHandle->size(); vtxIdx++)
+                {
+                    if (vertexTrackAssns.at(vtxIdx).size() > 0)
+                    {
+                        // Actually, the fact that there is a non-empty association vector is good enough for now
+                        pass = true;
+                        break;
+                    }
+                }
             }
         }
     }
@@ -157,8 +166,8 @@ bool TPCNeutrinoIDFilter::filter(art::Event& event)
     // To check for the 2D cluster ID results we need to get cosmic to cluster associations
     // For that we need to start with the overall cosmic tag producer module
     // Fortunately, we only do this if the above failed...
-    if (!pass)
-    {
+   // if (!pass)
+    //{
         art::Handle<std::vector<anab::CosmicTag>> cosmicVecHandle;
         event.getByLabel(fCosmicProducerLabel, cosmicVecHandle);
     
@@ -166,12 +175,19 @@ bool TPCNeutrinoIDFilter::filter(art::Event& event)
         {
             art::FindManyP<recob::Cluster> cosmicClusterAssns(cosmicVecHandle, event, fCosmicClusterAssnsLabel);
         
-            if (cosmicClusterAssns.isValid() && cosmicClusterAssns.size() > 0 && cosmicClusterAssns.at(0).size() > 0)
+            if (cosmicClusterAssns.isValid() && cosmicClusterAssns.size() > 0)
             {
-                pass = true;
+                for(size_t tagIdx = 0; tagIdx < cosmicVecHandle->size(); tagIdx++)
+                {
+                    if (cosmicClusterAssns.at(tagIdx).size() > 0)
+                    {
+                        pass = true;
+                        break;
+                    }
+                }
             }
         }
-    }
+    //}
 
     return pass;
 

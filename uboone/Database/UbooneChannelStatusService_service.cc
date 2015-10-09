@@ -12,7 +12,6 @@
 
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
-#include "Utilities/DetectorProperties.h"
 
 namespace lariov{
 
@@ -33,11 +32,11 @@ namespace lariov{
      
     private:
     
-      const IChannelStatusProvider& DoGetFilter() const override {
+      const IChannelStatusProvider& DoGetProvider() const override {
         return fProvider;
       }    
       
-      const IChannelStatusProvider* DoGetFilterPtr() const override {
+      const IChannelStatusProvider* DoGetProviderPtr() const override {
         return &fProvider;
       }
       
@@ -63,7 +62,7 @@ namespace lariov{
     fFindNoisyChannels  = pset.get<bool>                ("FindNoisyChannels",   false);
     fDigitModuleLabel   = pset.get<std::string>         ("DigitModuleLabel",    "daq");
     fTruncMeanFraction  = pset.get<float>               ("TruncMeanFraction",   0.1);
-    fRmsCut             = pset.get<std::vector<double> >("RMSRejectionCut",     std::vector<double>() = { 5.0, 5.0, 3.0});
+    fRmsCut             = pset.get<std::vector<double> >("RMSRejectionCut",     std::vector<double>() = { 20.0, 20.0, 10.0});
     
     //register callback to update local database cache before each event is processed
     reg.sPreProcessEvent.watch(this, &UbooneChannelStatusService::PreProcessEvent);
@@ -91,8 +90,6 @@ namespace lariov{
     if (!digitVecHandle.isValid()) return;
 
     art::ServiceHandle<geo::Geometry > geo;
-    art::ServiceHandle<util::DetectorProperties> detectorProperties;
-    unsigned int maxTimeSamples = detectorProperties->NumberTimeSamples();
 
     // Loop over raw digits, calculate the baseline rms of each one, and 
     // declare a channel noisy if its rms is above user-defined threshold 
@@ -105,12 +102,11 @@ namespace lariov{
       if (fProvider.IsBad(channel) || !fProvider.IsPresent(channel)) continue;
 
       unsigned int dataSize = digitVec->Samples();
-      maxTimeSamples = std::min(maxTimeSamples, dataSize);
 
 
       // vector holding uncompressed adc values
       std::vector<short> rawadc;
-      rawadc.resize(maxTimeSamples);
+      rawadc.resize(dataSize);
       raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
 
 

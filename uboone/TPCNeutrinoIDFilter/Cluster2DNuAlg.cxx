@@ -1,13 +1,17 @@
 /**
  *  @file   Cluster2DNuAlg.cxx
  * 
- *  @brief  Implementation of the Track/Vertex Neutrino ID alg
- *          This module outputs associations between vertices
- *          and tracks that are found to be within the cut value
+ *  @brief  Implementation of the 2DCluster Neutrino ID alg
+ *          This module outputs associations between cosmicTag 
+ *          and clusters that are found after all cuts have been 
+ *          implemented. 
+ *
  *
  *  Original implementation September 20, 2015 by usher@slac.stanford.edu
  *  This is based on work by Anne Schukraft (aschu@fnal.gov) and her
  *  Neutrino ID task force
+ *
+ *  Updated by Jessica Esquivel (jeesquiv@syr.edu) and Katherine Woodruff (kwoodruf@nmsu.edu)
  */
 
 // The main include
@@ -63,7 +67,7 @@ void Cluster2DNuAlg::reconfigure(fhicl::ParameterSet const &pset)
     const fhicl::ParameterSet& myPset = pset.get<fhicl::ParameterSet>("TPCCluster2DNuAlg");
     
     fClusterModuleLabel      = myPset.get<std::string> ("ClusterModuleLabel",   "fuzzycluster");
-    fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel",    "trackKalmanHitTag");
+    fCosmicModuleLabel       = myPset.get<std::string> ("CosmicModuleLabel",    "fuzzyclusterTag");
     fPlaneToCheck            = myPset.get<size_t>      ("PlaneToCheck",         2);
     fMinimumHits             = myPset.get<size_t>      ("MinimumHits",          10);
     fMaxCosmicScore          = myPset.get<float>       ("MaxCosmicScore",       0.4);
@@ -83,18 +87,27 @@ void Cluster2DNuAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs) {}
 void Cluster2DNuAlg::produces(art::EDProducer* owner)
 {
     fMyProducerModule = owner;
-    fMyProducerModule->produces< art::Assns<anab::CosmicTag, recob::Cluster> >();
+    fMyProducerModule->produces< std::vector<anab::CosmicTag> >();
+    fMyProducerModule->produces< std::vector<recob::Cluster> >();
+    fMyProducerModule->produces< art::Assns <anab::CosmicTag, recob::Cluster> >();
+    //fMyProducerModule->produces< art::Assns <recob::Cluster, recob::Cluster> >();
 }
 
     
 bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
 {
     // Agreed convention is to ALWAYS output to the event store so get a pointer to our collection
+    //std::unique_ptr<std::vector<recob::Cluster> > clusterPtrVec(new std::vector<recob::Cluster>);
+    //std::unique_ptr<std::vector<anab::CosmicTag> > cosmiccol(new std::vector<anab::CosmicTag>);
+    //std::vector<anab::CosmicTag>  cosmicTagPtrVec(new art::Ptr<anab::CosmicTag>);
+    //std::vector<recob::Cluster>  clusterPtrVec(new art::Ptr<recob::Cluster>);
     std::unique_ptr<art::Assns<anab::CosmicTag, recob::Cluster> > cosmicClusterAssociations(new art::Assns<anab::CosmicTag, recob::Cluster>);
-    
-    // Recover the hanles to the cluster collection we want to analyze.
+//    std::unique_ptr<art::Assns<recob::Cluster, recob::Cluster> > cosmicClusterAssociations(new art::Assns<recob::Cluster, recob::Cluster>);
+ 
+    // Recover the handles to the cluster collection we want to analyze.
     art::Handle< std::vector<recob::Cluster> > clusterVecHandle;
     
+    std::vector<art::Ptr<recob::Hit>> clusterHitVec;
     event.getByLabel(fClusterModuleLabel, clusterVecHandle);
     
     // Require valid handle, otherwise nothing to do
@@ -139,7 +152,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                 if (!cosmicVec.empty())
                 {
                     art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
-                    
+                    //cosmiccol->push_back(cosmicTag->CosmicScore()); 
                     if (cosmicTag->CosmicScore() >= fMaxCosmicScore) continue;
                 }
                 
@@ -158,13 +171,12 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
 
                     // Container to hold the clusters to associate
                     std::vector<art::Ptr<recob::Cluster>> clusterPtrVec;
-                    
                     float deltaWire = fabs(cluster->StartWire() - cluster->EndWire());
                     
                     if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire())
                     {
                         clusterPtrVec.push_back(cluster);
-                        // Starts with StartWire
+                        // first cluster is greater than maximum length and  starts with StartWire?
                         for(size_t k2 = 0; k2 < goodClusterVec.size(); k2++)
                         {
                             if(k2 == clusterIdx) continue;
@@ -177,9 +189,11 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                             
                             if((fabs(cluster->StartWire() - cluster2->StartWire()) <= fMaximumDistance) &&
                                (fabs(cluster->StartTick() - cluster2->StartTick()) <= fMaximumTime)       )
-                            {
+                            {   
+				// Vertex found if two clusters are within fMaximumDistance and  fMaximumTime
                                 if(cluster2->StartCharge() > cluster->StartCharge() || deltaWire > fMaximumLength)
                                 {
+				    // StartCharge of short cluster must be greater than StartChage of long cluster OR long cluster must be greater than fMaximumLength 
                                     if(cluster2->StartWire()<cluster2->EndWire()) openangle = fabs(cluster->StartAngle() - cluster2->StartAngle());
                                     else
                                     {
@@ -209,7 +223,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                                     }
                                 }
                             }
-                        }
+                        } 
                     } //end startwire
                     else if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() > cluster->EndWire())
                     {
@@ -272,6 +286,8 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                 	{
                             art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
                             util::CreateAssn(*fMyProducerModule, event, cosmicTag, clusterPtrVec, *cosmicClusterAssociations);
+                	                                    
+				
 			}
                     }
                 }//end loop over good clusters
@@ -279,8 +295,9 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
         }//end make sure valid handles 
     }//end require valid handle
     
-    // Add tracks and associations to event.
+    // Add clusters and associations to event.
     event.put(std::move(cosmicClusterAssociations));
+    //event.put(std::move(clusterPtrVec));
     
     return true;
 }

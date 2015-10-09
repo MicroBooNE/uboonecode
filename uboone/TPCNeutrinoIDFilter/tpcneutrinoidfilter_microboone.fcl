@@ -11,7 +11,7 @@ microboone_tpcTracksPlusVtxAlg:
 microboone_tpcCluster2DNuAlg:
 {
     ClusterModuleLabel:         "fuzzycluster"
-    CosmicModuleLabel:          "trackKalmanHitTag"
+    CosmicModuleLabel:          "fuzzyclusterTag"
     PlaneToCheck:               2
     MinimumHits:                10
     MaxCosmicScore:             0.4
@@ -20,8 +20,10 @@ microboone_tpcCluster2DNuAlg:
     MaximumWire:                3420
     MinimumWire:                5
     MaximumAngle:               0.5
+    MaximumMatchedLengthCut:    100.
     MaximumLengthCut:           200.
     MaximumLength:              500.
+    MinimumDeltaWires:          30.
     MinimumDeltaTicks:          30.
     MinCandidateClusters:       2
     MaximumDistance:            10.
@@ -41,7 +43,7 @@ microboone_tpcneutrinoidfilter:
     module_type:                  "TPCNeutrinoIDFilter"
     VertexModuleLabelVec:         ["pandoraNu"]
     VtxTrackAssnModuleLabelVec:   ["vtxPlusTrkPanKal"]
-    Cluster2DCosmicProducerLabel: "trackkalmanhittag"
+    Cluster2DCosmicProducerLabel: "fuzzyclustertag"
     Cluster2DCosmicClusterAssns:  "cluster2D"
 }
 
