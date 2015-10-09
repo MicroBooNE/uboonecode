@@ -7,5 +7,9 @@ art_make_library( LIBRARY_NAME uboone_subeventalgo
                   	    ${ROOT_BASIC_LIB_LIST}
 		)							   
 
+art_make( LIBRARY_NAME uboone_subeventalgodict
+	  LIB_LIBRARIES uboone_subeventalgo
+	  )
+
 install_headers()
 install_source()

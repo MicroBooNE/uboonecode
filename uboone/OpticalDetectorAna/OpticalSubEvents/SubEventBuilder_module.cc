@@ -55,11 +55,28 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
 // Initialize member data here.
 {
   // Call appropriate produces<>() functions here.
+  produces< std::vector< subevent::SubEvent > >();
 }
 
 void SubEventBuilder::produce(art::Event & e)
 {
   // Implementation of required member function here.
+  
+}
+
+void SubEventBuilder::prepWaveforms( art::Event& e, WaveformData& wfms ) {
+  
+  art::Handle< raw::OpDetWaveform > hgwfmHandle;
+  event.getByLabel( opdetHandle, fOpDetInputModule, "OpdetBeamHighGain" );
+  
+  art::Handle< raw::OpDetWaveform > lgwfmHandle;
+  event.getByLabel( opdetHandle, fOpDetInputModule, "OpdetBeamLowGain" );
+
+  for ( auto const& opdetData: (*hgwfmHandle) ) {
+    optdata::Channel_t channel = opdetData.
+  }
+  
+
 }
 
 DEFINE_ART_MODULE(SubEventBuilder)
