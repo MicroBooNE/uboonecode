@@ -1,13 +1,14 @@
 #ifndef __SUBEVENT__
 #define __SUBEVENT__
 
-#include "TObject.h"
+//#include "TObject.h"
 #include "Flash.hh"
 #include "FlashList.hh"
 
 namespace subevent {
 
-  class SubEvent : public TObject {
+  //class SubEvent : public TObject {
+  class SubEvent {
     
   public:
     
@@ -26,7 +27,7 @@ namespace subevent {
     
     FlashList flashes;
     
-    ClassDef( SubEvent, 1 );
+    //ClassDef( SubEvent, 1 );
     
   };
 

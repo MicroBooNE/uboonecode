@@ -1,7 +1,7 @@
 #ifndef __SubEventList__
 #define __SubEventList__
 
-#include "TObject.h"
+//#include "TObject.h"
 #include "SubEvent.hh"
 #include <vector>
 
@@ -9,7 +9,8 @@ namespace subevent {
 
   typedef std::vector< SubEvent >::iterator SubEventListIter;
 
-  class SubEventList : public TObject { 
+  //class SubEventList : public TObject { 
+  class SubEventList {
 
   public:
     SubEventList();
@@ -53,7 +54,7 @@ namespace subevent {
       else return false;
     };
 
-    ClassDef( SubEventList, 1 )
+    //ClassDef( SubEventList, 1 )
 
   };
 

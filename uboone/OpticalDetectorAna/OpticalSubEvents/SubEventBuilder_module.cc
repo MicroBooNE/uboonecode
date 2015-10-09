@@ -31,6 +31,7 @@
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEventModule.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEventModConfig.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/WaveformData.hh"
+#include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/pedestal.hh"
 
 class SubEventBuilder;
 
@@ -155,7 +156,7 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
 
   for ( auto const& opdetData: (*hgwfmHandle) ) {
     if ( opdetData.size()<600 ) {
-      std::cout << "skipping cosmic window: " << opdetData.size() << std::endl;
+      //std::cout << "skipping cosmic window: " << opdetData.size() << std::endl;
       continue; // skip cosmic windows
     }
     raw::Channel_t channel = opdetData.ChannelNumber();
@@ -179,7 +180,8 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
 	adcmax = (double)adc;
     }
     //std::cout << std::endl;
-    std::cout << "  adc max: " << adcmax << std::endl;
+    double ped =  subevent::removePedestal( wfmstore, 20, 2.0, 2047.0 );
+    std::cout << "  adc max: " << adcmax-ped << " pedestal=" << ped << std::endl;
     wfms.set( (int)channel, wfmstore );
   }
 
@@ -191,14 +193,25 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
       if ( use_lowgain_wfm.find( (int)channel )!=use_lowgain_wfm.end() ) {
 	// marked to replace hg
 	wfmstore.clear();
+	double adcmax = 0.0;
+	std::cout << " LG ch " << channel << ": ";
 	for ( auto adc: opdetData ) {
 	  wfmstore.push_back( (double)adc );
+	  if ( adcmax < (double)adc )
+	    adcmax = (double)adc;
 	}
+	double ped = subevent::removePedestal( wfmstore, 20, 2.0, 2047.0 );
+	std::cout << "  adc max: " << 10.0*(adcmax-ped) << " pedestal=" << ped << std::endl;
+	
+	// scale up
+	for (int i=0; i<(int)wfmstore.size(); i++ )
+	  wfmstore.at(i) *= 10.0;
+	
 	wfms.set( (int)channel, wfmstore );
       }// if marked for lg replacement
     }// loop over lowgain waveforms
   } // if replacements necessary
-
+  
   return true;
 }
 

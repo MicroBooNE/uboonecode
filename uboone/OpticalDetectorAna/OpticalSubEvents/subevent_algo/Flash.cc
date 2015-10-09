@@ -34,7 +34,6 @@ namespace subevent {
   }
 
   Flash::~Flash() {
-    std::cout << "destroying "<< this << std::endl;
     expectation.clear();
     waveform.clear();
   }

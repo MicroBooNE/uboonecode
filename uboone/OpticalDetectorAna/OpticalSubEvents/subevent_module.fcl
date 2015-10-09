@@ -7,7 +7,7 @@ microboone_subeventbuilder:
 {
     module_type: SubEventBuilder
     inputModule: "pmtreadout"
-    threshold: 10
+    threshold: 40
     deadtime: 24
     width: 24
     delay: 4
@@ -24,7 +24,7 @@ microboone_subeventbuilder:
     hgslot: 5
     lgslot: 6
     flashgate: 10
-    maxsubeventloops: 3
+    maxsubeventloops: 30
     ampthresh: 3.0
     hitthresh: 1
     nspersample: 15.625

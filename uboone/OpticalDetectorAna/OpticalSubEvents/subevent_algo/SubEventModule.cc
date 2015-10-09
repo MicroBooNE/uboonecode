@@ -64,11 +64,11 @@ namespace subevent {
     opflash.storeExpectation(  subexp );
 
     // for debug
-    std::cout << "return opflash: " << opflash.ch << " " << opflash.tstart << " " << opflash.tend << " " << opflash.tmax << " " << opflash.maxamp << std::endl;
-    std::cout << " expectation of flash: ";
-    for ( int i=0; i<(int)expectation.size(); i++)
-    std::cout << expectation.at(i) << " ";
-    std::cout << std::endl;
+    //std::cout << "return opflash: " << opflash.ch << " " << opflash.tstart << " " << opflash.tend << " " << opflash.tmax << " " << opflash.maxamp << std::endl;
+    // std::cout << " expectation of flash: ";
+    // for ( int i=0; i<(int)expectation.size(); i++)
+    // std::cout << expectation.at(i) << " ";
+    // std::cout << std::endl;
 
     return 1;
   }
@@ -94,9 +94,9 @@ namespace subevent {
     double sig = 0.0;
     double thresh = 0.0;
     double chped = 0.;
-    for (int i=0; i<5; i++)
-      chped += waveform.at(i);
-    chped /= 5.0;
+    // for (int i=0; i<5; i++)
+    //   chped += waveform.at(i);
+    // chped /= 5.0;
     
     //flashes.clear();
 
@@ -119,7 +119,6 @@ namespace subevent {
 	sig = sqrt( fx/20.0 );
 	thresh = fx + 3.0*sig*20.0; // 3 sigma variance
 	if ( postwfm.at( opflash.tstart )-chped < thresh ) {
-	  //postwfm.at( opflash.tstart + tdc ) = slope*( tdc ) + amp_start;
 	  postwfm.at( opflash.tstart + tdc ) = chped;
 	}
 	if ( tdc<600 && opflash.tstart+tdc+20<(int)waveform.size() ) {
@@ -153,9 +152,12 @@ namespace subevent {
       if ( (*iflash).claimed )
 	continue;
 
-      for ( int t=(*iflash).tstart-0.5*config.flashgate; t<(*iflash).tstart+0.5*config.flashgate; t++ ) {
-	peacc[t] += ((*iflash).maxamp)/pmtspemap[(*iflash).ch];
-	hitacc[t] += 1.0;
+      int start = std::max( int( (*iflash).tstart-0.5*config.flashgate), 0 );
+      int end = std::min( int( (*iflash).tstart+0.5*config.flashgate ), (int)peacc.size() );
+      //std::cout << "add flash acc: ch=" << (*iflash).ch << " maxamp=" <<  ((*iflash).maxamp)/pmtspemap[(*iflash).ch] << " t=[" << start << ", " << end << "]" << std::endl;
+      for ( int t=start; t<end; t++ ) {
+	peacc.at(t) += ((*iflash).maxamp)/pmtspemap[(*iflash).ch];
+	hitacc.at(t) += 1.0;
       }
       
     }
@@ -168,7 +170,6 @@ namespace subevent {
 
     FlashList flashes;
     formFlashes( wfms, config, flashes );
-
     std::cout << "  total flashes: " << flashes.size() << std::endl;
 
     int nloops = 0;
@@ -207,8 +208,6 @@ namespace subevent {
       // organize flashes within maxima
       if ( pemax>config.ampthresh || hitmax>config.hitthresh ) {
 	// passed! 
-	std::cout << "  subevent formed. loop #" << nloops << std::endl;
-
 	SubEvent newsubevent;
 	
 	//if ( !flashes.sortedByTime()  ) flashes.sortByTime();
@@ -231,10 +230,8 @@ namespace subevent {
 	    newsubevent.sumflash30 += ((*iflash).area30); // HACK
 	    newsubevent.sumfcomp_gausintegral += (*iflash).fcomp_gausintegral; // HACK
 	    (*iflash).claimed = true;
-	    //Flash copyflash( (*iflash ) );
-	    //Flash empty;
-	    //std::swap( empty, (*iflash) );
-	    //newsubevent.flashes.add( std::move(empty) ); 
+	    Flash copyflash( (*iflash ) );
+	    newsubevent.flashes.add( std::move( copyflash ) ); 
 	    nclaimed++;
 	  }
 
@@ -254,13 +251,7 @@ namespace subevent {
     }//end of while loop
     
     std::cout << " end of formsubevents. found " << subevents.size() << std::endl;
-    std::cout << "Clean up peacc.." << std::endl;
-    peacc.clear();
-    std::cout << "Clean up hitacc.." << std::endl;
-    hitacc.clear();
-    std::cout << "Clean up flashes.." << std::endl;
-    flashes.clear();
-    std::cout << "returning ..." << std::endl;
+    //std::cin.get();
   }
 
 }
