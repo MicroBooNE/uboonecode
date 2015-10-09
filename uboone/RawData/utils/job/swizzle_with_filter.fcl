@@ -2,8 +2,6 @@
 #include "timeservice_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
-
-#include "photpropservices.fcl"
 #include "sam_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "flashfilter_microboone.fcl"
@@ -11,9 +9,11 @@
 process_name: Swizzler
 services:
 {
+  scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "daq_hist.root" }
   Timing:       {}
   RandomNumberGenerator: {} 
+  FileCatalogMetadata:    @local::art_file_catalog_data
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
@@ -21,21 +21,14 @@ services:
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
           }
-  FileCatalogMetadata: { applicationFamily: "art"
-                         applicationVersion: "vxx_yy_zz"
-                         fileType: "data"
-                         group: "uboone"
-                         runType: "physics"
-                         service_type: "FileCatalogMetadata"
-                        }
-  FileCatalogMetadataMicroBooNE: { FCLName: "swizzle.fcl"
-                                   FCLVersion: "v1.0"
-                                   ProjectName: "Swizzler"
-                                   ProjectStage: "swizzle"
-                                   ProjectVersion: "vxx_yy_zz"
-                                   service_type: "FileCatalogMetadataMicroBooNE"
-            			 }
+}
 
+microboone_tfile_metadata:
+{
+  JSONFileName:          "daq_hist.root.json"
+  GenerateTFileMetadata: false
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
 }
 
 # Database settings
@@ -43,8 +36,7 @@ services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
 services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
 services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
 services.user.DatabaseUtil.Port:          5436
-services.user.DatabaseUtil.PassFileName:  "crap.log"  # name of password file. searched for using env var FW_SEARCH_PATH
-#services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
 services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: true
 services.user.DatabaseUtil.TableName: "main_run"
@@ -55,7 +47,7 @@ source:
   module_type:	   LArRawInputSourceUBooNE
   maxEvents:       -1
   huffmanDecode:   true
-  swizzleTPC:      false
+  swizzleTPC:      true
   swizzlePMT:      true
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
@@ -68,9 +60,11 @@ outputs:
  out1:
   {
    module_type: RootOutput
-   fileName:    "larsoft.root" 
-   compressionLevel: 3
+   fileName: "%ifb_%tc.root"
    dataTier: "raw"
+   compressionLevel: 3
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_daq_*_*"]
   }
 }
 
@@ -82,13 +76,16 @@ physics:
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+
+  digitcopy : { module_type : "RawDigitSaver" 
+                DAQRawDigitProducer : "daq" }
  }
 filters: {
  triggerEnforcement: { module_type : "TriggerEnforcement" }
  flashfilter: @local::microboone_flashtrigger
 }
 
- reco: [ triggerEnforcement, opflash, flashfilter ]
+ reco: [ triggerEnforcement, opflash, flashfilter, digitcopy ]
  stream1:   [ out1 ]
  trigger_paths: [ reco ] 
  end_paths: [ stream1 ]

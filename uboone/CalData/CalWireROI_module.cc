@@ -311,7 +311,7 @@ namespace caldata {
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     unsigned int bin(0);     // time bin loop variable
     
-    const lariov::IChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::IChannelStatusService>()->GetFilter();
+    const lariov::IChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::IChannelStatusService>()->GetProvider();
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double DeconNorm = sss->GetDeconNorm();

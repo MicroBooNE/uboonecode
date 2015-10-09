@@ -105,7 +105,8 @@ namespace lris {
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
     bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data
     bool                           fSwizzlePMT; //fhicl parameter.  Tells us whether to swizzle the PMT data
-    bool                           fSaveOutput; //fhicl parameter.  Tells us whether to save the LArSoft output file or just run analysis
+    std::string                    fSwizzleTriggerType; //fhicl parameter.  Tells us whether to swizzle a specific trigger type only. Options are ALL, BNB, NuMI, CALIB
+    bool skipEvent; // tag to skip event if trigger is not the type we want.
 
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
@@ -123,6 +124,9 @@ namespace lris {
     int discriminatorFrame [40][100];
     int discriminatorSample [40][100];
     int discriminatorType [40][100];
+    double PMT_waveform_times[400];
+    int N_PMT_waveforms; 
+
     uint32_t triggerFrame;
     uint32_t triggerSample;
     double triggerTime;
@@ -158,8 +162,24 @@ namespace lris {
 //    uint32_t RO_Gate2Frame;
 //    uint32_t RO_Gate2Sample;
 
-    uint32_t TPCtriggerFrame;
-    uint32_t TPCtriggerSample;
+    uint32_t TPC1triggerFrame;
+    uint32_t TPC1triggerSample;
+    uint32_t TPC2triggerFrame;
+    uint32_t TPC2triggerSample;
+    uint32_t TPC3triggerFrame;
+    uint32_t TPC3triggerSample;
+    uint32_t TPC4triggerFrame;
+    uint32_t TPC4triggerSample;
+    uint32_t TPC5triggerFrame;
+    uint32_t TPC5triggerSample;
+    uint32_t TPC6triggerFrame;
+    uint32_t TPC6triggerSample;
+    uint32_t TPC7triggerFrame;
+    uint32_t TPC7triggerSample;
+    uint32_t TPC8triggerFrame;
+    uint32_t TPC8triggerSample;
+    uint32_t TPC9triggerFrame;
+    uint32_t TPC9triggerSample;
     
     uint32_t ADCwords_crate0;
     uint32_t ADCwords_crate1;
@@ -171,7 +191,6 @@ namespace lris {
     uint32_t ADCwords_crate7;
     uint32_t ADCwords_crate8;
     uint32_t ADCwords_crate9;
-    uint32_t NumWords_crate0;
     uint32_t NumWords_crate1;
     uint32_t NumWords_crate2;
     uint32_t NumWords_crate3;

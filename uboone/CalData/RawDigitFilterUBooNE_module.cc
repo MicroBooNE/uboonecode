@@ -85,8 +85,12 @@ private:
     double                fMaxPedestalDiff;       ///< Max pedestal diff to db to warn
     bool                  fSmoothCorrelatedNoise; ///< Should we smooth the noise?
     std::vector<size_t>   fNumWiresToGroup;       ///< If smoothing, the number of wires to look at
+    bool                  fFillHistograms;        ///< if true then will fill diagnostic hists
     bool                  fRunFFTInput;           ///< Should we run FFT's on input wires?
     bool                  fRunFFTCorrected;       ///< Should we run FFT's on corrected wires?
+    bool                  fTruncateTicks;         ///< If true then drop channels off ends of wires
+    unsigned int          fWindowSize;            ///< # ticks to keep in window
+    unsigned int          fNumTicksToDropFront;   ///< # ticks to drop from front of waveform
 
     // Statistics.
     int fNumEvent;        ///< Number of events seen.
@@ -159,8 +163,12 @@ void RawDigitFilterUBooNE::reconfigure(fhicl::ParameterSet const & pset)
     fMaxPedestalDiff       = pset.get<double>             ("MaxPedestalDiff",                                          10.);
     fSmoothCorrelatedNoise = pset.get<bool>               ("SmoothCorrelatedNoise",                                   true);
     fNumWiresToGroup       = pset.get<std::vector<size_t>>("NumWiresToGroup",         std::vector<size_t>() = {48, 48, 96});
+    fFillHistograms        = pset.get<bool>               ("FillHistograms",                                         false);
     fRunFFTInput           = pset.get<bool>               ("RunFFTInputWires",                                       false);
     fRunFFTCorrected       = pset.get<bool>               ("RunFFTCorrectedWires",                                   false);
+    fTruncateTicks         = pset.get<bool>               ("TruncateTicks",                                          false);
+    fWindowSize            = pset.get<size_t>             ("WindowSize",                                              6400);
+    fNumTicksToDropFront   = pset.get<size_t>             ("NumTicksToDropFront",                                     2250);
 }
 
 //----------------------------------------------------------------------------
@@ -257,10 +265,10 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
         // impact downstream processing (I hope!).
         // What we are going to do is make a vector over views of vectors over wires of vectors over time samples
         std::vector<std::vector<raw::RawDigit::ADCvector_t>> rawDataViewWireTimeVec;
-        std::vector<std::vector<float>>                      rawDataViewWireNoiseVec;
-        std::vector<std::vector<float>>                      pedestalViewWireVec;
-        std::vector<std::vector<float>>                      pedCorViewWireVec;
-        std::vector<std::vector<raw::ChannelID_t>>           channelViewWireVec;
+        std::vector<std::vector<float>>                       rawDataViewWireNoiseVec;
+        std::vector<std::vector<float>>                       pedestalViewWireVec;
+        std::vector<std::vector<float>>                       pedCorViewWireVec;
+        std::vector<std::vector<raw::ChannelID_t>>            channelViewWireVec;
     
         // Initialize outer range to number of views
         rawDataViewWireTimeVec.resize(3);
@@ -279,6 +287,10 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
             pedCorViewWireVec[viewIdx].resize(fGeometry->Nwires(viewIdx));
             channelViewWireVec[viewIdx].resize(fGeometry->Nwires(viewIdx));
         }
+        
+        // Declare a temporary digit holder and resize it if downsizing the waveform
+        raw::RawDigit::ADCvector_t tempVec;
+        if (fTruncateTicks) tempVec.resize(9595);
     
         // Commence looping over raw digits
         for(size_t rdIter = 0; rdIter < digitVecHandle->size(); ++rdIter)
@@ -309,18 +321,33 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
             unsigned int wire = wids[0].Wire;
         
             unsigned int dataSize = digitVec->Samples();
-            
-            maxTimeSamples = std::min(maxTimeSamples, dataSize);
         
             // vector holding uncompressed adc values
             std::vector<short>& rawadc = rawDataViewWireTimeVec[view][wire];
         
             channelViewWireVec[view][wire] = channel;
-        
-            rawadc.resize(maxTimeSamples);
-        
-            // And now uncompress
-            raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
+            
+            // trickery if we want compression
+            if (fTruncateTicks)
+            {
+                maxTimeSamples = fWindowSize;
+                
+                rawadc.resize(maxTimeSamples);
+                
+                // And now uncompress
+                raw::Uncompress(digitVec->ADCs(), tempVec, digitVec->Compression());
+                
+                std::copy(tempVec.begin() + fNumTicksToDropFront, tempVec.begin() + fNumTicksToDropFront + fWindowSize, rawadc.begin());
+            }
+            else
+            {
+                maxTimeSamples = dataSize;
+                
+                rawadc.resize(maxTimeSamples);
+                
+                // And now uncompress
+                raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
+            }
 
             // The strategy for finding the average for a given wire will be to
             // find the most populated bin and the average using the neighboring bins
@@ -348,7 +375,7 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
             }
         
             // fill example hists - throw away code
-            if (fFirstEvent && wire == fTheChosenWire)
+            if (fFillHistograms && fFirstEvent && wire == fTheChosenWire)
             {
                 for(const auto& binAdcItr : binAdcMap)
                 {
@@ -359,7 +386,7 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
             // Armed with the max bin and its count, now set up to get an average
             // about this bin. We'll want to cut off at some user defined fraction
             // of the total bins on the wire
-            int minNumBins = (1. - fTruncMeanFraction) * dataSize - 1;
+            int minNumBins = (1. - fTruncMeanFraction) * maxTimeSamples - 1;
             int curBinCnt(binMaxCnt);
         
             double peakValue(curBinCnt * binMax);
@@ -409,12 +436,15 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
             pedCorViewWireVec[view][wire]   = truncMean - pedestal;
         
             // Fill some histograms here
-            fAdcCntHist[view]->Fill(curBinCnt, 1.);
-            fAveValHist[view]->Fill(std::max(-29.9, std::min(29.9,truncMean - pedestal)), 1.);
-            fRmsValHist[view]->Fill(std::min(49.9, rmsVal), 1.);
-            fRmsValProf[view]->Fill(wire, rmsVal, 1.);
-            fPedValProf[view]->Fill(wire, truncMean, 1.);
-            fPedValHist[view]->Fill(truncMean, 1.);
+            if (fFillHistograms)
+            {
+                fAdcCntHist[view]->Fill(curBinCnt, 1.);
+                fAveValHist[view]->Fill(std::max(-29.9, std::min(29.9,truncMean - pedestal)), 1.);
+                fRmsValHist[view]->Fill(std::min(49.9, rmsVal), 1.);
+                fRmsValProf[view]->Fill(wire, rmsVal, 1.);
+                fPedValProf[view]->Fill(wire, truncMean, 1.);
+                fPedValHist[view]->Fill(truncMean, 1.);
+            }
 
             // Output a message is there is significant different to the pedestal
             if (abs(truncMean - pedestal) > fMaxPedestalDiff)

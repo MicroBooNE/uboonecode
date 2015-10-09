@@ -41,7 +41,7 @@ physics:
 {
  producers:     { }
 
- filters:       { tpcneutrinoidfilter : @local::microboone_tpcneutrinoidfilter } 
+ filters:       { tpcneutrinoidfilter : @local::microboone_tpcneutrinoidfilter} 
 
  analyzers:     { }
 
@@ -56,6 +56,11 @@ physics:
 
 # define the list of LArSoft modules to run through the simulate path
 
-physics.analyzers.tpcneutrinoidfilter.TrackModuleLabel:        "trackkalmanhit"
-physics.analyzers.tpcneutrinoidfilter.CosmicTaggerAssocLabel:  "trackkalmanhittag"
-physics.analyzers.tpcneutrinoidfilter.VertexModuleLabel:       "pandoraNu"
+#physics.analyzers.tpcneutrinoidfilter.TrackModuleLabel:        "trackkalmanhit"
+#physics.analyzers.tpcneutrinoidfilter.CosmicTaggerAssocLabel:  "trackkalmanhittag"
+#physics.analyzers.tpcneutrinoidfilter.VertexModuleLabel:       "pandoraNu"
+
+physics.filters.tpcneutrinoidfilter.module_type:             "TPCNeutrinoIDFilter"
+physics.filters.tpcneutrinoidfilter.TrackModuleLabel:        "trackkalmanhit"
+physics.filters.tpcneutrinoidfilter.CosmicTaggerAssocLabel:  "ccclustertag"
+physics.filters.tpcneutrinoidfilter.VertexModuleLabel:       "pandoraNu"

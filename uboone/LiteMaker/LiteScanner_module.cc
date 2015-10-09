@@ -32,6 +32,7 @@
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
+#include "RawData/TriggerData.h"
 #include "RecoBase/Wire.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/OpHit.h"
@@ -265,6 +266,8 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<raw::RawDigit>(e,j); break;
       case ::larlite::data::kOpDetWaveform:
 	ScanData<raw::OpDetWaveform>(e,j); break;
+      case ::larlite::data::kTrigger:
+	ScanData<raw::Trigger>(e,j); break;
 
       case ::larlite::data::kHit:
 	ScanData<recob::Hit>(e,j); break;
@@ -450,6 +453,7 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
   case ::larlite::data::kMCNeutrino:    break;
   case ::larlite::data::kRawDigit:      break;
   case ::larlite::data::kOpDetWaveform: break;
+  case ::larlite::data::kTrigger:       break;
   case ::larlite::data::kWire:          break;
   case ::larlite::data::kHit:           break;
   case ::larlite::data::kCosmicTag:
