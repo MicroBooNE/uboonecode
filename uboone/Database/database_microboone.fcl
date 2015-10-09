@@ -4,7 +4,7 @@ BEGIN_PROLOG
 
 
 microboone_databaseretrievalalg: @local::standard_databaseretrievalalg
-microboone_databaseretrievalalg.DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+microboone_databaseretrievalalg.DBUrl: "http://dbdata0vm.fnal.gov:8186/uboonecon_prod/app/"
 
 
 microboone_pedestalretrievalalg:
