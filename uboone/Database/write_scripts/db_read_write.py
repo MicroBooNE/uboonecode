@@ -152,8 +152,8 @@ def main():
     elif o in ("--is_playlist"):
       is_playlist = True
     elif o in ("--production"):
-      print "We do not have a production database yet!\n"
-      sys.exit(1)
+      host = "ifdb02.fnal.gov"
+      dbname = "microboone_prod"
     else:
       assert False, "unhandled option "+o
       
