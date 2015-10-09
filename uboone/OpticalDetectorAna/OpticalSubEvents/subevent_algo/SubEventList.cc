@@ -1,6 +1,7 @@
 #include "SubEventList.hh"
+#include <algorithm>
 
-ClassImp( subevent::SubEventList );
+ClassImp( subevent::SubEventList )
 
 namespace subevent {
 

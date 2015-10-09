@@ -8,7 +8,7 @@ namespace subevent {
   void calcScintResponseCPP( std::vector< double >& fexpectation, int tstart, int tend, int maxt, float sig, float maxamp, float fastconst, float slowconst, float nspertick ) {
     
     //slow component shape: expo convolved with gaus
-    float t_smax = 95.0;    // peak of only slow component. numerically solved for det. smearing=3.5*15.625 ns, decay time const= 1500 ns
+    //float t_smax = 95.0;    // peak of only slow component. numerically solved for det. smearing=3.5*15.625 ns, decay time const= 1500 ns
     float t_fmax = 105.0;   // numerically solved for det. smearing=3.5*15.625 ns, decay time const= 6 ns
     float smax = exp( sig*sig/(2*slowconst*slowconst) - t_fmax/slowconst )*(1 - erf( (sig*sig - slowconst*t_fmax )/(sqrt(2.0)*sig*slowconst ) ) );
     // normalize max at fast component peak

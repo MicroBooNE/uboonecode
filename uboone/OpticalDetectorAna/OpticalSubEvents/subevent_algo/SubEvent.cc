@@ -1,6 +1,6 @@
 #include "SubEvent.hh"
 
-ClassImp( subevent::SubEvent );
+ClassImp( subevent::SubEvent )
 
 namespace subevent {
 

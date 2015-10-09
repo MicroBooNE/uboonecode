@@ -2,7 +2,7 @@
 #include <iostream>
 #include <algorithm>
 
-ClassImp( subevent::Flash );
+ClassImp( subevent::Flash )
 
 namespace subevent {
 

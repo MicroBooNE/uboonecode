@@ -1,6 +1,7 @@
 #include "FlashList.hh"
+#include <algorithm>
 
-ClassImp( subevent::FlashList );
+ClassImp( subevent::FlashList )
 
 namespace subevent {
 
