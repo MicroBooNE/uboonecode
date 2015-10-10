@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 #load/set ROOT options if necessary
+uby = 1
 import ROOT as R
 from ROOT import gDirectory
 R.gROOT.Reset()
