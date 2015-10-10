@@ -1,0 +1,11 @@
+BEGIN_PROLOG
+
+microboone_tpcneutrinoidfilter:
+{ 
+ module_type:              "TPCNeutrinoIDFilter"
+ TrackModuleLabel:         "trackkalmanhit"
+ VertexModuleLabel:        "pandoraNu"
+ CosmicTaggerAssocLabel:   "trackkalmanhit"
+}
+
+END_PROLOG

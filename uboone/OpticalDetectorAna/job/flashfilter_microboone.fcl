@@ -1,5 +1,5 @@
 
-#BEGIN_PROLOG
+BEGIN_PROLOG
 
 microboone_flashtrigger : {
 
@@ -24,4 +24,4 @@ microboone_flashtrigger : {
 
 }
 
-#END_PROLOG
+END_PROLOG

@@ -138,6 +138,10 @@ namespace lris {
     fDataTakingTime                    = ps.get< int  >("DataTakingTime", -1);
     fSwizzlingTime                     = ps.get< int  >("SwizzlingTime", -1);
 
+    fSwizzleTPC = ps.get<bool>("swizzleTPC",true);
+    fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
+    fSwizzleTriggerType = ps.get<std::string>("swizzleTriggerType"); // Only use ALL for this option, other options will not work
+
     //if ( fHuffmanDecode )
     tpc_crate_data_t::doDissect(true); // setup for decoding
 
@@ -174,6 +178,8 @@ namespace lris {
     tMyTree->Branch("FEM5triggerSample",&FEM5triggerSample,"FEM5triggerSample/I");
     tMyTree->Branch("FEM6triggerFrame",&FEM6triggerFrame,"FEM6triggerFrame/I");
     tMyTree->Branch("FEM6triggerSample",&FEM6triggerSample,"FEM6triggerSample/I");
+    tMyTree->Branch("FEM5triggerTime",&FEM5triggerTime,"FEM5triggerTime/D");
+    tMyTree->Branch("FEM6triggerTime",&FEM6triggerTime,"FEM6triggerTime/D");
 
     tMyTree->Branch("RO_BNBtriggerFrame",&RO_BNBtriggerFrame,"RO_BNBtriggerFrame/I");
     tMyTree->Branch("RO_NuMItriggerFrame",&RO_NuMItriggerFrame,"RO_NuMItriggerFrame/I");
@@ -183,18 +189,42 @@ namespace lris {
     tMyTree->Branch("RO_NuMItriggerSample",&RO_NuMItriggerSample,"RO_NuMItriggerSample/I");
     tMyTree->Branch("RO_EXTtriggerSample",&RO_EXTtriggerSample,"RO_EXTtriggerSample/I");
     tMyTree->Branch("RO_RWMtriggerSample",&RO_RWMtriggerSample,"RO_RWMtriggerSample/I");
+    tMyTree->Branch("RO_BNBtriggerTime",&RO_BNBtriggerTime,"RO_BNBtriggerTime/D");
+    tMyTree->Branch("RO_NuMItriggerTime",&RO_NuMItriggerTime,"RO_NuMItriggerTime/D");
+    tMyTree->Branch("RO_EXTtriggerTime",&RO_EXTtriggerTime,"RO_EXTtriggerTime/D");
+    tMyTree->Branch("RO_RWMtriggerTime",&RO_RWMtriggerTime,"RO_RWMtriggerTime/D");
 
 //    tMyTree->Branch("RO_Gate1Frame",&RO_Gate1Frame,"RO_Gate1Frame/I");
 //    tMyTree->Branch("RO_Gate1Sample",&RO_Gate1Sample,"RO_Gate1Sample/I");
 //    tMyTree->Branch("RO_Gate2Frame",&RO_Gate2Frame,"RO_Gate2Frame/I");
 //    tMyTree->Branch("RO_Gate2Sample",&RO_Gate2Sample,"RO_Gate2Sample/I");
 
-    tMyTree->Branch("TPCtriggerFrame",&TPCtriggerFrame,"TPCtriggerFrame/I");
-    tMyTree->Branch("TPCtriggerSample",&TPCtriggerSample,"TPCtriggerSample/I");
+    tMyTree->Branch("TPC1triggerFrame",&TPC1triggerFrame,"TPC1triggerFrame/I");
+    tMyTree->Branch("TPC1triggerSample",&TPC1triggerSample,"TPC1triggerSample/I");
+    tMyTree->Branch("TPC2triggerFrame",&TPC2triggerFrame,"TPC2triggerFrame/I");
+    tMyTree->Branch("TPC2triggerSample",&TPC2triggerSample,"TPC2triggerSample/I");
+    tMyTree->Branch("TPC3triggerFrame",&TPC3triggerFrame,"TPC3triggerFrame/I");
+    tMyTree->Branch("TPC3triggerSample",&TPC3triggerSample,"TPC3triggerSample/I");
+    tMyTree->Branch("TPC4triggerFrame",&TPC4triggerFrame,"TPC4triggerFrame/I");
+    tMyTree->Branch("TPC4triggerSample",&TPC4triggerSample,"TPC4triggerSample/I");
+    tMyTree->Branch("TPC5triggerFrame",&TPC5triggerFrame,"TPC5triggerFrame/I");
+    tMyTree->Branch("TPC5triggerSample",&TPC5triggerSample,"TPC5triggerSample/I");
+    tMyTree->Branch("TPC6triggerFrame",&TPC6triggerFrame,"TPC6triggerFrame/I");
+    tMyTree->Branch("TPC6triggerSample",&TPC6triggerSample,"TPC6triggerSample/I");
+    tMyTree->Branch("TPC7triggerFrame",&TPC7triggerFrame,"TPC7triggerFrame/I");
+    tMyTree->Branch("TPC7triggerSample",&TPC7triggerSample,"TPC7triggerSample/I");
+    tMyTree->Branch("TPC8triggerFrame",&TPC8triggerFrame,"TPC8triggerFrame/I");
+    tMyTree->Branch("TPC8triggerSample",&TPC8triggerSample,"TPC8triggerSample/I");
+    tMyTree->Branch("TPC9triggerFrame",&TPC9triggerFrame,"TPC9triggerFrame/I");
+    tMyTree->Branch("TPC9triggerSample",&TPC9triggerSample,"TPC9triggerSample/I");
+
     tMyTree->Branch("N_discriminators",N_discriminators,"N_discriminators[40]/I");
     tMyTree->Branch("discriminatorSample",discriminatorSample,"discriminatorSample[40][100]/I");
     tMyTree->Branch("discriminatorFrame",discriminatorFrame,"discriminatorFrame[40][100]/I");
     tMyTree->Branch("discriminatorType",discriminatorType,"discriminatorType[40][100]/I");
+    
+    tMyTree->Branch("N_PMT_waveforms",&N_PMT_waveforms,"N_PMT_waveforms/I");
+    tMyTree->Branch("PMT_waveform_times",PMT_waveform_times,"PMT_waveform_times[N_PMT_waveforms]/D");
 
     tMyTree->Branch("ADCwords_crate0",&ADCwords_crate0,"ADCwords_crate0/I");
     tMyTree->Branch("ADCwords_crate1",&ADCwords_crate1,"ADCwords_crate1/I");
@@ -206,7 +236,6 @@ namespace lris {
     tMyTree->Branch("ADCwords_crate7",&ADCwords_crate7,"ADCwords_crate7/I");
     tMyTree->Branch("ADCwords_crate8",&ADCwords_crate8,"ADCwords_crate8/I");
     tMyTree->Branch("ADCwords_crate9",&ADCwords_crate9,"ADCwords_crate9/I");
-    tMyTree->Branch("NumWords_crate0",&NumWords_crate0,"NumWords_crate0/I");
     tMyTree->Branch("NumWords_crate1",&NumWords_crate1,"NumWords_crate1/I");
     tMyTree->Branch("NumWords_crate2",&NumWords_crate2,"NumWords_crate2/I");
     tMyTree->Branch("NumWords_crate3",&NumWords_crate3,"NumWords_crate3/I");
@@ -309,7 +338,6 @@ namespace lris {
                                          art::SubRunPrincipal* &outSR,
                                          art::EventPrincipal* &outE)
   {
-
     if (fEventCounter==fNumberEventsInFile) {
       mf::LogInfo(__FUNCTION__)<<"Already read " << fNumberEventsInFile << " events, so checking end of file..." << std::endl;
       std::ios::streampos current_position = fInputStream.tellg(); //find out where in the file we're located
@@ -336,7 +364,6 @@ namespace lris {
       pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
     }
     event  = fEventCounter;
-    NumWords_crate0 = 0;
     NumWords_crate1 = 0;
     NumWords_crate2 = 0;
     NumWords_crate3 = 0;
@@ -416,7 +443,11 @@ namespace lris {
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
   {    
-
+     triggerFrame = -999;
+     FEM5triggerSample=-999;
+     FEM6triggerSample=-999;
+     FEM5triggerFrame=-999;
+     FEM6triggerFrame=-999;
      RO_BNBtriggerFrame=-999;
      RO_BNBtriggerSample=-999;
      RO_NuMItriggerFrame=-999;
@@ -425,6 +456,8 @@ namespace lris {
      RO_EXTtriggerSample=-999;
      RO_RWMtriggerFrame=-999;
      RO_RWMtriggerSample=-999;
+    
+     skipEvent = false;
 
 //     RO_Gate1Frame=-999;
 //     RO_Gate1Sample=-999;
@@ -439,11 +472,16 @@ namespace lris {
     //set granularity 
     //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
       
+    fillTriggerData(event_record, trigInfo);
+    //if (skipEvent){return false;} // check that trigger data doesn't suggest we should skip event. // commented out because this doesn't work at the moment
     fillDAQHeaderData(event_record, daqHeader);
     fillTPCData(event_record, tpcDigitList);
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
-    fillTriggerData(event_record, trigInfo);
+
+    std::cout << N_PMT_waveforms << std::endl;
+    tMyTree->Fill();
+
     //std::cout<<"Done ProcessNextEvent..."<<std::endl;
     /*
       } catch (...) {
@@ -563,37 +601,61 @@ namespace lris {
         //The format here is similar to the crate! There's a header (which is a ub_TPC_CardHeader_v*
         //object), and technically a trailer (though here it's empty!).
 	auto const& tpc_card_header = card.header();   
+        
+        unsigned int frame = RollOver(tpc_card_header.getFrame(), tpc_card_header.getTrigFrameMod16(), 3);
+        if (abs(frame - triggerFrame) > 1){
+          std::cerr << "ERROR!" << std::endl;
+          std::cerr << "TPC card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
+                    << triggerFrame << " and TPC card header frame is " << frame << std::endl;
+          throw std::exception();
+        }
         // Output tree variables - for calculating compression
         if (crate_number == 1){
           NumWords_crate1 += tpc_card_header.getWordCount();
+          TPC1triggerFrame = frame;
+          TPC1triggerSample = tpc_card_header.getTrigSample();
         }
         if (crate_number == 2){
           NumWords_crate2 += tpc_card_header.getWordCount();
+          TPC2triggerFrame = frame;
+          TPC2triggerSample = tpc_card_header.getTrigSample();
         }
         if (crate_number == 3){
           NumWords_crate3 += tpc_card_header.getWordCount();
+          TPC3triggerFrame = frame;
+          TPC3triggerSample = tpc_card_header.getTrigSample();
         }
         if (crate_number == 4){
           NumWords_crate4 += tpc_card_header.getWordCount();
+          TPC4triggerFrame = frame;
+          TPC4triggerSample = tpc_card_header.getTrigSample();
         }
         if (crate_number == 5){
           NumWords_crate5 += tpc_card_header.getWordCount();
+          TPC5triggerFrame = frame;
+          TPC5triggerSample = tpc_card_header.getTrigSample();
         }
         if (crate_number == 6){
           NumWords_crate6 += tpc_card_header.getWordCount();
+          TPC6triggerFrame = frame;
+          TPC6triggerSample = tpc_card_header.getTrigSample();
         }
         if (crate_number == 7){
           NumWords_crate7 += tpc_card_header.getWordCount();
+          TPC7triggerFrame = frame;
+          TPC7triggerSample = tpc_card_header.getTrigSample();
         }
         if (crate_number == 8){
           NumWords_crate8 += tpc_card_header.getWordCount();
+          TPC8triggerFrame = frame;
+          TPC8triggerSample = tpc_card_header.getTrigSample();
         }
         if (crate_number == 9){
           NumWords_crate9 += tpc_card_header.getWordCount();
+          TPC9triggerFrame = frame;
+          TPC9triggerSample = tpc_card_header.getTrigSample();
         }
-        if (crate_number == 0){
-          NumWords_crate0 += tpc_card_header.getWordCount();
-        }
+         
 
 	//	auto const& tpc_card_trailer = card.trailer(); 
 
@@ -682,7 +744,7 @@ namespace lris {
 		<< fAdcList_size << "!=" << chdsize << ") ... That's really bad!!!" << std::endl;
 	    }
 	      
-	  /*} else {
+	  /* else {
 	    const ub_RawData& chD = channel.data(); 
 	    // chdsize=(chD.getChannelDataSize()/sizeof(uint16_t));    
 	    // chdsize = chD.size()/sizeof(uint16_t);    
@@ -736,9 +798,10 @@ namespace lris {
 	    sprintf( warn, "Error: Number of ADCs in (crate,slot,channel)=( %d, %d, %d ) does not equal 9595!", crate_number, card.getModule(), tpc_channel_number );
 	    throw std::runtime_error( warn );
 	  }
-	    
-	  raw::RawDigit rd(ch,chdsize,adclist,compression);
-	  tpcDigitList.push_back(rd);
+	  if (fSwizzleTPC){ // here is where we actually fill the output
+  	    raw::RawDigit rd(ch,chdsize,adclist,compression);
+  	    tpcDigitList.push_back(rd);
+          }
 	    
 	  /*
             std::cout << ch << "\t"
@@ -779,6 +842,7 @@ namespace lris {
     
     auto const seb_pmt_map = event_record.getPMTSEBMap();
     
+    N_PMT_waveforms = 0;
     for(auto const& it:  seb_pmt_map) {
       pmt_crate_data_t const& crate_data = it.second;
       //      int crate_number = crate_data.crateHeader()->crate_number;
@@ -799,17 +863,25 @@ namespace lris {
 	}
             
 // Frame and sample for trigger
-            uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
-            uint32_t sample = card_data.getTrigSample();
-            if (card_data.getModule() == 5){
-              FEM5triggerFrame = frame;
-              FEM5triggerSample = sample;
-            }
-            if (card_data.getModule() == 6){
-              FEM6triggerFrame = frame;
-              FEM6triggerSample = sample;
-            }
-
+        uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
+        uint32_t sample = card_data.getTrigSample();
+        if (abs(frame - triggerFrame) > 1){
+          std::cerr << "ERROR!" << std::endl;
+          std::cerr << "PMT card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
+                    << triggerFrame << " and PMT card header frame is " << frame << std::endl;
+          throw std::exception();
+        }
+//         Filling output tree variables
+        if (card_data.getModule() == 5){
+          FEM5triggerFrame = frame;
+          FEM5triggerSample = sample;
+          FEM5triggerTime = timeService->OpticalClock().Time( sample, frame );
+        }
+        if (card_data.getModule() == 6){
+          FEM6triggerFrame = frame;
+          FEM6triggerSample = sample;
+          FEM6triggerTime = timeService->OpticalClock().Time( sample, frame );
+        }
 	//        int card_number = card_data.getModule();
         
         // nathaniel's version of datatypes:
@@ -828,7 +900,6 @@ namespace lris {
             const auto& window_header = window.header();    // auto here is ub_PMT_WindowHeader_v6
             const ub_RawData& window_data = window.data();
             size_t win_data_size=window_data.size();
-
 
             
             // //\todo check category, time & frame
@@ -852,24 +923,20 @@ namespace lris {
 	    opdet::UBOpticalChannelCategory_t ch_category = ub_pmt_channel_map->GetChannelCategory( data_product_ch_num );
 	    double window_timestamp = timeService->OpticalClock().Time( sample, frame );
 
-        // Filling output tree variables - these don't make so much sense currently
-            if (card_data.getModule() == 5){
-              FEM5triggerFrame = frame;
-              FEM5triggerSample = sample;
-            }
-            if (card_data.getModule() == 6){
-              FEM6triggerFrame = frame;
-              FEM6triggerSample = sample;
-            }
             raw::OpDetWaveform rd( window_timestamp, data_product_ch_num, win_data_size);
             rd.reserve(win_data_size); // Don't know if this compiles, but it is more efficient. push_back is terrible without it.
 
 	    //std::cout << " into ReadoutCH=" << data_product_ch_num << " category=" << opdet::UBOpChannelEnumName( ch_category ) << std::endl;
 	    short adc_max=0;
-	    
             for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
               rd.push_back(*it & 0xfff);                
               if(adc_max < rd.back()) adc_max = rd.back();
+            }
+            // fill OpDetWaveform time
+            double OpDetWaveForm_time = rd.TimeStamp();
+            if (N_PMT_waveforms < 400 and channel_number < 36){
+              PMT_waveform_times[N_PMT_waveforms] = OpDetWaveForm_time;
+              N_PMT_waveforms += 1;
             }
             // Saving trigger readout stream variables to output file
             if(adc_max>2150) { // logic pulses have high ADC values
@@ -879,6 +946,7 @@ namespace lris {
 //                std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() << std::endl;
                 RO_RWMtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
                 RO_RWMtriggerSample = window_header.getSample();
+                RO_RWMtriggerTime = timeService->OpticalClock().Time( RO_RWMtriggerSample, RO_RWMtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 38){
@@ -886,6 +954,7 @@ namespace lris {
 //                std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
                 RO_EXTtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
                 RO_EXTtriggerSample = window_header.getSample();
+                RO_EXTtriggerTime = timeService->OpticalClock().Time( RO_EXTtriggerSample, RO_EXTtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 37){
@@ -893,6 +962,7 @@ namespace lris {
 //                std::cout << "NuMI signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
                 RO_NuMItriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
                 RO_NuMItriggerSample = window_header.getSample();
+                RO_NuMItriggerTime = timeService->OpticalClock().Time( RO_NuMItriggerSample, RO_NuMItriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 36){
@@ -900,6 +970,7 @@ namespace lris {
 //                std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
                 RO_BNBtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
                 RO_BNBtriggerSample = window_header.getSample();
+                RO_BNBtriggerTime = timeService->OpticalClock().Time( RO_BNBtriggerSample, RO_BNBtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
 //              else if (channel_number == 46){
@@ -920,8 +991,9 @@ namespace lris {
 //                std::cout << "channel " << channel_number << ",regular PMT window size = " << win_data_size << std::endl;
 //              }
             }
-
-            pmtDigitList[ch_category]->emplace_back(rd);
+            if (fSwizzlePMT){
+              pmtDigitList[ch_category]->emplace_back(rd);
+            }
           }
         }//<--End channel_pmt_it for loop
       }//<---End card_pmt_it for loop
@@ -965,6 +1037,28 @@ namespace lris {
       auto const& trig_card  = trig_crate.getTriggerCardData(); // typedef of ub_Trigger_CardData_X
       auto const& trig_header = trig_crate.getTriggerHeader();   // ub_Trigger_HeaderData_X
       auto const& trig_data   = trig_crate.getTriggerData();     // ub_Trigger_
+      
+      // The following is to skip events if we don't care about that trigger type.  It does not currently work.
+      if (fSwizzleTriggerType == "BNB" and trig_data.Trig_Gate2() == 0){
+        skipEvent = true;
+        std::cout << "skipping non BNB" << std::endl;
+        return;
+      } 
+      else if (fSwizzleTriggerType == "NuMI" and not trig_data.Trig_Gate1()){
+        skipEvent = true;
+        std::cout << "skipping non NuMI" << std::endl;
+        return;
+      } 
+      else if (fSwizzleTriggerType == "EXT" and not trig_data.Trig_EXT()){
+        skipEvent = true;
+        std::cout << "skipping non EXT" << std::endl;
+        return;
+      } 
+      else if (fSwizzleTriggerType == "CALIB" and not trig_data.Trig_Calib()){
+        skipEvent = true;
+        std::cout << "skipping non CALIB" << std::endl;
+        return;
+      } 
 
       // Make a trigger clock 
       unsigned int sample_64MHz = (trig_header.get2MHzSampleNumber() * 32) + (trig_header.get16MHzRemainderNumber() * 4) + trig_data.getPhase();
