@@ -49,6 +49,7 @@ source:
   huffmanDecode:   true
   swizzleTPC:      true
   swizzlePMT:      true
+  swizzleTriggerType: ALL
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
@@ -65,6 +66,11 @@ outputs:
    compressionLevel: 3
    outputCommands: ["keep *_*_*_*",
                     "drop raw::RawDigits_daq_*_*"]
+   FCMDPlugins: [
+     { plugin_type:   "FileCatalogMetadataRawDigit"
+       RawDigitLabel: "digitcopy"
+     }
+    ]
   }
 }
 

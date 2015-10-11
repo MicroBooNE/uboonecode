@@ -19,7 +19,9 @@ set( uboone_util_lib_list LArFFT_service
 			${ART_UTILITIES}
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
+                        ${FHICLCPP}
 			${CETLIB}
+			${Boost_SYSTEM_LIBRARY}
 			${ROOT_BASIC_LIB_LIST}
     )
 
@@ -36,6 +38,10 @@ simple_plugin( TFileMetadataMicroBooNE "service"
                ${uboone_util_lib_list}
 	       BASENAME_ONLY
 	)	
+simple_plugin( FileCatalogMetadataRawDigit "plugin"
+               ${uboone_util_lib_list}
+	)	
+#	       BASENAME_ONLY
 simple_plugin( TinyHitFinderAna "module"
                ${uboone_util_lib_list}
 	       BASENAME_ONLY
