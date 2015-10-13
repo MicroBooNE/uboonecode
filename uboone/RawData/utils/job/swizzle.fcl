@@ -67,7 +67,7 @@ outputs:
  out1:
   {
    module_type: RootOutput
-   fileName:    "larsoft.root" 
+   fileName: "%ifb_%tc.root"
    compressionLevel: 3
    dataTier: "raw"
   }
