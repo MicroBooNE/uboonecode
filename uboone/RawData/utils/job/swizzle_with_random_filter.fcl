@@ -91,7 +91,7 @@ filters: {
  triggerEnforcement: { module_type : "TriggerEnforcement" }
  randomfilter: {
    module_type : "RandomPrescale"
-   Probability : 0.1
+   Probability : 0.01
  }
 }
 
