@@ -86,14 +86,13 @@ physics:
   digitcopy : { module_type : "RawDigitSaver" 
                 DAQRawDigitProducer : "daq" }
  }
-filters: {
- triggerEnforcement: { module_type : "TriggerEnforcement" }
- flashfilter: @local::microboone_flashtrigger
-}
-
+ filters: {
+  triggerEnforcement: { module_type : "TriggerEnforcement" }
+  flashfilter: @local::microboone_flashtrigger
+ }
  reco: [ triggerEnforcement, opflash, flashfilter, digitcopy ]
  stream1:   [ out1 ]
- trigger_paths: [ reco ] 
+ trigger_paths: [ reco ]
  end_paths: [ stream1 ]
 }
 

@@ -2,12 +2,17 @@
 #include "timeservice_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+
 process_name: Swizzler
 services:
 {
+  scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "daq_hist.root" }
   Timing:       {}
   RandomNumberGenerator: {} 
+  FileCatalogMetadata:    @local::art_file_catalog_data
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
@@ -15,21 +20,14 @@ services:
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
           }
-  FileCatalogMetadata: { applicationFamily: "art"
-                         applicationVersion: "vxx_yy_zz"
-                         fileType: "data"
-                         group: "uboone"
-                         runType: "physics"
-                         service_type: "FileCatalogMetadata"
-                        }
-  FileCatalogMetadataMicroBooNE: { FCLName: "swizzle.fcl"
-                                   FCLVersion: "v1.0"
-                                   ProjectName: "Swizzler"
-                                   ProjectStage: "swizzle"
-                                   ProjectVersion: "vxx_yy_zz"
-                                   service_type: "FileCatalogMetadataMicroBooNE"
-            			 }
+}
 
+microboone_tfile_metadata:
+{
+  JSONFileName:          "daq_hist.root.json"
+  GenerateTFileMetadata: false
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
 }
 
 # Database settings
@@ -37,7 +35,6 @@ services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
 services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
 services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
 services.user.DatabaseUtil.Port:          5436
-#services.user.DatabaseUtil.PassFileName:  "crap.log"  # name of password file. searched for using env var FW_SEARCH_PATH
 services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
 services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: true
@@ -60,7 +57,7 @@ source:
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
                      "E:TOR875, 100, 0, 5" ]
-}	
+}
 
 outputs:
 {
@@ -68,15 +65,27 @@ outputs:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc.root"
-   compressionLevel: 3
    dataTier: "raw"
+   compressionLevel: 3
   }
 }
 
 physics:
 {
- stream1:   [ out1 ] ## commented out to avoid writing output file - this is not desirable for production!
- #stream1:   [ ]
+  producers: {
+  ### flash finders
+  opflash          : @local::microboone_opflash_beam_highgain
+  opflashLow       : @local::microboone_opflash_beam_lowgain
+  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+ }
+ filters: {
+  triggerEnforcement: { module_type : "TriggerEnforcement" }
+ }
+ reco: [ triggerEnforcement, opflash ]
+ stream1:   [ out1 ]
+ trigger_paths: [ reco ]
  end_paths: [ stream1 ]
 }
 
+services.user.TimeService.TrigModuleName: "daq"
