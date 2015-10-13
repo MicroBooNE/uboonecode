@@ -77,8 +77,9 @@ microboone_g4_services.LArG4Parameters.EnabledPhysics:    [ "Em",
                                                             "Hadron",
                                                             "Decay",
                                                             "HadronElastic",
-                                                            "Stopping",
-                                                            "NeutronTrackingCut" ]
+                                                            "Stopping"]
+#                                                            "NeutronTrackingCut"] 
+							    
 
 # Define microboone_detsim_services ... (2*)
 microboone_detsim_services:                   @local::microboone_detsim_dark_services
