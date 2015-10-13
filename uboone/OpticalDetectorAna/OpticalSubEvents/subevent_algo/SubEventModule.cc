@@ -12,6 +12,8 @@
 
 namespace subevent {
 
+  // ============================================================================================================
+  // findChannelFlash
   int findChannelFlash( int channel, std::vector< double >& waveform, SubEventModConfig& config, std::string discrname, Flash& opflash ) {
     // ---------------------------------------
     // input
@@ -81,6 +83,8 @@ namespace subevent {
     return 1;
   }
 
+  // ============================================================================================================
+  // getChannelFlashes
   int getChannelFlashes( int channel, std::vector< double >& waveform, SubEventModConfig& config, std::string discrname, FlashList& flashes, std::vector<double>& postwfm ) {
     // corresponds to cyRunSubEventDiscChannel
     // input
@@ -152,8 +156,9 @@ namespace subevent {
 
   }
 
+  // ============================================================================================================
+  // formFlashes
   void formFlashes( WaveformData& wfms, SubEventModConfig& config, std::string discrname, FlashList& flashes, WaveformData& postwfms ) {
-
     for ( ChannelSetIter it=wfms.chbegin(); it!=wfms.chend(); it++ ) {
       int ch = *it;
       std::vector< double > postwfm;
@@ -163,6 +168,8 @@ namespace subevent {
     }
   }
 
+  // ============================================================================================================
+  // fillFlashAccumulators
   void fillFlashAccumulators( FlashList& flashes, std::map< int, double >& pmtspemap, SubEventModConfig& config, std::vector< double >& peacc, std::vector< double >& hitacc ) {
 
     for ( FlashListIter iflash=flashes.begin(); iflash!=flashes.end(); iflash++ ) {
@@ -181,6 +188,8 @@ namespace subevent {
 
   }
 
+  // ============================================================================================================
+  // formSubEvents
   void formSubEvents( WaveformData& wfms, SubEventModConfig& config, std::map< int, double >& pmtspemap, SubEventList& subevents, FlashList& unclaimed_flashes ) {
 
     std::cout << "FormSubEvents" << std::endl;
@@ -286,7 +295,7 @@ namespace subevent {
 	  continue;
 	double mintstart_diff = 1.0e6;
 	int best_subevent = -1;
-	for ( int isubevent=0; isubevent<subevents.size(); isubevent++ ) {
+	for ( int isubevent=0; isubevent<(int)subevents.size(); isubevent++ ) {
 	  double tdiff = fabs( subevents.get(isubevent).tstart_sample-(*iflash2).tstart );
 	  if ( (*iflash2).tstart >= subevents.get(isubevent).tstart_sample-config.flashgate && (*iflash2).tend <= (subevents.get(isubevent).tend_sample)+config.flashgate ) {
 	    if ( tdiff < mintstart_diff ) {
@@ -313,7 +322,7 @@ namespace subevent {
     //std::cin.get();
 
     nadditions = 0;
-    for ( int iflash=0; iflash<flashes.size(); iflash++ ) {
+    for ( int iflash=0; iflash<(int)flashes.size(); iflash++ ) {
       if ( !flashes.get( iflash ).claimed ) {
 	unclaimed_flashes.add( std::move( flashes.get( iflash ) ) );
 	nadditions ++;
@@ -322,5 +331,61 @@ namespace subevent {
     std::cout << " added " << nadditions << " unclaimed 1st pass flashes to the subevents." << std::endl;
     
   }
+
+  // ============================================================================================================
+  // Analyze SubEvents
+  void AnalyzeSubEvents( SubEventList& subevents ) {
+
+    // We analyze each subevent, calculating quantities such as area
+    for ( SubEventListIter isubevent=subevents.begin(); isubevent!=subevents.end(); isubevent++ ) {
+
+      // subevent and timing
+      SubEvent& subevent = (*isubevent);
+      int width = subevent.tend_sample-subevent.tstart_sample;
+      int tstart = subevent.tstart_sample;
+
+      // combine flashes into a global waveform
+      std::vector< double > combined_flash( width, 0.0 );
+      for ( FlashListIter iflash=subevent.flashes.begin(); iflash!=subevent.flashes.end(); iflash++ ) {
+	Flash& aflash = (*iflash);
+	int offset = aflash.tstart-tstart;
+	for (int tdc=0; tdc<(int)aflash.waveform.size(); tdc++) {
+	  if ( tdc+offset>=0 && tdc+offset<width )
+	    combined_flash.at( tdc+offset ) += aflash.waveform.at( tdc ); // assumed that the pedestal has been subtracted -- should relax this later
+	}
+      }
+
+      // find tmax, maxamp
+      subevent.maxamp = -1.0e-6;
+      for ( int tdc=0; tdc<(int)combined_flash.size(); tdc++ ) {
+	if ( subevent.maxamp < combined_flash[tdc] ) {
+	  subevent.maxamp = combined_flash[tdc];
+	  subevent.tmax_sample = tdc+tstart;
+	  subevent.totpe += combined_flash[tdc];
+	}
+      }
+
+      // find the start using the CFD, using a threshold of 10% maxamp
+      std::vector< int > t_fire;
+      std::vector< int > amp_fire;
+      std::vector< int > maxt_fire;
+      std::vector< int > diff_fire;
+      cpysubevent::runCFdiscriminatorCPP( t_fire, amp_fire, maxt_fire, diff_fire, combined_flash.data(), 4, 40.0, 24, 24, combined_flash.size() );
+
+      // calculate total pe and pe in first 30 samples
+      subevent.totpe = 0.0;
+      subevent.pe30  = 0.0;
+      int flash_start = 0;
+      if ( t_fire.size()>0 )
+	flash_start = std::max( 0, t_fire.at(0)-4 );
+      for ( int tdc=flash_start; tdc<(int)combined_flash.size(); tdc++ ) {
+	subevent.totpe += combined_flash[tdc];
+	if ( flash_start-tdc<30 )
+	  subevent.pe30 += combined_flash[tdc];
+      }
+      
+    }
+  }
+  
 
 }

@@ -25,6 +25,12 @@
 
 // LArSoft
 #include "RawData/OpDetWaveform.h"
+#include "RecoBase/OpFlash.h"
+#include "RecoBase/OpHit.h"
+#include "Utilities/AssociationUtil.h"
+#include "Utilities/TimeService.h"
+#include "Geometry/Geometry.h"
+#include "Geometry/OpDetGeo.h"
 
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/FlashList.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEvent.hh"
@@ -57,10 +63,21 @@ private:
   // Declare member data here.
   std::string fOpDetInputModule;
   subevent::SubEventModConfig fConfig;
+  bool fMakeOpFlash;
+  double fTrigCoinc;
 
   bool prepWaveforms( art::Event& event, subevent::WaveformData& wfms );
   bool gatherWaveforms( art::Event& event, subevent::WaveformData& wfms );
   void baselineCorrectWaveforms( subevent::WaveformData& wfms );
+  void makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, subevent::WaveformData& wfms );
+  void GetHitGeometryInfo(subevent::Flash const& flash,
+			  geo::Geometry const& geom,
+			  std::vector<double> & sumw,
+			  std::vector<double> & sumw2,
+			  double & sumy, double & sumy2,
+			  double & sumz, double & sumz2);
+  
+  
 };
 
 
@@ -70,6 +87,9 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
 {
 
   fOpDetInputModule           = p.get<std::string>( "inputModule");
+  fMakeOpFlash                = p.get<bool>( "makeOpFlash", true );
+  fTrigCoinc                  = p.get<double>       ("TrigCoinc");
+
   fConfig.cfdconfig.threshold = p.get<int>( "threshold" );
   fConfig.cfdconfig.deadtime  = p.get<int>( "deadtime" );
   fConfig.cfdconfig.delay     = p.get<int>( "delay" );
@@ -101,6 +121,12 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
   // Call appropriate produces<>() functions here.
   produces< std::vector< subevent::SubEvent > >();
   produces< subevent::FlashList >( "unclaimedFlashes" );
+
+  if ( fMakeOpFlash ) {
+    produces<std::vector< recob::OpFlash> >();
+    produces<std::vector< recob::OpHit> >();
+    produces<art::Assns<recob::OpFlash, recob::OpHit> >();
+  }
 }
 
 void SubEventBuilder::produce(art::Event & e)
@@ -128,6 +154,10 @@ void SubEventBuilder::produce(art::Event & e)
   formSubEvents( wfms, fConfig, pmtspemap, subevents, *unclaimed_flashes );
   std::cout << "subevents formed. now store in event." << std::endl;
   
+  // make opflash
+  if ( fMakeOpFlash )
+    makeOpFlashes( e, subevents, wfms );
+
   // transfer subevents to the event
   std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
   for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
@@ -146,6 +176,8 @@ bool SubEventBuilder::prepWaveforms( art::Event& event, subevent::WaveformData& 
 
 bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData& wfms ) {
 
+  art::ServiceHandle<util::TimeService> ts;
+
   art::Handle< std::vector< raw::OpDetWaveform > > hgwfmHandle;
   bool loadedhg = event.getByLabel( fOpDetInputModule, "OpdetBeamHighGain", hgwfmHandle );
   
@@ -160,6 +192,7 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
   std::vector< double > wfmstore;
   std::set< int > use_lowgain_wfm;
 
+  // High-Gain Waveforms
   for ( auto const& opdetData: (*hgwfmHandle) ) {
     if ( opdetData.size()<600 ) {
       //std::cout << "skipping cosmic window: " << opdetData.size() << std::endl;
@@ -189,8 +222,11 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
     double ped =  subevent::removePedestal( wfmstore, 20, 2.0, 2047.0 );
     std::cout << "  adc max: " << adcmax-ped << " pedestal=" << ped << std::endl;
     wfms.set( (int)channel, wfmstore, false );
+    // store time stamp for later
+    wfms.storeTimeInfo( (int)channel,  ts->OpticalClock().Frame( opdetData.TimeStamp() ), opdetData.TimeStamp() );
   }
 
+  // Low-Gain Waveforms
   if ( use_lowgain_wfm.size() > 0 ) {
     for ( auto const& opdetData: (*lgwfmHandle) ) {
       if ( opdetData.size()<600 )
@@ -214,6 +250,8 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
 	  wfmstore.at(i) *= 10.0;
 	
 	wfms.set( (int)channel, wfmstore, true ); // low gain waveform
+	
+
       }// if marked for lg replacement
     }// loop over lowgain waveforms
   } // if replacements necessary
@@ -225,7 +263,6 @@ void SubEventBuilder::baselineCorrectWaveforms( subevent::WaveformData& wfms ) {
   double RC = 50000.0; // ns
   double f = exp( -15.625/RC );
   std::vector< double > qcap;
-
   
   for ( subevent::ChannelSetIter itch=wfms.chbegin(); itch!=wfms.chend(); itch++ ) {
 
@@ -245,6 +282,123 @@ void SubEventBuilder::baselineCorrectWaveforms( subevent::WaveformData& wfms ) {
       wfms.get( *itch ).at( tdc ) -= qcap.at( tdc );
     }
   }
+}
+
+void SubEventBuilder::GetHitGeometryInfo(subevent::Flash const& flash,
+					 geo::Geometry const& geom,
+					 std::vector<double> & sumw,
+					 std::vector<double> & sumw2,
+					 double & sumy, double & sumy2,
+					 double & sumz, double & sumz2)
+{
+  double xyz[3];
+  geom.OpDetGeoFromOpChannel( (unsigned int)flash.ch ).GetCenter(xyz);
+
+  double PEThisHit = flash.area;
+  for(size_t p=0; p!=geom.Nplanes(); p++){
+    unsigned int w = geom.NearestWire(xyz,p);
+    sumw.at(p)  += w*PEThisHit;
+    sumw2.at(p) += w*w*PEThisHit;
+  }
+  
+  sumy+=xyz[1]*PEThisHit; sumy2+=xyz[1]*xyz[1]*PEThisHit;
+  sumz+=xyz[2]*PEThisHit; sumz2+=xyz[2]*xyz[2]*PEThisHit;
+}
+
+void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, subevent::WaveformData& wfms ) {
+  
+  art::ServiceHandle<util::TimeService> ts;
+  art::ServiceHandle<geo::Geometry> geom;
+  geo::Geometry const& Geometry(*geom);
+
+  std::unique_ptr< std::vector< recob::OpFlash > >  opflashes( new std::vector< recob::OpFlash > );
+  std::unique_ptr< std::vector< recob::OpHit > > ophits( new std::vector< recob::OpHit > );
+  std::unique_ptr< art::Assns<recob::OpFlash, recob::OpHit> >  AssnPtr( new art::Assns<recob::OpFlash, recob::OpHit> );
+
+  for ( subevent::SubEventListIter isubevent=subevents.begin(); isubevent!=subevents.end(); isubevent++ ) {
+    subevent::SubEvent& asubevent = (*isubevent);
+    // gather info to make an opflash for this subevent:
+    //
+    // OpFlash(double time, double timewidth, double abstime, unsigned int frame,
+    // 	    std::vector< double > PEperOpDet,
+    // 	    bool InBeamFrame=0, int OnBeamTime=0, double FastToTotal=1,
+    // 	    double yCenter=0, double yWidth=0,
+    // 	    double zCenter=0, double zWidth=0,
+    // 	    std::vector<double> WireCenters = std::vector<double>(0),
+    // 	    std::vector<double> WireWidths  = std::vector<double>(0));
+    double timestamp = wfms.getTimestamp(asubevent.flashes.get(0).ch);
+    double abstime = timestamp + asubevent.tmax_sample*ts->OpticalClock().TickPeriod();
+    double reltime = abstime - ts->BeamGateTime();
+    double width = ( asubevent.tend_sample - asubevent.tstart_sample )*ts->OpticalClock().TickPeriod();
+    // Emprical corrections to get the Frame right
+    // // Eventual solution - remove frames
+    // taken from OpFlashAlg.cxx
+    unsigned int frame = ts->OpticalClock().Frame( abstime-18.1 );
+    if ( frame==0 ) frame = 1;
+    unsigned int trigframe = ts->OpticalClock().Frame( ts->BeamGateTime() );
+    bool InBeamFrame = (frame==trigframe);
+    double timewidth = width*ts->OpticalClock().TickPeriod();
+    int OnBeamTime =0;
+    if( std::abs(reltime) < fTrigCoinc ) OnBeamTime=1; // this can't be right, can it?
+    double FastToTotal = 0.;
+
+    // geo stuff I copied
+    std::vector<double> PEs(geom->MaxOpChannel()+1,0.0);
+    unsigned int Nplanes = geom->Nplanes();
+    std::vector<double> sumw(Nplanes,0), sumw2(Nplanes,0);
+    double sumy=0, sumz=0, sumy2=0, sumz2=0;
+    
+    // sum pe for each opdet and do geo stuff
+    std::vector< double > PEperOpDet( geom->NOpDets(), 0.0 );
+    for ( subevent::FlashListIter iflash=asubevent.flashes.begin(); iflash!=asubevent.flashes.end(); iflash++ ) {
+      int iopdet = geom->OpDetFromOpChannel( (unsigned int)(*iflash).ch );
+      PEperOpDet.at( iopdet ) += (*iflash).area; // need calibration constants here
+      GetHitGeometryInfo( (*iflash), Geometry, sumw, sumw2, sumy, sumy2, sumz, sumz2 );
+    }
+    double meany = sumy/asubevent.totpe;
+    double meanz = sumz/asubevent.totpe;
+    double widthy  = sumy2*asubevent.totpe - sumy*sumy;
+    if ( widthy>0.0 )
+      widthy = sqrt( widthy );
+    else
+      widthy = 0.0;
+    double widthz = sumz2*asubevent.totpe - sumz*sumz;
+    if ( widthz>0.0 )
+      widthz = sqrt( widthz );
+    widthz = 0.0;
+
+    std::vector<double> WireCenters(Nplanes,0);
+    std::vector<double> WireWidths(Nplanes,0);
+    for(size_t p=0; p!=Nplanes; ++p){
+      WireCenters.at(p) = sumw.at(p)/asubevent.totpe;
+      WireWidths.at(p)  = sumw2.at(p)*asubevent.totpe - sumw.at(p)*sumw.at(p);
+      if ( WireWidths.at(p)> 0 ) WireWidths.at(p) = sqrt( WireWidths.at(p) );
+      else WireWidths.at(p) = 0.;
+    }
+
+    // finally, make the opflash
+    recob::OpFlash aopflash( reltime, timewidth, abstime, frame, PEperOpDet, 
+			     InBeamFrame, OnBeamTime, FastToTotal,
+			     meany, widthy, meanz, widthz,
+			     WireCenters, WireWidths );
+
+    // make ophits and associate it with the flashes
+    for ( subevent::FlashListIter iflash=asubevent.flashes.begin(); iflash!=asubevent.flashes.end(); iflash++ ) {
+      double flash_abstime = (*iflash).tmax*ts->OpticalClock().TickPeriod() + wfms.getTimestamp( (*iflash).ch );
+      double flash_reltime = flash_abstime -  ts->BeamGateTime();
+      unsigned int flash_frame = ts->OpticalClock().Frame( flash_abstime-18.1 );
+      if ( flash_frame==0 ) flash_frame=1;
+      double flash_width = ( (*iflash).tend-(*iflash).tstart )*ts->OpticalClock().TickPeriod();
+      ophits->emplace_back( (int)(*iflash).ch, flash_reltime, flash_abstime, flash_frame, flash_width, (*iflash).area, (*iflash).maxamp, (*iflash).area/100.0, 0.0 );
+    }
+    opflashes->emplace_back( std::move( aopflash ) );
+  }//end of subevent loop
+  
+  
+  e.put( std::move( opflashes ) );
+  e.put( std::move( ophits ) );
+  e.put( std::move( AssnPtr ) );
+  
 }
 
 DEFINE_ART_MODULE(SubEventBuilder)

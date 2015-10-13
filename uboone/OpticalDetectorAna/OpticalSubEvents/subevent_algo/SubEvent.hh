@@ -23,11 +23,15 @@ namespace subevent {
 
     int tstart_sample;
     int tend_sample;
+    int tmax_sample;
+
     double tstart_ns;
     double tend_ns;
-
+    double tmax_ns;
+    
     double maxamp;
     double totpe;
+    double pe30;
     double sumflash30;
     double sumfcomp_gausintegral;
     
