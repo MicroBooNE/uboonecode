@@ -26,6 +26,7 @@
 // LArSoft
 #include "RawData/OpDetWaveform.h"
 
+#include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/FlashList.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEvent.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEventList.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEventModule.hh"
@@ -74,10 +75,16 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
   fConfig.cfdconfig.delay     = p.get<int>( "delay" );
   fConfig.cfdconfig.width     = p.get<int>( "width" );
   fConfig.cfdconfig.gate      = p.get<int>( "gate" );
-  fConfig.fastfraction        = p.get<double>( "fastfraction", 0.5 );
-  fConfig.slowfraction        = p.get<double>( "slowfraction", 0.5 );
+  fConfig.cfdconfig_pass2.threshold = p.get<int>( "pass2_threshold" );
+  fConfig.cfdconfig_pass2.deadtime  = p.get<int>( "pass2_deadtime" );
+  fConfig.cfdconfig_pass2.delay     = p.get<int>( "pass2_delay" );
+  fConfig.cfdconfig_pass2.width     = p.get<int>( "pass2_width" );
+  fConfig.cfdconfig_pass2.gate      = p.get<int>( "pass2_gate" );
+  fConfig.fastfraction        = p.get<double>( "fastfraction", 0.8 );
+  fConfig.slowfraction        = p.get<double>( "slowfraction", 0.3 );
   fConfig.fastconst_ns        = p.get<double>( "fastconst_ns", 6.0 );
   fConfig.slowconst_ns        = p.get<double>( "slowconst_ns", 1600.0 );
+  fConfig.noslowthreshold     = p.get<double>( "noslowthreshold", 40.0 );
   fConfig.pedsamples          = p.get<int>( "pedsamples", 100 );
   fConfig.npresamples         = p.get<int>( "npresamples", 5 );
   fConfig.maxchflashes        = p.get<int>( "maxchflashes", 30 );
@@ -93,17 +100,12 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
 
   // Call appropriate produces<>() functions here.
   produces< std::vector< subevent::SubEvent > >();
+  produces< subevent::FlashList >( "unclaimedFlashes" );
 }
 
 void SubEventBuilder::produce(art::Event & e)
 {
-  // Implementation of required member function here.
-
-  // test
-  subevent::Flash* aflash = new subevent::Flash();
-  delete aflash;
-  std::cout << "passed simple flash test" << std::endl;
-  
+  // Implementation of required member function here.  
 
   // get waveforms and prep them
   subevent::WaveformData wfms;
@@ -112,7 +114,10 @@ void SubEventBuilder::produce(art::Event & e)
     std::cout << "trouble loading waveforms!" << std::endl;
     return;
   }
+
+  // declare containers for output
   subevent::SubEventList subevents;
+  std::unique_ptr< subevent::FlashList > unclaimed_flashes( new subevent::FlashList() );
 
   // hack: make spe calibration table
   std::map< int, double > pmtspemap;
@@ -120,7 +125,7 @@ void SubEventBuilder::produce(art::Event & e)
     pmtspemap[i] = 20.0;
   
   // Find subevents
-  formSubEvents( wfms, fConfig, pmtspemap, subevents );
+  formSubEvents( wfms, fConfig, pmtspemap, subevents, *unclaimed_flashes );
   std::cout << "subevents formed. now store in event." << std::endl;
   
   // transfer subevents to the event
@@ -129,6 +134,7 @@ void SubEventBuilder::produce(art::Event & e)
     subeventvec->emplace_back( *it );
   }
   e.put( std::move( subeventvec ) );
+  e.put( std::move( unclaimed_flashes ), "unclaimedFlashes" );
   
 }
 
@@ -182,7 +188,7 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
     //std::cout << std::endl;
     double ped =  subevent::removePedestal( wfmstore, 20, 2.0, 2047.0 );
     std::cout << "  adc max: " << adcmax-ped << " pedestal=" << ped << std::endl;
-    wfms.set( (int)channel, wfmstore );
+    wfms.set( (int)channel, wfmstore, false );
   }
 
   if ( use_lowgain_wfm.size() > 0 ) {
@@ -207,7 +213,7 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
 	for (int i=0; i<(int)wfmstore.size(); i++ )
 	  wfmstore.at(i) *= 10.0;
 	
-	wfms.set( (int)channel, wfmstore );
+	wfms.set( (int)channel, wfmstore, true ); // low gain waveform
       }// if marked for lg replacement
     }// loop over lowgain waveforms
   } // if replacements necessary

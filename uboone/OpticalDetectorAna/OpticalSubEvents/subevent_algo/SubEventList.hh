@@ -1,7 +1,10 @@
 #ifndef __SubEventList__
 #define __SubEventList__
 
-//#include "TObject.h"
+#ifdef __BUILD_ROOT_DICT__
+#include "TObject.h"
+#endif
+
 #include "SubEvent.hh"
 #include <vector>
 
@@ -9,8 +12,11 @@ namespace subevent {
 
   typedef std::vector< SubEvent >::iterator SubEventListIter;
 
-  //class SubEventList : public TObject { 
+#ifdef __BUILD_ROOT_DICT__
+  class SubEventList : public TObject { 
+#else
   class SubEventList {
+#endif
 
   public:
     SubEventList();
@@ -53,8 +59,10 @@ namespace subevent {
       if ( amp1.maxamp<amp2.maxamp ) return true;
       else return false;
     };
-
-    //ClassDef( SubEventList, 1 )
+    
+#ifdef __BUILD_ROOT_DICT__
+    ClassDef( SubEventList, 1 )
+#endif
 
   };
 

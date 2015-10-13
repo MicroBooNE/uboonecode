@@ -6,4 +6,5 @@
  <class name="std::vector<subevent::Flash>"/>
  <class name="std::vector<subevent::SubEvent>"/>
  <class name="art::Wrapper<std::vector<subevent::SubEvent>>"/>
+ <class name="art::Wrapper<subevent::FlashList>"/>
 </lcgdict>

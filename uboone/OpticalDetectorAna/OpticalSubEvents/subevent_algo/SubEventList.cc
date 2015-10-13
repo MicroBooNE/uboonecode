@@ -1,7 +1,9 @@
 #include "SubEventList.hh"
 #include <algorithm>
 
-//ClassImp( subevent::SubEventList )
+#ifdef __BUILD_ROOT_DICT__
+ClassImp( subevent::SubEventList )
+#endif
 
 namespace subevent {
 

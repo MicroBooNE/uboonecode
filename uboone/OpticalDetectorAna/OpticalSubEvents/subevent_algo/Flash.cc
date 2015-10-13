@@ -2,7 +2,9 @@
 #include <iostream>
 #include <algorithm>
 
-//ClassImp( subevent::Flash )
+#ifdef __BUILD_ROOT_DICT__
+ClassImp( subevent::Flash )
+#endif
 
 namespace subevent {
 

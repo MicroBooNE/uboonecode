@@ -7,26 +7,38 @@ microboone_subeventbuilder:
 {
     module_type: SubEventBuilder
     inputModule: "pmtreadout"
+    # 1st pass/high threshold, constant fraction discriminator
     threshold: 40
     deadtime: 24
     width: 24
     delay: 4
     gate: 4
-    fastfraction: 0.5
-    slowfraction: 0.5
+    # 2nd pass/low threshold, constant fraction discriminator
+    pass2_threshold: 7
+    pass2_deadtime: 24
+    pass2_width: 24
+    pass2_delay: 4
+    pass2_gate: 4
+    # scintillation response parameters
+    spe_sigma: 62.5
+    fastfraction: 0.8
+    slowfraction: 0.3
     fastconst_ns: 6.0
     slowconst_ns: 1500.0
+    noslowthreshold: 40.0
+    # pedestal
     pedsamples: 100
     npresamples: 5
-    maxchflashes: 30
     pedmaxvar: 1.0
-    spe_sigma: 62.5
+    # subevent finding parameters
+    maxchflashes: 30
     hgslot: 5
     lgslot: 6
     flashgate: 10
     maxsubeventloops: 30
     ampthresh: 3.0
     hitthresh: 1
+    # constants
     nspersample: 15.625
 }
 

@@ -7,3 +7,5 @@
 
 template class std::vector< subevent::SubEvent >;
 template class art::Wrapper< std::vector< subevent::SubEvent > >;
+template class std::vector< subevent::Flash >;
+template class art::Wrapper< subevent::FlashList >;

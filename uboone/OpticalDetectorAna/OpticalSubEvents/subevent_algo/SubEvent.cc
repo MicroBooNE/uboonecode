@@ -1,6 +1,8 @@
 #include "SubEvent.hh"
 
-//ClassImp( subevent::SubEvent )
+#ifdef __BUILD_ROOT_DICT__
+ClassImp( subevent::SubEvent )
+#endif
 
 namespace subevent {
 

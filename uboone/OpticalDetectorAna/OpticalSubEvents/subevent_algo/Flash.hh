@@ -1,12 +1,17 @@
 #ifndef __FLASH_HH__
 #define __FLASH_HH__
 
-//#include "TObject.h"
+#ifdef __BUILD_ROOT_DICT__
+#include "TObject.h"
+#endif
 #include <vector>
 
 namespace subevent {
-  //class Flash : public TObject {
+#ifdef __BUILD_ROOT_DICT__
+  class Flash : public TObject {
+#else
   class Flash {
+#endif
 
   public:
     
@@ -29,8 +34,9 @@ namespace subevent {
     bool claimed;
     std::vector< double > expectation;
     std::vector< double > waveform;
-
-    //ClassDef( Flash, 1 );
+#ifdef __BUILD_ROOT_DICT__
+    ClassDef( Flash, 1 );
+#endif
   };
 
 }

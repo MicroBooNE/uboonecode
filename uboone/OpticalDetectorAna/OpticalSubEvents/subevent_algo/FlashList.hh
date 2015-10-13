@@ -1,15 +1,20 @@
 #ifndef __FLASHLIST__
 #define __FLASHLIST__
 
+#ifdef __BUILD_ROOT_DICT__
+#include "TObject.h"
+#endif
 #include "Flash.hh"
 #include <vector>
 
 namespace subevent {
 
   typedef std::vector< Flash >::iterator FlashListIter;
-
-  //class FlashList : public TObject { 
+#ifdef __BUILD_ROOT_DICT__
+  class FlashList : public TObject { 
+#else
   class FlashList { 
+#endif
 
   public:
     FlashList();
@@ -55,7 +60,9 @@ namespace subevent {
 
     
   public:
-    //ClassDef( FlashList, 1 )
+#ifdef __BUILD_ROOT_DICT__
+    ClassDef( FlashList, 1 )
+#endif
   };
 
 }

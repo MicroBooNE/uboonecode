@@ -2,6 +2,7 @@
 #define __SubEventModConfig__
 
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/CFDiscConfig.hh"
+//#include "CFDiscConfig.hh"
 
 namespace subevent {
 
@@ -17,6 +18,7 @@ namespace subevent {
     double slowfraction;
     double fastconst_ns;
     double slowconst_ns;
+    double noslowthreshold;
 
     int npresamples;    
     int pedsamples;
@@ -33,6 +35,7 @@ namespace subevent {
     int hitthresh;
 
     cpysubevent::CFDiscConfig cfdconfig;
+    cpysubevent::CFDiscConfig cfdconfig_pass2;
 
   };
 

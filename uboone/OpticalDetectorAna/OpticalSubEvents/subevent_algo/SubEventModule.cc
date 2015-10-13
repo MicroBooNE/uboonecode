@@ -4,6 +4,7 @@
 #include "SubEventList.hh"
 #include "WaveformData.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"
+//#include "cfdiscriminator.hh"
 #include "scintresponse.hh"
 #include <algorithm>
 #include <iostream>
@@ -11,12 +12,13 @@
 
 namespace subevent {
 
-  int findChannelFlash( int channel, std::vector< double >& waveform, SubEventModConfig& config, Flash& opflash ) {
+  int findChannelFlash( int channel, std::vector< double >& waveform, SubEventModConfig& config, std::string discrname, Flash& opflash ) {
     // ---------------------------------------
     // input
     // int channel: channel id
     // waveform: ADCs
     // config: SubEventModule configuration
+    // chooses which CFD setting to use
     // output
     // opflash: Flash object
     // ---------------------------------------
@@ -27,8 +29,13 @@ namespace subevent {
     std::vector< int > diff_fire;
     //std::cout << "CFD config: " << config.cfdconfig.delay << " " <<  config.cfdconfig.threshold << " " <<  config.cfdconfig.deadtime << " " <<  config.cfdconfig.width << std::endl;
     
-    cpysubevent::runCFdiscriminatorCPP( t_fire, amp_fire, maxt_fire, diff_fire, waveform.data(), 
-					config.cfdconfig.delay, config.cfdconfig.threshold, config.cfdconfig.deadtime, config.cfdconfig.width, waveform.size() );
+    if ( discrname!="pass2" )
+      cpysubevent::runCFdiscriminatorCPP( t_fire, amp_fire, maxt_fire, diff_fire, waveform.data(), 
+					  config.cfdconfig.delay, config.cfdconfig.threshold, config.cfdconfig.deadtime, config.cfdconfig.width, waveform.size() );
+    else
+      cpysubevent::runCFdiscriminatorCPP( t_fire, amp_fire, maxt_fire, diff_fire, waveform.data(), 
+					  config.cfdconfig_pass2.delay, config.cfdconfig_pass2.threshold, config.cfdconfig_pass2.deadtime, config.cfdconfig_pass2.width, waveform.size() );
+	
 
     // find largest
     int largestCFD = -1;
@@ -54,7 +61,8 @@ namespace subevent {
     expectation.reserve( 200 );
     subevent::calcScintResponseCPP( expectation, 
 				    opflash.tstart, (int)waveform.size(), opflash.tmax, 
-				    config.spe_sigma, maxamp-waveform.at( opflash.tstart ), config.fastconst_ns, config.slowconst_ns, config.nspersample );
+				    config.spe_sigma, maxamp-waveform.at( opflash.tstart ), config.fastconst_ns, config.slowconst_ns, 
+				    config.nspersample, config.fastfraction, config.slowfraction, config.noslowthreshold );
 
     opflash.tend = std::min( opflash.tstart+(int)expectation.size(), (int)waveform.size()-1 );
     
@@ -73,7 +81,7 @@ namespace subevent {
     return 1;
   }
 
-  int getChannelFlashes( int channel, std::vector< double >& waveform, SubEventModConfig& config, FlashList& flashes, std::vector<double>& postwfm ) {
+  int getChannelFlashes( int channel, std::vector< double >& waveform, SubEventModConfig& config, std::string discrname, FlashList& flashes, std::vector<double>& postwfm ) {
     // corresponds to cyRunSubEventDiscChannel
     // input
     // channel: FEMCH number
@@ -103,7 +111,7 @@ namespace subevent {
     while ( nsubevents<maxsubevents ) {
       // find one subevent (finds the largest flash of light)
       Flash opflash;
-      int found = findChannelFlash( channel, postwfm, config, opflash );
+      int found = findChannelFlash( channel, postwfm, config, discrname, opflash );
       //std::cout << "[getChannelFlashes] Found  " << found << " flashes in channel " << channel << std::endl;
       if ( found==0 )
 	break;
@@ -116,16 +124,24 @@ namespace subevent {
       opflash.area = 0.0;
       for (int tdc=0; tdc<(int)opflash.expectation.size(); tdc++) {
 	fx = opflash.expectation.at(tdc);
+	// ---------------------------------------------
+	// This is all a little hacky
+	// this variance threshold should be tunned better?
+	// it really serves as a first pass attempt at preventing repeated flash formation
+	// later, we will refine the subevent to look for subevents inside the late-light tail
+	// but really, someone please put xenon into the detector
 	sig = sqrt( fx/20.0 );
 	thresh = fx + 3.0*sig*20.0; // 3 sigma variance
 	if ( postwfm.at( opflash.tstart )-chped < thresh ) {
 	  postwfm.at( opflash.tstart + tdc ) = chped;
 	}
-	if ( tdc<600 && opflash.tstart+tdc+20<(int)waveform.size() ) {
+	// we cap the area calculation and keep a 20 sample buffer from the end
+	if ( tdc<600 && opflash.tstart+tdc+20<(int)waveform.size() ) { 
 	  if ( tdc<30 )
 	    opflash.area30 += waveform.at( opflash.tstart+tdc )-chped;
 	  opflash.area += waveform.at( opflash.tstart+tdc )-chped;
 	}
+	// ---------------------------------------------
       }
       opflash.fcomp_gausintegral = (opflash.maxamp-chped)*(config.spe_sigma/15.625)*sqrt(2.0)*3.14159;
       nsubevents += 1;
@@ -136,13 +152,14 @@ namespace subevent {
 
   }
 
-  void formFlashes( WaveformData& wfms, SubEventModConfig& config, FlashList& flashes ) {
+  void formFlashes( WaveformData& wfms, SubEventModConfig& config, std::string discrname, FlashList& flashes, WaveformData& postwfms ) {
 
     for ( ChannelSetIter it=wfms.chbegin(); it!=wfms.chend(); it++ ) {
       int ch = *it;
       std::vector< double > postwfm;
-      getChannelFlashes( ch, wfms.get( ch ), config, flashes, postwfm );
+      getChannelFlashes( ch, wfms.get( ch ), config, discrname, flashes, postwfm );
       std::cout << "search for flashes in channel=" << ch << ". found=" << flashes.size() << std::endl;
+      postwfms.set( ch, postwfm, wfms.isLowGain(ch) );
     }
   }
 
@@ -164,13 +181,21 @@ namespace subevent {
 
   }
 
-  void formSubEvents( WaveformData& wfms, SubEventModConfig& config, std::map< int, double >& pmtspemap, SubEventList& subevents ) {
+  void formSubEvents( WaveformData& wfms, SubEventModConfig& config, std::map< int, double >& pmtspemap, SubEventList& subevents, FlashList& unclaimed_flashes ) {
 
     std::cout << "FormSubEvents" << std::endl;
 
+    WaveformData postwfms; // this will store "post" waveforms. We remove sections of the waveforms used to build hits (by returning them to baseline)
+
+    // We find flashes of light on each channel. We do this in two passes: a high threshold pass to look for pulses above any background spe light.
     FlashList flashes;
-    formFlashes( wfms, config, flashes );
-    std::cout << "  total flashes: " << flashes.size() << std::endl;
+    formFlashes( wfms, config, "pass1", flashes, postwfms );
+    std::cout << "  total pass1/high-trehsold flashes: " << flashes.size() << std::endl;
+
+    WaveformData postpostwfms;
+    FlashList flashes_pass2;
+    formFlashes( postwfms, config, "pass2", flashes_pass2, postpostwfms );
+    std::cout << "  total pass2/low-threshold flashes: " << flashes_pass2.size() << std::endl;
 
     int nloops = 0;
     ChannelSetIter itch=wfms.chbegin();
@@ -251,7 +276,51 @@ namespace subevent {
     }//end of while loop
     
     std::cout << " end of formsubevents. found " << subevents.size() << std::endl;
+
+    // now add in second pass flashes
+    int nadditions = 0;
+    if ( subevents.size() > 0 ) {
+      flashes_pass2.sortByTime();
+      for( FlashListIter iflash2=flashes_pass2.begin(); iflash2!=flashes_pass2.end(); iflash2++ ) {
+	if ( (*iflash2).claimed )
+	  continue;
+	double mintstart_diff = 1.0e6;
+	int best_subevent = -1;
+	for ( int isubevent=0; isubevent<subevents.size(); isubevent++ ) {
+	  double tdiff = fabs( subevents.get(isubevent).tstart_sample-(*iflash2).tstart );
+	  if ( (*iflash2).tstart >= subevents.get(isubevent).tstart_sample-config.flashgate && (*iflash2).tend <= (subevents.get(isubevent).tend_sample)+config.flashgate ) {
+	    if ( tdiff < mintstart_diff ) {
+	      best_subevent = isubevent;
+	      mintstart_diff = tdiff;
+	    }
+	  }
+	}
+	
+	// add to subevent if a match found
+	if ( best_subevent>=0 ) {
+	  (*iflash2).claimed = true;
+	  subevents.get(best_subevent).flashes.add( std::move(*iflash2) );
+	  //std::cout << " adding second pass flash to subevent #" << best_subevent << std::endl;
+	  nadditions += 1;
+	}
+	else {
+	  // moved into unclaimed flashes list
+	  unclaimed_flashes.add( std::move( *iflash2 ) );
+	}
+      }
+    }
+    std::cout << " added " << nadditions << " 2nd pass flashes to the subevents." << std::endl;
     //std::cin.get();
+
+    nadditions = 0;
+    for ( int iflash=0; iflash<flashes.size(); iflash++ ) {
+      if ( !flashes.get( iflash ).claimed ) {
+	unclaimed_flashes.add( std::move( flashes.get( iflash ) ) );
+	nadditions ++;
+      }
+    }
+    std::cout << " added " << nadditions << " unclaimed 1st pass flashes to the subevents." << std::endl;
+    
   }
 
 }

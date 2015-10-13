@@ -1,14 +1,20 @@
 #ifndef __SUBEVENT__
 #define __SUBEVENT__
 
-//#include "TObject.h"
+#ifdef __BUILD_ROOT_DICT__
+#include "TObject.h"
+#endif
+
 #include "Flash.hh"
 #include "FlashList.hh"
 
 namespace subevent {
 
-  //class SubEvent : public TObject {
+#ifdef __BUILD_ROOT_DICT__
+  class SubEvent : public TObject {
+#else
   class SubEvent {
+#endif
     
   public:
     
@@ -27,7 +33,9 @@ namespace subevent {
     
     FlashList flashes;
     
-    //ClassDef( SubEvent, 1 );
+#ifdef __BUILD_ROOT_DICT__
+    ClassDef( SubEvent, 1 );
+#endif
     
   };
 
