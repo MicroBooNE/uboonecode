@@ -4,6 +4,7 @@
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
 #include "seedservice_microboone.fcl"
 
 process_name: Swizzler
@@ -59,11 +60,12 @@ source:
 
 outputs:
 {
- out1:
+ filtered:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc.root"
+   fileName: "%ifb_%tc_filtered.root"
    dataTier: "raw"
+   streamName: "filtered"
    compressionLevel: 3
    outputCommands: ["keep *_*_*_*",
                     "drop raw::RawDigits_daq_*_*"]
@@ -72,6 +74,17 @@ outputs:
        RawDigitLabel: "digitcopy"
      }
     ]
+  }
+ prescaled:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_prescaled.root"
+   dataTier: "raw"
+   streamName: "prescaled"
+   compressionLevel: 3
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_digitcopy_*_*"]
+   SelectEvents: { SelectEvents: [ "filter2" ] }
   }
 }
 
@@ -89,16 +102,20 @@ physics:
  }
  filters: {
   triggerEnforcement: { module_type : "TriggerEnforcement" }
+  flashfilter: @local::microboone_flashtrigger
   randomfilter: {
    module_type : "RandomPrescale"
-   Probability : 0.01
+   Probability : 0.11
   }
  }
 
- reco: [ triggerEnforcement, opflash, randomfilter, digitcopy ]
- stream1:   [ out1 ]
- trigger_paths: [ reco ] 
- end_paths: [ stream1 ]
+ common: [ triggerEnforcement, opflash ]
+ filter1: [ flashfilter, digitcopy ]
+ filter2: [ randomfilter ]
+ stream1:   [ filtered ]
+ stream2:   [ prescaled ]
+ trigger_paths: [ common, filter1, filter2 ] 
+ end_paths: [ stream1, stream2 ]
 }
 
 services.user.TimeService.TrigModuleName: "daq"
