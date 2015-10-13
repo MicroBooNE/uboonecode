@@ -59,7 +59,7 @@ source:
 
 outputs:
 {
- out1:
+ rawprescale:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc.root"
@@ -96,7 +96,7 @@ physics:
  }
 
  reco: [ triggerEnforcement, opflash, randomfilter, digitcopy ]
- stream1:   [ out1 ]
+ stream1:   [ rawprescale ]
  trigger_paths: [ reco ] 
  end_paths: [ stream1 ]
 }

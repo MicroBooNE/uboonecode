@@ -60,12 +60,12 @@ source:
 
 outputs:
 {
- filtered:
+ rawfilter:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_filtered.root"
+   fileName: "%ifb_%tc_rawfilter.root"
    dataTier: "raw"
-   streamName: "filtered"
+   streamName: "rawfilter"
    compressionLevel: 3
    outputCommands: ["keep *_*_*_*",
                     "drop raw::RawDigits_daq_*_*"]
@@ -75,12 +75,12 @@ outputs:
      }
     ]
   }
- prescaled:
+ rawprescale:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_prescaled.root"
+   fileName: "%ifb_%tc_rawprescale.root"
    dataTier: "raw"
-   streamName: "prescaled"
+   streamName: "rawprescale"
    compressionLevel: 3
    outputCommands: ["keep *_*_*_*",
                     "drop raw::RawDigits_digitcopy_*_*"]
@@ -112,8 +112,8 @@ physics:
  common: [ triggerEnforcement, opflash ]
  filter1: [ flashfilter, digitcopy ]
  filter2: [ randomfilter ]
- stream1:   [ filtered ]
- stream2:   [ prescaled ]
+ stream1:   [ rawfilter ]
+ stream2:   [ rawprescale ]
  trigger_paths: [ common, filter1, filter2 ] 
  end_paths: [ stream1, stream2 ]
 }

@@ -58,7 +58,7 @@ source:
 
 outputs:
 {
- out1:
+ rawfilter:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc.root"
@@ -91,7 +91,7 @@ physics:
   flashfilter: @local::microboone_flashtrigger
  }
  reco: [ triggerEnforcement, opflash, flashfilter, digitcopy ]
- stream1:   [ out1 ]
+ stream1:   [ rawfilter ]
  trigger_paths: [ reco ]
  end_paths: [ stream1 ]
 }
