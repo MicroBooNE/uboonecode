@@ -380,7 +380,7 @@ namespace subevent {
 	flash_start = std::max( 0, t_fire.at(0)-4 );
       for ( int tdc=flash_start; tdc<(int)combined_flash.size(); tdc++ ) {
 	subevent.totpe += combined_flash[tdc];
-	if ( flash_start-tdc<30 )
+	if ( tdc-flash_start<30 )
 	  subevent.pe30 += combined_flash[tdc];
       }
       
