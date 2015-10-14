@@ -143,6 +143,9 @@ namespace lris {
     fSwizzleTrigger = ps.get<bool>("swizzleTrigger",true);
     fSwizzleTriggerType = ps.get<std::string>("swizzleTriggerType"); // Only use ALL for this option, other options will not work
 
+    //temporary kazuTestSwizzleTrigger
+    kazuTestSwizzleTrigger = ps.get<bool>("kazuTestSwizzleTrigger",true);
+   
     //if ( fHuffmanDecode )
     tpc_crate_data_t::doDissect(true); // setup for decoding
 
@@ -445,6 +448,8 @@ namespace lris {
 						 std::vector<raw::Trigger>& trigInfo)
   {  
      triggerFrame = -999;
+     TPCframe = -999;
+     PMTframe = -999;
      FEM5triggerSample=-999;
      FEM6triggerSample=-999;
      FEM5triggerFrame=-999;
@@ -480,10 +485,10 @@ namespace lris {
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
 
-    std::cout << N_PMT_waveforms << std::endl;
+    checkTimeStampConsistency();
+
     tMyTree->Fill();
 
-    //std::cout<<"Done ProcessNextEvent..."<<std::endl;
     /*
       } catch (...) {
       //throw art::Exception( art::errors::FileReadError )
@@ -604,21 +609,27 @@ namespace lris {
 	auto const& tpc_card_header = card.header();   
         
         unsigned int frame = RollOver(tpc_card_header.getFrame(), tpc_card_header.getTrigFrameMod16(), 3);
-
-
-        if (fSwizzleTrigger){
-          if (triggerFrame == -999){ // if we have swizzled trigger data, and we have the default triggerFrame, we have a problem
-            std::cerr << "ERROR!" << std::endl;
-            std::cerr << "Trigger data should have been swizzled, but triggerFrame remains as the default value of -999" << std::endl;
-            throw std::exception();
-          }
-          if (abs(frame - triggerFrame) > 1){ // if the triggerFrame and frame don't agree here then we have a problem
-            std::cerr << "ERROR!" << std::endl;
-            std::cerr << "TPC card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
-                      << triggerFrame << " and TPC card header frame is " << frame << std::endl;
-            throw std::exception();
-          }
+        
+        if (TPCframe == -999){TPCframe = frame;} // internal frame consistency checking
+        if (abs(frame - TPCframe) > 1){ // if the frame doesn't match the other TPC frames here then we have a problem
+          std::cerr << "ERROR!" << std::endl;
+          std::cerr << "TPC card header trigger frames not within one frame of each other!!" << std::endl;
+          throw std::exception();
         }
+
+//        if (fSwizzleTrigger){
+//          if (triggerFrame == -999){ // if we have swizzled trigger data, and we have the default triggerFrame, we have a problem
+//            std::cerr << "ERROR!" << std::endl;
+//            std::cerr << "Trigger data should have been swizzled, but triggerFrame remains as the default value of -999" << std::endl;
+//            throw std::exception();
+//          }
+//          if (abs(frame - triggerFrame) > 1){ // if the triggerFrame and frame don't agree here then we have a problem
+//            std::cerr << "ERROR!" << std::endl;
+//            std::cerr << "TPC card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
+//                      << triggerFrame << " and TPC card header frame is " << frame << std::endl;
+//            throw std::exception();
+//          }
+//        }
         // Output tree variables - for calculating compression
         if (crate_number == 1){
           NumWords_crate1 += tpc_card_header.getWordCount();
@@ -811,7 +822,7 @@ namespace lris {
 	  if (fSwizzleTPC){ // here is where we actually fill the output
   	    raw::RawDigit rd(ch,chdsize,adclist,compression);
   	    tpcDigitList.push_back(rd);
-          }
+        }
 	    
 	  /*
             std::cout << ch << "\t"
@@ -875,20 +886,29 @@ namespace lris {
 // Frame and sample for trigger
         uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
         uint32_t sample = card_data.getTrigSample();
-        // check if we have swizzled the trigger data
-        if (fSwizzleTrigger){
-          if (triggerFrame == -999){ // if we have swizzled trigger data, and we have the default triggerFrame, we have a problem
-            std::cerr << "ERROR!" << std::endl;
-            std::cerr << "Trigger data should have been swizzled, but triggerFrame remains as the default value of -999" << std::endl;
-            throw std::exception();
-          }
-          if (abs(frame - triggerFrame) > 1){ // if the triggerFrame and frame don't agree here then we have a problem
-            std::cerr << "ERROR!" << std::endl;
-            std::cerr << "PMT card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
-                      << triggerFrame << " and PMT card header frame is " << frame << std::endl;
-            throw std::exception();
-          }
+
+        if (PMTframe == -999){PMTframe = frame;} // internal frame consistency checking
+        if (abs(frame - PMTframe) > 1){ // if the frame doesn't match the other PMT frames here then we have a problem
+          std::cerr << "ERROR!" << std::endl;
+          std::cerr << "PMT card header trigger frames not within one frame of each other!!" << std::endl;
+          throw std::exception();
         }
+
+
+//        // check if we have swizzled the trigger data
+//        if (fSwizzleTrigger){
+//          if (triggerFrame == -999){ // if we have swizzled trigger data, and we have the default triggerFrame, we have a problem
+//            std::cerr << "ERROR!" << std::endl;
+//            std::cerr << "Trigger data should have been swizzled, but triggerFrame remains as the default value of -999" << std::endl;
+//            throw std::exception();
+//          }
+//          if (abs(frame - triggerFrame) > 1){ // if the triggerFrame and frame don't agree here then we have a problem
+//            std::cerr << "ERROR!" << std::endl;
+//            std::cerr << "PMT card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
+//                      << triggerFrame << " and PMT card header frame is " << frame << std::endl;
+//            throw std::exception();
+//          }
+//        }
 //         Filling output tree variables
         if (card_data.getModule() == 5){
           FEM5triggerFrame = frame;
@@ -1104,6 +1124,7 @@ namespace lris {
 			      trigger_time,
 			      beam_time,
 			      trig_bits );
+      if (not kazuTestSwizzleTrigger){return;}
       trigInfo.emplace_back( swiz_trig );
       
       if (not fSwizzleTrigger){return;} // if we don't want to swizzle the trigger data, then stop here.
@@ -1195,5 +1216,38 @@ namespace lris {
 	      << std::endl;
     throw std::exception();
   }
+
+
+  // =====================================================================  
+  void LArRawInputDriverUBooNE::checkTimeStampConsistency(){
+
+    if (fSwizzleTrigger && fSwizzlePMT ){ // trig-PMT comparison
+      if (abs(PMTframe - triggerFrame)>1){
+        std::cout << "ERROR!" << std::endl;
+        std::cout << "trigger data and PMT data both read out, but frames disagree (by more than 1)!" << std::endl;
+        std::cout << "trigger data frame = " << triggerFrame << ", PMT data frame = " << PMTframe << std::endl;
+        throw std::exception();
+      } // Done trig-PMT comparison
+    }
+    if (fSwizzleTrigger && fSwizzleTPC ){ // trig-TPC comparison
+      if (abs(TPCframe - triggerFrame)>1){
+        std::cout << "ERROR!" << std::endl;
+        std::cout << "trigger data and TPC data both read out, but frames disagree (by more than 1)!" << std::endl;
+        std::cout << "trigger data frame = " << triggerFrame << ", TPC data frame = " << TPCframe << std::endl;
+        throw std::exception();
+      } // Done trig-TPC comparison
+    }
+    if (fSwizzleTPC && fSwizzlePMT ){ // TPC-PMT comparison
+      if (abs(PMTframe - TPCframe)>1){
+        std::cout << "ERROR!" << std::endl;
+        std::cout << "TPC data and PMT data both read out, but frames disagree (by more than 1)!" << std::endl;
+        std::cout << "TPC data frame = " << TPCframe << ", PMT data frame = " << PMTframe << std::endl;
+        throw std::exception();
+      }
+    } // Done TPC-PMT comparison
+
+  }
+  // =====================================================================  
+
 }//<---Endlris
 

@@ -92,6 +92,7 @@ namespace lris {
 		      raw::BeamInfo& beamInfo);
     void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 			 std::vector<raw::Trigger>& trigInfo);
+    void checkTimeStampConsistency(void);
 
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;
@@ -108,6 +109,8 @@ namespace lris {
     bool                           fSwizzleTrigger; //fhicl parameter.  Tells us whether to swizzle the trigger data. (desired if we don't care about frame slippage)
     std::string                    fSwizzleTriggerType; //fhicl parameter.  Tells us whether to swizzle a specific trigger type only. Options are ALL, BNB, NuMI, CALIB
     bool skipEvent; // tag to skip event if trigger is not the type we want.
+
+    bool kazuTestSwizzleTrigger;
 
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
@@ -138,6 +141,7 @@ namespace lris {
     uint32_t triggerBitPMTBeam;
     uint32_t triggerBitPMTCosmic;
     
+    int PMTframe; // internal checking variable for PMT
     int FEM5triggerFrame ;
     int FEM5triggerSample;
     int FEM6triggerFrame ;
@@ -163,6 +167,7 @@ namespace lris {
 //    uint32_t RO_Gate2Frame;
 //    uint32_t RO_Gate2Sample;
 
+    int TPCframe; // internal checking variable for TPC
     int TPC1triggerFrame;
     int TPC1triggerSample;
     int TPC2triggerFrame;
