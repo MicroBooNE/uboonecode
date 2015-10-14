@@ -105,6 +105,7 @@ namespace lris {
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
     bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data
     bool                           fSwizzlePMT; //fhicl parameter.  Tells us whether to swizzle the PMT data
+    bool                           fSwizzleTrigger; //fhicl parameter.  Tells us whether to swizzle the trigger data. (desired if we don't care about frame slippage)
     std::string                    fSwizzleTriggerType; //fhicl parameter.  Tells us whether to swizzle a specific trigger type only. Options are ALL, BNB, NuMI, CALIB
     bool skipEvent; // tag to skip event if trigger is not the type we want.
 
@@ -127,8 +128,8 @@ namespace lris {
     double PMT_waveform_times[400];
     int N_PMT_waveforms; 
 
-    uint32_t triggerFrame;
-    uint32_t triggerSample;
+    int triggerFrame;
+    int triggerSample;
     double triggerTime;
     uint32_t triggerActive;
     uint32_t triggerBitBNB;
@@ -137,21 +138,21 @@ namespace lris {
     uint32_t triggerBitPMTBeam;
     uint32_t triggerBitPMTCosmic;
     
-    uint32_t FEM5triggerFrame ;
-    uint32_t FEM5triggerSample;
-    uint32_t FEM6triggerFrame ;
-    uint32_t FEM6triggerSample;
+    int FEM5triggerFrame ;
+    int FEM5triggerSample;
+    int FEM6triggerFrame ;
+    int FEM6triggerSample;
     double FEM5triggerTime;
     double FEM6triggerTime;
 
-    uint32_t RO_BNBtriggerFrame;
-    uint32_t RO_NuMItriggerFrame;
-    uint32_t RO_EXTtriggerFrame;
-    uint32_t RO_RWMtriggerFrame;
-    uint32_t RO_BNBtriggerSample;
-    uint32_t RO_NuMItriggerSample;
-    uint32_t RO_EXTtriggerSample;
-    uint32_t RO_RWMtriggerSample;
+    int RO_BNBtriggerFrame;
+    int RO_NuMItriggerFrame;
+    int RO_EXTtriggerFrame;
+    int RO_RWMtriggerFrame;
+    int RO_BNBtriggerSample;
+    int RO_NuMItriggerSample;
+    int RO_EXTtriggerSample;
+    int RO_RWMtriggerSample;
     double RO_BNBtriggerTime;
     double RO_NuMItriggerTime;
     double RO_EXTtriggerTime;
@@ -162,24 +163,24 @@ namespace lris {
 //    uint32_t RO_Gate2Frame;
 //    uint32_t RO_Gate2Sample;
 
-    uint32_t TPC1triggerFrame;
-    uint32_t TPC1triggerSample;
-    uint32_t TPC2triggerFrame;
-    uint32_t TPC2triggerSample;
-    uint32_t TPC3triggerFrame;
-    uint32_t TPC3triggerSample;
-    uint32_t TPC4triggerFrame;
-    uint32_t TPC4triggerSample;
-    uint32_t TPC5triggerFrame;
-    uint32_t TPC5triggerSample;
-    uint32_t TPC6triggerFrame;
-    uint32_t TPC6triggerSample;
-    uint32_t TPC7triggerFrame;
-    uint32_t TPC7triggerSample;
-    uint32_t TPC8triggerFrame;
-    uint32_t TPC8triggerSample;
-    uint32_t TPC9triggerFrame;
-    uint32_t TPC9triggerSample;
+    int TPC1triggerFrame;
+    int TPC1triggerSample;
+    int TPC2triggerFrame;
+    int TPC2triggerSample;
+    int TPC3triggerFrame;
+    int TPC3triggerSample;
+    int TPC4triggerFrame;
+    int TPC4triggerSample;
+    int TPC5triggerFrame;
+    int TPC5triggerSample;
+    int TPC6triggerFrame;
+    int TPC6triggerSample;
+    int TPC7triggerFrame;
+    int TPC7triggerSample;
+    int TPC8triggerFrame;
+    int TPC8triggerSample;
+    int TPC9triggerFrame;
+    int TPC9triggerSample;
     
     uint32_t ADCwords_crate0;
     uint32_t ADCwords_crate1;

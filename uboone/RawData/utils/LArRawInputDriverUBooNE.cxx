@@ -140,6 +140,7 @@ namespace lris {
 
     fSwizzleTPC = ps.get<bool>("swizzleTPC",true);
     fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
+    fSwizzleTrigger = ps.get<bool>("swizzleTrigger",true);
     fSwizzleTriggerType = ps.get<std::string>("swizzleTriggerType"); // Only use ALL for this option, other options will not work
 
     //if ( fHuffmanDecode )
@@ -442,7 +443,7 @@ namespace lris {
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
-  {    
+  {  
      triggerFrame = -999;
      FEM5triggerSample=-999;
      FEM6triggerSample=-999;
@@ -603,11 +604,20 @@ namespace lris {
 	auto const& tpc_card_header = card.header();   
         
         unsigned int frame = RollOver(tpc_card_header.getFrame(), tpc_card_header.getTrigFrameMod16(), 3);
-        if (abs(frame - triggerFrame) > 1){
-          std::cerr << "ERROR!" << std::endl;
-          std::cerr << "TPC card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
-                    << triggerFrame << " and TPC card header frame is " << frame << std::endl;
-          throw std::exception();
+
+
+        if (fSwizzleTrigger){
+          if (triggerFrame == -999){ // if we have swizzled trigger data, and we have the default triggerFrame, we have a problem
+            std::cerr << "ERROR!" << std::endl;
+            std::cerr << "Trigger data should have been swizzled, but triggerFrame remains as the default value of -999" << std::endl;
+            throw std::exception();
+          }
+          if (abs(frame - triggerFrame) > 1){ // if the triggerFrame and frame don't agree here then we have a problem
+            std::cerr << "ERROR!" << std::endl;
+            std::cerr << "TPC card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
+                      << triggerFrame << " and TPC card header frame is " << frame << std::endl;
+            throw std::exception();
+          }
         }
         // Output tree variables - for calculating compression
         if (crate_number == 1){
@@ -865,11 +875,19 @@ namespace lris {
 // Frame and sample for trigger
         uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
         uint32_t sample = card_data.getTrigSample();
-        if (abs(frame - triggerFrame) > 1){
-          std::cerr << "ERROR!" << std::endl;
-          std::cerr << "PMT card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
-                    << triggerFrame << " and PMT card header frame is " << frame << std::endl;
-          throw std::exception();
+        // check if we have swizzled the trigger data
+        if (fSwizzleTrigger){
+          if (triggerFrame == -999){ // if we have swizzled trigger data, and we have the default triggerFrame, we have a problem
+            std::cerr << "ERROR!" << std::endl;
+            std::cerr << "Trigger data should have been swizzled, but triggerFrame remains as the default value of -999" << std::endl;
+            throw std::exception();
+          }
+          if (abs(frame - triggerFrame) > 1){ // if the triggerFrame and frame don't agree here then we have a problem
+            std::cerr << "ERROR!" << std::endl;
+            std::cerr << "PMT card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
+                      << triggerFrame << " and PMT card header frame is " << frame << std::endl;
+            throw std::exception();
+          }
         }
 //         Filling output tree variables
         if (card_data.getModule() == 5){
@@ -1081,13 +1099,14 @@ namespace lris {
       if( trig_data.Trig_GateFake() ) trig_bits += ( 0x1 << ::trigger::kFakeGate     );
       if( trig_data.Trig_BeamFake() ) trig_bits += ( 0x1 << ::trigger::kFakeBeam     );
       if( trig_data.Trig_Spare1()   ) trig_bits += ( 0x1 << ::trigger::kSpare        );
-	
+	  
       raw::Trigger swiz_trig( trig_card.getTrigNumber(),
 			      trigger_time,
 			      beam_time,
 			      trig_bits );
       trigInfo.emplace_back( swiz_trig );
       
+      if (not fSwizzleTrigger){return;} // if we don't want to swizzle the trigger data, then stop here.
 // variables saving to output tree
       triggerFrame = frame;
       triggerSample = sample_64MHz;
