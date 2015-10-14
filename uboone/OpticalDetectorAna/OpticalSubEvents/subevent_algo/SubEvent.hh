@@ -32,10 +32,13 @@ namespace subevent {
     double maxamp;
     double totpe;
     double pe30;
+    double totpe_1; // first pass
+    double pe30_1;  // first pass
     double sumflash30;
     double sumfcomp_gausintegral;
     
-    FlashList flashes;
+    FlashList flashes;        // first pass flashes
+    FlashList flashes_pass2;  // second pass flashes
     
 #ifdef __BUILD_ROOT_DICT__
     ClassDef( SubEvent, 1 );

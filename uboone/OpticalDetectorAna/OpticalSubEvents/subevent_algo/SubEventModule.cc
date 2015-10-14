@@ -66,7 +66,7 @@ namespace subevent {
 				    config.spe_sigma, maxamp-waveform.at( opflash.tstart ), config.fastconst_ns, config.slowconst_ns, 
 				    config.nspersample, config.fastfraction, config.slowfraction, config.noslowthreshold );
 
-    opflash.tend = std::min( opflash.tstart+(int)expectation.size(), (int)waveform.size()-1 );
+    opflash.tend = std::min( opflash.tstart+(int)expectation.size(), (int)waveform.size() );
     
     std::vector< double > subwfm( waveform.begin()+opflash.tstart, waveform.begin()+opflash.tend );
     opflash.storeWaveform( subwfm );
@@ -163,7 +163,7 @@ namespace subevent {
       int ch = *it;
       std::vector< double > postwfm;
       getChannelFlashes( ch, wfms.get( ch ), config, discrname, flashes, postwfm );
-      std::cout << "search for flashes in channel=" << ch << ". found=" << flashes.size() << std::endl;
+      //std::cout << "search for flashes in channel=" << ch << ". found=" << flashes.size() << std::endl;
       postwfms.set( ch, postwfm, wfms.isLowGain(ch) );
     }
   }
@@ -260,9 +260,9 @@ namespace subevent {
 	      newsubevent.tend_sample = (int)(*iflash).tend;
 	    newsubevent.maxamp = pemax;
 	    //newsubevent.totpe += (*iflash).area/pmtspemap[ (*iflash).ch ];
-	    newsubevent.totpe += (*iflash).area; // HACK
-	    newsubevent.sumflash30 += ((*iflash).area30); // HACK
-	    newsubevent.sumfcomp_gausintegral += (*iflash).fcomp_gausintegral; // HACK
+	    newsubevent.totpe += (*iflash).area;
+	    newsubevent.sumflash30 += ((*iflash).area30); 
+	    newsubevent.sumfcomp_gausintegral += (*iflash).fcomp_gausintegral;
 	    (*iflash).claimed = true;
 	    Flash copyflash( (*iflash ) );
 	    newsubevent.flashes.add( std::move( copyflash ) ); 
@@ -293,6 +293,9 @@ namespace subevent {
       for( FlashListIter iflash2=flashes_pass2.begin(); iflash2!=flashes_pass2.end(); iflash2++ ) {
 	if ( (*iflash2).claimed )
 	  continue;
+	if ( wfms.isLowGain( (*iflash2).ch ) && (*iflash2).maxamp < 40.0 )
+	  continue; // skip low pulse height flashes in waveforms coming from low-gain. It is in the noise.
+	
 	double mintstart_diff = 1.0e6;
 	int best_subevent = -1;
 	for ( int isubevent=0; isubevent<(int)subevents.size(); isubevent++ ) {
@@ -308,7 +311,7 @@ namespace subevent {
 	// add to subevent if a match found
 	if ( best_subevent>=0 ) {
 	  (*iflash2).claimed = true;
-	  subevents.get(best_subevent).flashes.add( std::move(*iflash2) );
+	  subevents.get(best_subevent).flashes_pass2.add( std::move(*iflash2) );
 	  //std::cout << " adding second pass flash to subevent #" << best_subevent << std::endl;
 	  nadditions += 1;
 	}
@@ -329,6 +332,12 @@ namespace subevent {
       }
     }
     std::cout << " added " << nadditions << " unclaimed 1st pass flashes to the subevents." << std::endl;
+
+    // finally analyze subevents
+    std::cout << " analyze subevents" << std::endl;
+    AnalyzeSubEvents( subevents );
+
+    std::cout << "subevents formed." << std::endl;
     
   }
 
@@ -344,7 +353,7 @@ namespace subevent {
       int width = subevent.tend_sample-subevent.tstart_sample;
       int tstart = subevent.tstart_sample;
 
-      // combine flashes into a global waveform
+      // combine flashes into one waveform
       std::vector< double > combined_flash( width, 0.0 );
       for ( FlashListIter iflash=subevent.flashes.begin(); iflash!=subevent.flashes.end(); iflash++ ) {
 	Flash& aflash = (*iflash);
@@ -354,6 +363,16 @@ namespace subevent {
 	    combined_flash.at( tdc+offset ) += aflash.waveform.at( tdc ); // assumed that the pedestal has been subtracted -- should relax this later
 	}
       }
+      std::vector< double > combined_flash2( width, 0.0 );
+      for ( FlashListIter iflash=subevent.flashes_pass2.begin(); iflash!=subevent.flashes_pass2.end(); iflash++ ) {
+	Flash& aflash = (*iflash);
+	int offset = aflash.tstart-tstart;
+	for (int tdc=0; tdc<(int)aflash.waveform.size(); tdc++) {
+	  if ( tdc+offset>=0 && tdc+offset<width )
+	    combined_flash2.at( tdc+offset ) += aflash.waveform.at( tdc ); // assumed that the pedestal has been subtracted -- should relax this later
+	}
+      }
+      
 
       // find tmax, maxamp
       subevent.maxamp = -1.0e-6;
@@ -361,31 +380,35 @@ namespace subevent {
 	if ( subevent.maxamp < combined_flash[tdc] ) {
 	  subevent.maxamp = combined_flash[tdc];
 	  subevent.tmax_sample = tdc+tstart;
-	  subevent.totpe += combined_flash[tdc];
 	}
       }
 
-      // find the start using the CFD, using a threshold of 10% maxamp
-      std::vector< int > t_fire;
-      std::vector< int > amp_fire;
-      std::vector< int > maxt_fire;
-      std::vector< int > diff_fire;
-      cpysubevent::runCFdiscriminatorCPP( t_fire, amp_fire, maxt_fire, diff_fire, combined_flash.data(), 4, 40.0, 24, 24, combined_flash.size() );
+//       // find the start using the CFD, using a threshold of 10% maxamp
+//       std::vector< int > t_fire;
+//       std::vector< int > amp_fire;
+//       std::vector< int > maxt_fire;
+//       std::vector< int > diff_fire;
+//       cpysubevent::runCFdiscriminatorCPP( t_fire, amp_fire, maxt_fire, diff_fire, combined_flash.data(), 4, 40.0, 24, 24, combined_flash.size() );
 
       // calculate total pe and pe in first 30 samples
       subevent.totpe = 0.0;
       subevent.pe30  = 0.0;
-      int flash_start = 0;
-      if ( t_fire.size()>0 )
-	flash_start = std::max( 0, t_fire.at(0)-4 );
+      subevent.totpe_1 = 0.0; // first pass prompt fraction
+      subevent.pe30_1  = 0.0; // first pass prompt fraction
+      int flash_start = std::max( 0, (subevent.tmax_sample-tstart)-10 );
+//       if ( t_fire.size()>0 )
+// 	flash_start = std::max( 0, t_fire.at(0)-4 );
       for ( int tdc=flash_start; tdc<(int)combined_flash.size(); tdc++ ) {
-	subevent.totpe += combined_flash[tdc];
-	if ( tdc-flash_start<30 )
-	  subevent.pe30 += combined_flash[tdc];
+	subevent.totpe += combined_flash[tdc] + combined_flash2[tdc];
+	subevent.totpe_1 += combined_flash[tdc];
+	if ( tdc-flash_start<30 ) {
+	  subevent.pe30   += combined_flash[tdc] + combined_flash2[tdc];
+	  subevent.pe30_1 += combined_flash[tdc];
+	}
       }
       
     }
   }
   
-
+  
 }

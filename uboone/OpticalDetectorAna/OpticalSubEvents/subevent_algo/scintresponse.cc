@@ -35,7 +35,12 @@ namespace subevent {
     float t = 0.0;
     float tmax_ns = maxt*nspertick;
     float tstart_ns = tstart*nspertick;
-
+    float est_pe_f = maxamp/20.0;
+    float tend_ns = fabs( slowconst*log( (0.1/est_pe_f)*(fastfrac/(1.0-fastfrac))) );
+    if ( maxamp<noslowthresh )
+      tend_ns = sig*3; // uses SPE guassian
+    //std::cout << "tend_ns=" << tend_ns << "(Af=" << Af << ", maxamp=" << est_pe_f << ")" << std::endl;
+    
     //texpectation.clear();
     //texpectation.reserve( arrlen );
     fexpectation.clear();
@@ -53,7 +58,9 @@ namespace subevent {
       if ( rising && amp>5.0 )
 	rising = false;
       //else if ( (!rising && amp<0.1) || (t>target_slow_t && amp<5.0) )
-      else if ( (!rising && amp<0.1) )
+      //else if ( (!rising && amp<0.1) )
+      //break;
+      else if ( t>tend_ns )
 	break;
     }
   }

@@ -207,7 +207,7 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
 
     bool marked_for_lg = false;
     double adcmax = 0.0;
-    std::cout << " ch " << channel << ": ";
+    //std::cout << " ch " << channel << ": ";
     for ( auto adc: opdetData ) {
       if ( !marked_for_lg && adc>4090 ) {
 	marked_for_lg = true;
@@ -219,8 +219,9 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
 	adcmax = (double)adc;
     }
     //std::cout << std::endl;
-    double ped =  subevent::removePedestal( wfmstore, 20, 2.0, 2047.0 );
-    std::cout << "  adc max: " << adcmax-ped << " pedestal=" << ped << std::endl;
+    //double ped =  subevent::removePedestal( wfmstore, 20, 2.0, 2047.0 );
+    subevent::removePedestal( wfmstore, 20, 2.0, 2047.0 );
+    //std::cout << "  adc max: " << adcmax-ped << " pedestal=" << ped << std::endl;
     wfms.set( (int)channel, wfmstore, false );
     // store time stamp for later
     wfms.storeTimeInfo( (int)channel,  ts->OpticalClock().Frame( opdetData.TimeStamp() ), opdetData.TimeStamp() );
@@ -326,24 +327,28 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
     // 	    double zCenter=0, double zWidth=0,
     // 	    std::vector<double> WireCenters = std::vector<double>(0),
     // 	    std::vector<double> WireWidths  = std::vector<double>(0));
-    double timestamp = wfms.getTimestamp(asubevent.flashes.get(0).ch);
-    double abstime = timestamp + asubevent.tmax_sample*ts->OpticalClock().TickPeriod();
-    double reltime = abstime - ts->BeamGateTime();
-    double width = ( asubevent.tend_sample - asubevent.tstart_sample )*ts->OpticalClock().TickPeriod();
+    double timestamp = wfms.getTimestamp(asubevent.flashes.get(0).ch); // us
+    double abstime = timestamp + asubevent.tmax_sample*ts->OpticalClock().TickPeriod(); // us
+    double reltime = abstime - ts->BeamGateTime(); // us
+    double width = ( asubevent.tend_sample - asubevent.tstart_sample )*ts->OpticalClock().TickPeriod(); // us
+    std::cout << "opflash: timestamp=" << timestamp << " us"
+	      << " abstime=" << abstime << " us"
+	      << " reltime=" << reltime << " us"  
+	      << " width=" << width << " us" 
+	      << " beamgatetime=" << ts->BeamGateTime() << " us"
+	      << " tickperiod=" << ts->OpticalClock().TickPeriod() << " us" << std::endl;
     // Emprical corrections to get the Frame right
     // // Eventual solution - remove frames
     // taken from OpFlashAlg.cxx
-    unsigned int frame = ts->OpticalClock().Frame( abstime-18.1 );
-    if ( frame==0 ) frame = 1;
+    unsigned int frame = ts->OpticalClock().Frame( abstime );
     unsigned int trigframe = ts->OpticalClock().Frame( ts->BeamGateTime() );
     bool InBeamFrame = (frame==trigframe);
-    double timewidth = width*ts->OpticalClock().TickPeriod();
     int OnBeamTime =0;
     if( std::abs(reltime) < fTrigCoinc ) OnBeamTime=1; // this can't be right, can it?
     double FastToTotal = 0.;
 
     // geo stuff I copied
-    std::vector<double> PEs(geom->MaxOpChannel()+1,0.0);
+    //std::vector<double> PEs(geom->MaxOpChannel()+1,0.0);
     unsigned int Nplanes = geom->Nplanes();
     std::vector<double> sumw(Nplanes,0), sumw2(Nplanes,0);
     double sumy=0, sumz=0, sumy2=0, sumz2=0;
@@ -377,7 +382,7 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
     }
 
     // finally, make the opflash
-    recob::OpFlash aopflash( reltime, timewidth, abstime, frame, PEperOpDet, 
+    recob::OpFlash aopflash( reltime, width, abstime, frame, PEperOpDet, 
 			     InBeamFrame, OnBeamTime, FastToTotal,
 			     meany, widthy, meanz, widthz,
 			     WireCenters, WireWidths );
@@ -386,10 +391,9 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
     for ( subevent::FlashListIter iflash=asubevent.flashes.begin(); iflash!=asubevent.flashes.end(); iflash++ ) {
       double flash_abstime = (*iflash).tmax*ts->OpticalClock().TickPeriod() + wfms.getTimestamp( (*iflash).ch );
       double flash_reltime = flash_abstime -  ts->BeamGateTime();
-      unsigned int flash_frame = ts->OpticalClock().Frame( flash_abstime-18.1 );
-      if ( flash_frame==0 ) flash_frame=1;
+      unsigned int flash_frame = ts->OpticalClock().Frame( flash_abstime );
       double flash_width = ( (*iflash).tend-(*iflash).tstart )*ts->OpticalClock().TickPeriod();
-      ophits->emplace_back( (int)(*iflash).ch, flash_reltime, flash_abstime, flash_frame, flash_width, (*iflash).area, (*iflash).maxamp, (*iflash).area/100.0, 0.0 );
+      ophits->emplace_back( (int)(*iflash).ch, flash_reltime, flash_abstime, flash_frame, flash_width, (*iflash).area, (*iflash).maxamp, (*iflash).area/100.0, 0.0 ); // wants microseconds
     }
     opflashes->emplace_back( std::move( aopflash ) );
   }//end of subevent loop

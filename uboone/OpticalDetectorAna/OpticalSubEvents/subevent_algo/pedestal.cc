@@ -28,7 +28,7 @@ namespace subevent {
       x /= double( end-start );
       xx /= double( end-start );
       double var = sqrt( xx-x*x );
-      std::cout << "site: " << site << " pedestal: " << x << " var=" <<  var << std::endl;
+      //std::cout << "site: " << site << " pedestal: " << x << " var=" <<  var << std::endl;
       if (var<variance_threshold) {
 	return x;
       }
