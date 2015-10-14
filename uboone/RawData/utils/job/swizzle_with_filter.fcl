@@ -32,10 +32,10 @@ microboone_tfile_metadata:
 }
 
 # Database settings
-services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
-services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
+services.user.DatabaseUtil.DBHostName:    "ifdb02.fnal.gov"
+services.user.DatabaseUtil.DBName:        "hootgibson_prod"
 services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
-services.user.DatabaseUtil.Port:          5436
+services.user.DatabaseUtil.Port:          5444
 services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
 services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: true
@@ -49,6 +49,7 @@ source:
   huffmanDecode:   true
   swizzleTPC:      true
   swizzlePMT:      true
+  swizzleTriggerType: ALL
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
@@ -57,7 +58,7 @@ source:
 
 outputs:
 {
- out1:
+ rawfilter:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc.root"
@@ -65,6 +66,11 @@ outputs:
    compressionLevel: 3
    outputCommands: ["keep *_*_*_*",
                     "drop raw::RawDigits_daq_*_*"]
+   FCMDPlugins: [
+     { plugin_type:   "FileCatalogMetadataRawDigit"
+       RawDigitLabel: "digitcopy"
+     }
+    ]
   }
 }
 
@@ -80,14 +86,13 @@ physics:
   digitcopy : { module_type : "RawDigitSaver" 
                 DAQRawDigitProducer : "daq" }
  }
-filters: {
- triggerEnforcement: { module_type : "TriggerEnforcement" }
- flashfilter: @local::microboone_flashtrigger
-}
-
+ filters: {
+  triggerEnforcement: { module_type : "TriggerEnforcement" }
+  flashfilter: @local::microboone_flashtrigger
+ }
  reco: [ triggerEnforcement, opflash, flashfilter, digitcopy ]
- stream1:   [ out1 ]
- trigger_paths: [ reco ] 
+ stream1:   [ rawfilter ]
+ trigger_paths: [ reco ]
  end_paths: [ stream1 ]
 }
 

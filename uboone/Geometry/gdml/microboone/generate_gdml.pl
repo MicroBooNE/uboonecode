@@ -1976,6 +1976,18 @@ sub gen_world()
     x="$WorldWidth" 
     y="$WorldHeight" 
     z="$WorldLength"/>
+  <box name="VacuumBox"
+	lunit="cm"
+	x="$WorldWidth"
+    y="53000-1800"
+    z="$WorldLength"/>
+  <tube name="LArTFVacuumSubtract"
+    rmax="310*2.54"
+    z="(29*12+6)*2.54"
+    deltaphi="360"
+    lunit="cm"
+    aunit="deg"/>
+ 
 <tube name="ConcreteWallAboveGrade0"
    rmin="292*2.54"
    rmax="(310)*2.54"
@@ -2089,6 +2101,12 @@ sub gen_world()
     lunit="cm"
     aunit="deg"/>
 
+  <subtraction name="VacuumSpace">
+   <first ref="VacuumBox"/> <second ref="LArTFVacuumSubtract"/>
+   <rotation name="rotLArTFVac" unit="deg" x="90" y="0" z="0"/>
+   <position name="posLArTFVac" unit="cm" x="0.5*$TPCActiveDepth" y="-(53000-1800)/2+(29*12+6)*2.54/2" z="0.5*$TPCWirePlaneLength" />
+  </subtraction>
+
   <subtraction name="ConcreteWallAboveGrade">
     <first ref="ConcreteWallAboveGrade0"/> <second ref="ConcreteWallAboveGradeSegment"/>
 	<position name="posRemoval0" unit="cm" x="0" y="0" z="(122+24+3.5)*2.54"/>
@@ -2133,29 +2151,33 @@ sub gen_world()
 </solids>
 
 <structure>
-<volume name="volIBeam22">
+  <volume name="volVacuumSpace">
+    <materialref ref="Vacuum"/>
+ 	<solidref ref="VacuumSpace"/>
+  </volume>  
+
+  <volume name="volIBeam22">
 	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
 	<solidref ref="IBeam22"/>
-</volume>
-<volume name="volIBeam35">
+  </volume>
+  <volume name="volIBeam35">
 	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
 	<solidref ref="IBeam35"/>
-</volume>
+  </volume>
 
-
-<volume name="volConcreteWallAboveGrade" >
+  <volume name="volConcreteWallAboveGrade" >
     <materialref ref="Concrete" />
     <solidref ref="ConcreteWallAboveGrade" />
   </volume>
-<volume name="volConcreteDiscRoof" >
+  <volume name="volConcreteDiscRoof" >
     <materialref ref="Concrete" />
     <solidref ref="ConcreteDiscRoof" />
   </volume>
-<volume name="volConcreteSteelBeam" >
+  <volume name="volConcreteSteelBeam" >
     <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
     <solidref ref="ConcreteSteelBeam" />
   </volume>
-<volume name="volSteelGrating" >
+  <volume name="volSteelGrating" >
     <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
     <solidref ref="SteelGrating" />
   </volume>
@@ -2231,6 +2253,10 @@ print GDML<<EOF;
   <volume name="volWorld" >
     <materialref ref="Air"/> 
     <solidref ref="World"/>
+ 	<physvol>
+	  <volumeref ref="volVacuumSpace"/>
+ 	  <position name="posVacuumSpace" unit="cm" x="0" y="(53000-1800)/2 + 624.85" z="0"/>
+ 	</physvol>
 	<physvol>
       <volumeref ref="volConcreteWallAboveGrade"/>
       <position name="posConcreteWallAboveGrade" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 + 22.86" z="0.5*1037"/>
