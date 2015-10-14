@@ -105,7 +105,7 @@ physics:
   flashfilter: @local::microboone_flashtrigger
   randomfilter: {
    module_type : "RandomPrescale"
-   Probability : 0.11
+   Probability : 0.01
   }
  }
 
