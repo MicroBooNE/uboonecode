@@ -4,6 +4,8 @@
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "seedservice_microboone.fcl"
 
 process_name: Swizzler
 services:
@@ -12,6 +14,7 @@ services:
   TFileService: { fileName: "daq_hist.root" }
   Timing:       {}
   RandomNumberGenerator: {} 
+  SeedService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
@@ -48,11 +51,7 @@ source:
   huffmanDecode:   true
   swizzleTPC:      true
   swizzlePMT:      true
-  swizzleTriggerType: ALL ## This is the only option that works currently!
-#  swizzleTriggerType: BNB
-#  swizzleTriggerType: EXT
-#  swizzleTriggerType: NuMI
-#  swizzleTriggerType: CALIB
+  swizzleTriggerType: ALL
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
@@ -61,12 +60,31 @@ source:
 
 outputs:
 {
- out1:
+ rawfilter:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc.root"
+   fileName: "%ifb_%tc_rawfilter.root"
    dataTier: "raw"
+   streamName: "rawfilter"
    compressionLevel: 3
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_daq_*_*"]
+   FCMDPlugins: [
+     { plugin_type:   "FileCatalogMetadataRawDigit"
+       RawDigitLabel: "digitcopy"
+     }
+    ]
+  }
+ rawprescale:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawprescale.root"
+   dataTier: "raw"
+   streamName: "rawprescale"
+   compressionLevel: 3
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_digitcopy_*_*"]
+   SelectEvents: { SelectEvents: [ "filter2" ] }
   }
 }
 
@@ -78,14 +96,26 @@ physics:
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+
+  digitcopy : { module_type : "RawDigitSaver" 
+                DAQRawDigitProducer : "daq" }
  }
  filters: {
   triggerEnforcement: { module_type : "TriggerEnforcement" }
+  flashfilter: @local::microboone_flashtrigger
+  randomfilter: {
+   module_type : "RandomPrescale"
+   Probability : 0.01
+  }
  }
- reco: [ triggerEnforcement, opflash ]
- stream1:   [ out1 ]
- trigger_paths: [ reco ]
- end_paths: [ stream1 ]
+
+ common: [ triggerEnforcement, opflash ]
+ filter1: [ flashfilter, digitcopy ]
+ filter2: [ randomfilter ]
+ stream1:   [ rawfilter ]
+ stream2:   [ rawprescale ]
+ trigger_paths: [ common, filter1, filter2 ] 
+ end_paths: [ stream1, stream2 ]
 }
 
 services.user.TimeService.TrigModuleName: "daq"
