@@ -1,3 +1,4 @@
+
 BEGIN_PROLOG
 
 microboone_beamdata:
@@ -12,7 +13,7 @@ microboone_beamdata:
 	 #0x800  gate2
   	 trigger_mask : 0x800
   	 path_to_beam_file: "./"
-	 time_offset: -2390. #offset between detector and beam clock
+	 time_offset: 35.9 #offset between detector and beam clock
          merge_time_tolerance: 30. #in ms
 	 sum_devices: [ "E:TOR860", "E:TOR875" ]
 	 write_beam_data: true
