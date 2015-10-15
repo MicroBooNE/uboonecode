@@ -193,9 +193,17 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
   std::set< int > use_lowgain_wfm;
 
   // High-Gain Waveforms
+  unsigned int biggestcosmiclen = 0;
+  unsigned int beamwinlen = 0;
+  double shortestdt = 1e10;
   for ( auto const& opdetData: (*hgwfmHandle) ) {
-    if ( opdetData.size()<600 ) {
+    if ( opdetData.size()<600 ) { // arbitrary!
+      if ( opdetData.size()>biggestcosmiclen )
+	biggestcosmiclen = opdetData.size();
       //std::cout << "skipping cosmic window: " << opdetData.size() << std::endl;
+      double dtcosmic = opdetData.TimeStamp() - ts->BeamGateTime();
+      if ( fabs( dtcosmic )<shortestdt )
+	shortestdt = fabs( dtcosmic );
       continue; // skip cosmic windows
     }
     raw::Channel_t channel = opdetData.ChannelNumber();
@@ -204,6 +212,8 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
     if ( wfmstore.size() != opdetData.size() ) {
       wfmstore.reserve( opdetData.size() );
     }
+    if ( beamwinlen<opdetData.size() )
+      beamwinlen = opdetData.size();
 
     bool marked_for_lg = false;
     double adcmax = 0.0;
@@ -256,6 +266,8 @@ bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData
       }// if marked for lg replacement
     }// loop over lowgain waveforms
   } // if replacements necessary
+
+  std::cout << "gathered beam waveforms: beamwin length=" << beamwinlen << " cosmicwin length=" << biggestcosmiclen << " shorteddt=" << shortestdt*1000 << " ns" << std::endl;
   
   return true;
 }
