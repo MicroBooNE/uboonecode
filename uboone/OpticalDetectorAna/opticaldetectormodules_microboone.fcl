@@ -20,7 +20,7 @@ microboone_opflash_lowgain:
    AreaToPE:         false # Use area to calculate number of PEs
    SPEArea:          11.8  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
-   algo_threshold:   @local::standard_algo_threshold
+   algo_threshold:   @local::standard_algo_slidingwindow
 }
 
 microboone_opflash_highgain:
@@ -37,7 +37,7 @@ microboone_opflash_highgain:
    AreaToPE:         true # Use area to calculate number of PEs
    SPEArea:          118  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
-   algo_threshold:   @local::standard_algo_threshold
+   algo_threshold:   @local::standard_algo_slidingwindow
 }
 
 microboone_opflash_beam_highgain: @local::microboone_opflash_highgain
