@@ -1,0 +1,104 @@
+#include "geometry_microboone.fcl"
+#include "timeservice_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+
+microboone_subeventbuilder:
+{
+    module_type: SubEventBuilder
+    inputModule: "pmtreadout"
+    TrigCoinc: 2.5 # microseconds
+    # 1st pass/high threshold, constant fraction discriminator
+    threshold: 40
+    deadtime: 24
+    width: 24
+    delay: 4
+    gate: 4
+    # 2nd pass/low threshold, constant fraction discriminator
+    pass2_threshold: 7
+    pass2_deadtime: 24
+    pass2_width: 24
+    pass2_delay: 4
+    pass2_gate: 4
+    # scintillation response parameters
+    spe_sigma: 62.5
+    fastfraction: 0.8
+    slowfraction: 0.3
+    fastconst_ns: 6.0
+    slowconst_ns: 1500.0
+    noslowthreshold: 40.0
+    # pedestal
+    pedsamples: 100
+    npresamples: 5
+    pedmaxvar: 1.0
+    # subevent finding parameters
+    maxchflashes: 30
+    hgslot: 5
+    lgslot: 6
+    flashgate: 10
+    maxsubeventloops: 30
+    ampthresh: 3.0
+    hitthresh: 1
+    # constants
+    nspersample: 15.625
+}
+
+process_name: SubEventBuilder
+services:
+{
+  TFileService: { fileName: "raw_digits.root" }
+  user: {
+          ExptGeoHelperInterface: @local::microboone_geometry_helper
+          Geometry:               @local::microboone_geo
+          TimeService:            @local::microboone_timeservice
+          #DatabaseUtil:           @local::microboone_database
+	  UBOpReadoutMap:         @local::microboone_opreadoutmap
+         }
+}
+
+# Time Service
+services.user.TimeService.TrigModuleName: "daq"
+
+# Database settings
+services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
+services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
+services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.user.DatabaseUtil.Port:          5436
+services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.user.DatabaseUtil.ToughErrorTreatment: true
+services.user.DatabaseUtil.ShouldConnect: true
+services.user.DatabaseUtil.TableName: "main_run"
+
+outputs:
+{
+ out1:
+  {
+   module_type: RootOutput
+   fileName:    "larsoft.root" 
+   compressionLevel: 1			    
+  }
+}
+
+physics:
+{
+  producers:
+  {
+     subevents: @local::microboone_subeventbuilder
+  }
+
+ produceIt: [ subevents ]
+ analyzeIt: []
+
+ #define the output stream, there could be more than one if using filters
+ stream1:  [ out1 ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event,
+ #ie filters and producers
+ trigger_paths: [ produceIt ]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event,
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ stream1 ]
+}
+
+

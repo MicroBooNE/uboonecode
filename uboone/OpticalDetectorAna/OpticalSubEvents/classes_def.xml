@@ -1,0 +1,10 @@
+<lcgdict>
+ <class name="subevent::SubEvent"/>
+ <class name="subevent::Flash"/>
+ <class name="subevent::FlashList"/>
+ <class name="subevent::SubEventList"/>
+ <class name="std::vector<subevent::Flash>"/>
+ <class name="std::vector<subevent::SubEvent>"/>
+ <class name="art::Wrapper<std::vector<subevent::SubEvent>>"/>
+ <class name="art::Wrapper<subevent::FlashList>"/>
+</lcgdict>
