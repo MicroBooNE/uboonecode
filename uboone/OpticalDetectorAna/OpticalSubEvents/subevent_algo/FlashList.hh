@@ -36,6 +36,7 @@ namespace subevent {
     bool sortedByTime() { if (sortMethod==kByTime) return true; else return false; }; 
     bool sortedByCharge() { if (sortMethod==kByCharge) return true; else return false; }; 
     bool sortedByAmp() { if (sortMethod==kByAmp) return true; else return false; }; 
+    void transferFlash( Flash& flash ); // wrapper around add for cython
 
   protected:
     std::vector< Flash > fFlashes;
