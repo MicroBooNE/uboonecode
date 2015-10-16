@@ -16,4 +16,10 @@ namespace subevent {
   
   SubEvent::~SubEvent() {}
 
+  void SubEvent::transferFlashes( FlashList& flashes ) {
+    for ( FlashListIter it=flashes.begin(); it!=flashes.end(); it++ ) {
+      flashes.add( std::move( *it ) );
+    }
+  }
+  
 }
