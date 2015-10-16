@@ -966,9 +966,14 @@ namespace lris {
 
 	    //std::cout << " into ReadoutCH=" << data_product_ch_num << " category=" << opdet::UBOpChannelEnumName( ch_category ) << std::endl;
 	    short adc_max=0;
+	    short adc_max_sample=0;
             for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
               rd.push_back(*it & 0xfff);                
-              if(adc_max < rd.back()) adc_max = rd.back();
+              if(adc_max < rd.back()){
+                adc_max_sample = rd.size();
+                adc_max = rd.back();
+              }
+
             }
             // fill OpDetWaveform time
             double OpDetWaveForm_time = rd.TimeStamp();
@@ -981,17 +986,17 @@ namespace lris {
 
               if (channel_number == 39){
 //                std::cout << "Found RWM signal!" << std::endl;
-//                std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() << std::endl;
+//                std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() + adc_max_sample << std::endl;
                 RO_RWMtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-                RO_RWMtriggerSample = window_header.getSample();
+                RO_RWMtriggerSample = window_header.getSample() + adc_max_sample;
                 RO_RWMtriggerTime = timeService->OpticalClock().Time( RO_RWMtriggerSample, RO_RWMtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 38){
 //                std::cout << "Found STROBE signal!" << std::endl;
-//                std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+//                std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() + adc_max_sample << std::endl;
                 RO_EXTtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-                RO_EXTtriggerSample = window_header.getSample();
+                RO_EXTtriggerSample = window_header.getSample() + adc_max_sample;
                 RO_EXTtriggerTime = timeService->OpticalClock().Time( RO_EXTtriggerSample, RO_EXTtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
@@ -999,15 +1004,15 @@ namespace lris {
 //                std::cout << "Found NuMI signal!" << std::endl;
 //                std::cout << "NuMI signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
                 RO_NuMItriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-                RO_NuMItriggerSample = window_header.getSample();
+                RO_NuMItriggerSample = window_header.getSample() + adc_max_sample;
                 RO_NuMItriggerTime = timeService->OpticalClock().Time( RO_NuMItriggerSample, RO_NuMItriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 36){
 //                std::cout << "Found BNB signal!" << std::endl;
-//                std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+//                std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() + adc_max_sample << std::endl;
                 RO_BNBtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-                RO_BNBtriggerSample = window_header.getSample();
+                RO_BNBtriggerSample = window_header.getSample() + adc_max_sample;
                 RO_BNBtriggerTime = timeService->OpticalClock().Time( RO_BNBtriggerSample, RO_BNBtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
