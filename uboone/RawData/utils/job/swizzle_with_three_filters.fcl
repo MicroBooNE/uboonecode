@@ -68,13 +68,7 @@ outputs:
    dataTier: "raw"
    streamName: "rawfilter"
    compressionLevel: 3
-   outputCommands: ["keep *_*_*_*",
-                    "drop raw::RawDigits_daq_*_*"]
-   FCMDPlugins: [
-     { plugin_type:   "FileCatalogMetadataRawDigit"
-       RawDigitLabel: "digitcopy"
-     }
-    ]
+   SelectEvents: { SelectEvents: [ "filter1" ] }
   }
  rawprescale:
   {
@@ -83,9 +77,17 @@ outputs:
    dataTier: "raw"
    streamName: "rawprescale"
    compressionLevel: 3
-   outputCommands: ["keep *_*_*_*",
-                    "drop raw::RawDigits_digitcopy_*_*"]
    SelectEvents: { SelectEvents: [ "filter2" ] }
+  }
+ rawnotpc:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawnotpc.root"
+   dataTier: "raw"
+   streamName: "rawnotpc"
+   compressionLevel: 3
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_*_*_*"]
   }
 }
 
@@ -97,9 +99,6 @@ physics:
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
-
-  digitcopy : { module_type : "RawDigitSaver" 
-                DAQRawDigitProducer : "daq" }
 
   #hwflash : @local::microboone_subeventbuilder
  }
@@ -113,21 +112,22 @@ physics:
   }
  }
 
- common: [ triggerEnforcement, opflash, opflashLow ]
- filter1: [ opflashfilter, digitcopy ]
+ common: [ triggerEnforcement, opflash, opflashLow ] 
+ filter1: [ opflashfilter ]
  filter2: [ randomfilter ]
  stream1:   [ rawfilter ]
  stream2:   [ rawprescale ]
+ stream3:   [ rawnotpc ]
  trigger_paths: [ common, filter1, filter2 ] 
- end_paths: [ stream1, stream2 ]
+ end_paths: [ stream1, stream2, stream3 ]
 }
 
 services.user.TimeService.TrigModuleName: "daq"
-
-#physics.producers.hwflash.lightenFlashes: true
 
 physics.filters.opflashfilter.OpFlashModule : "opflash"
 #physics.filters.hwflashfilter.OpFlashModule : "hwflash"
 
 physics.filters.opflashfilter.DisableFilter: false
 #physics.filters.hwflashfilter.DisableFilter: true
+
+

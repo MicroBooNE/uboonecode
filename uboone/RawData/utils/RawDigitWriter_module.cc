@@ -104,6 +104,8 @@ namespace zmqds {
     int fFrame;
     int fSample;
     double fTimeStamp;
+    double fTrigTimeStamp;
+    double fBeamTimeStamp;
     int fOpCrate;
     int fOpSlot;
     int fOpFemCH;
@@ -111,6 +113,9 @@ namespace zmqds {
     TTree* fTOpDetWaveforms;
     std::vector< short > opdetwaveforms;
     void GetOpticalRawDigits(const art::Event& evt);
+
+    bool fWriteTPCdata;
+    bool fWritePMTdata;
 
   }; // class RawDigitWriter
   
@@ -145,14 +150,19 @@ namespace zmqds {
       fTOpDetWaveforms->Branch( "opfemch", &fOpFemCH, "opfemch/I" );
       fTOpDetWaveforms->Branch( "frame", &fFrame, "frame/I" );
       fTOpDetWaveforms->Branch( "sample", &fSample, "sample/I" );
-      fTOpDetWaveforms->Branch( "timestamp", &fTimeStamp, "timestamp/D" );
       fTOpDetWaveforms->Branch( "readoutch", &fOpReadoutCH, "readoutch/I" );
       fTOpDetWaveforms->Branch( "category", &fCategory, "category/I" );
       fTOpDetWaveforms->Branch( "gaintype", &fType, "gaintype/I" );
+      fTOpDetWaveforms->Branch( "timestamp", &fTimeStamp, "timestamp/D" );
+      fTOpDetWaveforms->Branch( "trig_timestamp", &fTrigTimeStamp, "trig_timestamp/D" );
+      fTOpDetWaveforms->Branch( "beam_timestamp", &fBeamTimeStamp, "beam_timestamp/D" );
       fTOpDetWaveforms->Branch( "adcs", &opdetwaveforms );
+      
 
       mf::LogInfo("")<<"Fetched channel map from DB";
-      
+
+      fWriteTPCdata = pset.get< bool >( "WriteTPCdata", true );
+      fWritePMTdata = pset.get< bool >( "WritePMTdata", true );
     }
 
   RawDigitWriter::~RawDigitWriter() {
@@ -167,9 +177,11 @@ namespace zmqds {
     fSubRun = (int)evt.subRun();
     fEvent = (int)evt.event();
 
-    GetRawDigits(evt);
+    if ( fWriteTPCdata )
+      GetRawDigits(evt);
 
-    GetOpticalRawDigits( evt );
+    if ( fWritePMTdata )
+      GetOpticalRawDigits( evt );
 
     // if ( fSendOpticalRawDigits )
     //   SendOpticalRawDigits(evt);
@@ -236,6 +248,8 @@ namespace zmqds {
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
     art::ServiceHandle<util::TimeService> ts;
+    fTrigTimeStamp = ts->TriggerTime();
+    fBeamTimeStamp = ts->BeamGateTime();
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
     
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
@@ -270,6 +284,7 @@ namespace zmqds {
 	fSample = ts->OpticalClock().Sample( fTimeStamp );
 
 	opdetwaveforms.clear();
+	opdetwaveforms.reserve( wfm.size() );
 	for ( auto &adc : wfm )
 	  opdetwaveforms.push_back( (short)adc );
 	fTOpDetWaveforms->Fill();

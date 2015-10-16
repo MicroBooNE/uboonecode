@@ -15,16 +15,17 @@ beamDAQConfig* beamDAQConfig::fInstance = NULL;
 beamDAQConfig::beamDAQConfig()
 {
   //load config
-  cet::filepath_lookup fpath("BEAMDAQ_CONFIG_PATH");
+  cet::filepath_lookup fpath(getenv("FHICL_FILE_PATH"));
   std::string fcfgname="beamdaq_config.fcl";
   if (getenv("BEAMDAQ_CONFIG_FILE"))
      fcfgname=getenv("BEAMDAQ_CONFIG_FILE");
 
-  try {
+   try {
     fhicl::make_ParameterSet(fcfgname, fpath, fPSet);
   } catch ( std::exception& e ) {
     std::cerr<<"Unable to locate "<<fcfgname<<" in "
-	     <<"$BEAMDAQ_CONFIG_PATH"<<std::endl;
+	     <<"$FHICL_FILE_PATH"<<std::endl
+	     <<e.what()<<std::endl;
     exit(0);
   }
 
