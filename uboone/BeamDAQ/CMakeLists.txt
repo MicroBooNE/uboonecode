@@ -22,6 +22,8 @@ target_link_libraries( bdaq_readraw ${BOOSTLIB} ${UBDATATYPESLIB} )
 
 install_fhicl()
 
+install_scripts()
+
 install( TARGETS bdaq_get
          DESTINATION ${flavorqual_dir}/bin )
 
