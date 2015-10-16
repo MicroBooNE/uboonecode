@@ -73,15 +73,13 @@ private:
   bool sortWaveforms( art::Event& event, subevent::WaveformData& hgbeam, subevent::WaveformData& lgbeam, subevent::CosmicWindowHolder& cosmics, int beamwin_len_threshold );
   void prepCosmicDiscWaveforms(  subevent::CosmicWindowHolder& cosmics ); 
   void prepBeamWaveforms( art::Event& event, subevent::WaveformData& hgwfms, subevent::WaveformData& lgwfms, subevent::SubEventList& cosmic_subevents );
-  // bool gatherWaveforms( art::Event& event, subevent::WaveformData& wfms );
-  // void baselineCorrectWaveforms( subevent::WaveformData& wfms );
-  // void makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, subevent::WaveformData& wfms );
-  // void GetHitGeometryInfo(subevent::Flash const& flash,
-  // 			  geo::Geometry const& geom,
-  // 			  std::vector<double> & sumw,
-  // 			  std::vector<double> & sumw2,
-  // 			  double & sumy, double & sumy2,
-  // 			  double & sumz, double & sumz2);
+  void makeBeamOpFlashes( art::Event& e, subevent::SubEventList& subevents, subevent::WaveformData& wfms );
+  void GetHitGeometryInfo(subevent::Flash const& flash,
+  			  geo::Geometry const& geom,
+  			  std::vector<double> & sumw,
+  			  std::vector<double> & sumw2,
+  			  double & sumy, double & sumy2,
+  			  double & sumz, double & sumz2);
   
   
 };
@@ -157,8 +155,8 @@ void SubEventBuilder::produce(art::Event & e)
   subevent::SubEventList cosmic_subevents;
   prepCosmicDiscWaveforms( cosmicwins );
   subevent::formCosmicWindowSubEvents( cosmicwins, fConfig, cosmic_subevents );
+  subevent::AnalyzeSubEvents( cosmic_subevents );
   std::cout << "Cosmic Disc. Subevents found: " << cosmic_subevents.size() << std::endl;
-  
   // get waveforms and prep them
   prepBeamWaveforms( e, hgwfms, lgwfms, cosmic_subevents );
 
@@ -176,18 +174,23 @@ void SubEventBuilder::produce(art::Event & e)
   std::cout << "subevents formed. now store in event." << std::endl;
   
   // make opflash
-  // if ( fMakeOpFlash ) {
-  //   //makeBeamOpFlashes( e, subevents, wfms );
+  if ( fMakeOpFlash ) {
+    makeBeamOpFlashes( e, subevents, hgwfms );
+  }
   //   //makeCosmicOpFlashes( e, cosmic_subevents );
   // }
 
   // transfer subevents to the event
-  //std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
-  // for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
-  //   subeventvec->emplace_back( *it );
-  // }
-  // e.put( std::move( subeventvec ) );
-  // e.put( std::move( unclaimed_flashes ), "unclaimedFlashes" );
+  std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
+  for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
+    subeventvec->emplace_back( *it );
+  }
+  for ( subevent::SubEventListIter it=cosmic_subevents.begin(); it!=cosmic_subevents.end(); it++ ) {
+    subeventvec->emplace_back( *it );
+  }
+  
+  e.put( std::move( subeventvec ) );
+  e.put( std::move( unclaimed_flashes ), "unclaimedFlashes" );
   
 }
 
@@ -572,124 +575,124 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
 //   }
 // }
 
-// void SubEventBuilder::GetHitGeometryInfo(subevent::Flash const& flash,
-// 					 geo::Geometry const& geom,
-// 					 std::vector<double> & sumw,
-// 					 std::vector<double> & sumw2,
-// 					 double & sumy, double & sumy2,
-// 					 double & sumz, double & sumz2)
-// {
-//   double xyz[3];
-//   geom.OpDetGeoFromOpChannel( (unsigned int)flash.ch ).GetCenter(xyz);
+void SubEventBuilder::GetHitGeometryInfo(subevent::Flash const& flash,
+					 geo::Geometry const& geom,
+					 std::vector<double> & sumw,
+					 std::vector<double> & sumw2,
+					 double & sumy, double & sumy2,
+					 double & sumz, double & sumz2)
+{
+  double xyz[3];
+  geom.OpDetGeoFromOpChannel( (unsigned int)flash.ch ).GetCenter(xyz);
 
-//   double PEThisHit = flash.area;
-//   for(size_t p=0; p!=geom.Nplanes(); p++){
-//     unsigned int w = geom.NearestWire(xyz,p);
-//     sumw.at(p)  += w*PEThisHit;
-//     sumw2.at(p) += w*w*PEThisHit;
-//   }
+  double PEThisHit = flash.area;
+  for(size_t p=0; p!=geom.Nplanes(); p++){
+    unsigned int w = geom.NearestWire(xyz,p);
+    sumw.at(p)  += w*PEThisHit;
+    sumw2.at(p) += w*w*PEThisHit;
+  }
   
-//   sumy+=xyz[1]*PEThisHit; sumy2+=xyz[1]*xyz[1]*PEThisHit;
-//   sumz+=xyz[2]*PEThisHit; sumz2+=xyz[2]*xyz[2]*PEThisHit;
-// }
+  sumy+=xyz[1]*PEThisHit; sumy2+=xyz[1]*xyz[1]*PEThisHit;
+  sumz+=xyz[2]*PEThisHit; sumz2+=xyz[2]*xyz[2]*PEThisHit;
+}
 
-// void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, subevent::WaveformData& wfms ) {
+void SubEventBuilder::makeBeamOpFlashes( art::Event& e, subevent::SubEventList& subevents, subevent::WaveformData& wfms ) {
   
-//   art::ServiceHandle<util::TimeService> ts;
-//   art::ServiceHandle<geo::Geometry> geom;
-//   geo::Geometry const& Geometry(*geom);
+  art::ServiceHandle<util::TimeService> ts;
+  art::ServiceHandle<geo::Geometry> geom;
+  geo::Geometry const& Geometry(*geom);
 
-//   std::unique_ptr< std::vector< recob::OpFlash > >  opflashes( new std::vector< recob::OpFlash > );
-//   std::unique_ptr< std::vector< recob::OpHit > > ophits( new std::vector< recob::OpHit > );
-//   std::unique_ptr< art::Assns<recob::OpFlash, recob::OpHit> >  AssnPtr( new art::Assns<recob::OpFlash, recob::OpHit> );
+  std::unique_ptr< std::vector< recob::OpFlash > >  opflashes( new std::vector< recob::OpFlash > );
+  std::unique_ptr< std::vector< recob::OpHit > > ophits( new std::vector< recob::OpHit > );
+  std::unique_ptr< art::Assns<recob::OpFlash, recob::OpHit> >  AssnPtr( new art::Assns<recob::OpFlash, recob::OpHit> );
 
-//   for ( subevent::SubEventListIter isubevent=subevents.begin(); isubevent!=subevents.end(); isubevent++ ) {
-//     subevent::SubEvent& asubevent = (*isubevent);
-//     // gather info to make an opflash for this subevent:
-//     //
-//     // OpFlash(double time, double timewidth, double abstime, unsigned int frame,
-//     // 	    std::vector< double > PEperOpDet,
-//     // 	    bool InBeamFrame=0, int OnBeamTime=0, double FastToTotal=1,
-//     // 	    double yCenter=0, double yWidth=0,
-//     // 	    double zCenter=0, double zWidth=0,
-//     // 	    std::vector<double> WireCenters = std::vector<double>(0),
-//     // 	    std::vector<double> WireWidths  = std::vector<double>(0));
-//     double timestamp = wfms.getTimestamp(asubevent.flashes.get(0).ch); // us
-//     double abstime = timestamp + asubevent.tmax_sample*ts->OpticalClock().TickPeriod(); // us
-//     double reltime = abstime - ts->BeamGateTime(); // us
-//     double width = ( asubevent.tend_sample - asubevent.tstart_sample )*ts->OpticalClock().TickPeriod(); // us
-//     std::cout << "opflash: timestamp=" << timestamp << " us"
-// 	      << " abstime=" << abstime << " us"
-// 	      << " reltime=" << reltime << " us"  
-// 	      << " width=" << width << " us" 
-// 	      << " beamgatetime=" << ts->BeamGateTime() << " us"
-// 	      << " tickperiod=" << ts->OpticalClock().TickPeriod() << " us" << std::endl;
-//     // Emprical corrections to get the Frame right
-//     // // Eventual solution - remove frames
-//     // taken from OpFlashAlg.cxx
-//     unsigned int frame = ts->OpticalClock().Frame( abstime );
-//     unsigned int trigframe = ts->OpticalClock().Frame( ts->BeamGateTime() );
-//     bool InBeamFrame = (frame==trigframe);
-//     int OnBeamTime =0;
-//     if( std::abs(reltime) < fTrigCoinc ) OnBeamTime=1; // this can't be right, can it?
-//     double FastToTotal = 0.;
+  for ( subevent::SubEventListIter isubevent=subevents.begin(); isubevent!=subevents.end(); isubevent++ ) {
+    subevent::SubEvent& asubevent = (*isubevent);
+    // gather info to make an opflash for this subevent:
+    //
+    // OpFlash(double time, double timewidth, double abstime, unsigned int frame,
+    // 	    std::vector< double > PEperOpDet,
+    // 	    bool InBeamFrame=0, int OnBeamTime=0, double FastToTotal=1,
+    // 	    double yCenter=0, double yWidth=0,
+    // 	    double zCenter=0, double zWidth=0,
+    // 	    std::vector<double> WireCenters = std::vector<double>(0),
+    // 	    std::vector<double> WireWidths  = std::vector<double>(0));
+    double timestamp = wfms.getTimestamp(asubevent.flashes.get(0).ch); // us
+    double abstime = timestamp + asubevent.tmax_sample*ts->OpticalClock().TickPeriod(); // us
+    double reltime = abstime - ts->BeamGateTime(); // us
+    double width = ( asubevent.tend_sample - asubevent.tstart_sample )*ts->OpticalClock().TickPeriod(); // us
+    std::cout << "opflash: timestamp=" << timestamp << " us"
+	      << " abstime=" << abstime << " us"
+	      << " reltime=" << reltime << " us"  
+	      << " width=" << width << " us" 
+	      << " beamgatetime=" << ts->BeamGateTime() << " us"
+	      << " tickperiod=" << ts->OpticalClock().TickPeriod() << " us" << std::endl;
+    // Emprical corrections to get the Frame right
+    // // Eventual solution - remove frames
+    // taken from OpFlashAlg.cxx
+    unsigned int frame = ts->OpticalClock().Frame( abstime );
+    unsigned int trigframe = ts->OpticalClock().Frame( ts->BeamGateTime() );
+    bool InBeamFrame = (frame==trigframe);
+    int OnBeamTime =0;
+    if( std::abs(reltime) < fTrigCoinc ) OnBeamTime=1; // this can't be right, can it?
+    double FastToTotal = 0.;
 
-//     // geo stuff I copied
-//     //std::vector<double> PEs(geom->MaxOpChannel()+1,0.0);
-//     unsigned int Nplanes = geom->Nplanes();
-//     std::vector<double> sumw(Nplanes,0), sumw2(Nplanes,0);
-//     double sumy=0, sumz=0, sumy2=0, sumz2=0;
+    // geo stuff I copied
+    //std::vector<double> PEs(geom->MaxOpChannel()+1,0.0);
+    unsigned int Nplanes = geom->Nplanes();
+    std::vector<double> sumw(Nplanes,0), sumw2(Nplanes,0);
+    double sumy=0, sumz=0, sumy2=0, sumz2=0;
     
-//     // sum pe for each opdet and do geo stuff
-//     std::vector< double > PEperOpDet( geom->NOpDets(), 0.0 );
-//     for ( subevent::FlashListIter iflash=asubevent.flashes.begin(); iflash!=asubevent.flashes.end(); iflash++ ) {
-//       int iopdet = geom->OpDetFromOpChannel( (unsigned int)(*iflash).ch );
-//       PEperOpDet.at( iopdet ) += (*iflash).area; // need calibration constants here
-//       GetHitGeometryInfo( (*iflash), Geometry, sumw, sumw2, sumy, sumy2, sumz, sumz2 );
-//     }
-//     double meany = sumy/asubevent.totpe;
-//     double meanz = sumz/asubevent.totpe;
-//     double widthy  = sumy2*asubevent.totpe - sumy*sumy;
-//     if ( widthy>0.0 )
-//       widthy = sqrt( widthy );
-//     else
-//       widthy = 0.0;
-//     double widthz = sumz2*asubevent.totpe - sumz*sumz;
-//     if ( widthz>0.0 )
-//       widthz = sqrt( widthz );
-//     widthz = 0.0;
+    // sum pe for each opdet and do geo stuff
+    std::vector< double > PEperOpDet( geom->NOpDets(), 0.0 );
+    for ( subevent::FlashListIter iflash=asubevent.flashes.begin(); iflash!=asubevent.flashes.end(); iflash++ ) {
+      int iopdet = geom->OpDetFromOpChannel( (unsigned int)(*iflash).ch );
+      PEperOpDet.at( iopdet ) += (*iflash).area; // need calibration constants here
+      GetHitGeometryInfo( (*iflash), Geometry, sumw, sumw2, sumy, sumy2, sumz, sumz2 );
+    }
+    double meany = sumy/asubevent.totpe;
+    double meanz = sumz/asubevent.totpe;
+    double widthy  = sumy2*asubevent.totpe - sumy*sumy;
+    if ( widthy>0.0 )
+      widthy = sqrt( widthy );
+    else
+      widthy = 0.0;
+    double widthz = sumz2*asubevent.totpe - sumz*sumz;
+    if ( widthz>0.0 )
+      widthz = sqrt( widthz );
+    widthz = 0.0;
 
-//     std::vector<double> WireCenters(Nplanes,0);
-//     std::vector<double> WireWidths(Nplanes,0);
-//     for(size_t p=0; p!=Nplanes; ++p){
-//       WireCenters.at(p) = sumw.at(p)/asubevent.totpe;
-//       WireWidths.at(p)  = sumw2.at(p)*asubevent.totpe - sumw.at(p)*sumw.at(p);
-//       if ( WireWidths.at(p)> 0 ) WireWidths.at(p) = sqrt( WireWidths.at(p) );
-//       else WireWidths.at(p) = 0.;
-//     }
+    std::vector<double> WireCenters(Nplanes,0);
+    std::vector<double> WireWidths(Nplanes,0);
+    for(size_t p=0; p!=Nplanes; ++p){
+      WireCenters.at(p) = sumw.at(p)/asubevent.totpe;
+      WireWidths.at(p)  = sumw2.at(p)*asubevent.totpe - sumw.at(p)*sumw.at(p);
+      if ( WireWidths.at(p)> 0 ) WireWidths.at(p) = sqrt( WireWidths.at(p) );
+      else WireWidths.at(p) = 0.;
+    }
 
-//     // finally, make the opflash
-//     recob::OpFlash aopflash( reltime, width, abstime, frame, PEperOpDet, 
-// 			     InBeamFrame, OnBeamTime, FastToTotal,
-// 			     meany, widthy, meanz, widthz,
-// 			     WireCenters, WireWidths );
+    // finally, make the opflash
+    recob::OpFlash aopflash( reltime, width, abstime, frame, PEperOpDet, 
+			     InBeamFrame, OnBeamTime, FastToTotal,
+			     meany, widthy, meanz, widthz,
+			     WireCenters, WireWidths );
 
-//     // make ophits and associate it with the flashes
-//     for ( subevent::FlashListIter iflash=asubevent.flashes.begin(); iflash!=asubevent.flashes.end(); iflash++ ) {
-//       double flash_abstime = (*iflash).tmax*ts->OpticalClock().TickPeriod() + wfms.getTimestamp( (*iflash).ch );
-//       double flash_reltime = flash_abstime -  ts->BeamGateTime();
-//       unsigned int flash_frame = ts->OpticalClock().Frame( flash_abstime );
-//       double flash_width = ( (*iflash).tend-(*iflash).tstart )*ts->OpticalClock().TickPeriod();
-//       ophits->emplace_back( (int)(*iflash).ch, flash_reltime, flash_abstime, flash_frame, flash_width, (*iflash).area, (*iflash).maxamp, (*iflash).area/100.0, 0.0 ); // wants microseconds
-//     }
-//     opflashes->emplace_back( std::move( aopflash ) );
-//   }//end of subevent loop
+    // make ophits and associate it with the flashes
+    for ( subevent::FlashListIter iflash=asubevent.flashes.begin(); iflash!=asubevent.flashes.end(); iflash++ ) {
+      double flash_abstime = (*iflash).tmax*ts->OpticalClock().TickPeriod() + wfms.getTimestamp( (*iflash).ch );
+      double flash_reltime = flash_abstime -  ts->BeamGateTime();
+      unsigned int flash_frame = ts->OpticalClock().Frame( flash_abstime );
+      double flash_width = ( (*iflash).tend-(*iflash).tstart )*ts->OpticalClock().TickPeriod();
+      ophits->emplace_back( (int)(*iflash).ch, flash_reltime, flash_abstime, flash_frame, flash_width, (*iflash).area, (*iflash).maxamp, (*iflash).area/100.0, 0.0 ); // wants microseconds
+    }
+    opflashes->emplace_back( std::move( aopflash ) );
+  }//end of subevent loop
   
   
-//   e.put( std::move( opflashes ) );
-//   e.put( std::move( ophits ) );
-//   e.put( std::move( AssnPtr ) );
+  e.put( std::move( opflashes ) );
+  e.put( std::move( ophits ) );
+  e.put( std::move( AssnPtr ) );
   
-// }
+}
 
 DEFINE_ART_MODULE(SubEventBuilder)
