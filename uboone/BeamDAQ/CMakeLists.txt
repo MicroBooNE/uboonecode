@@ -20,8 +20,7 @@ target_link_libraries( bdaq_readraw ${BOOSTLIB} ${UBDATATYPESLIB} )
 # ----------------------------------------------------------------------
 # Install this project's headers, sources, library, and executables:
 
-install( FILES beamdaq_config.fcl
-         DESTINATION ${flavorqual_dir}/bin )
+install_fhicl()
 
 install( TARGETS bdaq_get
          DESTINATION ${flavorqual_dir}/bin )
