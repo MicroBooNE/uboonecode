@@ -82,7 +82,7 @@ namespace subevent {
       subevents.add( std::move( asubevent ) );
       matchid++;
     }
-    std::cout << "Formed " << subevents.size() << " cosmic discriminator subevents" << std::endl;
+    //std::cout << "Formed " << subevents.size() << " cosmic discriminator subevents" << std::endl;
   }
   
 }

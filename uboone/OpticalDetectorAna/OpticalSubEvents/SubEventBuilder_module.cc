@@ -166,7 +166,7 @@ void SubEventBuilder::produce(art::Event & e)
   prepCosmicDiscWaveforms( cosmicwins );
   subevent::formCosmicWindowSubEvents( cosmicwins, fConfig, cosmic_subevents );
   subevent::AnalyzeSubEvents( cosmic_subevents );
-  std::cout << "Cosmic Disc. Subevents found: " << cosmic_subevents.size() << std::endl;
+  //std::cout << "Cosmic Disc. Subevents found: " << cosmic_subevents.size() << std::endl;
   // get waveforms and prep them
   prepBeamWaveforms( e, hgwfms, lgwfms, cosmic_subevents );
 
@@ -181,7 +181,7 @@ void SubEventBuilder::produce(art::Event & e)
   
   // Find subevents
   formSubEvents( hgwfms, fConfig, pmtspemap, subevents, *unclaimed_flashes );
-  std::cout << "subevents formed. now store in event." << std::endl;
+  //std::cout << "subevents formed. now store in event." << std::endl;
   
   // make opflash
   if ( fMakeOpFlash ) {
@@ -249,7 +249,7 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
 
   // get trigger and beamgate info
   double trig_timestamp = ts->TriggerTime();
-  std::cout << "[SubEventBuilder] trig timestamp: " << trig_timestamp << std::endl;
+  //std::cout << "[SubEventBuilder] trig timestamp: " << trig_timestamp << std::endl;
   //unsigned int trig_frame = ts->OpticalClock().Frame( trig_timestamp );
   //unsigned int trig_sample = ts->OpticalClock().Sample( trig_timestamp );
   //double beam_timestamp = ts->BeamGateTime();
@@ -383,7 +383,7 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
       hgwfms.get( *it ).reserve( lgwfm.size() );
       for ( auto adc : lgwfm )
 	hgwfms.get( *it ).push_back( 10.0*adc );
-      std::cout << " replaced hg with lowgain channel: size=" <<  hgwfms.get( *it ).size() << " lgwfmsize=" << lgwfm.size() << std::endl;
+      //std::cout << " replaced hg with lowgain channel: size=" <<  hgwfms.get( *it ).size() << " lgwfmsize=" << lgwfm.size() << std::endl;
       hgwfms.setLowGain( *it, true );
     }
     else {
@@ -397,7 +397,7 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
   int closest = 0;
   for ( subevent::SubEventListIter it=cosmicsubevents.begin(); it!=cosmicsubevents.end(); it++ ) {
     if ( (*it).tstart_sample<0 && (*it).tend_sample>0 ) {
-      std::cout << "[SubEventBuilder] found boundary subevent candidate, tstart=" << (*it).tstart_sample << " tend=" << (*it).tend_sample << " (ticks)" << std::endl;
+      //std::cout << "[SubEventBuilder] found boundary subevent candidate, tstart=" << (*it).tstart_sample << " tend=" << (*it).tend_sample << " (ticks)" << std::endl;
       if ( boundarysubevent==NULL || -(*it).tstart_sample < closest ) {
 	boundarysubevent = &(*it);
 	closest = -(*it).tstart_sample;
@@ -408,7 +408,7 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
   // if we found a boundary subevent, we correct the baseline
   std::map< int, int > baseline_correction_start;
   if ( boundarysubevent ) {
-    std::cout << "[SubEventBuilder] boundary subevent, tstart=" << boundarysubevent->tstart_sample << " tend=" << boundarysubevent->tend_sample << " (ticks)" << std::endl;
+    //std::cout << "[SubEventBuilder] boundary subevent, tstart=" << boundarysubevent->tstart_sample << " tend=" << boundarysubevent->tend_sample << " (ticks)" << std::endl;
     double f = exp( -fConfig.nspersample/fRC );
 
     for ( subevent::FlashListIter iflash=boundarysubevent->flashes.begin(); iflash!=boundarysubevent->flashes.end(); iflash++ ) {
@@ -480,8 +480,8 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
       //double ped = calcPedestal( wfm, 20, 1.0, wfm.at(tend) );
       int tend = std::min(subevent_tend-channel_offset,(int)wfm.size());
       if ( tend>=0 ) {
-	std::cout << "suppressing ch " << ch << " waveform from boundary subevent (tend=" << subevent_tend << ") up to sample " << tend << " of " << wfm.size() 
-		  << " (channel offset=" << hgwfms.getTimestamp( ch ) - ts->TriggerTime() << ")" << std::endl;
+	//std::cout << "suppressing ch " << ch << " waveform from boundary subevent (tend=" << subevent_tend << ") up to sample " << tend << " of " << wfm.size() 
+	//	  << " (channel offset=" << hgwfms.getTimestamp( ch ) - ts->TriggerTime() << ")" << std::endl;
 	double ped = wfm.at(tend);
 	for ( int iadc=0; iadc<tend; iadc++ ) {
 	  wfm.at(iadc) = ped;
