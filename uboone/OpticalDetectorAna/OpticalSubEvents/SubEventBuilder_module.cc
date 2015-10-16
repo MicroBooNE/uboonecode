@@ -244,7 +244,7 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
   for ( auto const& opdetData: (*lgwfmHandle) ) {
 
     // get window info
-    raw::Channel_t channel = opdetData.ChannelNumber();
+    raw::Channel_t channel = opdetData.ChannelNumber()%100;
     double timestamp = opdetData.TimeStamp();      
 
     if ( ((int)opdetData.size()) < beamwin_len_threshold ) {
