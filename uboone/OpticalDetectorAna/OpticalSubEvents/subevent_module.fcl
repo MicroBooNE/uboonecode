@@ -5,7 +5,8 @@ microboone_subeventbuilder:
     inputModule: "pmtreadout"
     makeOpFlash: true
     makeSubEvents: true
-    lightenFlashes: false
+    lightenFlashes: true
+    verbose: false
     TrigCoinc: 2.5 # microseconds
     RC: 60000.0
     fA: 3.0

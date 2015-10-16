@@ -36,10 +36,16 @@ namespace subevent {
     double pe30_1;  // first pass
     double sumflash30;
     double sumfcomp_gausintegral;
+
+    // you made me do this art
+    int runid;
+    int subrunid;
+    int eventid;
     
     FlashList flashes;        // first pass flashes
     FlashList flashes_pass2;  // second pass flashes
     void transferFlashes( FlashList& flashes );
+
     
 #ifdef __BUILD_ROOT_DICT__
     ClassDef( SubEvent, 1 );
