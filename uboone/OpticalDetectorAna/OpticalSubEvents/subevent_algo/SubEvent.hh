@@ -39,6 +39,7 @@ namespace subevent {
     
     FlashList flashes;        // first pass flashes
     FlashList flashes_pass2;  // second pass flashes
+    void transferFlashes( FlashList& flashes );
     
 #ifdef __BUILD_ROOT_DICT__
     ClassDef( SubEvent, 1 );

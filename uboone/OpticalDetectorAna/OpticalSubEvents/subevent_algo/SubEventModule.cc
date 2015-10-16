@@ -192,19 +192,19 @@ namespace subevent {
   // formSubEvents
   void formSubEvents( WaveformData& wfms, SubEventModConfig& config, std::map< int, double >& pmtspemap, SubEventList& subevents, FlashList& unclaimed_flashes ) {
 
-    std::cout << "FormSubEvents" << std::endl;
+    //std::cout << "FormSubEvents" << std::endl;
 
     WaveformData postwfms; // this will store "post" waveforms. We remove sections of the waveforms used to build hits (by returning them to baseline)
 
     // We find flashes of light on each channel. We do this in two passes: a high threshold pass to look for pulses above any background spe light.
     FlashList flashes;
     formFlashes( wfms, config, "pass1", flashes, postwfms );
-    std::cout << "  total pass1/high-trehsold flashes: " << flashes.size() << std::endl;
+    //std::cout << "  total pass1/high-trehsold flashes: " << flashes.size() << std::endl;
 
     WaveformData postpostwfms;
     FlashList flashes_pass2;
     formFlashes( postwfms, config, "pass2", flashes_pass2, postpostwfms );
-    std::cout << "  total pass2/low-threshold flashes: " << flashes_pass2.size() << std::endl;
+    //std::cout << "  total pass2/low-threshold flashes: " << flashes_pass2.size() << std::endl;
 
     int nloops = 0;
     ChannelSetIter itch=wfms.chbegin();
@@ -213,7 +213,7 @@ namespace subevent {
     std::vector< double > hitacc( nsamples, 0.0 );
 
     while ( nloops < config.maxsubeventloops ) {
-      std::cout << " start subevent search: loop#" << nloops << std::endl;
+      //std::cout << " start subevent search: loop#" << nloops << std::endl;
 
       // accumulators: the summed pulse height and the number of hits
       // use first entry to set size
@@ -237,7 +237,7 @@ namespace subevent {
 	  //hit_tmax = tick;
 	}
       }
-      std::cout << "  accumulator max: t=" << pe_tmax << " amp=" << pemax << " hits=" << hitmax << std::endl;
+      //std::cout << "  accumulator max: t=" << pe_tmax << " amp=" << pemax << " hits=" << hitmax << std::endl;
 
       // organize flashes within maxima
       if ( pemax>config.ampthresh || hitmax>config.hitthresh ) {
@@ -272,19 +272,19 @@ namespace subevent {
 	} //end of flash loop
 	
 	// store new subevent
-	std::cout << "  subevent " << subevents.size() << ": tstart=" << newsubevent.tstart_sample << "  tend=" << newsubevent.tend_sample << " nflashes=" << newsubevent.flashes.size() << std::endl;
+	//std::cout << "  subevent " << subevents.size() << ": tstart=" << newsubevent.tstart_sample << "  tend=" << newsubevent.tend_sample << " nflashes=" << newsubevent.flashes.size() << std::endl;
 	subevents.add( std::move( newsubevent ) );
 	
       }
       else {
-	std::cout << "  did not find additional subevent" << std::endl;
+	//std::cout << "  did not find additional subevent" << std::endl;
 	break;
       }
 
       nloops += 1;
     }//end of while loop
     
-    std::cout << " end of formsubevents. found " << subevents.size() << std::endl;
+    //std::cout << " end of formsubevents. found " << subevents.size() << std::endl;
 
     // now add in second pass flashes
     int nadditions = 0;
@@ -321,7 +321,7 @@ namespace subevent {
 	}
       }
     }
-    std::cout << " added " << nadditions << " 2nd pass flashes to the subevents." << std::endl;
+    //std::cout << " added " << nadditions << " 2nd pass flashes to the subevents." << std::endl;
     //std::cin.get();
 
     nadditions = 0;
@@ -331,13 +331,13 @@ namespace subevent {
 	nadditions ++;
       }
     }
-    std::cout << " added " << nadditions << " unclaimed 1st pass flashes to the subevents." << std::endl;
+    //std::cout << " added " << nadditions << " unclaimed 1st pass flashes to the subevents." << std::endl;
 
     // finally analyze subevents
-    std::cout << " analyze subevents" << std::endl;
+    //std::cout << " analyze subevents" << std::endl;
     AnalyzeSubEvents( subevents );
 
-    std::cout << "subevents formed." << std::endl;
+    //std::cout << "subevents formed." << std::endl;
     
   }
 
@@ -409,6 +409,5 @@ namespace subevent {
       
     }
   }
-  
-  
+
 }

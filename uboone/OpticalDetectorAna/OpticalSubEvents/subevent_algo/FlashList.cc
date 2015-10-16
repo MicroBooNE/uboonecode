@@ -32,6 +32,11 @@ namespace subevent {
     return fFlashes.end();
   }
 
+  void FlashList::transferFlash( Flash& aflash ) {
+    // it's mine now
+    add( std::move(aflash) );
+  }
+
   void FlashList::sortByTime() {
     std::sort( begin(), end(), FlashList::compareTime );
     sortMethod = kByTime;

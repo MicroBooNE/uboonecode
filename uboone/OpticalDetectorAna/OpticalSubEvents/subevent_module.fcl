@@ -7,7 +7,12 @@ microboone_subeventbuilder:
 {
     module_type: SubEventBuilder
     inputModule: "pmtreadout"
+    makeOpFlash: true
+    makeSubEvents: true
+    lightenFlashes: false
     TrigCoinc: 2.5 # microseconds
+    RC: 60000.0
+    fA: 3.0
     # 1st pass/high threshold, constant fraction discriminator
     threshold: 40
     deadtime: 24
@@ -56,6 +61,8 @@ services:
          }
 }
 
+# Time Service
+services.user.TimeService.TrigModuleName: "daq"
 
 # Database settings
 services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
@@ -73,7 +80,11 @@ outputs:
   {
    module_type: RootOutput
    fileName:    "larsoft.root" 
-   compressionLevel: 1			    
+   compressionLevel: 1
+   #outputCommands: ["keep *_*_*_*",
+   #                 "drop raw::OpDetWaveforms_*_*_*",
+   #                 "drop raw::RawDigits_*_*_*",
+   #                 "drop recob::Wires_*_*_*"]
   }
 }
 
