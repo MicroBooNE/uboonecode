@@ -65,6 +65,7 @@ private:
   std::string fOpDetInputModule;
   subevent::SubEventModConfig fConfig;
   bool fMakeOpFlash;
+  bool fMakeSubEvents;
   double fTrigCoinc;
   int fBeamWinLengthThreshold;
   double fRC;
@@ -102,6 +103,7 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
 
   fOpDetInputModule           = p.get<std::string>( "inputModule");
   fMakeOpFlash                = p.get<bool>( "makeOpFlash", true );
+  fMakeSubEvents              = p.get<bool>( "makeSubEvents", true );
   fTrigCoinc                  = p.get<double>       ("TrigCoinc");
   fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
   fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
@@ -137,8 +139,10 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
   fConfig.nspersample         = p.get<double>( "nspersample", 15.625 );
 
   // Call appropriate produces<>() functions here.
-  produces< std::vector< subevent::SubEvent > >();
-  produces< subevent::FlashList >( "unclaimedFlashes" );
+  if ( fMakeSubEvents ) {
+    produces< std::vector< subevent::SubEvent > >();
+    produces< subevent::FlashList >( "unclaimedFlashes" );
+  }
 
   if ( fMakeOpFlash ) {
     produces<std::vector< recob::OpFlash> >();
@@ -186,50 +190,32 @@ void SubEventBuilder::produce(art::Event & e)
   // make opflash
   if ( fMakeOpFlash ) {
 
-    // std::vector< recob::OpFlash >*  opflashes = new std::vector< recob::OpFlash >;
-    // std::vector< recob::OpHit >* ophits = new std::vector< recob::OpHit >;
-    // art::Assns<recob::OpFlash, recob::OpHit>*  AssnPtr =  new art::Assns<recob::OpFlash, recob::OpHit>;
-    // std::vector< recob::OpFlash > opflashes;
-    // std::vector< recob::OpHit > ophits;
-    // art::Assns<recob::OpFlash, recob::OpHit>  AssnPtr;
     std::unique_ptr< std::vector< recob::OpFlash > >  opflashes( new std::vector< recob::OpFlash > );
     std::unique_ptr< std::vector< recob::OpHit > > ophits( new std::vector< recob::OpHit > );
     std::unique_ptr< art::Assns<recob::OpFlash, recob::OpHit> >  AssnPtr( new art::Assns<recob::OpFlash, recob::OpHit> );
 
-
     makeOpFlashes( e, subevents, *opflashes, *ophits, *AssnPtr );
     makeOpFlashes( e, cosmic_subevents, *opflashes, *ophits, *AssnPtr );
 
-    // extra transfer ... not great
-    // std::unique_ptr< std::vector< recob::OpFlash > >  ptr_opflashes( new std::vector< recob::OpFlash > );
-    // std::unique_ptr< std::vector< recob::OpHit > > ptr_ophits( new std::vector< recob::OpHit > );
-    // std::unique_ptr< art::Assns<recob::OpFlash, recob::OpHit> >  ptr_AssnPtr( new art::Assns<recob::OpFlash, recob::OpHit> );
-    
-    // for ( std::vector< recob::OpFlash >::iterator it=opflashes.begin(); it!=opflashes.end(); it++ )
-    //   ptr_opflashes->emplace_back( *it );
-    // for ( std::vector< recob::OpHit >::iterator it=ophits.begin(); it!=ophits.end(); it++ )
-    //   ptr_ophits->emplace_back( *it );
-    // for ( art::Assns<recob::OpFlash, recob::OpHit>::iterator it=AssnPtr.begin(); it!=AssnPtr.end(); it++ )
-    //   ptr_AssnPtr->emplace_back( *it );
-    
-    
     e.put( std::move( opflashes ) );
     e.put( std::move( ophits ) );
     e.put( std::move( AssnPtr ) );
     
   }
 
-  // transfer subevents to the event
-  std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
-  for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
-    subeventvec->emplace_back( *it );
+  if ( fMakeSubEvents ) {
+    // transfer subevents to the event
+    std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
+    for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
+      subeventvec->emplace_back( *it );
+    }
+    for ( subevent::SubEventListIter it=cosmic_subevents.begin(); it!=cosmic_subevents.end(); it++ ) {
+      subeventvec->emplace_back( *it );
+    }
+    
+    e.put( std::move( subeventvec ) );
+    e.put( std::move( unclaimed_flashes ), "unclaimedFlashes" );
   }
-  for ( subevent::SubEventListIter it=cosmic_subevents.begin(); it!=cosmic_subevents.end(); it++ ) {
-    subeventvec->emplace_back( *it );
-  }
-  
-  e.put( std::move( subeventvec ) );
-  e.put( std::move( unclaimed_flashes ), "unclaimedFlashes" );
   
 }
 
