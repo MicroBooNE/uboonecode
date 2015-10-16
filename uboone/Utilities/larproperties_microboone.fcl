@@ -8,6 +8,6 @@ microboone_properties.Temperature:      87
 # use commented version to make lifetime ~ infinite
 #microboone_properties.Electronlifetime: 3.0e6 
 microboone_properties.Electronlifetime: 3.0e3 
-microboone_properties.Efield:           [0.5,0.666,0.8]  #(predicted for microBooNE)
+microboone_properties.Efield:           [0.273, 0.367,0.767] # 0.273 corresponds to 70 kV, wirebias taken from ECL#9266
 
 END_PROLOG
