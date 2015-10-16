@@ -44,3 +44,6 @@ simple_plugin( SubEventBuilder "module"
 install_headers()
 install_source()
 
+install_fhicl()
+FILE(GLOB fcl_files *.fcl)
+install_source( EXTRAS ${fcl_files} )
