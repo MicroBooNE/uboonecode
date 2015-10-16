@@ -140,8 +140,12 @@ namespace lris {
 
     fSwizzleTPC = ps.get<bool>("swizzleTPC",true);
     fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
+    fSwizzleTrigger = ps.get<bool>("swizzleTrigger",true);
     fSwizzleTriggerType = ps.get<std::string>("swizzleTriggerType"); // Only use ALL for this option, other options will not work
 
+    //temporary kazuTestSwizzleTrigger
+    kazuTestSwizzleTrigger = ps.get<bool>("kazuTestSwizzleTrigger",true);
+   
     //if ( fHuffmanDecode )
     tpc_crate_data_t::doDissect(true); // setup for decoding
 
@@ -442,8 +446,10 @@ namespace lris {
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo)
-  {    
+  {  
      triggerFrame = -999;
+     TPCframe = -999;
+     PMTframe = -999;
      FEM5triggerSample=-999;
      FEM6triggerSample=-999;
      FEM5triggerFrame=-999;
@@ -479,10 +485,10 @@ namespace lris {
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
 
-    std::cout << N_PMT_waveforms << std::endl;
+    checkTimeStampConsistency();
+
     tMyTree->Fill();
 
-    //std::cout<<"Done ProcessNextEvent..."<<std::endl;
     /*
       } catch (...) {
       //throw art::Exception( art::errors::FileReadError )
@@ -603,12 +609,27 @@ namespace lris {
 	auto const& tpc_card_header = card.header();   
         
         unsigned int frame = RollOver(tpc_card_header.getFrame(), tpc_card_header.getTrigFrameMod16(), 3);
-        if (abs(frame - triggerFrame) > 1){
+        
+        if (TPCframe == -999){TPCframe = frame;} // internal frame consistency checking
+        if (abs(frame - TPCframe) > 1){ // if the frame doesn't match the other TPC frames here then we have a problem
           std::cerr << "ERROR!" << std::endl;
-          std::cerr << "TPC card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
-                    << triggerFrame << " and TPC card header frame is " << frame << std::endl;
+          std::cerr << "TPC card header trigger frames not within one frame of each other!!" << std::endl;
           throw std::exception();
         }
+
+//        if (fSwizzleTrigger){
+//          if (triggerFrame == -999){ // if we have swizzled trigger data, and we have the default triggerFrame, we have a problem
+//            std::cerr << "ERROR!" << std::endl;
+//            std::cerr << "Trigger data should have been swizzled, but triggerFrame remains as the default value of -999" << std::endl;
+//            throw std::exception();
+//          }
+//          if (abs(frame - triggerFrame) > 1){ // if the triggerFrame and frame don't agree here then we have a problem
+//            std::cerr << "ERROR!" << std::endl;
+//            std::cerr << "TPC card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
+//                      << triggerFrame << " and TPC card header frame is " << frame << std::endl;
+//            throw std::exception();
+//          }
+//        }
         // Output tree variables - for calculating compression
         if (crate_number == 1){
           NumWords_crate1 += tpc_card_header.getWordCount();
@@ -801,7 +822,7 @@ namespace lris {
 	  if (fSwizzleTPC){ // here is where we actually fill the output
   	    raw::RawDigit rd(ch,chdsize,adclist,compression);
   	    tpcDigitList.push_back(rd);
-          }
+        }
 	    
 	  /*
             std::cout << ch << "\t"
@@ -865,12 +886,29 @@ namespace lris {
 // Frame and sample for trigger
         uint32_t frame = RollOver(card_data.getFrame(), card_data.getTrigFrameMod16(), 4);
         uint32_t sample = card_data.getTrigSample();
-        if (abs(frame - triggerFrame) > 1){
+
+        if (PMTframe == -999){PMTframe = frame;} // internal frame consistency checking
+        if (abs(frame - PMTframe) > 1){ // if the frame doesn't match the other PMT frames here then we have a problem
           std::cerr << "ERROR!" << std::endl;
-          std::cerr << "PMT card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
-                    << triggerFrame << " and PMT card header frame is " << frame << std::endl;
+          std::cerr << "PMT card header trigger frames not within one frame of each other!!" << std::endl;
           throw std::exception();
         }
+
+
+//        // check if we have swizzled the trigger data
+//        if (fSwizzleTrigger){
+//          if (triggerFrame == -999){ // if we have swizzled trigger data, and we have the default triggerFrame, we have a problem
+//            std::cerr << "ERROR!" << std::endl;
+//            std::cerr << "Trigger data should have been swizzled, but triggerFrame remains as the default value of -999" << std::endl;
+//            throw std::exception();
+//          }
+//          if (abs(frame - triggerFrame) > 1){ // if the triggerFrame and frame don't agree here then we have a problem
+//            std::cerr << "ERROR!" << std::endl;
+//            std::cerr << "PMT card header trigger frame not within one frame of trigger header frame!! Trigger header frame is " 
+//                      << triggerFrame << " and PMT card header frame is " << frame << std::endl;
+//            throw std::exception();
+//          }
+//        }
 //         Filling output tree variables
         if (card_data.getModule() == 5){
           FEM5triggerFrame = frame;
@@ -928,9 +966,14 @@ namespace lris {
 
 	    //std::cout << " into ReadoutCH=" << data_product_ch_num << " category=" << opdet::UBOpChannelEnumName( ch_category ) << std::endl;
 	    short adc_max=0;
+	    short adc_max_sample=0;
             for(ub_RawData::const_iterator it = window_data.begin(); it!= window_data.end(); it++){ 
               rd.push_back(*it & 0xfff);                
-              if(adc_max < rd.back()) adc_max = rd.back();
+              if(adc_max < rd.back()){
+                adc_max_sample = rd.size();
+                adc_max = rd.back();
+              }
+
             }
             // fill OpDetWaveform time
             double OpDetWaveForm_time = rd.TimeStamp();
@@ -943,17 +986,17 @@ namespace lris {
 
               if (channel_number == 39){
 //                std::cout << "Found RWM signal!" << std::endl;
-//                std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() << std::endl;
+//                std::cout << "RWM signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) << ", " <<  window_header.getSample() + adc_max_sample << std::endl;
                 RO_RWMtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-                RO_RWMtriggerSample = window_header.getSample();
+                RO_RWMtriggerSample = window_header.getSample() + adc_max_sample;
                 RO_RWMtriggerTime = timeService->OpticalClock().Time( RO_RWMtriggerSample, RO_RWMtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 38){
 //                std::cout << "Found STROBE signal!" << std::endl;
-//                std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+//                std::cout << "STROBE signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() + adc_max_sample << std::endl;
                 RO_EXTtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-                RO_EXTtriggerSample = window_header.getSample();
+                RO_EXTtriggerSample = window_header.getSample() + adc_max_sample;
                 RO_EXTtriggerTime = timeService->OpticalClock().Time( RO_EXTtriggerSample, RO_EXTtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
@@ -961,15 +1004,15 @@ namespace lris {
 //                std::cout << "Found NuMI signal!" << std::endl;
 //                std::cout << "NuMI signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
                 RO_NuMItriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-                RO_NuMItriggerSample = window_header.getSample();
+                RO_NuMItriggerSample = window_header.getSample() + adc_max_sample;
                 RO_NuMItriggerTime = timeService->OpticalClock().Time( RO_NuMItriggerSample, RO_NuMItriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
               else if (channel_number == 36){
 //                std::cout << "Found BNB signal!" << std::endl;
-//                std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() << std::endl;
+//                std::cout << "BNB signal at frame, sample " << RollOver(card_data.getFrame(),window_header.getFrame(),3) <<  ", " << window_header.getSample() + adc_max_sample << std::endl;
                 RO_BNBtriggerFrame = RollOver(card_data.getFrame(),window_header.getFrame(),3);
-                RO_BNBtriggerSample = window_header.getSample();
+                RO_BNBtriggerSample = window_header.getSample() + adc_max_sample;
                 RO_BNBtriggerTime = timeService->OpticalClock().Time( RO_BNBtriggerSample, RO_BNBtriggerFrame);
 //                std::cout << "window size = " << win_data_size << std::endl;
               }
@@ -1081,13 +1124,15 @@ namespace lris {
       if( trig_data.Trig_GateFake() ) trig_bits += ( 0x1 << ::trigger::kFakeGate     );
       if( trig_data.Trig_BeamFake() ) trig_bits += ( 0x1 << ::trigger::kFakeBeam     );
       if( trig_data.Trig_Spare1()   ) trig_bits += ( 0x1 << ::trigger::kSpare        );
-	
+	  
       raw::Trigger swiz_trig( trig_card.getTrigNumber(),
 			      trigger_time,
 			      beam_time,
 			      trig_bits );
+      if (not kazuTestSwizzleTrigger){return;}
       trigInfo.emplace_back( swiz_trig );
       
+      if (not fSwizzleTrigger){return;} // if we don't want to swizzle the trigger data, then stop here.
 // variables saving to output tree
       triggerFrame = frame;
       triggerSample = sample_64MHz;
@@ -1176,5 +1221,38 @@ namespace lris {
 	      << std::endl;
     throw std::exception();
   }
+
+
+  // =====================================================================  
+  void LArRawInputDriverUBooNE::checkTimeStampConsistency(){
+
+    if (fSwizzleTrigger && fSwizzlePMT ){ // trig-PMT comparison
+      if (abs(PMTframe - triggerFrame)>1){
+        std::cout << "ERROR!" << std::endl;
+        std::cout << "trigger data and PMT data both read out, but frames disagree (by more than 1)!" << std::endl;
+        std::cout << "trigger data frame = " << triggerFrame << ", PMT data frame = " << PMTframe << std::endl;
+        throw std::exception();
+      } // Done trig-PMT comparison
+    }
+    if (fSwizzleTrigger && fSwizzleTPC ){ // trig-TPC comparison
+      if (abs(TPCframe - triggerFrame)>1){
+        std::cout << "ERROR!" << std::endl;
+        std::cout << "trigger data and TPC data both read out, but frames disagree (by more than 1)!" << std::endl;
+        std::cout << "trigger data frame = " << triggerFrame << ", TPC data frame = " << TPCframe << std::endl;
+        throw std::exception();
+      } // Done trig-TPC comparison
+    }
+    if (fSwizzleTPC && fSwizzlePMT ){ // TPC-PMT comparison
+      if (abs(PMTframe - TPCframe)>1){
+        std::cout << "ERROR!" << std::endl;
+        std::cout << "TPC data and PMT data both read out, but frames disagree (by more than 1)!" << std::endl;
+        std::cout << "TPC data frame = " << TPCframe << ", PMT data frame = " << PMTframe << std::endl;
+        throw std::exception();
+      }
+    } // Done TPC-PMT comparison
+
+  }
+  // =====================================================================  
+
 }//<---Endlris
 

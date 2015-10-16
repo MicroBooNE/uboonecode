@@ -14,6 +14,7 @@ microboonev6.gdml (microboonev6_nowires.gdml): Contains the 2 wires which were p
 v7 has the correct shape of liquid argon and cold argon gas
 microboonev7.gdml (microboonev7_nowires.gdml): Has the correct shape of liquid argon and cold gas inside tank; tank thickness was also corrected. Previous versions had extra LAr outside the vessel endcap and above the active region in the tank, no ullage.
 
+v8 replaces the air above ground with vacuum 
 
 vX
 microboonevX.gdml (microboonevX_nowires.gdml): Working gdml.  This file (may) contain working changes which are not tagged with a version. Don't use this gdml.  

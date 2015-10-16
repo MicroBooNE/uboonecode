@@ -1,0 +1,68 @@
+#include "geometry_microboone.fcl"
+#include "timeservice_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "subevent_module.fcl"
+process_name: SubEventBuilder
+services:
+{
+  TFileService: { fileName: "raw_digits.root" }
+  user: {
+          ExptGeoHelperInterface: @local::microboone_geometry_helper
+          Geometry:               @local::microboone_geo
+          TimeService:            @local::microboone_timeservice
+          #DatabaseUtil:           @local::microboone_database
+	  UBOpReadoutMap:         @local::microboone_opreadoutmap
+         }
+}
+
+# Time Service
+services.user.TimeService.TrigModuleName: "daq"
+
+# Database settings
+services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
+services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
+services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.user.DatabaseUtil.Port:          5436
+services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.user.DatabaseUtil.ToughErrorTreatment: true
+services.user.DatabaseUtil.ShouldConnect: true
+services.user.DatabaseUtil.TableName: "main_run"
+
+outputs:
+{
+ out1:
+  {
+   module_type: RootOutput
+   fileName:    "larsoft.root" 
+   compressionLevel: 1
+   #outputCommands: ["keep *_*_*_*",
+   #                 "drop raw::OpDetWaveforms_*_*_*",
+   #                 "drop raw::RawDigits_*_*_*",
+   #                 "drop recob::Wires_*_*_*"]
+  }
+}
+
+physics:
+{
+  producers:
+  {
+     subevents: @local::microboone_subeventbuilder
+  }
+
+ produceIt: [ subevents ]
+ analyzeIt: []
+
+ #define the output stream, there could be more than one if using filters
+ stream1:  [ out1 ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event,
+ #ie filters and producers
+ trigger_paths: [ produceIt ]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event,
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ stream1 ]
+}
+
+

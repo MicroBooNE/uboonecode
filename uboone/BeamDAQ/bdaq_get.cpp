@@ -23,8 +23,8 @@ int main(int ac, char* av[])
   options_description opt("Options");
   opt.add_options()
     ("help,h", "Print help message")
-    ("begin-time,i",value< vector<uint32_t> >(&t0)->multitoken(),"Begin (sub)run time in seconds milliseconds (unix time); takes up to two arguments")
-    ("end-time,e",value< vector<uint32_t> >(&t1)->multitoken(),"End (sub)run time in seconds milliseconds (unix time); takes up to two arguments")
+    ("begin-time,i",value< vector<uint32_t> >(&t0)->multitoken(),"Begin (sub)run time in seconds microseconds (unix time); takes up to two arguments")
+    ("end-time,e",value< vector<uint32_t> >(&t1)->multitoken(),"End (sub)run time in seconds microseconds (unix time); takes up to two arguments")
     ("run-number,r",value<int>()->default_value(99999),"Run number.")
     ("subrun-number,s",value<int>()->default_value(9999),"Subrun number.")
     ("fhicl-file,f",value<string>()->default_value(""),"Configuration fhicl file.");

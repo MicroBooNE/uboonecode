@@ -3,18 +3,22 @@
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "seedservice_microboone.fcl"
+
 process_name: Swizzler
 services:
 {
   scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "daq_hist.root" }
-  TimeTracker:       {}
+  Timing:       {}
   RandomNumberGenerator: {} 
+  SeedService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
-	  UBOpReadoutMap:         @local::microboone_opreadoutmap
+	  UBOpReadoutMap:           @local::microboone_opreadoutmap
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
           }
@@ -29,15 +33,14 @@ microboone_tfile_metadata:
 }
 
 # Database settings
-services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
-services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
+services.user.DatabaseUtil.DBHostName:    "ifdb02.fnal.gov"
+services.user.DatabaseUtil.DBName:        "hootgibson_prod"
 services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
-services.user.DatabaseUtil.Port:          5436
+services.user.DatabaseUtil.Port:          5444
 services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
 services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: true
 services.user.DatabaseUtil.TableName: "main_run"
-
 
 source:
 {
@@ -45,27 +48,57 @@ source:
   module_type:	   LArRawInputSourceUBooNE
   maxEvents:       -1
   huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTriggerType: ALL
   beam_histograms: [ "E:TOR101, 100, 0, 50",
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
                      "E:TOR875, 100, 0, 5" ]
-}	
+}
 
 outputs:
 {
- out1:
+ rawprescale:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc.root"
    dataTier: "raw"
    compressionLevel: 3
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_daq_*_*"]
+   FCMDPlugins: [
+     { plugin_type:   "FileCatalogMetadataRawDigit"
+       RawDigitLabel: "digitcopy"
+     }
+    ]
   }
 }
 
 physics:
 {
- stream1:   [ out1 ]
+  producers: {
+  ### flash finders
+  opflash          : @local::microboone_opflash_beam_highgain
+  opflashLow       : @local::microboone_opflash_beam_lowgain
+  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+
+  digitcopy : { module_type : "RawDigitSaver" 
+                DAQRawDigitProducer : "daq" }
+ }
+ filters: {
+  triggerEnforcement: { module_type : "TriggerEnforcement" }
+  randomfilter: {
+   module_type : "RandomPrescale"
+   Probability : 0.01
+  }
+ }
+
+ reco: [ triggerEnforcement, opflash, randomfilter, digitcopy ]
+ stream1:   [ rawprescale ]
+ trigger_paths: [ reco ] 
  end_paths: [ stream1 ]
 }
 
-
+services.user.TimeService.TrigModuleName: "daq"

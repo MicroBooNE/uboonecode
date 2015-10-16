@@ -334,7 +334,7 @@ void BeamData::produce(art::Event & e)
     }
   }
   if (beam_name=="") {
-    mf::LogDebug(__FUNCTION__) << "Trigger not matching any of the beam(s). Skipping beam merging.";
+    mf::LogInfo(__FUNCTION__) << "Trigger not matching any of the beam(s). Skipping beam merging.";
     return;
   }
   mf::LogDebug(__FUNCTION__) <<"Looking for "<<beam_name<<" event";
@@ -469,7 +469,7 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offs
   time_t dettime64  = daqHeaderHandle->GetTimeStamp();
    
   uint32_t detsec = uint32_t(dettime64>>32);
-  uint32_t detmsec =uint32_t((dettime64 & 0x0000FFFF)/1000);
+  uint32_t detmsec =uint32_t((dettime64 & 0xFFFFFFFF)/1000000);
     
   time_t dettime  = time_t(detsec)*1000.+time_t(detmsec);
   time_t beamtime = time_t(bh.getSeconds())*1000 + time_t(bh.getMilliSeconds())+time_t(offsetT);
