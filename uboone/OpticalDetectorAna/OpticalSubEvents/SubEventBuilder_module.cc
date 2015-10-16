@@ -69,6 +69,7 @@ private:
   bool fLightenFlashes;
   double fTrigCoinc;
   int fBeamWinLengthThreshold;
+  bool fverbose;
   double fRC;
   double fA;
 
@@ -99,6 +100,7 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
   fMakeOpFlash                = p.get<bool>( "makeOpFlash", true );
   fMakeSubEvents              = p.get<bool>( "makeSubEvents", true );
   fLightenFlashes             = p.get<bool>( "lightenFlashes", false );
+  fverbose                    = p.get<bool>( "verbose", true );
   fTrigCoinc                  = p.get<double>       ("TrigCoinc");
   fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
   fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
@@ -165,7 +167,8 @@ void SubEventBuilder::produce(art::Event & e)
   prepCosmicDiscWaveforms( cosmicwins );
   subevent::formCosmicWindowSubEvents( cosmicwins, fConfig, cosmic_subevents );
   subevent::AnalyzeSubEvents( cosmic_subevents );
-  //std::cout << "Cosmic Disc. Subevents found: " << cosmic_subevents.size() << std::endl;
+  if ( fverbose )
+    std::cout << "Cosmic Disc. Subevents found: " << cosmic_subevents.size() << std::endl;
   // get waveforms and prep them
   prepBeamWaveforms( e, hgwfms, lgwfms, cosmic_subevents );
 
@@ -180,7 +183,8 @@ void SubEventBuilder::produce(art::Event & e)
   
   // Find subevents
   formSubEvents( hgwfms, fConfig, pmtspemap, subevents, *unclaimed_flashes );
-  //std::cout << "subevents formed. now store in event." << std::endl;
+  if ( fverbose )
+    std::cout << "formed " << subevents.size() << " formed. now store in event." << std::endl;
   
   // make opflash
   if ( fMakeOpFlash ) {
@@ -215,9 +219,15 @@ void SubEventBuilder::produce(art::Event & e)
     // transfer subevents to the event
     std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
     for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
+      (*it).runid = e.id().run();
+      (*it).subrunid = e.id().subRun();
+      (*it).eventid = e.id().event();
       subeventvec->emplace_back( *it );
     }
     for ( subevent::SubEventListIter it=cosmic_subevents.begin(); it!=cosmic_subevents.end(); it++ ) {
+      (*it).runid = e.id().run();
+      (*it).subrunid = e.id().subRun();
+      (*it).eventid = e.id().event();
       subeventvec->emplace_back( *it );
     }
     
@@ -461,7 +471,6 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
   
   // finally we want to suppress the creation of subevents within the bounds of the boundary subevents. we do this by removing the waveform here
   if ( boundarysubevent ) {
-    //int subevent_tend = int( (boundarysubevent->tend_sample*ts->OpticalClock().(TickPeriod()*1.0e6) - ts->TriggerTime())/ts->OpticalClock().TickPeriod() )+1;
     int subevent_tend = boundarysubevent->tend_sample; // samples from trigger
     // std::cout << "suppressing waveform from boundary subevent up to sample " << subevent_tend << " tend=" << boundarysubevent->tend_sample << " (ticks)" 
     // 	      << " " << boundarysubevent->tend_sample*ts->OpticalClock().TickPeriod()*1.0e6
@@ -474,16 +483,16 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
       //double ped = calcPedestal( wfm, 20, 1.0, wfm.at(tend) );
       int tend = std::min(subevent_tend-channel_offset,(int)wfm.size());
       if ( tend>=0 ) {
-	//std::cout << "suppressing ch " << ch << " waveform from boundary subevent (tend=" << subevent_tend << ") up to sample " << tend << " of " << wfm.size() 
-	//	  << " (channel offset=" << hgwfms.getTimestamp( ch ) - ts->TriggerTime() << ")" << std::endl;
-	double ped = wfm.at(tend);
-	for ( int iadc=0; iadc<tend; iadc++ ) {
-	  wfm.at(iadc) = ped;
-	}
-	subevent::removePedestal( wfm, 20, 1.0, ped );
+  	//std::cout << "suppressing ch " << ch << " waveform from boundary subevent (tend=" << subevent_tend << ") up to sample " << tend << " of " << wfm.size() 
+  	//	  << " (channel offset=" << hgwfms.getTimestamp( ch ) - ts->TriggerTime() << ")" << std::endl;
+  	double ped = wfm.at(tend);
+  	for ( int iadc=0; iadc<tend; iadc++ ) {
+  	  wfm.at(iadc) = ped;
+  	}
+  	subevent::removePedestal( wfm, 20, 1.0, ped );
       }
     }
-  }
+  }//end of suppression 
 }
 
 // bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData& wfms, subevent::CosmicWindowHolder& cosmics ) {
@@ -632,10 +641,6 @@ void SubEventBuilder::GetHitGeometryInfo(subevent::Flash const& flash,
   sumz+=xyz[2]*PEThisHit; sumz2+=xyz[2]*xyz[2]*PEThisHit;
 }
 
-// void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, 
-// 				     std::unique_ptr< std::vector< recob::OpFlash > >  opflashes,
-// 				     std::unique_ptr< std::vector< recob::OpHit > > ophits,
-// 				     std::unique_ptr< art::Assns<recob::OpFlash, recob::OpHit> > AssnPtr )
 void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, 
  				     std::vector< recob::OpFlash >&  opflashes,
  				     std::vector< recob::OpHit >& ophits,
@@ -646,10 +651,6 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
   art::ServiceHandle<geo::Geometry> geom;
   geo::Geometry const& Geometry(*geom);
   double dt_beam = ts->BeamGateTime() - ts->TriggerTime();
-
-  // std::unique_ptr< std::vector< recob::OpFlash > >  opflashes( new std::vector< recob::OpFlash > );
-  // std::unique_ptr< std::vector< recob::OpHit > > ophits( new std::vector< recob::OpHit > );
-  // std::unique_ptr< art::Assns<recob::OpFlash, recob::OpHit> >  AssnPtr( new art::Assns<recob::OpFlash, recob::OpHit> );
 
   for ( subevent::SubEventListIter isubevent=subevents.begin(); isubevent!=subevents.end(); isubevent++ ) {
     subevent::SubEvent& asubevent = (*isubevent);
@@ -666,12 +667,14 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
     double abstime = ts->TriggerTime() + asubevent.tmax_sample*ts->OpticalClock().TickPeriod(); // us (both beam and cosmics measured relative to beginning of trigger
     double reltime_beam = reltime + dt_beam;
     double width = ( asubevent.tend_sample - asubevent.tstart_sample )*ts->OpticalClock().TickPeriod(); // us
-    // std::cout << "opflash: "
-    // 	      << " abstime=" << abstime << " us"
-    // 	      << " reltime=" << reltime << " us"  
-    // 	      << " width=" << width << " us" 
-    // 	      << " beamgatetime=" << ts->BeamGateTime() << " us"
-    // 	      << " tickperiod=" << ts->OpticalClock().TickPeriod() << " us" << std::endl;
+    if ( fverbose )
+      std::cout << "opflash: "
+		<< " tsample_start=" << asubevent.tstart_sample << " tend_sample=" << asubevent.tend_sample
+		<< " abstime=" << abstime << " us"
+		<< " reltime=" << reltime << " us"  
+		<< " width=" << width << " us" 
+		<< " beamgatetime=" << ts->BeamGateTime() << " us"
+		<< " tickperiod=" << ts->OpticalClock().TickPeriod() << " us" << std::endl;
     // Emprical corrections to get the Frame right
     // // Eventual solution - remove frames
     // taken from OpFlashAlg.cxx
