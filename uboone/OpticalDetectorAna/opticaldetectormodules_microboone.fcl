@@ -5,6 +5,7 @@ BEGIN_PROLOG
 microboone_simphotoncounter: @local::standard_simphotoncounter
 microboone_opdigi:           @local::standard_opdigi
 microboone_tracktimeassoc:   @local::standard_tracktimeassoc
+microboone_algo_slidingwindow: @local::standard_algo_slidingwindow
 
 microboone_opflash_lowgain:
 {
@@ -20,8 +21,13 @@ microboone_opflash_lowgain:
    AreaToPE:         false # Use area to calculate number of PEs
    SPEArea:          11.8  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
-   algo_threshold:   @local::standard_algo_slidingwindow
+   algo_threshold:   @local::microboone_algo_slidingwindow
 }
+
+microboone_opflash_lowgain.algo_threshold.ADCThreshold: 8
+microboone_opflash_lowgain.algo_threshold.NSigmaThreshold: 5
+microboone_opflash_lowgain.algo_threshold.MinWindowSize: 5
+microboone_opflash_lowgain.algo_threshold.MaxSigma: 1.0
 
 microboone_opflash_highgain:
 {
@@ -37,8 +43,15 @@ microboone_opflash_highgain:
    AreaToPE:         true # Use area to calculate number of PEs
    SPEArea:          118  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
-   algo_threshold:   @local::standard_algo_slidingwindow
+   algo_threshold:   @local::microboone_algo_slidingwindow
 }
+
+microboone_opflash_highgain.algo_threshold.ADCThreshold: 8
+microboone_opflash_highgain.algo_threshold.NSigmaThreshold: 5
+microboone_opflash_highgain.algo_threshold.MinWindowSize: 5
+microboone_opflash_highgain.algo_threshold.MaxSigma: 1.0
+
+
 
 microboone_opflash_beam_highgain: @local::microboone_opflash_highgain
 microboone_opflash_beam_highgain.InputLabels:  ["OpdetBeamHighGain"]

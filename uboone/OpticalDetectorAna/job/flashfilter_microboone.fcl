@@ -10,7 +10,7 @@ microboone_flashtrigger : {
   NeutrinoGenerator : "generator" # simb::MCTruth producer module name
 
   BeamDTLow     : -0.1         # OpFlash timing low boundary in micro-seconds w.r.t. beginning of beam spill
-  BeamDTHigh    : 23.4         # OpFlash timing high boundary in micro-seconds w.r.t. beginning of beam spill
+  BeamDTHigh    : 20.1         # OpFlash timing high boundary in micro-seconds w.r.t. beginning of beam spill
   TotalPEThreshold : 50        # The minimum number of total photoelectrons from all PMTs in a flash to consider an event as nu candidate
 
   EnableMultiplicityCut : false # Multiplicity cut switch
