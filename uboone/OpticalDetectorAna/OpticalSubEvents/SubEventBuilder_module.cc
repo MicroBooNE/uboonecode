@@ -66,6 +66,7 @@ private:
   subevent::SubEventModConfig fConfig;
   bool fMakeOpFlash;
   bool fMakeSubEvents;
+  bool fLightenFlashes;
   double fTrigCoinc;
   int fBeamWinLengthThreshold;
   double fRC;
@@ -80,18 +81,11 @@ private:
   			  std::vector<double> & sumw2,
   			  double & sumy, double & sumy2,
   			  double & sumz, double & sumz2);
-  // void makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, 
-  // 		      std::vector< recob::OpFlash >*  opflashes,
-  // 		      std::vector< recob::OpHit >* ophits,
-  // 		      art::Assns<recob::OpFlash, recob::OpHit>* AssnPtr );
-  // void makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, 
-  // 		      std::unique_ptr< std::vector< recob::OpFlash > >  opflashes,
-  // 		      std::unique_ptr< std::vector< recob::OpHit > > ophits,
-  // 		      std::unique_ptr< art::Assns<recob::OpFlash, recob::OpHit> > AssnPtr );
   void makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, 
   		      std::vector< recob::OpFlash >&  opflashes,
   		      std::vector< recob::OpHit >& ophits,
   		      art::Assns<recob::OpFlash, recob::OpHit>& AssnPtr );
+  void lightenFlashes( subevent::FlashList& flashes );
   
 };
 
@@ -104,6 +98,7 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
   fOpDetInputModule           = p.get<std::string>( "inputModule");
   fMakeOpFlash                = p.get<bool>( "makeOpFlash", true );
   fMakeSubEvents              = p.get<bool>( "makeSubEvents", true );
+  fLightenFlashes             = p.get<bool>( "lightenFlashes", false );
   fTrigCoinc                  = p.get<double>       ("TrigCoinc");
   fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
   fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
@@ -204,6 +199,19 @@ void SubEventBuilder::produce(art::Event & e)
   }
 
   if ( fMakeSubEvents ) {
+
+    if ( fLightenFlashes ) {
+      for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
+	lightenFlashes( (*it).flashes );
+	lightenFlashes( (*it).flashes_pass2 );
+      }
+      for ( subevent::SubEventListIter it=cosmic_subevents.begin(); it!=cosmic_subevents.end(); it++ ) {
+	lightenFlashes( (*it).flashes );
+	lightenFlashes( (*it).flashes_pass2 );
+      }
+      lightenFlashes( *unclaimed_flashes );
+    }
+
     // transfer subevents to the event
     std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
     for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
@@ -726,11 +734,18 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
     opflashes.emplace_back( std::move( aopflash ) );
   }//end of subevent loop
   
-  
-  // e.put( std::move( opflashes ) );
-  // e.put( std::move( ophits ) );
-  // e.put( std::move( AssnPtr ) );
-  
 }
+
+void SubEventBuilder::lightenFlashes( subevent::FlashList& flashes ) {
+  // doesn't seem to work
+  for ( subevent::FlashListIter it=flashes.begin(); it!=flashes.end(); it++ ) {
+    (*it).waveform.clear();
+    (*it).expectation.clear();
+    //std::vector<double>().swap( (*it).waveform );
+    //std::vector<double>().swap( (*it).expectation );
+  }
+}
+
+
 
 DEFINE_ART_MODULE(SubEventBuilder)
