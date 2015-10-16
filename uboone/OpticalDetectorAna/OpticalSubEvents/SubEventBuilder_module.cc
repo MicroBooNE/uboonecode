@@ -67,10 +67,12 @@ private:
   bool fMakeOpFlash;
   double fTrigCoinc;
   int fBeamWinLengthThreshold;
+  double fRC;
+  double fA;
 
   bool sortWaveforms( art::Event& event, subevent::WaveformData& hgbeam, subevent::WaveformData& lgbeam, subevent::CosmicWindowHolder& cosmics, int beamwin_len_threshold );
   void prepCosmicDiscWaveforms(  subevent::CosmicWindowHolder& cosmics ); 
-  // bool prepWaveforms( art::Event& event, subevent::WaveformData& wfms );
+  void prepBeamWaveforms( art::Event& event, subevent::WaveformData& hgwfms, subevent::WaveformData& lgwfms, subevent::SubEventList& cosmic_subevents );
   // bool gatherWaveforms( art::Event& event, subevent::WaveformData& wfms );
   // void baselineCorrectWaveforms( subevent::WaveformData& wfms );
   // void makeOpFlashes( art::Event& e, subevent::SubEventList& subevents, subevent::WaveformData& wfms );
@@ -139,7 +141,8 @@ void SubEventBuilder::produce(art::Event & e)
   // Implementation of required member function here.  
 
   // get waveforms
-  subevent::WaveformData hgwfms, lgwfms;
+  subevent::WaveformData hgwfms;
+  subevent::WaveformData lgwfms;
   subevent::CosmicWindowHolder cosmicwins;
   bool ok = sortWaveforms( e, hgwfms, lgwfms, cosmicwins, fBeamWinLengthThreshold );
   if (!ok) {
@@ -199,9 +202,9 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
     return false;
   }
 
-
   // get trigger and beamgate info
   double trig_timestamp = ts->TriggerTime();
+  std::cout << "[SubEventBuilder] trig timestamp: " << trig_timestamp << std::endl;
   //unsigned int trig_frame = ts->OpticalClock().Frame( trig_timestamp );
   //unsigned int trig_sample = ts->OpticalClock().Sample( trig_timestamp );
   //double beam_timestamp = ts->BeamGateTime();
@@ -212,20 +215,23 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
   for ( auto const& opdetData: (*hgwfmHandle) ) {
 
     // get window info
-    raw::Channel_t channel = opdetData.ChannelNumber();
+    raw::Channel_t channel = opdetData.ChannelNumber()%100;
     double timestamp = opdetData.TimeStamp();      
 
     if ( ((int)opdetData.size()) < beamwin_len_threshold ) {
       // cosmic windows: want to store ticks since trigger
       int ticks = (int)(timestamp - trig_timestamp)/ts->OpticalClock().TickPeriod();
-      std::vector< double > wfm( opdetData.size(), 0.0 );
+      //std::cout << "cosmic window start=" << ticks << " (ticks)" << std::endl;
+      std::vector< double > wfm;
+      wfm.reserve( opdetData.size() );
       for ( auto adc: opdetData )
 	wfm.push_back( (double)adc );
       cosmics.addHG( (int)channel, ticks, wfm );
     }
     else {
       // beam windows: store timestamp
-      std::vector< double > wfm( opdetData.size(), 0.0 );
+      std::vector< double > wfm;
+      wfm.reserve( opdetData.size() );
       for ( auto adc: opdetData )
 	wfm.push_back( (double)adc );
       hgbeam.set( (int)channel, wfm, false );
@@ -244,17 +250,19 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
     if ( ((int)opdetData.size()) < beamwin_len_threshold ) {
       // cosmic windows: want to store ticks since trigger
       int ticks = (int)(timestamp - trig_timestamp)/ts->OpticalClock().TickPeriod();
-      std::vector< double > wfm( opdetData.size(), 0.0 );
+      std::vector< double > wfm;
+      wfm.reserve( opdetData.size() );
       for ( auto adc: opdetData )
 	wfm.push_back( (double)adc );
       cosmics.addLG( (int)channel, ticks, wfm );
     }
     else {
       // beam windows: store timestamp
-      std::vector< double > wfm( opdetData.size(), 0.0 );
+      std::vector< double > wfm;
+      wfm.reserve( opdetData.size() );
       for ( auto adc: opdetData )
 	wfm.push_back( (double)adc );
-      lgbeam.set( (int)channel, wfm, false );
+      lgbeam.set( (int)(channel), wfm, false );
       // store time stamp for later
       lgbeam.storeTimeInfo( (int)channel,  ts->OpticalClock().Frame( opdetData.TimeStamp() ), opdetData.TimeStamp() );
     }
@@ -308,8 +316,132 @@ void SubEventBuilder::prepCosmicDiscWaveforms( subevent::CosmicWindowHolder& cos
   }//end of high gain loop
 } // end of prepCosmicDiscWaveforms
 
-void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformData& hgwfms, subevent::WaveformData* lgwfms, subevent::SubEventList& cosmicsubevents ) {
-  // we 
+void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformData& hgwfms, subevent::WaveformData& lgwfms, subevent::SubEventList& cosmicsubevents ) {
+  // get services
+  art::ServiceHandle<util::TimeService> ts;
+
+  // first replace hgwfms that saturate and remove pedestal
+  for ( subevent::ChannelSetIter it=hgwfms.chbegin(); it!=hgwfms.chend(); it++ ) {
+    std::vector< double >& wfm = hgwfms.get( *it );
+    bool replace = false;
+    for ( auto adc : wfm ) {
+      if ( adc > 4050 ) {
+	replace = true;
+	break;
+      }
+    }
+    if ( replace ) {
+      // remove low gain pedestal and scale by a factor of 10.0
+      hgwfms.get( *it ).clear();
+      std::vector< double >& lgwfm = lgwfms.get( *it );
+      subevent::removePedestal( lgwfm, 20, 2.0, 2047.0 );
+      hgwfms.get( *it ).reserve( lgwfm.size() );
+      for ( auto adc : lgwfm )
+	hgwfms.get( *it ).push_back( 10.0*adc );
+      std::cout << " replaced hg with lowgain channel: size=" <<  hgwfms.get( *it ).size() << " lgwfmsize=" << lgwfm.size() << std::endl;
+      hgwfms.setLowGain( *it, true );
+    }
+    else {
+      // remove high gain pedestal only
+      subevent::removePedestal( hgwfms.get( *it ), 20.0, 2.0, 2047.0 );
+    }
+  } //end of channel loop
+  
+  // look for cosmic discriminator windows that cross into the boundary of the beam window
+  subevent::SubEvent* boundarysubevent = NULL;
+  int closest = 0;
+  for ( subevent::SubEventListIter it=cosmicsubevents.begin(); it!=cosmicsubevents.end(); it++ ) {
+    if ( (*it).tstart_sample<0 && (*it).tend_sample>0 ) {
+      std::cout << "[SubEventBuilder] found boundary subevent candidate, tstart=" << (*it).tstart_sample << " tend=" << (*it).tend_sample << " (ticks)" << std::endl;
+      if ( boundarysubevent==NULL || -(*it).tstart_sample < closest ) {
+	boundarysubevent = &(*it);
+	closest = -(*it).tstart_sample;
+      }
+    }
+  }
+  
+  // if we found a boundary subevent, we correct the baseline
+  std::map< int, int > baseline_correction_start;
+  if ( boundarysubevent ) {
+    std::cout << "[SubEventBuilder] boundary subevent, tstart=" << boundarysubevent->tstart_sample << " tend=" << boundarysubevent->tend_sample << " (ticks)" << std::endl;
+    double f = exp( -fConfig.nspersample/fRC );
+
+    for ( subevent::FlashListIter iflash=boundarysubevent->flashes.begin(); iflash!=boundarysubevent->flashes.end(); iflash++ ) {
+      int ch = (*iflash).ch;
+      std::vector< double > vcorr( 1, 0.0 );
+      // use the expectation to make the correction, because we don't have the actual waveform unfortunately
+      for ( unsigned int iadc=1; iadc<(*iflash).expectation.size(); iadc++ ) {
+	double q = (*iflash).expectation.at(iadc)*fA*(fConfig.nspersample/fRC) + vcorr.at( iadc-1 )*f;
+	vcorr.push_back( q );
+      }
+      // extend until we fall below 1 adc
+      unsigned int iadc = vcorr.size()-1;
+      while ( vcorr.at(iadc) > 1.0 ) {
+	double q = vcorr.at(iadc)*f;
+	vcorr.push_back( q );
+	iadc++;
+      }
+      // apply the correction
+      std::vector< double >& beamwin = hgwfms.get( ch );
+      int offset = int( ((*iflash).tstart*ts->OpticalClock().TickPeriod() - ts->TriggerTime())/ts->OpticalClock().TickPeriod() );
+      int cosmic_start = std::max( 0, offset );
+      int cosmic_len   = std::min( (int)vcorr.size()-cosmic_start, (int)beamwin.size() );
+      for ( int iadc=cosmic_start; iadc<cosmic_start+cosmic_len; iadc++ ) {
+	beamwin.at( iadc-cosmic_start ) -= vcorr.at( iadc );
+      }
+      if ( !hgwfms.isLowGain( ch ) )
+	subevent::removePedestal( beamwin, 20.0, 2.0, 0.0 );
+      else
+	subevent::removePedestal( beamwin, 20.0, 20.0, 0.0 );
+      // we save where we started. this is so that baseline correction from charge inside beam window doesn't double count the correction we just made
+      baseline_correction_start[ ch ] = cosmic_len;
+    }//end of loop over flashes/channels
+  }// end of if boundary event
+
+  // baseline correct other waveforms
+  double f = exp( -fConfig.nspersample/fRC );
+  for ( subevent::ChannelSetIter it=hgwfms.chbegin(); it!=hgwfms.chend(); it++ ) {
+    int ch = (*it);
+    std::vector< double >& wfm = hgwfms.get( ch );
+    // determine start of correction
+    int correction_start = 1;
+    if ( baseline_correction_start.find( ch )!=baseline_correction_start.end() )
+      correction_start = baseline_correction_start[ch];
+    if ( correction_start<1 )
+      correction_start = 1;
+    // calculate size of correction
+    std::vector< double > vcorr( wfm.size(), 0.0 );
+    for ( int iadc=correction_start; iadc<(int)vcorr.size(); iadc++ ) {
+      double q = wfm.at( iadc )*fA*fConfig.nspersample/fRC + vcorr.at( iadc-1 )*f;
+      vcorr.at( iadc ) = q;
+    }
+    // apply correction
+    for ( int iadc=0; iadc<(int)wfm.size(); iadc++ )
+      wfm.at(iadc) += vcorr.at( iadc );
+  }// end of loop over hg channels
+  
+  // finally we want to suppress the creation of subevents within the bounds of the boundary subevents. we do this by removing the waveform here
+  if ( boundarysubevent ) {
+    //int subevent_tend = int( (boundarysubevent->tend_sample*ts->OpticalClock().(TickPeriod()*1.0e6) - ts->TriggerTime())/ts->OpticalClock().TickPeriod() )+1;
+    int subevent_tend = boundarysubevent->tend_sample; // samples from trigger
+    // std::cout << "suppressing waveform from boundary subevent up to sample " << subevent_tend << " tend=" << boundarysubevent->tend_sample << " (ticks)" 
+    // 	      << " " << boundarysubevent->tend_sample*ts->OpticalClock().TickPeriod()*1.0e6
+    // 	      << " " << boundarysubevent->tend_sample*ts->OpticalClock().TickPeriod()*1.0e6 - ts->TriggerTime()
+    // 	      << std::endl;
+    for ( subevent::FlashListIter iflash=boundarysubevent->flashes.begin(); iflash!=boundarysubevent->flashes.end(); iflash++ ) {
+      int ch = (*iflash).ch;
+      std::vector< double >& wfm = hgwfms.get( ch );
+      int channel_offset = int( (hgwfms.getTimestamp( ch ) - ts->TriggerTime() )/ts->OpticalClock().TickPeriod() );
+      //double ped = calcPedestal( wfm, 20, 1.0, wfm.at(tend) );
+      int tend = std::min(subevent_tend-channel_offset,(int)wfm.size());
+      std::cout << "suppressing ch " << ch << " waveform from boundary subevent (tend=" << subevent_tend << ") up to sample " << tend << " of " << wfm.size() << " (channel offset=" << hgwfms.getTimestamp( ch ) - ts->TriggerTime() << ")" << std::endl;
+      double ped = wfm.at(tend);
+      for ( int iadc=0; iadc<tend; iadc++ ) {
+  	wfm.at(iadc) = ped;
+      }
+      subevent::removePedestal( wfm, 20, 1.0, ped );
+    }
+  }
 }
 
 // bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData& wfms, subevent::CosmicWindowHolder& cosmics ) {
