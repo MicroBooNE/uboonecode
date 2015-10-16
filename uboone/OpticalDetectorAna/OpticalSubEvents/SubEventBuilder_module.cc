@@ -96,6 +96,9 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
   fMakeOpFlash                = p.get<bool>( "makeOpFlash", true );
   fTrigCoinc                  = p.get<double>       ("TrigCoinc");
   fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
+  fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
+  fRC                         = p.get<double>( "RC", 60000.0 );
+  fA                          = p.get<double>( "A", 3.0 );
 
   fConfig.cfdconfig.threshold = p.get<int>( "threshold" );
   fConfig.cfdconfig.deadtime  = p.get<int>( "deadtime" );
@@ -169,8 +172,8 @@ void SubEventBuilder::produce(art::Event & e)
     pmtspemap[i] = 20.0;
   
   // Find subevents
-  //formSubEvents( wfms, fConfig, pmtspemap, subevents, *unclaimed_flashes );
-  //std::cout << "subevents formed. now store in event." << std::endl;
+  formSubEvents( hgwfms, fConfig, pmtspemap, subevents, *unclaimed_flashes );
+  std::cout << "subevents formed. now store in event." << std::endl;
   
   // make opflash
   // if ( fMakeOpFlash ) {
