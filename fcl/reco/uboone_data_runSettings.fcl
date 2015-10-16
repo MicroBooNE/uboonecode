@@ -22,6 +22,6 @@ services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:
 # Plane space is 0.3cm
 # These settings for the change in wire bias 8/13/15
 services.LArProperties.Efield:                             [0.273,0.367,0.767] # 0.273 corresponds to 70 kV, wirebias taken from ECL#9266
-services.LArProperties.Electronlifetime:                   2.0e03   # Current statement is that electron lifetime is 2 ms
+services.LArProperties.Electronlifetime:                   8.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
 
 services.TimeService.TrigModuleName:     "daq"
