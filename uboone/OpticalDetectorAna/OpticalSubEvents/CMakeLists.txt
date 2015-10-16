@@ -3,6 +3,7 @@
 #add_subdirectory( cfdiscriminator_algo )
 #add_subdirectory( subevent_algo )
 
+#SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -D__BUILD_ROOT_DICT__" )
 
 art_make( LIBRARY_NAME OpticalSubEvents
 	  SUBDIRS cfdiscriminator_algo subevent_algo	  
