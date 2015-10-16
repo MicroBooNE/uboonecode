@@ -5,6 +5,7 @@
 #include "sam_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
 #include "seedservice_microboone.fcl"
 
 process_name: Swizzler
@@ -98,18 +99,21 @@ physics:
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+
+  hwflash : @local::microboone_subeventbuilder
  }
  filters: {
   triggerEnforcement: { module_type : "TriggerEnforcement" }
-  flashfilter: @local::microboone_flashtrigger
+  opflashfilter: @local::microboone_flashtrigger
+  hwflashfilter: @local::microboone_flashtrigger
   randomfilter: {
    module_type : "RandomPrescale"
    Probability : 0.01
   }
  }
 
- common: [ triggerEnforcement, opflash ]
- filter1: [ flashfilter ]
+ common: [ triggerEnforcement, opflash, opflashLow, hwflash ] 
+ filter1: [ hwflashfilter, opflashfilter ]
  filter2: [ randomfilter ]
  stream1:   [ rawfilter ]
  stream2:   [ rawprescale ]
@@ -119,3 +123,11 @@ physics:
 }
 
 services.user.TimeService.TrigModuleName: "daq"
+
+physics.filters.opflashfilter.OpFlashModule : "opflash"
+physics.filters.hwflashfilter.OpFlashModule : "hwflash"
+
+physics.filters.opflashfilter.DisableFilter: false
+physics.filters.hwflashfilter.DisableFilter: true
+
+
