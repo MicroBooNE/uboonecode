@@ -100,20 +100,20 @@ physics:
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
 
-  hwflash : @local::microboone_subeventbuilder
+  #hwflash : @local::microboone_subeventbuilder
  }
  filters: {
   triggerEnforcement: { module_type : "TriggerEnforcement" }
   opflashfilter: @local::microboone_flashtrigger
-  hwflashfilter: @local::microboone_flashtrigger
+  #hwflashfilter: @local::microboone_flashtrigger
   randomfilter: {
    module_type : "RandomPrescale"
    Probability : 0.01
   }
  }
 
- common: [ triggerEnforcement, opflash, opflashLow, hwflash ] 
- filter1: [ hwflashfilter, opflashfilter ]
+ common: [ triggerEnforcement, opflash, opflashLow ] 
+ filter1: [ opflashfilter ]
  filter2: [ randomfilter ]
  stream1:   [ rawfilter ]
  stream2:   [ rawprescale ]
@@ -125,9 +125,9 @@ physics:
 services.user.TimeService.TrigModuleName: "daq"
 
 physics.filters.opflashfilter.OpFlashModule : "opflash"
-physics.filters.hwflashfilter.OpFlashModule : "hwflash"
+#physics.filters.hwflashfilter.OpFlashModule : "hwflash"
 
 physics.filters.opflashfilter.DisableFilter: false
-physics.filters.hwflashfilter.DisableFilter: true
+#physics.filters.hwflashfilter.DisableFilter: true
 
 

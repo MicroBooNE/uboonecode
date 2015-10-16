@@ -101,20 +101,20 @@ physics:
   digitcopy : { module_type : "RawDigitSaver" 
                 DAQRawDigitProducer : "daq" }
 
-  hwflash : @local::microboone_subeventbuilder
+  #hwflash : @local::microboone_subeventbuilder
  }
  filters: {
   triggerEnforcement: { module_type : "TriggerEnforcement" }
   opflashfilter: @local::microboone_flashtrigger
-  hwflashfilter: @local::microboone_flashtrigger
+  #hwflashfilter: @local::microboone_flashtrigger
   randomfilter: {
    module_type : "RandomPrescale"
    Probability : 0.01
   }
  }
 
- common: [ triggerEnforcement, opflash, opflashLow, hwflash ]
- filter1: [ hwflashfilter, opflashfilter, digitcopy ]
+ common: [ triggerEnforcement, opflash, opflashLow ]
+ filter1: [ opflashfilter, digitcopy ]
  filter2: [ randomfilter ]
  stream1:   [ rawfilter ]
  stream2:   [ rawprescale ]
@@ -124,10 +124,10 @@ physics:
 
 services.user.TimeService.TrigModuleName: "daq"
 
-physics.producers.hwflash.lightenFlashes: true
+#physics.producers.hwflash.lightenFlashes: true
 
 physics.filters.opflashfilter.OpFlashModule : "opflash"
-physics.filters.hwflashfilter.OpFlashModule : "hwflash"
+#physics.filters.hwflashfilter.OpFlashModule : "hwflash"
 
 physics.filters.opflashfilter.DisableFilter: false
-physics.filters.hwflashfilter.DisableFilter: true
+#physics.filters.hwflashfilter.DisableFilter: true
