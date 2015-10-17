@@ -6,7 +6,7 @@ microboone_subeventbuilder:
     makeOpFlash: true
     makeSubEvents: true
     lightenFlashes: true
-    verbose: true
+    verbose: false
     TrigCoinc: 2.5 # microseconds
     RC: 80000.0
     fA: 5.0

@@ -141,6 +141,7 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
     produces< subevent::FlashList >( "unclaimedFlashes" );
     produces< int >( "nbeamsubevents" );
     produces< int >( "ncosmicwindows" );
+    //produces< int >( "nboundarysubevents" );
   }
 
   if ( fMakeOpFlash ) {
