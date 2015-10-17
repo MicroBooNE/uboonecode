@@ -10,10 +10,10 @@ microboone_subeventbuilder:
     makeOpFlash: true
     makeSubEvents: true
     lightenFlashes: true
-    verbose: false
+    verbose: true
     TrigCoinc: 2.5 # microseconds
-    RC: 60000.0
-    fA: 3.0
+    RC: 80000.0
+    fA: 5.0
     # 1st pass/high threshold, constant fraction discriminator
     threshold: 40
     deadtime: 24
