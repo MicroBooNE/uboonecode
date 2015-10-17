@@ -139,6 +139,8 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
   if ( fMakeSubEvents ) {
     produces< std::vector< subevent::SubEvent > >();
     produces< subevent::FlashList >( "unclaimedFlashes" );
+    produces< int >( "nbeamsubevents" );
+    produces< int >( "ncosmicwindows" );
   }
 
   if ( fMakeOpFlash ) {
@@ -216,6 +218,11 @@ void SubEventBuilder::produce(art::Event & e)
       lightenFlashes( *unclaimed_flashes );
     }
 
+    std::unique_ptr< int > NumBeamSubEvents( new int ); 
+    std::unique_ptr< int > NumCosmicWindows( new int );
+    (*NumBeamSubEvents) = subevents.size();
+    (*NumCosmicWindows) = cosmic_subevents.size();
+
     // transfer subevents to the event
     std::unique_ptr< std::vector< subevent::SubEvent > > subeventvec( new std::vector< subevent::SubEvent > );
     for ( subevent::SubEventListIter it=subevents.begin(); it!=subevents.end(); it++ ) {
@@ -232,6 +239,8 @@ void SubEventBuilder::produce(art::Event & e)
     }
     
     e.put( std::move( subeventvec ) );
+    e.put( std::move( NumBeamSubEvents ), "nbeamsubevents" );
+    e.put( std::move( NumCosmicWindows ), "ncosmicwindows" );
     e.put( std::move( unclaimed_flashes ), "unclaimedFlashes" );
   }
   
@@ -533,6 +542,10 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
       }
     }
   }//end of suppression 
+  
+  hgwfms.calcBaselineInfo();
+  lgwfms.calcBaselineInfo();
+
 }
 
 // bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData& wfms, subevent::CosmicWindowHolder& cosmics ) {
