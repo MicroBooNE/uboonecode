@@ -283,7 +283,8 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
     double timestamp = opdetData.TimeStamp();      
 
     if ( (int)channel<fChannelRangeMin || (int)channel>fChannelRangeMax ) {
-      std::cout << "[SubEventBuilder] skipping channel=" <<  channel << std::endl;
+      if ( fverbose )
+	std::cout << "[SubEventBuilder] skipping channel=" <<  channel << std::endl;
       continue;
     }
 
@@ -318,7 +319,8 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
     double timestamp = opdetData.TimeStamp();      
 
     if ( (int)channel<fChannelRangeMin || (int)channel>fChannelRangeMax ) {
-      std::cout << "[SubEventBuilder] skipping channel=" <<  channel << std::endl;
+      if ( fverbose )
+	std::cout << "[SubEventBuilder] skipping channel=" <<  channel << std::endl;
       continue;
     }
 
