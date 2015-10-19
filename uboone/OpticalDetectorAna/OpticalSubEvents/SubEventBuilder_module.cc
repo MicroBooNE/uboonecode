@@ -69,6 +69,8 @@ private:
   bool fLightenFlashes;
   double fTrigCoinc;
   int fBeamWinLengthThreshold;
+  int fChannelRangeMin;
+  int fChannelRangeMax;
   bool fverbose;
   double fRC;
   double fA;
@@ -106,6 +108,8 @@ SubEventBuilder::SubEventBuilder(fhicl::ParameterSet const & p)
   fBeamWinLengthThreshold     = p.get<int>( "BeamWinLengthThreshold", 500 );
   fRC                         = p.get<double>( "RC", 60000.0 );
   fA                          = p.get<double>( "A", 3.0 );
+  fChannelRangeMin            = p.get<int>("ChannelRangeMin", 0 );
+  fChannelRangeMax            = p.get<int>("ChannelRangeMin", 31 );
 
   fConfig.cfdconfig.threshold = p.get<int>( "threshold" );
   fConfig.cfdconfig.deadtime  = p.get<int>( "deadtime" );
@@ -278,6 +282,11 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
     raw::Channel_t channel = opdetData.ChannelNumber()%100;
     double timestamp = opdetData.TimeStamp();      
 
+    if ( (int)channel<fChannelRangeMin || (int)channel>fChannelRangeMax ) {
+      std::cout << "[SubEventBuilder] skipping channel=" <<  channel << std::endl;
+      continue;
+    }
+
     if ( ((int)opdetData.size()) < beamwin_len_threshold ) {
       // cosmic windows: want to store ticks since trigger
       int ticks = (int)((timestamp - trig_timestamp)/ts->OpticalClock().TickPeriod());
@@ -307,6 +316,11 @@ bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& 
     // get window info
     raw::Channel_t channel = opdetData.ChannelNumber()%100;
     double timestamp = opdetData.TimeStamp();      
+
+    if ( (int)channel<fChannelRangeMin || (int)channel>fChannelRangeMax ) {
+      std::cout << "[SubEventBuilder] skipping channel=" <<  channel << std::endl;
+      continue;
+    }
 
     if ( ((int)opdetData.size()) < beamwin_len_threshold ) {
       // cosmic windows: want to store ticks since trigger
@@ -748,7 +762,11 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
     // sum pe for each opdet and do geo stuff
     std::vector< double > PEperOpDet( geom->NOpDets(), 0.0 );
     for ( subevent::FlashListIter iflash=asubevent.flashes.begin(); iflash!=asubevent.flashes.end(); iflash++ ) {
+      // if ( (*iflash).ch>=32 )
+      // 	std::cout << "weird channel: " << (*iflash).ch << std::endl;
       int iopdet = geom->OpDetFromOpChannel( (unsigned int)(*iflash).ch );
+      // if ( iopdet >=32 )
+      // 	std::cout << "weird opdet: " << iopdet << " " << (*iflash).ch << std::endl;
       PEperOpDet.at( iopdet ) += (*iflash).area; // need calibration constants here
       GetHitGeometryInfo( (*iflash), Geometry, sumw, sumw2, sumy, sumy2, sumz, sumz2 );
     }

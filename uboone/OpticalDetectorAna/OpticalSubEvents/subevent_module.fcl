@@ -7,6 +7,8 @@ microboone_subeventbuilder:
     makeSubEvents: true
     lightenFlashes: true
     verbose: false
+    ChannelRangeMin: 0
+    ChannelRangeMax: 31
     TrigCoinc: 2.5 # microseconds
     RC: 80000.0
     fA: 5.0
