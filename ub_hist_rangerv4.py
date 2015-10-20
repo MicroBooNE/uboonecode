@@ -5,7 +5,7 @@
 #A module for dealing reranging histograms from uB
 #Adapted from Gabe Nowak's uB_v2.py
 #Haha, okay, really it was stolen from Gabe
-import sys, os
+import sys, os 
 from optparse import OptionParser
 import array
 import time #for timing
