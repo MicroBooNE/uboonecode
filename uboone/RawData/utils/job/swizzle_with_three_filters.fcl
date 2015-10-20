@@ -96,9 +96,9 @@ physics:
   producers: {
   ### flash finders
   opflash          : @local::microboone_opflash_beam_highgain
-  opflashLow       : @local::microboone_opflash_beam_lowgain
+  #opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
-  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  #opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
 
   #hwflash : @local::microboone_subeventbuilder
  }
@@ -112,7 +112,7 @@ physics:
   }
  }
 
- common: [ triggerEnforcement, opflash, opflashLow ] 
+ common: [ triggerEnforcement, opflash ] 
  filter1: [ opflashfilter ]
  filter2: [ randomfilter ]
  stream1:   [ rawfilter ]
