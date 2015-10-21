@@ -31,7 +31,7 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
-larsoft         v04_26_02
+larsoft         v04_26_03
 ubutil          v01_31_00
 uboone_data     v01_01_00
 uboonedaq_datatypes v6_15_03c  - optional
