@@ -70,9 +70,9 @@ microboone_optical_adc_sim:
 
   EnableSpread: true
 
-  Duration:     6.4e3
+  Duration:     6.85e3
 
-  G4StartTime:  -3.2e6
+  G4StartTime:  -3.65e6
 
   LogicPulseAmplitude: 3000
 

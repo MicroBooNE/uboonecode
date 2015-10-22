@@ -7,4 +7,4 @@ outputs.out1.fileName: "prodgenie_numi_nu_cosmic_uboone_%tc_gen.root"
 physics.producers.generator: @local::microboone_genie_simple_numi
 physics.producers.generator.GlobalTimeOffset: 0.
 physics.producers.generator.RandomTimeOffset: 9600.
-physics.producers.generator.TopVolume: "volTPCActive"
+physics.producers.generator.TopVolume: "volCryostat"
