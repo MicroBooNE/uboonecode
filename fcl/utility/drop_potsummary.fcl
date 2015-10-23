@@ -33,6 +33,7 @@ outputs:
    module_type: RootOutput
    fileName:    "%ifb_%tc_merged.root"
    dataTier:    "raw"
+   outputCommands: ["keep *_*_*_*",  "drop sumdata::POTSummary_*_*_*"]
    compressionLevel: 3
  }
 }
