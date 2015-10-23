@@ -4,6 +4,7 @@
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "triggerenforcement.fcl"
 
 process_name: Swizzler
 services:
@@ -82,7 +83,7 @@ physics:
   #opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
  }
  filters: {
-  triggerEnforcement: { module_type : "TriggerEnforcement" }
+  triggerEnforcement: @local::trigger_enforcement
  }
  reco: [ triggerEnforcement, opflash ]
  stream1:   [ out1 ]
