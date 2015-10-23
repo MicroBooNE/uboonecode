@@ -19,6 +19,9 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <memory>
+#include "RawData/TriggerData.h"
+#include "uboone/TriggerSim/UBTriggerTypes.h"
+#include <string>
 
 class TriggerEnforcement;
 
@@ -37,11 +40,12 @@ public:
   // Required functions.
   bool filter(art::Event & e) override;
 
-
 private:
 
   // Declare member data here.
-
+  std::vector<bool> _exclude_bit_v;
+  std::string _trigger_producer;
+  bool _verbose;
 };
 
 
@@ -49,16 +53,72 @@ TriggerEnforcement::TriggerEnforcement(fhicl::ParameterSet const & p)
 // :
 // Initialize member data here.
 {
-  // Call appropriate produces<>() functions here.
+
+  _trigger_producer = p.get<std::string>("TriggerProducer");
+  _verbose = p.get<bool>("Verbose");
+  _exclude_bit_v.clear();
+  _exclude_bit_v.resize(32,false);
+  for(auto const& name : p.get<std::vector<std::string> >("ExcludeBits")) {
+
+    if(_verbose) std::cout<<"\033[93m["<<__FUNCTION__<<"]\033[00m excluding: "<<name.c_str()<<std::endl;
+    
+    if      ( name == "PMTTriggerBeam"   ) _exclude_bit_v.at(trigger::kPMTTriggerBeam   ) = true;
+    else if ( name == "PMTTriggerCosmic" ) _exclude_bit_v.at(trigger::kPMTTriggerCosmic ) = true;
+    else if ( name == "PMTTrigger"       ) _exclude_bit_v.at(trigger::kPMTTrigger       ) = true;
+    else if ( name == "TriggerPC"        ) _exclude_bit_v.at(trigger::kTriggerPC        ) = true;
+    else if ( name == "TriggerEXT"       ) _exclude_bit_v.at(trigger::kTriggerEXT       ) = true;
+    else if ( name == "TriggerBNB"       ) _exclude_bit_v.at(trigger::kTriggerBNB       ) = true;
+    else if ( name == "TriggerNuMI"      ) _exclude_bit_v.at(trigger::kTriggerNuMI      ) = true;
+    else if ( name == "Veto"             ) _exclude_bit_v.at(trigger::kVeto             ) = true;
+    else if ( name == "TriggerCalib"     ) _exclude_bit_v.at(trigger::kTriggerCalib     ) = true;
+    else if ( name == "FakeGate"         ) _exclude_bit_v.at(trigger::kFakeGate         ) = true;
+    else if ( name == "FakeBeam"         ) _exclude_bit_v.at(trigger::kFakeBeam         ) = true;
+    else if ( name == "Spare"            ) _exclude_bit_v.at(trigger::kSpare            ) = true;
+    else {
+      std::cerr<<"\033[93mInvalid TriggerBit Name: "<<name.c_str()<<std::endl;
+      throw std::exception();
+    }
+    
+  }
+  if(_verbose) {
+    std::cout<<"\033[93m["<<__FUNCTION__<<"]\033[00m bits to be excluded: ";
+    for(size_t i=0; i<_exclude_bit_v.size(); ++i)
+      if(_exclude_bit_v[i]) std::cout<< i << " ";
+    std::cout<<std::endl;
+  }
 }
 
 bool TriggerEnforcement::filter(art::Event & e)
 {
   ::art::ServiceHandle< util::TimeService > ts;
-  std::cout<<"BEFORE: " <<ts->TriggerTime()<<std::endl;
+
   ts->preProcessEvent(e);
-  std::cout<<"AFTER: " <<ts->TriggerTime()<<std::endl;
-  // Implementation of required member function here.
+
+  if(_trigger_producer.empty()) return true;
+
+  art::Handle<std::vector<raw::Trigger> > trigger_handle;
+  e.getByLabel(_trigger_producer,trigger_handle);
+
+  if(!trigger_handle.isValid()) {
+    std::cerr<<"\033[93mInvalid Producer Label: \033[00m" <<_trigger_producer.c_str()<<std::endl;
+    throw std::exception();
+  }
+
+  for(auto const& t : *trigger_handle) {
+
+    for(size_t i=0; i<_exclude_bit_v.size(); ++i) {
+
+      if(!_exclude_bit_v[i]) continue;
+
+      unsigned char bit_index = (unsigned char)i;
+
+      if(t.Triggered(bit_index)) {
+	if(_verbose) std::cout<<"Excluding by the bit: "<< i <<std::endl;
+	return false;
+      }
+    }
+  }
+
   return true;
 }
 

@@ -85,7 +85,7 @@ namespace subevent {
 
   // ============================================================================================================
   // getChannelFlashes
-  int getChannelFlashes( int channel, std::vector< double >& waveform, SubEventModConfig& config, std::string discrname, FlashList& flashes, std::vector<double>& postwfm ) {
+  int getChannelFlashes( int channel, std::vector< double >& waveform, std::vector< double >& baseline, SubEventModConfig& config, std::string discrname, FlashList& flashes, std::vector<double>& postwfm ) {
     // corresponds to cyRunSubEventDiscChannel
     // input
     // channel: FEMCH number
@@ -128,6 +128,14 @@ namespace subevent {
       opflash.area = 0.0;
       for (int tdc=0; tdc<(int)opflash.expectation.size(); tdc++) {
 	fx = opflash.expectation.at(tdc);
+
+	if ( opflash.tstart+tdc>=0 && opflash.tstart+tdc<(int)baseline.size() )
+	  chped = baseline.at( opflash.tstart+tdc );
+	else if ( opflash.tstart+tdc>=(int)baseline.size() )
+	  chped = baseline.at( baseline.size()-1 );
+	else
+	  chped = baseline.at( 0 );
+
 	// ---------------------------------------------
 	// This is all a little hacky
 	// this variance threshold should be tunned better?
@@ -136,7 +144,7 @@ namespace subevent {
 	// but really, someone please put xenon into the detector
 	sig = sqrt( fx/20.0 );
 	thresh = fx + 3.0*sig*20.0; // 3 sigma variance
-	if ( postwfm.at( opflash.tstart )-chped < thresh ) {
+	if ( (opflash.tstart+tdc)<(int)postwfm.size() && postwfm.at( opflash.tstart+tdc )-chped<thresh ) {
 	  postwfm.at( opflash.tstart + tdc ) = chped;
 	}
 	// we cap the area calculation and keep a 20 sample buffer from the end
@@ -146,7 +154,7 @@ namespace subevent {
 	  opflash.area += waveform.at( opflash.tstart+tdc )-chped;
 	}
 	// ---------------------------------------------
-      }
+      }//loop over expectation
       opflash.fcomp_gausintegral = (opflash.maxamp-chped)*(config.spe_sigma/15.625)*sqrt(2.0)*3.14159;
       nsubevents += 1;
       flashes.add( std::move(opflash) );
@@ -162,7 +170,7 @@ namespace subevent {
     for ( ChannelSetIter it=wfms.chbegin(); it!=wfms.chend(); it++ ) {
       int ch = *it;
       std::vector< double > postwfm;
-      getChannelFlashes( ch, wfms.get( ch ), config, discrname, flashes, postwfm );
+      getChannelFlashes( ch, wfms.get( ch ), wfms.getbaseline( ch ), config, discrname, flashes, postwfm );
       //std::cout << "search for flashes in channel=" << ch << ". found=" << flashes.size() << std::endl;
       postwfms.set( ch, postwfm, wfms.isLowGain(ch) );
     }
@@ -201,6 +209,9 @@ namespace subevent {
     formFlashes( wfms, config, "pass1", flashes, postwfms );
     //std::cout << "  total pass1/high-trehsold flashes: " << flashes.size() << std::endl;
 
+    for ( ChannelSetIter it=wfms.chbegin(); it!=wfms.chend(); it++ ) {
+      postwfms.rollingmean[ *it ] = std::vector<double>( wfms.getbaseline(*it).begin(), wfms.getbaseline(*it).end() );
+    }
     WaveformData postpostwfms;
     FlashList flashes_pass2;
     formFlashes( postwfms, config, "pass2", flashes_pass2, postpostwfms );

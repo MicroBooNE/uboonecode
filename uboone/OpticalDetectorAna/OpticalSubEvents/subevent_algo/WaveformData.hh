@@ -16,6 +16,8 @@ namespace subevent {
     ~WaveformData();
     
     std::map< int, std::vector<double> > waveforms;
+    std::map< int, std::vector<double> > rollingmean;
+    std::map< int, std::vector<double> > rollingvariance;
     std::map< int, bool > is_lowgain_channel;
     std::set< int > channels;
     std::map< int, unsigned int> frames;
@@ -31,6 +33,8 @@ namespace subevent {
     void storeTimeInfo( int ch, unsigned int frame, double timestamp ) { frames[ch] = frame; timestamps[ch] = timestamp; };
     unsigned int getFrame( int ch ) { return frames[ch]; };
     double getTimestamp( int ch ) { return timestamps[ch]; };
+    void calcBaselineInfo();
+    std::vector< double >& getbaseline( int ch ) { return rollingmean[ch]; };
     
   };
 
