@@ -7,7 +7,7 @@
 #include "flashfilter_microboone.fcl"
 #include "subevent_module.fcl"
 #include "seedservice_microboone.fcl"
-
+#include "triggerenforcement.fcl"
 process_name: Swizzler
 services:
 {
@@ -103,7 +103,7 @@ physics:
   #hwflash : @local::microboone_subeventbuilder
  }
  filters: {
-  triggerEnforcement: { module_type : "TriggerEnforcement" }
+  triggerEnforcement: @local::trigger_enforcement
   opflashfilter: @local::microboone_flashtrigger
   #hwflashfilter: @local::microboone_flashtrigger
   randomfilter: {

@@ -5,6 +5,7 @@
 #include "sam_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "flashfilter_microboone.fcl"
+#include "triggerenforcement.fcl"
 
 process_name: Swizzler
 services:
@@ -87,7 +88,7 @@ physics:
                 DAQRawDigitProducer : "daq" }
  }
  filters: {
-  triggerEnforcement: { module_type : "TriggerEnforcement" }
+  triggerEnforcement: @local::trigger_enforcement
   flashfilter: @local::microboone_flashtrigger
  }
  reco: [ triggerEnforcement, opflash, flashfilter, digitcopy ]
