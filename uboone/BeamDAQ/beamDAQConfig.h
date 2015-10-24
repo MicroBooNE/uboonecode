@@ -22,6 +22,8 @@ class beamDAQConfig {
   std::vector<std::string> GetBeamLineList() {return fBeamLine;};
   std::map<std::string, int> GetEventTypeMap() {return fEventTypeMap;};
   std::map<std::string, int> GetTimeWindowMap() {return fTimeWindowMap;};
+  std::map<std::string, float> GetTimeOffsetMap() {return fTimeOffsetMap;};
+  std::map<std::string, float> GetTimePaddingMap() {return fTimePaddingMap;};
   std::map<std::string, std::vector<std::string> > GetBundles() {return fBundle;};
   std::string GetIFDBURL() {return fIFDBURL;};
   int GetMaxRunLength() {return fMaxRunLength;};
@@ -45,6 +47,8 @@ class beamDAQConfig {
   std::string fIFDBURL;
   std::map<std::string, int> fEventTypeMap;
   std::map<std::string, int> fTimeWindowMap;
+  std::map<std::string, float> fTimeOffsetMap;
+  std::map<std::string, float> fTimePaddingMap;
   int fIFDBLatency;
   int fMaxRunLength;
   long fMWRTimeOffset;
