@@ -129,6 +129,18 @@ void beamRun::Update(boost::posix_time::ptime tend)
 void beamRun::EndRun(boost::posix_time::ptime tstop) 
 {
   fRunHeader.fRunEnd=tstop;
+  beamDAQConfig* bdconfig=beamDAQConfig::GetInstance();
+
+  if (tstop-fRunHeader.fRunStart>hours(bdconfig->GetMaxRunLength())) {
+    mf::LogError(__FUNCTION__)<<"Refusing to start a run longer than "
+		      <<bdconfig->GetMaxRunLength()  
+		      <<" hours!";
+    return;
+  }
+  if (fRunHeader.fRunStart-tstop>seconds(0)) {
+    mf::LogError(__FUNCTION__)<<"Refusing to start a run with t0>t1";
+    return;
+  }
 
   // in case run ends up in the future?
   while (microsec_clock::local_time() < tstop ) {
