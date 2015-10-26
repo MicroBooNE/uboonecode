@@ -100,10 +100,6 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
     event.getByLabel(fVertexModuleLabel, vertexVecHandle);
     event.getByLabel(fTrackModuleLabel,  trackVecHandle);
     
-    size_t nTracks = trackVecHandle->size();
-    
-    std::cout << nTracks << std::endl;
-    
     // Require valid handles, otherwise nothing to do
     if (vertexVecHandle.isValid() && vertexVecHandle->size() > 0 && trackVecHandle.isValid() && trackVecHandle->size() > 0)
     {
@@ -147,7 +143,7 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                     {
                         art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
                         
-                        if (cosmicTag->CosmicScore() < fCosmicScoreCut) continue;
+                        if (cosmicTag->CosmicScore() > fCosmicScoreCut) continue;
                     }
                 }
                 
@@ -183,7 +179,7 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                         {
                             art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
                             
-                            if (cosmicTag->CosmicScore() < fCosmicScoreCut) continue;
+                            if (cosmicTag->CosmicScore() > fCosmicScoreCut) continue;
                         }
                     }
                     
