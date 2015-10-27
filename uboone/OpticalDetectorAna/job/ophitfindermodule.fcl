@@ -1,0 +1,38 @@
+
+BEGIN_PROLOG
+
+standard_algo_threshold:
+{
+    HitFinder:       "Threshold"
+    ADCThreshold:    3
+    NSigmaThreshold: 5
+}
+
+###################################################################
+
+standard_algo_fixedwindow:
+{ 
+    HitFinder:       "FixedWindow"
+    StartIndex: 0
+    EndIndex:   0
+}
+
+standard_algo_slidingwindow:
+{
+    HitFinder:       "SlidingWindow"
+    ADCThreshold:    8
+    NSigmaThreshold: 5
+    MinWindowSize:   5
+    MaxSigma:        1.0
+}
+
+ophitfinder_microboone:
+{
+  module_type: "OpHitFinder"
+  OpDetWaveformProducer: "pmtreadout"
+  UseArea: true
+  SPESize: 118
+  HitAlgoPset: @local::standard_algo_fixedwindow
+}
+
+END_PROLOG
