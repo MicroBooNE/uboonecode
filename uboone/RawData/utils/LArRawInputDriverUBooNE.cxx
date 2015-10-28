@@ -590,7 +590,7 @@ namespace lris {
       //Special to the crate, there is a special header that the DAQ attaches. You can access this
       //like so. The type here is a unique ptr to a ub_CrateHeader_v6 struct. That has useful info
       //like the local host time, which may or may not be set properly right now...
-      auto const& tpc_crate_DAQ_header = tpc_crate.crateHeader(); // I think auto should be tpc_crate_data_t::ub_CrateHeader_t --NJT
+      //auto const& tpc_crate_DAQ_header = tpc_crate.crateHeader(); // I think auto should be tpc_crate_data_t::ub_CrateHeader_t --NJT
       //     ub_LocalHostTime this_time = tpc_crate_DAQ_header->local_host_time;
       
       //The Crate Data is split up into Cards. You use the "getCards()" command to get access to
