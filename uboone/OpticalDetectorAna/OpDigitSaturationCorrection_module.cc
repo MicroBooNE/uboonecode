@@ -21,7 +21,8 @@
 // data-products
 #include "RecoBase/OpHit.h"
 #include "RawData/OpDetWaveform.h"
-#include "RawData/TriggerData.h"
+//#include "RawData/TriggerData.h"
+#include "Utilities/TimeService.h"
 
 // C++ includes
 #include <memory>
@@ -101,6 +102,12 @@ private:
   // vector holding the calibration correction factors per PMT
   std::vector<double> _calibration_corr;
 
+  // Waveform producer name
+  std::string _lowgain_producer;
+  std::string _lowgain_label;
+  std::string _highgain_producer;
+  std::string _highgain_label;
+
   // Tree variables
   TTree* _tree;
   int    _event;
@@ -173,6 +180,12 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
   // make tree
   MakeTree();
 
+  // producer name/labels
+  _lowgain_producer  = p.get<std::string>( "LGProducer"  );
+  _lowgain_label     = p.get<std::string>( "LGLabel","*" );
+  _highgain_producer = p.get<std::string>( "HGProducer"  );
+  _highgain_label    = p.get<std::string>( "HGLabel","*" );
+
 }
 
 void OpDigitSaturationCorrection::produce(art::Event & e)
@@ -188,7 +201,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 
   // load OpDetWaveform from High Gain raw data
   art::Handle<std::vector<raw::OpDetWaveform> > opwf_HG_v;
-  e.getByLabel("pmtreadout", "OpdetBeamHighGain", opwf_HG_v);
+  e.getByLabel(_highgain_producer, _highgain_label, opwf_HG_v);
   // make sure hits look good
   if(!opwf_HG_v.isValid()) {
     std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate HG OpDetWf!"<<std::endl;
@@ -197,7 +210,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 
   // load OpDetWaveform from Low Gain raw data
   art::Handle<std::vector<raw::OpDetWaveform> > opwf_LG_v;
-  e.getByLabel("pmtreadout", "OpdetBeamLowGain", opwf_LG_v);
+  e.getByLabel(_lowgain_producer, _lowgain_label, opwf_LG_v);
   // make sure hits look good
   if(!opwf_LG_v.isValid()) {
     std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate LG OpDetWf!"<<std::endl;
@@ -205,18 +218,10 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   }
 
   // load trigger data
-  art::Handle<std::vector<raw::Trigger> > trigger_v;
-  e.getByLabel("daq", trigger_v);
-  if(!trigger_v.isValid()) {
-    std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate Trigger!"<<std::endl;
-    throw std::exception();
-  }
-
-  // get the single trigger!
-  const art::Ptr<::raw::Trigger> trigger_ptr(trigger_v,0);
+  art::ServiceHandle<util::TimeService> ts;
 
   // get the trigger time
-  _TrigTime = trigger_ptr->TriggerTime();
+  _TrigTime = ts->TriggerTime();
 
   // fill a vector (for LG):
   // [ pmt channel ] -> [ idx(wf1), idx(wf2), ...]
@@ -264,7 +269,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     _max_adc_corr = -1;
     
     auto const& max_idx = getMaxADC(wf_HG);
-    double wf_time = wf_HG.TimeStamp() - trigger_ptr->TriggerTime();
+    double wf_time = wf_HG.TimeStamp() - _TrigTime;
     _time_HG    = wf_time;
     _max_adc_HG = wf_HG.at(max_idx) - _baseline;
     _max_tdc_HG = max_idx;
@@ -295,7 +300,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 	std::cout << "getting corresponding LG pulse w/ idx " << LG_idx << std::endl;
       auto const& wf_LG = opwf_LG_v->at(LG_idx);
       auto const& max_idx_LG = getMaxADC(wf_LG);
-      _time_LG      = wf_LG.TimeStamp() - trigger_ptr->TriggerTime();
+      _time_LG      = wf_LG.TimeStamp() - _TrigTime;
       _max_adc_LG   = wf_LG.at(max_idx_LG) - _baseline;
       _max_tdc_LG   = max_idx_LG;
       _max_adc_corr = _max_adc_LG * (_gain_fact*_calibration_corr[wf_LG.ChannelNumber()-100]);
@@ -350,7 +355,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     
     if (_verbose)
       std::cout << "This LG channel has Ch Num : " << wf.ChannelNumber()
-		<< " w/ TimeStamp : " << wf.TimeStamp() - trigger_ptr->TriggerTime() 
+		<< " w/ TimeStamp : " << wf.TimeStamp() - _TrigTime 
 		<< " w/ size : " << wf.size() << std::endl
 		<< "\t max ADC @ " << max_idx << " is " << wf.at(max_idx) << std::endl;
   }
