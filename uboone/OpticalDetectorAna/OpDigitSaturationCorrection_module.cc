@@ -98,6 +98,9 @@ private:
   // baseline?
   short unsigned int _baseline;
 
+  // vector holding the calibration correction factors per PMT
+  std::vector<double> _calibration_corr;
+
   // Tree variables
   TTree* _tree;
   int    _event;
@@ -107,6 +110,7 @@ private:
   double _time_HG, _time_LG;
   int    _max_adc_HG, _max_adc_LG;
   int    _max_tdc_HG, _max_tdc_LG;
+  int    _max_adc_corr; // the maximum ADC assigned to the LG corrected WF that replaced the HG saturated WF
 };
 
 size_t OpDigitSaturationCorrection::FindMatchingLGPulse(const unsigned int& chan, const double& time,
@@ -140,6 +144,14 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
   // Call appropriate produces<>() functions here.
   produces< std::vector<raw::OpDetWaveform>   >();
 
+  // load per-PMT calibration correction factors
+  _calibration_corr = p.get< std::vector<double> > ( "CalibrationCorr" );
+  // if we did not provide 32 values (one per PMT) raise an exception
+  if(_calibration_corr.size() != 32) {
+    std::cerr<<"\033[93m[ERROR]\033[00m Calibration Correction vector does not have 32 elements!"<<std::endl;
+    throw std::exception();
+  }
+
   // time tick is 15.6 ns (in usec)
   _TDC = 0.0156;
 
@@ -165,6 +177,12 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
 
 void OpDigitSaturationCorrection::produce(art::Event & e)
 {
+  
+  // update tree variables for this event
+  _run    = e.id().run();
+  _subrun = e.id().subRun();
+  _event  = e.id().event();
+
   // produce OpDetWaveform data-product to be filled within module
   std::unique_ptr< std::vector<raw::OpDetWaveform> > corrected_wfs(new std::vector<raw::OpDetWaveform>);
 
@@ -209,7 +227,11 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     LG_ChanMap.push_back( std::vector<std::pair<size_t,double> >() );
   for (size_t idx = 0; idx < opwf_LG_v->size(); idx++){
     auto const& wf_LG = opwf_LG_v->at(idx);
+    // ignore PMTs with channel number > 32
     if ( (wf_LG.ChannelNumber() >= 132) or (wf_LG.ChannelNumber() < 100) )
+      continue;
+    // ignore PMTs with size != cosmic discriminator size
+    if (wf_LG.size() > 61)
       continue;
     // LG indx = ChannelNumber() - 100 (to match HG channel number)
     double wf_time = wf_LG.TimeStamp() - _TrigTime;
@@ -227,7 +249,11 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   // loop through HG waveforms
   for(auto const& wf_HG : *opwf_HG_v){
 
+    // ignore PMTs with channel number > 32
     if (wf_HG.ChannelNumber() >= 32)
+      continue;
+    // ignore PMTs with size != cosmic discriminator size
+    if (wf_HG.size() > 61)
       continue;
 
     if (_verbose)
@@ -235,12 +261,14 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 
     _time_LG = -1;
     _max_adc_LG = _max_tdc_LG = -1;
+    _max_adc_corr = -1;
     
     auto const& max_idx = getMaxADC(wf_HG);
     double wf_time = wf_HG.TimeStamp() - trigger_ptr->TriggerTime();
     _time_HG    = wf_time;
     _max_adc_HG = wf_HG.at(max_idx) - _baseline;
     _max_tdc_HG = max_idx;
+    _chan       = wf_HG.ChannelNumber();
 
     if (_verbose)
       std::cout << "This HG channel has Ch Num : " << wf_HG.ChannelNumber()
@@ -267,14 +295,15 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 	std::cout << "getting corresponding LG pulse w/ idx " << LG_idx << std::endl;
       auto const& wf_LG = opwf_LG_v->at(LG_idx);
       auto const& max_idx_LG = getMaxADC(wf_LG);
-      _time_LG     = wf_LG.TimeStamp() - trigger_ptr->TriggerTime();
-      _max_adc_LG = wf_LG.at(max_idx_LG) - _baseline;
-      _max_tdc_LG = max_idx_LG;
+      _time_LG      = wf_LG.TimeStamp() - trigger_ptr->TriggerTime();
+      _max_adc_LG   = wf_LG.at(max_idx_LG) - _baseline;
+      _max_tdc_LG   = max_idx_LG;
+      _max_adc_corr = _max_adc_LG * (_gain_fact*_calibration_corr[wf_LG.ChannelNumber()-100]);
       if (_verbose)
 	std::cout << "finished getting corresponding LG pulse w/ idx " << LG_idx << std::endl;
       
       // if the max ADC value for the HG was below saturation -> add the HG wf
-      if (_max_adc_HG <= 4095){
+      if (_max_adc_HG < (4095-_baseline) ){
 	if (_verbose)
 	  std::cout << "HG pulse not saturated -> add HG pulse" << std::endl;
 	corrected_wfs->push_back(wf_HG);
@@ -283,14 +312,19 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 	if (_verbose)
 	  std::cout << "found a match and HG saturates! -> add LG wf w/ correction" << std::endl;
 	// create a new waveform by editing the LG one
+	if (_verbose)
+	  std::cout << "corr factor for chan " << wf_LG.ChannelNumber()-100 
+		    << " : " << _calibration_corr[wf_LG.ChannelNumber()-100] << std::endl;
 	std::vector<short unsigned int> adcs;
 	for (size_t n=0; n < wf_LG.size(); n++){
 	  short unsigned int this_ADC = wf_LG.at(n) - _baseline;
 	  // make sure we don't overflow the data-product (not the firmware waveform...)
-	  if (this_ADC > (short unsigned int)(ADC_max/_gain_fact) )
+	  if (this_ADC > (short unsigned int)( ADC_max / (_gain_fact*_calibration_corr[wf_LG.ChannelNumber()-100]) ) )
 	    adcs.push_back(ADC_max);
-	  else
-	    adcs.push_back((short unsigned int)(this_ADC*_gain_fact));
+	  else{
+	    short unsigned int new_ADC = (short unsigned int)( this_ADC * (_gain_fact*_calibration_corr[wf_LG.ChannelNumber()-100]) + _baseline );
+	    adcs.push_back( new_ADC );
+	  }
 	}// for all ADCs
 	raw::OpDetWaveform new_wf(wf_LG.TimeStamp(),
 				  wf_LG.ChannelNumber()-100,
@@ -331,7 +365,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 void OpDigitSaturationCorrection::MakeTree()
 {
   art::ServiceHandle<art::TFileService> tfs;
-  _tree = tfs->make<TTree>("saturation__tree","Saturation Correction Tree");
+  _tree = tfs->make<TTree>("saturation_tree","Saturation Correction Tree");
   
   // Simple type branch
   _tree->Branch ( "run",        &_run,        "run/i"       );
@@ -344,6 +378,7 @@ void OpDigitSaturationCorrection::MakeTree()
   _tree->Branch ( "time_LG",    &_time_LG,    "time_LG/D"   );
   _tree->Branch ( "max_adc_LG", &_max_adc_LG, "max_adc_LG/I");
   _tree->Branch ( "max_tdc_LG", &_max_tdc_LG, "max_tdc_LG/I");
+  _tree->Branch ( "max_adc_corr", &_max_adc_corr, "max_adc_corr/I");
 
 }
 
