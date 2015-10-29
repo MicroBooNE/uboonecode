@@ -47,7 +47,8 @@ namespace geo {
     unsigned int GetNumberOfChannelsInCategory( opdet::UBOpticalChannelCategory_t category ) const;
     unsigned int GetChannelNumberFromCrateSlotFEMCh( unsigned int crate, unsigned int slot, unsigned int femch ) const;
     void GetCrateSlotFEMChFromReadoutChannel( unsigned int readoutch, unsigned int& crate, unsigned int& slot, unsigned int& femch ) const;
-
+    const std::set<unsigned int>& GetReadoutChannelSet() const
+    { return fReadoutChannelSet; }
   private:
     void LoadOpticalReadoutMapData( fhicl::ParameterSet const& p);
     unsigned int fNReadoutChannels;
