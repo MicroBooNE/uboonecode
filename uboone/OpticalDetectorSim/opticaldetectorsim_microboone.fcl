@@ -5,6 +5,7 @@ microboone_optical_fem_sim:
 {
   module_type:               "OpticalFEM"   # The module we're trying to execute.
   BeamGateModule:            "generator"    # the name of the process used to generate the simulated beam gate
+  FakeBeamGateModule:        ""             # the name of the process used to generate the FAKE beam gate
   OpticalDigitizationModule: "optdigitizer" # the name of the process used to generate the input ADC counts
 
   # For all the remaining parameters there are two values:
@@ -82,15 +83,11 @@ microboone_optical_adc_sim:
 
 }
 
-#microboone_optical_adc_sim_1window:             @local::microboone_optical_adc_sim
-#microboone_optical_adc_sim_1window.Duration:    1.6e3
-#microboone_optical_adc_sim_1window.G4StartTime: 0
-
 microboone_optical_adc_sim_singlep: @local::microboone_optical_adc_sim
-microboone_optical_adc_sim_singlep.UserBNBTime:  [0] 
+microboone_optical_adc_sim_singlep.UserBNBTime:  [0]
 microboone_optical_adc_sim_singlep.UserNuMITime: [] 
 
-microboone_optical_fem_sim_singlep: @local::microboone_optical_adc_sim
+microboone_optical_fem_sim_singlep: @local::microboone_optical_fem_sim
 microboone_optical_fem_sim_singlep.BeamGateModule: ""
 microboone_optical_fem_sim_singlep.FakeBeamGateModule: "optdigitizer"
 

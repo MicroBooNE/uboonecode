@@ -269,40 +269,38 @@ namespace opdet {
 
       fLogicGen.SetPedestal( ch_conf->GetFloat( kPedestalMean, ch ), ch_conf->GetFloat( kPedestalSpread, ch ) );
 
-      if( (chcat == opdet::BNBLogicPulse || chcat == opdet::NUMILogicPulse) && fBeamModName.size() ) {
+      if( chcat == opdet::BNBLogicPulse || chcat == opdet::NUMILogicPulse ) {
 
-	// get beam gate data product
-	for(auto const& name : fBeamModName) {
-	  art::Handle< std::vector<sim::BeamGateInfo> > beamHandle;
-	  evt.getByLabel(name, beamHandle);
-	  if(!beamHandle.isValid()) continue;
-	  
-	  for(size_t i=0; i<beamHandle->size(); ++i) {
-
-	    const art::Ptr<sim::BeamGateInfo> beam_ptr(beamHandle,i);
+	if(fBeamModName.size()) {
+	  // get beam gate data product
+	  for(auto const& name : fBeamModName) {
+	    art::Handle< std::vector<sim::BeamGateInfo> > beamHandle;
+	    evt.getByLabel(name, beamHandle);
+	    if(!beamHandle.isValid()) continue;
 	    
-	    if( (beam_ptr->BeamType() == ::sim::kBNB  && chcat == opdet::BNBLogicPulse ) ||
-		(beam_ptr->BeamType() == ::sim::kNuMI && chcat == opdet::NUMILogicPulse ) )
-
-	      fLogicGen.AddPulse(beam_ptr->Start());
-
+	    for(size_t i=0; i<beamHandle->size(); ++i) {
+	      
+	      const art::Ptr<sim::BeamGateInfo> beam_ptr(beamHandle,i);
+	      
+	      if( (beam_ptr->BeamType() == ::sim::kBNB  && chcat == opdet::BNBLogicPulse ) ||
+		  (beam_ptr->BeamType() == ::sim::kNuMI && chcat == opdet::NUMILogicPulse ) )
+		
+		fLogicGen.AddPulse(beam_ptr->Start());
+	      
+	    }
 	  }
 	}
 
 	// open user-defined beamgate open (BNB)
 	if(chcat == opdet::BNBLogicPulse) {
-	  for(auto const& t : fUserBNBTime_v) {
+	  for(auto const& t : fUserBNBTime_v)
 	    fLogicGen.AddPulse(t);
-	    beam_info_ptr->push_back(sim::BeamGateInfo( t, 1600, ::sim::kBNB) );
-	  }
 	}
 
 	if(chcat == opdet::NUMILogicPulse) {
 
-	  for(auto const& t : fUserNuMITime_v) {
+	  for(auto const& t : fUserNuMITime_v)
 	    fLogicGen.AddPulse(t);
-	    beam_info_ptr->push_back(sim::BeamGateInfo( t, 1600*6, ::sim::kNuMI) );
-	  }
 	}
 	// open user-defined beamgate open (NuMI)
 
@@ -320,6 +318,11 @@ namespace opdet {
     // 
     if(wfs->size())
       evt.put(std::move(wfs));
+
+    for(auto const& t : fUserBNBTime_v)    
+      beam_info_ptr->push_back(sim::BeamGateInfo( t, 1600, ::sim::kBNB) );
+    for(auto const& t : fUserNuMITime_v)
+      beam_info_ptr->push_back(sim::BeamGateInfo( t, 1600*6, ::sim::kNuMI) );
     evt.put(std::move(beam_info_ptr));
     // Make sure to free memory
     fOpticalGen.Reset();
