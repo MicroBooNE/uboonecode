@@ -904,6 +904,7 @@ namespace larlite {
       const art::Ptr<::recob::Shower> shower_ptr(dh,i);
       
       larlite::shower lite_shower;
+      /*
       lite_shower.set_id(shower_ptr->ID());
       lite_shower.set_total_energy(shower_ptr->Energy());
       lite_shower.set_total_energy_err(shower_ptr->EnergyErr());
@@ -919,7 +920,7 @@ namespace larlite {
       lite_shower.set_length(shower_ptr->Length());
       lite_shower.set_direction(shower_ptr->Direction());
       lite_shower.set_direction_err(shower_ptr->DirectionErr());
-      
+      */     
       //fPtrIndex_shower[shower_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_shower);
