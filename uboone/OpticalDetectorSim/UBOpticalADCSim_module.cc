@@ -84,6 +84,12 @@ namespace opdet {
     /// G4 time to start waveform generation (default 0)
     double fG4StartTime;
 
+    /// User-defined beamgate pulse (BNB) in G4 time ns
+    std::vector<double> fUserBNBTime_v;
+
+    /// User-defined beamgate pulse (NuMI)
+    std::vector<double> fUserNuMITime_v;
+
   };
 
 } 
@@ -117,7 +123,13 @@ namespace opdet {
 
     fLogicGen.SetPedestal(2048,0.3); // move to ubchannelconfig
 
+    fUserBNBTime_v = pset.get<std::vector<double> >("UserBNBTime");
+
+    fUserNuMITime_v = pset.get<std::vector<double> >("UserNuMITime");
+
     produces< optdata::ChannelDataGroup >();
+
+    produces< std::vector<sim::BeamGateInfo > >();
   }
 
   //#################################
@@ -138,6 +150,7 @@ namespace opdet {
 
     // allocate the container
     ::std::unique_ptr< optdata::ChannelDataGroup > wfs(new optdata::ChannelDataGroup);
+    ::std::unique_ptr< std::vector<sim::BeamGateInfo > > beam_info_ptr(new std::vector<sim::BeamGateInfo>);
 
     // get the clock definition
     ::util::ElecClock clock = ts->OpticalClock();
@@ -274,8 +287,24 @@ namespace opdet {
 	      fLogicGen.AddPulse(beam_ptr->Start());
 
 	  }
-
 	}
+
+	// open user-defined beamgate open (BNB)
+	if(chcat == opdet::BNBLogicPulse) {
+	  for(auto const& t : fUserBNBTime_v) {
+	    fLogicGen.AddPulse(t);
+	    beam_info_ptr->push_back(sim::BeamGateInfo( t, 1600, ::sim::kBNB) );
+	  }
+	}
+
+	if(chcat == opdet::NUMILogicPulse) {
+
+	  for(auto const& t : fUserNuMITime_v) {
+	    fLogicGen.AddPulse(t);
+	    beam_info_ptr->push_back(sim::BeamGateInfo( t, 1600*6, ::sim::kNuMI) );
+	  }
+	}
+	// open user-defined beamgate open (NuMI)
 
       }
       
@@ -291,7 +320,7 @@ namespace opdet {
     // 
     if(wfs->size())
       evt.put(std::move(wfs));
-
+    evt.put(std::move(beam_info_ptr));
     // Make sure to free memory
     fOpticalGen.Reset();
     fLogicGen.Reset();

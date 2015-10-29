@@ -76,11 +76,22 @@ microboone_optical_adc_sim:
 
   LogicPulseAmplitude: 3000
 
+  UserBNBTime:  [] # G4 Time [ns] to force opening BNB beamgate for the case there is no BeamGateInfo created by GENIE
+
+  UserNuMITime: [] # G4 Time [ns] to force opening NuMI beamgate for the case there is no BeamGateInfo created by GENIE
+
 }
 
 #microboone_optical_adc_sim_1window:             @local::microboone_optical_adc_sim
 #microboone_optical_adc_sim_1window.Duration:    1.6e3
 #microboone_optical_adc_sim_1window.G4StartTime: 0
 
+microboone_optical_adc_sim_singlep: @local::microboone_optical_adc_sim
+microboone_optical_adc_sim_singlep.UserBNBTime:  [0] 
+microboone_optical_adc_sim_singlep.UserNuMITime: [] 
+
+microboone_optical_fem_sim_singlep: @local::microboone_optical_adc_sim
+microboone_optical_fem_sim_singlep.BeamGateModule: ""
+microboone_optical_fem_sim_singlep.FakeBeamGateModule: "optdigitizer"
 
 END_PROLOG
