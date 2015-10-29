@@ -385,6 +385,10 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
     art::ServiceHandle<util::TimeService> ts;
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
+    evt.getByLabel(lite_id.second, dh);
+
+    if(dh.isValid()) fAlg.ScanData(dh,lite_data);
+
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
 
       evt.getByLabel(lite_id.second, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), dh);
