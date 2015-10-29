@@ -4,6 +4,7 @@
 #include "DataFormat/event_ass.h"
 #include "DataFormat/sparse_vector.h"
 #include "DataFormat/opdetwaveform.h"
+#include "DataFormat/simphotons.h"
 #include "DataFormat/trigger.h"
 #include "DataFormat/potsummary.h"
 #include "DataFormat/hit.h"
@@ -1110,7 +1111,6 @@ namespace larlite {
   template <> std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mcshower; }
 
-
   template <> std::map<art::Ptr< ::sim::MCTrack>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mctrack; }
 
@@ -1195,6 +1195,8 @@ namespace larlite {
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::simb::MCNeutrino> () const
   { return ::larlite::data::kMCNeutrino; }
   // sim
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::SimPhotonsCollection> () const
+  { return ::larlite::data::kSimPhotons; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::SimChannel> () const
   { return ::larlite::data::kSimChannel; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCShower> () const

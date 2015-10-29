@@ -39,6 +39,7 @@
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/CosmicTag.h"
 #include "Simulation/SimChannel.h"
+#include "Simulation/SimPhotons.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/GTruth.h"
 #include "SimulationBase/MCTruth.h"

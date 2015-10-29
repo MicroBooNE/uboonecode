@@ -15,6 +15,7 @@ art_make( BASENAME_ONLY
 	  LIBRARY_NAME     uboonecode_uboone_LiteMaker
 	  LIB_LIBRARIES
 	  	   Geometry
+		   uboone_Geometry
 		   Geometry_service
 	   	   Simulation
 		   SimulationBase
@@ -52,6 +53,7 @@ art_make( BASENAME_ONLY
           MODULE_LIBRARIES 	  		   
 		   uboonecode_uboone_LiteMaker
 		   Geometry
+		   uboone_Geometry
 		   Geometry_service
 		   TimeService_service
 		   Simulation
