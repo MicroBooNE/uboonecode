@@ -173,7 +173,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     std::vector<art::Ptr<recob::Cluster>> clusterPtrVec;
                     float deltaWire = fabs(cluster->StartWire() - cluster->EndWire());
                     
-                    if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire())
+                    if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire() && cluster->StartCharge() < cluster->EndCharge() )
                     {
                         clusterPtrVec.push_back(cluster);
                         // first cluster is greater than maximum length and  starts with StartWire?
@@ -225,7 +225,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                             }
                         } 
                     } //end startwire
-                    else if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() > cluster->EndWire())
+                    else if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() > cluster->EndWire() && cluster->StartCharge() > cluster->EndCharge() )
                     {
                         clusterPtrVec.push_back(cluster);
 

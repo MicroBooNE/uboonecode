@@ -33,6 +33,8 @@ beamRun::beamRun()
   fIFDBLatency   = bdconfig->GetIFDBLatency();
   fEventTypeMap  = bdconfig->GetEventTypeMap();
   fTimeWindowMap = bdconfig->GetTimeWindowMap();
+  fTimePaddingMap = bdconfig->GetTimePaddingMap();
+  fTimeOffsetMap = bdconfig->GetTimeOffsetMap();
   fMWRTimeOffset = bdconfig->GetMWRTimeOffset();
 
   fZoneOffset=second_clock::local_time()-second_clock::universal_time();
@@ -66,6 +68,8 @@ void beamRun::StartRun(beamRunHeader& rh, boost::posix_time::ptime tstart)
 		    <<ss.str();
     fOut[i].open(ss.str().c_str(), ios::out | ios::binary);
     // fOA[fBeamLine[i]]=new boost::archive::binary_oarchive(fOut[i]);
+    tstart=tstart-microseconds(fTimeOffsetMap[fBeamLine[i]]*1000.)-microseconds(fTimePaddingMap[fBeamLine[i]]*1000.);
+    mf::LogInfo("") <<"Added padding ("<<fTimePaddingMap[fBeamLine[i]]<<"ms) and offset ("<<fTimeOffsetMap[fBeamLine[i]]<<"ms) to start time "<<fBeamLine[i]<<" "<<tstart;
     fLastQueryTime[fBeamLine[i]]=tstart;
   }
 }
@@ -125,7 +129,19 @@ void beamRun::Update(boost::posix_time::ptime tend)
 void beamRun::EndRun(boost::posix_time::ptime tstop) 
 {
   fRunHeader.fRunEnd=tstop;
-  
+  beamDAQConfig* bdconfig=beamDAQConfig::GetInstance();
+
+  if (tstop-fRunHeader.fRunStart>hours(bdconfig->GetMaxRunLength())) {
+    mf::LogError(__FUNCTION__)<<"Refusing to start a run longer than "
+		      <<bdconfig->GetMaxRunLength()  
+		      <<" hours!";
+    return;
+  }
+  if (fRunHeader.fRunStart-tstop>seconds(0)) {
+    mf::LogError(__FUNCTION__)<<"Refusing to start a run with t0>t1";
+    return;
+  }
+
   // in case run ends up in the future?
   while (microsec_clock::local_time() < tstop ) {
     Update(microsec_clock::local_time());
@@ -297,7 +313,7 @@ void beamRun::WriteData(std::string beamline, map<ub_BeamHeader, std::vector<ub_
   while (it != data_map.end()) {
     if ( ( fLastBeamHeader.find(beamline) == fLastBeamHeader.end() ||
 	  !(it->first <= fLastBeamHeader[beamline])) &&
-	 (ToPtime(it->first) <= fRunHeader.fRunEnd)) {
+	 (ToPtime(it->first) <= fRunHeader.fRunEnd-microseconds(fTimeOffsetMap[beamline]*1000.)+microseconds(fTimePaddingMap[beamline]*1000.))) {
       fRunHeader.fCounter[beamline]=fRunHeader.fCounter[beamline]+1;
       //    (*fOA[beamline]) << it->first;
       boost::archive::binary_oarchive oa(fOut[ibeamline]);

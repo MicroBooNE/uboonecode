@@ -100,10 +100,6 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
     event.getByLabel(fVertexModuleLabel, vertexVecHandle);
     event.getByLabel(fTrackModuleLabel,  trackVecHandle);
     
-    size_t nTracks = trackVecHandle->size();
-    
-    std::cout << nTracks << std::endl;
-    
     // Require valid handles, otherwise nothing to do
     if (vertexVecHandle.isValid() && vertexVecHandle->size() > 0 && trackVecHandle.isValid() && trackVecHandle->size() > 0)
     {
@@ -147,7 +143,7 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                     {
                         art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
                         
-                        if (cosmicTag->CosmicScore() < fCosmicScoreCut) continue;
+                        if (cosmicTag->CosmicScore() > fCosmicScoreCut) continue;
                     }
                 }
                 
@@ -183,7 +179,7 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                         {
                             art::Ptr<anab::CosmicTag>& cosmicTag(cosmicVec.front());
                             
-                            if (cosmicTag->CosmicScore() < fCosmicScoreCut) continue;
+                            if (cosmicTag->CosmicScore() > fCosmicScoreCut) continue;
                         }
                     }
                     
@@ -216,15 +212,31 @@ bool TrackPairPlusVertexAlg::findNeutrinoCandidates(art::Event & event) const
                     // Is this the best?
                     if (maxDist < bestDistance)
                     {
-                        // Clear out the old results
-                        bestVertexVec.clear();
-                        bestTrackVec.clear();
+                        double length1 = (track1End - track1Pos).Mag();
+                        double length2 = (track2End - track2Pos).Mag();
+                        double cos = 0;
+
+                        if(length1 > 10 && length1 > length2) {
+                           double length1z = fabs(track1End.z() - track1Pos.z());
+                           cos = length1z/length1;
+                        }
+                        else if(length2 > 10) {
+                           double length2z = fabs(track2End.z() - track2Pos.z());
+                           cos = length2z/length2;
+                        }
+
+                        if(cos > 0.85) {
+
+			   // Clear out the old results
+                           bestVertexVec.clear();
+                           bestTrackVec.clear();
                         
-                        // Now store away
-                        bestVertexVec.push_back(vertex);
-                        bestTrackVec.push_back(track1);
-                        bestTrackVec.push_back(track2);
-                        bestDistance = maxDist;
+                           //Now store away
+                           bestVertexVec.push_back(vertex);
+                           bestTrackVec.push_back(track1);
+                           bestTrackVec.push_back(track2);
+                           bestDistance = maxDist;
+                       }
                     }
                 }
             }

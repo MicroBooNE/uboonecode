@@ -4,6 +4,7 @@
 #include "DataFormat/event_ass.h"
 #include "DataFormat/sparse_vector.h"
 #include "DataFormat/opdetwaveform.h"
+#include "DataFormat/simphotons.h"
 #include "DataFormat/trigger.h"
 #include "DataFormat/potsummary.h"
 #include "DataFormat/hit.h"
@@ -904,6 +905,7 @@ namespace larlite {
       const art::Ptr<::recob::Shower> shower_ptr(dh,i);
       
       larlite::shower lite_shower;
+      /*
       lite_shower.set_id(shower_ptr->ID());
       lite_shower.set_total_energy(shower_ptr->Energy());
       lite_shower.set_total_energy_err(shower_ptr->EnergyErr());
@@ -919,7 +921,7 @@ namespace larlite {
       lite_shower.set_length(shower_ptr->Length());
       lite_shower.set_direction(shower_ptr->Direction());
       lite_shower.set_direction_err(shower_ptr->DirectionErr());
-      
+      */     
       //fPtrIndex_shower[shower_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_shower);
@@ -1109,7 +1111,6 @@ namespace larlite {
   template <> std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mcshower; }
 
-
   template <> std::map<art::Ptr< ::sim::MCTrack>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
   { return fPtrIndex_mctrack; }
 
@@ -1194,6 +1195,8 @@ namespace larlite {
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::simb::MCNeutrino> () const
   { return ::larlite::data::kMCNeutrino; }
   // sim
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::SimPhotonsCollection> () const
+  { return ::larlite::data::kSimPhotons; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::SimChannel> () const
   { return ::larlite::data::kSimChannel; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCShower> () const

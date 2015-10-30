@@ -54,6 +54,8 @@ public:
    std::vector<std::string> fBeamLine;
    std::map<std::string, int> fEventTypeMap;
    std::map<std::string, int> fTimeWindowMap;
+   std::map<std::string, float> fTimeOffsetMap;
+   std::map<std::string, float> fTimePaddingMap;
    std::map<std::string, std::vector<std::string> > fBundle;
    std::string fIFDBURL;
    int fIFDBLatency;

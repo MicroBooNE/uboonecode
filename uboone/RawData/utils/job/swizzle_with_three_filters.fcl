@@ -8,6 +8,8 @@
 #include "subevent_module.fcl"
 #include "seedservice_microboone.fcl"
 #include "triggerenforcement.fcl"
+#include "beamdata_microboone.fcl"
+
 process_name: Swizzler
 services:
 {
@@ -23,6 +25,7 @@ services:
 	  UBOpReadoutMap:           @local::microboone_opreadoutmap
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
+	  IFDH:                   {}
           }
 }
 
@@ -96,9 +99,10 @@ physics:
   producers: {
   ### flash finders
   opflash          : @local::microboone_opflash_beam_highgain
-  opflashLow       : @local::microboone_opflash_beam_lowgain
+  #opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
-  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  #opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  beamdata         : @local::microboone_beamdata
 
   #hwflash : @local::microboone_subeventbuilder
  }
@@ -112,7 +116,7 @@ physics:
   }
  }
 
- common: [ triggerEnforcement, opflash, opflashLow ] 
+ common: [ triggerEnforcement, opflash, beamdata ] 
  filter1: [ opflashfilter ]
  filter2: [ randomfilter ]
  stream1:   [ rawfilter ]

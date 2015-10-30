@@ -118,6 +118,7 @@ void SimpleFlashFinder::produce(art::Event & e)
   std::vector<std::pair<double,double> > OpTime(n_bins, std::make_pair(0.,0.) );
   // total number of hits added:
   int nhits = 0;
+
   for(auto const& hit : *ophit_h) {
     // ignore hits with < 5 PE
     if (hit.PE() < _PE_min_hit)
@@ -138,9 +139,10 @@ void SimpleFlashFinder::produce(art::Event & e)
       OpTime[bin] = std::make_pair( hit.PeakTime(), hit.PE() );
   }// for all OpHits
 
-  if (nhits == 0)
+  if (nhits == 0) {
+    e.put(std::move(opflashes));
     return;
-
+  }
   //std::cout << "take care of late-light " << std::endl;
 
   // try and take care of late-light:

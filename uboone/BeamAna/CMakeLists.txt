@@ -1,10 +1,3 @@
-find_ups_product( uboonedaq_datatypes v6_13_07 )
-find_ups_product( ifdh_art v1_12_06 )
-
-include_directories ( $ENV{IFDHC_FQ_DIR}/inc )
-
-find_library( UB_DATA_TYPES NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LIB} )
-
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES
                         Utilities
@@ -12,7 +5,6 @@ art_make( BASENAME_ONLY
                         Filters
                         RawData
 			SummaryData
-			BeamDAQ
 			${UB_DATA_TYPES}
 			${Boost_SERIALIZATION_LIBRARY}
                         ${SEEDSERVICE_SERVICE} # artextensions
@@ -22,11 +14,9 @@ art_make( BASENAME_ONLY
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-                        ${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}
                         ${ART_PERSISTENCY_COMMON}
                         ${ART_PERSISTENCY_PROVENANCE}
                         ${ART_UTILITIES}
-			ifdh
                         ${MF_MESSAGELOGGER}
                         ${MF_UTILITIES}
                         ${FHICLCPP}
