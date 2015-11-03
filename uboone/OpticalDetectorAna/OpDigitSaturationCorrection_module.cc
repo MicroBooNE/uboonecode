@@ -96,6 +96,9 @@ private:
   // verbosity flag
   bool _verbose;
 
+  // Flag to include beamgate
+  bool _include_beamgate;
+
   // baseline?
   short unsigned int _baseline;
 
@@ -158,6 +161,9 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
     std::cerr<<"\033[93m[ERROR]\033[00m Calibration Correction vector does not have 32 elements!"<<std::endl;
     throw std::exception();
   }
+
+  // Take care of a beamgate if specified
+  _include_beamgate = p.get<bool>("IncludeBeamgate");
 
   // time tick is 15.6 ns (in usec)
   _TDC = 0.0156;
@@ -236,7 +242,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     if ( (wf_LG.ChannelNumber() >= 132) or (wf_LG.ChannelNumber() < 100) )
       continue;
     // ignore PMTs with size != cosmic discriminator size
-    if (wf_LG.size() > 61)
+    if (!_include_beamgate && wf_LG.size() > 800)
       continue;
     // LG indx = ChannelNumber() - 100 (to match HG channel number)
     double wf_time = wf_LG.TimeStamp() - _TrigTime;
@@ -258,7 +264,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     if (wf_HG.ChannelNumber() >= 32)
       continue;
     // ignore PMTs with size != cosmic discriminator size
-    if (wf_HG.size() > 61)
+    if (!_include_beamgate && wf_HG.size() > 800)
       continue;
 
     if (_verbose)
