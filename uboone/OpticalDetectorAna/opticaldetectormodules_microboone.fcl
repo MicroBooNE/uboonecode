@@ -24,8 +24,11 @@ microboone_opflash_lowgain:
    algo_threshold:   @local::microboone_algo_slidingwindow
 }
 
+microboone_opflash_lowgain.algo_threshold.NumPreSample: 3
 microboone_opflash_lowgain.algo_threshold.ADCThreshold: 8
 microboone_opflash_lowgain.algo_threshold.NSigmaThreshold: 5
+microboone_opflash_lowgain.algo_threshold.EndADCThreshold: 2
+microboone_opflash_lowgain.algo_threshold.EndNSigmaThreshold: 1
 microboone_opflash_lowgain.algo_threshold.MinWindowSize: 5
 microboone_opflash_lowgain.algo_threshold.MaxSigma: 1.0
 
@@ -46,12 +49,13 @@ microboone_opflash_highgain:
    algo_threshold:   @local::microboone_algo_slidingwindow
 }
 
+microboone_opflash_highgain.algo_threshold.NumPreSample: 3
 microboone_opflash_highgain.algo_threshold.ADCThreshold: 8
+microboone_opflash_lowgain.algo_threshold.EndADCThreshold: 3
+microboone_opflash_lowgain.algo_threshold.EndNSigmaThreshold: 1
 microboone_opflash_highgain.algo_threshold.NSigmaThreshold: 5
 microboone_opflash_highgain.algo_threshold.MinWindowSize: 5
 microboone_opflash_highgain.algo_threshold.MaxSigma: 1.0
-
-
 
 microboone_opflash_beam_highgain: @local::microboone_opflash_highgain
 microboone_opflash_beam_highgain.InputLabels:  ["OpdetBeamHighGain"]
