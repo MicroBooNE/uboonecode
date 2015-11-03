@@ -55,6 +55,7 @@ private:
   std::string _producer;
   bool   _use_area;
   double _spe_size;
+  bool _verbose;
   pmtana::PMTPulseRecoBase* _preco_alg;
   
 };
@@ -69,6 +70,8 @@ OpHitFinder::OpHitFinder(fhicl::ParameterSet const & p)
   _producer = p.get<std::string>("OpDetWaveformProducer");
   _use_area = p.get<bool>("UseArea");
   _spe_size = p.get<double>("SPESize");
+
+  _verbose  = p.get<bool>("Verbosity");
 
   _preco_mgr.SetPedAlgo(pmtana::kHEAD);
   _preco_mgr.SePedSampleCosmic (  3 );
@@ -109,6 +112,8 @@ void OpHitFinder::produce(art::Event & e)
     const int Channel = (int)wf_ptr.ChannelNumber();
     const double TimeStamp = wf_ptr.TimeStamp();
 
+    if(_verbose) std::cout << "Processing channel: " << Channel << std::endl;
+
     if(Channel>32) continue;
 
     if( !geom->IsValidOpChannel( Channel ) ) {
@@ -116,7 +121,11 @@ void OpHitFinder::produce(art::Event & e)
       continue;
     }
 
-    _preco_mgr.RecoPulse(wf_ptr);
+    if(!_preco_mgr.RecoPulse(wf_ptr)) {
+
+      std::cout << "\033[95m[WARNING]\033[00m PulseFinder algorithm returned invalid status! (Ch. " << Channel << ")" << std::endl;
+
+    }
 
     const size_t NPulses = _preco_alg->GetNPulse();
     for(size_t k=0; k<NPulses; ++k){
