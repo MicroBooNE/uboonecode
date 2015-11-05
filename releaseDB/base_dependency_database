@@ -617,6 +617,7 @@ larreco : larreco : ClusterFinder/ClusterCreator.h
 larreco : larreco : ClusterFinder/RStarTree/RStarBoundingBox.h
 larreco : larreco : ClusterFinder/RStarTree/RStarTree.h
 larreco : larreco : ClusterFinder/RStarTree/RStarVisitor.h
+larreco : larreco : DirOfGamma/DirOfGamma.h
 larreco : larreco : Genfit/GFAbsBField.h
 larreco : larreco : Genfit/GFAbsEnergyLoss.h
 larreco : larreco : Genfit/GFAbsFinitePlane.h
@@ -932,6 +933,7 @@ uboonecode : larcore : SimpleTypesAndConstants/PhysicalConstants.h
 uboonecode : larcore : SimpleTypesAndConstants/RawTypes.h
 uboonecode : larcore : SimpleTypesAndConstants/geo_types.h
 uboonecode : larcore : SummaryData/POTSummary.h
+uboonecode : larcore : SummaryData/RunData.h
 uboonecode : larcore : test/Geometry/GeometryIteratorLoopTestAlg.h
 uboonecode : larcore : test/Geometry/GeometryIteratorTestAlg.h
 uboonecode : larcore : test/Geometry/GeometryTestAlg.h
@@ -953,6 +955,7 @@ uboonecode : lardata : OpticalDetectorData/OpticalRawDigit.h
 uboonecode : lardata : OpticalDetectorData/OpticalTypes.h
 uboonecode : lardata : OpticalDetectorData/PMTTrigger.h
 uboonecode : lardata : RawData/BeamInfo.h
+uboonecode : lardata : RawData/DAQHeader.h
 uboonecode : lardata : RawData/OpDetWaveform.h
 uboonecode : lardata : RawData/RawDigit.h
 uboonecode : lardata : RawData/TriggerData.h
@@ -1038,6 +1041,13 @@ uboonecode : larsim : Simulation/SimChannel.h
 uboonecode : larsim : Simulation/SimPhotons.h
 uboonecode : larsim : Simulation/sim.h
 uboonecode : uboonecode : test/Geometry/geometry_unit_test_uboone.h
+uboonecode : uboonecode : uboone/BeamDAQ/MWRData.h
+uboonecode : uboonecode : uboone/BeamDAQ/bdaq_get.h
+uboonecode : uboonecode : uboone/BeamDAQ/beamDAQConfig.h
+uboonecode : uboonecode : uboone/BeamDAQ/beamIFDBInterface.h
+uboonecode : uboonecode : uboone/BeamDAQ/beamRun.h
+uboonecode : uboonecode : uboone/BeamDAQ/beamRunHeader.h
+uboonecode : uboonecode : uboone/BeamDAQ/httpResponse.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg_CalibrationPulseFinder.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg_DigitAboveBaseline.h
@@ -1078,6 +1088,7 @@ uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoBase.h
 uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoDigitizedSPE.h
 uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoPedestal.h
 uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoSPEBase.h
+uboonecode : uboonecode : uboone/RawData/utils/LArRawInputDriverUBooNE.h
 uboonecode : uboonecode : uboone/TPCNeutrinoIDFilter/Cluster2DNuAlg.h
 uboonecode : uboonecode : uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h
 uboonecode : uboonecode : uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h
