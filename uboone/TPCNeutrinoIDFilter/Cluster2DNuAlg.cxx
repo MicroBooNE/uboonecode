@@ -87,8 +87,8 @@ void Cluster2DNuAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs) {}
 void Cluster2DNuAlg::produces(art::EDProducer* owner)
 {
     fMyProducerModule = owner;
-    fMyProducerModule->produces< std::vector<anab::CosmicTag> >();
-    fMyProducerModule->produces< std::vector<recob::Cluster> >();
+    //fMyProducerModule->produces< std::vector<anab::CosmicTag> >();
+    //fMyProducerModule->produces< std::vector<recob::Cluster> >();
     fMyProducerModule->produces< art::Assns <anab::CosmicTag, recob::Cluster> >();
     //fMyProducerModule->produces< art::Assns <recob::Cluster, recob::Cluster> >();
 }
