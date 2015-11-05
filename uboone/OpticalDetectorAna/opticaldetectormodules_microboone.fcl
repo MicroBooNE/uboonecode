@@ -18,8 +18,8 @@ microboone_opflash_lowgain:
    HitThreshold:     0.2 # PE
    WidthTolerance:   0.5 # unitless
    TrigCoinc:        2.5 # in microseconds!
-   AreaToPE:         false # Use area to calculate number of PEs
-   SPEArea:          11.8  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
+   AreaToPE:         true # Use area to calculate number of PEs
+   SPEArea:          12.0  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
    algo_threshold:   @local::microboone_algo_slidingwindow
 }
@@ -44,7 +44,7 @@ microboone_opflash_highgain:
    WidthTolerance:   0.5 # unitless
    TrigCoinc:        2.5 # in microseconds!
    AreaToPE:         true # Use area to calculate number of PEs
-   SPEArea:          118  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
+   SPEArea:          120  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
    algo_threshold:   @local::microboone_algo_slidingwindow
 }

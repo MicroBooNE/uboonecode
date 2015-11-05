@@ -213,7 +213,7 @@ namespace opdet {
 	for(size_t photon_index=0; photon_index<pmt_ptr->size(); ++photon_index)
 	  photon_time.push_back(pmt_ptr->at(photon_index).Time);
       }
-      //std::cout<<"INPUT: pmt="<<ipmt<<" # photons="<<photon_time.size()<<std::endl;      
+      //std::cout<<"INPUT: pmt="<<ipmt<<" PE ="<<photon_time.size()<<std::endl;
       // send the hits over to the waveform generator
       fOpticalGen.SetPhotons(photon_time);
       
@@ -246,7 +246,7 @@ namespace opdet {
 	  std::cout<<"Digit Ch: "<<channel_num
 		   <<" Pedestal: "<<ped_mean
 		   <<" ... " << min << " => "<<max
-		   <<" PE: "<< pe / 118. << std::endl<<std::endl;
+		   <<" PE: "<< pe / 119.76 << " or PE: " << (max - ped_mean)/20. << std::endl<<std::endl;
 	}
 	*/
 	wfs->emplace_back( adc_wfm );

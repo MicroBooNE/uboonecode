@@ -29,15 +29,16 @@ standard_algo_slidingwindow:
     MaxSigma:        1.0
     PedRangeMax:     2150
     PedRangeMin:     100
-    Verbosity:       true
+    Verbosity:       false
 }
 
 ophitfinder_microboone:
 {
   module_type: "OpHitFinder"
   OpDetWaveformProducer: "pmtreadout"
+  OpDetWaveformLabel:    "OpdetBeamHighGain"
   UseArea: true
-  SPESize: 118
+  SPESize: 120
   Verbosity: false
   HitAlgoPset: @local::standard_algo_fixedwindow
 }

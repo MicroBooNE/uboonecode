@@ -73,9 +73,9 @@ namespace opdet {
 	    wf.at(rel_spe_start.Ticks()) += (fGain * fSPE.at(i));
 
 	  else
-
+	    
 	    wf.at(rel_spe_start.Ticks()) += ( RandomServer::GetME().Gaus(fGain,fGainSigma*fGain) * fSPE.at(i) );
-
+	  
 	}
 
 	rel_spe_start += unit_time;
@@ -101,14 +101,15 @@ namespace opdet {
 
     fSPE.clear();
     fSPE.reserve(wf.size());
-    double max_amp = 0;
+
+    double area = 0;
     for(auto const &v : wf) {
-      if(max_amp < v) max_amp = v;
       fSPE.push_back(v);
+      area += v;
     }
 
-    // Normalize amplitude
-    for(auto &v : fSPE) v /= max_amp;
+    // Normalize area
+    for(auto &v : fSPE) v /= area;
 
     fSPETime = time_info;
     

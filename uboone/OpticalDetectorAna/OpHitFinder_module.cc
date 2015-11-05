@@ -53,6 +53,7 @@ private:
   // Declare member data here.
   pmtana::PulseRecoManager  _preco_mgr;
   std::string _producer;
+  std::string _label;
   bool   _use_area;
   double _spe_size;
   bool _verbose;
@@ -68,6 +69,7 @@ OpHitFinder::OpHitFinder(fhicl::ParameterSet const & p)
   // Call appropriate produces<>() functions here.
   produces< std::vector<recob::OpHit>   >();
   _producer = p.get<std::string>("OpDetWaveformProducer");
+  _label    = p.get<std::string>("OpDetWaveformLabel");
   _use_area = p.get<bool>("UseArea");
   _spe_size = p.get<double>("SPESize");
 
@@ -98,7 +100,10 @@ void OpHitFinder::produce(art::Event & e)
   std::unique_ptr< std::vector<recob::OpHit> > ophits(new std::vector<recob::OpHit>);
   
   art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
-  e.getByLabel("pmtreadout", "OpdetBeamHighGain", wfHandle);
+  if(_label.empty())
+    e.getByLabel(_producer, wfHandle);
+  else
+    e.getByLabel(_producer,_label,wfHandle);
   if (!wfHandle.isValid()) {
     std::cerr<<"\033[93mInvalid Producer name: \033[00m"<<_producer.c_str()<<std::endl;
     throw std::exception();
