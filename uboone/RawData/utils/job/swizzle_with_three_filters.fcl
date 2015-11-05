@@ -32,7 +32,7 @@ services:
 microboone_tfile_metadata:
 {
   JSONFileName:          "daq_hist.root.json"
-  GenerateTFileMetadata: false
+  GenerateTFileMetadata: true
   dataTier:              "root-tuple"
   fileFormat:            "root"
 }
