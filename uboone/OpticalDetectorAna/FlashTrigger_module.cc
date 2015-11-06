@@ -100,7 +100,7 @@ private:
   double _fy_err;            ///< Flash Y position error
   double _fz;                ///< Flash Z position
   double _fz_err;            ///< Flash Z position error
-
+  double _t_width;           ///< Flash Time Width
   //
   // Attribute functions
   //
@@ -182,6 +182,7 @@ void FlashTrigger::MakeTree()
   _flash_tree->Branch ( "nhit",     &_nhit,     "nhit/s"     );
   _flash_tree->Branch ( "pe_total", &_pe_total, "pe_total/D" );
   _flash_tree->Branch ( "dt",       &_dt,       "dt/D"       );
+  _flash_tree->Branch ( "t_width",  &_t_width,  "t_width/D"  );
   _flash_tree->Branch ( "fy",       &_fy,       "fy/D"       );
   _flash_tree->Branch ( "fy_err",   &_fy_err,   "fy_err/D"   );
   _flash_tree->Branch ( "fz",       &_fz,       "fz/D"       );
@@ -230,6 +231,7 @@ void FlashTrigger::AnalyzeFlash(const recob::OpFlash& flash)
   }
 
   _dt = flash.Time();
+  _t_width = flash.TimeWidth();
   _fy = flash.YCenter();
   _fz = flash.ZCenter();
   _fy_err = flash.YWidth();

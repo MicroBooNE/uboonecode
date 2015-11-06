@@ -260,7 +260,7 @@ namespace trigger {
     fAlg.ProcessTrigger(*triggers);
     
     // Store
-    if(triggers->size())
+    //if(triggers->size()) // now unnecessary
       evt.put(std::move(triggers));
   }
 } 

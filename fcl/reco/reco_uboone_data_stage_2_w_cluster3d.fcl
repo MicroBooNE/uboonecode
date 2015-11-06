@@ -26,7 +26,7 @@ services:
   SimpleMemoryCheck:          { ignoreTotal: 1 } # default is one
   RandomNumberGenerator:      {} #ART native random number generator
   message:                    @local::microboone_message_services_prod_debug
-  FileCatalogMetadata:        @local::art_file_catalog_mc
+  FileCatalogMetadata:        @local::art_file_catalog_data
   PhotonVisibilityService:    @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties
                               @table::microboone_services_reco

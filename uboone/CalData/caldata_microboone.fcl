@@ -18,10 +18,9 @@ microboone_calroi:
  uPlaneRamp:       true # Set true if U plane response includes a pre-ROI ramp
  FFTSize:     256      # re-initialize FFT service to this size
  SaveWireWF:  0
- MaxAllowedChannelStatus: 4 # All channels up to this status level are considered
+ MinAllowedChannelStatus: 3 # All channels greater than or equal to this status level are considered
  DoBaselineSub_WaveformPropertiesAlg:   false # subtract baseline after deconvolution?
  
- DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
  ROIPropertiesAlg:      { ROIAlgParams: @local::roiAlg_DigitAboveBaseline }
 }
 
@@ -39,8 +38,7 @@ microboone_calwire:
  BaselineSigThreshold:  3.   # signal threshold for adaptive baseline method
  BaseVarCut:         25.  # Variance cut for selecting baseline points
  SaveWireWF:          0
- 
- DetPedestalRetrievalAlg:  @local::microboone_pedestalretrievalalg
+
 }
 
 microboone_calwirePrespill:  @local::microboone_calwire
@@ -102,13 +100,17 @@ microboone_rawdigitfilter:
     DigitModuleLabel:      "daq"
     RMSRejectionCutHi:     [25.,25.,25.]
     RMSRejectionCutLow:    [0.7,0.7,0.7]
-    RMSSelectionCut:       [1.5,1.3,0.7]
+    RMSSelectionCut:       [2.0,2.0,1.5]
     TheChosenWire:         1200
     MaxPedestalDiff:       10.
     SmoothCorrelatedNoise: true
     NumWiresToGroup:       [48, 48, 96]  # these correspond to observed groupings
+    FillHistograms:        false
     RunFFTInputWires:      false
     RunFFTCorrectedWires:  false
+    TruncateTicks:         false
+    WindowSize:            6400
+    NumTicksToDropFront:   2250   # these values will put 70 kV drift time in "middle"
 }
 
 

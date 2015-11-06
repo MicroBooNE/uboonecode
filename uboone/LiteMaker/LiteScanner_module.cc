@@ -32,6 +32,8 @@
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
+#include "Simulation/SimPhotons.h"
+#include "RawData/TriggerData.h"
 #include "RecoBase/Wire.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/OpHit.h"
@@ -61,6 +63,8 @@
 #include "Utilities/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
 #include "Utilities/DetectorProperties.h"
+
+#include "DataFormat/simphotons.h"
 
 #include "ScannerAlgo.h"
 //#include "ScannerAlgo.template.h"
@@ -97,6 +101,9 @@ private:
 
   /// Templated data scanner function
   template<class T> void ScanData(const art::Event& evt, const size_t name_index);
+
+  /// Special function for SimPhotons
+  void ScanSimPhotons(const art::Event& evt, const size_t name_index);
 
   /// Templated association scanner function
   template<class T> void SaveAssociationSource(const art::Event& evt);
@@ -253,11 +260,12 @@ void LiteScanner::analyze(art::Event const & e)
       case ::larlite::data::kMCParticle:
 	ScanData<simb::MCParticle>(e,j); break;
 
+      case ::larlite::data::kSimPhotons:
+	ScanSimPhotons(e,j); break;
       case ::larlite::data::kSimChannel:
 	ScanData<sim::SimChannel>(e,j); break;
       case ::larlite::data::kMCShower:
 	ScanData<sim::MCShower>(e,j); break;
-
       case ::larlite::data::kMCTrack: 
 	ScanData<sim::MCTrack>(e,j); break;
 
@@ -265,6 +273,8 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<raw::RawDigit>(e,j); break;
       case ::larlite::data::kOpDetWaveform:
 	ScanData<raw::OpDetWaveform>(e,j); break;
+      case ::larlite::data::kTrigger:
+	ScanData<raw::Trigger>(e,j); break;
 
       case ::larlite::data::kHit:
 	ScanData<recob::Hit>(e,j); break;
@@ -348,6 +358,7 @@ void LiteScanner::analyze(art::Event const & e)
       case ::larlite::data::kOpHit:
       case ::larlite::data::kOpFlash:
       case ::larlite::data::kSimChannel:
+      case ::larlite::data::kSimPhotons:
       case ::larlite::data::kMCShower:
       case ::larlite::data::kMCTrack:
       case ::larlite::data::kWire:
@@ -382,6 +393,10 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
     art::ServiceHandle<util::TimeService> ts;
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
+    evt.getByLabel(lite_id.second, dh);
+
+    if(dh.isValid()) fAlg.ScanData(dh,lite_data);
+
     for ( unsigned int cat=0; cat<(unsigned int)opdet::NumUBOpticalChannelCategories; cat++ ) {
 
       evt.getByLabel(lite_id.second, opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)cat ), dh);
@@ -393,6 +408,42 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
     }
   }
 }
+
+//-------------------------------------------------------------------------------------------------
+// Scan
+//-------------------------------------------------------------------------------------------------
+void LiteScanner::ScanSimPhotons(const art::Event& evt, const size_t name_index)
+{ 
+  auto lite_id = fAlg.ProductID<::sim::SimPhotonsCollection>(name_index);
+  auto lite_data = (::larlite::event_simphotons*)(_mgr.get_data((::larlite::data::DataType_t)lite_id.first,lite_id.second));
+
+  art::Handle< std::vector<sim::SimPhotons> > dh;
+  evt.getByLabel(lite_id.second,dh);
+  if(!dh.isValid()) return;
+
+  lite_data->reserve(dh->size());
+  for(auto& simph : *dh) {
+    
+    ::larlite::simphotons lite_simph;
+    ::larlite::onephoton  lite_photon;
+
+    lite_simph.SetChannel(simph.OpChannel());
+    lite_simph.reserve(simph.size());
+
+    for(auto const& ph : simph) {
+
+      lite_photon.SetInSD = ph.SetInSD;
+      lite_photon.InitialPosition = ph.InitialPosition;
+      lite_photon.FinalLocalPosition = ph.FinalLocalPosition;
+      lite_photon.Time = ph.Time;
+      lite_photon.Energy = ph.Energy;
+
+      lite_simph.push_back(lite_photon);
+    }
+    lite_data->emplace_back(lite_simph);
+  }
+}
+
 
 //-------------------------------------------------------------------------------------------------
 // SaveAssociationSource
@@ -450,6 +501,8 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
   case ::larlite::data::kMCNeutrino:    break;
   case ::larlite::data::kRawDigit:      break;
   case ::larlite::data::kOpDetWaveform: break;
+  case ::larlite::data::kSimPhotons:    break;
+  case ::larlite::data::kTrigger:       break;
   case ::larlite::data::kWire:          break;
   case ::larlite::data::kHit:           break;
   case ::larlite::data::kCosmicTag:

@@ -92,6 +92,7 @@ namespace lris {
 		      raw::BeamInfo& beamInfo);
     void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 			 std::vector<raw::Trigger>& trigInfo);
+    void checkTimeStampConsistency(void);
 
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;
@@ -103,6 +104,13 @@ namespace lris {
     util::UBChannelMap_t           fChannelMap;   
     int                            fDataTakingTime; //fhicl parameter. Optional to override raw data's internal time stamp.
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
+    bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data
+    bool                           fSwizzlePMT; //fhicl parameter.  Tells us whether to swizzle the PMT data
+    bool                           fSwizzleTrigger; //fhicl parameter.  Tells us whether to swizzle the trigger data. (desired if we don't care about frame slippage)
+    std::string                    fSwizzleTriggerType; //fhicl parameter.  Tells us whether to swizzle a specific trigger type only. Options are ALL, BNB, NuMI, CALIB
+    bool skipEvent; // tag to skip event if trigger is not the type we want.
+
+    bool kazuTestSwizzleTrigger;
 
     //histograms
     std::map<std::string, TH1D*>   fHistMapBeam; //histograms for scalar beam devices
@@ -120,33 +128,64 @@ namespace lris {
     int discriminatorFrame [40][100];
     int discriminatorSample [40][100];
     int discriminatorType [40][100];
-    uint32_t triggerFrame;
-    uint32_t triggerSample;
+    double PMT_waveform_times[400];
+    int N_PMT_waveforms; 
+
+    int triggerFrame;
+    int triggerSample;
     double triggerTime;
     uint32_t triggerActive;
     uint32_t triggerBitBNB;
     uint32_t triggerBitNuMI;
     uint32_t triggerBitEXT;
+    uint32_t triggerBitPMTBeam;
+    uint32_t triggerBitPMTCosmic;
     
-    uint32_t FEM1triggerFrame ;
-    uint16_t FEM1triggerSample;
-    uint32_t FEM2triggerFrame ;
-    uint16_t FEM2triggerSample;
-    uint32_t FEM3triggerFrame ;
-    uint16_t FEM3triggerSample;
-    uint32_t FEM4triggerFrame ;
-    uint16_t FEM4triggerSample;
-    uint32_t FEM5triggerFrame ;
-    uint16_t FEM5triggerSample;
-    uint32_t FEM6triggerFrame ;
-    uint16_t FEM6triggerSample;
-    uint32_t FEM7triggerFrame ;
-    uint16_t FEM7triggerSample;
-    uint32_t FEM8triggerFrame ;
-    uint16_t FEM8triggerSample;
+    int PMTframe; // internal checking variable for PMT
+    int FEM5triggerFrame ;
+    int FEM5triggerSample;
+    int FEM6triggerFrame ;
+    int FEM6triggerSample;
+    double FEM5triggerTime;
+    double FEM6triggerTime;
 
-    uint32_t TPCtriggerFrame;
-    uint32_t TPCtriggerSample;
+    int RO_BNBtriggerFrame;
+    int RO_NuMItriggerFrame;
+    int RO_EXTtriggerFrame;
+    int RO_RWMtriggerFrame;
+    int RO_BNBtriggerSample;
+    int RO_NuMItriggerSample;
+    int RO_EXTtriggerSample;
+    int RO_RWMtriggerSample;
+    double RO_BNBtriggerTime;
+    double RO_NuMItriggerTime;
+    double RO_EXTtriggerTime;
+    double RO_RWMtriggerTime;
+    
+//    uint32_t RO_Gate1Frame;
+//    uint32_t RO_Gate1Sample;
+//    uint32_t RO_Gate2Frame;
+//    uint32_t RO_Gate2Sample;
+
+    int TPCframe; // internal checking variable for TPC
+    int TPC1triggerFrame;
+    int TPC1triggerSample;
+    int TPC2triggerFrame;
+    int TPC2triggerSample;
+    int TPC3triggerFrame;
+    int TPC3triggerSample;
+    int TPC4triggerFrame;
+    int TPC4triggerSample;
+    int TPC5triggerFrame;
+    int TPC5triggerSample;
+    int TPC6triggerFrame;
+    int TPC6triggerSample;
+    int TPC7triggerFrame;
+    int TPC7triggerSample;
+    int TPC8triggerFrame;
+    int TPC8triggerSample;
+    int TPC9triggerFrame;
+    int TPC9triggerSample;
     
     uint32_t ADCwords_crate0;
     uint32_t ADCwords_crate1;
@@ -158,7 +197,6 @@ namespace lris {
     uint32_t ADCwords_crate7;
     uint32_t ADCwords_crate8;
     uint32_t ADCwords_crate9;
-    uint32_t NumWords_crate0;
     uint32_t NumWords_crate1;
     uint32_t NumWords_crate2;
     uint32_t NumWords_crate3;

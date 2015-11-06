@@ -67,6 +67,7 @@ namespace opdet {
     typedef std::vector<optdata::TimeSlice_t> timeVector_t;
     typedef std::vector<unsigned int>         adcVector_t; // ART can't handle reading vectors of ADC_Count_t
     std::string          fBeamModule;           // module that created input simulated beam gate
+    std::string          fFakeBeamModule;       // module that created input "fake" beam gate (UBOpticalADCSim)
     std::string          fInputModule;          // module that created input ADC counts.
     timeVector_t         fm_delay0;             // delay for DIFF subtraction, in time slices
     std::vector<int>     fm_delay1;             // number of slices to go back relative to disc 0
@@ -132,6 +133,7 @@ namespace opdet {
     // Read parameters from the .fcl file.
     fInputModule          = p.get< std::string >         ("OpticalDigitizationModule");
     fBeamModule           = p.get< std::string >         ("BeamGateModule");
+    fFakeBeamModule       = p.get< std::string >         ("FakeBeamGateModule");
     fm_hist               = p.get< bool >                ("VerboseHistograms");
     fm_delay0             = p.get< timeVector_t >        ("PMTDelay0");
     fm_delay1             = p.get< std::vector<int> >    ("PMTDelay1");
@@ -206,7 +208,7 @@ namespace opdet {
 	    << "\033[00m" << std::endl;
 	
 	optdata::TimeSlice_t gateTime = ts->OpticalG4Time2TDC(beamGateInfo.Start());
-	optdata::TimeSlice_t gateWidth = clock.Ticks(beamGateInfo.Width());
+	//optdata::TimeSlice_t gateWidth = clock.Ticks(beamGateInfo.Width());
 
 	if(gateTime < readout_start_tdc) {
 	  //std::cout << "FillBeamTimingVectors: gateTime < readout_start_tdc (" << gateTime << " < " << readout_start_tdc << ")" << std::endl;
@@ -262,7 +264,6 @@ namespace opdet {
 	//std::cout << "Beam gate #" << gateIndex
 	  << " begin beam gate bin to save = " << beamBeginBin[gateIndex]
 	  << "; end beam gate bin to save = " << beamEndBin[gateIndex]
-	  << "; beam gate width = " << gateWidth
 	  << "; beam gate frame = " << gateFrame[gateIndex]
 	  << "; starts at sample = " << gateWindowTime[gateIndex]
 	  << "; slices to save = " << beam_words;
@@ -327,11 +328,26 @@ namespace opdet {
     // Did we actually read in any BeamGateInfo objects?
     size_t numberOfGates = 0;
     if ( beamGates.isValid() ) {
+      if( !fFakeBeamModule.empty() ) {
+	std::cout<< "\033[95m[ERROR]\033[00m Found both BeamGateModule and FakeBeamGateModule provided!" << std::endl;
+	throw std::exception();
+      }
       numberOfGates = beamGates->size();
       FillBeamTimingVectors(*beamGates,
 			    firstTDC,
-			    (firstSlice + sizeFirstChannel - 1));
+			    (firstSlice + sizeFirstChannel - 1) );
     }
+    
+    else if(!fFakeBeamModule.empty()) {
+      event.getByLabel(fFakeBeamModule, beamGates);
+      if( beamGates.isValid() ) {
+	numberOfGates = beamGates->size();
+	FillBeamTimingVectors(*beamGates,
+			      firstTDC,
+			      (firstSlice + sizeFirstChannel -1) );
+      }
+    }
+  
     //std::cout << "Number of Gates: " << numberOfGates << std::endl;
 
     // Do the same for the vectors that will accumulate the sums of

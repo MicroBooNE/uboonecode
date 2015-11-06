@@ -1,0 +1,8 @@
+BEGIN_PROLOG
+trigger_enforcement: {
+  module_type: "TriggerEnforcement"
+  Verbose: false
+  TriggerProducer: ""
+  ExcludeBits: []
+}
+END_PROLOG

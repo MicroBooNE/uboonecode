@@ -7,6 +7,7 @@ set( uboone_util_lib_list LArFFT_service
 			RecoBase
 			Geometry_service
 			Utilities
+			${SEEDSERVICE_SERVICE} # artextensions
   			${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -14,12 +15,16 @@ set( uboone_util_lib_list LArFFT_service
 			${ART_PERSISTENCY_PROVENANCE}
 			${ART_FRAMEWORK_SERVICES_BASIC}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL}
+                        ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
 			${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}
 			${ART_UTILITIES}
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
+			${FHICLCPP}
 			${CETLIB}
+			${Boost_SYSTEM_LIBRARY}
+                        ${CLHEP}
 			${ROOT_BASIC_LIB_LIST}
     )
 
@@ -40,6 +45,14 @@ simple_plugin( TinyHitFinderAna "module"
                ${uboone_util_lib_list}
 	       BASENAME_ONLY
         )
+simple_plugin( RandomPrescale "module"
+               ${uboone_util_lib_list}
+	       BASENAME_ONLY
+	)	
+simple_plugin( FileCatalogMetadataRawDigit "plugin"
+               ${uboone_util_lib_list}
+	       BASENAME_ONLY
+	)	
              
  
 install_headers()

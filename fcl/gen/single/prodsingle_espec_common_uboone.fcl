@@ -53,9 +53,10 @@ physics:
  producers:
  {
    generator:    @local::toyoneshowergen
+   rns:          { module_type: "RandomNumberSaver" }
  }
  
- simulate: [ generator ]
+ simulate: [ rns, generator ]
 
  stream1:  [ out1 ]
 

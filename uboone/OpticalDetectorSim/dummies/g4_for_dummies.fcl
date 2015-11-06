@@ -90,8 +90,8 @@ services.user.LArG4Parameters.EnabledPhysics: [ "Em",
                                                "Hadron",
                                                "Decay",
                                                "HadronElastic",
-                                               "Stopping",
-                                               "NeutronTrackingCut" ]
+                                               "Stopping"]
+                                               #"NeutronTrackingCut" ]
 
 # enable this custom physics list
 services.user.LArG4Parameters.UseCustomPhysics: true

@@ -1234,6 +1234,7 @@ namespace microboone {
           fData->SetBits(AnalysisTreeDataStruct::tdGeant,  !fSaveGeantInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdMCshwr, !fSaveMCShowerInfo); 
           fData->SetBits(AnalysisTreeDataStruct::tdHit,    !fSaveHitInfo);
+          fData->SetBits(AnalysisTreeDataStruct::tdFlash,  !fSaveFlashInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdCluster,!fSaveClusterInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdTrack,  !fSaveTrackInfo);
@@ -2795,29 +2796,21 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   
   if (isMC) { //is MC
+
+    //find origin
+    std::vector< art::Handle< std::vector<simb::MCTruth> > > allmclists;
+    evt.getManyByType(allmclists);
+    for(size_t mcl = 0; mcl < allmclists.size(); ++mcl){
+      art::Handle< std::vector<simb::MCTruth> > mclistHandle = allmclists[mcl];
+      for(size_t m = 0; m < mclistHandle->size(); ++m){
+	art::Ptr<simb::MCTruth> mct(mclistHandle, m);
+	if (mct->Origin() == simb::kCosmicRay) isCosmics = true;
+      }
+    }
+    if (fSaveCaloCosmics) isCosmics = false; //override to save calo info
+
     // GENIE
     if (!mclist.empty()){//at least one mc record
-      //if (fSaveGenieInfo){
-        //if (mclist[0]->NeutrinoSet()){//is neutrino
-        //sometimes there can be multiple neutrino interactions in one spill
-        //this is trying to find the primary interaction
-        //by looking for the highest energy deposition
-        //std::map<art::Ptr<simb::MCTruth>,double> mctruthemap;
-      static bool isfirsttime = true;
-      if (isfirsttime){
-	for (size_t i = 0; i<hitlist.size(); i++){
-	  //if (hitlist[i]->View() == geo::kV){//collection view
-	  std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hitlist[i]);
-	  for (size_t e = 0; e<eveIDs.size(); e++){
-	    art::Ptr<simb::MCTruth> ev_mctruth = bt->TrackIDToMCTruth(eveIDs[e].trackID);
-	    //mctruthemap[ev_mctruth]+=eveIDs[e].energy;
-	    if (ev_mctruth->Origin() == simb::kCosmicRay) isCosmics = true;
-	  }
-	    //}
-	}
-	isfirsttime = false;
-	if (fSaveCaloCosmics) isCosmics = false; //override to save calo info
-      }
 
 //        double maxenergy = -1;
 //        int imc0 = 0;
@@ -2981,7 +2974,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       //extracting hit true XYZ from simIDEs
       if (isMC){
         std::vector<sim::IDE> ides;
-        bt->HitToSimIDEs(hitlist[i], ides);
+	try{
+	  bt->HitToSimIDEs(hitlist[i], ides);
+	}
+	catch(...){}
         if (ides.size()>0){
           std::vector<double> xyz = bt->SimIDEsToXYZ(ides);
           fData->hit_trueX[i] = xyz[0];
@@ -3603,7 +3599,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           fData->genie_ND[iPart]=part.NumberDaughters();
           fData->genie_mother[iPart]=part.Mother();
         } // for particle
-        const simb::MCNeutrino& nu(mctruth->GetNeutrino());
+        //const simb::MCNeutrino& nu(mctruth->GetNeutrino());
       } //if neutrino set
     }// end (fSaveGenieInfo)  
 

@@ -20,6 +20,7 @@
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
+#include "RawData/TriggerData.h"
 #include "RecoBase/Wire.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/OpHit.h"
@@ -38,6 +39,7 @@
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/CosmicTag.h"
 #include "Simulation/SimChannel.h"
+#include "Simulation/SimPhotons.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/GTruth.h"
 #include "SimulationBase/MCTruth.h"
@@ -171,6 +173,7 @@ namespace larlite {
     std::map<art::Ptr<::sim::MCTrack>,      std::pair<size_t,size_t> > fPtrIndex_mctrack;
     std::map<art::Ptr<::raw::RawDigit>,     std::pair<size_t,size_t> > fPtrIndex_rawdigit;
     std::map<art::Ptr<::raw::OpDetWaveform>,std::pair<size_t,size_t> > fPtrIndex_opdigit;
+    std::map<art::Ptr<::raw::Trigger>,      std::pair<size_t,size_t> > fPtrIndex_trigger;
     std::map<art::Ptr<::recob::Wire>,       std::pair<size_t,size_t> > fPtrIndex_wire;
     std::map<art::Ptr<::recob::Hit>,        std::pair<size_t,size_t> > fPtrIndex_hit;
     std::map<art::Ptr<::recob::OpHit>,      std::pair<size_t,size_t> > fPtrIndex_ophit;

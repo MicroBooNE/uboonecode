@@ -15,16 +15,17 @@ beamDAQConfig* beamDAQConfig::fInstance = NULL;
 beamDAQConfig::beamDAQConfig()
 {
   //load config
-  cet::filepath_lookup fpath("BEAMDAQ_CONFIG_PATH");
+  cet::filepath_lookup fpath(getenv("FHICL_FILE_PATH"));
   std::string fcfgname="beamdaq_config.fcl";
   if (getenv("BEAMDAQ_CONFIG_FILE"))
      fcfgname=getenv("BEAMDAQ_CONFIG_FILE");
 
-  try {
+   try {
     fhicl::make_ParameterSet(fcfgname, fpath, fPSet);
   } catch ( std::exception& e ) {
     std::cerr<<"Unable to locate "<<fcfgname<<" in "
-	     <<"$BEAMDAQ_CONFIG_PATH"<<std::endl;
+	     <<"$FHICL_FILE_PATH"<<std::endl
+	     <<e.what()<<std::endl;
     exit(0);
   }
 
@@ -43,19 +44,35 @@ beamDAQConfig::beamDAQConfig()
     
     fhicl::ParameterSet eventType=fPSet.get<fhicl::ParameterSet>("event_type");
     
-    std::vector<std::string> keys=eventType.get_keys();
+    std::vector<std::string> keys=eventType.get_names();
     for (unsigned int i=0;i<keys.size();i++) {
       int eid=eventType.get<int>(keys[i]);
       std::pair<std::string,int> p(keys[i],eid);
       fEventTypeMap.insert(p);
     }
-    fhicl::ParameterSet timeWindow=fPSet.get<fhicl::ParameterSet>("time_window");
-    
-    keys=timeWindow.get_keys();
+
+    fhicl::ParameterSet timeWindow=fPSet.get<fhicl::ParameterSet>("time_window");    
+    keys=timeWindow.get_names();
     for (unsigned int i=0;i<keys.size();i++) {
       int tw=timeWindow.get<int>(keys[i]);
       std::pair<std::string,int> p(keys[i],tw);
       fTimeWindowMap.insert(p);
+    }
+
+    fhicl::ParameterSet timeOffset=fPSet.get<fhicl::ParameterSet>("time_offset");    
+    keys=timeOffset.get_names();
+    for (unsigned int i=0;i<keys.size();i++) {
+      float tw=timeOffset.get<float>(keys[i]);
+      std::pair<std::string,float> p(keys[i],tw);
+      fTimeOffsetMap.insert(p);
+    }
+
+    fhicl::ParameterSet timePadding=fPSet.get<fhicl::ParameterSet>("time_padding");    
+    keys=timePadding.get_names();
+    for (unsigned int i=0;i<keys.size();i++) {
+      float tw=timePadding.get<float>(keys[i]);
+      std::pair<std::string,float> p(keys[i],tw);
+      fTimePaddingMap.insert(p);
     }
   } catch ( std::exception& e ) {
     std::cerr<<"Bad "<<fcfgname<<" file. \n"<<e.what()<<std::endl;
