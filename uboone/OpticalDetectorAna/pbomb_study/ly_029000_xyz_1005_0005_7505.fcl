@@ -1,0 +1,15 @@
+#include "pbomb.fcl"
+
+services.user.PhotonVisibilityService.XMin: 100
+services.user.PhotonVisibilityService.XMax: 101
+services.user.PhotonVisibilityService.YMin: 0
+services.user.PhotonVisibilityService.YMax: 1
+services.user.PhotonVisibilityService.ZMin: 750
+services.user.PhotonVisibilityService.ZMax: 751
+
+physics.producers.generator.N: 29000
+physics.producers.generator.T: 0
+physics.producers.generator.SigmaT: 6
+physics.producers.generator.TDist: 0
+
+physics.analyzers.opdata.out_filename: "ly_029000_xyz_1005_0005_7505.root"
