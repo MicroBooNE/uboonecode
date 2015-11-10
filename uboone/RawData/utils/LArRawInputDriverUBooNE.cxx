@@ -14,9 +14,9 @@
 #include "RawData/DAQHeader.h"
 #include "RawData/BeamInfo.h"
 #include "RawData/OpDetWaveform.h"
-#include "Geometry/Geometry.h"
 #include "SummaryData/RunData.h"
-#include "Utilities/TimeService.h"
+#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "Utilities/DetectorClocksService.h" // lardata
 #include "Utilities/ElecClock.h" // lardata
 #include "OpticalDetectorData/OpticalTypes.h" // lardata -- I want to move the enums we use back to UBooNE as they are UBooNE-specific
 #include "uboone/TriggerSim/UBTriggerTypes.h"
@@ -855,8 +855,7 @@ namespace lris {
     
     //crate -> card -> channel -> window
 
-    ::art::ServiceHandle<geo::Geometry> geom;
-    ::art::ServiceHandle< util::TimeService > timeService;
+    auto const* timeService = lar::providerFrom<util::DetectorClocksService>();
     ::art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     
     using namespace gov::fnal::uboone::datatypes;
@@ -1071,7 +1070,7 @@ namespace lris {
 						std::vector<raw::Trigger>& trigInfo)
   {
 
-    ::art::ServiceHandle< util::TimeService > timeService;
+    auto const* timeService = lar::providerFrom<util::DetectorClocksService>();
 
     for(auto const& it_trig_map : event_record.getTRIGSEBMap()){
 

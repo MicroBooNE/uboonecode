@@ -26,9 +26,9 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // LArSoft includes
+#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "Geometry/Geometry.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "Geometry/PlaneGeo.h"
 #include "Geometry/WireGeo.h"
 #include "Utilities/AssociationUtil.h"
@@ -48,11 +48,8 @@ Cluster2DNuAlg::Cluster2DNuAlg(fhicl::ParameterSet const &pset) : fMyProducerMod
 {
     this->reconfigure(pset);
     
-    art::ServiceHandle<geo::Geometry>            geometry;
-    art::ServiceHandle<util::DetectorProperties> detectorProperties;
-    
-    m_geometry = &*geometry;
-    m_detector = &*detectorProperties;
+    m_geometry = lar::providerFrom<geo::Geometry>();
+    m_detector = lar::providerFrom<util::DetectorPropertiesService>();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

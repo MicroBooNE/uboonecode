@@ -47,9 +47,9 @@
 #include "OpticalDetectorData/OpticalTypes.h"
 #include "MCBase/MCShower.h"
 //#include "RecoAlg/ClusterParamsAlg.h"
-#include "Utilities/LArProperties.h"
+#include "Utilities/LArPropertiesService.h"
 #include "Utilities/GeometryUtilities.h"
-#include "Utilities/DetectorProperties.h"
+#include "Utilities/DetectorPropertiesService.h"
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -228,9 +228,9 @@ namespace datascanner {
     Double_t _readout_size;   ///< Readout window size in readout time thick
 
     // Service modules
-    art::ServiceHandle<util::DetectorProperties> _detp;
-    art::ServiceHandle<util::LArProperties> _larp;
-    art::ServiceHandle<geo::Geometry> _geo;
+    dataprov::DetectorProperties const* _detp;
+    dataprov::LArProperties const* _larp;
+    geo::GeometryCore const* _geo;
 
   };
 
@@ -253,16 +253,19 @@ namespace datascanner {
   //#######################################################################################################
   {
 
+    _detp = lar::providerFrom<util::DetectorPropertiesService>();
+    _larp = lar::providerFrom<util::LArPropertiesService>();
+    _geo = lar::providerFrom<geo::Geometry>();
+    
     //fCParamsAlg.reconfigure(pset.get< fhicl::ParameterSet >("ClusterParamsAlg"));
 
     // Set detector boundaries
-    art::ServiceHandle<geo::Geometry> geo;
-    _y_max = geo->DetHalfHeight();
+    _y_max = _geo->DetHalfHeight();
     _y_min = (-1.) * _y_max;
     _z_min = 0;
-    _z_max = geo->DetLength();
+    _z_max = _geo->DetLength();
     _x_min = 0;
-    _x_max = 2.*(geo->DetHalfWidth());
+    _x_max = 2.*(_geo->DetHalfWidth());
 
     // These should be obtained from time service
     _readout_startT = -1.6e-3;

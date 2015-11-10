@@ -8,7 +8,6 @@ art_make( BASENAME_ONLY
 	  MODULE_LIBRARIES Geometry
 	  	        Geometry_service
 		        Utilities
-	       	        TimeService_service
 	                uboone_Geometry
                         OpticalDetectorData
 			OpticalDetector

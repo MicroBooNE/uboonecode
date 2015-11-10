@@ -90,7 +90,6 @@
 #include "Geometry/Geometry.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
-#include "Utilities/TimeService.h"
 
 using DoubleVec = std::vector<double>;
 

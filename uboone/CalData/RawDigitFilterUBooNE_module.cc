@@ -46,9 +46,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
-#include "Utilities/SimpleTimeService.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
 #include "CalibrationDBI/Interface/IDetPedestalProvider.h"
 
@@ -139,8 +137,8 @@ private:
     bool                 fFirstEvent;
     
     // Useful services, keep copies for now (we can update during begin run periods)
-    art::ServiceHandle<geo::Geometry>            fGeometry;             ///< pointer to Geometry service
-    art::ServiceHandle<util::DetectorProperties> fDetectorProperties;   ///< Detector properties service
+    geo::GeometryCore const* fGeometry;                         ///< pointer to Geometry service
+    dataprov::DetectorProperties const* fDetectorProperties;   ///< Detector properties service
     const lariov::IDetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
 };
 
@@ -156,9 +154,12 @@ DEFINE_ART_MODULE(RawDigitFilterUBooNE)
 RawDigitFilterUBooNE::RawDigitFilterUBooNE(fhicl::ParameterSet const & pset) :
                       fNumEvent(0),
                       fFirstEvent(true),
-                      fPedestalRetrievalAlg(art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider())
-
+                      fPedestalRetrievalAlg(*lar::providerFrom<lariov::IDetPedestalService>())
 {
+    
+    fGeometry = lar::providerFrom<geo::Geometry>();
+    fDetectorProperties = lar::providerFrom<util::DetectorPropertiesService>();
+    
     reconfigure(pset);
     produces<std::vector<raw::RawDigit> >();
 

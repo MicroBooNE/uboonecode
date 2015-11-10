@@ -59,9 +59,8 @@ extern "C" {
 #include "Simulation/SimChannel.h"
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
-#include "Utilities/DetectorProperties.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "Utilities/LArFFT.h"
-#include "Utilities/LArProperties.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 
 namespace art {
@@ -157,7 +156,7 @@ namespace detsim{
     fSigTime          = p.get< std::vector<int>           >("SigTime");
     fSigUnit          = p.get< bool                       >("SigUnit");
     fChannel          = p.get< unsigned int               >("Channel");
-    art::ServiceHandle<util::DetectorProperties> detprop;
+    auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
     fSampleRate       = detprop->SamplingRate();
     fNSamplesReadout  = detprop->NumberTimeSamples();
     fShapingTimeOrder = { {0.5, 0}, {1.0, 1}, {2.0, 2}, {3.0, 3} };

@@ -22,7 +22,7 @@
 #include "RecoBase/OpHit.h"
 #include "RawData/OpDetWaveform.h"
 //#include "RawData/TriggerData.h"
-#include "Utilities/TimeService.h"
+#include "Utilities/DetectorClocksService.h" // lardata
 
 // C++ includes
 #include <memory>
@@ -224,7 +224,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   }
 
   // load trigger data
-  art::ServiceHandle<util::TimeService> ts;
+  auto const* ts = lar::providerFrom<util::DetectorClocksService>();
 
   // get the trigger time
   _TrigTime = ts->TriggerTime();

@@ -3,6 +3,8 @@
 
 #include "WFAlgoDigitizedSPE.h"
 
+#include "Utilities/DetectorClocksService.h"
+
 namespace opdet {
   
   //--------------------------------------------------------
@@ -12,7 +14,7 @@ namespace opdet {
     Reset();
     fSPE.clear();
     //fSPETime = util::TimeService::GetME().OpticalClock();
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
     fSPETime = ts->OpticalClock();
   }
 
@@ -35,6 +37,7 @@ namespace opdet {
 
     double unit_time = fSPETime.TickPeriod();
 
+    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
     for(auto const &t : fPhotonTime) {
 
       //
@@ -43,7 +46,6 @@ namespace opdet {
 
       // Time in electronics clock frame (with T0)
       //double time = ::util::TimeService::GetME().G4ToElecTime(t);
-      art::ServiceHandle<util::TimeService> ts;
       double time = ts->G4ToElecTime(t);
 
       if(fEnableSpread)  time +=  RandomServer::GetME().Gaus(fT0,fT0Sigma) * 1.e-3 ;

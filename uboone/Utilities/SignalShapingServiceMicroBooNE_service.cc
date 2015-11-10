@@ -12,8 +12,10 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
+#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "Utilities/DetectorPropertiesService.h"
+#include "Utilities/LArPropertiesService.h"
+#include "Utilities/DetectorClocksService.h"
 #include "Utilities/LArFFT.h"
 #include "TFile.h"
 
@@ -49,7 +51,8 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 {
   // add a comment here
   art::ServiceHandle<geo::Geometry> geo;
-  art::ServiceHandle<util::LArProperties> larp;
+  auto const* larp = lar::providerFrom<util::LArPropertiesService>();
+  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
   // Reset initialization flag.
 
   fInit = false;
@@ -239,7 +242,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
    */
   for(size_t plane = 0; plane < geo->Nplanes(); ++plane) {
 
-    double larg4_velocity = larp->DriftVelocity( larp->Efield(plane), larp->Temperature() );
+    double larg4_velocity = detprop->DriftVelocity( detprop->Efield(plane), larp->Temperature() );
 
     if(fDefaultDriftVelocity.at(plane) < 0) fDefaultDriftVelocity.at(plane) = larg4_velocity;
 
@@ -324,10 +327,11 @@ void util::SignalShapingServiceMicroBooNE::SetTimeScaleFactor()
   // get the scale factor between the bulk drift velocity used to generate the field response
   //   and that used for this simulation.
 
-  art::ServiceHandle<util::LArProperties> larp;
+  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* larp = lar::providerFrom<util::LArPropertiesService>();
 
-  double defaultVelocity = larp->DriftVelocity(fDefaultEField, fDefaultTemperature);
-  double thisVelocity    = larp->DriftVelocity( larp->Efield(0), larp->Temperature() );
+  double defaultVelocity = detprop->DriftVelocity(fDefaultEField, fDefaultTemperature);
+  double thisVelocity    = detprop->DriftVelocity( detprop->Efield(0), larp->Temperature() );
   double vRatio = defaultVelocity/thisVelocity;
   double vDiff = vRatio -1.0;
 
@@ -574,9 +578,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse(size_t ktype)
 {
   // Get services.
 
-  art::ServiceHandle<geo::Geometry> geo;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> larp;
+//  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
 
   //  std::cout << fNResponses.size() << std::endl;
   //  for (auto& ktype : fNResponses) {
@@ -601,7 +603,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse(size_t ktype)
 
 
 
-  //double driftvelocity=larp->DriftVelocity()/1000.; // in cm/nsec
+  //double driftvelocity=detprop->DriftVelocity()/1000.; // in cm/nsec
   ////////////////////////////////////////////////////
 
   // Ticks in nanosecond
@@ -639,8 +641,6 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(size_t ktype,double 
 {
   // Get services.
 
-  art::ServiceHandle<geo::Geometry> geo;
-  art::ServiceHandle<util::DetectorProperties> detprop;
   art::ServiceHandle<util::LArFFT> fft;
 
   LOG_DEBUG("SignalShapingMicroBooNE") << "Setting MicroBooNE electronics response function...";
@@ -722,6 +722,7 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(size_t ktype,double 
 
   
 
+  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
   for(auto& element : fElectResponse[ktype]){
     element /= max;
     element *= fADCPerPCAtLowestASICGain * 1.60217657e-7;
@@ -740,7 +741,7 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
 {
   // Get services.
 
-  art::ServiceHandle<util::DetectorProperties> detprop;
+  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
   art::ServiceHandle<util::LArFFT> fft;
 
   double ts = detprop->SamplingRate();
@@ -791,9 +792,7 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
 void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
 {
   // Get services
-  art::ServiceHandle<geo::Geometry> geo;
-  art::ServiceHandle<util::LArProperties> larp;
-  art::ServiceHandle<util::DetectorProperties> detprop;
+  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
   art::ServiceHandle<util::LArFFT> fft;
 
   /* This could be a warning, but in principle, there's no reason to restrict the binning
@@ -1033,7 +1032,7 @@ int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int cons
     default:
       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
   }
-  auto tpc_clock = art::ServiceHandle<util::TimeService>()->TPCClock();
+  auto tpc_clock = lar::providerFrom<util::DetectorClocksService>()->TPCClock();
   return tpc_clock.Ticks(time_offset/1.e3);
 }
 
@@ -1064,7 +1063,7 @@ const std::vector<TComplex>& util::SignalShapingServiceMicroBooNE::GetConvKernel
 // Evaluate 2D filter used in induced charge deconvolution (M. Mooney)
 double util::SignalShapingServiceMicroBooNE::Get2DFilterVal(size_t planeNum, size_t freqDimension, double binFrac) const
 {
-  art::ServiceHandle<util::DetectorProperties> detprop;
+  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
   double ts = detprop->SamplingRate();
 
   double freq;

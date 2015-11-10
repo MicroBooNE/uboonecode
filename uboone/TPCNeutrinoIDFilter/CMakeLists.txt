@@ -8,7 +8,6 @@ art_make(BASENAME_ONLY
 		     AnalysisBase
 		     Geometry
 		     Geometry_service
-		     LArProperties_service
 		     Utilities
 		     ${ART_PERSISTENCY_COMMON}
 		     ${ART_PERSISTENCY_PROVENANCE}
@@ -31,8 +30,6 @@ art_make(BASENAME_ONLY
 		     AnalysisBase
 		     Geometry
 		     Geometry_service
-		     LArProperties_service
-		     DetectorProperties_service
 		     Utilities
 		     ${ART_PERSISTENCY_COMMON}
 		     ${ART_PERSISTENCY_PROVENANCE}

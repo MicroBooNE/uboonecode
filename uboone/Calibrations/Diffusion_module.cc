@@ -34,9 +34,8 @@
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RawData/BeamInfo.h"
-#include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
-#include "Utilities/DetectorProperties.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "SummaryData/POTSummary.h"
 #include "MCCheater/BackTracker.h"
 #include "RecoBase/Track.h"
@@ -508,10 +507,8 @@ void microboone::Diffusion::analyze(const art::Event& evt)
   }  
 
   //services
-  art::ServiceHandle<geo::Geometry> geom;  
+  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
   art::ServiceHandle<cheat::BackTracker> bt;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> LArProp;
   
   //associations
   if (fSaveTrackInfo){
@@ -1047,7 +1044,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
    }//if (mcevts_truth)
   }//if (!isdata) 
   
-  taulife = LArProp->ElectronLifetime();
+  taulife = detprop->ElectronLifetime();
   fTree->Fill();
 }
 
@@ -1106,8 +1103,7 @@ double microboone::Diffusion::length(const recob::Track& track)
 double microboone::Diffusion::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
 {
   // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
+  auto const* geom = lar::providerFrom<geo::Geometry>();
   
   // Get active volume boundary.
   double xmin = 0.;

@@ -20,7 +20,7 @@
 #include "OpticalDetectorData/OpticalRawDigit.h"
 #include "RawData/TriggerData.h"
 #include "RawData/OpDetWaveform.h" // from lardata
-#include "Utilities/TimeService.h"
+#include "Utilities/DetectorClocksServiceStandard.h" // FIXME: this code is non-portable
 #include "uboone/OpticalDetectorSim/UBOpticalException.h"
 #include "Geometry/Geometry.h" // larcore
 #include "uboone/Geometry/UBOpChannelTypes.h"  // uboonecode
@@ -165,8 +165,10 @@ namespace opdet {
     // Get needed services
 
     // Obtain optical clock to be used for sample/frame number generation
-    art::ServiceHandle<util::TimeService> ts;
-    ts->preProcessEvent(event); // sets trigger time
+    // FIXME: this code is non-portable
+    art::ServiceHandle<util::DetectorClocksServiceStandard> tss;
+    tss->preProcessEvent(event); // sets trigger time
+    auto const* ts = lar::providerFrom<util::DetectorClocksServiceStandard>();
     ::util::ElecClock clock = ts->OpticalClock();
     //std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
@@ -194,7 +196,7 @@ namespace opdet {
 		<< "\033[95m" << "<<" << __PRETTY_FUNCTION__ << ">>" << "\033[00m"
 		<< std::endl << "  "
 		<< "\033[93m"
-		<< " No trigger data exists => will use the default trigger time set in TimeService..."
+		<< " No trigger data exists => will use the default trigger time set in DetectorClocksService..."
 		<< "\033[00m"
 		<< std::endl;
 

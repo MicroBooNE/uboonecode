@@ -20,14 +20,11 @@ art_make( BASENAME_ONLY
 	   	   Simulation
 		   SimulationBase
 		   Utilities
-		   TimeService_service
 		   RawData
 		   MCBase
 		   SummaryData
 		   RecoBase
 		   RecoObjects
-		   LArProperties_service
-		   DetectorProperties_service
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}
@@ -55,7 +52,6 @@ art_make( BASENAME_ONLY
 		   Geometry
 		   uboone_Geometry
 		   Geometry_service
-		   TimeService_service
 		   Simulation
 		   SimulationBase
 		   Utilities
@@ -64,8 +60,6 @@ art_make( BASENAME_ONLY
 		   RawData
 		   RecoBase
 		   RecoObjects
-		   LArProperties_service
-		   DetectorProperties_service
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}

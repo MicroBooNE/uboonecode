@@ -30,7 +30,8 @@
 #include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
 #include "Filters/ChannelFilter.h"
-#include "Utilities/TimeService.h" // lardata
+#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "Utilities/DetectorClocksService.h" // lardata
 // RawDigits
 #include "RawData/raw.h" // raw::Uncompress()
 #include "RawData/RawDigit.h"
@@ -247,7 +248,7 @@ namespace zmqds {
 
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
     fTrigTimeStamp = ts->TriggerTime();
     fBeamTimeStamp = ts->BeamGateTime();
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;

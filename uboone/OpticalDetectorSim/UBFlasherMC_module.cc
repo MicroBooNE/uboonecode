@@ -40,6 +40,7 @@
 /// LArSoft
 #include "OpticalDetectorData/ChannelDataGroup.h" // from lardata
 #include "Geometry/Geometry.h" // larcore
+#include "Utilities/DetectorClocksService.h" // lardata
 #include "Simulation/SimPhotons.h" // larsim
 #include "UBOpticalADC.h" // uboonecode
 #include "UBLogicPulseADC.h" // uboonecode
@@ -219,7 +220,7 @@ namespace opdet {
     ::art::ServiceHandle<geo::Geometry> geom;
     ::art::ServiceHandle<geo::UBOpReadoutMap> chanmap;
     ::art::ServiceHandle<opdet::UBOpticalChConfig> ch_conf;
-    ::art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
     ::art::ServiceHandle<art::TFileService> tfs;
 
     // allocate the container

@@ -50,9 +50,8 @@
 #include "Simulation/SimChannel.h"
 #include "Geometry/Geometry.h"
 #include "Utilities/LArFFT.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
+#include "Utilities/DetectorPropertiesService.h"
+#include "Utilities/DetectorClocksServiceStandard.h" // FIXME: this is not portable
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
 #include "CalibrationDBI/Interface/IDetPedestalService.h"
@@ -219,7 +218,7 @@ namespace detsim {
 
     }
     //detector properties information
-    art::ServiceHandle<util::DetectorProperties> detprop;
+    auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
     fSampleRate    = detprop->SamplingRate();
     fNTimeSamples  = detprop->NumberTimeSamples();
 
@@ -326,9 +325,10 @@ namespace detsim {
     art::ServiceHandle<art::TFileService> tfs;
 
     //TimeService
-    art::ServiceHandle<util::TimeService> ts;
+    art::ServiceHandle<util::DetectorClocksServiceStandard> tss;
     // In case trigger simulation is run in the same job...
-    ts->preProcessEvent(evt);
+    tss->preProcessEvent(evt);
+    auto const* ts = tss->provider();
 
     // Check if trigger data product exists or not. If not, throw a warning
     art::Handle< std::vector<raw::Trigger> > trig_array;

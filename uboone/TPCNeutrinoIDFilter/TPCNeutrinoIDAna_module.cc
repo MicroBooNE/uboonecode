@@ -33,11 +33,13 @@
 #include "RecoBase/Track.h"
 #include "RecoBase/Vertex.h"
 #include "AnalysisBase/CosmicTag.h"
-#include "Geometry/Geometry.h"
 #include "SimpleTypesAndConstants/geo_types.h"
-#include "Utilities/TimeService.h"
+#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "Geometry/GeometryCore.h"
+#include "DataProviders/DetectorProperties.h"
+#include "Geometry/Geometry.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "Utilities/AssociationUtil.h"
-#include "Utilities/DetectorProperties.h"
 
 // ROOT includes. Note: To look up the properties of the ROOT classes,
 // use the ROOT web site; e.g.,
@@ -100,8 +102,8 @@ private:
     int fSubRun;
 
     // Other variables that will be shared between different methods.
-    art::ServiceHandle<geo::Geometry>            fGeometry;       // pointer to Geometry service
-    art::ServiceHandle<util::DetectorProperties> fDetectorProperties;
+    geo::GeometryCore const*             fGeometry;           ///< pointer to the Geometry service
+    dataprov::DetectorProperties const* fDetectorProperties; ///< Pointer to the detector properties
 
 }; // class  TPCNeutrinoIDAna
 
@@ -157,6 +159,9 @@ void  TPCNeutrinoIDAna::reconfigure(fhicl::ParameterSet const& pset)
     // For now require that we input the fully qualified input file name, including full path to file
     // **TODO** learn how to recover from art framework
     fInputFileName = pset.get<std::string>("FullyQualifiedInputFile");
+    
+    fGeometry = lar::providerFrom<geo::Geometry>();
+    fDetectorProperties = lar::providerFrom<util::DetectorPropertiesService>();
     
     return;
 }

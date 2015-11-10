@@ -3,6 +3,8 @@
 
 #include "WFAlgoAnalyticalSPE.h"
 
+#include "Utilities/DetectorClocksService.h"
+
 namespace opdet {
   
   //----------------------------------------------------------
@@ -27,7 +29,7 @@ namespace opdet {
     // Predefine variables to save time later
     ::util::ElecClock rel_spe_start = start_time;
 
-    ::art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
 
     rel_spe_start.SetTime(0);
 

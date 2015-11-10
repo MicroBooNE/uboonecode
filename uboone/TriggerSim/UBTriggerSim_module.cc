@@ -31,13 +31,14 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
+#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "UBTrigException.h"
 #include "UBTriggerAlgo.h"
 #include "RawData/TriggerData.h"
 #include "OpticalDetectorData/PMTTrigger.h"
 #include "Utilities/AssociationUtil.h"
 #include "Utilities/ElecClock.h"
-#include "Utilities/TimeService.h"
+#include "Utilities/DetectorClocksService.h"
 
 /// nutools
 #include "Simulation/BeamGateInfo.h"
@@ -143,7 +144,7 @@ namespace trigger {
 				     );
 
     // Store user-defined trigger timings to the attributes
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
     auto clock = ts->OpticalClock();
     fTriggerCalib.clear();
     fTriggerExt.clear();
@@ -200,7 +201,7 @@ namespace trigger {
   //#########################################
   {
     // Initialize
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
     std::unique_ptr< std::vector<raw::Trigger>   >  triggers(new std::vector<raw::Trigger>);
     fAlg.ClearInputTriggers();
     auto clock = ts->OpticalClock();

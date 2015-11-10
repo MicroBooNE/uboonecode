@@ -30,14 +30,32 @@ simple_plugin( RawDigitWriter "module"
                BASENAME_ONLY
              )
 
-art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
+simple_plugin( TriggerEnforcement "module"
+                   DetectorClocksServiceStandard_service # BUG note that we link to a specific service implementation
+                   RawData
+                   ${ART_FRAMEWORK_CORE}
+                   ${ART_FRAMEWORK_PRINCIPAL}
+                   ${ART_FRAMEWORK_SERVICES_REGISTRY}
+                   ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+                   ${ART_PERSISTENCY_COMMON}
+                   ${ART_PERSISTENCY_PROVENANCE}
+                   ${ART_UTILITIES}
+                   ${MF_MESSAGELOGGER}
+                   ${MF_UTILITIES}
+                   ${FHICLCPP}
+                   ${CETLIB}
+                   ${ROOT_BASIC_LIB_LIST}
+                   BASENAME_ONLY
+             )
+
+
+art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc TriggerEnforcement_module.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME uboone_RawData
 	  LIB_LIBRARIES DatabaseUtil_service
                         Geometry
 	  	        Geometry_service
 		        Utilities
-	       	        TimeService_service
 	                uboone_Geometry
 			UBOpReadoutMap_service
                         OpticalDetectorData
@@ -69,7 +87,6 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
                         Geometry
 	  	        Geometry_service
 		        Utilities
-	       	        TimeService_service
 	                uboone_Geometry
 			UBOpReadoutMap_service
                         OpticalDetectorData

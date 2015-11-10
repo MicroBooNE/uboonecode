@@ -37,6 +37,7 @@
 
 /// LArSoft
 #include "OpticalDetectorData/ChannelDataGroup.h" // from lardata
+#include "Utilities/DetectorClocksService.h" // lardata
 #include "Geometry/Geometry.h" // larcore
 #include "Simulation/SimPhotons.h" // larsim
 #include "UBOpticalADC.h" // uboonecode
@@ -146,7 +147,7 @@ namespace opdet {
     // Get services
     //
     ::art::ServiceHandle<geo::Geometry> geom;
-    ::art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
 
     // allocate the container
     ::std::unique_ptr< optdata::ChannelDataGroup > wfs(new optdata::ChannelDataGroup);

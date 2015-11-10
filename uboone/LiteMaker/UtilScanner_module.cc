@@ -25,9 +25,9 @@
 #include "Geometry/OpDetGeo.h"
 #include "Geometry/WireGeo.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/LArProperties.h"
+#include "Utilities/LArPropertiesService.h"
 #include "Utilities/GeometryUtilities.h"
-#include "Utilities/DetectorProperties.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
 
 // LArLite
@@ -269,8 +269,8 @@ namespace ana {
   {
     if(_detp_tree) return;
     art::ServiceHandle<art::TFileService>  fileService;    
-    art::ServiceHandle<util::DetectorProperties> _detp;
-    art::ServiceHandle<geo::Geometry> _geom;
+    auto const* _detp = lar::providerFrom<util::DetectorPropertiesService>();
+    auto const* _geom = lar::providerFrom<geo::Geometry>();
     TTree* _detp_tree = fileService->make<TTree>("DetectorProperties","");
 
     //--- Fill Variables ---//
@@ -306,8 +306,8 @@ namespace ana {
   void UtilScanner::SaveLArProperties(fhicl::ParameterSet const& pset)
   {
     if(_larp_tree) return;
-    art::ServiceHandle<util::LArProperties> _larp;
-    art::ServiceHandle<geo::Geometry> _geom;
+    auto const* _larp = lar::providerFrom<util::LArPropertiesService>();
+    auto const* _geom = lar::providerFrom<geo::Geometry>();
 
     //--- Fill Variables ---//
     std::vector< Double_t >          fEfield(_geom->Nplanes(),0);

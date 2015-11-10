@@ -1,7 +1,6 @@
 cet_enable_asserts()
 
 set( uboone_util_lib_list LArFFT_service
-                        LArProperties_service
 			Geometry
 			HitFinder
 			RecoBase

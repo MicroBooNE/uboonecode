@@ -15,7 +15,7 @@
 #define WFALGOBASE_H
 
 #include <vector>
-#include "Utilities/TimeService.h"
+#include "Utilities/ElecClock.h"
 #include "UBOpticalException.h"
 
 namespace opdet {

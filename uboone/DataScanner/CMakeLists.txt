@@ -27,8 +27,6 @@ art_make( BASENAME_ONLY
 			   RawData
 			   RecoBase
 			   RecoObjects
-			   LArProperties_service
-			   DetectorProperties_service
 			   ${UBOONECODE_LIB}
 			   ${SIMULATIONBASE}
 			   ${LARRECO_LIB}

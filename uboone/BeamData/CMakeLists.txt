@@ -8,7 +8,6 @@ find_library( UB_DATA_TYPES NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LI
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES
                         Utilities
-                        TimeService_service
                         Filters
                         RawData
 			SummaryData
