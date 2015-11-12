@@ -65,15 +65,17 @@ namespace opdet {
 	
 	double amp = EvaluateSPE(func_time*1.e3);
 
-	if(fEnableSpread) amp *= RandomServer::GetME().Gaus(fGain,fGainSigma * fGain);
-	else amp *= fGain;
+	double gain = fGain;
+	if(fEnableSpread) gain = RandomServer::GetME().Gaus(fGain,fGainSigma * fGain);
+
+	amp *= gain;
 
 	wf.at(i) += amp;
 	/*
 	if(!peaked && amp >0.01) peaked = true;
 	else if(peaked && amp<0.01) break;
 	*/
-	if(func_time>0.4) break;
+	if(func_time>0.624) break;
       }
     }
   }
@@ -87,7 +89,7 @@ namespace opdet {
     //
     // Max @ x=62.8000 (and I believe we don't need sub pico-second accuracy) 
     //
-    return (2.853e-3 * pow(x,3) * exp( -x / 20.94) - 4.988e-3 * exp( -x / 110000)) / 35.208752;
+    return (2.853e-3 * pow(x,3) * exp( -x / 20.94) - 4.988e-3 * exp( -x / 110000)) / 35.208752 / 5.9865;
     
   }
 
