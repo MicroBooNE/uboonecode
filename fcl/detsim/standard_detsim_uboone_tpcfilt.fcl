@@ -50,6 +50,7 @@ filters :
      module_type: FilterNoDirtNeutrinos
      GenModuleLabel: "generator"
      LArG4ModuleLabel: "largeant"
+     KeepCryostatNeutrinos: "false"
     }
 }
  
