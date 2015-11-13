@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a STEPS=( ${@:6:$(($#-5))} ) # -g option to declare this array global
+declare -a STEPS=( ${@:7:$(($#-6))} ) # -g option to declare this array global
                                       # is not present in bash version 4.1.2(1)-release
                                       # so the array has been declared in the global scope
 
@@ -15,23 +15,20 @@ function initialize
     LARSOFT_REFERENCE_VERSION=$3
     BASEFILENAME=$4
     EXPCODE=$5
+    REQUIREDFILES=$6
 
-    #declare -ga STEPS=( ${@:6:$(($#-5))} )
+    #declare -ga STEPS=( ${@:7:$(($#-6))} )
 
-    declare -a SeedsFiles=(GenRandomSeeds_Ref.dat G4RandomSeeds_Ref.dat DetSimRandomSeeds_Ref.dat Reco1RandomSeeds_Ref.dat)
-    if [ x${SeedsFiles[STEP-1]} != x ]; then
-        xrdcp --nopbar xroot://fndca1.fnal.gov/pnfs/fnal.gov/usr/uboone/scratch/users/vito/ci_tests_inputfiles/${SeedsFiles[STEP-1]} .
-    fi
+
+    for FILE in $(echo "${REQUIREDFILES}"| sed 's/--/ /g'); do
+        NEWFILE=$(echo $FILE | sed 's/\/pnfs\//xroot:\/\/fndca1.fnal.gov\/pnfs\/fnal.gov\/usr\//')
+        xrdcp --nopbar ${NEWFILE} .
+    done
+
 
     INPUT_FILE="${BASEFILENAME}_Reference_${STEPS[STEP-1]}_${LARSOFT_REFERENCE_VERSION}.root"
     if [ x"${STEPS[STEP-1]}" == xnone ]; then INPUT_FILE=""; fi
 
-    if [ x$INPUT_FILE != x ]; then
-        xrdcp --nopbar xroot://fndca1.fnal.gov/pnfs/fnal.gov/usr/uboone/scratch/users/vito/ci_tests_inputfiles/${INPUT_FILE} .
-    fi
-
-    REFERENCE_FILE="${BASEFILENAME}_Reference_${STEPS[STEP]}_${LARSOFT_REFERENCE_VERSION}.root"
-    xrdcp --nopbar xroot://fndca1.fnal.gov/pnfs/fnal.gov/usr/uboone/scratch/users/vito/ci_tests_inputfiles/${REFERENCE_FILE} .
 
     OUTPUT_FILE="${BASEFILENAME}_Current_${STEPS[STEP]}.root"
 
@@ -127,19 +124,25 @@ initialize $@
 
 exitstatus $?
 
-TASKSTRING="larsoft_data_production"
-larsoft_data_production
+if [ $(awk '{print $2}' testmask.txt) -eq 1 ] ; then
+    TASKSTRING="larsoft_data_production"
+    larsoft_data_production
 
-exitstatus $?
-
+    exitstatus $?
+fi
 
 COMPAREINIT=0
-TASKSTRING="compare_data_products 0"
-compare_data_products 0 #Check for added/removed data products
 
-exitstatus $?
+if [ $(awk '{print $2}' testmask.txt) -eq 1 ] ; then
+    TASKSTRING="compare_data_products 0"
+    compare_data_products 0 #Check for added/removed data products
 
-TASKSTRING="compare_data_products 1"
-compare_data_products 1 #Check for differences in the size of data products
+    exitstatus $?
+fi
 
-exitstatus $?
+if [ $(awk '{print $3}' testmask.txt) -eq 1 ] ; then
+    TASKSTRING="compare_data_products 1"
+    compare_data_products 1 #Check for differences in the size of data products
+
+    exitstatus $?
+fi
