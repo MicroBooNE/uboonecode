@@ -30,7 +30,7 @@ source:
 
 services.user.PhotonVisibilityService: @local::standard_photonvisibilityservice
 services.user.OpDigiProperties:        @local::microboone_opdigiproperties
-#services.user.TimeService              @local::microboone_timeservice
+#services.user.DetectorClocksService:   @local::microboone_detectorclocks
 # Define and configure some modules to do work on each event.
 # First modules are defined; they are scheduled later.
 # Modules are grouped by type.
@@ -80,7 +80,7 @@ outputs:
 }
 
 # set quantum efficiency supressed scint yield to 0.03 * 24000
-#services.user.LArProperties.ScintYield: 24000
+#services.user.LArPropertiesService.ScintYield: 24000
 
 # enable optical physics in LArG4
 services.user.LArG4Parameters.EnabledPhysics: [ "Em",
@@ -95,7 +95,7 @@ services.user.LArG4Parameters.EnabledPhysics: [ "Em",
 
 # enable this custom physics list
 services.user.LArG4Parameters.UseCustomPhysics: true
-services.user.LArProperties.EnableCerenkovLight: false
+services.user.LArPropertiesService.EnableCerenkovLight: false
 physics.producers.generator.SigmaThetaXZ: [ 5.0 ]
 physics.producers.generator.SigmaThetaYZ: [ 5.0 ]
 physics.producers.generator.X0: [ 100.0 ]

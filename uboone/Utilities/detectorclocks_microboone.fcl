@@ -1,0 +1,25 @@
+#include "detectorclocks.fcl"
+
+BEGIN_PROLOG
+
+microboone_detectorclocks: @local::standard_detectorclocks
+
+microboone_detectorclocks.TrigModuleName:     "triggersim"
+microboone_detectorclocks.InheritClockConfig: true
+microboone_detectorclocks.G4RefTime:        -3.65e3 # G4 time [us] where electronics clock counting start
+microboone_detectorclocks.TriggerOffsetTPC: -1.6e3 # Time [us] for TPC readout start w.r.t. trigger time
+microboone_detectorclocks.FramePeriod:       1.6e3 # Frame period [us]
+microboone_detectorclocks.ClockSpeedTPC:     2.    # TPC clock speed in MHz
+microboone_detectorclocks.ClockSpeedOptical: 64.   # Optical clock speed in MHz
+microboone_detectorclocks.ClockSpeedTrigger: 16.   # Trigger clock speed in MHz
+microboone_detectorclocks.DefaultTrigTime:   3650. # Default trigger time [us].
+microboone_detectorclocks.DefaultBeamTime:   3650. # Default beam time [us].
+
+microboone_detectorclocks_1window: @local::microboone_detectorclocks
+microboone_detectorclocks_1window.G4RefTime:       0
+microboone_detectorclocks_1window.TriggerOffset:   0
+microboone_detectorclocks_1window.DefaultTrigTime: 0
+microboone_detectorclocks_1window.DefaultBeamTime: 0
+
+
+END_PROLOG

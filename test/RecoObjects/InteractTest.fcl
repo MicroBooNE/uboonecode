@@ -10,7 +10,7 @@ services:
 
 services.user.DatabaseUtil:       @local::standard_database
 services.user.DatabaseUtil.ShouldConnect: false
-services.user.LArProperties:      @local::standard_properties
+services.user.LArPropertiesService:      @local::standard_properties
 
 source:
 {

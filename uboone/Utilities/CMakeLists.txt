@@ -58,6 +58,7 @@ install_headers()
 # do not install duplicate standard_reco_uboone.fcl file
 # hack until install_fhicl( EXCLUDES standard_reco_uboone.fcl ) does the right thing
 install_fhicl( LIST databaseutil_microboone.fcl
+		    detectorclocks_microboone.fcl
 		    detectorproperties_microboone.fcl
 		    evdservices_microboone.fcl
 		    tinyhitfinderana_microboone.fcl
