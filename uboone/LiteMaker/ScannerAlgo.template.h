@@ -905,23 +905,23 @@ namespace larlite {
       const art::Ptr<::recob::Shower> shower_ptr(dh,i);
       
       larlite::shower lite_shower;
-      /*
+
       lite_shower.set_id(shower_ptr->ID());
-      lite_shower.set_total_energy(shower_ptr->Energy());
-      lite_shower.set_total_energy_err(shower_ptr->EnergyErr());
-      lite_shower.set_total_MIPenergy(shower_ptr->MIPEnergy());
-      lite_shower.set_total_MIPenergy_err(shower_ptr->MIPEnergyErr());
+      lite_shower.set_total_energy_v(shower_ptr->Energy());
+      lite_shower.set_total_energy_err_v(shower_ptr->EnergyErr());
+      lite_shower.set_total_MIPenergy_v(shower_ptr->MIPEnergy());
+      lite_shower.set_total_MIPenergy_err_v(shower_ptr->MIPEnergyErr());
       lite_shower.set_total_best_plane(shower_ptr->best_plane());
       lite_shower.set_direction(shower_ptr->Direction());
       lite_shower.set_direction_err(shower_ptr->DirectionErr());
       lite_shower.set_start_point(shower_ptr->ShowerStart());
       lite_shower.set_start_point_err(shower_ptr->ShowerStartErr());
-      lite_shower.set_dedx(shower_ptr->dEdx());
-      lite_shower.set_dedx_err(shower_ptr->dEdxErr());
+      lite_shower.set_dedx_v(shower_ptr->dEdx());
+      lite_shower.set_dedx_err_v(shower_ptr->dEdxErr());
       lite_shower.set_length(shower_ptr->Length());
       lite_shower.set_direction(shower_ptr->Direction());
       lite_shower.set_direction_err(shower_ptr->DirectionErr());
-      */     
+
       //fPtrIndex_shower[shower_ptr] = std::make_pair(lite_data->size(),name_index);
       
       lite_data->push_back(lite_shower);
