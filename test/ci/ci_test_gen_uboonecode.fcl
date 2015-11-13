@@ -2,6 +2,7 @@
 
 physics.producers.generator: @local::microboone_genie_hist
 physics.producers.generator.FluxType:       "histogram"
+physics.producers.generator.FluxSearchPaths: "./"
 physics.producers.generator.FluxFiles:     ["numode_bnb_470m_r200.root"] 
 
 services.user.SeedService.policy: "preDefinedSeed"
