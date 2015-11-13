@@ -25,6 +25,8 @@ function initialize
         xrdcp --nopbar ${NEWFILE} .
     done
 
+    pwd
+    ls -lh
 
     INPUT_FILE="${BASEFILENAME}_Reference_${STEPS[STEP-1]}_${LARSOFT_REFERENCE_VERSION}.root"
     if [ x"${STEPS[STEP-1]}" == xnone ]; then INPUT_FILE=""; fi
