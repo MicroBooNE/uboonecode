@@ -139,12 +139,7 @@ namespace opdet {
     
     fReadoutFrameOffset = p.get<std::vector<optdata::Frame_t> >("ReadoutFrameOffset");
 
-    try {
-      fDataProductsStemName = p.get<std::string>( "OpDataProductStemName" );
-    }
-    catch (...) {
-      fDataProductsStemName = "opdrammcreadout";
-    }
+    fDataProductsStemName = p.get<std::string>( "OpDataProductStemName", "opdrammcreadout");
 
     // do we want to give user option to name data?
     // do this here
