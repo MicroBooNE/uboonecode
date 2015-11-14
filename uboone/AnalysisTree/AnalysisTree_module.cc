@@ -789,6 +789,7 @@ namespace microboone {
     std::vector<Float_t>  cry_StartPointx;
     std::vector<Float_t>  cry_StartPointy;
     std::vector<Float_t>  cry_StartPointz;
+    std::vector<Float_t>  cry_StartPointt;
     std::vector<Int_t>    cry_status_code;
     std::vector<Float_t>  cry_mass;
     std::vector<Int_t>    cry_trackID;
@@ -2051,7 +2052,8 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(cry_P, -99999.);
   FillWith(cry_StartPointx, -99999.);
   FillWith(cry_StartPointy, -99999.);
-  FillWith(cry_StartPointz, -99999.);  
+  FillWith(cry_StartPointz, -99999.);
+  FillWith(cry_StartPointt, -99999.);  
   FillWith(cry_status_code, -99999);
   FillWith(cry_mass, -99999.);
   FillWith(cry_trackID, -99999);
@@ -2230,7 +2232,8 @@ void microboone::AnalysisTreeDataStruct::ResizeCry(int nPrimaries) {
   cry_P.resize(nPrimaries);
   cry_StartPointx.resize(nPrimaries);
   cry_StartPointy.resize(nPrimaries);
-  cry_StartPointz.resize(nPrimaries);  
+  cry_StartPointz.resize(nPrimaries); 
+  cry_StartPointt.resize(nPrimaries);  
   cry_status_code.resize(nPrimaries);
   cry_mass.resize(nPrimaries);
   cry_trackID.resize(nPrimaries);
@@ -2469,7 +2472,8 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("cry_P",cry_P,"cry_P[cry_no_primaries]/F");
     CreateBranch("cry_StartPointx",cry_StartPointx,"cry_StartPointx[cry_no_primaries]/F");
     CreateBranch("cry_StartPointy",cry_StartPointy,"cry_StartPointy[cry_no_primaries]/F");
-    CreateBranch("cry_StartPointz",cry_StartPointz,"cry_StartPointz[cry_no_primaries]/F");   
+    CreateBranch("cry_StartPointz",cry_StartPointz,"cry_StartPointz[cry_no_primaries]/F");
+    CreateBranch("cry_StartPointt",cry_StartPointt,"cry_StartPointt[cry_no_primaries]/F");   
     CreateBranch("cry_status_code",cry_status_code,"cry_status_code[cry_no_primaries]/I");
     CreateBranch("cry_mass",cry_mass,"cry_mass[cry_no_primaries]/F");
     CreateBranch("cry_trackID",cry_trackID,"cry_trackID[cry_no_primaries]/I");
@@ -2926,7 +2930,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   }
 
   std::vector<const sim::SimChannel*> fSimChannels;
-  if (isMC)
+  if (isMC && fSaveGeantInfo)
      evt.getView(fLArG4ModuleLabel, fSimChannels);
 
   fData->run = evt.run();
@@ -3494,7 +3498,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         fData->cry_P[iPartc]=partc.P();
 	fData->cry_StartPointx[iPartc] = partc.Vx();
 	fData->cry_StartPointy[iPartc] = partc.Vy();
-	fData->cry_StartPointz[iPartc] = partc.Vz();	
+	fData->cry_StartPointz[iPartc] = partc.Vz();
+	fData->cry_StartPointt[iPartc] = partc.T();	
         fData->cry_status_code[iPartc]=partc.StatusCode();
         fData->cry_mass[iPartc]=partc.Mass();
         fData->cry_trackID[iPartc]=partc.TrackId();
