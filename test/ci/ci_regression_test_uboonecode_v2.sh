@@ -126,7 +126,7 @@ initialize $@
 
 exitstatus $?
 
-if [ $(awk '{print $2}' testmask.txt) -eq 1 ] ; then
+if [ $(awk '{print $1}' testmask.txt) -eq 1 ] ; then
     TASKSTRING="larsoft_data_production"
     larsoft_data_production
 
