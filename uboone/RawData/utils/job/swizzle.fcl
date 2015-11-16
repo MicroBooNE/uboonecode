@@ -48,9 +48,7 @@ source:
   huffmanDecode:   true
   swizzleTPC:      true
   swizzlePMT:      true
-  swizzleTrigger:  true # This skips trigger information so we keep PMT and TPC data regardless of whether the frames match
-
-  kazuTestSwizzleTrigger: false # test flag for kazu to fix things...
+  swizzleTrigger:  true
 
   swizzleTriggerType: ALL ## This is the only option that works currently!
 #  swizzleTriggerType: BNB
