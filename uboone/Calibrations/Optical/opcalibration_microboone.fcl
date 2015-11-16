@@ -1,0 +1,26 @@
+
+BEGIN_PROLOG
+
+microboone_SPEcalibration:
+{
+    module_type: SPEcalibration
+    OpDataModule: "pmtreadout"
+    LogicChannel: 39
+    LogicSlot: 6
+    LogicThreshold: 200
+    LeadingBaselineStart: 0
+    LeadingBaselineEnd: 180
+    TrailingBaselineStart: 210
+    TrailingBaselineEnd: 260
+    PulseStart: 180
+    PulseEnd: 210
+    SaveAverageSPE: true
+
+    UsePulseFinder: false
+    CFDThreshold: 10
+    CFDDelay: 4
+    CFDDeadtime: 20
+    CFDWidth: 20
+}
+
+END_PROLOG
