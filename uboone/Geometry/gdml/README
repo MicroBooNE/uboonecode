@@ -16,6 +16,8 @@ microboonev7.gdml (microboonev7_nowires.gdml): Has the correct shape of liquid a
 
 v8 replaces the air above ground with vacuum 
 
+v9 rotates the roof of LARTF by 39 degrees -- it is no longer aligned with Cryostat
+
 vX
 microboonevX.gdml (microboonevX_nowires.gdml): Working gdml.  This file (may) contain working changes which are not tagged with a version. Don't use this gdml.  
 

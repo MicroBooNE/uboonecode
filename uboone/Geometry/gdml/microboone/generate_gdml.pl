@@ -95,7 +95,7 @@ my $test_switch="off";          #turn on if test boxes wanted.
 my $NumberOfTestBoxes=30;
 my $granite_block="off";
 my $enclosureExtras="on";       #turn on or off depending on whether you'd like to generate the external things around the cryostat (ie. insulation, platform, stands, etc.) in the gdml file
-my $vetoWall_switch="off";  #turn on or off a proposed scintillator wall infront of the cryostat
+my $vetoWall_switch="on";  #turn on or off a proposed scintillator wall infront of the cryostat
 
 # The routines that create the GDML sub-files. Most of the explanatory
 # comments are in gen_defs().
@@ -116,7 +116,7 @@ if ( $granite_block eq "on" ) {  gen_granite(); } # physical volumes defined in 
 #gen_testbox();
 if ( $enclosureExtras eq "on" ) {  gen_enclosureExtras(); } #generation of insulation, etc. will happen if specified
 gen_cryostat();
-if ( $vetoWall_switch eq "on" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
+if ( $vetoWall_switch eq "off" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
 
 gen_enclosure();
 gen_world();
@@ -252,6 +252,7 @@ sub gen_rotations()
    <rotation name="rPlus90AboutXMinus90AboutZ" unit="deg" x="90" y="0"   z="-90"/>
    <rotation name="rPlus90AboutXPlus90AboutY"  unit="deg"  x="90" y="90" z="0"/>
    <rotation name="rPMTRotation1"  unit="deg" x="90"  y="270"   z="0"/>
+   <rotation name="r39degFix" unit="deg" x="0" y="39" z="0"/>
    <position name="posCenter" unit="mm" x="0" y="0" z="0"/>
 
 </define>
@@ -2002,7 +2003,7 @@ sub gen_world()
    lunit="cm"
    aunit="deg"/>
 <tube name="ConcreteDiscRoof0"
-	rmax="304*2.54-0.1"
+	rmax="304*2.54-31.5"
 	z="13*2.54"
 	deltaphi="360"
 	lunit="cm"
@@ -2023,11 +2024,17 @@ sub gen_world()
   	y="2*230*2.54+0.1" 
   	z="34*2.54+0.1"/> 
 
+<tube name="RoofPlusBars"
+	rmax="304*2.54-31"
+	z="68*2.54 + 0.1"
+	deltaphi="360"
+	lunit="cm"
+	aunit="deg"/>
  <box name="SteelGrating"
   	lunit="cm"
 	x="(23*12*2.54)"
   	y=".5*2.54"
-	z="(43*12+2+6.56)*2.54"/>
+	z="(43*12-2)*2.54"/>
  <box name="RemovableRoof"
 	lunit="cm"
 	x="(23*12*2.54+.1)"
@@ -2115,7 +2122,6 @@ sub gen_world()
   <subtraction name="ConcreteDiscRoof">
     <first ref="ConcreteDiscRoof0"/> <second ref="RemovableRoof"/>
 	<position name="posRemoval1" unit="cm" x="0" y="0" z="0"/>
-<!--	<rotation name="rotPlatformSub0" unit="deg" x="90" y="0" z="0"/>-->
   </subtraction>
 
   <subtraction name="ConcreteSteelBeam1">
@@ -2147,10 +2153,14 @@ sub gen_world()
     <first ref="IBeam35_1"/> <second ref="IBeam35Segment"/>
 	<position name="posBeamRemoval5" unit="cm" x="-(6.56-3.13)*0.5*2.54" y="0" z="0"/>
   </subtraction>
-
 </solids>
 
 <structure>
+ 
+  <volume name="volBeams">
+	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+	<solidref ref="Beams"/>
+  </volume>
   <volume name="volVacuumSpace">
     <materialref ref="Vacuum"/>
  	<solidref ref="VacuumSpace"/>
@@ -2228,6 +2238,7 @@ sub gen_world()
        <volumeref ref="volIBeam22"/>
        <position name="posIBeam223" unit="cm" x="-((3*12+5)*2.54+(6*12+10)*2.54+4.03*0.5*2.54)" y="0" z="-(12.5*2.54*0.5)"/>
      </physvol> 
+	 
 EOF
 	
 	for($i=0;$i<4;++$i){
@@ -2246,14 +2257,38 @@ EOF
 EOF
 	}
 
-
 print GDML<<EOF;
   </volume>
+  <volume name="volRoofPlusBars">
+	<materialref ref="Air"/>
+	<solidref ref="RoofPlusBars"/>
+	<physvol>
+		<volumeref ref="volSteelGrating"/>
+		<position name="posSteelGrating" unit="cm" x="0" y="0" z="50"/>
+        <rotationref ref="rPlus90AboutX"/>
+	</physvol>
+	<physvol>
+		<volumeref ref="volConcreteDiscRoof"/>
+    	<position name="posConcreteDiscRoof" unit="cm" x="0" y="0" z="0"/>
+	</physvol>
+	<physvol>
+		<volumeref ref="volConcreteSteelBeam"/>
+    	<position name="posCBeam1" unit="cm" x="-6*27*2.54" y="0" z="0"/>
+	</physvol>
+	<physvol>
+		<volumeref ref="volConcreteSteelBeam"/>
+    	<position name="posCBeam2" unit="cm" x="6*27*2.54" y="0" z="0"/>
+	</physvol>
+	<physvol>
+		<volumeref ref="volRemovableRoof"/>
+		<position name="posRemovableRoof" unit="cm" x="0" y="0" z="0"/>
+	</physvol>
+	</volume>
 
   <volume name="volWorld" >
     <materialref ref="Air"/> 
     <solidref ref="World"/>
- 	<physvol>
+   <physvol>
 	  <volumeref ref="volVacuumSpace"/>
  	  <position name="posVacuumSpace" unit="cm" x="0" y="(53000-1800)/2 + 624.85" z="0"/>
  	</physvol>
@@ -2263,28 +2298,9 @@ print GDML<<EOF;
       <rotationref ref="rPlus90AboutX"/>
     </physvol> 
 	<physvol>
-      <volumeref ref="volRemovableRoof"/>
-      <position name="posRemovableRoof" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 +22.86 +127*2.54" z="0.5*1037"/>
-      <rotationref ref="rPlus90AboutX"/>
-    </physvol> 
-	<physvol>
-      <volumeref ref="volConcreteDiscRoof"/>
-      <position name="posConcreteDiscRoof" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 +22.86+2.54 +127.5*2.54" z="0.5*1037"/>
-      <rotationref ref="rPlus90AboutX"/>
-    </physvol> 
-	<physvol>
-      <volumeref ref="volConcreteSteelBeam"/>
-      <position name="posConcreteSteelBeam0" unit="cm" x="0.5*256.35+(23+ 4)*12*0.5*2.54" y="34.50000555*12*2.54+22.86 + 121*2.54-0.1" z="0.5*1037"/>
-	<rotation name="rot90X180Y" unit="deg" x="90" y="0" z="180"/>
-    </physvol> 
-	<physvol>
-      <volumeref ref="volConcreteSteelBeam"/>
-      <position name="posConcreteSteelBeam1" unit="cm" x="0.5*256.35-(23 + 4)*12*0.5*2.54" y="34.50000555*12*2.54+22.86+121*2.54-0.1" z="0.5*1037"/>
-      <rotationref ref="rPlus90AboutX"/>
-    </physvol> 
-	<physvol>
-      <volumeref ref="volSteelGrating"/>
-      <position name="posSteelGrating" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54+ 22.86+127*2.54+13*2.54" z="0.5*1037"/>
+      <volumeref ref="volRoofPlusBars"/>
+      <position name="posRoofPlusBars" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 +22.86 +127*2.54" z="0.5*1037"/>
+	  <rotation name="r39Plus90" unit="deg" x="90" y="0" z="39" />
     </physvol> 
     <physvol>
       <volumeref ref="volConcreteEnclosure"/>
