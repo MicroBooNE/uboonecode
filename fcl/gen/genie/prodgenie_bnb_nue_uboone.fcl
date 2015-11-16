@@ -8,4 +8,4 @@ physics.producers.generator: @local::microboone_genie_simple
 physics.producers.generator.GlobalTimeOffset: 0.
 physics.producers.generator.RandomTimeOffset: 1600.
 physics.producers.generator.MixerConfig:     "map 12:14 -12:-14 14:12 -14:-12" # example flavor swapping
-physics.producers.generator.TopVolume: "volTPCActive"
+physics.producers.generator.TopVolume: "volCryostat"

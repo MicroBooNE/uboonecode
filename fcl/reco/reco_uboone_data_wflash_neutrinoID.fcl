@@ -172,7 +172,7 @@ physics:
 	 cchit,
          ###>> fuzzy cluster up to bat first
 	 fuzzycluster,
-	 fuzzyclustermerger,
+	 #fuzzyclustermerger,
          trackkalmanhit,   
          # stitchkalmanhit,   
          # trackkalmanhitcalo,   
@@ -218,7 +218,7 @@ physics:
          vtx2trackPanKal, 
          vtx2trackLinePan, 
          vtx2trackLineKal,
-         #cluster2D,
+         cluster2D,
          tpcneutrinoidfilter
          ]
 

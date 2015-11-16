@@ -28,6 +28,7 @@
 #include "Utilities/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
 #include "Utilities/DetectorProperties.h"
+#include "uboone/Geometry/UBOpReadoutMap.h"
 
 // LArLite
 #include "Base/Base-TypeDef.h"
@@ -186,13 +187,43 @@ namespace ana {
     }
 
     Double_t xyz[3]={0.};
-    std::vector<std::vector<Float_t> > fOpChannelVtx(_geom->Cryostat().NOpDet(),std::vector<Float_t>(3,-1.));
+    std::vector<std::vector<Float_t> > fOpChannelVtx;
+    std::vector<unsigned int> fOpChannel2OpDet;
+    ::art::ServiceHandle<geo::UBOpReadoutMap> ub_geom;
+    auto const& readout_channel_set = ub_geom->GetReadoutChannelSet();
+
+    for(auto const& ch : readout_channel_set) {
+
+      if(ch >= fOpChannel2OpDet.size()) fOpChannel2OpDet.resize(ch+1,larlite::data::kINVALID_UINT);
+      if(fOpChannelVtx.size()<=ch) fOpChannelVtx.resize(ch+1,std::vector<Float_t>(3,larlite::data::kINVALID_FLOAT));
+
+      bool skip=true;
+      for(size_t i=0; i<_geom->Cryostat().NOpDet(); ++i) {
+	try{
+	  skip = !(_geom->OpDetFromOpChannel(ch) < _geom->Cryostat().NOpDet());
+	}catch(...){
+	  skip = true;
+	}
+	if(!skip) break;
+      }
+      if(skip) continue;
+
+      fOpChannel2OpDet[ch] = _geom->OpDetFromOpChannel(ch);
+      
+      _geom->OpDetGeoFromOpChannel(ch).GetCenter(xyz);
+      fOpChannelVtx[ch][0]=xyz[0];
+      fOpChannelVtx[ch][1]=xyz[1];
+      fOpChannelVtx[ch][2]=xyz[2];
+    }
+
+    std::vector<std::vector<Float_t> > fOpDetVtx(_geom->Cryostat().NOpDet(),std::vector<Float_t>(3,-1.));
     for(size_t i=0; i<_geom->Cryostat().NOpDet(); ++i) {
 
       _geom->Cryostat().OpDet(i).GetCenter(xyz);
-      fOpChannelVtx[i][0]=xyz[0];
-      fOpChannelVtx[i][1]=xyz[1];
-      fOpChannelVtx[i][2]=xyz[2];
+
+      fOpDetVtx[i][0]=xyz[0];
+      fOpDetVtx[i][1]=xyz[1];
+      fOpDetVtx[i][2]=xyz[2];
     }
 
     std::vector<std::vector<Double_t> > fPlaneOriginVtx(_geom->Nplanes(),std::vector<Double_t>(3,larlite::data::kINVALID_DOUBLE));
@@ -226,6 +257,8 @@ namespace ana {
     _geom_tree->Branch("fWireAngle","std::vector<Double_t>",&fWireAngle);
 
     _geom_tree->Branch("fOpChannelVtx","std::vector<std::vector<Float_t> >",&fOpChannelVtx);
+    _geom_tree->Branch("fOpDetVtx","std::vector<std::vector<Float_t> >",&fOpDetVtx);
+    _geom_tree->Branch("fOpChannel2OpDet","std::vector<unsigned int>",&fOpChannel2OpDet);
 
     _geom_tree->Branch("fPlaneOriginVtx","std::vector<std::vector<Double_t> >",&fPlaneOriginVtx);
 

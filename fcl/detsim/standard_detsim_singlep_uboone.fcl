@@ -2,5 +2,6 @@
 
 outputs.out1.fileName: "%ifb_%tc_detsim_singlep.root"
 
-physics.producers.triggersim: @local::ubtrigger_singlep
-
+physics.producers.triggersim:   @local::ubtrigger_singlep
+physics.producers.optdigitizer: @local::microboone_optical_adc_sim_singlep
+physics.producers.optfem:       @local::microboone_optical_fem_sim_singlep

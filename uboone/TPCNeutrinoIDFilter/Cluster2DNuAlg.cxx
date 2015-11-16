@@ -87,8 +87,8 @@ void Cluster2DNuAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs) {}
 void Cluster2DNuAlg::produces(art::EDProducer* owner)
 {
     fMyProducerModule = owner;
-    fMyProducerModule->produces< std::vector<anab::CosmicTag> >();
-    fMyProducerModule->produces< std::vector<recob::Cluster> >();
+    //fMyProducerModule->produces< std::vector<anab::CosmicTag> >();
+    //fMyProducerModule->produces< std::vector<recob::Cluster> >();
     fMyProducerModule->produces< art::Assns <anab::CosmicTag, recob::Cluster> >();
     //fMyProducerModule->produces< art::Assns <recob::Cluster, recob::Cluster> >();
 }
@@ -173,7 +173,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                     std::vector<art::Ptr<recob::Cluster>> clusterPtrVec;
                     float deltaWire = fabs(cluster->StartWire() - cluster->EndWire());
                     
-                    if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire())
+                    if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() < cluster->EndWire() && cluster->StartCharge() < cluster->EndCharge() )
                     {
                         clusterPtrVec.push_back(cluster);
                         // first cluster is greater than maximum length and  starts with StartWire?
@@ -225,7 +225,7 @@ bool Cluster2DNuAlg::findNeutrinoCandidates(art::Event & event) const
                             }
                         } 
                     } //end startwire
-                    else if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() > cluster->EndWire())
+                    else if(deltaWire > fMaximumMatchedLengthCut && cluster->StartWire() > cluster->EndWire() && cluster->StartCharge() > cluster->EndCharge() )
                     {
                         clusterPtrVec.push_back(cluster);
 

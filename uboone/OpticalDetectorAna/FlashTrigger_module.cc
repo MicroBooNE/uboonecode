@@ -25,6 +25,7 @@
 #include "SimulationBase/MCTruth.h"
 #include "RecoBase/OpFlash.h"
 #include "Geometry/Geometry.h"
+#include "RawData/TriggerData.h"
 #include <limits>
 #include <climits>
 #include <TFile.h>
@@ -100,7 +101,8 @@ private:
   double _fy_err;            ///< Flash Y position error
   double _fz;                ///< Flash Z position
   double _fz_err;            ///< Flash Z position error
-
+  double _t_width;           ///< Flash Time Width
+  unsigned int _trig_word;           ///< Flash Time Width
   //
   // Attribute functions
   //
@@ -182,6 +184,7 @@ void FlashTrigger::MakeTree()
   _flash_tree->Branch ( "nhit",     &_nhit,     "nhit/s"     );
   _flash_tree->Branch ( "pe_total", &_pe_total, "pe_total/D" );
   _flash_tree->Branch ( "dt",       &_dt,       "dt/D"       );
+  _flash_tree->Branch ( "t_width",  &_t_width,  "t_width/D"  );
   _flash_tree->Branch ( "fy",       &_fy,       "fy/D"       );
   _flash_tree->Branch ( "fy_err",   &_fy_err,   "fy_err/D"   );
   _flash_tree->Branch ( "fz",       &_fz,       "fz/D"       );
@@ -189,6 +192,7 @@ void FlashTrigger::MakeTree()
   _flash_tree->Branch ( "nu_mc_x",  &_nu_mc_x,  "mc_nu_x/D"  );
   _flash_tree->Branch ( "nu_mc_y",  &_nu_mc_y,  "mc_nu_y/D"  );
   _flash_tree->Branch ( "nu_mc_z",  &_nu_mc_z,  "mc_nu_z/D"  );
+  _flash_tree->Branch ( "trig_word",&_trig_word, "trig_word/I");
   // Object branch
   _flash_tree->Branch ( "pe_v", "std::vector<double>", &_pe_v);
 }
@@ -230,6 +234,7 @@ void FlashTrigger::AnalyzeFlash(const recob::OpFlash& flash)
   }
 
   _dt = flash.Time();
+  _t_width = flash.TimeWidth();
   _fy = flash.YCenter();
   _fz = flash.ZCenter();
   _fy_err = flash.YWidth();
@@ -297,6 +302,15 @@ bool FlashTrigger::filter(art::Event & e)
   if(flash_handle.isValid()) {
     for(auto const& flash : *flash_handle) {
       
+      // Get trigger word here!
+      art::Handle<std::vector<raw::Trigger> > trigger_handle;
+      e.getByLabel("daq",trigger_handle);
+      
+      if (!trigger_handle->size()){_trig_word=0;}
+      for(auto const& t : *trigger_handle) {
+        _trig_word = t.TriggerBits();
+      }
+
       if(_flash_tree) AnalyzeFlash(flash);
 
       // Check timing

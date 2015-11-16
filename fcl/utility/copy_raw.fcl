@@ -34,10 +34,5 @@ outputs:
    fileName:    "%ifb_%tc_merged.root"
    dataTier:    "raw"
    compressionLevel: 3
-   FCMDPlugins: [
-     { plugin_type:   "FileCatalogMetadataRawDigit"
-       RawDigitLabel: "digitcopy"
-     }
-    ]
  }
 }

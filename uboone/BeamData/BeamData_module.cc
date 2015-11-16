@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "art/Framework/Core/EDProducer.h"
+#include "art/Framework/Core/FileBlock.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
@@ -18,6 +19,8 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
+#include "IFDH_service.h"
+
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
@@ -27,12 +30,22 @@
 #include "RawData/TriggerData.h"
 #include "datatypes/raw_data_access.h"
 
+#include "../BeamDAQ/beamRun.h"
+#include "../BeamDAQ/beamRunHeader.h"
+#include "../BeamDAQ/beamDAQConfig.h"
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <algorithm>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
+#include "boost/date_time/gregorian/gregorian.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include <boost/date_time/c_local_time_adjustor.hpp>
+#include <boost/format.hpp>
+
+#include <ctime>
 
 #include <memory>
 
@@ -57,7 +70,9 @@ public:
   void produce(art::Event & e) override;
   void endSubRun(art::SubRun & sr) override;
   void endJob() override;
- 
+  void respondToOpenInputFile(art::FileBlock const& fb) override;	
+  void respondToCloseInputFile(art::FileBlock const& fb) override;
+
   bool nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vector<ub_BeamData> &bd);
   bool rewindBeamFile(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData> &bd); //goes back one event in the file
   int compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offsetT);
@@ -92,11 +107,16 @@ private:
 
   std::vector<std::string> fBeams;
   std::map<std::string, BeamConf_t>  fBeamConf;
-  int fRun;
-  int fSubRun;
-  long long fTimestamp;
+  uint32_t fRun;
+  uint32_t fSubRun;
+  uint32_t fNonBeamCount;
+  uint32_t fSeconds;
+  uint32_t fMilliSeconds;
   float fFOM;
+  std::string fInputFileName;
 
+  bool fFetchBeamData;
+  std::string fBDAQfhicl;
 };
 
 BeamData::BeamData(fhicl::ParameterSet const & p)
@@ -123,7 +143,11 @@ BeamData::BeamData(fhicl::ParameterSet const & p)
     std::pair<std::string, BeamConf_t> p(fBeams[i],bconf);
     fBeamConf.insert(p);
   }
-
+  
+  fFetchBeamData=p.get<bool>("fetch_beam_data");
+  if (fFetchBeamData) {
+    fBDAQfhicl=p.get<std::string>("bdaq_fhicl_file");
+  }
   for (auto& it_beamline : fBeamConf) {
     if (it_beamline.second.fWriteBeamData) {
       art::ServiceHandle<art::TFileService> tfs;
@@ -144,9 +168,89 @@ BeamData::BeamData(fhicl::ParameterSet const & p)
 
 void BeamData::beginSubRun(art::SubRun & sr)
 {
-  //load beam file
+
   fRun=sr.run();
   fSubRun=sr.subRun();
+
+  if (fFetchBeamData) {
+    mf::LogInfo(__FUNCTION__)<<"Fetching beam files for run "<<sr.run()
+			     <<" subrun "<<sr.subRun();
+
+    std::string fhiclFile("BEAMDAQ_CONFIG_FILE=");
+    fhiclFile.append(fBDAQfhicl);
+    ::putenv(const_cast<char *>(fhiclFile.c_str()));
+    
+    gov::fnal::uboone::beam::beamDAQConfig* bdconfig=gov::fnal::uboone::beam::beamDAQConfig::GetInstance();
+    if (!bdconfig) 
+      mf::LogError(__FUNCTION__) <<"Failed to initialize beamDAQConfig";
+    
+    // Get sam metadata for input file.
+    art::ServiceHandle<ifdh_ns::IFDH> ifdh;
+    boost::filesystem::path inputPath(fInputFileName);
+    std::string md = ifdh->getMetadata(inputPath.filename().string());
+    std::cout << "BeamData: metadata" << std::endl;
+    std::cout << md << std::endl;
+    std::cout << "BeamData: end metadata" << std::endl;
+
+    // Set timezone to Fermilab local time (seconds west of utc).
+    const char* tz = getenv("TZ");
+    setenv("TZ", "CST+6CDT", 1);
+    tzset();
+    
+    size_t n1 = md.find("Start Time:");
+    n1 += 11;
+    size_t n2 = md.find("\n", n1);
+    //std::cout << "Start time = " << md.substr(n1, n2-n1) << std::endl;
+    struct tm tm;
+    memset(&tm, 0, sizeof(tm));
+    tm.tm_isdst = -1;
+    strptime(md.substr(n1, n2-n1).c_str(), "%Y-%m-%dT%H:%M:%S%Z", &tm);
+    //    tm.tm_hour -= 1;
+    time_t tstart = mktime(&tm);
+    //std::cout << "Start time seconds = " << tstart << std::endl;
+    n1 = md.find("End Time:");
+    n1 += 9;
+    n2 = md.find("\n", n1);
+    //std::cout << "End time = " << md.substr(n1, n2-n1) << std::endl;
+    memset(&tm, 0, sizeof(tm));
+    tm.tm_isdst = -1;
+    strptime(md.substr(n1, n2-n1).c_str(), "%Y-%m-%dT%H:%M:%S%Z", &tm);
+    //tm.tm_hour -= 1;
+    time_t tend = mktime(&tm);
+
+    //std::cout << "End time seconds = " << tend << std::endl;
+    n1 = md.find("online.start_time_usec:");
+    n1 = md.find(":",n1)+1;
+    n2 = md.find("\n", n1);
+    std::cout << "Usec start time = " << md.substr(n1, n2-n1) << std::endl;
+    long tstart_us=stol(md.substr(n1, n2-n1));
+    n1 = md.find("online.end_time_usec:");
+    n1 = md.find(":",n1)+1;
+    n2 = md.find("\n", n1);
+    std::cout << "Usec end time = " << md.substr(n1, n2-n1) << std::endl;
+    long tend_us=stol(md.substr(n1, n2-n1));
+ 
+    // Restore time zone.
+    if(tz)
+      setenv("TZ", tz, 1);
+    else
+      unsetenv("TZ");
+    
+    tzset();
+
+    boost::posix_time::time_duration zoneOffset = boost::posix_time::second_clock::local_time()-boost::posix_time::second_clock::universal_time();
+
+    boost::posix_time::ptime pt0= boost::posix_time::from_time_t(tstart)+ boost::posix_time::hours(zoneOffset.hours())+ boost::posix_time::microseconds(tstart_us);
+    boost::posix_time::ptime pt1= boost::posix_time::from_time_t(tend)+ boost::posix_time::hours(zoneOffset.hours())+ boost::posix_time::microseconds(tend_us);
+
+    gov::fnal::uboone::beam::beamRun brm;
+    gov::fnal::uboone::beam::beamRunHeader rh;
+    rh.fRun=fRun;
+    rh.fSubRun=fSubRun;
+    brm.StartRun(rh,pt0);
+    brm.EndRun(pt1);
+  }
+  
   mf::LogInfo(__FUNCTION__)<<"Open beam files for run "<<sr.run()
 			   <<" subrun "<<sr.subRun();
   std::stringstream ss;
@@ -187,6 +291,7 @@ void BeamData::beginSubRun(art::SubRun & sr)
     }
     ss<<std::endl;
   }
+  fNonBeamCount=0;
   for (int i=0;i<120;i++) ss<<"=";
   ss<<std::endl;
   mf::LogInfo(__FUNCTION__) <<ss.str();
@@ -236,6 +341,7 @@ void BeamData::endSubRun(art::SubRun & sr)
 void BeamData::endJob()
 {
   std::stringstream ss;
+  ss<<"Non beam events: "<<fNonBeamCount<<std::endl;
   for (int i=0;i<120;i++) ss<<"=";
   ss<<std::endl;  
   ss<<std::setw(10)<<"Beam"
@@ -286,6 +392,20 @@ void BeamData::endJob()
   fBeamConf.clear();
 }
 
+void BeamData::respondToOpenInputFile(art::FileBlock const& fb)
+{
+  std::cout << "BeamData: " << fb.fileName() << " opened." << std::endl;
+  fInputFileName = fb.fileName();
+
+}
+
+void BeamData::respondToCloseInputFile(art::FileBlock const& fb)
+{
+  std::cout << "BeamData: " << fb.fileName() << " closed." << std::endl;
+  fInputFileName.clear();
+}
+
+
 void BeamData::produce(art::Event & e)
 {
   // Implementation of required member function here.
@@ -334,7 +454,8 @@ void BeamData::produce(art::Event & e)
     }
   }
   if (beam_name=="") {
-    mf::LogDebug(__FUNCTION__) << "Trigger not matching any of the beam(s). Skipping beam merging.";
+    mf::LogInfo(__FUNCTION__) << "Trigger not matching any of the beam(s). Skipping beam merging.";
+    fNonBeamCount++;
     return;
   }
   mf::LogDebug(__FUNCTION__) <<"Looking for "<<beam_name<<" event";
@@ -469,11 +590,12 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offs
   time_t dettime64  = daqHeaderHandle->GetTimeStamp();
    
   uint32_t detsec = uint32_t(dettime64>>32);
-  uint32_t detmsec =uint32_t((dettime64 & 0x0000FFFF)/1000);
+  uint32_t detmsec =uint32_t((dettime64 & 0xFFFFFFFF)/1000000);
     
   time_t dettime  = time_t(detsec)*1000.+time_t(detmsec);
   time_t beamtime = time_t(bh.getSeconds())*1000 + time_t(bh.getMilliSeconds())+time_t(offsetT);
-  
+
+  mf::LogDebug(__FUNCTION__)<<"Detector vs beam time "<<detsec<<"\t"<<detmsec<<"\t"<<bh.getSeconds()<<"\t"<<bh.getMilliSeconds()<<"\t"<<dettime-beamtime;
   int comp=1;
   if ( dettime>=beamtime && dettime - beamtime < dt ) {comp = 0;}
   else if ( dettime<beamtime && beamtime - dettime < dt ) {comp = 0;}
@@ -490,8 +612,10 @@ float BeamData::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vec
 
 void BeamData::fillTreeData(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
 {
+  mf::LogDebug(__FUNCTION__)<<"Filling "<<beam<<" ntuple";
   fFOM=getFOM(beam, bh,bd);
-  fTimestamp=bh.getSeconds()*1000+bh.getMilliSeconds();
+  fSeconds=bh.getSeconds();
+  fMilliSeconds=bh.getMilliSeconds();
 
   for (int i=0;i<bh.getNumberOfDevices();i++) {
     std::string varname=bd[i].getDeviceName();
@@ -545,9 +669,10 @@ void BeamData::createBranches(std::string beam)
     it->second=0;
   }
 
-  fBeamConf[beam].fTree->Branch("run",&fRun,"run/I");
-  fBeamConf[beam].fTree->Branch("subrun",&fSubRun,"subrun/I");
-  fBeamConf[beam].fTree->Branch("timestamp",&fTimestamp,"timestamp/L");
+  fBeamConf[beam].fTree->Branch("run",&fRun,"run/i");
+  fBeamConf[beam].fTree->Branch("subrun",&fSubRun,"subrun/i");
+  fBeamConf[beam].fTree->Branch("seconds",&fSeconds,"seconds/i");
+  fBeamConf[beam].fTree->Branch("milliseconds",&fMilliSeconds,"milliseconds/i");
   fBeamConf[beam].fTree->Branch("FOM",&fFOM,"FOM/F");
 
   std::stringstream ss;

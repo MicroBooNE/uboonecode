@@ -33,6 +33,8 @@ beamRun::beamRun()
   fIFDBLatency   = bdconfig->GetIFDBLatency();
   fEventTypeMap  = bdconfig->GetEventTypeMap();
   fTimeWindowMap = bdconfig->GetTimeWindowMap();
+  fTimePaddingMap = bdconfig->GetTimePaddingMap();
+  fTimeOffsetMap = bdconfig->GetTimeOffsetMap();
   fMWRTimeOffset = bdconfig->GetMWRTimeOffset();
 
   fZoneOffset=second_clock::local_time()-second_clock::universal_time();
@@ -66,6 +68,8 @@ void beamRun::StartRun(beamRunHeader& rh, boost::posix_time::ptime tstart)
 		    <<ss.str();
     fOut[i].open(ss.str().c_str(), ios::out | ios::binary);
     // fOA[fBeamLine[i]]=new boost::archive::binary_oarchive(fOut[i]);
+    tstart=tstart-microseconds(fTimeOffsetMap[fBeamLine[i]]*1000.)-microseconds(fTimePaddingMap[fBeamLine[i]]*1000.);
+    mf::LogInfo("") <<"Added padding ("<<fTimePaddingMap[fBeamLine[i]]<<"ms) and offset ("<<fTimeOffsetMap[fBeamLine[i]]<<"ms) to start time "<<fBeamLine[i]<<" "<<tstart;
     fLastQueryTime[fBeamLine[i]]=tstart;
   }
 }
@@ -94,7 +98,7 @@ void beamRun::Update(boost::posix_time::ptime tend)
 		  to_iso_extended_string(fLastQueryTime[fBeamLine[ibeam]]).c_str(),
 		  endtime.c_str());  
 	} else {
-	  mf::LogInfo("")<<"Pad time for multiwire bundle";
+	  mf::LogDebug("")<<"Pad time for multiwire bundle";
 	  endtime=to_iso_extended_string(t1+minutes(1));
 	  sprintf(sbuf, "%s/data?b=%s&t0=%s&t1=%s&f=csv", fIFDBURL.c_str(), fBundle[fBeamLine[ibeam]][i].c_str(),
 		  to_iso_extended_string(fLastQueryTime[fBeamLine[ibeam]]-minutes(1)).c_str(),
@@ -103,6 +107,7 @@ void beamRun::Update(boost::posix_time::ptime tend)
 	mf::LogDebug("") <<"Query server:\n"<<sbuf;
 	fIFDB.GetData(sbuf,response);	
       }
+      mf::LogDebug("")<<response;
       ProcessResponse(response, data_map, fBeamLine[ibeam], t1);   
       if (data_map.size() > 0 ) 
 	last_proc_time = ToPtime(data_map.rbegin()->first) + milliseconds(fTimeWindowMap[fBeamLine[ibeam]]);
@@ -124,7 +129,19 @@ void beamRun::Update(boost::posix_time::ptime tend)
 void beamRun::EndRun(boost::posix_time::ptime tstop) 
 {
   fRunHeader.fRunEnd=tstop;
-  
+  beamDAQConfig* bdconfig=beamDAQConfig::GetInstance();
+
+  if (tstop-fRunHeader.fRunStart>hours(bdconfig->GetMaxRunLength())) {
+    mf::LogError(__FUNCTION__)<<"Refusing to start a run longer than "
+		      <<bdconfig->GetMaxRunLength()  
+		      <<" hours!";
+    return;
+  }
+  if (fRunHeader.fRunStart-tstop>seconds(0)) {
+    mf::LogError(__FUNCTION__)<<"Refusing to start a run with t0>t1";
+    return;
+  }
+
   // in case run ends up in the future?
   while (microsec_clock::local_time() < tstop ) {
     Update(microsec_clock::local_time());
@@ -157,7 +174,7 @@ void beamRun::EndRun(boost::posix_time::ptime tstop)
   stringstream ss;
   ss<<fOutputDirInfo<<"/beam_"
       <<setfill('0')<<setw(7)<<fRunHeader.fRun<<"_"
-      <<setfill('0')<<setw(4)<<fRunHeader.fSubRun
+      <<setfill('0')<<setw(5)<<fRunHeader.fSubRun
       <<".info";
   mf::LogInfo("") <<"Writing beam run summary to "<<ss.str();
   infofile.open(ss.str().c_str());
@@ -201,8 +218,8 @@ void beamRun::ProcessResponse(httpResponse* response, beamdatamap_t &data_map, s
     
     uint32_t secs=uint32_t(timestamp/1000);
     uint16_t msecs=uint16_t(timestamp-(timestamp/1000)*1000);
-    if (from_time_t(secs)+hours(fZoneOffset.hours())+microseconds(msecs)<fLastQueryTime[beamline]) continue;
-    if (from_time_t(secs)+hours(fZoneOffset.hours())+microseconds(msecs)>tend) continue;
+    if (from_time_t(secs)+hours(fZoneOffset.hours())+microseconds(msecs*1000)<fLastQueryTime[beamline]) continue;
+    if (from_time_t(secs)+hours(fZoneOffset.hours())+microseconds(msecs*1000)>tend) continue;
 
     ub_BeamData dt;
     dt.setDeviceName(row[1]);
@@ -234,7 +251,6 @@ void beamRun::ProcessResponse(httpResponse* response, beamdatamap_t &data_map, s
     uint64_t timestamp=itr->first;
     uint32_t secs=uint32_t(timestamp/1000);
     uint16_t msecs=uint16_t(timestamp-(timestamp/1000)*1000);
-
     //collect all data within fTimeWindowMap[beamline]
     //once we step over fTimeWindowMap, create header and insert into data_map
     //clear vectors and start again
@@ -283,7 +299,7 @@ void beamRun::WriteData(std::string beamline, map<ub_BeamHeader, std::vector<ub_
   stringstream ss;
   ss<<fOutputDirData<<"/beam_"<<beamline<<"_"
     <<setfill('0')<<setw(7)<<fRunHeader.fRun<<"_"
-    <<setfill('0')<<setw(4)<<fRunHeader.fSubRun
+    <<setfill('0')<<setw(5)<<fRunHeader.fSubRun
     <<".dat.lock";
   
   fopen(ss.str().c_str(),"w");
@@ -295,17 +311,19 @@ void beamRun::WriteData(std::string beamline, map<ub_BeamHeader, std::vector<ub_
   while (beamline!=fBeamLine[ibeamline]) ibeamline++;
 
   while (it != data_map.end()) {
-    if ( !(it->first <= fLastBeamHeader[beamline]) &&
-	 (ToPtime(it->first) <= fRunHeader.fRunEnd)) {
+    if ( ( fLastBeamHeader.find(beamline) == fLastBeamHeader.end() ||
+	  !(it->first <= fLastBeamHeader[beamline])) &&
+	 (ToPtime(it->first) <= fRunHeader.fRunEnd-microseconds(fTimeOffsetMap[beamline]*1000.)+microseconds(fTimePaddingMap[beamline]*1000.))) {
       fRunHeader.fCounter[beamline]=fRunHeader.fCounter[beamline]+1;
       //    (*fOA[beamline]) << it->first;
       boost::archive::binary_oarchive oa(fOut[ibeamline]);
       oa<<it->first;
       for (unsigned int i=0;i<it->second.size();i++)  oa<<it->second[i];
-	// (*fOA[beamline])<<it->second[i];
+      // (*fOA[beamline])<<it->second[i];
       n++;
     } 
     it++;
+    
   }
   
   remove(ss.str().c_str());

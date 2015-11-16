@@ -4,7 +4,11 @@
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
 #include "seedservice_microboone.fcl"
+#include "triggerenforcement.fcl"
+#include "beamdata_microboone.fcl"
 
 process_name: Swizzler
 services:
@@ -21,22 +25,23 @@ services:
 	  UBOpReadoutMap:           @local::microboone_opreadoutmap
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
+	  IFDH:                   {}
           }
 }
 
 microboone_tfile_metadata:
 {
   JSONFileName:          "daq_hist.root.json"
-  GenerateTFileMetadata: false
+  GenerateTFileMetadata: true
   dataTier:              "root-tuple"
   fileFormat:            "root"
 }
 
 # Database settings
-services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
-services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
+services.user.DatabaseUtil.DBHostName:    "ifdb02.fnal.gov"
+services.user.DatabaseUtil.DBName:        "hootgibson_prod"
 services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
-services.user.DatabaseUtil.Port:          5436
+services.user.DatabaseUtil.Port:          5444
 services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
 services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: true
@@ -59,19 +64,33 @@ source:
 
 outputs:
 {
- out1:
+ rawfilter:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc.root"
+   fileName: "%ifb_%tc_rawfilter.root"
    dataTier: "raw"
+   streamName: "rawfilter"
+   compressionLevel: 3
+   SelectEvents: { SelectEvents: [ "filter1" ] }
+  }
+ rawprescale:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawprescale.root"
+   dataTier: "raw"
+   streamName: "rawprescale"
+   compressionLevel: 3
+   SelectEvents: { SelectEvents: [ "filter2" ] }
+  }
+ rawnotpc:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawnotpc.root"
+   dataTier: "raw"
+   streamName: "rawnotpc"
    compressionLevel: 3
    outputCommands: ["keep *_*_*_*",
-                    "drop raw::RawDigits_daq_*_*"]
-   FCMDPlugins: [
-     { plugin_type:   "FileCatalogMetadataRawDigit"
-       RawDigitLabel: "digitcopy"
-     }
-    ]
+                    "drop raw::RawDigits_*_*_*"]
   }
 }
 
@@ -80,25 +99,39 @@ physics:
   producers: {
   ### flash finders
   opflash          : @local::microboone_opflash_beam_highgain
-  opflashLow       : @local::microboone_opflash_beam_lowgain
+  #opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
-  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  #opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  beamdata         : @local::microboone_beamdata
 
-  digitcopy : { module_type : "RawDigitSaver" 
-                DAQRawDigitProducer : "daq" }
+  #hwflash : @local::microboone_subeventbuilder
  }
-filters: {
- triggerEnforcement: { module_type : "TriggerEnforcement" }
- randomfilter: {
+ filters: {
+  triggerEnforcement: @local::trigger_enforcement
+  opflashfilter: @local::microboone_flashtrigger
+  #hwflashfilter: @local::microboone_flashtrigger
+  randomfilter: {
    module_type : "RandomPrescale"
    Probability : 0.01
+  }
  }
-}
 
- reco: [ triggerEnforcement, opflash, randomfilter, digitcopy ]
- stream1:   [ out1 ]
- trigger_paths: [ reco ] 
- end_paths: [ stream1 ]
+ common: [ triggerEnforcement, opflash, beamdata ] 
+ filter1: [ opflashfilter ]
+ filter2: [ randomfilter ]
+ stream1:   [ rawfilter ]
+ stream2:   [ rawprescale ]
+ stream3:   [ rawnotpc ]
+ trigger_paths: [ common, filter1, filter2 ] 
+ end_paths: [ stream1, stream2, stream3 ]
 }
 
 services.user.TimeService.TrigModuleName: "daq"
+
+physics.filters.opflashfilter.OpFlashModule : "opflash"
+#physics.filters.hwflashfilter.OpFlashModule : "hwflash"
+
+physics.filters.opflashfilter.DisableFilter: false
+#physics.filters.hwflashfilter.DisableFilter: true
+
+

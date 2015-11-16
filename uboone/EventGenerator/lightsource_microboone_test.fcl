@@ -121,8 +121,8 @@ services.user.LArG4Parameters.EnabledPhysics:   [ "Em",
                                                   "Hadron",
                                                   "Decay",
                                                   "HadronElastic",
-                                                  "Stopping",
-                                                  "NeutronTrackingCut" ]
+                                                  "Stopping"]
+                                                  #"NeutronTrackingCut" ]
 
 # Simphotoncounter tree creation
 #physics.analyzers.pmtresponse.MakeAllPhotonsTree: true

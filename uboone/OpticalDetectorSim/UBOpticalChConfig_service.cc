@@ -79,7 +79,7 @@ namespace opdet {
       if ( chanmap->GetChannelType( chnum )==opdet::LogicChannel )
 	continue; // skip QE check for logic channels
       
-      if ( LarProp->ScintPreScale() >= tmp_QE.at(i) ) {
+      if ( ((float)(LarProp->ScintPreScale())) >= (float)(tmp_QE.at(i)) ) {
         //tmp_QE[i] /= LarProp->ScintPreScale();
 	tmp_float_params.at( kQE )[i] /=  LarProp->ScintPreScale();
       }

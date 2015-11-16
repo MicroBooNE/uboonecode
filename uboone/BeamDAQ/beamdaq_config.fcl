@@ -4,10 +4,10 @@ output_dir_data : "./"
 output_dir_info : "./"
 
 //maximum run length in hours
-max_run_length : 10
+max_run_length : 8
 
 //database latency (minutes) 
-ifdb_latency : 5
+ifdb_latency : 15
 
 // list of beamlines; should be an array even if listing only one beamline
 beamlines : [ "bnb", "numi" ]
@@ -30,6 +30,14 @@ event_type : { bnb : 18
 // into single event. time given in milliseconds
 time_window : { bnb : 10
 	        numi : 60 }
+
+//padding and offset modify the begin/end time that is fetched from IFDB, actual timestamps not changed
+time_padding : { bnb: 30
+	         numi: 100 }
+
+time_offset  : { bnb: 35.9
+	         numi: 100 }
+
 
 //IF beam database
 ifdb_url : "http://dbweb0.fnal.gov:8088/ifbeam/data"
