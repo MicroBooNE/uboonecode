@@ -4,6 +4,7 @@ cet_find_library( BOOST_DATE_TIME     NAMES boost_date_time     PATHS ENV BOOST_
 
 
 set( UBOONEDAQ_DATATYPES_DIR $ENV{UBOONEDAQ_DATATYPES_DIR} )
+set( IFDH_ART_DIR $ENV{IFDH_ART_DIR} )
 
 add_subdirectory(Geometry)
 if( UBOONEDAQ_DATATYPES_DIR )
