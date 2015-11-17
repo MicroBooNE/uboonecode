@@ -134,6 +134,7 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   fTouttree->Branch("baselinerms",  &rms_baseline,  "baselinerms/D");
   fTouttree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
   fTouttree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
+  fTouttree->Branch("chmaxamp",     &event_maxamp,  "chmaxamp/D" );
 
   // Data for each Beam Window
   fTevent = out_file->make<TTree>("eventtree", "Data about the event" );
@@ -320,6 +321,29 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   event_nchfires->resize( 32, 0.0 );
   nsamples = 0;
   
+  // get channel maxamp
+  for(auto &wfm : opwfms)  {
+    readout_ch = wfm.ChannelNumber();
+    if ( readout_ch%100>=32 )
+      continue;
+
+    unsigned int c,s,f;
+    ub_PMT_channel_map->GetCrateSlotFEMChFromReadoutChannel(readout_ch, c, s, f);
+    slot = (int)s;
+    ch = (int)f;
+    if ( slot!=(int)SPE_SLOT )
+      continue;
+    if ( WINDOW_MINSIZE > wfm.size() )
+      continue;
+    nsamples = (int)wfm.size();
+    
+    for (int i=0; i<(int)wfm.size(); i++) {
+      if ( event_maxamp<(double)wfm.at(i) )
+	event_maxamp = (double)wfm.at(i);
+    }
+  }
+
+  
   for(auto &wfm : opwfms)  {
     readout_ch = wfm.ChannelNumber();
 
@@ -348,7 +372,8 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 					data.data(), (int)cfd_delay, (int)cfd_threshold, (int)cfd_deadtime, (int)cfd_width, (int)data.size() );
 
     // we loop through the pulses.  
-    event_nchfires->at( ch ) = (int)t_fire.size();
+    if ( ch<32 )
+      event_nchfires->at( ch ) = (int)t_fire.size();
     for ( int ifire=0; ifire<(int)t_fire.size(); ifire++ ) {
 
       int tick = (int)t_fire.at(ifire) - (int)cfd_delay;
@@ -368,8 +393,6 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 	rms_baseline  += (double)wfm.at( tick-cfd_width+i )*wfm.at( tick-cfd_width+i );
 	ave_baseline2  += (double)wfm.at( tick+cfd_width+i );
 	rms_baseline2 += (double)wfm.at( tick+cfd_width+i )*wfm.at( tick+cfd_width+i );
-	if ( (double)diff_fire.at(ifire) > event_maxamp )
-	  event_maxamp = (double)diff_fire.at(ifire);
       }
       ave_baseline /= (double)cfd_width;
       ave_baseline2  /= (double)cfd_width;
