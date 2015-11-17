@@ -26,13 +26,17 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cmath>
+#include <algorithm>
 
 // ROOT
 #include "TTree.h"
+#include "TH1D.h"
 
 // LArSoft 
 #include "SimpleTypesAndConstants/RawTypes.h"
 #include "SimpleTypesAndConstants/geo_types.h"
+#include "Utilities/TimeService.h"
 
 //Optical Channel Maps
 #include "uboone/Geometry/UBOpChannelTypes.h"
@@ -68,6 +72,8 @@ public:
 
 private:
 
+  int irun;
+  int isubrun;
   int ievent;
   int opchannel;
   int readout_ch;
@@ -83,6 +89,8 @@ private:
   std::vector<unsigned short> flasher_adcs;
   std::vector<unsigned short> adcs;
   std::vector<int>* event_nchfires;
+  std::vector<double>* event_lastcosmicwin;
+  std::vector<double>* event_lastsatcosmicwin;
   int nsamples = 0;
   double event_maxamp;
 
@@ -91,6 +99,7 @@ private:
   unsigned short LOGIC_THRESHOLD;
   unsigned short SPE_SLOT;
   unsigned int WINDOW_MINSIZE;
+  int COSMIC_THRESHOLD;
   unsigned short baseline_start;
   unsigned short baseline_end;
   unsigned short pulse_start;
@@ -102,12 +111,15 @@ private:
   unsigned short cfd_deadtime;
   unsigned short cfd_width;
   bool SAVE_AVE_SPE;
-  bool USE_PULSE_FINDER;
+  double AVESPE_RMSLIMIT;
   std::string OpDataModule;
 
   TTree* fTouttree;
+  TTree* fTpulsetree;
   TTree* fTevent;
-
+  TH1D** hSPE_ave;
+  //TH1D* hSPE_rms;
+  int hspe_nfills[32];
 
   // LED Pulser Mode
   void anayzeLEDPulserMode( const art::Event& evt );
@@ -126,7 +138,10 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   art::ServiceHandle<art::TFileService> out_file;
 
   // Pulse Tree
-  fTouttree = out_file->make<TTree>("pulsetree","Analyzed Flasher Run Data");
+  fTouttree = out_file->make<TTree>("outtree","Analyzed Flasher Run Data");
+  fTouttree->Branch("run",        &irun,        "run/I");
+  fTouttree->Branch("subrun",        &isubrun,        "subrun/I");
+  fTouttree->Branch("event",        &ievent,        "event/I");
   fTouttree->Branch("opchannel",    &opchannel,     "opchannel/I");
   fTouttree->Branch("charge",       &charge ,       "charge/D");
   fTouttree->Branch("maxamp",       &maxamp,        "maxamp/D");
@@ -134,19 +149,45 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   fTouttree->Branch("baselinerms",  &rms_baseline,  "baselinerms/D");
   fTouttree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
   fTouttree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
-  fTouttree->Branch("chmaxamp",     &event_maxamp,  "chmaxamp/D" );
+
+  fTpulsetree = out_file->make<TTree>("pulsetree","Analyzed Pulses");
+  fTpulsetree->Branch("run",        &irun,        "run/I");
+  fTpulsetree->Branch("subrun",        &isubrun,        "subrun/I");
+  fTpulsetree->Branch("event",        &ievent,        "event/I");
+  fTpulsetree->Branch("opchannel",    &opchannel,     "opchannel/I");
+  fTpulsetree->Branch("charge",       &charge ,       "charge/D");
+  fTpulsetree->Branch("maxamp",       &maxamp,        "maxamp/D");
+  fTpulsetree->Branch("baseline",     &ave_baseline,  "baseline/D");
+  fTpulsetree->Branch("baselinerms",  &rms_baseline,  "baselinerms/D");
+  fTpulsetree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
+  fTpulsetree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
+  fTpulsetree->Branch("chmaxamp",     &event_maxamp,  "chmaxamp/D" );
 
   // Data for each Beam Window
   fTevent = out_file->make<TTree>("eventtree", "Data about the event" );
   event_nchfires = new std::vector<int>;
-  fTevent->Branch("nsamples", &nsamples, "nsamples/I" );
+  event_lastcosmicwin = new std::vector<double>;
+  event_lastsatcosmicwin = new std::vector<double>;
+  fTevent->Branch("run",        &irun,        "run/I");
+  fTevent->Branch("subrun",        &isubrun,        "subrun/I");
+  fTevent->Branch("event",    &ievent,       "event/I");
+  fTevent->Branch("nsamples", &nsamples,     "nsamples/I" );
   fTevent->Branch("chmaxamp", &event_maxamp, "chmaxamp/D");
   fTevent->Branch("nchfires", "vector<int>", &event_nchfires );
+  fTevent->Branch("dt_lastcosmicwin_usec",    "vector<double>", &event_lastcosmicwin );
+  fTevent->Branch("dt_lastsatcosmicwin_usec", "vector<double>", &event_lastsatcosmicwin );
+
+  // Tree for PMT slam events (planned)
+  // fTslam = out_file->make<TTree>("slamtree", "Data about fully staurated PMT events" );
+  // slam_chtstamp = new std::vector<double>;
+  // fTslam->Branch("event",     &ievent,          "event/I");
+  // fTslam->Branch( "chtstamp", "vector<double>", &slam_chtstamp );
 
   // Setup Analyzer
   LOGIC_CH         = p.get<unsigned short>( "LogicChannel", 39 );
   LOGIC_SLOT       = p.get<unsigned short>( "LogicSlot", 6 );
   LOGIC_THRESHOLD  = p.get<unsigned short>( "LogicThreshold", 200 );
+  COSMIC_THRESHOLD  = p.get<int>( "LogicThreshold", 2348 );  // ~15 pe (with pe=20 ADC counts)
   SPE_SLOT         = p.get<unsigned short>( "WaveformSlot", 5 );
   WINDOW_MINSIZE   = p.get<unsigned int>( "WindowMinSize", 500 );
   baseline_start   = p.get<unsigned short>( "LeadingBaselineStart", 0 );   // first tick after logic pulse start that defines baseline window
@@ -157,21 +198,36 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   pulse_end        = p.get<unsigned short>( "PulseEnd", 210 );      // first tick after logic pulse start that defines pulse window
   OpDataModule     = p.get<std::string>( "OpDataModule", "pmtreadout" );
   SAVE_AVE_SPE     = p.get<bool>( "SaveAverageSPE", true );
-  USE_PULSE_FINDER = p.get<bool>( "UsePulseFinder", false );
+  //USE_PULSE_FINDER = p.get<bool>( "UsePulseFinder", false );
   cfd_threshold    = p.get<double>( "CFDThreshold", 10.0 );
   cfd_delay        = p.get<unsigned short>( "CFDDelay", 4 );
   cfd_deadtime     = p.get<unsigned short>( "CFDDeadtime", 20 );
   cfd_width        = p.get<unsigned short>( "CFDWidth", 20 );
+  AVESPE_RMSLIMIT  = p.get<double>( "AveSPEBaselineRMScut", 2.0 );
 
+  // Ave SPE waveform
+  hSPE_ave = new TH1D*[32];
+  for (int i=0; i<32; i++) {
+    hspe_nfills[i] = 0;
+    char hname[32];
+    sprintf( hname, "hSPE_ave_femch%02d", i );
+    hSPE_ave[i] = out_file->make<TH1D>(hname, "Average SPE waveform;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
+    //hSPE_rms = out_file->make<TH1D>("hSPE_rms", "Average SPE waveform;ticks from disc. fire-delay-deadtime", (int)3*cfd_deadtime, 0.0, (double)3*cfd_deadtime );
+  }
+  
+  
 }
 
 void SPEcalibration::analyze(const art::Event& evt)
 {
-
-  if ( !USE_PULSE_FINDER )
-    anayzeLEDPulserMode( evt );    
-  else
-    analyzePulseFindingMode( evt );
+  // Run both routines
+  irun    = (int)evt.run();
+  isubrun = (int)evt.subRun();
+  ievent    = (int)evt.event();
+  //if ( !USE_PULSE_FINDER )
+  anayzeLEDPulserMode( evt );    
+  //else
+  analyzePulseFindingMode( evt );
 
 }
 
@@ -310,6 +366,7 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 {
   // initialize data handles and services
   art::ServiceHandle<geo::UBOpReadoutMap> ub_PMT_channel_map;
+  art::ServiceHandle<util::TimeService> ts;
   art::Handle< std::vector< raw::OpDetWaveform > > LogicHandle;
   art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
 
@@ -319,9 +376,16 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   event_maxamp = 0.0;
   event_nchfires->clear();
   event_nchfires->resize( 32, 0.0 );
+  event_lastcosmicwin->clear();
+  event_lastcosmicwin->resize( 32, 1.0 );
+  event_lastsatcosmicwin->clear();
+  event_lastsatcosmicwin->resize( 32, 1.0 );
   nsamples = 0;
+
+  // get trigger time
+  double trig_timestamp = ts->TriggerTime();
   
-  // get channel maxamp
+  // get channel maxamp and other event related info
   for(auto &wfm : opwfms)  {
     readout_ch = wfm.ChannelNumber();
     if ( readout_ch%100>=32 )
@@ -333,16 +397,37 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
     ch = (int)f;
     if ( slot!=(int)SPE_SLOT )
       continue;
-    if ( WINDOW_MINSIZE > wfm.size() )
-      continue;
-    nsamples = (int)wfm.size();
+    if ( WINDOW_MINSIZE < wfm.size() ) {
+      // beam window
+      nsamples = (int)wfm.size();
     
-    for (int i=0; i<(int)wfm.size(); i++) {
-      if ( event_maxamp<(double)wfm.at(i) )
-	event_maxamp = (double)wfm.at(i);
+      for (int i=0; i<(int)wfm.size(); i++) {
+	if ( event_maxamp<(double)wfm.at(i) )
+	  event_maxamp = (double)wfm.at(i);
+      }
+    }
+    else {
+      // cosmic window. we have a cosmic threshold (to prevent considering late or smaller light pulses)
+      double dt_usec = wfm.TimeStamp()-trig_timestamp; // usec
+      auto maxelem = std::max_element( wfm.begin(), wfm.end() );
+      //std::cout << " " << ch << ", " << wfm.size() << ": " << dt_usec << " " << wfm.TimeStamp() << " " << trig_timestamp << " " << *maxelem << std::endl;
+      if ( dt_usec>0 )
+	continue;
+
+      if ( (int)(*maxelem)>COSMIC_THRESHOLD ) {
+	if ( event_lastcosmicwin->at(ch) > 0.0 || std::fabs(dt_usec)<std::fabs(event_lastcosmicwin->at(ch)) ) {
+	  event_lastcosmicwin->at(ch) = dt_usec;
+	}
+	if ( (int)(*maxelem)>4090 ) {
+	  // saturated channel
+	  if ( event_lastsatcosmicwin->at(ch)>0.0 || (std::fabs(dt_usec)<std::fabs(event_lastsatcosmicwin->at(ch)) ) ) {
+	    event_lastsatcosmicwin->at(ch) = dt_usec;
+	  }
+	}
+      }//end of if cosmic threshold met
     }
   }
-
+  
   
   for(auto &wfm : opwfms)  {
     readout_ch = wfm.ChannelNumber();
@@ -410,11 +495,16 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 	charge += adc;
 	if ( adc>maxamp )
 	  maxamp = adc;
+	if ( ch<32 && rms_baseline<AVESPE_RMSLIMIT && rms_baseline2<AVESPE_RMSLIMIT ) {
+	  hSPE_ave[ch]->SetBinContent( i+1, (hSPE_ave[ch]->GetBinContent( i+1 )*hspe_nfills[ch] + adc)/double(hspe_nfills[ch]+1) );
+	}
       }
+      if ( ch<32 && rms_baseline<AVESPE_RMSLIMIT && rms_baseline2<AVESPE_RMSLIMIT )
+	hspe_nfills[ch]++;
 
       // ok done for the pulse
       opchannel = readout_ch;
-      fTouttree->Fill();
+      fTpulsetree->Fill();
     }
   } //end of loop over waveforms
 

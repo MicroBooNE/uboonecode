@@ -27,6 +27,9 @@ services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: false
 services.user.DatabaseUtil.TableName: "main_run"
 
+services.user.TimeService.TrigModuleName: "daq"
+
+
 outputs:
 {
 }
@@ -56,5 +59,6 @@ physics:
  #ie analyzers and output streams.  these all run simultaneously
  end_paths:     [analyzeIt]
 }
+
 
 

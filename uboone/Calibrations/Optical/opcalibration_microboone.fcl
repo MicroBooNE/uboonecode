@@ -16,12 +16,13 @@ microboone_SPEcalibration:
     PulseStart: 180
     PulseEnd: 210
     SaveAverageSPE: true
+    AveSPEBaselineRMScut: 1.0
 
     UsePulseFinder: true
     CFDThreshold: 10
     CFDDelay: 4
-    CFDDeadtime: 30
-    CFDWidth: 30
+    CFDDeadtime: 35
+    CFDWidth: 35
 }
 
 END_PROLOG
