@@ -43,6 +43,9 @@
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
 
+// Pulse finding
+#include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"
+
 
 
 class SPEcalibration;
@@ -79,10 +82,15 @@ private:
 
   std::vector<unsigned short> flasher_adcs;
   std::vector<unsigned short> adcs;
+  std::vector<int>* event_nchfires;
+  int nsamples = 0;
+  double event_maxamp;
 
   unsigned short LOGIC_CH;
   unsigned short LOGIC_SLOT;
   unsigned short LOGIC_THRESHOLD;
+  unsigned short SPE_SLOT;
+  unsigned int WINDOW_MINSIZE;
   unsigned short baseline_start;
   unsigned short baseline_end;
   unsigned short pulse_start;
@@ -98,6 +106,14 @@ private:
   std::string OpDataModule;
 
   TTree* fTouttree;
+  TTree* fTevent;
+
+
+  // LED Pulser Mode
+  void anayzeLEDPulserMode( const art::Event& evt );
+
+  // Pulse Finding Mode
+  void analyzePulseFindingMode( const art::Event& evt );
 
 };
 
@@ -108,8 +124,9 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
 
   // Setup Analyzer File
   art::ServiceHandle<art::TFileService> out_file;
-  fTouttree = out_file->make<TTree>("outtree","Analyzed Flasher Run Data");
 
+  // Pulse Tree
+  fTouttree = out_file->make<TTree>("pulsetree","Analyzed Flasher Run Data");
   fTouttree->Branch("opchannel",    &opchannel,     "opchannel/I");
   fTouttree->Branch("charge",       &charge ,       "charge/D");
   fTouttree->Branch("maxamp",       &maxamp,        "maxamp/D");
@@ -118,10 +135,19 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   fTouttree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
   fTouttree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
 
+  // Data for each Beam Window
+  fTevent = out_file->make<TTree>("eventtree", "Data about the event" );
+  event_nchfires = new std::vector<int>;
+  fTevent->Branch("nsamples", &nsamples, "nsamples/I" );
+  fTevent->Branch("chmaxamp", &event_maxamp, "chmaxamp/D");
+  fTevent->Branch("nchfires", "vector<int>", &event_nchfires );
+
   // Setup Analyzer
   LOGIC_CH         = p.get<unsigned short>( "LogicChannel", 39 );
   LOGIC_SLOT       = p.get<unsigned short>( "LogicSlot", 6 );
   LOGIC_THRESHOLD  = p.get<unsigned short>( "LogicThreshold", 200 );
+  SPE_SLOT         = p.get<unsigned short>( "WaveformSlot", 5 );
+  WINDOW_MINSIZE   = p.get<unsigned int>( "WindowMinSize", 500 );
   baseline_start   = p.get<unsigned short>( "LeadingBaselineStart", 0 );   // first tick after logic pulse start that defines baseline window
   baseline_end     = p.get<unsigned short>( "LeadingBaselineEnd", 180 );   // last tick after lofic pulses start that defines baseline window
   baseline2_start  = p.get<unsigned short>( "TrailingBaselineStart", 210 );   // first tick after logic pulse start that defines baseline window
@@ -138,9 +164,18 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
 
 }
 
-
 void SPEcalibration::analyze(const art::Event& evt)
+{
 
+  if ( !USE_PULSE_FINDER )
+    anayzeLEDPulserMode( evt );    
+  else
+    analyzePulseFindingMode( evt );
+
+}
+
+
+void SPEcalibration::anayzeLEDPulserMode(const art::Event& evt)
 {
   // initialize data handles and services
   art::ServiceHandle<geo::UBOpReadoutMap> ub_PMT_channel_map;
@@ -161,7 +196,7 @@ void SPEcalibration::analyze(const art::Event& evt)
     slot = (int)s;
     ch = (int)f;
 
-    if(slot == LOGIC_SLOT && ch == LOGIC_CH) {
+    if(slot == (int)LOGIC_SLOT && ch == (int)LOGIC_CH) {
 
       flasher_adcs.clear();
       for(auto &adc : wfm)
@@ -268,10 +303,100 @@ void SPEcalibration::analyze(const art::Event& evt)
 
   }
 
+}
 
+void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
+{
+  // initialize data handles and services
+  art::ServiceHandle<geo::UBOpReadoutMap> ub_PMT_channel_map;
+  art::Handle< std::vector< raw::OpDetWaveform > > LogicHandle;
+  art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
 
-}  
+  evt.getByLabel( OpDataModule, "OpdetBeamHighGain", wfHandle);
+  std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
 
+  event_maxamp = 0.0;
+  event_nchfires->clear();
+  event_nchfires->resize( 32, 0.0 );
+  nsamples = 0;
+  
+  for(auto &wfm : opwfms)  {
+    readout_ch = wfm.ChannelNumber();
+
+    if ( WINDOW_MINSIZE > wfm.size() )
+      continue;
+    nsamples = (int)wfm.size();
+
+    unsigned int c,s,f;
+    ub_PMT_channel_map->GetCrateSlotFEMChFromReadoutChannel(readout_ch, c, s, f);
+    slot = (int)s;
+    ch = (int)f;
+    if ( slot!=(int)SPE_SLOT )
+      continue;
+
+    // convert waveform
+    std::vector<double> data;
+    for (int i=0; i<(int)wfm.size(); i++)
+      data.push_back( (double)wfm.at(i) );
+
+    // get pulse positions
+    std::vector< int > t_fire;
+    std::vector< int > amp_fire;
+    std::vector< int > maxt_fire;
+    std::vector< int > diff_fire;
+    cpysubevent::runCFdiscriminatorCPP( t_fire, amp_fire, maxt_fire, diff_fire,
+					data.data(), (int)cfd_delay, (int)cfd_threshold, (int)cfd_deadtime, (int)cfd_width, (int)data.size() );
+
+    // we loop through the pulses.  
+    event_nchfires->at( ch ) = (int)t_fire.size();
+    for ( int ifire=0; ifire<(int)t_fire.size(); ifire++ ) {
+
+      int tick = (int)t_fire.at(ifire) - (int)cfd_delay;
+      if ( tick<(int)2*cfd_deadtime || tick>(int)wfm.size()-(int)2*cfd_deadtime 
+	   || ( ifire>0 && tick < t_fire.at(ifire-1)+(int)2*cfd_deadtime ) ) {
+	// only use pulses 2 times the deadtime from the ends and 2 deadtimes away from the previous pulse
+	continue;
+      }
+      
+      // ok we like this one. baseline time. also save maximum amplitude of channel
+      ave_baseline = 0.;
+      rms_baseline = 0.;
+      ave_baseline2 = 0.;
+      rms_baseline2  = 0.;
+      for (int i=0; i<(int)cfd_width; i++) {
+	ave_baseline += (double)wfm.at( tick-cfd_width+i );
+	rms_baseline  += (double)wfm.at( tick-cfd_width+i )*wfm.at( tick-cfd_width+i );
+	ave_baseline2  += (double)wfm.at( tick+cfd_width+i );
+	rms_baseline2 += (double)wfm.at( tick+cfd_width+i )*wfm.at( tick+cfd_width+i );
+	if ( (double)diff_fire.at(ifire) > event_maxamp )
+	  event_maxamp = (double)diff_fire.at(ifire);
+      }
+      ave_baseline /= (double)cfd_width;
+      ave_baseline2  /= (double)cfd_width;
+      rms_baseline /= (double)cfd_width;
+      rms_baseline2 /= (double)cfd_width;
+      rms_baseline = sqrt( rms_baseline - ave_baseline*ave_baseline );
+      rms_baseline2 = sqrt( rms_baseline2 - ave_baseline2*ave_baseline2 );
+
+      // calculate integral
+      maxamp = 0.0;
+      charge = 0.0;
+      double baseline_slope = (ave_baseline2-ave_baseline)/(double)cfd_width;
+      for (int i=0; i<(int)cfd_width; i++) {
+	double adc = wfm.at( tick + i ) - (baseline_slope*(i) + ave_baseline);
+	charge += adc;
+	if ( adc>maxamp )
+	  maxamp = adc;
+      }
+
+      // ok done for the pulse
+      opchannel = readout_ch;
+      fTouttree->Fill();
+    }
+  } //end of loop over waveforms
+
+  fTevent->Fill();
+}
 
 
 

@@ -8,6 +8,7 @@ microboone_SPEcalibration:
     LogicChannel: 39
     LogicSlot: 6
     LogicThreshold: 200
+    WindowMinSize: 500
     LeadingBaselineStart: 0
     LeadingBaselineEnd: 180
     TrailingBaselineStart: 210
