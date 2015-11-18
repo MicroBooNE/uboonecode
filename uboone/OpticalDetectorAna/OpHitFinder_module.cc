@@ -92,6 +92,8 @@ OpHitFinder::OpHitFinder(fhicl::ParameterSet const & p)
   //_preco_alg = new pmtana::AlgoSiPM(hit_alg_pset);
   else if (hit_alg_name == "SlidingWindow")
     _preco_alg = new pmtana::AlgoSlidingWindow(hit_alg_pset);
+  else if (hit_alg_name == "FixedWindow")
+    _preco_alg = new pmtana::AlgoFixedWindow(hit_alg_pset);
   else if (hit_alg_name == "CFD" )
     _preco_alg = new pmtana::AlgoCFD(hit_alg_pset);
   else throw art::Exception(art::errors::UnimplementedFeature)
