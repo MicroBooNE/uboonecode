@@ -1,36 +1,5 @@
-
+#include "opticaldetectormodules.fcl"
 BEGIN_PROLOG
-
-standard_algo_threshold:
-{
-    HitFinder:       "Threshold"
-    ADCThreshold:    3
-    NSigmaThreshold: 5
-}
-
-###################################################################
-
-standard_algo_fixedwindow:
-{ 
-    HitFinder:       "FixedWindow"
-    StartIndex: 0
-    EndIndex:   0
-}
-
-standard_algo_slidingwindow:
-{
-    HitFinder:       "SlidingWindow"
-    NumPreSample:    3
-    ADCThreshold:    8
-    NSigmaThreshold: 5
-    EndADCThreshold: 2
-    EndNSigmaThreshold: 1
-    MinWindowSize:   5
-    MaxSigma:        1.0
-    PedRangeMax:     2150
-    PedRangeMin:     100
-    Verbosity:       false
-}
 
 ophitfinder_microboone:
 {
@@ -40,7 +9,8 @@ ophitfinder_microboone:
   UseArea: true
   SPESize: 120
   Verbosity: false
-  HitAlgoPset: @local::standard_algo_fixedwindow
+  HitAlgoPset: @local::standard_algo_cfd
+  PedAlgoPset: @local::standard_algo_pedestal_ub
 }
 
 END_PROLOG
