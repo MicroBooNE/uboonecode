@@ -4977,7 +4977,6 @@
   <subtraction name="ConcreteDiscRoof">
     <first ref="ConcreteDiscRoof0"/> <second ref="RemovableRoof"/>
 	<position name="posRemoval1" unit="cm" x="0" y="0" z="0"/>
-<!--	<rotation name="rotPlatformSub0" unit="deg" x="90" y="0" z="0"/>-->
   </subtraction>
 
   <subtraction name="ConcreteSteelBeam1">
@@ -39161,10 +39160,6 @@
  </volume>
 
  
-  <volume name="volBeams">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-	<solidref ref="Beams"/>
-  </volume>
   <volume name="volVacuumSpace">
     <materialref ref="Vacuum"/>
  	<solidref ref="VacuumSpace"/>
@@ -39317,7 +39312,7 @@
   <volume name="volWorld" >
     <materialref ref="Air"/> 
     <solidref ref="World"/>
-	<physvol>
+   <physvol>
 	  <volumeref ref="volVacuumSpace"/>
  	  <position name="posVacuumSpace" unit="cm" x="0" y="(53000-1800)/2 + 624.85" z="0"/>
  	</physvol>
