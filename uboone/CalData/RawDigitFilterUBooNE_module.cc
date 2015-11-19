@@ -47,8 +47,8 @@
 
 #include "Geometry/Geometry.h"
 #include "Utilities/DetectorPropertiesService.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "CalibrationDBI/Interface/DetPedestalService.h"
+#include "CalibrationDBI/Interface/DetPedestalProvider.h"
 
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
@@ -139,7 +139,7 @@ private:
     // Useful services, keep copies for now (we can update during begin run periods)
     geo::GeometryCore const* fGeometry;                         ///< pointer to Geometry service
     dataprov::DetectorProperties const* fDetectorProperties;   ///< Detector properties service
-    const lariov::IDetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
+    const lariov::DetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
 };
 
 DEFINE_ART_MODULE(RawDigitFilterUBooNE)
@@ -154,7 +154,7 @@ DEFINE_ART_MODULE(RawDigitFilterUBooNE)
 RawDigitFilterUBooNE::RawDigitFilterUBooNE(fhicl::ParameterSet const & pset) :
                       fNumEvent(0),
                       fFirstEvent(true),
-                      fPedestalRetrievalAlg(*lar::providerFrom<lariov::IDetPedestalService>())
+                      fPedestalRetrievalAlg(*lar::providerFrom<lariov::DetPedestalService>())
 {
     
     fGeometry = lar::providerFrom<geo::Geometry>();

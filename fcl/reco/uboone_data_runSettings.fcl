@@ -8,9 +8,9 @@ services.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: [ 14.0, 14.0, 14.0 ]
 #
 # Database access for pedestals
 #
-services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
-services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
-services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:        "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
+services.DetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
+services.DetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:        "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
 
 # Notes on August 25, 2015
 # According to Leon the three parameters below are:

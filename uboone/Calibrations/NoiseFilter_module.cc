@@ -29,8 +29,8 @@
 #include "RawData/raw.h"
 #include "Geometry/Geometry.h"
 // #include "Utilities/DetectorPropertiesService.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "CalibrationDBI/Interface/DetPedestalService.h"
+#include "CalibrationDBI/Interface/DetPedestalProvider.h"
 
 namespace calibration {
 
@@ -92,7 +92,7 @@ namespace calibration {
     TH1F *currentHist;
     TH1F *currentFFTHist;
 
-    const lariov::IDetPedestalProvider&  fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
+    const lariov::DetPedestalProvider&  fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
   }; //end class Noise
 
 
@@ -100,7 +100,7 @@ namespace calibration {
   NoiseFilter::NoiseFilter(fhicl::ParameterSet const& pset)
     : EDProducer(),
     fMaxTicks(9595),
-    fPedestalRetrievalAlg(art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider())
+    fPedestalRetrievalAlg(art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider())
     {
     this->reconfigure(pset);
     produces<std::vector<raw::RawDigit> >();

@@ -76,13 +76,13 @@ microboone_disp:
  LArVoxelCalculator:       @local::microboone_larvoxelcalculator
  InfoTransfer: 		   @local::microboone_infotransfer
  DetectorClocksService:    @local::microboone_detectorclocks
- IDetPedestalService:      @local::microboone_detpedestalservice
- IChannelStatusService:    @local::microboone_channelstatus_service
+ DetPedestalService:      @local::microboone_detpedestalservice
+ ChannelStatusService:    @local::microboone_channelstatus_service
  LArFFT:                   @local::microboone_larfft
  SignalShapingServiceMicroBooNE:   @local::microboone_signalshapingservice
 }
 
-#microboone_disp.IDetPedestalService: @local::microboone_detpedestalservice
+#microboone_disp.DetPedestalService: @local::microboone_detpedestalservice
 #microboone_disp.LArFFT:                   @local::microboone_larfft
 #microboone_disp.SignalShapingServiceMicroBooNE:   @local::microboone_signalshapingservice
 

@@ -26,8 +26,8 @@
 #include "Simulation/SimChannel.h"
 #include "Geometry/Geometry.h"
 
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "CalibrationDBI/Interface/DetPedestalService.h"
+#include "CalibrationDBI/Interface/DetPedestalProvider.h"
 
 
 // ROOT
@@ -91,7 +91,7 @@ void TestDBI::analyze(art::Event const & evt)
     }
   }//end loop over digits
 
-  const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+  const lariov::DetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
   std::cout<<"PEDESTAL "<<pedestalRetrievalAlg.PedMean(8100)<<std::endl;   
 
 

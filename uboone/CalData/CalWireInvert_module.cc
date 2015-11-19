@@ -42,8 +42,8 @@
 #include "RecoBase/Wire.h"
 #include "RecoBaseArt/WireCreator.h"
 #include "Utilities/AssociationUtil.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "CalibrationDBI/Interface/DetPedestalService.h"
+#include "CalibrationDBI/Interface/DetPedestalProvider.h"
 
 ///creation of calibrated signals on wires
 namespace caldata {
@@ -76,7 +76,7 @@ private:
     size_t                      fEventCount;           ///< count of event processed
     int                         fMaxAllowedChanStatus; ///< Examine channels with status below this
     
-    const lariov::IDetPedestalProvider& fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
+    const lariov::DetPedestalProvider& fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
     
     float SubtractBaseline(std::vector<float>& holder, float basePre,
                            float basePost,unsigned int roiStart,unsigned int roiLen,
@@ -88,7 +88,7 @@ DEFINE_ART_MODULE(CalWireInvert)
   
 //-------------------------------------------------
 CalWireInvert::CalWireInvert(fhicl::ParameterSet const& pset) :
-    fPedestalRetrievalAlg(art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider())
+    fPedestalRetrievalAlg(art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider())
 {
     this->reconfigure(pset);
 

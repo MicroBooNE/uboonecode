@@ -7,8 +7,8 @@
 
 #include "Geometry/Geometry.h"
 
-#include "CalibrationDBI/Interface/IChannelStatusService.h"
-#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+#include "CalibrationDBI/Interface/ChannelStatusService.h"
+#include "CalibrationDBI/Interface/ChannelStatusProvider.h"
 #include "CalibrationDBI/IOVData/ChannelStatus.h"
 
 #include <fstream>
@@ -26,8 +26,8 @@ class TestCFI : public art::EDAnalyzer {
 void TestCFI::analyze(art::Event const& evt) {
   
   art::ServiceHandle<geo::Geometry> geo;
-  art::ServiceHandle<lariov::IChannelStatusService> cf; 
-  const lariov::IChannelStatusProvider& cp = cf->GetProvider();
+  art::ServiceHandle<lariov::ChannelStatusService> cf; 
+  const lariov::ChannelStatusProvider& cp = cf->GetProvider();
   
   std::ofstream f("channelStatus.txt",std::ofstream::out);
   
