@@ -37,6 +37,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <bitset>
 #include <algorithm>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
@@ -305,7 +306,7 @@ void BeamData::endSubRun(art::SubRun & sr)
   //loop over remaining beam events
 
   for (auto it=fBeamConf.begin();it!=fBeamConf.end();it++) {
-    mf::LogDebug(__FUNCTION__) <<"Loop through the remaining "
+    mf::LogInfo(__FUNCTION__) <<"Loop through the remaining "
 			      <<it->first<<" beam events";
     while (true) {
       ub_BeamHeader bh;
@@ -448,17 +449,27 @@ void BeamData::produce(art::Event & e)
   */
 
   std::string beam_name="";
+  std::bitset<16> trigbit(trigInfo[0]->TriggerBits());
   for (auto& it : fBeamConf) {
     if (trigInfo[0]->TriggerBits() & it.second.fTriggerMask) {
       beam_name=it.first;
     }
   }
   if (beam_name=="") {
-    mf::LogInfo(__FUNCTION__) << "Trigger not matching any of the beam(s). Skipping beam merging.";
+    mf::LogInfo(__FUNCTION__) << "Trigger not matching any of the beam(s). Skipping beam merging. trigger bits= "<<trigInfo[0]->TriggerBits()<<" "<<trigbit;
     fNonBeamCount++;
-    return;
-  }
-  mf::LogDebug(__FUNCTION__) <<"Looking for "<<beam_name<<" event";
+
+  } else {
+  mf::LogInfo(__FUNCTION__) <<"Looking for "<<beam_name<<" event (trigger bits= "<<trigInfo[0]->TriggerBits()<<" "<<trigbit<<" )";
+
+  art::Handle< raw::DAQHeader > daqHeaderHandle;
+  e.getByLabel("daq", daqHeaderHandle);
+  time_t dettime64  = daqHeaderHandle->GetTimeStamp();
+   
+  uint32_t detsec = uint32_t(dettime64>>32);
+  uint32_t detmsec =uint32_t((dettime64 & 0xFFFFFFFF)/1000000);
+    
+  mf::LogInfo(__FUNCTION__)<<"Looking for a match to det event "<<detsec<<"\t"<<detmsec;
 
   bool ready_for_next_det_event=false;
   while ( !ready_for_next_det_event ) {
@@ -501,6 +512,7 @@ void BeamData::produce(art::Event & e)
       fBeamConf[beam_name].fNonMergedEventCount+=1;
     }
   }
+  }
   e.put(std::move(beam_info));
 }
 
@@ -538,6 +550,7 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
     mf::LogInfo(__FUNCTION__)<<"Reached end of beam file "<<fBeamConf[beamline].fFileName;
     result=false;
   }
+  mf::LogInfo(__FUNCTION__)<<"Returning beam event "<<bh.getSeconds()<<"\t"<<bh.getMilliSeconds();
   return result;
 }
 
@@ -595,7 +608,7 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offs
   time_t dettime  = time_t(detsec)*1000.+time_t(detmsec);
   time_t beamtime = time_t(bh.getSeconds())*1000 + time_t(bh.getMilliSeconds())+time_t(offsetT);
 
-  mf::LogDebug(__FUNCTION__)<<"Detector vs beam time "<<detsec<<"\t"<<detmsec<<"\t"<<bh.getSeconds()<<"\t"<<bh.getMilliSeconds()<<"\t"<<dettime-beamtime;
+  mf::LogInfo(__FUNCTION__)<<"Detector vs beam time "<<detsec<<"\t"<<detmsec<<"\t"<<bh.getSeconds()<<"\t"<<bh.getMilliSeconds()<<"\t"<<dettime-beamtime;
   int comp=1;
   if ( dettime>=beamtime && dettime - beamtime < dt ) {comp = 0;}
   else if ( dettime<beamtime && beamtime - dettime < dt ) {comp = 0;}
