@@ -2,7 +2,7 @@
 #define UBOPTICALCHCONFIG_CXX
 
 #include "UBOpticalChConfig.h"
-#include "Utilities/LArPropertiesService.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "uboone/Geometry/UBOpReadoutMap.h" // uboonecode
 
@@ -69,7 +69,7 @@ namespace opdet {
     // ------------------------------------------------------------------------------------------------------
     
     // Correct QE by prescaling set in LArProperties
-    auto const* LarProp = lar::providerFrom<util::LArPropertiesService>();
+    auto const* LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
     auto tmp_QE = tmp_float_params.at( kQE );
     for (unsigned int i = 0; i < tmp_QE.size(); i++) {
 

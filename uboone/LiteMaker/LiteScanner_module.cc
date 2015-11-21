@@ -28,7 +28,7 @@
 // LArSoft includes
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
-#include "Utilities/TimeService.h"
+#include "DetectorInfoServices/TimeService.h"
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
@@ -60,9 +60,9 @@
 #include "MCBase/MCShower.h"
 #include "MCBase/MCTrack.h"
 #include "SummaryData/POTSummary.h"
-#include "Utilities/LArProperties.h"
+#include "DetectorInfo/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
-#include "Utilities/DetectorProperties.h"
+#include "DetectorInfo/DetectorProperties.h"
 
 #include "DataFormat/simphotons.h"
 
@@ -211,7 +211,7 @@ void LiteScanner::analyze(art::Event const & e)
   _mgr.set_id(e.id().run(),
 	      e.id().subRun(),
 	      e.id().event());
-  art::ServiceHandle<util::TimeService> ts;
+  art::ServiceHandle<detinfo::DetectorClocksService> ts;
   ts->preProcessEvent(e);
   /*
   std::cout<<" Run: " << _mgr.run_id() << " ... "
@@ -390,7 +390,7 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
     fAlg.ScanData(dh,lite_data);
   }else{
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
-    art::ServiceHandle<util::TimeService> ts;
+    art::ServiceHandle<detinfo::DetectorClocksService> ts;
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
     evt.getByLabel(lite_id.second, dh);

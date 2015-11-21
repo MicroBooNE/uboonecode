@@ -46,7 +46,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "Geometry/Geometry.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "CalibrationDBI/Interface/DetPedestalService.h"
 #include "CalibrationDBI/Interface/DetPedestalProvider.h"
 
@@ -138,7 +138,7 @@ private:
     
     // Useful services, keep copies for now (we can update during begin run periods)
     geo::GeometryCore const* fGeometry;                         ///< pointer to Geometry service
-    dataprov::DetectorProperties const* fDetectorProperties;   ///< Detector properties service
+    detinfo::DetectorProperties const* fDetectorProperties;   ///< Detector properties service
     const lariov::DetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
 };
 
@@ -158,7 +158,7 @@ RawDigitFilterUBooNE::RawDigitFilterUBooNE(fhicl::ParameterSet const & pset) :
 {
     
     fGeometry = lar::providerFrom<geo::Geometry>();
-    fDetectorProperties = lar::providerFrom<util::DetectorPropertiesService>();
+    fDetectorProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     
     reconfigure(pset);
     produces<std::vector<raw::RawDigit> >();

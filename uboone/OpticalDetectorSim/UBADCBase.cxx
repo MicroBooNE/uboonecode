@@ -3,7 +3,7 @@
 
 #include "UBADCBase.h"
 
-#include "Utilities/DetectorClocksService.h" // lardata
+#include "DetectorInfoServices/DetectorClocksService.h" // lardata
 
 namespace opdet {
 
@@ -11,7 +11,7 @@ namespace opdet {
   UBADCBase::UBADCBase()
   //--------------------
   {
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     fTimeInfo = ts->OpticalClock();
     fDuration = fTimeInfo.TickPeriod();
     Reset();

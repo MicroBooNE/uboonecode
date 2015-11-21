@@ -38,7 +38,7 @@
 ///                    which the input field responses are obtained
 ///                 4. Convolute the field and electronic responses,
 ///                    and then sample the convoluted function with
-///                    the nominal sampling rate (util::DetectorProperties).
+///                    the nominal sampling rate (detinfo::DetectorPropertiesService).
 ///                    NOTE: Currently this doesn't include the filter 
 ///                    function and the deconvolution kernel.
 ///                    We may want to include them later?

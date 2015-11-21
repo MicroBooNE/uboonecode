@@ -36,9 +36,9 @@
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "Geometry/GeometryCore.h"
-#include "DataProviders/DetectorProperties.h"
+#include "DetectorInfo/DetectorProperties.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "Utilities/AssociationUtil.h"
 
 // ROOT includes. Note: To look up the properties of the ROOT classes,
@@ -103,7 +103,7 @@ private:
 
     // Other variables that will be shared between different methods.
     geo::GeometryCore const*             fGeometry;           ///< pointer to the Geometry service
-    dataprov::DetectorProperties const* fDetectorProperties; ///< Pointer to the detector properties
+    detinfo::DetectorProperties const* fDetectorProperties; ///< Pointer to the detector properties
 
 }; // class  TPCNeutrinoIDAna
 
@@ -161,7 +161,7 @@ void  TPCNeutrinoIDAna::reconfigure(fhicl::ParameterSet const& pset)
     fInputFileName = pset.get<std::string>("FullyQualifiedInputFile");
     
     fGeometry = lar::providerFrom<geo::Geometry>();
-    fDetectorProperties = lar::providerFrom<util::DetectorPropertiesService>();
+    fDetectorProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     
     return;
 }

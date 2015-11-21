@@ -25,9 +25,9 @@
 #include "Geometry/OpDetGeo.h"
 #include "Geometry/WireGeo.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/LArPropertiesService.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
 #include "Utilities/GeometryUtilities.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 
 #include "Base/Base-TypeDef.hh"
 
@@ -229,7 +229,7 @@ namespace ana {
   {
     if(_detp_tree) return;
     art::ServiceHandle<art::TFileService>  fileService;    
-    auto const* _detp = lar::providerFrom<util::DetectorPropertiesService>();
+    auto const* _detp = lar::providerFrom<detinfo::DetectorPropertiesService>();
     auto const* _geom = lar::providerFrom<geo::Geometry>();
     TTree* _detp_tree = fileService->make<TTree>("DetectorProperties","");
 
@@ -266,7 +266,7 @@ namespace ana {
   void UtilScanner::SaveLArProperties(fhicl::ParameterSet const& pset)
   {
     if(_larp_tree) return;
-    auto const* _larp = lar::providerFrom<util::LArPropertiesService>();
+    auto const* _larp = lar::providerFrom<detinfo::LArPropertiesService>();
     auto const* _geom = lar::providerFrom<geo::Geometry>();
 
     //--- Fill Variables ---//

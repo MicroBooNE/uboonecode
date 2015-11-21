@@ -20,7 +20,7 @@
 #include "OpticalDetectorData/OpticalRawDigit.h"
 #include "RawData/TriggerData.h"
 #include "RawData/OpDetWaveform.h" // from lardata
-#include "Utilities/DetectorClocksServiceStandard.h" // FIXME: this code is non-portable
+#include "DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this code is non-portable
 #include "uboone/OpticalDetectorSim/UBOpticalException.h"
 #include "Geometry/Geometry.h" // larcore
 #include "uboone/Geometry/UBOpChannelTypes.h"  // uboonecode
@@ -161,9 +161,9 @@ namespace opdet {
 
     // Obtain optical clock to be used for sample/frame number generation
     // FIXME: this code is non-portable
-    art::ServiceHandle<util::DetectorClocksServiceStandard> tss;
+    art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
     tss->preProcessEvent(event); // sets trigger time
-    auto const* ts = lar::providerFrom<util::DetectorClocksServiceStandard>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksServiceStandard>();
     ::util::ElecClock clock = ts->OpticalClock();
     //std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 

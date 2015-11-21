@@ -19,7 +19,7 @@
 // LArSoft includes
 #include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "Geometry/Geometry.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "Geometry/PlaneGeo.h"
 #include "Geometry/WireGeo.h"
 #include "Utilities/AssociationUtil.h"
@@ -41,7 +41,7 @@ TrackPairPlusVertexAlg::TrackPairPlusVertexAlg(fhicl::ParameterSet const &pset) 
     this->reconfigure(pset);
     
     m_geometry = lar::providerFrom<geo::Geometry>();
-    m_detector = lar::providerFrom<util::DetectorPropertiesService>();
+    m_detector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

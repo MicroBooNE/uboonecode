@@ -29,8 +29,8 @@ extern "C" {
 
 // LArSoft includes
 #include "Utilities/LArFFT.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
+#include "DetectorInfo/LArProperties.h"
+#include "DetectorInfo/DetectorProperties.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/PlaneGeo.h"
 

@@ -16,8 +16,8 @@
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 // #include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
-// #include "Utilities/DetectorClocksService.h" // lardata
-//#include "Utilities/DetectorClocksServiceStandard.h" // lardata; FIXME: not portable
+// #include "DetectorInfoServices/DetectorClocksService.h" // lardata
+//#include "DetectorInfoServices/DetectorClocksServiceStandard.h" // lardata; FIXME: not portable
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <memory>
@@ -94,7 +94,7 @@ bool TriggerEnforcement::filter(art::Event & e)
 {
 /*
   /// @bug This code is not portable and requires redesign
-  ::art::ServiceHandle< util::DetectorClocksServiceStandard > ts;
+  ::art::ServiceHandle< detinfo::DetectorClocksServiceStandard > ts;
 
   ts->preProcessEvent(e);
 */

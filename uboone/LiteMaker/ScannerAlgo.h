@@ -48,9 +48,9 @@
 #include "OpticalDetectorData/OpticalTypes.h"
 #include "MCBase/MCShower.h"
 #include "MCBase/MCTrack.h"
-#include "Utilities/LArProperties.h"
+#include "DetectorInfo/LArProperties.h"
 #include "Utilities/GeometryUtilities.h"
-#include "Utilities/DetectorProperties.h"
+#include "DetectorInfo/DetectorProperties.h"
 
 // std 
 #include <vector>

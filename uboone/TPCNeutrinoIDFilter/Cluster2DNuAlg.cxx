@@ -28,7 +28,7 @@
 // LArSoft includes
 #include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "Geometry/Geometry.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "Geometry/PlaneGeo.h"
 #include "Geometry/WireGeo.h"
 #include "Utilities/AssociationUtil.h"
@@ -49,7 +49,7 @@ Cluster2DNuAlg::Cluster2DNuAlg(fhicl::ParameterSet const &pset) : fMyProducerMod
     this->reconfigure(pset);
     
     m_geometry = lar::providerFrom<geo::Geometry>();
-    m_detector = lar::providerFrom<util::DetectorPropertiesService>();
+    m_detector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

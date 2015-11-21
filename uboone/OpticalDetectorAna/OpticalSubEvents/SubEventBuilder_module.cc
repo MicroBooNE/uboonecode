@@ -28,7 +28,7 @@
 #include "RecoBase/OpFlash.h"
 #include "RecoBase/OpHit.h"
 #include "Utilities/AssociationUtil.h"
-#include "Utilities/DetectorClocksService.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/OpDetGeo.h"
 
@@ -253,7 +253,7 @@ void SubEventBuilder::produce(art::Event & e)
 
 bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& hgbeam, subevent::WaveformData& lgbeam, subevent::CosmicWindowHolder& cosmics, int beamwin_len_threshold ) {
   // Load Services and Event Handles
-  auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
   
   art::Handle< std::vector< raw::OpDetWaveform > > hgwfmHandle;
   bool loadedhg = event.getByLabel( fOpDetInputModule, "OpdetBeamHighGain", hgwfmHandle );
@@ -394,7 +394,7 @@ void SubEventBuilder::prepCosmicDiscWaveforms( subevent::CosmicWindowHolder& cos
 
 void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformData& hgwfms, subevent::WaveformData& lgwfms, subevent::SubEventList& cosmicsubevents ) {
   // get services
-  auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
   // first replace hgwfms that saturate and remove pedestal. also calculate mean beam timestapm while we are at it
   double mean_hg_beamtimestamp = 0.;
@@ -568,7 +568,7 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
 // bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData& wfms, subevent::CosmicWindowHolder& cosmics ) {
 
 //   // Load Services and Event Handles
-//    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+//    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
 //   art::Handle< std::vector< raw::OpDetWaveform > > hgwfmHandle;
 //   bool loadedhg = event.getByLabel( fOpDetInputModule, "OpdetBeamHighGain", hgwfmHandle );
@@ -717,7 +717,7 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
  				     art::Assns<recob::OpFlash, recob::OpHit>& AssnPtr )
 {
   
-  auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
   geo::GeometryCore const* geom = lar::providerFrom<geo::Geometry>();
   double dt_beam = ts->BeamGateTime() - ts->TriggerTime();
 

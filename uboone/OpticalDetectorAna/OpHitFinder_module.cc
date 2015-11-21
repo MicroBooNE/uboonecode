@@ -26,7 +26,7 @@
 #include "OpticalDetector/PulseRecoManager.h"
 #include "RecoBase/OpHit.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/DetectorClocksService.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 #include "RawData/OpDetWaveform.h"
 #include <string>
 
@@ -110,7 +110,7 @@ void OpHitFinder::produce(art::Event & e)
   }
 
   art::ServiceHandle<geo::Geometry> geom;
-  auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
   for(auto const& wf_ptr : *wfHandle) {
 

@@ -37,8 +37,8 @@
 #include "RawData/TriggerData.h"
 #include "OpticalDetectorData/PMTTrigger.h"
 #include "Utilities/AssociationUtil.h"
-#include "Utilities/ElecClock.h"
-#include "Utilities/DetectorClocksService.h"
+#include "DetectorInfo/ElecClock.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 
 /// nutools
 #include "Simulation/BeamGateInfo.h"
@@ -144,7 +144,7 @@ namespace trigger {
 				     );
 
     // Store user-defined trigger timings to the attributes
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto clock = ts->OpticalClock();
     fTriggerCalib.clear();
     fTriggerExt.clear();
@@ -201,7 +201,7 @@ namespace trigger {
   //#########################################
   {
     // Initialize
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     std::unique_ptr< std::vector<raw::Trigger>   >  triggers(new std::vector<raw::Trigger>);
     fAlg.ClearInputTriggers();
     auto clock = ts->OpticalClock();

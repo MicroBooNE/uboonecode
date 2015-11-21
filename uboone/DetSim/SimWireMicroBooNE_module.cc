@@ -50,14 +50,14 @@
 #include "Simulation/SimChannel.h"
 #include "Geometry/Geometry.h"
 #include "Utilities/LArFFT.h"
-#include "Utilities/DetectorPropertiesService.h"
-#include "Utilities/DetectorClocksServiceStandard.h" // FIXME: this is not portable
+#include "DetectorInfoServices/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 #include "Simulation/sim.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
-#include "CalibrationDBI/Interface/IChannelStatusService.h"
-#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+#include "CalibrationDBI/Interface/DetPedestalService.h"
+#include "CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "CalibrationDBI/Interface/ChannelStatusService.h"
+#include "CalibrationDBI/Interface/ChannelStatusProvider.h"
 
 
 ///Detector simulation of raw signals on wires
@@ -218,7 +218,7 @@ namespace detsim {
 
     }
     //detector properties information
-    auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     fSampleRate    = detprop->SamplingRate();
     fNTimeSamples  = detprop->NumberTimeSamples();
 
@@ -297,16 +297,16 @@ namespace detsim {
     //--------------------------------------------------------------------
     
     //get pedestal conditions
-    const lariov::IDetPedestalProvider& pedestalRetrievalAlg 
-       = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+    const lariov::DetPedestalProvider& pedestalRetrievalAlg 
+       = art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
     
     //get rng for pedestals
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");   
     
     //channel status for simulating dead channels
-    const lariov::IChannelStatusProvider& ChannelStatusProvider
-       = art::ServiceHandle<lariov::IChannelStatusService>()->GetProvider();
+    const lariov::ChannelStatusProvider& ChannelStatusProvider
+       = art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider();
 
     //get the FFT
     art::ServiceHandle<util::LArFFT> fFFT;
@@ -325,7 +325,7 @@ namespace detsim {
     art::ServiceHandle<art::TFileService> tfs;
 
     //TimeService
-    art::ServiceHandle<util::DetectorClocksServiceStandard> tss;
+    art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
     // In case trigger simulation is run in the same job...
     tss->preProcessEvent(evt);
     auto const* ts = tss->provider();

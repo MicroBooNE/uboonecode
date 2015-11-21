@@ -13,9 +13,9 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 #include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
-#include "Utilities/DetectorPropertiesService.h"
-#include "Utilities/LArPropertiesService.h"
-#include "Utilities/DetectorClocksService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 #include "Utilities/LArFFT.h"
 #include "TFile.h"
 
@@ -51,8 +51,8 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 {
   // add a comment here
   art::ServiceHandle<geo::Geometry> geo;
-  auto const* larp = lar::providerFrom<util::LArPropertiesService>();
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* larp = lar::providerFrom<detinfo::LArPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   // Reset initialization flag.
 
   fInit = false;
@@ -327,8 +327,8 @@ void util::SignalShapingServiceMicroBooNE::SetTimeScaleFactor()
   // get the scale factor between the bulk drift velocity used to generate the field response
   //   and that used for this simulation.
 
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
-  auto const* larp = lar::providerFrom<util::LArPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+  auto const* larp = lar::providerFrom<detinfo::LArPropertiesService>();
 
   double defaultVelocity = detprop->DriftVelocity(fDefaultEField, fDefaultTemperature);
   double thisVelocity    = detprop->DriftVelocity( detprop->Efield(0), larp->Temperature() );
@@ -578,7 +578,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse(size_t ktype)
 {
   // Get services.
 
-//  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+//  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
   //  std::cout << fNResponses.size() << std::endl;
   //  for (auto& ktype : fNResponses) {
@@ -722,7 +722,7 @@ void util::SignalShapingServiceMicroBooNE::SetElectResponse(size_t ktype,double 
 
   
 
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   for(auto& element : fElectResponse[ktype]){
     element /= max;
     element *= fADCPerPCAtLowestASICGain * 1.60217657e-7;
@@ -741,7 +741,7 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
 {
   // Get services.
 
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   art::ServiceHandle<util::LArFFT> fft;
 
   double ts = detprop->SamplingRate();
@@ -792,7 +792,7 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
 void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype)
 {
   // Get services
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   art::ServiceHandle<util::LArFFT> fft;
 
   /* This could be a warning, but in principle, there's no reason to restrict the binning
@@ -1032,7 +1032,7 @@ int util::SignalShapingServiceMicroBooNE::FieldResponseTOffset(unsigned int cons
     default:
       throw cet::exception(__FUNCTION__) << "Invalid geo::View_t ... " << view << std::endl;
   }
-  auto tpc_clock = lar::providerFrom<util::DetectorClocksService>()->TPCClock();
+  auto tpc_clock = lar::providerFrom<detinfo::DetectorClocksService>()->TPCClock();
   return tpc_clock.Ticks(time_offset/1.e3);
 }
 
@@ -1063,7 +1063,7 @@ const std::vector<TComplex>& util::SignalShapingServiceMicroBooNE::GetConvKernel
 // Evaluate 2D filter used in induced charge deconvolution (M. Mooney)
 double util::SignalShapingServiceMicroBooNE::Get2DFilterVal(size_t planeNum, size_t freqDimension, double binFrac) const
 {
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   double ts = detprop->SamplingRate();
 
   double freq;

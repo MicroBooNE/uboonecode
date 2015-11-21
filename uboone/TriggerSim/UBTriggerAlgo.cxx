@@ -11,7 +11,7 @@
 #include <sstream>
 #include <TString.h>
 #include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
-#include "Utilities/DetectorClocksService.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 #include "UBTriggerTypes.h"
 #include "UBTriggerAlgo.h"
 
@@ -22,7 +22,7 @@ namespace trigger{
 				   _prescale(9,false)
   //##############################################################
   {
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     _trig_clock = ts->TriggerClock();
     _pmt_clock  = ts->OpticalClock();
     _tpc_clock  = ts->TPCClock();
@@ -141,9 +141,9 @@ namespace trigger{
   util::ElecClock UBTriggerAlgo::BNBStartTime(const util::ElecClock& time) const
   //############################################################################
   {
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto clock = ts->OpticalClock(_pmt_clock.Time(time.Time()));
-    //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
+    //auto clock = detinfo::DetectorClocksService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
 
     clock += _bnb_delay;
 
@@ -154,9 +154,9 @@ namespace trigger{
   util::ElecClock UBTriggerAlgo::NuMIStartTime(const util::ElecClock& time) const
   //#############################################################################
   {
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto clock = ts->OpticalClock(_pmt_clock.Time(time.Time()));
-    //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
+    //auto clock = detinfo::DetectorClocksService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
 
     clock += _numi_delay;
 
@@ -335,7 +335,7 @@ namespace trigger{
 	  if(_debug_mode) Report(Form("    Combined bit %d ... now %d",i,res_bits));
 	}
     }
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto trig_time = ts->OpticalClock( res_sample,  res_frame  );
     auto beam_time = ts->OpticalClock( beam_sample, beam_frame );
     return raw::Trigger(res_number,

@@ -16,7 +16,7 @@
 #include "OpticalDetectorData/FIFOChannel.h"
 #include "OpticalDetectorData/PMTTrigger.h"
 #include "Simulation/BeamGateInfo.h"
-#include "Utilities/DetectorClocksService.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 #include "UBOpticalChConfig.h"
 #include "UBOpticalConstants.h"
 #include "uboone/Geometry/UBOpChannelTypes.h"
@@ -168,7 +168,7 @@ namespace opdet {
   {
     
     // Obtain optical clock to be used for sample/frame number generation
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     ::util::ElecClock clock = ts->OpticalClock();
     size_t numberOfGates = beamGates.size();
 
@@ -277,7 +277,7 @@ namespace opdet {
   void OpticalFEM::produce(art::Event& event)
   {
     // Obtain optical clock to be used for sample/frame number generation
-    auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     ::util::ElecClock clock = ts->OpticalClock();
 
     // The collection of channels we'll write in response to beam

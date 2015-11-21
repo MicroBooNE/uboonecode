@@ -21,7 +21,7 @@
 
 #include "RawData/OpDetWaveform.h"
 #include "OpDetWaveformAna.h"
-#include "Utilities/DetectorClocksService.h" // lardata
+#include "DetectorInfoServices/DetectorClocksService.h" // lardata
 #include <vector>
 #include <string>
 
@@ -88,7 +88,7 @@ void UBBasicOpticalAna::beginJob()
 
 void UBBasicOpticalAna::analyze(art::Event const & e)
 {
-  auto const* ts = lar::providerFrom<util::DetectorClocksService>();
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
   // Implementation of required member function here.
   for(size_t i=0; i<_module_v.size(); ++i) {

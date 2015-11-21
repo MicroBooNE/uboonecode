@@ -290,7 +290,7 @@
 #include "RawData/RawDigit.h"
 #include "RawData/BeamInfo.h"
 #include "Utilities/AssociationUtil.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "SummaryData/POTSummary.h"
 #include "MCCheater/BackTracker.h"
 #include "RecoBase/Track.h"
@@ -2732,7 +2732,7 @@ void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
 void microboone::AnalysisTree::analyze(const art::Event& evt)
 {
   //services
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   art::ServiceHandle<cheat::BackTracker> bt;
 
   // collect the sizes which might me needed to resize the tree data structure:
@@ -4054,7 +4054,7 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
 {
   // Get geometry.
   auto const* geom = lar::providerFrom<geo::Geometry>();
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   
   // Get active volume boundary.
   double xmin = 0.;
@@ -4106,8 +4106,8 @@ double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& 
 {
   // Get geometry.
   auto const* geom = lar::providerFrom<geo::Geometry>();
-  // auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
-  auto const* larprop = lar::providerFrom<util::LArPropertiesService>();
+  // auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+  auto const* larprop = lar::providerFrom<detinfo::LArPropertiesService>();
   
   // Get active volume boundary.
   double xmin = 0.;

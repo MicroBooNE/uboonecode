@@ -35,7 +35,7 @@
 #include "RawData/raw.h"
 #include "RawData/BeamInfo.h"
 #include "Utilities/AssociationUtil.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "SummaryData/POTSummary.h"
 #include "MCCheater/BackTracker.h"
 #include "RecoBase/Track.h"
@@ -507,7 +507,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
   }  
 
   //services
-  auto const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   art::ServiceHandle<cheat::BackTracker> bt;
   
   //associations

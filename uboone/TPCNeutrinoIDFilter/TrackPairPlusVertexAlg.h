@@ -11,7 +11,7 @@
 
 // LArSoft includes
 #include "Geometry/GeometryCore.h"
-#include "DataProviders/DetectorProperties.h"
+#include "DetectorInfo/DetectorProperties.h"
 
 // Root includes
 #include "TH1D.h"
@@ -82,7 +82,7 @@ private:
      *  @brief Standard useful properties
      */
     geo::GeometryCore const*             m_geometry;           ///< pointer to the Geometry service
-    dataprov::DetectorProperties const* m_detector;           ///< Pointer to the detector properties
+    detinfo::DetectorProperties const* m_detector;           ///< Pointer to the detector properties
     /// @}
 };
 

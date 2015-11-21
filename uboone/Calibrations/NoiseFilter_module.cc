@@ -28,7 +28,7 @@
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "Geometry/Geometry.h"
-// #include "Utilities/DetectorPropertiesService.h"
+// #include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "CalibrationDBI/Interface/DetPedestalService.h"
 #include "CalibrationDBI/Interface/DetPedestalProvider.h"
 
@@ -162,7 +162,7 @@ namespace calibration {
     LOG_INFO ("NoiseFilter Module") << "Processing Run " << fRun << ", Subrun " << fSubrun << ", Event " << fEvent;
 
     auto const* fGeometry = lar::providerFrom<geo::Geometry>();
-  //  auto const* fDetectorProperties = lar::providerFrom<util::DetectorPropertiesService>();
+  //  auto const* fDetectorProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     
     //filtered raw digits	
     std::unique_ptr<std::vector<raw::RawDigit> > filteredRawDigit(new std::vector<raw::RawDigit>);

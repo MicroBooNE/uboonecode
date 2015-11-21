@@ -47,9 +47,9 @@
 #include "OpticalDetectorData/OpticalTypes.h"
 #include "MCBase/MCShower.h"
 //#include "RecoAlg/ClusterParamsAlg.h"
-#include "Utilities/LArPropertiesService.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
 #include "Utilities/GeometryUtilities.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -228,8 +228,8 @@ namespace datascanner {
     Double_t _readout_size;   ///< Readout window size in readout time thick
 
     // Service modules
-    dataprov::DetectorProperties const* _detp;
-    dataprov::LArProperties const* _larp;
+    detinfo::DetectorProperties const* _detp;
+    detinfo::LArProperties const* _larp;
     geo::GeometryCore const* _geo;
 
   };
@@ -253,8 +253,8 @@ namespace datascanner {
   //#######################################################################################################
   {
 
-    _detp = lar::providerFrom<util::DetectorPropertiesService>();
-    _larp = lar::providerFrom<util::LArPropertiesService>();
+    _detp = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    _larp = lar::providerFrom<detinfo::LArPropertiesService>();
     _geo = lar::providerFrom<geo::Geometry>();
     
     //fCParamsAlg.reconfigure(pset.get< fhicl::ParameterSet >("ClusterParamsAlg"));

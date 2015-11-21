@@ -20,7 +20,7 @@
 
 //LArSoft
 #include "RawData/TriggerData.h"
-#include "Utilities/ElecClock.h"
+#include "DetectorInfo/ElecClock.h"
 #include "UBTrigException.h"
 
 namespace trigger
