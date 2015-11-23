@@ -39,22 +39,22 @@ namespace opdet {
     /**
        Core function: the algorithm is supposed to add relevant singal/noise ADC
        values to the input vector std::vector<float> wf. The tick=0 timing is 
-       provided by util::ElecClock start_time input variable which can also used
+       provided by detinfo::ElecClock start_time input variable which can also used
        to retrieve G4 time offset to electronics clock counting.
      */
     virtual void Process(std::vector<float> &wf,
-			 const ::util::ElecClock &start_time);
+			 const ::detinfo::ElecClock &start_time);
 
     /// Function to get SPE vector the instance currently holds
     const std::vector<float>& GetSPE() const { return fSPE; }
 
     /**
-       Function to set SPE waveform. The second argument is util::ElecClock which
+       Function to set SPE waveform. The second argument is detinfo::ElecClock which
        period should specify waveform tick size and timing specfies photon time
        w.r.t. start of the waveform.
      */
     void SetSPE( const std::vector<float> &wf,
-		 const ::util::ElecClock &time_info);
+		 const ::detinfo::ElecClock &time_info);
 
   protected:
 
@@ -62,7 +62,7 @@ namespace opdet {
     std::vector<float> fSPE;
 
     /// SPE waveform timing information (tick period & signal timing)
-    ::util::ElecClock fSPETime;
+    ::detinfo::ElecClock fSPETime;
 
   };
 }

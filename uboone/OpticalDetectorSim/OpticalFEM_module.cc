@@ -169,7 +169,7 @@ namespace opdet {
     
     // Obtain optical clock to be used for sample/frame number generation
     auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
-    ::util::ElecClock clock = ts->OpticalClock();
+    ::detinfo::ElecClock clock = ts->OpticalClock();
     size_t numberOfGates = beamGates.size();
 
     // Determine the "begin" and "end" bin of the beam-gate
@@ -278,7 +278,7 @@ namespace opdet {
   {
     // Obtain optical clock to be used for sample/frame number generation
     auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
-    ::util::ElecClock clock = ts->OpticalClock();
+    ::detinfo::ElecClock clock = ts->OpticalClock();
 
     // The collection of channels we'll write in response to beam
     // gates and cosmic signals.

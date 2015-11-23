@@ -78,11 +78,11 @@ namespace trigger {
     std::string fOpticalFEMMod;
 
     //-- ElecClock for user-defined trigger times --//
-    std::vector<util::ElecClock> fTriggerCalib; ///< user-defined calibration trigger (per-event)
-    std::vector<util::ElecClock> fTriggerPC;    ///< user-defined PC trigger (per-event)
-    std::vector<util::ElecClock> fTriggerExt;   ///< user-defined Ext trigger (per-event)
-    std::vector<util::ElecClock> fTriggerBNB;   ///< user-defined BNB trigger (per-event)
-    std::vector<util::ElecClock> fTriggerNuMI;  ///< user-defined NuMI trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerCalib; ///< user-defined calibration trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerPC;    ///< user-defined PC trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerExt;   ///< user-defined Ext trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerBNB;   ///< user-defined BNB trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerNuMI;  ///< user-defined NuMI trigger (per-event)
 
   };
 

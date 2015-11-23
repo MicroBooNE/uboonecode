@@ -121,7 +121,7 @@ namespace detsim {
     //be made a fcl parameter but not likely to ever change
     const float adcsaturation = 4095;
 
-    ::util::ElecClock fClock; ///< TPC electronics clock
+    ::detinfo::ElecClock fClock; ///< TPC electronics clock
 
     TH1D* hTest[5] = {0, 0, 0, 0, 0};
 

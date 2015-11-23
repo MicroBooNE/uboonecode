@@ -23,11 +23,11 @@ namespace opdet {
 
   //--------------------------------------------------------------------
   void WFAlgoAnalyticalSPE::Process(std::vector<float> &wf,
-				    const ::util::ElecClock &start_time)
+				    const ::detinfo::ElecClock &start_time)
   //--------------------------------------------------------------------
   {
     // Predefine variables to save time later
-    ::util::ElecClock rel_spe_start = start_time;
+    ::detinfo::ElecClock rel_spe_start = start_time;
 
     auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 

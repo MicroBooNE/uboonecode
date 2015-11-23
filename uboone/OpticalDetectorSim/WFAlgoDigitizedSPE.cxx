@@ -27,11 +27,11 @@ namespace opdet {
 
   //--------------------------------------------------------------
   void WFAlgoDigitizedSPE::Process(std::vector<float> &wf,
-			  const ::util::ElecClock &start_time)
+			  const ::detinfo::ElecClock &start_time)
   //--------------------------------------------------------------
   {
     // Predefine variables to save time later
-    ::util::ElecClock rel_spe_start = start_time;
+    ::detinfo::ElecClock rel_spe_start = start_time;
 
     rel_spe_start.SetTime(0);
 
@@ -90,7 +90,7 @@ namespace opdet {
   
   //----------------------------------------------------------------
   void WFAlgoDigitizedSPE::SetSPE( const std::vector<float> &wf,
-				   const util::ElecClock &time_info)
+				   const detinfo::ElecClock &time_info)
   //----------------------------------------------------------------
   {
     if(time_info.Time() < 0 || time_info.Ticks() >= (int)(wf.size()))

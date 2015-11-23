@@ -1106,7 +1106,7 @@ namespace lris {
       unsigned int sample_64MHz = (trig_header.get2MHzSampleNumber() * 32) + (trig_header.get16MHzRemainderNumber() * 4) + trig_data.getPhase();
       unsigned int frame = trig_header.getFrame();
       //std::cout << "Trigger frame: " << frame << " ... sample : " << sample_64MHz << std::endl;
-      util::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
+      detinfo::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
 
       double trigger_time = trig_clock.Time();
       double beam_time = -1;

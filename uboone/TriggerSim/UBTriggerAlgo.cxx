@@ -138,7 +138,7 @@ namespace trigger{
   }
 
   //############################################################################
-  util::ElecClock UBTriggerAlgo::BNBStartTime(const util::ElecClock& time) const
+  detinfo::ElecClock UBTriggerAlgo::BNBStartTime(const detinfo::ElecClock& time) const
   //############################################################################
   {
     auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
@@ -151,7 +151,7 @@ namespace trigger{
   }
 
   //#############################################################################
-  util::ElecClock UBTriggerAlgo::NuMIStartTime(const util::ElecClock& time) const
+  detinfo::ElecClock UBTriggerAlgo::NuMIStartTime(const detinfo::ElecClock& time) const
   //#############################################################################
   {
     auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
@@ -164,7 +164,7 @@ namespace trigger{
   }
 
   //##############################################################
-  void UBTriggerAlgo::AddTriggerCalib(const util::ElecClock &time)
+  void UBTriggerAlgo::AddTriggerCalib(const detinfo::ElecClock &time)
   //##############################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -178,7 +178,7 @@ namespace trigger{
   }
 
   //############################################################
-  void UBTriggerAlgo::AddTriggerExt(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerExt(const detinfo::ElecClock& time)
   //############################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -192,7 +192,7 @@ namespace trigger{
   }
 
   //###########################################################
-  void UBTriggerAlgo::AddTriggerPC(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerPC(const detinfo::ElecClock& time)
   //###########################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -382,7 +382,7 @@ namespace trigger{
   }
 
   //##################################################################
-  void UBTriggerAlgo::AddTriggerPMTCosmic(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerPMTCosmic(const detinfo::ElecClock& time)
   //##################################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -403,7 +403,7 @@ namespace trigger{
   }
 
   //################################################################
-  void UBTriggerAlgo::AddTriggerPMTBeam(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerPMTBeam(const detinfo::ElecClock& time)
   //################################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -424,7 +424,7 @@ namespace trigger{
   }
 
   //############################################################
-  void UBTriggerAlgo::AddTriggerBNB(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerBNB(const detinfo::ElecClock& time)
   //############################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -442,7 +442,7 @@ namespace trigger{
   }
 
   //#############################################################
-  void UBTriggerAlgo::AddTriggerNuMI(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerNuMI(const detinfo::ElecClock& time)
   //#############################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -538,8 +538,8 @@ namespace trigger{
       ShowCandidateTriggers();
 
     // Just make sure trigger clock is only used for sample/frame getter (i.e. no time used)
-    _trig_clock.SetTime(::util::kTIME_MAX);
-    util::ElecClock trig_time = _trig_clock;
+    _trig_clock.SetTime(::detinfo::kTIME_MAX);
+    detinfo::ElecClock trig_time = _trig_clock;
 
     time_window_t bnb_active  (_trig_clock,_trig_clock);
     time_window_t numi_active (_trig_clock,_trig_clock);

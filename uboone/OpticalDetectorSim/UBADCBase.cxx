@@ -19,7 +19,7 @@ namespace opdet {
 
 
   //------------------------------------------------------------
-  void UBADCBase::SetTimeInfo(const util::ElecClock &start_freq,
+  void UBADCBase::SetTimeInfo(const detinfo::ElecClock &start_freq,
 				double duration)
   //------------------------------------------------------------
   {

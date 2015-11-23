@@ -164,7 +164,7 @@ namespace opdet {
     art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
     tss->preProcessEvent(event); // sets trigger time
     auto const* ts = lar::providerFrom<detinfo::DetectorClocksServiceStandard>();
-    ::util::ElecClock clock = ts->OpticalClock();
+    ::detinfo::ElecClock clock = ts->OpticalClock();
     //std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
     // geometry and channel map services

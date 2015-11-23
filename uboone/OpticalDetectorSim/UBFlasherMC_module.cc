@@ -227,7 +227,7 @@ namespace opdet {
     ::std::unique_ptr< optdata::ChannelDataGroup > wfs(new optdata::ChannelDataGroup);
 
     // get the clock definition
-    ::util::ElecClock clock = ts->OpticalClock();
+    ::detinfo::ElecClock clock = ts->OpticalClock();
     clock.SetTime(ts->G4ToElecTime(fG4StartTime));
     if(clock.Time()<0)
       throw UBOpticalException(Form("Cannot start readout @ %g (before Electronics Clock start time %g)",
