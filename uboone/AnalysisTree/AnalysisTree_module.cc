@@ -288,7 +288,9 @@
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/ParticleID.h"
 #include "RawData/RawDigit.h"
+#include "RawData/raw.h"
 #include "RawData/BeamInfo.h"
+#include "RawData/TriggerData.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
 #include "Utilities/DetectorProperties.h"
@@ -605,6 +607,7 @@ namespace microboone {
       tdShower = 0x100,
       tdMCshwr = 0x200,
       tdCluster = 0x400,
+      tdRawDigit = 0x800,
       tdDefault = 0
     }; // DataBits_t
     
@@ -634,9 +637,15 @@ namespace microboone {
   //  Double_t   pot;                  //protons on target moved in subrun data
     Double_t   taulife;              //electron lifetime
     Char_t     isdata;               //flag, 0=MC 1=data
+    unsigned int triggernumber;      //trigger counter
+    Double_t     triggertime;        //trigger time w.r.t. electronics clock T0
+    Double_t     beamgatetime;       //beamgate time w.r.t. electronics clock T0
+    unsigned int triggerbits;        //trigger bits
+    Double_t     potbnb;             //pot per event
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
+    Int_t    no_hits_stored;                  //number of hits actually stored in the tree    
     Short_t  hit_plane[kMaxHits];      //plane number
     Short_t  hit_wire[kMaxHits];       //wire number
     Short_t  hit_channel[kMaxHits];    //channel ID
@@ -645,6 +654,7 @@ namespace microboone {
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
     Float_t  hit_endT[kMaxHits];       //hit end time
+    Float_t  hit_rms[kMaxHits];       //hit rms from the hit object
     Float_t  hit_goodnessOfFit[kMaxHits]; //chi2/dof goodness of fit 
     Short_t  hit_multiplicity[kMaxHits];  //multiplicity of the given hit					 
     Float_t  hit_trueX[kMaxHits];      // hit true X (cm)
@@ -654,6 +664,12 @@ namespace microboone {
     Short_t  hit_trkKey[kMaxHits];      //is this hit associated with a reco track,  if so associate a unique track key ID?
     Short_t  hit_clusterid[kMaxHits];  //is this hit associated with a reco cluster?
     Short_t  hit_clusterKey[kMaxHits];  //is this hit associated with a reco cluster, if so associate a unique cluster key ID?
+
+    Float_t rawD_ph[kMaxHits];  
+    Float_t rawD_peakT[kMaxHits];  
+    Float_t rawD_charge[kMaxHits];  
+    Float_t rawD_fwhh[kMaxHits];  
+    Double_t rawD_rms[kMaxHits]; 
 
     //Cluster Information
     Short_t nclusters;				      //number of clusters in a given event
@@ -925,6 +941,9 @@ namespace microboone {
     
     /// Returns whether we have Hit data
     bool hasHitInfo() const { return bits & tdHit; }
+
+    /// Returns whether we have Hit data
+    bool hasRawDigitInfo() const { return bits & tdRawDigit; }
 
     /// Returns whether we have Track data
     bool hasTrackInfo() const { return bits & tdTrack; }
@@ -1198,6 +1217,7 @@ namespace microboone {
     bool fSaveGeantInfo; ///whether to extract and save Geant information
     bool fSaveMCShowerInfo; ///whether to extract and save MC Shower information
     bool fSaveHitInfo; ///whether to extract and save Hit information
+    bool fSaveRawDigitInfo; ///whether to extract and save Raw Digit information
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
     bool fSaveClusterInfo;  ///whether to extract and save Shower information
@@ -1235,6 +1255,7 @@ namespace microboone {
           fData->SetBits(AnalysisTreeDataStruct::tdGeant,  !fSaveGeantInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdMCshwr, !fSaveMCShowerInfo); 
           fData->SetBits(AnalysisTreeDataStruct::tdHit,    !fSaveHitInfo);
+          fData->SetBits(AnalysisTreeDataStruct::tdRawDigit,    !fSaveRawDigitInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdFlash,  !fSaveFlashInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdCluster,!fSaveClusterInfo);
@@ -1883,8 +1904,14 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   beamtime = -99999;
   isdata = -99;
   taulife = -99999;
+  triggernumber = 0;
+  triggertime = -99999;
+  beamgatetime = -99999;
+  triggerbits = 0;
+  potbnb = 0;
 
   no_hits = 0;
+  no_hits_stored = 0;  
   
   std::fill(hit_plane, hit_plane + sizeof(hit_plane)/sizeof(hit_plane[0]), -9999);
   std::fill(hit_wire, hit_wire + sizeof(hit_wire)/sizeof(hit_wire[0]), -9999);
@@ -1894,6 +1921,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
   std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
   std::fill(hit_endT, hit_endT + sizeof(hit_endT)/sizeof(hit_endT[0]), -99999.);
+  std::fill(hit_rms, hit_rms + sizeof(hit_rms)/sizeof(hit_rms[0]), -99999.);
   std::fill(hit_trueX, hit_trueX + sizeof(hit_trueX)/sizeof(hit_trueX[0]), -99999.);
   std::fill(hit_goodnessOfFit, hit_goodnessOfFit + sizeof(hit_goodnessOfFit)/sizeof(hit_goodnessOfFit[0]), -99999.);
   std::fill(hit_multiplicity, hit_multiplicity + sizeof(hit_multiplicity)/sizeof(hit_multiplicity[0]), -99999.);
@@ -1903,6 +1931,12 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_clusterKey, hit_clusterKey + sizeof(hit_clusterKey)/sizeof(hit_clusterKey[0]), -9999);
   std::fill(hit_nelec, hit_nelec + sizeof(hit_nelec)/sizeof(hit_nelec[0]), -99999.);
   std::fill(hit_energy, hit_energy + sizeof(hit_energy)/sizeof(hit_energy[0]), -99999.);
+  //raw digit information
+  std::fill(rawD_ph, rawD_ph + sizeof(rawD_ph)/sizeof(rawD_ph[0]), -99999.);
+  std::fill(rawD_peakT, rawD_peakT + sizeof(rawD_peakT)/sizeof(rawD_peakT[0]), -99999.);
+  std::fill(rawD_charge, rawD_charge + sizeof(rawD_charge)/sizeof(rawD_charge[0]), -99999.);
+  std::fill(rawD_fwhh, rawD_fwhh + sizeof(rawD_fwhh)/sizeof(rawD_fwhh[0]), -99999.);
+  std::fill(rawD_rms, rawD_rms + sizeof(rawD_rms)/sizeof(rawD_rms[0]), -99999.);
 
   no_flashes = 0;
   std::fill(flash_time, flash_time + sizeof(flash_time)/sizeof(flash_time[0]), -9999);
@@ -2303,28 +2337,41 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("pot",&SubRunData.pot,"pot/D");
   CreateBranch("isdata",&isdata,"isdata/B");
   CreateBranch("taulife",&taulife,"taulife/D");
-
-  if (hasHitInfo()){
+  CreateBranch("triggernumber",&triggernumber,"triggernumber/i");
+  CreateBranch("triggertime",&triggertime,"triggertime/D");
+  CreateBranch("beamgatetime",&beamgatetime,"beamgatetime/D");
+  CreateBranch("triggerbits",&triggerbits,"triggerbits/i");
+  CreateBranch("potbnb",&potbnb,"potbnb/D");
+  if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
-    CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits]/S");
-    CreateBranch("hit_wire",hit_wire,"hit_wire[no_hits]/S");
-    CreateBranch("hit_channel",hit_channel,"hit_channel[no_hits]/S");
-    CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/F");
-    CreateBranch("hit_charge",hit_charge,"hit_charge[no_hits]/F");
-    CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
-    CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
-    CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits]/F");
-    CreateBranch("hit_trueX",hit_trueX,"hit_trueX[no_hits]/F");    
-    CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits]/F");    
-    CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits]/S");    
-    CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
-    CreateBranch("hit_trkKey",hit_trkKey,"hit_trkKey[no_hits]/S");   
-    CreateBranch("hit_clusterid",hit_clusterid,"hit_clusterid[no_hits]/S");
-    CreateBranch("hit_clusterKey",hit_clusterKey,"hit_clusterKey[no_hits]/S");
+    CreateBranch("no_hits_stored",&no_hits_stored,"no_hits_stored/I");    
+    CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits_stored]/S");
+    CreateBranch("hit_wire",hit_wire,"hit_wire[no_hits_stored]/S");
+    CreateBranch("hit_channel",hit_channel,"hit_channel[no_hits_stored]/S");
+    CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits_stored]/F");
+    CreateBranch("hit_charge",hit_charge,"hit_charge[no_hits_stored]/F");
+    CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits_stored]/F");
+    CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits_stored]/F");
+    CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits_stored]/F");
+    CreateBranch("hit_rms",hit_rms,"hit_rms[no_hits_stored]/F"); 
+    CreateBranch("hit_trueX",hit_trueX,"hit_trueX[no_hits_stored]/F");    
+    CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits_stored]/F");    
+    CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits_stored]/S");    
+    CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits_stored]/S");
+    CreateBranch("hit_trkKey",hit_trkKey,"hit_trkKey[no_hits_stored]/S");   
+    CreateBranch("hit_clusterid",hit_clusterid,"hit_clusterid[no_hits_stored]/S");
+    CreateBranch("hit_clusterKey",hit_clusterKey,"hit_clusterKey[no_hits_stored]/S");
     if (!isCosmics){
-      CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
-      CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
+      CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits_stored]/F");
+      CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits_stored]/F");
     }
+    if (hasRawDigitInfo()){
+      CreateBranch("rawD_ph",rawD_ph,"rawD_ph[no_hits_stored]/F");  
+      CreateBranch("rawD_peakT",rawD_peakT,"rawD_peakT[no_hits_stored]/F");
+      CreateBranch("rawD_charge",rawD_charge,"rawD_charge[no_hits_stored]/F");
+      CreateBranch("rawD_fwhh",rawD_fwhh,"rawD_fwhh[no_hits_stored]/F");
+      CreateBranch("rawD_rms",rawD_rms,"rawD_rms[no_hits_stored]/D"); 
+    }  
   }
 
   if (hasClusterInfo()){
@@ -2632,6 +2679,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveGeantInfo	    (pset.get< bool >("SaveGeantInfo", false)), 
   fSaveMCShowerInfo	    (pset.get< bool >("SaveMCShowerInfo", false)), 
   fSaveHitInfo	            (pset.get< bool >("SaveHitInfo", false)), 
+  fSaveRawDigitInfo	            (pset.get< bool >("SaveRawDigitInfo", false)), 
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
   fSaveClusterInfo	    (pset.get< bool >("SaveClusterInfo", false)),
@@ -2645,6 +2693,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fG4minE                   (pset.get< float>("G4minE",0.01))
 {
   if (fSaveAuxDetInfo == true) fSaveGeantInfo = true;
+  if (fSaveRawDigitInfo == true) fSaveHitInfo = true;
   mf::LogInfo("AnalysisTree") << "Configuration:"
     << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
     ;
@@ -2872,6 +2921,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   fData->isdata = int(!isMC);
 
+  // * raw trigger
+  art::Handle< std::vector<raw::Trigger>> triggerListHandle;
+  std::vector<art::Ptr<raw::Trigger>> triggerlist;
+  if (evt.getByLabel(fDigitModuleLabel, triggerListHandle))
+    art::fill_ptr_vector(triggerlist, triggerListHandle);
+
+  if (triggerlist.size()){
+    fData->triggernumber = triggerlist[0]->TriggerNumber();
+    fData->triggertime   = triggerlist[0]->TriggerTime();
+    fData->beamgatetime  = triggerlist[0]->BeamGateTime();
+    fData->triggerbits   = triggerlist[0]->TriggerBits();
+  }
+
   // * vertices
   std::vector< art::Handle< std::vector<recob::Vertex> > > vertexListHandle(NVertexAlgos);
   std::vector< std::vector<art::Ptr<recob::Vertex> > > vertexlist(NVertexAlgos);
@@ -2943,10 +3005,15 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   //copied from MergeDataPaddles.cxx
   art::Handle< raw::BeamInfo > beam;
-  if (evt.getByLabel("beam",beam)){
+  if (evt.getByLabel("beamdata",beam)){
     fData->beamtime = (double)beam->get_t_ms();
     fData->beamtime/=1000.; //in second
+    std::map<std::string, std::vector<double>> datamap = beam->GetDataMap();
+    if (datamap["E:TOR860"].size()){
+      fData->potbnb = datamap["E:TOR860"][0];
+    }
   }
+
 
 //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
 //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;
@@ -2955,6 +3022,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   //hit information
   if (fSaveHitInfo){
     fData->no_hits = (int) NHits;
+    fData->no_hits_stored = TMath::Min( (int) NHits, (int) kMaxHits);    
     if (NHits > kMaxHits) {
       // got this error? consider increasing kMaxHits
       // (or ask for a redesign using vectors)
@@ -2970,6 +3038,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->hit_ph[i]  = hitlist[i]->PeakAmplitude();
       fData->hit_startT[i] = hitlist[i]->PeakTimeMinusRMS();
       fData->hit_endT[i] = hitlist[i]->PeakTimePlusRMS();
+      fData->hit_rms[i] = hitlist[i]->RMS();
       fData->hit_goodnessOfFit[i] = hitlist[i]->GoodnessOfFit();
       fData->hit_multiplicity[i] = hitlist[i]->Multiplicity();
       //std::vector<double> xyz = bt->HitToXYZ(hitlist[i]);
@@ -2998,6 +3067,48 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           hit_trkid[it][i] = 0;
       }
       */
+      
+    if (fSaveRawDigitInfo){
+      //Hit to RawDigit information	       
+      art::FindManyP<raw::RawDigit> fmrd(hitListHandle,evt,fHitsModuleLabel);
+      //if (hitlist[i]->WireID().Plane==2)
+      {
+      int dataSize = fmrd.at(i)[0]->Samples();
+      short ped = fmrd.at(i)[0]->GetPedestal();
+     
+      std::vector<short> rawadc(dataSize);
+      raw::Uncompress(fmrd.at(i)[0]->ADCs(), rawadc, fmrd.at(i)[0]->Compression());
+      int t0 = hitlist[i]->PeakTime() - 3*(hitlist[i]->RMS());
+      if (t0<0) t0 = 0;
+      int t1 = hitlist[i]->PeakTime() + 3*(hitlist[i]->RMS());
+      if (t1>=dataSize) t1 = dataSize-1;
+      fData->rawD_ph[i] = -1;
+      fData->rawD_peakT[i] = -1;
+      for (int j = t0; j<=t1; ++j){
+        if (rawadc[j]-ped>fData->rawD_ph[i]){
+          fData->rawD_ph[i] = rawadc[j]-ped;
+          fData->rawD_peakT[i] = j;
+        }
+      }
+      fData->rawD_charge[i] = 0;
+      fData->rawD_fwhh[i] = 0;
+      double mean_t = 0.0;
+      double mean_t2 = 0.0;
+      for (int j = t0; j<=t1; ++j){
+        if (rawadc[j]-ped>=0.5*fData->rawD_ph[i]){
+          ++fData->rawD_fwhh[i];
+        }
+        if (rawadc[j]-ped>=0.1*fData->rawD_ph[i]){
+          fData->rawD_charge[i] += rawadc[j]-ped;
+          mean_t += (double)j*(rawadc[j]-ped);
+          mean_t2 += (double)j*(double)j*(rawadc[j]-ped);
+        }
+      }
+      mean_t/=fData->rawD_charge[i];
+      mean_t2/=fData->rawD_charge[i];
+      fData->rawD_rms[i] = sqrt(mean_t2-mean_t*mean_t);
+   }   }
+      
 
       if (!evt.isRealData()&&!isCosmics){
          fData -> hit_nelec[i] = 0;
