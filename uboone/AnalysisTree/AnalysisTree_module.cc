@@ -641,7 +641,9 @@ namespace microboone {
     Double_t     triggertime;        //trigger time w.r.t. electronics clock T0
     Double_t     beamgatetime;       //beamgate time w.r.t. electronics clock T0
     unsigned int triggerbits;        //trigger bits
-    Double_t     potbnb;             //pot per event
+    Double_t     potbnb;             //pot per event (BNB E:TOR860)
+    Double_t     potnumitgt;         //pot per event (NuMI E:TORTGT)
+    Double_t     potnumi101;         //pot per event (NuMI E:TOR101)
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
@@ -1909,6 +1911,8 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   beamgatetime = -99999;
   triggerbits = 0;
   potbnb = 0;
+  potnumitgt = 0;
+  potnumi101 = 0;
 
   no_hits = 0;
   no_hits_stored = 0;  
@@ -2342,6 +2346,9 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("beamgatetime",&beamgatetime,"beamgatetime/D");
   CreateBranch("triggerbits",&triggerbits,"triggerbits/i");
   CreateBranch("potbnb",&potbnb,"potbnb/D");
+  CreateBranch("potnumitgt",&potnumitgt,"potnumitgt/D");
+  CreateBranch("potnumi101",&potnumi101,"potnumi101/D");
+
   if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
     CreateBranch("no_hits_stored",&no_hits_stored,"no_hits_stored/I");    
@@ -3011,6 +3018,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     std::map<std::string, std::vector<double>> datamap = beam->GetDataMap();
     if (datamap["E:TOR860"].size()){
       fData->potbnb = datamap["E:TOR860"][0];
+    }
+    if (datamap["E:TORTGT"].size()){
+      fData->potnumitgt = datamap["E:TORTGT"][0];
+    }
+    if (datamap["E:TOR101"].size()){
+      fData->potnumi101 = datamap["E:TOR101"][0];
     }
   }
 
