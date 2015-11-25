@@ -641,6 +641,7 @@ namespace microboone {
     Double_t     triggertime;        //trigger time w.r.t. electronics clock T0
     Double_t     beamgatetime;       //beamgate time w.r.t. electronics clock T0
     unsigned int triggerbits;        //trigger bits
+    Double_t     potbnb;             //pot per event
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
@@ -1907,6 +1908,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   triggertime = -99999;
   beamgatetime = -99999;
   triggerbits = 0;
+  potbnb = 0;
 
   no_hits = 0;
   no_hits_stored = 0;  
@@ -2339,7 +2341,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("triggertime",&triggertime,"triggertime/D");
   CreateBranch("beamgatetime",&beamgatetime,"beamgatetime/D");
   CreateBranch("triggerbits",&triggerbits,"triggerbits/i");
-
+  CreateBranch("potbnb",&potbnb,"potbnb/D");
   if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
     CreateBranch("no_hits_stored",&no_hits_stored,"no_hits_stored/I");    
@@ -3003,10 +3005,15 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   //copied from MergeDataPaddles.cxx
   art::Handle< raw::BeamInfo > beam;
-  if (evt.getByLabel("beam",beam)){
+  if (evt.getByLabel("beamdata",beam)){
     fData->beamtime = (double)beam->get_t_ms();
     fData->beamtime/=1000.; //in second
+    std::map<std::string, std::vector<double>> datamap = beam->GetDataMap();
+    if (datamap["E:TOR860"].size()){
+      fData->potbnb = datamap["E:TOR860"][0];
+    }
   }
+
 
 //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
 //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;
