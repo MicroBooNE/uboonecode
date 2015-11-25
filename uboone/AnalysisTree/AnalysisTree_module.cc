@@ -290,6 +290,7 @@
 #include "RawData/RawDigit.h"
 #include "RawData/raw.h"
 #include "RawData/BeamInfo.h"
+#include "RawData/TriggerData.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
 #include "Utilities/DetectorProperties.h"
@@ -636,6 +637,10 @@ namespace microboone {
   //  Double_t   pot;                  //protons on target moved in subrun data
     Double_t   taulife;              //electron lifetime
     Char_t     isdata;               //flag, 0=MC 1=data
+    unsigned int triggernumber;      //trigger counter
+    Double_t     triggertime;        //trigger time w.r.t. electronics clock T0
+    Double_t     beamgatetime;       //beamgate time w.r.t. electronics clock T0
+    unsigned int triggerbits;        //trigger bits
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
@@ -1898,6 +1903,10 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   beamtime = -99999;
   isdata = -99;
   taulife = -99999;
+  triggernumber = 0;
+  triggertime = -99999;
+  beamgatetime = -99999;
+  triggerbits = 0;
 
   no_hits = 0;
   no_hits_stored = 0;  
@@ -2326,6 +2335,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("pot",&SubRunData.pot,"pot/D");
   CreateBranch("isdata",&isdata,"isdata/B");
   CreateBranch("taulife",&taulife,"taulife/D");
+  CreateBranch("triggernumber",&triggernumber,"triggernumber/i");
+  CreateBranch("triggertime",&triggertime,"triggertime/D");
+  CreateBranch("beamgatetime",&beamgatetime,"beamgatetime/D");
+  CreateBranch("triggerbits",&triggerbits,"triggerbits/i");
 
   if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
@@ -2905,6 +2918,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   fData->SubRunData = SubRunData;
 
   fData->isdata = int(!isMC);
+
+  // * raw trigger
+  art::Handle< std::vector<raw::Trigger>> triggerListHandle;
+  std::vector<art::Ptr<raw::Trigger>> triggerlist;
+  if (evt.getByLabel(fDigitModuleLabel, triggerListHandle))
+    art::fill_ptr_vector(triggerlist, triggerListHandle);
+
+  if (triggerlist.size()){
+    fData->triggernumber = triggerlist[0]->TriggerNumber();
+    fData->triggertime   = triggerlist[0]->TriggerTime();
+    fData->beamgatetime  = triggerlist[0]->BeamGateTime();
+    fData->triggerbits   = triggerlist[0]->TriggerBits();
+  }
 
   // * vertices
   std::vector< art::Handle< std::vector<recob::Vertex> > > vertexListHandle(NVertexAlgos);
