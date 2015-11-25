@@ -31,6 +31,7 @@ microboone_analysistree:
  SaveGeantInfo:            true
  SaveMCShowerInfo:         true 
  SaveHitInfo:              true
+ SaveRawDigitInfo:         false  //set this to false by default since not everyone want rawdigits.
  SaveTrackInfo:            true
  SaveVertexInfo:           true
  SaveClusterInfo:          true
