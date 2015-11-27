@@ -21,8 +21,8 @@ microboone_SPEcalibration:
     UsePulseFinder: true
     CFDThreshold: 10
     CFDDelay: 4
-    CFDDeadtime: 35
-    CFDWidth: 35
+    CFDDeadtime: 34
+    CFDWidth: 34
 }
 
 END_PROLOG

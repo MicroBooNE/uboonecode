@@ -8,6 +8,7 @@ process_name: SPEcalibration
 services:
 {
   TFileService: { fileName: "SPEcalibration_output.root" }
+  Timing:       {}
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
@@ -42,11 +43,11 @@ physics:
 
   analyzers:
   {
-        speCalibration: @local::microboone_SPEcalibration
+        specalib: @local::microboone_SPEcalibration
   }
 
  produceIt: []
- analyzeIt: [speCalibration]
+ analyzeIt: [specalib]
 
  #define the output stream, there could be more than one if using filters
  stream1:  []

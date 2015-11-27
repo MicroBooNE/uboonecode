@@ -187,7 +187,7 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   LOGIC_CH         = p.get<unsigned short>( "LogicChannel", 39 );
   LOGIC_SLOT       = p.get<unsigned short>( "LogicSlot", 6 );
   LOGIC_THRESHOLD  = p.get<unsigned short>( "LogicThreshold", 200 );
-  COSMIC_THRESHOLD  = p.get<int>( "LogicThreshold", 2348 );  // ~15 pe (with pe=20 ADC counts)
+  COSMIC_THRESHOLD  = p.get<int>( "CosmicThreshold", 2348 );  // ~15 pe (with pe=20 ADC counts)
   SPE_SLOT         = p.get<unsigned short>( "WaveformSlot", 5 );
   WINDOW_MINSIZE   = p.get<unsigned int>( "WindowMinSize", 500 );
   baseline_start   = p.get<unsigned short>( "LeadingBaselineStart", 0 );   // first tick after logic pulse start that defines baseline window

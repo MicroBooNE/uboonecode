@@ -37,4 +37,4 @@ simple_plugin( SPEcalibration "module"
 
 install_headers()
 install_source()
-
+install_fhicl()
