@@ -14,7 +14,6 @@
 #include "cetlib/exception.h"
 #include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "DetectorInfoServices/LArPropertiesService.h"
 #include "DetectorInfoServices/DetectorClocksService.h"
 #include "Utilities/LArFFT.h"
 #include "TFile.h"
@@ -51,7 +50,6 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 {
   // add a comment here
   art::ServiceHandle<geo::Geometry> geo;
-  auto const* larp = lar::providerFrom<detinfo::LArPropertiesService>();
   auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   // Reset initialization flag.
 
@@ -242,7 +240,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
    */
   for(size_t plane = 0; plane < geo->Nplanes(); ++plane) {
 
-    double larg4_velocity = detprop->DriftVelocity( detprop->Efield(plane), larp->Temperature() );
+    double larg4_velocity = detprop->DriftVelocity( detprop->Efield(plane), detprop->Temperature() );
 
     if(fDefaultDriftVelocity.at(plane) < 0) fDefaultDriftVelocity.at(plane) = larg4_velocity;
 
@@ -328,10 +326,9 @@ void util::SignalShapingServiceMicroBooNE::SetTimeScaleFactor()
   //   and that used for this simulation.
 
   auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
-  auto const* larp = lar::providerFrom<detinfo::LArPropertiesService>();
 
   double defaultVelocity = detprop->DriftVelocity(fDefaultEField, fDefaultTemperature);
-  double thisVelocity    = detprop->DriftVelocity( detprop->Efield(0), larp->Temperature() );
+  double thisVelocity    = detprop->DriftVelocity( detprop->Efield(0), detprop->Temperature() );
   double vRatio = defaultVelocity/thisVelocity;
   double vDiff = vRatio -1.0;
 
@@ -344,7 +341,7 @@ void util::SignalShapingServiceMicroBooNE::SetTimeScaleFactor()
     term *= vDiff;
   }
 
-  //  std::cout << "Current E field = " << larp->Efield(0) << " KV/cm, Ratio of drift velocities = " << vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
+  //  std::cout << "Current E field = " << detprop->Efield(0) << " KV/cm, Ratio of drift velocities = " << vRatio << ", timeScaleFactor = " << timeScaleFactor << std::endl;
 
 }
 

@@ -3,6 +3,5 @@
 BEGIN_PROLOG
 
 microboone_properties:                  @local::standard_properties
-microboone_properties.Temperature:      89
 
 END_PROLOG

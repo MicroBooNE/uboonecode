@@ -1,16 +1,18 @@
+#include "geometry.fcl"
 #include "larproperties.fcl"
-#include "databaseutil.fcl"
+#include "detectorclocks.fcl"
+#include "detectorproperties.fcl"
 
 process_name: PropTest
 
 services:
 {
-  user: {}
+  ExptGeoHelperInterface:    @local::standard_geometry_helper
+  Geometry:                  @local::standard_geo
+  LArPropertiesService:      @local::standard_properties
+  DetectorClocksService:     @local::standard_detectorclocks
+  DetectorPropertiesService: @local::standard_detproperties
 }
-
-services.user.DatabaseUtil:       @local::standard_database
-services.user.DatabaseUtil.ShouldConnect: false
-services.user.LArPropertiesService:      @local::standard_properties
 
 source:
 {
