@@ -1,0 +1,70 @@
+#include "geometry_microboone.fcl"
+#include "timeservice_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
+#include "seedservice_microboone.fcl"
+#include "beamdata_microboone.fcl"
+#include "triggerenforcement.fcl"
+
+
+microboone_reco_notpc_services:
+{
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  Geometry:               @local::microboone_geo
+  UBOpReadoutMap:           @local::microboone_opreadoutmap
+  TimeService:            @local::microboone_timeservice
+  IFDH:                   {}
+}
+
+microboone_reco_notpc_producers: {
+
+  ### flash finders
+  opflash          : @local::microboone_opflash_beam_highgain
+  #opflashLow       : @local::microboone_opflash_beam_lowgain
+  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  #opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  beamdata         : @local::microboone_beamdata
+
+  #hwflash : @local::microboone_subeventbuilder
+}
+
+microboone_reco_notpc_filters: {
+  trig_bnb:  @local::trigger_enforcement
+  trig_numi: @local::trigger_enforcement
+  trig_ext:  @local::trigger_enforcement
+
+  opflashfilter:      @local::microboone_flashtrigger
+  opflashfilter_numi: @local::microboone_flashtrigger
+  #hwflashfilter: @local::microboone_flashtrigger
+
+  randomfilter: {
+   module_type : "RandomPrescale"
+   Probability : 0.01
+  }
+}
+
+microboone_reco_notpc: [ opflash, beamdata ]
+
+microboone_reco_notpc_services.TimeService.TrigModuleName: "daq"
+
+microboone_reco_notpc_producers.trig_bnb.TriggerProducer: "daq"
+microboone_reco_notpc_producers.trig_bnb.IncludeBits: [ "TriggerBNB" ]
+
+microboone_reco_notpc_producers.trig_numi.TriggerProducer: "daq"
+microboone_reco_notpc_producers.trig_numi.IncludeBits: [ "TriggerNuMI" ]
+
+microboone_reco_notpc_producers.trig_ext.TriggerProducer: "daq"
+microboone_reco_notpc_producers.trig_ext.IncludeBits: [ "TriggerEXT" ]
+
+
+microboone_reco_notpc_filters.opflashfilter.OpFlashModule : "opflash"
+#microboone_reco_notpc_filters.hwflashfilter.OpFlashModule : "hwflash"
+
+microboone_reco_notpc_filters.opflashfilter.DisableFilter: false
+#microboone_reco_notpc_filters.hwflashfilter.DisableFilter: true
+
+
