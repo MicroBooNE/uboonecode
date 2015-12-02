@@ -70,6 +70,7 @@ int main(int argc, char const** argv) {
   
   MicroBooNEGeometryConfiguration config
     ("geometry_iterator_loop_test_MicroBooNE");
+  config.SetMainTesterParameterSetName("geotest");
   
   //
   // parameter parsing
@@ -80,9 +81,12 @@ int main(int argc, char const** argv) {
   if (++iParam < argc) config.SetConfigurationPath(argv[iParam]);
   
   // second argument: path of the parameter set for geometry test configuration
-  // (optional; default: "physics.analysers.geotest")
-  config.SetTesterParameterSetPath
-    ((++iParam < argc)? argv[iParam]: "physics.analyzers.geotest");
+  // (optional; default: "physics.analysers.geotest");
+  // if no path is provided, we have a empty default configuration;
+  // if path is provided, we don't have any default configuration
+  // and if the configuration is missing there will be an error
+  if (++iParam < argc) config.SetMainTesterParameterSetPath(argv[iParam]);
+  else                 config.AddDefaultTesterConfiguration("");
   
   // third argument: path of the parameter set for geometry configuration
   // (optional; default: "services.Geometry" from the inherited object)
