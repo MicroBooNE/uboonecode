@@ -3084,7 +3084,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     if (fSaveRawDigitInfo){
       //Hit to RawDigit information	       
       art::FindManyP<raw::RawDigit> fmrd(hitListHandle,evt,fHitsModuleLabel);
-      //if (hitlist[i]->WireID().Plane==2)
+      if (hitlist[i]->WireID().Plane==2)
       {
       int dataSize = fmrd.at(i)[0]->Samples();
       short ped = fmrd.at(i)[0]->GetPedestal();
