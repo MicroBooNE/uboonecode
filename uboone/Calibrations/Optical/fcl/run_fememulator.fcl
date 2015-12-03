@@ -3,25 +3,7 @@
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 #include "opcalibration_microboone.fcl"
-
-microboone_fememulator:
-{
-    module_type: FEMemulator
-    OpDataModule: "pmtreadout"
-    FEMslot: 5
-    NChannels: 32
-    BeamWinSize: 103
-    FrontPorchBuffer: 0
-    Discr0precount: 2
-    Discr0threshold: 5
-    Discr0width: 5
-    Discr0delay: 5
-    Discr0deadtime: 5
-    Discr3threshold: 10
-    Discr3width: 4
-    Discr3delay: 4
-    Discr3deadtime: 4
-}
+#include "fememulator_microboone.fcl"
 
 process_name: FEMemulator
 services:
