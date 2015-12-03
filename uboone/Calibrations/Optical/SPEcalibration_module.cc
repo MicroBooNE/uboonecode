@@ -83,6 +83,9 @@ private:
   double rms_baseline;
   double ave_baseline2;
   double rms_baseline2;
+  double event_unixtime;
+  double wfm_unixtime;
+  double pulse_unixtime;
   int slot;
   int ch;
 
@@ -162,6 +165,9 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   fTpulsetree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
   fTpulsetree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
   fTpulsetree->Branch("chmaxamp",     &event_maxamp,  "chmaxamp/D" );
+  fTpulsetree->Branch("event_unixtime", &event_unixtime, "event_unixtime/D" );
+  fTpulsetree->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
+  fTpulsetree->Branch("pulse_unixtime", &pulse_unixtime, "pulse_unixtime/D" );
 
   // Data for each Beam Window
   fTevent = out_file->make<TTree>("eventtree", "Data about the event" );
@@ -172,6 +178,8 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   fTevent->Branch("subrun",        &isubrun,        "subrun/I");
   fTevent->Branch("event",    &ievent,       "event/I");
   fTevent->Branch("nsamples", &nsamples,     "nsamples/I" );
+  fTevent->Branch("event_unixtime", &event_unixtime, "event_unixtime/D" );
+  fTevent->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
   fTevent->Branch("chmaxamp", &event_maxamp, "chmaxamp/D");
   fTevent->Branch("nchfires", "vector<int>", &event_nchfires );
   fTevent->Branch("dt_lastcosmicwin_usec",    "vector<double>", &event_lastcosmicwin );
@@ -384,6 +392,7 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 
   // get trigger time
   double trig_timestamp = ts->TriggerTime();
+  event_unixtime = trig_timestamp;
   
   // get channel maxamp and other event related info
   for(auto &wfm : opwfms)  {
@@ -400,15 +409,17 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
     if ( WINDOW_MINSIZE < wfm.size() ) {
       // beam window
       nsamples = (int)wfm.size();
-    
       for (int i=0; i<(int)wfm.size(); i++) {
 	if ( event_maxamp<(double)wfm.at(i) )
 	  event_maxamp = (double)wfm.at(i);
       }
+      wfm_unixtime = wfm.TimeStamp();
     }
     else {
       // cosmic window. we have a cosmic threshold (to prevent considering late or smaller light pulses)
       double dt_usec = wfm.TimeStamp()-trig_timestamp; // usec
+      wfm_unixtime = wfm.TimeStamp();
+      pulse_unixtime = wfm.TimeStamp();
       auto maxelem = std::max_element( wfm.begin(), wfm.end() );
       //std::cout << " " << ch << ", " << wfm.size() << ": " << dt_usec << " " << wfm.TimeStamp() << " " << trig_timestamp << " " << *maxelem << std::endl;
       if ( dt_usec>0 )
@@ -455,6 +466,9 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
     std::vector< int > diff_fire;
     cpysubevent::runCFdiscriminatorCPP( t_fire, amp_fire, maxt_fire, diff_fire,
 					data.data(), (int)cfd_delay, (int)cfd_threshold, (int)cfd_deadtime, (int)cfd_width, (int)data.size() );
+
+    wfm_unixtime = wfm.TimeStamp();
+    pulse_unixtime = wfm.TimeStamp();
 
     // we loop through the pulses.  
     if ( ch<32 )
@@ -504,6 +518,10 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 
       // ok done for the pulse
       opchannel = readout_ch;
+
+      // pulses
+      pulse_unixtime = wfm.TimeStamp() + tick*0.015625; // usec
+
       fTpulsetree->Fill();
     }
   } //end of loop over waveforms
