@@ -1,0 +1,39 @@
+#include "services_microboone.fcl"
+
+process_name: Copy
+
+services:
+{
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  message:      @local::standard_warning
+  FileCatalogMetadata:  @local::art_file_catalog_data
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  10        # Number of events to create
+}
+
+physics:
+{
+
+ #define the output stream, there could be more than one if using filters 
+ stream1:  [ out1 ]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ stream1 ]  
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "%ifb_%tc_merged.root"
+   dataTier:    "raw"
+   streamName:  "outnotpc"
+   compressionLevel: 3
+ }
+}
