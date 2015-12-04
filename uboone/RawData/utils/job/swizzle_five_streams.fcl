@@ -135,10 +135,10 @@ physics:
  stream_prescale: [ outprescale ]
 
  trigger_paths: [ path_notpc, path_bnb, path_numi, path_ext, path_prescale ] 
- end_paths:     [ outnotpc, outbnb, outnumi, outext, outprescale ]
+ end_paths:     [ stream_notpc, stream_bnb, stream_numi, stream_ext, stream_prescale ]
 }
 
-services.user.TimeService.TrigModuleName: "daq"
+services.TimeService.TrigModuleName: "daq"
 
 physics.filters.opflashfilter.OpFlashModule : "opflash"
 #physics.filters.hwflashfilter.OpFlashModule : "hwflash"
