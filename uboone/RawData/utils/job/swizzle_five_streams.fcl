@@ -1,0 +1,149 @@
+#include "geometry_microboone.fcl"
+#include "timeservice_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
+#include "seedservice_microboone.fcl"
+#include "beamdata_microboone.fcl"
+#include "triggerenforcement.fcl"
+
+
+#include "reco_uboone_data_notpc.fcl"
+#include "reco_uboone_minimal_data.fcl"
+
+process_name: Swizzler
+services:
+{
+  scheduler: { fileMode: NOMERGE }
+  TFileService: { fileName: "daq_hist.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} 
+  SeedService:  @local::microboone_seedservice
+  FileCatalogMetadata:    @local::art_file_catalog_data
+  DatabaseUtil:           @local::microboone_database
+  @table::microboone_reco_notpc_services
+  @table::microboone_reco_minimal_services
+}
+
+microboone_tfile_metadata:
+{
+  JSONFileName:          "daq_hist.root.json"
+  GenerateTFileMetadata: true
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
+}
+
+# Database settings
+services.DatabaseUtil.DBHostName:    "ifdb02.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: true
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
+
+source:
+{
+  fileNames:       []
+  module_type:	   LArRawInputSourceUBooNE
+  maxEvents:       -1
+  huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTriggerType: ALL
+  beam_histograms: [ "E:TOR101, 100, 0, 50",
+                     "E:TORTGT, 100, 0, 50",
+                     "E:TOR860, 100, 0, 5",
+                     "E:TOR875, 100, 0, 5" ]
+}
+
+outputs:
+{
+ out_bnb:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawfilter.root"
+   dataTier: "raw"
+   streamName: "rawfilter"
+   compressionLevel: 3
+   SelectEvents: { SelectEvents: [ path_bnb ] }
+  }
+ out_numi:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawnumi.root"
+   dataTier: "raw"
+   streamName: "rawnumi"
+   compressionLevel: 3
+   SelectEvents: { SelectEvents: [ path_numi ] }
+  }
+ out_ext:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawext.root"
+   dataTier: "raw"
+   streamName: "rawext"
+   compressionLevel: 3
+   SelectEvents: { SelectEvents: [ path_ext ] }
+  }
+ out_prescale:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawprescale.root"
+   dataTier: "raw"
+   streamName: "rawprescale"
+   compressionLevel: 3
+   SelectEvents: { SelectEvents: [ path_prescale ] }
+  }
+ out_notpc:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawnotpc.root"
+   dataTier: "raw"
+   streamName: "rawnotpc"
+   compressionLevel: 3
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_*_*_*"]
+   SelectEvents: { SelectEvents: [ path_notpc ] }
+  }
+}
+
+physics:
+{
+ producers: {
+  @table::microboone_reco_minimal_producers
+  @table::microboone_reco_notpc_producers
+ }
+ filters: {
+  @table::microboone_reco_minimal_filters
+  @table::microboone_reco_notpc_filters
+ }
+
+ path_notpc:    [ @sequence::microboone_reco_notpc ]
+ path_bnb:      [ trig_bnb,     @sequence::microboone_reco_notpc, opflashfilter,      @sequence::microboone_reco_minimal ]
+ path_numi:     [ trig_numi,    @sequence::microboone_reco_notpc, opflashfilter_numi, @sequence::microboone_reco_minimal ]
+ path_ext:      [ trig_ext,     @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
+ path_prescale: [ randomfilter, @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
+ stream_notpc:    [ out_notpc ]
+ stream_bnb:      [ out_bnb ]
+ stream_numi:     [ out_numi ]
+ stream_ext:      [ out_ext ]
+ stream_prescale: [ out_prescale ]
+
+ trigger_paths: [ path_notpc, path_bnb, path_numi, path_ext, path_prescale ] 
+ end_paths:     [ out_notpc, out_bnb, out_numi, out_ext, out_prescale ]
+}
+
+services.user.TimeService.TrigModuleName: "daq"
+
+physics.filters.opflashfilter.OpFlashModule : "opflash"
+#physics.filters.hwflashfilter.OpFlashModule : "hwflash"
+
+physics.filters.opflashfilter.DisableFilter: false
+#physics.filters.hwflashfilter.DisableFilter: true
+
+
