@@ -176,6 +176,7 @@ void FEMemulator::analyze(art::Event const & evt)
   art::ServiceHandle<geo::UBOpReadoutMap> ub_PMT_channel_map;
   art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
   //art::Handle< std::vector< raw::OpDetWaveform > > LogicHandle;
+  ub_PMT_channel_map->SetOpMapRun( evt.run() );
 
   evt.getByLabel( fOpDataModule, "OpdetBeamHighGain", wfHandle);
   //evt.getByLabel( fOpDataModule, "UnspecifiedLogic" , LogicHandle);
