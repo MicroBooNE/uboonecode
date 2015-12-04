@@ -22,6 +22,10 @@ microboone_opreadoutmap_new:
         twoFEMOpMap:   ["2015-01-01 00:00:00","2099-12-31 23:59:59"]   
         threeFEMOpMap: ["2100-01-01 00:00:00","3000-01-01 23:59:59"]
         }
+ OpMapRunRanges: {
+        twoFEMOpMap:   [1,3900]   
+        threeFEMOpMap: [3900,999999]
+        }
 }
 
 END_PROLOG
