@@ -42,7 +42,7 @@ services.DatabaseUtil.DBName:        "hootgibson_prod"
 services.DatabaseUtil.DBUser:        "uboonedaq_web"
 services.DatabaseUtil.Port:          5444
 services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
-services.DatabaseUtil.ToughErrorTreatment: true
+services.DatabaseUtil.ToughErrorTreatment: false
 services.DatabaseUtil.ShouldConnect: true
 services.DatabaseUtil.TableName: "main_run"
 
@@ -139,6 +139,7 @@ physics:
 }
 
 services.TimeService.TrigModuleName: "daq"
+services.DetectorProperties.InheritNumberTimeSamples: false
 
 physics.filters.opflashfilter.OpFlashModule : "opflash"
 #physics.filters.hwflashfilter.OpFlashModule : "hwflash"
