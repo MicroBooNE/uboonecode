@@ -52,14 +52,14 @@ microboone_reco_notpc: [ opflash, beamdata ]
 
 microboone_reco_notpc_services.TimeService.TrigModuleName: "daq"
 
-microboone_reco_notpc_producers.trigbnb.TriggerProducer: "daq"
-microboone_reco_notpc_producers.trigbnb.IncludeBits: [ "TriggerBNB" ]
+microboone_reco_notpc_filters.trigbnb.TriggerProducer: "daq"
+microboone_reco_notpc_filters.trigbnb.IncludeBits: [ "TriggerBNB" ]
 
-microboone_reco_notpc_producers.trignumi.TriggerProducer: "daq"
-microboone_reco_notpc_producers.trignumi.IncludeBits: [ "TriggerNuMI" ]
+microboone_reco_notpc_filters.trignumi.TriggerProducer: "daq"
+microboone_reco_notpc_filters.trignumi.IncludeBits: [ "TriggerNuMI" ]
 
-microboone_reco_notpc_producers.trigext.TriggerProducer: "daq"
-microboone_reco_notpc_producers.trigext.IncludeBits: [ "TriggerEXT" ]
+microboone_reco_notpc_filters.trigext.TriggerProducer: "daq"
+microboone_reco_notpc_filters.trigext.IncludeBits: [ "TriggerEXT" ]
 
 
 microboone_reco_notpc_filters.opflashfilter.OpFlashModule : "opflash"
