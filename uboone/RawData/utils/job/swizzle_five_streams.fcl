@@ -12,7 +12,7 @@
 
 
 #include "reco_uboone_data_notpc.fcl"
-#include "reco_uboone_minimal_data.fcl"
+#include "reco_uboone_data_minimal.fcl"
 
 process_name: Swizzler
 services:
@@ -63,7 +63,7 @@ source:
 
 outputs:
 {
- out_bnb:
+ outbnb:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc_rawfilter.root"
@@ -72,7 +72,7 @@ outputs:
    compressionLevel: 3
    SelectEvents: { SelectEvents: [ path_bnb ] }
   }
- out_numi:
+ outnumi:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc_rawnumi.root"
@@ -81,7 +81,7 @@ outputs:
    compressionLevel: 3
    SelectEvents: { SelectEvents: [ path_numi ] }
   }
- out_ext:
+ outext:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc_rawext.root"
@@ -90,7 +90,7 @@ outputs:
    compressionLevel: 3
    SelectEvents: { SelectEvents: [ path_ext ] }
   }
- out_prescale:
+ outprescale:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc_rawprescale.root"
@@ -99,7 +99,7 @@ outputs:
    compressionLevel: 3
    SelectEvents: { SelectEvents: [ path_prescale ] }
   }
- out_notpc:
+ outnotpc:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc_rawnotpc.root"
@@ -124,18 +124,18 @@ physics:
  }
 
  path_notpc:    [ @sequence::microboone_reco_notpc ]
- path_bnb:      [ trig_bnb,     @sequence::microboone_reco_notpc, opflashfilter,      @sequence::microboone_reco_minimal ]
- path_numi:     [ trig_numi,    @sequence::microboone_reco_notpc, opflashfilter_numi, @sequence::microboone_reco_minimal ]
- path_ext:      [ trig_ext,     @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
+ path_bnb:      [ trigbnb,     @sequence::microboone_reco_notpc, opflashfilter,     @sequence::microboone_reco_minimal ]
+ path_numi:     [ trignumi,    @sequence::microboone_reco_notpc, opflashfilternumi, @sequence::microboone_reco_minimal ]
+ path_ext:      [ trigext,     @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
  path_prescale: [ randomfilter, @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
- stream_notpc:    [ out_notpc ]
- stream_bnb:      [ out_bnb ]
- stream_numi:     [ out_numi ]
- stream_ext:      [ out_ext ]
- stream_prescale: [ out_prescale ]
+ stream_notpc:    [ outnotpc ]
+ stream_bnb:      [ outbnb ]
+ stream_numi:     [ outnumi ]
+ stream_ext:      [ outext ]
+ stream_prescale: [ outprescale ]
 
  trigger_paths: [ path_notpc, path_bnb, path_numi, path_ext, path_prescale ] 
- end_paths:     [ out_notpc, out_bnb, out_numi, out_ext, out_prescale ]
+ end_paths:     [ outnotpc, outbnb, outnumi, outext, outprescale ]
 }
 
 services.user.TimeService.TrigModuleName: "daq"
