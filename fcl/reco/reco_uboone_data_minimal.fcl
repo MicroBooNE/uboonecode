@@ -20,6 +20,8 @@
 #include "flashfilter_microboone.fcl"
 #include "tpcneutrinoidfilter_microboone.fcl"
 
+BEGIN_PROLOG
+
 microboone_reco_minimal_services:
 {
   PhotonVisibilityService: @local::microboone_photonvisibilityservice
@@ -131,7 +133,7 @@ microboone_reco_minimal_producers:
 microboone_reco_minimal_filters:
 { 
   #flashtrigger :                @local::microboone_flashtrigger 
-  tpcneutrinoidfilter :         @local::microboone_tpcneutrinoidfilter
+  #tpcneutrinoidfilter :         @local::microboone_tpcneutrinoidfilter
 }
 
  #define the producer and filter modules for this path, order matters, 
@@ -194,8 +196,8 @@ microboone_reco_minimal_filters:
          		  vtx2trackPanKal, 
          		  vtx2trackLinePan, 
          		  vtx2trackLineKal,
-         		  cluster2D,
-         		  tpcneutrinoidfilter
+         		  cluster2D
+         		  # tpcneutrinoidfilter
          		  ]
 
 ### Here we include the file giving us run/data dependent overrides
@@ -401,8 +403,9 @@ microboone_reco_minimal_producers.cluster2D.NeutrinoIDAlgName:                  
 microboone_reco_minimal_producers.cluster2D.TPCCluster2DNuAlg.ClusterModuleLabel:            "linecluster"
 microboone_reco_minimal_producers.cluster2D.TPCCluster2DNuAlg.CosmicModuleLabel:             "lineclustertag"
 
-microboone_reco_minimal_filters.tpcneutrinoidfilter.VertexModuleLabelVec:                    ["pandoraNu", "linecluster", "linecluster"]
-microboone_reco_minimal_filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:              ["vtx2trackPanKal", "vtx2trackLinePan", "vtx2trackLineKal"]
-microboone_reco_minimal_filters.tpcneutrinoidfilter.Cluster2DCosmicProducerLabel:            "lineclustertag"
-microboone_reco_minimal_filters.tpcneutrinoidfilter.Cluster2DCosmicClusterAssns:             "cluster2D"
+#microboone_reco_minimal_filters.tpcneutrinoidfilter.VertexModuleLabelVec:                    ["pandoraNu", "linecluster", "linecluster"]
+#microboone_reco_minimal_filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:              ["vtx2trackPanKal", "vtx2trackLinePan", "vtx2trackLineKal"]
+#microboone_reco_minimal_filters.tpcneutrinoidfilter.Cluster2DCosmicProducerLabel:            "lineclustertag"
+#microboone_reco_minimal_filters.tpcneutrinoidfilter.Cluster2DCosmicClusterAssns:             "cluster2D"
 
+END_PROLOG
