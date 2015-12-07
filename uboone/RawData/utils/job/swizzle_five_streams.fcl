@@ -148,3 +148,36 @@ physics.filters.opflashfilter.DisableFilter: false
 #physics.filters.hwflashfilter.DisableFilter: true
 
 
+### Here we try to suppress known and pointless messages
+services.message.destinations :
+{
+  STDCOUT: 
+  {
+     type:      "cout"      #tells the message service to output this destination to cout
+     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
+     append:     true       #says to append all messages to the output
+     categories:
+     {
+       ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       default:
+       {
+         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
+         reportEvery: 1
+       }
+     }
+  }
+}
