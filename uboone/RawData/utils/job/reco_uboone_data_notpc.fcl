@@ -18,6 +18,10 @@ microboone_reco_notpc_services:
   Geometry:               @local::microboone_geo
   UBOpReadoutMap:           @local::microboone_opreadoutmap
   TimeService:            @local::microboone_timeservice
+  user:
+  {
+    IFDH:                   {}
+  }
 }
 
 microboone_reco_notpc_producers: {
