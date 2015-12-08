@@ -252,6 +252,7 @@ void SPEcalibration::anayzeLEDPulserMode(const art::Event& evt)
   std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
   std::vector<raw::OpDetWaveform> const& logwfms(*LogicHandle);
   
+  ub_PMT_channel_map->SetOpMapRun( evt.run() );
 
   for(auto &wfm : logwfms)  {
 
@@ -380,6 +381,8 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 
   evt.getByLabel( OpDataModule, "OpdetBeamHighGain", wfHandle);
   std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
+
+  ub_PMT_channel_map->SetOpMapRun( evt.run() );
 
   event_maxamp = 0.0;
   event_nchfires->clear();
