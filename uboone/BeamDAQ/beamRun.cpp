@@ -77,12 +77,14 @@ void beamRun::StartRun(beamRunHeader& rh, boost::posix_time::ptime tstart)
 void beamRun::Update(boost::posix_time::ptime tend)
 {
   static char sbuf[1024];
- 
+
+  boost::posix_time::ptime orgtend=tend;
   for (unsigned int ibeam=0;ibeam<fBeamLine.size();ibeam++) {
     bool isdone=false;
     beamdatamap_t data_map;
-    ptime last_proc_time=tend-hours(10000);
+    ptime last_proc_time=orgtend-hours(10000);
     //now get data from db 10min at the time
+    tend=orgtend-microseconds(fTimeOffsetMap[fBeamLine[ibeam]]*1000.)+microseconds(fTimePaddingMap[fBeamLine[ibeam]]*1000.);
     ptime t1 = (fLastQueryTime[fBeamLine[ibeam]]+minutes(10)<tend) ? 
 	(fLastQueryTime[fBeamLine[ibeam]]+minutes(10)) : tend;
 
@@ -99,12 +101,12 @@ void beamRun::Update(boost::posix_time::ptime tend)
 		  endtime.c_str());  
 	} else {
 	  mf::LogDebug("")<<"Pad time for multiwire bundle";
-	  endtime=to_iso_extended_string(t1+minutes(1));
+	  endtime=to_iso_extended_string(t1+seconds(2));
 	  sprintf(sbuf, "%s/data?b=%s&t0=%s&t1=%s&f=csv", fIFDBURL.c_str(), fBundle[fBeamLine[ibeam]][i].c_str(),
-		  to_iso_extended_string(fLastQueryTime[fBeamLine[ibeam]]-minutes(1)).c_str(),
+		  to_iso_extended_string(fLastQueryTime[fBeamLine[ibeam]]-seconds(2)).c_str(),
 		  endtime.c_str());  
 	}
-	mf::LogDebug("") <<"Query server:\n"<<sbuf;
+	mf::LogInfo("") <<"Query server:\n"<<sbuf;
 	fIFDB.GetData(sbuf,response);	
       }
       mf::LogDebug("")<<response;
@@ -152,7 +154,11 @@ void beamRun::EndRun(boost::posix_time::ptime tstop)
   while ( 1 ) {
     //update beyond tstop to see data (data after 
     //fRunHeader.fRunEnd will not be written to file anyway)
-    Update(tstop+minutes(fIFDBLatency)); 
+    if (tstop-minutes(fIFDBLatency)<microsec_clock::local_time())
+      Update(tstop); 
+    else
+      Update(tstop+minutes(fIFDBLatency)); 
+  
     bool all_done=true;
     for (unsigned int i=0;i<fBeamLine.size();i++) {
       if (ToPtime(fLastBeamHeader[fBeamLine[i]]) < tstop ) all_done=false;
@@ -247,7 +253,11 @@ void beamRun::ProcessResponse(httpResponse* response, beamdatamap_t &data_map, s
 
   bool is_first=true;
   
-  for (auto itr=bd_map.begin(); itr!=bd_map.end();itr++) {
+  bool is_last=false;
+  unsigned int iel=0;
+
+  for (auto itr=bd_map.begin(); itr!=bd_map.end();itr++,iel++) {
+    if (iel==bd_map.size()-1) is_last=true;
     uint64_t timestamp=itr->first;
     uint32_t secs=uint32_t(timestamp/1000);
     uint16_t msecs=uint16_t(timestamp-(timestamp/1000)*1000);
@@ -281,6 +291,22 @@ void beamRun::ProcessResponse(httpResponse* response, beamdatamap_t &data_map, s
     //    number_of_bytes_in_record += ??;
     number_of_devices+=itr->second.size();
 
+    if (is_last) {
+      ub_BeamHeader hdr;
+      hdr.setRecordType(8);
+      hdr.setEventSignal(std::to_string(fEventTypeMap[beamline]));
+      hdr.setSeconds(last_secs);
+      hdr.setMilliSeconds(last_msecs);
+      hdr.setNumberOfBytesInRecord(number_of_bytes_in_record+sizeof(hdr));
+      hdr.setNumberOfDevices(number_of_devices);
+      pair<ub_BeamHeader, std::vector<ub_BeamData> > p(hdr,vdt);
+      data_map.insert(p);
+      
+      vdt.clear();
+      number_of_bytes_in_record=0;
+      number_of_devices=0;
+    }
+    
     is_first=false;
   }
 

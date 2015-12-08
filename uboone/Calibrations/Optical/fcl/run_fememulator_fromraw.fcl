@@ -4,34 +4,38 @@
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
 #include "seedservice_microboone.fcl"
 #include "triggerenforcement.fcl"
+#include "beamdata_microboone.fcl"
+#include "fememulator_microboone.fcl"
+#include "opcalibration_microboone.fcl"
 
-process_name: Swizzler
+process_name: FEMemulator
 services:
 {
-  scheduler: { fileMode: NOMERGE }
-  TFileService: { fileName: "daq_hist.root" }
+  TFileService: { fileName: "FEMemulator.root" }
   Timing:       {}
-  RandomNumberGenerator: {} 
-  SeedService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
-	  UBOpReadoutMap:           @local::microboone_opreadoutmap
+	  UBOpReadoutMap:         @local::microboone_opreadoutmap
           TimeService:            @local::microboone_timeservice
           DatabaseUtil:           @local::microboone_database
-          }
+	  IFDH:                   {}
+         }
 }
 
 microboone_tfile_metadata:
 {
-  JSONFileName:          "daq_hist.root.json"
-  GenerateTFileMetadata: false
+  JSONFileName:          "FEMemulator.root.json"
+  GenerateTFileMetadata: true
   dataTier:              "root-tuple"
   fileFormat:            "root"
 }
+
 
 # Database settings
 services.user.DatabaseUtil.DBHostName:    "ifdb02.fnal.gov"
@@ -43,13 +47,16 @@ services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: true
 services.user.DatabaseUtil.TableName: "main_run"
 
+services.user.TimeService.TrigModuleName: "daq"
+
+
 source:
 {
   fileNames:       []
   module_type:	   LArRawInputSourceUBooNE
   maxEvents:       -1
   huffmanDecode:   true
-  swizzleTPC:      true
+  swizzleTPC:      false
   swizzlePMT:      true
   swizzleTriggerType: ALL
   beam_histograms: [ "E:TOR101, 100, 0, 50",
@@ -58,48 +65,48 @@ source:
                      "E:TOR875, 100, 0, 5" ]
 }
 
+
 outputs:
 {
- rawprescale:
+ rawnotpc:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc.root"
+   fileName: "%ifb_%tc_rawnotpc.root"
    dataTier: "raw"
+   streamName: "rawnotpc"
    compressionLevel: 3
    outputCommands: ["keep *_*_*_*",
-                    "drop raw::RawDigits_daq_*_*"]
-   FCMDPlugins: [
-     { plugin_type:   "FileCatalogMetadataRawDigit"
-       RawDigitLabel: "digitcopy"
-     }
-    ]
+                    "drop raw::RawDigits_*_*_*"]
   }
 }
 
 physics:
 {
-  producers: {
-  ### flash finders
-  opflash          : @local::microboone_opflash_beam_highgain
-  opflashLow       : @local::microboone_opflash_beam_lowgain
-  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
-  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
 
-  digitcopy : { module_type : "RawDigitSaver" 
-                DAQRawDigitProducer : "daq" }
- }
+  producers: {
+   opflash          : @local::microboone_opflash_beam_highgain
+  }
+
  filters: {
   triggerEnforcement: @local::trigger_enforcement
-  randomfilter: {
-   module_type : "RandomPrescale"
-   Probability : 0.01
-  }
  }
 
- reco: [ triggerEnforcement, opflash, randomfilter, digitcopy ]
- stream1:   [ rawprescale ]
- trigger_paths: [ reco ] 
- end_paths: [ stream1 ]
+  analyzers:
+  {
+        femsoft: @local::microboone_fememulator
+        specalib: @local::microboone_SPEcalibration
+  }
+
+ common: [ triggerEnforcement, opflash  ] 
+ trigger_paths: [ common ]
+ stream1: [ rawnotpc ]
+ analyzeIt: [femsoft, specalib]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event,
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ stream1, analyzeIt ]
+
 }
 
-services.user.TimeService.TrigModuleName: "daq"
+
+
