@@ -276,9 +276,10 @@ void FEMemulator::basicTrigger( int BeamWinSize, int NChannels, const std::vecto
 	      tmaxdiff = diff3.at(t);
 	  }
 	  // fill the accumulators
-	  for (int t=tick; t<std::min( tick+fDiscr3deadtime, (int)diff3.size() ); t++) {
-	    chdiff[ch].at( tick ) = tmaxdiff;
-	    chhit[ch].at( tick ) = 1;
+	  int tend = std::min( tick+fDiscr3deadtime, (int)diff3.size() );
+	  for (int t=tick; t<tend; t++) {
+	    chdiff[ch].at( t ) = tmaxdiff;
+	    chhit[ch].at( t ) = 1;
 	  }
 	}
       }

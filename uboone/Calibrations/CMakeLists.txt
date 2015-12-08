@@ -1,4 +1,6 @@
 
+add_subdirectory(Optical)
+
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME  uboonecode_uboone_Calibrations
 	  LIB_LIBRARIES
