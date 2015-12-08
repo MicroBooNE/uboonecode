@@ -865,7 +865,6 @@ namespace lris {
     uint32_t nano_seconds=global_header.getNanoSeconds()+global_header.getMicroSeconds()*1000;
     //time_t mytime = ((time_t)seconds<<32) | nano_seconds;
     time_t mytime = (time_t)seconds;
-    std::cout << "[LArRawInputDriverUBooNE::fillPMTData] " << mytime << " " << seconds << " " << nano_seconds << std::endl;
     if ( mytime==0 ) {
       std::cout << "[LArRawInputDriverUBooNE::fillPMTData] event epoch time 0 (!?). using run to set channel map" << std::endl;
       ub_pmt_channel_map->SetOpMapRun( global_header.getRunNumber() );
