@@ -42,7 +42,7 @@ microboone_reco_notpc_filters: {
   trigext:  @local::trigger_enforcement
 
   opflashfilter:      @local::microboone_flashtrigger
-  opflashfilternumi:  @local::microboone_flashtrigger
+  opflashfilternumi:  @local::microboone_flashtrigger_numi
   #hwflashfilter: @local::microboone_flashtrigger
 
   randomfilter: {
@@ -66,9 +66,10 @@ microboone_reco_notpc_filters.trigext.IncludeBits: [ "TriggerEXT" ]
 
 
 microboone_reco_notpc_filters.opflashfilter.OpFlashModule : "opflash"
-#microboone_reco_notpc_filters.hwflashfilter.OpFlashModule : "hwflash"
-
 microboone_reco_notpc_filters.opflashfilter.DisableFilter: false
-#microboone_reco_notpc_filters.hwflashfilter.DisableFilter: true
+
+microboone_reco_notpc_filters.opflashfilternumi.OpFlashModule : "opflash"
+microboone_reco_notpc_filters.opflashfilternumi.DisableFilter: false
+
 
 END_PROLOG
