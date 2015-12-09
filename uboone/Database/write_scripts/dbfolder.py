@@ -136,7 +136,7 @@ class dbfolder():
 	    return 5  #column mismatch
 	    
 
-        print '\nStoring data with starting t = %s' % (datetime.fromtimestamp(t_start),)
+        print '\nStoring data with starting t(%s) = %s' % (t_start, datetime.fromtimestamp(t_start))
         T0 = time.time()
         folder.addData(t_start, data, True, override_future)
         print '\nData stored. Elapsed time = %.1f seconds' % (time.time() - T0,)
