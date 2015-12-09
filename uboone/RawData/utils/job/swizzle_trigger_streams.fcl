@@ -12,7 +12,6 @@
 
 
 #include "reco_uboone_data_notpc.fcl"
-#include "reco_uboone_data_minimal.fcl"
 
 process_name: Swizzler
 services:
@@ -25,7 +24,6 @@ services:
   FileCatalogMetadata:    @local::art_file_catalog_data
   DatabaseUtil:           @local::microboone_database
   @table::microboone_reco_notpc_services
-  @table::microboone_reco_minimal_services
 }
 
 microboone_tfile_metadata:
@@ -90,6 +88,15 @@ outputs:
    compressionLevel: 3
    SelectEvents: { SelectEvents: [ path_ext ] }
   }
+ outmucs:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawmucs.root"
+   dataTier: "raw"
+   streamName: "rawmucs"
+   compressionLevel: 3
+   SelectEvents: { SelectEvents: [ path_mucs ] }
+  }
  outprescale:
   {
    module_type: RootOutput
@@ -115,37 +122,37 @@ outputs:
 physics:
 {
  producers: {
-  @table::microboone_reco_minimal_producers
   @table::microboone_reco_notpc_producers
  }
  filters: {
-  @table::microboone_reco_minimal_filters
   @table::microboone_reco_notpc_filters
  }
 
  path_notpc:    [ @sequence::microboone_reco_notpc ]
- path_bnb:      [ trigbnb,     @sequence::microboone_reco_notpc, opflashfilter,     @sequence::microboone_reco_minimal ]
- path_numi:     [ trignumi,    @sequence::microboone_reco_notpc, opflashfilternumi, @sequence::microboone_reco_minimal ]
- path_ext:      [ trigext,     @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
- path_prescale: [ randomfilter, @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
+ path_bnb:      [ trigbnb,  @sequence::microboone_reco_notpc, opflashfilter ]
+ path_numi:     [ trignumi, @sequence::microboone_reco_notpc, opflashfilternumi ]
+ path_ext:      [ trigext ]
+ path_mucs:     [ trigmucs ]
+ path_prescale: [ randomfilter ]
  stream_notpc:    [ outnotpc ]
  stream_bnb:      [ outbnb ]
  stream_numi:     [ outnumi ]
  stream_ext:      [ outext ]
+ stream_mucs:     [ outmucs ]
  stream_prescale: [ outprescale ]
 
- trigger_paths: [ path_notpc, path_bnb, path_numi, path_ext, path_prescale ] 
- end_paths:     [ stream_notpc, stream_bnb, stream_numi, stream_ext, stream_prescale ]
+ trigger_paths: [ path_notpc, path_bnb, path_numi, path_ext, path_mucs, path_prescale ] 
+ end_paths:     [ stream_notpc, stream_bnb, stream_numi, stream_ext, stream_mucs, stream_prescale ]
 }
 
 services.TimeService.TrigModuleName: "daq"
-services.DetectorProperties.InheritNumberTimeSamples: false
 
 physics.filters.opflashfilter.OpFlashModule : "opflash"
 physics.filters.opflashfilter.DisableFilter: false
 
 physics.filters.opflashfilternumi.OpFlashModule : "opflash"
 physics.filters.opflashfilternumi.DisableFilter: false
+
 
 
 ### Here we try to suppress known and pointless messages

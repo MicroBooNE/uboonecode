@@ -90,6 +90,15 @@ outputs:
    compressionLevel: 3
    SelectEvents: { SelectEvents: [ path_ext ] }
   }
+ outmucs:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_rawmucs.root"
+   dataTier: "raw"
+   streamName: "rawmucs"
+   compressionLevel: 3
+   SelectEvents: { SelectEvents: [ path_mucs ] }
+  }
  outprescale:
   {
    module_type: RootOutput
@@ -124,18 +133,20 @@ physics:
  }
 
  path_notpc:    [ @sequence::microboone_reco_notpc ]
- path_bnb:      [ trigbnb,     @sequence::microboone_reco_notpc, opflashfilter,     @sequence::microboone_reco_minimal ]
- path_numi:     [ trignumi,    @sequence::microboone_reco_notpc, opflashfilternumi, @sequence::microboone_reco_minimal ]
- path_ext:      [ trigext,     @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
+ path_bnb:      [ trigbnb,  @sequence::microboone_reco_notpc, opflashfilter,     @sequence::microboone_reco_minimal ]
+ path_numi:     [ trignumi, @sequence::microboone_reco_notpc, opflashfilternumi, @sequence::microboone_reco_minimal ]
+ path_ext:      [ trigext,  @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
+ path_mucs:     [ trigmucs ]
  path_prescale: [ randomfilter, @sequence::microboone_reco_notpc, @sequence::microboone_reco_minimal ]
  stream_notpc:    [ outnotpc ]
  stream_bnb:      [ outbnb ]
  stream_numi:     [ outnumi ]
  stream_ext:      [ outext ]
+ stream_mucs:     [ outmucs ]
  stream_prescale: [ outprescale ]
 
- trigger_paths: [ path_notpc, path_bnb, path_numi, path_ext, path_prescale ] 
- end_paths:     [ stream_notpc, stream_bnb, stream_numi, stream_ext, stream_prescale ]
+ trigger_paths: [ path_notpc, path_bnb, path_numi, path_ext, path_mucs, path_prescale ] 
+ end_paths:     [ stream_notpc, stream_bnb, stream_numi, stream_ext, stream_mucs, stream_prescale ]
 }
 
 services.TimeService.TrigModuleName: "daq"
