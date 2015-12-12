@@ -261,6 +261,14 @@ namespace geo {
     // ----------------------------------------------------------------------
     // read in channel types
     fNReadoutChannels = 0;
+    fLogicChannels.clear();
+    fReadoutChannelSet.clear();
+    fChannelCategory.clear();
+    fChannelType.clear();
+    fTypeChannels.clear();
+    fCategoryChannels.clear();
+    fReadout2CSF.clear();
+    fCSF2Readout.clear();
 
     for ( unsigned int icat=0; icat<(unsigned int)opdet::NumUBOpticalChannelCategories; icat++ ) {
       std::vector< unsigned int > cat_channels;
