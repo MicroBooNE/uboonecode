@@ -19,6 +19,20 @@ services:
   scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "daq_hist.root" }
   Timing:       {}
+  SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
+  TimeTracker: { 
+    printSummary : true
+    dbOutput     : {
+      filename   :  "time.db"
+      overwrite  :  true
+    }
+  }
+  MemoryTracker: {
+    ignoreTotal       : 1 # no. of events to exclude - '1' by default
+    printSummaries    : ["*"] # or any combination of ["general","event","module"]
+    includeMallocInfo : true
+    filename          : "mem.db" 
+  }
   RandomNumberGenerator: {} 
   SeedService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data
