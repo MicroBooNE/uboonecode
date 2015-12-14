@@ -18,8 +18,6 @@ services:
 {
   scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "daq_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
   TimeTracker: { 
     printSummary : true
     dbOutput     : {
