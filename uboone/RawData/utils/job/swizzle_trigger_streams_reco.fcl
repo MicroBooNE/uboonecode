@@ -128,7 +128,12 @@ outputs:
    streamName: "rawnotpc"
    compressionLevel: 3
    outputCommands: ["keep *_*_*_*",
-                    "drop raw::RawDigits_*_*_*"]
+                    "drop raw::RawDigit*_*_*_*",     # Drop RawDigits.
+                    "drop anab::*_*_*_*",            # Drop all anab:: data products.
+                    "drop recob::*_*_*_*",           # Drop all recob:: data products,
+                    "keep recob::OpHit*_*_*_*",      # except OpHits,
+                    "keep recob::OpFlash*_*_*_*" ]   # and OpFlashes.
+
    SelectEvents: { SelectEvents: [ path_notpc ] }
   }
 }
