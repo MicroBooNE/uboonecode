@@ -78,9 +78,9 @@ outputs:
  outbnb:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawfilter.root"
-   dataTier: "raw"
-   streamName: "rawfilter"
+   fileName: "%ifb_%tc_bnb.root"
+   dataTier: "reconstructed"
+   streamName: "outbnb"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_bnb ] }
@@ -88,9 +88,9 @@ outputs:
  outnumi:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawnumi.root"
-   dataTier: "raw"
-   streamName: "rawnumi"
+   fileName: "%ifb_%tc_numi.root"
+   dataTier: "reconstructed"
+   streamName: "outnumi"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_numi ] }
@@ -98,9 +98,9 @@ outputs:
  outext:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawext.root"
-   dataTier: "raw"
-   streamName: "rawext"
+   fileName: "%ifb_%tc_ext.root"
+   dataTier: "reconstructed"
+   streamName: "outext"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_ext ] }
@@ -108,9 +108,9 @@ outputs:
  outmucs:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawmucs.root"
+   fileName: "%ifb_%tc_mucs.root"
    dataTier: "raw"
-   streamName: "rawmucs"
+   streamName: "outmucs"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    outputCommands: ["keep *_*_*_*",
@@ -123,9 +123,9 @@ outputs:
  outprescale:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawprescale.root"
-   dataTier: "raw"
-   streamName: "rawprescale"
+   fileName: "%ifb_%tc_prescale.root"
+   dataTier: "reconstructed"
+   streamName: "outprescale"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_prescale ] }
@@ -133,9 +133,9 @@ outputs:
  outnotpc:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawnotpc.root"
-   dataTier: "raw"
-   streamName: "rawnotpc"
+   fileName: "%ifb_%tc_notpc.root"
+   dataTier: "reconstructed"
+   streamName: "outnotpc"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    outputCommands: ["keep *_*_*_*",

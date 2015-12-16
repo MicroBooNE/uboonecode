@@ -76,9 +76,9 @@ outputs:
  outbnb:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawfilter.root"
+   fileName: "%ifb_%tc_bnb.root"
    dataTier: "raw"
-   streamName: "rawfilter"
+   streamName: "outbnb"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_bnb ] }
@@ -86,9 +86,9 @@ outputs:
  outnumi:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawnumi.root"
+   fileName: "%ifb_%tc_numi.root"
    dataTier: "raw"
-   streamName: "rawnumi"
+   streamName: "outnumi"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_numi ] }
@@ -96,9 +96,9 @@ outputs:
  outext:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawext.root"
+   fileName: "%ifb_%tc_ext.root"
    dataTier: "raw"
-   streamName: "rawext"
+   streamName: "outext"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_ext ] }
@@ -106,9 +106,9 @@ outputs:
  outmucs:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawmucs.root"
+   fileName: "%ifb_%tc_mucs.root"
    dataTier: "raw"
-   streamName: "rawmucs"
+   streamName: "outmucs"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_mucs ] }
@@ -116,9 +116,9 @@ outputs:
  outprescale:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawprescale.root"
+   fileName: "%ifb_%tc_prescale.root"
    dataTier: "raw"
-   streamName: "rawprescale"
+   streamName: "outprescale"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_prescale ] }
@@ -126,9 +126,9 @@ outputs:
  outnotpc:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_rawnotpc.root"
-   dataTier: "raw"
-   streamName: "rawnotpc"
+   fileName: "%ifb_%tc_notpc.root"
+   dataTier: "reconstructed"
+   streamName: "outnotpc"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
    outputCommands: ["keep *_*_*_*",
