@@ -109,7 +109,7 @@ outputs:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc_mucs.root"
-   dataTier: "raw"
+   dataTier: "reconstructed"
    streamName: "outmucs"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
