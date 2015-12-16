@@ -127,7 +127,7 @@ outputs:
   {
    module_type: RootOutput
    fileName: "%ifb_%tc_notpc.root"
-   dataTier: "reconstructed"
+   dataTier: "raw"
    streamName: "outnotpc"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
