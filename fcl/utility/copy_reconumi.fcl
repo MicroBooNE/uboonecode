@@ -19,7 +19,7 @@ physics:
 {
 
  #define the output stream, there could be more than one if using filters 
- stream1:  [ out1 ]
+ stream1:  [ outnumi ]
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
@@ -28,7 +28,7 @@ physics:
 
 outputs:
 {
- out1:
+ outnumi:
  {
    module_type: RootOutput
    fileName:    "%ifb_%tc_merged.root"
