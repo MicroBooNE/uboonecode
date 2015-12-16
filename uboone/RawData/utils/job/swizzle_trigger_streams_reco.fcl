@@ -82,6 +82,7 @@ outputs:
    dataTier: "raw"
    streamName: "rawfilter"
    compressionLevel: 3
+   saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_bnb ] }
   }
  outnumi:
@@ -91,6 +92,7 @@ outputs:
    dataTier: "raw"
    streamName: "rawnumi"
    compressionLevel: 3
+   saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_numi ] }
   }
  outext:
@@ -100,6 +102,7 @@ outputs:
    dataTier: "raw"
    streamName: "rawext"
    compressionLevel: 3
+   saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_ext ] }
   }
  outmucs:
@@ -109,6 +112,12 @@ outputs:
    dataTier: "raw"
    streamName: "rawmucs"
    compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   outputCommands: ["keep *_*_*_*",
+                    "drop anab::*_*_*_*",            # Drop all anab:: data products.
+                    "drop recob::*_*_*_*",           # Drop all recob:: data products,
+                    "keep recob::OpHit*_*_*_*",      # except OpHits,
+                    "keep recob::OpFlash*_*_*_*" ]   # and OpFlashes.
    SelectEvents: { SelectEvents: [ path_mucs ] }
   }
  outprescale:
@@ -118,6 +127,7 @@ outputs:
    dataTier: "raw"
    streamName: "rawprescale"
    compressionLevel: 3
+   saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_prescale ] }
   }
  outnotpc:
@@ -127,6 +137,7 @@ outputs:
    dataTier: "raw"
    streamName: "rawnotpc"
    compressionLevel: 3
+   saveMemoryObjectThreshold: 0
    outputCommands: ["keep *_*_*_*",
                     "drop raw::RawDigit*_*_*_*",     # Drop RawDigits.
                     "drop anab::*_*_*_*",            # Drop all anab:: data products.
