@@ -28,6 +28,8 @@ add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(DataScanner)
 #add_subdirectory(LiteMaker)
 
+add_subdirectory(DataOverlay)
+
 # Respect the order specified in lar_build, which is:
 #
 #     "SoftRelTools",
