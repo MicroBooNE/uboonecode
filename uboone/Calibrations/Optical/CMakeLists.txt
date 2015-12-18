@@ -1,5 +1,5 @@
 art_make( LIBRARY_NAME SPEcalibrationCode
-	  EXCLUDE SPEcalibration_module.cxx FEMemulator_module.cxx CalibrationFit.C
+	  EXCLUDE SPEcalibration_module.cc FEMemulator_module.cc CalibrationFit.C
 	  RawData
 	  UBOpReadoutMap_service
 	  LIB_LIBRARIES ${ART_FRAMEWORK_CORE} 

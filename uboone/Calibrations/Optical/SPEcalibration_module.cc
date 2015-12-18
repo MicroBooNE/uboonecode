@@ -46,6 +46,7 @@
 #include "RawData/raw.h"
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
+#include "RawData/DAQHeader.h"
 
 // Pulse finding
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"
@@ -83,7 +84,8 @@ private:
   double rms_baseline;
   double ave_baseline2;
   double rms_baseline2;
-  double event_unixtime;
+  double event_timestamp_sec;
+  double event_timestamp_usec;
   double wfm_unixtime;
   double pulse_unixtime;
   int slot;
@@ -116,11 +118,13 @@ private:
   bool SAVE_AVE_SPE;
   double AVESPE_RMSLIMIT;
   std::string OpDataModule;
+  std::string DAQHeaderModule;
 
   TTree* fTouttree;
   TTree* fTpulsetree;
   TTree* fTevent;
   TH1D** hSPE_ave;
+  TH1D** hSPE_norm;
   //TH1D* hSPE_rms;
   int hspe_nfills[32];
 
@@ -165,7 +169,8 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   fTpulsetree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
   fTpulsetree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
   fTpulsetree->Branch("chmaxamp",     &event_maxamp,  "chmaxamp/D" );
-  fTpulsetree->Branch("event_unixtime", &event_unixtime, "event_unixtime/D" );
+  fTpulsetree->Branch("event_timestamp_sec", &event_timestamp_sec, "event_timestamp_sec/D" );
+  fTpulsetree->Branch("event_timestamp_usec", &event_timestamp_usec, "event_timestamp_usec/D" );
   fTpulsetree->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
   fTpulsetree->Branch("pulse_unixtime", &pulse_unixtime, "pulse_unixtime/D" );
 
@@ -178,7 +183,8 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   fTevent->Branch("subrun",        &isubrun,        "subrun/I");
   fTevent->Branch("event",    &ievent,       "event/I");
   fTevent->Branch("nsamples", &nsamples,     "nsamples/I" );
-  fTevent->Branch("event_unixtime", &event_unixtime, "event_unixtime/D" );
+  fTevent->Branch("event_timestamp_sec", &event_timestamp_sec, "event_timestamp_sec/D" );
+  fTevent->Branch("event_timestamp_usec", &event_timestamp_usec, "event_timestamp_usec/D" );
   fTevent->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
   fTevent->Branch("chmaxamp", &event_maxamp, "chmaxamp/D");
   fTevent->Branch("nchfires", "vector<int>", &event_nchfires );
@@ -205,8 +211,8 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   pulse_start      = p.get<unsigned short>( "PulseStart", 180 );    // first tick after logic pulse start that defines pulse window
   pulse_end        = p.get<unsigned short>( "PulseEnd", 210 );      // first tick after logic pulse start that defines pulse window
   OpDataModule     = p.get<std::string>( "OpDataModule", "pmtreadout" );
+  DAQHeaderModule  = p.get<std::string>( "DAQHeaderModule", "daq" );
   SAVE_AVE_SPE     = p.get<bool>( "SaveAverageSPE", true );
-  //USE_PULSE_FINDER = p.get<bool>( "UsePulseFinder", false );
   cfd_threshold    = p.get<double>( "CFDThreshold", 10.0 );
   cfd_delay        = p.get<unsigned short>( "CFDDelay", 4 );
   cfd_deadtime     = p.get<unsigned short>( "CFDDeadtime", 20 );
@@ -215,11 +221,16 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
 
   // Ave SPE waveform
   hSPE_ave = new TH1D*[32];
+  hSPE_norm = new TH1D*[32];
   for (int i=0; i<32; i++) {
     hspe_nfills[i] = 0;
     char hname[32];
     sprintf( hname, "hSPE_ave_femch%02d", i );
     hSPE_ave[i] = out_file->make<TH1D>(hname, "Average SPE waveform;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
+    sprintf( hname, "hSPE_norm_femch%02d", i );
+    hSPE_norm[i] = out_file->make<TH1D>(hname, "Normalization;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
+    for (int j=0;j<cfd_width;j++)
+      hSPE_norm[i]->SetBinContent( j+1, 1.0 );
     //hSPE_rms = out_file->make<TH1D>("hSPE_rms", "Average SPE waveform;ticks from disc. fire-delay-deadtime", (int)3*cfd_deadtime, 0.0, (double)3*cfd_deadtime );
   }
   
@@ -378,9 +389,12 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   art::ServiceHandle<util::TimeService> ts;
   art::Handle< std::vector< raw::OpDetWaveform > > LogicHandle;
   art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
+  art::Handle< raw::DAQHeader > dhHandle;
 
   evt.getByLabel( OpDataModule, "OpdetBeamHighGain", wfHandle);
   std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
+
+  evt.getByLabel( DAQHeaderModule, dhHandle );
 
   ub_PMT_channel_map->SetOpMapRun( evt.run() );
 
@@ -394,8 +408,13 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   nsamples = 0;
 
   // get trigger time
-  double trig_timestamp = ts->TriggerTime();
-  event_unixtime = trig_timestamp;
+  double trig_timestamp = ts->TriggerTime(); // usec from beginning of run (or subrun?)
+
+  // event timestamp
+  const raw::DAQHeader& dh = (*dhHandle);
+  time_t daq_timestamp = dh.GetTimeStamp();
+  event_timestamp_sec = (double)(daq_timestamp>>32);
+  event_timestamp_usec  = 0.001*(double)( daq_timestamp & 0xFFFFFFFF );
   
   // get channel maxamp and other event related info
   for(auto &wfm : opwfms)  {
