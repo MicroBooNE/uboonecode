@@ -23,6 +23,7 @@ set( uboone_util_lib_list LArFFT_service
 			${MF_UTILITIES}
 			${FHICLCPP}
 			${CETLIB}
+			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}
                         ${CLHEP}
 			${ROOT_BASIC_LIB_LIST}
