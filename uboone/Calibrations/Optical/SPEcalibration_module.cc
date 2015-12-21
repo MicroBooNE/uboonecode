@@ -26,10 +26,12 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cstdio>
 #include <cmath>
 #include <algorithm>
 
 // ROOT
+#include "TDirectory.h"
 #include "TTree.h"
 #include "TH1D.h"
 
@@ -119,7 +121,10 @@ private:
   double AVESPE_RMSLIMIT;
   std::string OpDataModule;
   std::string DAQHeaderModule;
+  bool fHandleOwnTFile;
 
+  TFile* fOutfile;
+  TDirectory* fOutDir;
   TTree* fTouttree;
   TTree* fTpulsetree;
   TTree* fTevent;
@@ -134,68 +139,24 @@ private:
   // Pulse Finding Mode
   void analyzePulseFindingMode( const art::Event& evt );
 
+  // overriding these
+  // virtual void beginRun(Run const&){}
+  // virtual void endRun(Run const&){}
+  virtual void beginSubRun(art::SubRun const&);
+  virtual void endSubRun(art::SubRun const&);
+  virtual void endJob();
+ 
+  void SetupBranches();
+  void SetupTFile( TFile* );
+  void CloseoutTFile( TFile* );
+  
+  
 };
 
 
 SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   :EDAnalyzer(p)
 {
-
-  // Setup Analyzer File
-  art::ServiceHandle<art::TFileService> out_file;
-
-  // Pulse Tree
-  fTouttree = out_file->make<TTree>("outtree","Analyzed Flasher Run Data");
-  fTouttree->Branch("run",        &irun,        "run/I");
-  fTouttree->Branch("subrun",        &isubrun,        "subrun/I");
-  fTouttree->Branch("event",        &ievent,        "event/I");
-  fTouttree->Branch("opchannel",    &opchannel,     "opchannel/I");
-  fTouttree->Branch("charge",       &charge ,       "charge/D");
-  fTouttree->Branch("maxamp",       &maxamp,        "maxamp/D");
-  fTouttree->Branch("baseline",     &ave_baseline,  "baseline/D");
-  fTouttree->Branch("baselinerms",  &rms_baseline,  "baselinerms/D");
-  fTouttree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
-  fTouttree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
-
-  fTpulsetree = out_file->make<TTree>("pulsetree","Analyzed Pulses");
-  fTpulsetree->Branch("run",        &irun,        "run/I");
-  fTpulsetree->Branch("subrun",        &isubrun,        "subrun/I");
-  fTpulsetree->Branch("event",        &ievent,        "event/I");
-  fTpulsetree->Branch("opchannel",    &opchannel,     "opchannel/I");
-  fTpulsetree->Branch("charge",       &charge ,       "charge/D");
-  fTpulsetree->Branch("maxamp",       &maxamp,        "maxamp/D");
-  fTpulsetree->Branch("baseline",     &ave_baseline,  "baseline/D");
-  fTpulsetree->Branch("baselinerms",  &rms_baseline,  "baselinerms/D");
-  fTpulsetree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
-  fTpulsetree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
-  fTpulsetree->Branch("chmaxamp",     &event_maxamp,  "chmaxamp/D" );
-  fTpulsetree->Branch("event_timestamp_sec", &event_timestamp_sec, "event_timestamp_sec/D" );
-  fTpulsetree->Branch("event_timestamp_usec", &event_timestamp_usec, "event_timestamp_usec/D" );
-  fTpulsetree->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
-  fTpulsetree->Branch("pulse_unixtime", &pulse_unixtime, "pulse_unixtime/D" );
-
-  // Data for each Beam Window
-  fTevent = out_file->make<TTree>("eventtree", "Data about the event" );
-  event_nchfires = new std::vector<int>;
-  event_lastcosmicwin = new std::vector<double>;
-  event_lastsatcosmicwin = new std::vector<double>;
-  fTevent->Branch("run",        &irun,        "run/I");
-  fTevent->Branch("subrun",        &isubrun,        "subrun/I");
-  fTevent->Branch("event",    &ievent,       "event/I");
-  fTevent->Branch("nsamples", &nsamples,     "nsamples/I" );
-  fTevent->Branch("event_timestamp_sec", &event_timestamp_sec, "event_timestamp_sec/D" );
-  fTevent->Branch("event_timestamp_usec", &event_timestamp_usec, "event_timestamp_usec/D" );
-  fTevent->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
-  fTevent->Branch("chmaxamp", &event_maxamp, "chmaxamp/D");
-  fTevent->Branch("nchfires", "vector<int>", &event_nchfires );
-  fTevent->Branch("dt_lastcosmicwin_usec",    "vector<double>", &event_lastcosmicwin );
-  fTevent->Branch("dt_lastsatcosmicwin_usec", "vector<double>", &event_lastsatcosmicwin );
-
-  // Tree for PMT slam events (planned)
-  // fTslam = out_file->make<TTree>("slamtree", "Data about fully staurated PMT events" );
-  // slam_chtstamp = new std::vector<double>;
-  // fTslam->Branch("event",     &ievent,          "event/I");
-  // fTslam->Branch( "chtstamp", "vector<double>", &slam_chtstamp );
 
   // Setup Analyzer
   LOGIC_CH         = p.get<unsigned short>( "LogicChannel", 39 );
@@ -218,24 +179,165 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   cfd_deadtime     = p.get<unsigned short>( "CFDDeadtime", 20 );
   cfd_width        = p.get<unsigned short>( "CFDWidth", 20 );
   AVESPE_RMSLIMIT  = p.get<double>( "AveSPEBaselineRMScut", 2.0 );
+  fHandleOwnTFile  = p.get<bool>( "HandleOwnTFile", true );
 
-  // Ave SPE waveform
+  // Data for each Beam Window
+  event_nchfires = new std::vector<int>;
+  event_lastcosmicwin = new std::vector<double>;
+  event_lastsatcosmicwin = new std::vector<double>;
+
+  if ( !fHandleOwnTFile ) {
+    // User TFileService
+    // Setup Analyzer File
+    art::ServiceHandle<art::TFileService> out_file;
+
+    // Flasher code
+    fTouttree = out_file->make<TTree>("outtree","Analyzed Flasher Run Data");
+
+    // Pulse Tree
+    fTpulsetree = out_file->make<TTree>("pulsetree","Analyzed Pulses");
+
+    // Event Tree
+    fTevent = out_file->make<TTree>("eventtree", "Data about the event" );
+
+    // Ave SPE waveform
+    hSPE_ave = new TH1D*[32];
+    hSPE_norm = new TH1D*[32];
+    for (int i=0; i<32; i++) {
+      hspe_nfills[i] = 0;
+      char hname[32];
+      sprintf( hname, "hSPE_ave_femch%02d", i );
+      hSPE_ave[i] = out_file->make<TH1D>(hname, "Average SPE waveform;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
+      sprintf( hname, "hSPE_norm_femch%02d", i );
+      hSPE_norm[i] = out_file->make<TH1D>(hname, "Normalization;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
+      for (int j=0;j<cfd_width;j++)
+      hSPE_norm[i]->SetBinContent( j+1, 1.0 );
+    }
+    
+  }    
+  else {
+    // We will open a tree at the beginning of each subrun file
+  }
+    
+  
+}
+
+void SPEcalibration::SetupTFile( TFile* file ) {
+  file->cd();
+  fOutDir = file->mkdir("specalib");
+  fOutDir->cd();
+
+  std::cout << "[SPEcalibration] SetupTFile" << std::endl;
+  fTouttree = new TTree( "outtree","Analyzed Flasher Run Data");
+  fTpulsetree = new TTree("pulsetree","Analyzed Pulses");
+  fTevent = new TTree("eventtree", "Data about the event" );
   hSPE_ave = new TH1D*[32];
   hSPE_norm = new TH1D*[32];
   for (int i=0; i<32; i++) {
     hspe_nfills[i] = 0;
     char hname[32];
     sprintf( hname, "hSPE_ave_femch%02d", i );
-    hSPE_ave[i] = out_file->make<TH1D>(hname, "Average SPE waveform;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
+    hSPE_ave[i] = new TH1D(hname, "Average SPE waveform;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
     sprintf( hname, "hSPE_norm_femch%02d", i );
-    hSPE_norm[i] = out_file->make<TH1D>(hname, "Normalization;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
+    hSPE_norm[i] = new TH1D(hname, "Normalization;ticks from disc. fire-delay-deadtime", (int)cfd_width, 0.0, (double)cfd_width );
     for (int j=0;j<cfd_width;j++)
       hSPE_norm[i]->SetBinContent( j+1, 1.0 );
-    //hSPE_rms = out_file->make<TH1D>("hSPE_rms", "Average SPE waveform;ticks from disc. fire-delay-deadtime", (int)3*cfd_deadtime, 0.0, (double)3*cfd_deadtime );
   }
-  
-  
 }
+
+void SPEcalibration::CloseoutTFile( TFile* file ) {
+  std::cout << "[SPEcalibration] Closeout TFile" << std::endl;
+  fOutDir->cd();
+  fOutDir->ls();
+  fTouttree->Write();
+  fTpulsetree->Write();
+  fTevent->Write();
+  for (int i=0; i<32; i++) {
+    hSPE_ave[i]->Write();
+    hSPE_norm[i]->Write();
+  }
+  file->Close();
+}
+
+void SPEcalibration::endJob() {
+  CloseoutTFile( fOutfile );
+}
+
+void SPEcalibration::SetupBranches() {
+  // assumes trees are setup properly
+
+  // Flasher-based code
+  fTouttree->Branch("run",          &irun,          "run/I");
+  fTouttree->Branch("subrun",       &isubrun,       "subrun/I");
+  fTouttree->Branch("event",        &ievent,        "event/I");
+  fTouttree->Branch("opchannel",    &opchannel,     "opchannel/I");
+  fTouttree->Branch("charge",       &charge ,       "charge/D");
+  fTouttree->Branch("maxamp",       &maxamp,        "maxamp/D");
+  fTouttree->Branch("baseline",     &ave_baseline,  "baseline/D");
+  fTouttree->Branch("baselinerms",  &rms_baseline,  "baselinerms/D");
+  fTouttree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
+  fTouttree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
+
+  // pulse-finding based code
+  fTpulsetree->Branch("run",          &irun,          "run/I");
+  fTpulsetree->Branch("subrun",       &isubrun,       "subrun/I");
+  fTpulsetree->Branch("event",        &ievent,        "event/I");
+  fTpulsetree->Branch("opchannel",    &opchannel,     "opchannel/I");
+  fTpulsetree->Branch("charge",       &charge ,       "charge/D");
+  fTpulsetree->Branch("maxamp",       &maxamp,        "maxamp/D");
+  fTpulsetree->Branch("baseline",     &ave_baseline,  "baseline/D");
+  fTpulsetree->Branch("baselinerms",  &rms_baseline,  "baselinerms/D");
+  fTpulsetree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
+  fTpulsetree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
+  fTpulsetree->Branch("chmaxamp",     &event_maxamp,  "chmaxamp/D" );
+  fTpulsetree->Branch("event_timestamp_sec", &event_timestamp_sec, "event_timestamp_sec/D" );
+  fTpulsetree->Branch("event_timestamp_usec", &event_timestamp_usec, "event_timestamp_usec/D" );
+  fTpulsetree->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
+  fTpulsetree->Branch("pulse_unixtime", &pulse_unixtime, "pulse_unixtime/D" );
+
+  // event data
+  fTevent->Branch("run",        &irun,        "run/I");
+  fTevent->Branch("subrun",        &isubrun,        "subrun/I");
+  fTevent->Branch("event",    &ievent,       "event/I");
+  fTevent->Branch("nsamples", &nsamples,     "nsamples/I" );
+  fTevent->Branch("event_timestamp_sec", &event_timestamp_sec, "event_timestamp_sec/D" );
+  fTevent->Branch("event_timestamp_usec", &event_timestamp_usec, "event_timestamp_usec/D" );
+  fTevent->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
+  fTevent->Branch("chmaxamp", &event_maxamp, "chmaxamp/D");
+  fTevent->Branch("nchfires", "vector<int>", &event_nchfires );
+  fTevent->Branch("dt_lastcosmicwin_usec",    "vector<double>", &event_lastcosmicwin );
+  fTevent->Branch("dt_lastsatcosmicwin_usec", "vector<double>", &event_lastsatcosmicwin );
+
+  // Tree for PMT slam events (planned)
+  // fTslam = out_file->make<TTree>("slamtree", "Data about fully staurated PMT events" );
+  // slam_chtstamp = new std::vector<double>;
+  // fTslam->Branch("event",     &ievent,          "event/I");
+  // fTslam->Branch( "chtstamp", "vector<double>", &slam_chtstamp );  
+}
+
+void SPEcalibration::beginSubRun( art::SubRun const& sr){
+  art::RunNumber_t run = sr.run();
+  art::SubRunNumber_t subrun = sr.subRun();
+
+  if ( fHandleOwnTFile ) {
+    char filename[1048];
+    sprintf( filename, "SPEcalibration_run%05d_subrun%05d.root", (int)run, (int)subrun );
+    std::cout << "[SPEcalibration] Open TFile " << filename << std::endl;
+    fOutfile = new TFile( filename, "RECREATE" );
+    SetupTFile( fOutfile );
+    SetupBranches();
+  }
+}
+
+void SPEcalibration::endSubRun( art::SubRun const& sr){
+  //art::RunNumber_t run = sr.run();
+  //art::SubRunNumber_t subrun = sr.subRun();
+
+  if ( fHandleOwnTFile ) {
+    CloseoutTFile( fOutfile );
+  }
+}
+
 
 void SPEcalibration::analyze(const art::Event& evt)
 {
