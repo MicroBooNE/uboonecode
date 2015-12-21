@@ -44,20 +44,20 @@
 #include "artextensions/SeedService/SeedService.hh"
 
 // LArSoft libraries
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "RawData/TriggerData.h"
-#include "Simulation/SimChannel.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/LArFFT.h"
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/TriggerData.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/LArFFT.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "Simulation/sim.h"
-#include "CalibrationDBI/Interface/DetPedestalService.h"
-#include "CalibrationDBI/Interface/DetPedestalProvider.h"
-#include "CalibrationDBI/Interface/ChannelStatusService.h"
-#include "CalibrationDBI/Interface/ChannelStatusProvider.h"
+#include "larsim/Simulation/sim.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
 
 ///Detector simulation of raw signals on wires

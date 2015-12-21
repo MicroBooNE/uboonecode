@@ -45,13 +45,13 @@
 #include "art/Persistency/Common/Ptr.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Geometry/Geometry.h"
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "CalibrationDBI/Interface/DetPedestalService.h"
-#include "CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
 
 #include "TH1.h"
 #include "TH2.h"

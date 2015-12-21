@@ -2,7 +2,7 @@
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME  uboonecode_uboone_Calibrations
 	  LIB_LIBRARIES
-                        LArFFT_service
+                        lardata_Utilities_LArFFT_service
 			${ART_FRAMEWORK_CORE}
 			${ART_UTILITIES}
 			${MF_MESSAGELOGGER}
@@ -15,15 +15,15 @@ art_make( BASENAME_ONLY
 			RawData
 			CalData
 			Geometry
-			Geometry_service
-			BackTracker_service
+			larcore_Geometry_Geometry_service
+			larsim_MCCheater_BackTracker_service
 			Simulation
 			RecoBase
 			RecoObjects  
 			RecoAlg
 			Utilities
 			Filters
-                        LArFFT_service
+                        lardata_Utilities_LArFFT_service
 			SignalShapingServiceMicroBooNE_service
 			${SIMULATIONBASE}
 			${LARRECO_LIB}

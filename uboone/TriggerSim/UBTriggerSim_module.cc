@@ -31,17 +31,17 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
-#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "UBTrigException.h"
 #include "UBTriggerAlgo.h"
-#include "RawData/TriggerData.h"
-#include "OpticalDetectorData/PMTTrigger.h"
-#include "Utilities/AssociationUtil.h"
-#include "DetectorInfo/ElecClock.h"
-#include "DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/OpticalDetectorData/PMTTrigger.h"
+#include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/DetectorInfo/ElecClock.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 /// nutools
-#include "Simulation/BeamGateInfo.h"
+#include "larsim/Simulation/BeamGateInfo.h"
 
 namespace trigger {
   /**

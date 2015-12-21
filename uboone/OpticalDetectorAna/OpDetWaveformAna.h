@@ -14,9 +14,9 @@
 #ifndef OPTICALDETECTORANA_OPDETWAVEFORMANA_H
 #define OPTICALDETECTORANA_OPDETWAVEFORMANA_H
 
-#include "OpticalDetector/AlgoThreshold.h"
-#include "OpticalDetector/AlgoPedestal.h"
-#include "OpticalDetector/PulseRecoManager.h"
+#include "larana/OpticalDetector/AlgoThreshold.h"
+#include "larana/OpticalDetector/AlgoPedestal.h"
+#include "larana/OpticalDetector/PulseRecoManager.h"
 
 #include <TTree.h>
 #include <string>

@@ -38,16 +38,16 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
-#include "OpticalDetectorData/ChannelDataGroup.h" // from lardata
-#include "Geometry/Geometry.h" // larcore
-#include "DetectorInfoServices/DetectorClocksService.h" // lardata
-#include "Simulation/SimPhotons.h" // larsim
+#include "lardata/OpticalDetectorData/ChannelDataGroup.h" // from lardata
+#include "larcore/Geometry/Geometry.h" // larcore
+#include "lardata/DetectorInfoServices/DetectorClocksService.h" // lardata
+#include "larsim/Simulation/SimPhotons.h" // larsim
 #include "UBOpticalADC.h" // uboonecode
 #include "UBLogicPulseADC.h" // uboonecode
 #include "uboone/Geometry/UBOpReadoutMap.h" // uboone
 
 /// nutools
-#include "Simulation/BeamGateInfo.h"
+#include "larsim/Simulation/BeamGateInfo.h"
 
 // Other
 #include "TF1.h"

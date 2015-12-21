@@ -16,7 +16,7 @@
 #include "test/Geometry/geometry_unit_test_uboone.h"
 #include "test/Geometry/boost_unit_test_base.h"
 #include "test/Geometry/GeometryIteratorTestAlg.h"
-#include "Geometry/ChannelMapStandardAlg.h"
+#include "larcore/Geometry/ChannelMapStandardAlg.h"
 
 //------------------------------------------------------------------------------
 //---  The test environment

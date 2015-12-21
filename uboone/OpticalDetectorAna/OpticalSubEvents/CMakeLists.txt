@@ -26,7 +26,7 @@ simple_plugin( SubEventBuilder "module"
 	       uboone_OpticalDetectorAna_OpticalSubEvents_dict
 	       RecoBase
 	       Geometry
-	       Geometry_service
+	       larcore_Geometry_Geometry_service
 	       Utilities
                ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}

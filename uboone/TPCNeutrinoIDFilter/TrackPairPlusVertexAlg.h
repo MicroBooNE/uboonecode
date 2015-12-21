@@ -10,8 +10,8 @@
 #include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
 
 // LArSoft includes
-#include "Geometry/GeometryCore.h"
-#include "DetectorInfo/DetectorProperties.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
 
 // Root includes
 #include "TH1D.h"

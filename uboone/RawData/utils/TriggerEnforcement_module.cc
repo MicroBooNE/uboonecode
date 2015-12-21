@@ -21,7 +21,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <memory>
-#include "RawData/TriggerData.h"
+#include "lardata/RawData/TriggerData.h"
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 #include <string>
 

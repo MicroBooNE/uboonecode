@@ -9,7 +9,7 @@ art_make( BASENAME_ONLY
 			${ROOT_BASIC_LIB_LIST}
 	  MODULE_LIBRARIES Geometry
   	  		CalData
-	  		Geometry_service
+	  		larcore_Geometry_Geometry_service
 	                Utilities
 			Filters
 			RawData

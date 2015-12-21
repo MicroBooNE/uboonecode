@@ -16,7 +16,7 @@ art_make( BASENAME_ONLY
 	  LIB_LIBRARIES
 	  	   Geometry
 		   uboone_Geometry
-		   Geometry_service
+		   larcore_Geometry_Geometry_service
 	   	   Simulation
 		   SimulationBase
 		   Utilities
@@ -51,7 +51,7 @@ art_make( BASENAME_ONLY
 		   uboonecode_uboone_LiteMaker
 		   Geometry
 		   uboone_Geometry
-		   Geometry_service
+		   larcore_Geometry_Geometry_service
 		   Simulation
 		   SimulationBase
 		   Utilities

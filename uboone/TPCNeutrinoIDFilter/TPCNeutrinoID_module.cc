@@ -30,8 +30,8 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "RecoBase/Track.h"
-#include "RecoBase/Vertex.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Vertex.h"
 
 // Includes for the interface to our algorithms and their creator
 #include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h"

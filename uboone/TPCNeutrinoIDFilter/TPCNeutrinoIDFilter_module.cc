@@ -19,10 +19,10 @@
 #include "art/Framework/Core/FindManyP.h"
 
 // LArSoft data definitions
-#include "RecoBase/Track.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Vertex.h"
-#include "AnalysisBase/CosmicTag.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/Vertex.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
 
 // root
 #include "TH1D.h"

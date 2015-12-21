@@ -5,13 +5,13 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "CalibrationDBI/Interface/ChannelStatusService.h"
-#include "CalibrationDBI/Providers/SIOVChannelStatusProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Providers/SIOVChannelStatusProvider.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
 
 namespace lariov{
 

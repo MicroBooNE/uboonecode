@@ -19,15 +19,15 @@
 
 #include <memory>
 
-#include "OpticalDetector/AlgoThreshold.h"
-#include "OpticalDetector/AlgoFixedWindow.h"
-#include "OpticalDetector/AlgoSlidingWindow.h"
-#include "OpticalDetector/AlgoPedestal.h"
-#include "OpticalDetector/PulseRecoManager.h"
-#include "RecoBase/OpHit.h"
-#include "Geometry/Geometry.h"
-#include "DetectorInfoServices/DetectorClocksService.h"
-#include "RawData/OpDetWaveform.h"
+#include "larana/OpticalDetector/AlgoThreshold.h"
+#include "larana/OpticalDetector/AlgoFixedWindow.h"
+#include "larana/OpticalDetector/AlgoSlidingWindow.h"
+#include "larana/OpticalDetector/AlgoPedestal.h"
+#include "larana/OpticalDetector/PulseRecoManager.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/RawData/OpDetWaveform.h"
 #include <string>
 
 class OpHitFinder;

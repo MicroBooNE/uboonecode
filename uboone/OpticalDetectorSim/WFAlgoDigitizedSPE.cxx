@@ -3,7 +3,7 @@
 
 #include "WFAlgoDigitizedSPE.h"
 
-#include "DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 namespace opdet {
   

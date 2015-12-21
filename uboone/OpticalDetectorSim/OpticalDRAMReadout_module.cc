@@ -16,13 +16,13 @@
 #define OPTICALDRAMREADOUT_MODULE_CC
 
 // LArSoft includes
-#include "OpticalDetectorData/FIFOChannel.h"
-#include "OpticalDetectorData/OpticalRawDigit.h"
-#include "RawData/TriggerData.h"
-#include "RawData/OpDetWaveform.h" // from lardata
-#include "DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this code is non-portable
+#include "lardata/OpticalDetectorData/FIFOChannel.h"
+#include "lardata/OpticalDetectorData/OpticalRawDigit.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/RawData/OpDetWaveform.h" // from lardata
+#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this code is non-portable
 #include "uboone/OpticalDetectorSim/UBOpticalException.h"
-#include "Geometry/Geometry.h" // larcore
+#include "larcore/Geometry/Geometry.h" // larcore
 #include "uboone/Geometry/UBOpChannelTypes.h"  // uboonecode
 #include "uboone/Geometry/UBOpReadoutMap.h"  // uboonecode
 

@@ -3,7 +3,7 @@
 
 #include "UBADCBase.h"
 
-#include "DetectorInfoServices/DetectorClocksService.h" // lardata
+#include "lardata/DetectorInfoServices/DetectorClocksService.h" // lardata
 
 namespace opdet {
 

@@ -9,16 +9,16 @@
 
 //LArSoft 
 #include "uboone/RawData/utils/LArRawInputDriverUBooNE.h"
-#include "RawData/RawDigit.h"
-#include "RawData/TriggerData.h"
-#include "RawData/DAQHeader.h"
-#include "RawData/BeamInfo.h"
-#include "RawData/OpDetWaveform.h"
-#include "SummaryData/RunData.h"
-#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
-#include "DetectorInfoServices/DetectorClocksService.h" // lardata
-#include "DetectorInfo/ElecClock.h" // lardata
-#include "OpticalDetectorData/OpticalTypes.h" // lardata -- I want to move the enums we use back to UBooNE as they are UBooNE-specific
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/RawData/DAQHeader.h"
+#include "lardata/RawData/BeamInfo.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "larcore/SummaryData/RunData.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/DetectorClocksService.h" // lardata
+#include "lardata/DetectorInfo/ElecClock.h" // lardata
+#include "lardata/OpticalDetectorData/OpticalTypes.h" // lardata -- I want to move the enums we use back to UBooNE as they are UBooNE-specific
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //ART, ...

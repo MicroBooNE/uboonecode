@@ -50,7 +50,7 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc OpticalDRAMReadout_module.cc
 simple_plugin(UBOpticalChConfig "service"
 	      uboone_Geometry
 	      UBOpReadoutMap_service	
-	      Geometry_service
+	      larcore_Geometry_Geometry_service
 	      Geometry
 #	      uboonecode_uboone_OpticalDetectorSim
 	      ${ART_UTILITIES}
@@ -64,7 +64,7 @@ simple_plugin(UBOpticalChConfig "service"
 
 simple_plugin(OpticalDRAMReadout "module"
                   Simulation
-                  DetectorClocksServiceStandard_service # BUG note that we link to a specific service implementation
+                  lardata_DetectorInfoServices_DetectorClocksServiceStandard_service # BUG note that we link to a specific service implementation
                   OpticalDetectorData
                   UBOpticalChConfig_service
                   UBOpReadoutMap_service

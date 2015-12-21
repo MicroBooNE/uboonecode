@@ -6,7 +6,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_BASIC_LIB_LIST}
 
 	  MODULE_LIBRARIES Geometry
-	  	        Geometry_service
+	  	        larcore_Geometry_Geometry_service
 		        Utilities
 	                uboone_Geometry
                         OpticalDetectorData

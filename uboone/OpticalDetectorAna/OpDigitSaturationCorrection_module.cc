@@ -19,10 +19,10 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // data-products
-#include "RecoBase/OpHit.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "lardata/RawData/OpDetWaveform.h"
 //#include "RawData/TriggerData.h"
-#include "DetectorInfoServices/DetectorClocksService.h" // lardata
+#include "lardata/DetectorInfoServices/DetectorClocksService.h" // lardata
 
 // C++ includes
 #include <memory>

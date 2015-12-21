@@ -2,7 +2,7 @@
 #define UBOPTICALCHCONFIG_CXX
 
 #include "UBOpticalChConfig.h"
-#include "DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "uboone/Geometry/UBOpReadoutMap.h" // uboonecode
 

@@ -3,7 +3,7 @@ art_make( BASENAME_ONLY
 	                    CalibrationDBI_IOVData
 			    RawData
 			    Geometry
-			    Geometry_service
+			    larcore_Geometry_Geometry_service
 			    ${ART_FRAMEWORK_SERVICES_REGISTRY}
 			    ${ART_FRAMEWORK_CORE}
                             ${ART_FRAMEWORK_PRINCIPAL}

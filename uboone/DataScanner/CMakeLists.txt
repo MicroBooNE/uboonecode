@@ -18,10 +18,10 @@ add_subdirectory(job)
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES uboonecode_uboone_MCShowerReco
 			   Geometry
-			   Geometry_service
+			   larcore_Geometry_Geometry_service
 			   Simulation
 			   SimulationBase
-			   BackTracker_service
+			   larsim_MCCheater_BackTracker_service
 			   Utilities
 			   Filters
 			   RawData

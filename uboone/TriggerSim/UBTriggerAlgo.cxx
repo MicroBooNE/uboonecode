@@ -10,8 +10,8 @@
 #include <iostream>
 #include <sstream>
 #include <TString.h>
-#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
-#include "DetectorInfoServices/DetectorClocksService.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "UBTriggerTypes.h"
 #include "UBTriggerAlgo.h"
 

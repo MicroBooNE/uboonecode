@@ -7,7 +7,7 @@ art_make(BASENAME_ONLY
 		     RecoBase
 		     AnalysisBase
 		     Geometry
-		     Geometry_service
+		     larcore_Geometry_Geometry_service
 		     Utilities
 		     ${ART_PERSISTENCY_COMMON}
 		     ${ART_PERSISTENCY_PROVENANCE}
@@ -29,7 +29,7 @@ art_make(BASENAME_ONLY
 		     RecoBase
 		     AnalysisBase
 		     Geometry
-		     Geometry_service
+		     larcore_Geometry_Geometry_service
 		     Utilities
 		     ${ART_PERSISTENCY_COMMON}
 		     ${ART_PERSISTENCY_PROVENANCE}

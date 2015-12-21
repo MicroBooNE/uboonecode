@@ -1,10 +1,10 @@
 cet_enable_asserts()
 
-set( uboone_util_lib_list LArFFT_service
+set( uboone_util_lib_list lardata_Utilities_LArFFT_service
 			Geometry
 			HitFinder
 			RecoBase
-			Geometry_service
+			larcore_Geometry_Geometry_service
 			Utilities
 			${SEEDSERVICE_SERVICE} # artextensions
   			${ART_FRAMEWORK_CORE}

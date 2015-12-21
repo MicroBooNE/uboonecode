@@ -15,7 +15,7 @@ simple_plugin( LArRawInputSourceUBooNE
 
 simple_plugin( RawDigitWriter "module"
 	       UBOpReadoutMap_service
-	       DatabaseUtil_service
+	       lardata_Utilities_DatabaseUtil_service
 	       RawData
                ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
@@ -31,7 +31,7 @@ simple_plugin( RawDigitWriter "module"
              )
 
 simple_plugin( TriggerEnforcement "module"
-                   DetectorClocksServiceStandard_service # BUG note that we link to a specific service implementation
+                   lardata_DetectorInfoServices_DetectorClocksServiceStandard_service # BUG note that we link to a specific service implementation
                    RawData
                    ${ART_FRAMEWORK_CORE}
                    ${ART_FRAMEWORK_PRINCIPAL}
@@ -52,9 +52,9 @@ simple_plugin( TriggerEnforcement "module"
 art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc TriggerEnforcement_module.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME uboone_RawData
-	  LIB_LIBRARIES DatabaseUtil_service
+	  LIB_LIBRARIES lardata_Utilities_DatabaseUtil_service
                         Geometry
-	  	        Geometry_service
+	  	        larcore_Geometry_Geometry_service
 		        Utilities
 	                uboone_Geometry
 			UBOpReadoutMap_service
@@ -83,9 +83,9 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc Tri
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
 
-	  MODULE_LIBRARIES DatabaseUtil_service
+	  MODULE_LIBRARIES lardata_Utilities_DatabaseUtil_service
                         Geometry
-	  	        Geometry_service
+	  	        larcore_Geometry_Geometry_service
 		        Utilities
 	                uboone_Geometry
 			UBOpReadoutMap_service

@@ -18,13 +18,13 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "CalibrationDBI/Interface/DetPedestalService.h"
-#include "CalibrationDBI/Interface/DetPedestalProvider.h"
-#include "SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "Geometry/Geometry.h"
-#include "RecoBase/Wire.h"
-#include "RawData/RawDigit.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RawData/RawDigit.h"
 
 #include "TH1.h"
 #include "TH2.h"
