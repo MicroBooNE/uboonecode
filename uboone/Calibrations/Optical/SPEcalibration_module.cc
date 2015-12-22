@@ -122,6 +122,7 @@ private:
   std::string OpDataModule;
   std::string DAQHeaderModule;
   bool fHandleOwnTFile;
+  bool fAutoSlot;
 
   bool fOutputActive;
   TFile* fOutfile;
@@ -160,27 +161,28 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
 {
 
   // Setup Analyzer
-  LOGIC_CH         = p.get<unsigned short>( "LogicChannel", 39 );
-  LOGIC_SLOT       = p.get<unsigned short>( "LogicSlot", 6 );
-  LOGIC_THRESHOLD  = p.get<unsigned short>( "LogicThreshold", 200 );
-  COSMIC_THRESHOLD  = p.get<int>( "CosmicThreshold", 2348 );  // ~15 pe (with pe=20 ADC counts)
-  SPE_SLOT         = p.get<unsigned short>( "WaveformSlot", 5 );
-  WINDOW_MINSIZE   = p.get<unsigned int>( "WindowMinSize", 500 );
+  LOGIC_CH         = p.get<unsigned short>( "LogicChannel", 39 );          // logic pulse channel for LED flasher
+  LOGIC_SLOT       = p.get<unsigned short>( "LogicSlot", 6 );              // slot for LED flasher
+  LOGIC_THRESHOLD  = p.get<unsigned short>( "LogicThreshold", 200 );       // threshold for finding logic pulse
+  COSMIC_THRESHOLD  = p.get<int>( "CosmicThreshold", 2348 );               // ~15 pe (with pe=20 ADC counts)
+  SPE_SLOT         = p.get<unsigned short>( "WaveformSlot", 5 );           // Slot of waveforms used by pulse-finding method
+  WINDOW_MINSIZE   = p.get<unsigned int>( "WindowMinSize", 500 );          // minimum length of readout window 
   baseline_start   = p.get<unsigned short>( "LeadingBaselineStart", 0 );   // first tick after logic pulse start that defines baseline window
   baseline_end     = p.get<unsigned short>( "LeadingBaselineEnd", 180 );   // last tick after lofic pulses start that defines baseline window
-  baseline2_start  = p.get<unsigned short>( "TrailingBaselineStart", 210 );   // first tick after logic pulse start that defines baseline window
-  baseline2_end    = p.get<unsigned short>( "TrailingBaselineEnd", 260  );   // last tick after lofic pulses start that defines baseline window
-  pulse_start      = p.get<unsigned short>( "PulseStart", 180 );    // first tick after logic pulse start that defines pulse window
-  pulse_end        = p.get<unsigned short>( "PulseEnd", 210 );      // first tick after logic pulse start that defines pulse window
-  OpDataModule     = p.get<std::string>( "OpDataModule", "pmtreadout" );
-  DAQHeaderModule  = p.get<std::string>( "DAQHeaderModule", "daq" );
-  SAVE_AVE_SPE     = p.get<bool>( "SaveAverageSPE", true );
-  cfd_threshold    = p.get<double>( "CFDThreshold", 10.0 );
-  cfd_delay        = p.get<unsigned short>( "CFDDelay", 4 );
-  cfd_deadtime     = p.get<unsigned short>( "CFDDeadtime", 20 );
-  cfd_width        = p.get<unsigned short>( "CFDWidth", 20 );
-  AVESPE_RMSLIMIT  = p.get<double>( "AveSPEBaselineRMScut", 2.0 );
-  fHandleOwnTFile  = p.get<bool>( "HandleOwnTFile", true );
+  baseline2_start  = p.get<unsigned short>( "TrailingBaselineStart", 210 );// first tick after logic pulse start that defines baseline window
+  baseline2_end    = p.get<unsigned short>( "TrailingBaselineEnd", 260  ); // last tick after lofic pulses start that defines baseline window
+  pulse_start      = p.get<unsigned short>( "PulseStart", 180 );           // first tick after logic pulse start that defines pulse window
+  pulse_end        = p.get<unsigned short>( "PulseEnd", 210 );             // first tick after logic pulse start that defines pulse window
+  OpDataModule     = p.get<std::string>( "OpDataModule", "pmtreadout" );   // Waveform Module name, to get waveforms
+  DAQHeaderModule  = p.get<std::string>( "DAQHeaderModule", "daq" );       // DAQ header module name, to get timestamp
+  SAVE_AVE_SPE     = p.get<bool>( "SaveAverageSPE", true );                // Make average SPE waveforms
+  cfd_threshold    = p.get<double>( "CFDThreshold", 10.0 );                // threshold for pulse-finding algorithm in ADCs
+  cfd_delay        = p.get<unsigned short>( "CFDDelay", 4 );               // delay for pulse-finding algorithm in ticks
+  cfd_deadtime     = p.get<unsigned short>( "CFDDeadtime", 20 );           // deadtime for pulse-finding algorithm in ticks
+  cfd_width        = p.get<unsigned short>( "CFDWidth", 20 );              // width for pulse-finding algorithm in ticks
+  AVESPE_RMSLIMIT  = p.get<double>( "AveSPEBaselineRMScut", 2.0 );         // cut to use when selecting pulses to make average SPE waveforms
+  fHandleOwnTFile  = p.get<bool>( "HandleOwnTFile", true );                // module manages its own rootfiles instead of using TFileService
+  fAutoSlot        = p.get<bool>( "AutoFindWaveformSlot", true );          // if true, automatically determins slot to get waveform (to handle 2 or 3 FEM)
 
   // Data for each Beam Window
   event_nchfires = new std::vector<int>;
@@ -525,6 +527,16 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   event_timestamp_sec = (double)(daq_timestamp>>32);
   event_timestamp_usec  = 0.001*(double)( daq_timestamp & 0xFFFFFFFF );
   
+  // auto-slot
+  unsigned int autoslot = 0;
+  if ( fAutoSlot ) {
+    // this is hacky
+    // we use the readout channel 0 to determine which slot provides high-gain waveforms
+    unsigned int c,s,f;
+    ub_PMT_channel_map->GetCrateSlotFEMChFromReadoutChannel(0, c, s, f);
+    autoslot = s;
+  }
+  
   // get channel maxamp and other event related info
   for(auto &wfm : opwfms)  {
     readout_ch = wfm.ChannelNumber();
@@ -535,7 +547,7 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
     ub_PMT_channel_map->GetCrateSlotFEMChFromReadoutChannel(readout_ch, c, s, f);
     slot = (int)s;
     ch = (int)f;
-    if ( slot!=(int)SPE_SLOT )
+    if ( (!fAutoSlot && slot!=(int)SPE_SLOT) || (fAutoSlot && slot!=(int)autoslot ) )
       continue;
     if ( WINDOW_MINSIZE < wfm.size() ) {
       // beam window
@@ -582,7 +594,7 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
     ub_PMT_channel_map->GetCrateSlotFEMChFromReadoutChannel(readout_ch, c, s, f);
     slot = (int)s;
     ch = (int)f;
-    if ( slot!=(int)SPE_SLOT )
+    if ( (!fAutoSlot && slot!=(int)SPE_SLOT) || (fAutoSlot && slot!=(int)autoslot ) )
       continue;
 
     // convert waveform
