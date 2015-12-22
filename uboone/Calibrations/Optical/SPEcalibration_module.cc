@@ -123,6 +123,7 @@ private:
   std::string DAQHeaderModule;
   bool fHandleOwnTFile;
 
+  bool fOutputActive;
   TFile* fOutfile;
   TDirectory* fOutDir;
   TTree* fTouttree;
@@ -217,6 +218,7 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   }    
   else {
     // We will open a tree at the beginning of each subrun file
+    fOutputActive = false;
   }
     
   
@@ -243,9 +245,13 @@ void SPEcalibration::SetupTFile( TFile* file ) {
     for (int j=0;j<cfd_width;j++)
       hSPE_norm[i]->SetBinContent( j+1, 1.0 );
   }
+  fOutputActive = true;
 }
 
 void SPEcalibration::CloseoutTFile( TFile* file ) {
+  if (!fOutputActive)
+    return;
+
   std::cout << "[SPEcalibration] Closeout TFile" << std::endl;
   fOutDir->cd();
   fOutDir->ls();
@@ -257,6 +263,7 @@ void SPEcalibration::CloseoutTFile( TFile* file ) {
     hSPE_norm[i]->Write();
   }
   file->Close();
+  fOutputActive = false;
 }
 
 void SPEcalibration::endJob() {
