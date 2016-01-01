@@ -1,0 +1,8 @@
+#include "reco_uboone_stage_1.fcl"
+
+services.SeedService.policy: "preDefinedSeed"
+services.SeedService.baseSeed: 1234
+services.SeedService.fuzzycluster: 1234
+
+services.RandomNumberGenerator.restoreFrom: "Reco1RandomSeeds_Ref.dat"
+services.RandomNumberGenerator.saveTo: "Reco1RandomSeeds.dat"
