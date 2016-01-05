@@ -187,6 +187,10 @@ physics.filters.opflashfilternumi.OpFlashModule : "opflash"
 physics.filters.opflashfilternumi.DisableFilter: false
 
 
+### Here we include the file giving us run/data dependent overrides
+#include "uboone_data_runSettings.fcl"
+
+
 ### Here we try to suppress known and pointless messages
 services.message.destinations :
 {
