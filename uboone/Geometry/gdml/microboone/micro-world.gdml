@@ -186,10 +186,6 @@
 
 <structure>
  
-  <volume name="volBeams">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-	<solidref ref="Beams"/>
-  </volume>
   <volume name="volVacuumSpace">
     <materialref ref="Vacuum"/>
  	<solidref ref="VacuumSpace"/>

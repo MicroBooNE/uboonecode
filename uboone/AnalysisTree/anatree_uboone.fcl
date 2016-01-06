@@ -125,6 +125,7 @@ physics.analyzers.analysistree.ClusterModuleLabel: "linecluster"
 physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
 physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
 physics.analyzers.analysistree.IgnoreMissingShowers: true
+physics.analyzers.analysistree.SaveHitInfo: true
 
 
 #physics.analyzers.analysistree.SaveCryInfo: false

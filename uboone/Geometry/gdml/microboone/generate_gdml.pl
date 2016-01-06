@@ -95,7 +95,7 @@ my $test_switch="off";          #turn on if test boxes wanted.
 my $NumberOfTestBoxes=30;
 my $granite_block="off";
 my $enclosureExtras="on";       #turn on or off depending on whether you'd like to generate the external things around the cryostat (ie. insulation, platform, stands, etc.) in the gdml file
-my $vetoWall_switch="on";  #turn on or off a proposed scintillator wall infront of the cryostat
+my $vetoWall_switch="off";  #turn on or off a proposed scintillator wall infront of the cryostat
 
 # The routines that create the GDML sub-files. Most of the explanatory
 # comments are in gen_defs().
@@ -116,7 +116,7 @@ if ( $granite_block eq "on" ) {  gen_granite(); } # physical volumes defined in 
 #gen_testbox();
 if ( $enclosureExtras eq "on" ) {  gen_enclosureExtras(); } #generation of insulation, etc. will happen if specified
 gen_cryostat();
-if ( $vetoWall_switch eq "off" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
+if ( $vetoWall_switch eq "on" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
 
 gen_enclosure();
 gen_world();
@@ -2157,10 +2157,6 @@ sub gen_world()
 
 <structure>
  
-  <volume name="volBeams">
-	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
-	<solidref ref="Beams"/>
-  </volume>
   <volume name="volVacuumSpace">
     <materialref ref="Vacuum"/>
  	<solidref ref="VacuumSpace"/>
