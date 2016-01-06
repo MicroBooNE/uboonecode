@@ -24,4 +24,8 @@ microboone_flashtrigger : {
 
 }
 
+microboone_flashtrigger_numi: @local::microboone_flashtrigger
+microboone_flashtrigger_numi.BeamDTLow:  4.
+microboone_flashtrigger_numi.BeamDTHigh: 18.
+
 END_PROLOG
