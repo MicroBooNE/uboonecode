@@ -9,6 +9,8 @@
 #include "seedservice_microboone.fcl"
 #include "triggerenforcement.fcl"
 #include "beamdata_microboone.fcl"
+#include "triggerenforcement.fcl"
+
 
 process_name: Swizzler
 services:

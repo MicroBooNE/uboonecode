@@ -22,7 +22,7 @@ namespace geo {
     loadedmap_timerange_end = 0;
     requested_time = 0;
     user_set_run = false;
-    fVerbose = pset.get<bool>( "TalkVerbyToMe", false );
+    fVerbose = pset.get<bool>( "Verbose", false );
 
     // save fcl pset ( a copy )
     fPSet = pset;
@@ -198,8 +198,11 @@ namespace geo {
       LoadOpticalReadoutMapData( mapset );
     }
     else {
-      if ( fVerbose )
-	std::cout << "[UBOpReadoutMap] current requested time is consistent with current OpMap." << std::endl;
+      if ( fVerbose ) {
+	char zrequest[200];
+	strftime( zrequest, 200, "%Y-%m-%d %H:%M:%S %Z", localtime( &requested_time ) );
+	std::cout << "[UBOpReadoutMap] current requested time, " <<  zrequest << " (" << requested_time << ") is consistent with current OpMap." << std::endl;
+      }
     }
     
   }
@@ -258,6 +261,14 @@ namespace geo {
     // ----------------------------------------------------------------------
     // read in channel types
     fNReadoutChannels = 0;
+    fLogicChannels.clear();
+    fReadoutChannelSet.clear();
+    fChannelCategory.clear();
+    fChannelType.clear();
+    fTypeChannels.clear();
+    fCategoryChannels.clear();
+    fReadout2CSF.clear();
+    fCSF2Readout.clear();
 
     for ( unsigned int icat=0; icat<(unsigned int)opdet::NumUBOpticalChannelCategories; icat++ ) {
       std::vector< unsigned int > cat_channels;

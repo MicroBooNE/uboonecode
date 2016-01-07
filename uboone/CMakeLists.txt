@@ -1,5 +1,7 @@
 
+set( UBOONEDAQ_DATATYPES_DIR $ENV{UBOONEDAQ_DATATYPES_DIR} )
 set( IFDH_ART_DIR $ENV{IFDH_ART_DIR} )
+
 add_subdirectory(Geometry)
 if ( IFDH_ART_DIR )
     add_subdirectory(BeamData)
