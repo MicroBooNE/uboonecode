@@ -53,8 +53,8 @@ set_source_files_properties(eventRecord.cpp PROPERTIES COMPILE_FLAGS "-Wno-unuse
 
 art_make_library(LIBRARY_NAME ${LIB_NAME} SOURCE ${LIB_SOURCES}
 LIBRARIES # daq_share
-${BOOST_SERIALIZATION}
-${BOOST_DATE_TIME} 
+${Boost_SERIALIZATION_LIBRARY}
+${Boost_DATE_TIME_LIBRARY} 
 ${CMAKE_DL_LIBS})
 
 
