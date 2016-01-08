@@ -341,7 +341,7 @@
    <physvol>
 	  <volumeref ref="volVacuumSpace"/>
  	  <position name="posVacuumSpace" unit="cm" x="0" y="(53000-1800)/2 + 624.85" z="0"/>
- 	</physvol>
+ 	</physvol> 
 	<physvol>
       <volumeref ref="volConcreteWallAboveGrade"/>
       <position name="posConcreteWallAboveGrade" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 + 22.86" z="0.5*1037"/>
