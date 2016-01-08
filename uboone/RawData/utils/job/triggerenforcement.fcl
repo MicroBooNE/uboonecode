@@ -4,5 +4,6 @@ trigger_enforcement: {
   Verbose: false
   TriggerProducer: ""
   ExcludeBits: []
+  IncludeBits: []
 }
 END_PROLOG
