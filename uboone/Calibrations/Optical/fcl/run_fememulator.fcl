@@ -1,0 +1,66 @@
+#include "geometry_microboone.fcl"
+#include "timeservice_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "opcalibration_microboone.fcl"
+#include "fememulator_microboone.fcl"
+
+process_name: FEMemulator
+services:
+{
+  TFileService: { fileName: "FEMemulator.root" }
+  Timing:       {}
+  user: {
+          ExptGeoHelperInterface: @local::microboone_geometry_helper
+          Geometry:               @local::microboone_geo
+          TimeService:            @local::microboone_timeservice
+	  UBOpReadoutMap:         @local::microboone_opreadoutmap
+         }
+}
+
+
+# Database settings
+services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
+services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
+services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.user.DatabaseUtil.Port:          5436
+services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.user.DatabaseUtil.ToughErrorTreatment: true
+services.user.DatabaseUtil.ShouldConnect: false
+services.user.DatabaseUtil.TableName: "main_run"
+
+services.user.TimeService.TrigModuleName: "daq"
+
+
+outputs:
+{
+}
+
+physics:
+{
+  producers:
+  {
+  }
+
+  analyzers:
+  {
+        femsoft: @local::microboone_fememulator
+  }
+
+ produceIt: []
+ analyzeIt: [femsoft]
+
+ #define the output stream, there could be more than one if using filters
+ stream1:  []
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event,
+ #ie filters and producers
+ trigger_paths: []
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event,
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [analyzeIt]
+}
+
+
+
