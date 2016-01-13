@@ -39,6 +39,7 @@
 #include "SimpleTypesAndConstants/RawTypes.h"
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "Utilities/TimeService.h"
+#include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //Optical Channel Maps
 #include "uboone/Geometry/UBOpChannelTypes.h"
@@ -49,6 +50,7 @@
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
 #include "RawData/DAQHeader.h"
+#include "RawData/TriggerData.h"
 
 // Pulse finding
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"
@@ -90,6 +92,8 @@ private:
   double event_timestamp_usec;
   double wfm_unixtime;
   double pulse_unixtime;
+  unsigned int triggerbit;
+  unsigned int trigs[10];
   int slot;
   int ch;
 
@@ -132,7 +136,6 @@ private:
   TTree* fTevent;
   TH1D** hSPE_ave;
   TH1D** hSPE_norm;
-  //TH1D* hSPE_rms;
   int hspe_nfills[32];
 
   // LED Pulser Mode
@@ -181,7 +184,7 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   cfd_deadtime     = p.get<unsigned short>( "CFDDeadtime", 20 );           // deadtime for pulse-finding algorithm in ticks
   cfd_width        = p.get<unsigned short>( "CFDWidth", 20 );              // width for pulse-finding algorithm in ticks
   AVESPE_RMSLIMIT  = p.get<double>( "AveSPEBaselineRMScut", 2.0 );         // cut to use when selecting pulses to make average SPE waveforms
-  fHandleOwnTFile  = p.get<bool>( "HandleOwnTFile", true );                // module manages its own rootfiles instead of using TFileService
+  fHandleOwnTFile  = p.get<bool>( "HandleOwnTFile", false );                // module manages its own rootfiles instead of using TFileService
   fAutoSlot        = p.get<bool>( "AutoFindWaveformSlot", true );          // if true, automatically determins slot to get waveform (to handle 2 or 3 FEM)
 
   // Data for each Beam Window
@@ -202,6 +205,9 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
 
     // Event Tree
     fTevent = out_file->make<TTree>("eventtree", "Data about the event" );
+
+    // Setup the branches of the above trees
+    SetupBranches();
 
     // Ave SPE waveform
     hSPE_ave = new TH1D*[32];
@@ -299,6 +305,8 @@ void SPEcalibration::SetupBranches() {
   fTpulsetree->Branch("baseline2",    &ave_baseline2, "baseline2/D");
   fTpulsetree->Branch("baselinerms2", &rms_baseline2, "baselinerms2/D");
   fTpulsetree->Branch("chmaxamp",     &event_maxamp,  "chmaxamp/D" );
+  fTpulsetree->Branch("triggerbit",   &triggerbit,    "triggerbit/i");
+  fTpulsetree->Branch("trigs",        trigs,          "trigs[10]/i");
   fTpulsetree->Branch("event_timestamp_sec", &event_timestamp_sec, "event_timestamp_sec/D" );
   fTpulsetree->Branch("event_timestamp_usec", &event_timestamp_usec, "event_timestamp_usec/D" );
   fTpulsetree->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
@@ -309,6 +317,8 @@ void SPEcalibration::SetupBranches() {
   fTevent->Branch("subrun",        &isubrun,        "subrun/I");
   fTevent->Branch("event",    &ievent,       "event/I");
   fTevent->Branch("nsamples", &nsamples,     "nsamples/I" );
+  fTevent->Branch("triggerbit",   &triggerbit,    "triggerbit/i");
+  fTevent->Branch("trigs",        trigs,         "trigs[10]/i");
   fTevent->Branch("event_timestamp_sec", &event_timestamp_sec, "event_timestamp_sec/D" );
   fTevent->Branch("event_timestamp_usec", &event_timestamp_usec, "event_timestamp_usec/D" );
   fTevent->Branch("wfm_unixtime", &wfm_unixtime, "wfm_unixtime/D" );
@@ -501,11 +511,13 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   art::Handle< std::vector< raw::OpDetWaveform > > LogicHandle;
   art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
   art::Handle< raw::DAQHeader > dhHandle;
+  art::Handle< std::vector< raw::Trigger > > trigHandle;
 
   evt.getByLabel( OpDataModule, "OpdetBeamHighGain", wfHandle);
   std::vector<raw::OpDetWaveform> const& opwfms(*wfHandle);
 
   evt.getByLabel( DAQHeaderModule, dhHandle );
+  evt.getByLabel( DAQHeaderModule, trigHandle );
 
   ub_PMT_channel_map->SetOpMapRun( evt.run() );
 
@@ -527,6 +539,37 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   event_timestamp_sec = (double)(daq_timestamp>>32);
   event_timestamp_usec  = 0.001*(double)( daq_timestamp & 0xFFFFFFFF );
   
+  // trigger bit
+  const std::vector< raw::Trigger >& trigvec = (*trigHandle);
+  const raw::Trigger& trig = trigvec.at(0);
+
+  // From uboone/RawData/util/LArRawInputDriverUBooNE.cxx
+  // uint32_t trig_bits = trig_data.getPMTTrigData();
+  // if( trig_data.Trig_PC()       ) trig_bits += ( 0x1 << ::trigger::kTriggerPC    );
+  // if( trig_data.Trig_EXT()      ) trig_bits += ( 0x1 << ::trigger::kTriggerEXT   );
+  // if( trig_data.Trig_Active()   ) trig_bits += ( 0x1 << ::trigger::kActive       );
+  // if( trig_data.Trig_Gate1()    ) trig_bits += ( 0x1 << ::trigger::kTriggerNuMI  );
+  // if( trig_data.Trig_Gate2()    ) trig_bits += ( 0x1 << ::trigger::kTriggerBNB   );
+  // if( trig_data.Trig_Veto()     ) trig_bits += ( 0x1 << ::trigger::kVeto         );
+  // if( trig_data.Trig_Calib()    ) trig_bits += ( 0x1 << ::trigger::kTriggerCalib );
+  // if( trig_data.Trig_GateFake() ) trig_bits += ( 0x1 << ::trigger::kFakeGate     );
+  // if( trig_data.Trig_BeamFake() ) trig_bits += ( 0x1 << ::trigger::kFakeBeam     );
+  // if( trig_data.Trig_Spare1()   ) trig_bits += ( 0x1 << ::trigger::kSpare        );
+
+  triggerbit = trig.TriggerBits();
+  for (int i=0; i<10; i++)
+    trigs[i] = 0;
+  trigs[0] = triggerbit & ( 0x1 << ::trigger::kTriggerPC);
+  trigs[1] = triggerbit & ( 0x1 << ::trigger::kTriggerEXT);
+  trigs[2] = triggerbit & ( 0x1 << ::trigger::kActive );
+  trigs[3] = triggerbit & ( 0x1 << ::trigger::kTriggerNuMI );
+  trigs[4] = triggerbit & ( 0x1 << ::trigger::kTriggerBNB );
+  trigs[5] = triggerbit & ( 0x1 << ::trigger::kVeto );
+  trigs[6] = triggerbit & ( 0x1 << ::trigger::kTriggerCalib );
+  trigs[7] = triggerbit & ( 0x1 << ::trigger::kFakeGate );
+  trigs[8] = triggerbit & ( 0x1 << ::trigger::kFakeBeam );
+  trigs[9] = triggerbit & ( 0x1 << ::trigger::kSpare );
+
   // auto-slot
   unsigned int autoslot = 0;
   if ( fAutoSlot ) {
@@ -671,7 +714,6 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 
   fTevent->Fill();
 }
-
 
 
 DEFINE_ART_MODULE(SPEcalibration)
