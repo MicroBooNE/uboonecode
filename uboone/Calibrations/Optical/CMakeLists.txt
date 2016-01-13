@@ -1,3 +1,5 @@
+add_subdirectory(fcl)
+
 art_make( LIBRARY_NAME SPEcalibrationCode
 	  EXCLUDE SPEcalibration_module.cc FEMemulator_module.cc CalibrationFit.C
 	  RawData
