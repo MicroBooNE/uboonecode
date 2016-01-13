@@ -377,9 +377,9 @@ void CalWireROI::produce(art::Event& evt)
             else if (fNoiseSource != 2) raw_noise = std::max(raw_noise,rms_noise);
             
             size_t startBin(0);
-            size_t stopBin(fNumBinsHalf);
+            size_t stopBin(2*fNumBinsHalf+1);
             
-            float startThreshold = raw_noise*sqrt(float(2 * fNumBinsHalf + 1))*6.;
+            float startThreshold = sqrt(float(2*fNumBinsHalf+1))*6.*(raw_noise + fThreshold[thePlane]);
             float stopThreshold  = 0.5 * startThreshold;
             
             std::vector<float> rawAdcLessPedVec(rawadc.size());
