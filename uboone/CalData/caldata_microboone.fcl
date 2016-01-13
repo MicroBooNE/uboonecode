@@ -8,6 +8,8 @@ microboone_calroi:
 {
  module_type:        "CalWireROI"
  DigitModuleLabel:   "daq"
+ NoiseSource:        3
+ NumBinsHalf:        3
  Threshold: [ 3, 3, 3 ] # abs(threshold) for finding a Region Of Interest
  MinWid:              4 # min width (time bins) for a ROI
  MinSep:             50 # min separation (time bins) between ROIs
