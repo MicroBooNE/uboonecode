@@ -8,9 +8,11 @@ art_make( BASENAME_ONLY
 			${CETLIB}
 			${ROOT_BASIC_LIB_LIST}
 	  MODULE_LIBRARIES Geometry
-  	  		CalData
+	                CalData
+  	  		NoiseFilterAlgs
 	  		Geometry_service
 	                Utilities
+			DetectorProperties_service
 			Filters
 			RawData
 			CalibrationDBI_IOVData
@@ -37,7 +39,8 @@ art_make( BASENAME_ONLY
 			${ROOT_BASIC_LIB_LIST}
         )
 
+add_subdirectory(NoiseFilterAlgs)
+
 install_headers()
 install_fhicl()
 install_source()
-

@@ -5,17 +5,18 @@ BEGIN_PROLOG
 
 microboone_opreadoutmap:
 {
+ Verbose: false
  OpMapLists: { 
         twoFEMOpMap: @local::microboone_twofem_opmap
         threeFEMOpMap: @local::microboone_threefem_opmap
         }
  OpMapTimeRanges: {
-        twoFEMOpMap:   ["2015-01-01 00:00:00","2099-12-31 23:59:59"]   
-        threeFEMOpMap: ["2100-01-01 00:00:00","3000-01-01 23:59:59"]
+        twoFEMOpMap:   ["2015-01-01 00:00:00 CST","2015-12-09 18:50:00 CST"]   
+        threeFEMOpMap: ["2015-12-09 18:50:01 CST","3000-01-01 23:59:59 CST"]
         }
  OpMapRunRanges: {
-        twoFEMOpMap:   [1,3900]   
-        threeFEMOpMap: [3900,999999]
+        twoFEMOpMap:   [1, 3984]   
+        threeFEMOpMap: [3985,999999]
         }
 }
 

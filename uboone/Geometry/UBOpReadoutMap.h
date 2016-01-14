@@ -51,8 +51,7 @@ namespace geo {
     void GetCrateSlotFEMChFromReadoutChannel( unsigned int readoutch, unsigned int& crate, unsigned int& slot, unsigned int& femch ) const;
     void SetOpMapTime( time_t t ) { requested_time = t; user_set_run=false; CheckValidity(); };
     void SetOpMapRun( int run ) { requested_run = run; user_set_run=true; CheckValidity(); };
-    const std::set<unsigned int>& GetReadoutChannelSet() const
-    { return fReadoutChannelSet; }
+
   private:
     void CheckValidity();
     void LoadOpticalReadoutMapData( fhicl::ParameterSet const& p);
