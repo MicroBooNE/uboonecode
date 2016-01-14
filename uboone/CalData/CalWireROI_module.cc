@@ -139,8 +139,7 @@ class CalWireROI : public art::EDProducer
     unsigned short              fNoiseSource;          ///< Used to determine ROI threshold
     unsigned short              fNumBinsHalf;          ///< Determines # bins in ROI running sum
     std::vector<unsigned short> fThreshold;            ///< abs(threshold) ADC counts for ROI
-    unsigned short              fMinWid;               ///< min width for a ROI
-    unsigned short              fMinSep;               ///< min separation between ROIs
+    std::vector<int>            fNumSigma;             ///< "# sigma" rms noise for ROI threshold
     int                         fFFTSize;              ///< FFT size for ROI deconvolution
     std::vector<unsigned short> fPreROIPad;            ///< ROI padding
     std::vector<unsigned short> fPostROIPad;           ///< ROI padding
@@ -218,8 +217,7 @@ void CalWireROI::reconfigure(fhicl::ParameterSet const& p)
     fNoiseSource          = p.get< unsigned short >                ("NoiseSource",          3);
     fNumBinsHalf          = p.get< unsigned short >                ("NumBinsHalf",          3);
     fThreshold            = p.get< std::vector<unsigned short> >   ("Threshold"              );
-    fMinWid               = p.get< unsigned short >                ("MinWid"                 );
-    fMinSep               = p.get< unsigned short >                ("MinSep"                 );
+    fNumSigma             = p.get< std::vector<int> >              ("NumSigma"               );
     uin                   = p.get< std::vector<unsigned short> >   ("uPlaneROIPad"           );
     vin                   = p.get< std::vector<unsigned short> >   ("vPlaneROIPad"           );
     zin                   = p.get< std::vector<unsigned short> >   ("zPlaneROIPad"           );
@@ -380,14 +378,14 @@ void CalWireROI::produce(art::Event& evt)
             size_t startBin(0);
             size_t stopBin(numBins);
             
-            float startThreshold = sqrt(float(numBins))*6.*raw_noise;
-            float stopThreshold  = 0.5 * startThreshold;
+            float startThreshold = sqrt(float(numBins)) * (fNumSigma[thePlane] * raw_noise + fThreshold[thePlane]);
+            float stopThreshold  = startThreshold;
             
             std::vector<float> rawAdcLessPedVec(rawadc.size());
             
             std::transform(rawadc.begin(),rawadc.end(),rawAdcLessPedVec.begin(),[pdstl](const short& adc){return float(adc) - pdstl;});
             
-            float runningSum = std::accumulate(rawAdcLessPedVec.begin(),rawAdcLessPedVec.begin() + stopBin, 0.); //, [](float sum, float add){return sum + fabs(add);});
+            float runningSum = std::accumulate(rawAdcLessPedVec.begin(),rawAdcLessPedVec.begin() + stopBin, 0.);
             
             size_t roiStartBin(0);
             bool   roiCandStart(false);
@@ -409,7 +407,7 @@ void CalWireROI::produce(art::Event& evt)
                 {
                     if (fabs(runningSum) < stopThreshold)
                     {
-                        rois.push_back(std::make_pair(roiStartBin, bin));
+                        if (bin - roiStartBin > 1) rois.push_back(std::make_pair(roiStartBin, bin));
                         
                         roiCandStart = false;
                     }
@@ -433,7 +431,7 @@ void CalWireROI::produce(art::Event& evt)
             }
 
             // skip deconvolution if there are no ROIs
-            if(rois.size() == 0) continue;
+            if(rois.empty()) continue;
 
             // pad the ROIs
             for(size_t ii = 0; ii < rois.size(); ++ii)
@@ -471,7 +469,7 @@ void CalWireROI::produce(art::Event& evt)
                 
                 // Make sure to get the last one
                 trois.push_back(std::pair<size_t,size_t>(startRoi,stopRoi));
-	  
+
                 rois = trois;
             }
             
