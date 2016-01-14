@@ -369,17 +369,18 @@ void CalWireROI::produce(art::Event& evt)
             
             // loop over all adc values and subtract the pedestal
             // When we have a pedestal database, can provide the digit timestamp as the third argument of GetPedestalMean
-            float pdstl     = pedestalRetrievalAlg.PedMean(channel);
-            float rms_noise = digitVec->GetSigma();
-            float raw_noise = sss->GetRawNoise(channel);
+            size_t numBins   = 2 * fNumBinsHalf + 1;
+            float  pdstl     = pedestalRetrievalAlg.PedMean(channel);
+            float  rms_noise = digitVec->GetSigma();
+            float  raw_noise = sss->GetRawNoise(channel);
             
             if      (fNoiseSource == 1) raw_noise = rms_noise;
             else if (fNoiseSource != 2) raw_noise = std::max(raw_noise,rms_noise);
             
             size_t startBin(0);
-            size_t stopBin(2*fNumBinsHalf+1);
+            size_t stopBin(numBins);
             
-            float startThreshold = sqrt(float(2*fNumBinsHalf+1))*6.*(raw_noise + fThreshold[thePlane]);
+            float startThreshold = sqrt(float(numBins))*6.*raw_noise;
             float stopThreshold  = 0.5 * startThreshold;
             
             std::vector<float> rawAdcLessPedVec(rawadc.size());
@@ -401,7 +402,7 @@ void CalWireROI::produce(art::Event& evt)
                 runningSum -= rawAdcLessPedVec[startBin++];
                 
                 // Case, we are at end of waveform
-                runningSum += rawAdcLessPedVec[++stopBin];
+                runningSum += rawAdcLessPedVec[stopBin++];
                 
                 // We have already started a candidate ROI
                 if (roiCandStart)
