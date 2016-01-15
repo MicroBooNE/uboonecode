@@ -64,3 +64,5 @@ outputs:
    compressionLevel: 1
  }
 }
+
+physics.producers.largeant.KeepParticlesInVolumes: ["volCryostat"] #only keep MCParticles that cross the cryostat
