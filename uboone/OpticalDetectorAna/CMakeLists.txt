@@ -2,20 +2,20 @@
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME  uboone_OpticalDetectorAna
 	  LIB_LIBRARIES
-			OpticalDetector
+			larana_OpticalDetector
                         ${ROOT_BASIC_LIB_LIST}
 
-	  MODULE_LIBRARIES Geometry
+	  MODULE_LIBRARIES larcore_Geometry
 	  	        larcore_Geometry_Geometry_service
-		        Utilities
+		        lardata_Utilities
 	                uboone_Geometry
-                        OpticalDetectorData
-			OpticalDetector
-                        RawData
-			RecoBase
-			Simulation
+                        lardata_OpticalDetectorData
+			larana_OpticalDetector
+                        lardata_RawData
+			lardata_RecoBase
+			larsim_Simulation
 			SimulationBase
-			PhotonPropagation
+			larsim_PhotonPropagation
 			uboone_OpticalDetectorAna
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_SOURCES}

@@ -32,7 +32,7 @@ cet_test(geometry_uboone_test
   SOURCES geometry_uboone_test.cxx
   DATAFILES test_geometry_uboone.fcl
   TEST_ARGS ./test_geometry_uboone.fcl
-  LIBRARIES Geometry
+  LIBRARIES larcore_Geometry
             GeometryTestLib
             ${MF_MESSAGELOGGER}
             ${MF_UTILITIES}
@@ -46,7 +46,7 @@ cet_test(geometry_uboone_test
 # this uses BOOST for the test
 cet_test(geometry_iterator_uboone_test
   SOURCES geometry_iterator_uboone_test.cxx
-  LIBRARIES Geometry
+  LIBRARIES larcore_Geometry
             GeometryTestLib
             ${MF_MESSAGELOGGER}
             ${MF_UTILITIES}
@@ -60,7 +60,7 @@ cet_test(geometry_iterator_uboone_test
 # unit test (use the hard-coded configuration for MicroBooNE v5 geometry)
 cet_test(geometry_iterator_loop_uboone_test
   SOURCES geometry_iterator_loop_uboone_test.cxx
-  LIBRARIES Geometry
+  LIBRARIES larcore_Geometry
             GeometryTestLib
             ${MF_MESSAGELOGGER}
             ${MF_UTILITIES}

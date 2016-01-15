@@ -1,8 +1,8 @@
 art_make( BASENAME_ONLY
-	  SERVICE_LIBRARIES CalibrationDBI_Providers
-	                    CalibrationDBI_IOVData
-			    RawData
-			    Geometry
+	  SERVICE_LIBRARIES larevt_CalibrationDBI_Providers
+	                    larevt_CalibrationDBI_IOVData
+			    lardata_RawData
+			    larcore_Geometry
 			    larcore_Geometry_Geometry_service
 			    ${ART_FRAMEWORK_SERVICES_REGISTRY}
 			    ${ART_FRAMEWORK_CORE}

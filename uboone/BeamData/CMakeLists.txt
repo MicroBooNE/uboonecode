@@ -7,10 +7,10 @@ find_library( UB_DATA_TYPES NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LI
 
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES
-                        Utilities
-                        Filters
-                        RawData
-			SummaryData
+                        lardata_Utilities
+                        larevt_Filters
+                        lardata_RawData
+			larcore_SummaryData
 			BeamDAQ
 			${UB_DATA_TYPES}
 			${Boost_SERIALIZATION_LIBRARY}

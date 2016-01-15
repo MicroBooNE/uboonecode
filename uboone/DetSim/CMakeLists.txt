@@ -1,13 +1,13 @@
 art_make( BASENAME_ONLY
           EXCLUDE SimWireMicroBooNE_module.cc
-          MODULE_LIBRARIES Geometry
+          MODULE_LIBRARIES larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        Simulation
-                        Utilities
-                        Filters
-                        RawData
+                        larsim_Simulation
+                        lardata_Utilities
+                        larevt_Filters
+                        lardata_RawData
                         SignalShapingServiceMicroBooNE_service
-			CalibrationDBI_Providers
+			larevt_CalibrationDBI_Providers
                         ${SEEDSERVICE_SERVICE} # artextensions
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
@@ -31,15 +31,15 @@ art_make( BASENAME_ONLY
 
 simple_plugin(SimWireMicroBooNE "module"
           BASENAME_ONLY
-              Geometry
+              larcore_Geometry
               larcore_Geometry_Geometry_service
-              Simulation
-              Utilities
-              Filters
-              RawData
+              larsim_Simulation
+              lardata_Utilities
+              larevt_Filters
+              lardata_RawData
               lardata_DetectorInfoServices_DetectorClocksServiceStandard_service # BUG note that we link to a specific service implementation
               SignalShapingServiceMicroBooNE_service
-              CalibrationDBI_Providers
+              larevt_CalibrationDBI_Providers
               ${SEEDSERVICE_SERVICE} # artextensions
               ${ART_FRAMEWORK_CORE}
               ${ART_FRAMEWORK_PRINCIPAL}

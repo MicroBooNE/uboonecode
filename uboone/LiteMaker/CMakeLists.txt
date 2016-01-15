@@ -14,17 +14,17 @@ add_subdirectory(job)
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME     uboonecode_uboone_LiteMaker
 	  LIB_LIBRARIES
-	  	   Geometry
+	  	   larcore_Geometry
 		   uboone_Geometry
 		   larcore_Geometry_Geometry_service
-	   	   Simulation
+	   	   larsim_Simulation
 		   SimulationBase
-		   Utilities
-		   RawData
-		   MCBase
-		   SummaryData
-		   RecoBase
-		   RecoObjects
+		   lardata_Utilities
+		   lardata_RawData
+		   lardata_MCBase
+		   larcore_SummaryData
+		   lardata_RecoBase
+		   lardata_RecoObjects
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}
@@ -49,17 +49,17 @@ art_make( BASENAME_ONLY
 
           MODULE_LIBRARIES 	  		   
 		   uboonecode_uboone_LiteMaker
-		   Geometry
+		   larcore_Geometry
 		   uboone_Geometry
 		   larcore_Geometry_Geometry_service
-		   Simulation
+		   larsim_Simulation
 		   SimulationBase
-		   Utilities
-		   MCBase
-		   SummaryData
-		   RawData
-		   RecoBase
-		   RecoObjects
+		   lardata_Utilities
+		   lardata_MCBase
+		   larcore_SummaryData
+		   lardata_RawData
+		   lardata_RecoBase
+		   lardata_RecoObjects
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}
