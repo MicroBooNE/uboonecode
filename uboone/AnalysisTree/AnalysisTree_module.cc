@@ -281,6 +281,7 @@
 #include "Geometry/Geometry.h"
 #include "SimulationBase/MCTruth.h"
 #include "MCBase/MCShower.h"
+#include "MCBase/MCTrack.h"
 #include "MCBase/MCStep.h"
 #include "SimulationBase/MCFlux.h"
 #include "Simulation/SimChannel.h"
@@ -606,8 +607,9 @@ namespace microboone {
       tdFlash = 0x80,
       tdShower = 0x100,
       tdMCshwr = 0x200,
-      tdCluster = 0x400,
-      tdRawDigit = 0x800,
+      tdMCtrk  = 0x400,
+      tdCluster = 0x800,
+      tdRawDigit = 0x1000,
       tdDefault = 0
     }; // DataBits_t
     
@@ -903,8 +905,41 @@ namespace microboone {
     std::vector<Float_t>     mcshwr_AncestorendX;      //MC Shower's ancestor  G4 endX  
     std::vector<Float_t>     mcshwr_AncestorendY;      //MC Shower's ancestor  G4 endY  
     std::vector<Float_t>     mcshwr_AncestorendZ;      //MC Shower's ancestor  G4 endZ  
-						       
-
+    
+    //MC track information
+    Int_t     no_mctracks;                         //number of MC tracks in this event.
+    //MC track particle information
+    std::vector<Int_t>       mctrk_origin;	    //MC track origin information.  
+    std::vector<Int_t>       mctrk_pdg;	    //MC track particle PDG code.   
+    std::vector<Int_t>       mctrk_TrackId;        //MC track particle G4 track ID.
+    std::vector<std::string> mctrk_Process;	    //MC track particle's creation process. 
+    std::vector<Float_t>     mctrk_startX;	    //MC track particle G4 startX 
+    std::vector<Float_t>     mctrk_startY;	    //MC track particle G4 startY 
+    std::vector<Float_t>     mctrk_startZ;	    //MC track particle G4 startZ 
+    std::vector<Float_t>     mctrk_endX;		//MC track particle G4 endX 
+    std::vector<Float_t>     mctrk_endY;		//MC track particle G4 endY 
+    std::vector<Float_t>     mctrk_endZ;		//MC track particle G4 endZ  
+    //MC Track mother information
+    std::vector<Int_t>       mctrk_Motherpdg;       //MC Track's mother PDG code. 
+    std::vector<Int_t>       mctrk_MotherTrkId;     //MC Track's mother G4 track ID.
+    std::vector<std::string> mctrk_MotherProcess;   //MC Track's mother creation process. 
+    std::vector<Float_t>     mctrk_MotherstartX;    //MC Track's mother  G4 startX .
+    std::vector<Float_t>     mctrk_MotherstartY;    //MC Track's mother  G4 startY .
+    std::vector<Float_t>     mctrk_MotherstartZ;    //MC Track's mother  G4 startZ .
+    std::vector<Float_t>     mctrk_MotherendX;	     //MC Track's mother  G4 endX   .
+    std::vector<Float_t>     mctrk_MotherendY;	     //MC Track's mother  G4 endY   .
+    std::vector<Float_t>     mctrk_MotherendZ;	     //MC Track's mother  G4 endZ   .
+    //MC Track ancestor information
+    std::vector<Int_t>       mctrk_Ancestorpdg;       //MC Track's ancestor PDG code. 
+    std::vector<Int_t>       mctrk_AncestorTrkId;     //MC Track's ancestor G4 track ID.
+    std::vector<std::string> mctrk_AncestorProcess;   //MC Track's ancestor creation process. 
+    std::vector<Float_t>     mctrk_AncestorstartX;    //MC Track's ancestor  G4 startX
+    std::vector<Float_t>     mctrk_AncestorstartY;    //MC Track's ancestor  G4 startY
+    std::vector<Float_t>     mctrk_AncestorstartZ;    //MC Track's ancestor  G4 startZ
+    std::vector<Float_t>     mctrk_AncestorendX;      //MC Track's ancestor  G4 endX  
+    std::vector<Float_t>     mctrk_AncestorendY;      //MC Track's ancestor  G4 endY  
+    std::vector<Float_t>     mctrk_AncestorendZ;      //MC Track's ancestor  G4 endZ    
+						      
     // Auxiliary detector variables saved for each geant track
     // This data is saved as a vector (one item per GEANT particle) of C arrays
     // (wrapped in a BoxedArray for technical reasons), one item for each
@@ -940,6 +975,9 @@ namespace microboone {
     
     /// Returns whether we have MCShower data
     bool hasMCShowerInfo() const { return bits & tdMCshwr; }
+    
+     /// Returns whether we have MCTrack data
+    bool hasMCTrackInfo() const { return bits & tdMCtrk; }
     
     /// Returns whether we have Hit data
     bool hasHitInfo() const { return bits & tdHit; }
@@ -1017,6 +1055,9 @@ namespace microboone {
     
     /// Resize the data strutcure for  MC Showers
     void ResizeMCShower(int nMCShowers);
+    
+    /// Resize the data strutcure for  MC Tracks
+    void ResizeMCTrack(int nMCTracks);
     
     /// Connect this object with a tree
     void SetAddresses(
@@ -1203,6 +1244,7 @@ namespace microboone {
     std::string fClusterModuleLabel;
     std::string fOpFlashModuleLabel;
     std::string fMCShowerModuleLabel;
+    std::string fMCTrackModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
     std::vector<std::string> fVertexModuleLabel;
     std::vector<std::string> fShowerModuleLabel;
@@ -1218,6 +1260,7 @@ namespace microboone {
     bool fSaveGenieInfo; ///whether to extract and save Genie information
     bool fSaveGeantInfo; ///whether to extract and save Geant information
     bool fSaveMCShowerInfo; ///whether to extract and save MC Shower information
+    bool fSaveMCTrackInfo; ///whether to extract and save MC Track information
     bool fSaveHitInfo; ///whether to extract and save Hit information
     bool fSaveRawDigitInfo; ///whether to extract and save Raw Digit information
     bool fSaveTrackInfo; ///whether to extract and save Track information
@@ -1256,6 +1299,7 @@ namespace microboone {
           fData->SetBits(AnalysisTreeDataStruct::tdGenie,  !fSaveGenieInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdGeant,  !fSaveGeantInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdMCshwr, !fSaveMCShowerInfo); 
+          fData->SetBits(AnalysisTreeDataStruct::tdMCtrk,  !fSaveMCTrackInfo); 
           fData->SetBits(AnalysisTreeDataStruct::tdHit,    !fSaveHitInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdRawDigit,    !fSaveRawDigitInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdFlash,  !fSaveFlashInfo);
@@ -2032,6 +2076,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   geant_list_size=0;
   geant_list_size_in_tpcAV = 0;
   no_mcshowers = 0;
+  no_mctracks = 0;
   
   FillWith(pdg, -99999);
   FillWith(status, -99999);
@@ -2323,6 +2368,40 @@ void microboone::AnalysisTreeDataStruct::ResizeMCShower(int nMCShowers) {
   mcshwr_AncestorendZ.resize(nMCShowers);	 	
 
 } // microboone::AnalysisTreeDataStruct::ResizeMCShower()
+
+void microboone::AnalysisTreeDataStruct::ResizeMCTrack(int nMCTracks) {
+  mctrk_origin.resize(nMCTracks);		
+  mctrk_pdg.resize(nMCTracks);		
+  mctrk_TrackId.resize(nMCTracks); 	
+  mctrk_Process.resize(nMCTracks); 
+  mctrk_startX.resize(nMCTracks); 	
+  mctrk_startY.resize(nMCTracks);	 
+  mctrk_startZ.resize(nMCTracks);	 
+  mctrk_endX.resize(nMCTracks);	 
+  mctrk_endY.resize(nMCTracks);	 
+  mctrk_endZ.resize(nMCTracks);
+  mctrk_Motherpdg.resize(nMCTracks);	
+  mctrk_MotherTrkId.resize(nMCTracks);	
+  mctrk_MotherProcess.resize(nMCTracks);
+  mctrk_MotherstartX.resize(nMCTracks);	 
+  mctrk_MotherstartY.resize(nMCTracks);	 
+  mctrk_MotherstartZ.resize(nMCTracks);	 
+  mctrk_MotherendX.resize(nMCTracks);	 
+  mctrk_MotherendY.resize(nMCTracks);	 
+  mctrk_MotherendZ.resize(nMCTracks);	   	
+  mctrk_Ancestorpdg.resize(nMCTracks);	
+  mctrk_AncestorTrkId.resize(nMCTracks);	
+  mctrk_AncestorProcess.resize(nMCTracks); 
+  mctrk_AncestorstartX.resize(nMCTracks);	 
+  mctrk_AncestorstartY.resize(nMCTracks);	 
+  mctrk_AncestorstartZ.resize(nMCTracks);	 
+  mctrk_AncestorendX.resize(nMCTracks);	 
+  mctrk_AncestorendY.resize(nMCTracks);	 
+  mctrk_AncestorendZ.resize(nMCTracks);	 
+  
+} // microboone::AnalysisTreeDataStruct::ResizeMCTrack()
+  
+
 
 void microboone::AnalysisTreeDataStruct::SetAddresses(
   TTree* pTree,
@@ -2621,6 +2700,38 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("mcshwr_AncestorendY",mcshwr_AncestorendY,"mcshwr_AncestorendY[no_mcshowers]/F");
     CreateBranch("mcshwr_AncestorendZ",mcshwr_AncestorendZ,"mcshwr_AncestorendZ[no_mcshowers]/F");
   }   
+  
+   if (hasMCTrackInfo()){
+    CreateBranch("no_mctracks",&no_mctracks,"no_mctracks/I");  
+    CreateBranch("mctrk_origin",mctrk_origin,"mctrk_origin[no_mctracks]/I");
+    CreateBranch("mctrk_pdg",mctrk_pdg,"mctrk_pdg[no_mctracks]/I");
+    CreateBranch("mctrk_TrackId",mctrk_TrackId,"mctrk_TrackId[no_mctracks]/I");
+    CreateBranch("mctrk_Process",mctrk_Process);
+    CreateBranch("mctrk_startX",mctrk_startX,"mctrk_startX[no_mctracks]/F");
+    CreateBranch("mctrk_startY",mctrk_startY,"mctrk_startY[no_mctracks]/F");
+    CreateBranch("mctrk_startZ",mctrk_startZ,"mctrk_startZ[no_mctracks]/F");
+    CreateBranch("mctrk_endX",mctrk_endX,"mctrk_endX[no_mctracks]/F");
+    CreateBranch("mctrk_endY",mctrk_endY,"mctrk_endY[no_mctracks]/F");
+    CreateBranch("mctrk_endZ",mctrk_endZ,"mctrk_endZ[no_mctracks]/F");
+    CreateBranch("mctrk_Motherpdg",mctrk_Motherpdg,"mctrk_Motherpdg[no_mctracks]/I");
+    CreateBranch("mctrk_MotherTrkId",mctrk_MotherTrkId,"mctrk_MotherTrkId[no_mctracks]/I");
+    CreateBranch("mctrk_MotherProcess",mctrk_MotherProcess);
+    CreateBranch("mctrk_MotherstartX",mctrk_MotherstartX,"mctrk_MotherstartX[no_mctracks]/F");
+    CreateBranch("mctrk_MotherstartY",mctrk_MotherstartY,"mctrk_MotherstartY[no_mctracks]/F");
+    CreateBranch("mctrk_MotherstartZ",mctrk_MotherstartZ,"mctrk_MotherstartZ[no_mctracks]/F");
+    CreateBranch("mctrk_MotherendX",mctrk_MotherendX,"mctrk_MotherendX[no_mctracks]/F");
+    CreateBranch("mctrk_MotherendY",mctrk_MotherendY,"mctrk_MotherendY[no_mctracks]/F");
+    CreateBranch("mctrk_MotherendZ",mctrk_MotherendZ,"mctrk_MotherendZ[no_mctracks]/F");    
+    CreateBranch("mctrk_Ancestorpdg",mctrk_Ancestorpdg,"mctrk_Ancestorpdg[no_mctracks]/I");
+    CreateBranch("mctrk_AncesotorTrkId",mctrk_AncestorTrkId,"mctrk_AncestorTrkId[no_mctracks]/I");
+    CreateBranch("mctrk_AncesotorProcess",mctrk_AncestorProcess);   
+    CreateBranch("mctrk_AncestorstartX",mctrk_AncestorstartX,"mctrk_AncestorstartX[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorstartY",mctrk_AncestorstartY,"mctrk_AncestorstartY[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorstartZ",mctrk_AncestorstartZ,"mctrk_AncestorstartZ[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorendX",mctrk_AncestorendX,"mctrk_AncestorendX[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorendY",mctrk_AncestorendY,"mctrk_AncestorendY[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorendZ",mctrk_AncestorendZ,"mctrk_AncestorendZ[no_mctracks]/F");
+  }  
 
   if (hasAuxDetector()) {
     // Geant information is required to fill aux detector information.
@@ -2670,6 +2781,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")     ),
   fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
   fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
+  fMCTrackModuleLabel      (pset.get< std::string >("MCTrackModuleLabel")     ),  
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
   fVertexModuleLabel        (pset.get< std::vector<std::string> >("VertexModuleLabel")),
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
@@ -2685,6 +2797,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveGenieInfo	    (pset.get< bool >("SaveGenieInfo", false)), 
   fSaveGeantInfo	    (pset.get< bool >("SaveGeantInfo", false)), 
   fSaveMCShowerInfo	    (pset.get< bool >("SaveMCShowerInfo", false)), 
+  fSaveMCTrackInfo	    (pset.get< bool >("SaveMCTrackInfo", false)), 
   fSaveHitInfo	            (pset.get< bool >("SaveHitInfo", false)), 
   fSaveRawDigitInfo	            (pset.get< bool >("SaveRawDigitInfo", false)), 
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
@@ -2842,6 +2955,15 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (fSaveMCShowerInfo && mcshowerh.isValid())
   	nMCShowers = mcshowerh->size();
 	
+  // *MC Track information
+  art::Handle< std::vector<sim::MCTrack> > mctrackh;
+  if (isMC)
+    evt.getByLabel(fMCTrackModuleLabel, mctrackh);
+  
+  int nMCTracks = 0;
+  if (fSaveMCTrackInfo && mctrackh.isValid())
+  	nMCTracks = mctrackh->size();	
+	
   art::Ptr<simb::MCTruth> mctruthcry;
   int nCryPrimaries = 0;
    
@@ -2908,7 +3030,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (fSaveGeantInfo)    
     fData->ResizeGEANT(nGEANTparticles);  
   if (fSaveMCShowerInfo)
-    fData->ResizeMCShower(nMCShowers);   
+    fData->ResizeMCShower(nMCShowers); 
+  if (fSaveMCTrackInfo)
+    fData->ResizeMCTrack(nMCTracks);     
     
   fData->ClearLocalData(); // don't bother clearing tracker data yet
   
@@ -3788,7 +3912,50 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
        fData->mcshwr_Process.resize(shwr);
        fData->mcshwr_MotherProcess.resize(shwr);
        fData->mcshwr_AncestorProcess.resize(shwr);
-    }//End if (fSaveMCShowerInfo){   
+    }//End if (fSaveMCShowerInfo){  
+    
+    //Extract MC Track information and fill the Shower branches
+    if (fSaveMCTrackInfo){
+       fData->no_mctracks = nMCTracks;       
+       size_t trk = 0;
+       for(std::vector<sim::MCTrack>::const_iterator imctrk = mctrackh->begin();    
+    	 imctrk != mctrackh->end(); ++imctrk) {
+    	  const sim::MCTrack& mctrk = *imctrk;
+	  fData->mctrk_origin[trk]          = mctrk.Origin();
+    	  fData->mctrk_pdg[trk]	            = mctrk.PdgCode();	   
+    	  fData->mctrk_TrackId[trk]	    = mctrk.TrackID();	   
+    	  fData->mctrk_Process[trk]	    = mctrk.Process();	   
+    	  fData->mctrk_startX[trk]          = mctrk.Start().X();	    
+    	  fData->mctrk_startY[trk]          = mctrk.Start().Y();      	 
+    	  fData->mctrk_startZ[trk]          = mctrk.Start().Z();      	 
+    	  fData->mctrk_endX[trk]            = mctrk.End().X();      	 
+    	  fData->mctrk_endY[trk]            = mctrk.End().Y();      	 
+    	  fData->mctrk_endZ[trk]            = mctrk.End().Z(); 
+	  fData->mctrk_Motherpdg[trk]       = mctrk.MotherPdgCode(); 
+    	  fData->mctrk_MotherTrkId[trk]     = mctrk.MotherTrackID();    
+    	  fData->mctrk_MotherProcess[trk]   = mctrk.MotherProcess(); 
+	  fData->mctrk_MotherstartX[trk]    = mctrk.MotherStart().X();     
+    	  fData->mctrk_MotherstartY[trk]    = mctrk.MotherStart().Y();	  
+    	  fData->mctrk_MotherstartZ[trk]    = mctrk.MotherStart().Z();	  
+    	  fData->mctrk_MotherendX[trk]      = mctrk.MotherEnd().X(); 	  
+    	  fData->mctrk_MotherendY[trk]      = mctrk.MotherEnd().Y(); 	  
+    	  fData->mctrk_MotherendZ[trk]      = mctrk.MotherEnd().Z();  
+    	  fData->mctrk_Ancestorpdg[trk]     = mctrk.AncestorPdgCode();  
+    	  fData->mctrk_AncestorTrkId[trk]   = mctrk.AncestorTrackID();  
+    	  fData->mctrk_AncestorProcess[trk] = mctrk.AncestorProcess();
+	  fData->mctrk_AncestorstartX[trk]  = mctrk.AncestorStart().X();	  
+    	  fData->mctrk_AncestorstartY[trk]  = mctrk.AncestorStart().Y();		 
+    	  fData->mctrk_AncestorstartZ[trk]  = mctrk.AncestorStart().Z();		 
+    	  fData->mctrk_AncestorendX[trk]    = mctrk.AncestorEnd().X();	 
+    	  fData->mctrk_AncestorendY[trk]    = mctrk.AncestorEnd().Y();	 
+    	  fData->mctrk_AncestorendZ[trk]    = mctrk.AncestorEnd().Z();
+    	  ++trk; 
+       }
+       fData->mctrk_Process.resize(trk);
+       fData->mctrk_MotherProcess.resize(trk);
+       fData->mctrk_AncestorProcess.resize(trk);
+    }//End if (fSaveMCTrackInfo){  
+	  
 
       //GEANT particles information
       if (fSaveGeantInfo){ 

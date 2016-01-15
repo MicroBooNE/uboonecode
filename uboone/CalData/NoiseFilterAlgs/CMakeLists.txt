@@ -1,5 +1,5 @@
 art_make( BASENAME_ONLY
-          LIBRARY_NAME CalData
+          LIBRARY_NAME NoiseFilterAlgs
           LIB_LIBRARIES 
 			RawData
                         RecoBase
@@ -7,9 +7,7 @@ art_make( BASENAME_ONLY
 	                ${FHICLCPP}
 			${CETLIB}
 			${ROOT_BASIC_LIB_LIST}
-	  MODULE_LIBRARIES Geometry
-	                CalData
-  	  		NoiseFilterAlgs
+	                Geometry
 	  		Geometry_service
 	                Utilities
 			DetectorProperties_service
@@ -38,8 +36,6 @@ art_make( BASENAME_ONLY
 			${ROOT_FFTW}
 			${ROOT_BASIC_LIB_LIST}
         )
-
-add_subdirectory(NoiseFilterAlgs)
 
 install_headers()
 install_fhicl()
