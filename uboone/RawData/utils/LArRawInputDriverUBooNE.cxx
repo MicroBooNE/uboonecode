@@ -130,10 +130,11 @@ namespace lris {
     ::handle_missing_words<ub_TPC_CardData_v6>(true);
     ::handle_missing_words<ub_PMT_CardData_v6>(true);
 
-    helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
-    helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
-    helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
-    helper.reconstitutes<std::vector<raw::Trigger>,   art::InEvent>("daq");
+    helper.reconstitutes<raw::DAQHeader,                 art::InEvent>("daq");
+    helper.reconstitutes<std::vector<raw::RawDigit>,     art::InEvent>("daq");
+    helper.reconstitutes<raw::BeamInfo,                  art::InEvent>("daq");
+    helper.reconstitutes<std::vector<raw::Trigger>,      art::InEvent>("daq");
+    helper.reconstitutes<raw::ubdaqSoftwareTriggerData, art::InEvent>("daq");
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
     fDataTakingTime                    = ps.get< int  >("DataTakingTime", -1);
     fSwizzlingTime                     = ps.get< int  >("SwizzlingTime", -1);
@@ -364,8 +365,8 @@ namespace lris {
     std::unique_ptr<raw::BeamInfo> beam_info(new raw::BeamInfo);
     std::unique_ptr<std::vector<raw::Trigger>> trig_info( new std::vector<raw::Trigger> );
     std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > pmt_raw_digits;
-    std::unique_ptr<gov::fnal::uboone::datatypes::daqSoftwareTriggerData> sw_trig_info( new gov::fnal::uboone::datatypes::daqSoftwareTriggerData );
-    //gov::fnal::uboone::datatypes::daqSoftwareTriggerData * sw_trig_info(new gov::fnal::uboone::datatypes::daqSoftwareTriggerData);
+    std::unique_ptr<raw::ubdaqSoftwareTriggerData> sw_trig_info( new raw::ubdaqSoftwareTriggerData );
+    //raw::ubdaqSoftwareTriggerData * sw_trig_info(new raw::ubdaqSoftwareTriggerData);
 
     for ( unsigned int opdetcat=0; opdetcat<(unsigned int)opdet::NumUBOpticalChannelCategories; opdetcat++ ) {
       pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
@@ -452,7 +453,7 @@ namespace lris {
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo,
-                         gov::fnal::uboone::datatypes::daqSoftwareTriggerData& sw_trigInfo)
+                         raw::ubdaqSoftwareTriggerData& sw_trigInfo)
   {  
      triggerFrame = -999;
      TPCframe = -999;
@@ -1178,17 +1179,26 @@ namespace lris {
 
   // =====================================================================  
   void LArRawInputDriverUBooNE::fillSWTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
-						gov::fnal::uboone::datatypes::daqSoftwareTriggerData& trigInfo)
+						raw::ubdaqSoftwareTriggerData& trigInfo)
   {
-      // Trigger data pulled from DAQ software trigger...
+    try {
+      // Software trigger data pulled from DAQ software trigger
       ub_FEMBeamTriggerOutput swTrig = event_record.getSWTriggerOutputVector().at(0);
-     
+      // set art data product values
       trigInfo.setPass(swTrig.pass);
       trigInfo.setPhmax(swTrig.amplitude);
       trigInfo.setMultiplicity(swTrig.multiplicity);
       trigInfo.setTriggerTick(swTrig.time);
       trigInfo.setAlgorithm("");
-
+    }
+    catch(...){
+      std::cout << "failed to obtain software trigger object from binary file - setting all values to default" << std::endl;
+      trigInfo.setPass(0);
+      trigInfo.setPhmax(0);
+      trigInfo.setMultiplicity(0);
+      trigInfo.setTriggerTick(0);
+      trigInfo.setAlgorithm("NoSWTriggerData");
+    }
   }
     
 

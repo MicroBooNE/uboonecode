@@ -2,7 +2,7 @@
 #define _UBOONETYPES_DAQSWTRIGGERDATA_H
 #include <sys/types.h>
 #include <inttypes.h>
-#include "evttypes.h"
+//#include "evttypes.h"
 #include <string>
 //#include "share/boonetypes.h"
 //
@@ -13,14 +13,11 @@
 //#include "boost/date_time/posix_time/posix_time.hpp"
 //#include "boost/date_time/gregorian/greg_serialize.hpp"
 //#include "boost/date_time/posix_time/time_serialize.hpp"
-#include "constants.h"
+//#include "constants.h"
 
-namespace gov {
-namespace fnal {
-namespace uboone {
-namespace datatypes {
+namespace raw{
 
-using namespace gov::fnal::uboone;
+//using namespace gov::fnal::uboone;
 
 /**
    Note: this is the serialization class for the otherwise hardcoded trigger_data_t struct,
@@ -28,11 +25,11 @@ using namespace gov::fnal::uboone;
    should be made here as well, and the version number should be increased.
  **/
 
-class daqSoftwareTriggerData {
+class ubdaqSoftwareTriggerData {
 
  public:
 //  static const uint8_t DAQ_version_number = gov::fnal::uboone::datatypes::constants::VERSION;
-  daqSoftwareTriggerData(){};
+  ubdaqSoftwareTriggerData();
   //~daqSoftwareTriggerData();
 //  daqSoftwareTriggerData(daqSoftwareTriggerData &td) { pass= td.pass;  } //copy constructor?
 
@@ -70,10 +67,7 @@ class daqSoftwareTriggerData {
 };
 
 
-}  // end of namespace datatypes
-}  // end of namespace uboone
-}  // end of namespace fnal
-}  // end of namespace gov
+}  // end of namespace raw
 
 // This MACRO must be outside any namespaces.
 //BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::daqSoftwareTriggerData, gov::fnal::uboone::datatypes::constants::VERSION)    
