@@ -364,6 +364,9 @@ namespace lris {
     std::unique_ptr<raw::BeamInfo> beam_info(new raw::BeamInfo);
     std::unique_ptr<std::vector<raw::Trigger>> trig_info( new std::vector<raw::Trigger> );
     std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > pmt_raw_digits;
+    std::unique_ptr<gov::fnal::uboone::datatypes::daqSoftwareTriggerData> sw_trig_info( new gov::fnal::uboone::datatypes::daqSoftwareTriggerData );
+    //gov::fnal::uboone::datatypes::daqSoftwareTriggerData * sw_trig_info(new gov::fnal::uboone::datatypes::daqSoftwareTriggerData);
+
     for ( unsigned int opdetcat=0; opdetcat<(unsigned int)opdet::NumUBOpticalChannelCategories; opdetcat++ ) {
       pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
     }
@@ -390,7 +393,7 @@ namespace lris {
 
     bool res=false;
 
-    res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info );
+    res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info, *sw_trig_info );
 
     if (res) {
       fEventCounter++;
@@ -431,6 +434,9 @@ namespace lris {
       art::put_product_in_principal(std::move(trig_info),
 				    *outE,
 				    "daq"); // Module label
+      art::put_product_in_principal(std::move(sw_trig_info),
+				    *outE,
+				    "daq"); // Module label
       putPMTDigitsIntoEvent( pmt_raw_digits, outE );
      
     }
@@ -445,7 +451,8 @@ namespace lris {
                                                  std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
-						 std::vector<raw::Trigger>& trigInfo)
+						 std::vector<raw::Trigger>& trigInfo,
+                         gov::fnal::uboone::datatypes::daqSoftwareTriggerData& sw_trigInfo)
   {  
      triggerFrame = -999;
      TPCframe = -999;
@@ -484,6 +491,7 @@ namespace lris {
     fillTPCData(event_record, tpcDigitList);
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
+    fillSWTriggerData(event_record, sw_trigInfo);
 
     checkTimeStampConsistency();
 
@@ -1163,10 +1171,26 @@ namespace lris {
 //      if (triggerBitNuMI){std::cout << "NuMI Trigger issued" << std::endl;}
 //      if (triggerBitEXT){std::cout << "EXT Trigger issued" << std::endl;}
 //      std::cout << "trigger frame, sample = " << frame << "," << sample_64MHz << std::endl;
-
+      
       
     }
   }
+
+  // =====================================================================  
+  void LArRawInputDriverUBooNE::fillSWTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
+						gov::fnal::uboone::datatypes::daqSoftwareTriggerData& trigInfo)
+  {
+      // Trigger data pulled from DAQ software trigger...
+      ub_FEMBeamTriggerOutput swTrig = event_record.getSWTriggerOutputVector().at(0);
+     
+      trigInfo.setPass(swTrig.pass);
+      trigInfo.setPhmax(swTrig.amplitude);
+      trigInfo.setMultiplicity(swTrig.multiplicity);
+      trigInfo.setTriggerTick(swTrig.time);
+      trigInfo.setAlgorithm("");
+
+  }
+    
 
   // =====================================================================  
   std::vector<short> LArRawInputDriverUBooNE::decodeChannelTrailer(unsigned short last_adc, unsigned short data)

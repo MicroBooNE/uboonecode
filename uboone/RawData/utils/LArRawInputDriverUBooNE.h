@@ -21,6 +21,7 @@
 #include "datatypes/raw_data_access.h"
 #include <boost/archive/binary_iarchive.hpp>
 #include "datatypes/ub_EventRecord.h"
+#include "uboone/RawData/uboone_datatypes/daqSoftwareTriggerData.h"
 
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "Utilities/DatabaseUtil.h" // lardata
@@ -81,7 +82,8 @@ namespace lris {
 			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo,
-			  std::vector<raw::Trigger>& trigInfo);
+			  std::vector<raw::Trigger>& trigInfo,
+              gov::fnal::uboone::datatypes::daqSoftwareTriggerData& sw_trigInfo);
     void fillDAQHeaderData(gov::fnal::uboone::datatypes::ub_EventRecord& event_record,
 			   raw::DAQHeader& daqHeader);
     void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
@@ -92,6 +94,9 @@ namespace lris {
 		      raw::BeamInfo& beamInfo);
     void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 			 std::vector<raw::Trigger>& trigInfo);
+    void fillSWTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
+                        gov::fnal::uboone::datatypes::daqSoftwareTriggerData& trigInfo);
+
     void checkTimeStampConsistency(void);
 
     art::SourceHelper            fSourceHelper;
