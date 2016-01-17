@@ -1,0 +1,47 @@
+#include "prodsingle_common_uboone.fcl"
+# This job script just creates one likely-to-stop mu-, overlaid
+# with the otherwise usual cosmic bkgd.
+
+process_name: GenieGen
+
+# set quantum efficiency supressed scint yield to 0.03 * 24000
+services.user.LArProperties.ScintYield: 29000
+
+# enable optical physics in LArG4
+services.user.LArG4Parameters.EnabledPhysics: [ "Em",
+                                                "FastOptical",
+                                                "SynchrotronAndGN",
+                                                "Ion",
+                                                "Hadron",
+                                                "Decay",
+                                                "HadronElastic",
+                                                "Stopping",
+                                                "NeutronTrackingCut" ]
+
+# enable this custom physics list
+services.user.LArG4Parameters.UseCustomPhysics: true
+
+# disable cerenkov light
+services.user.LArProperties.EnableCerenkovLight: false
+
+physics.producers.generator: @local::microboone_singlep
+physics.producers.generator.TopVolume: "volTPCActive"
+physics.producers.generator.GlobalTimeOffset: 0.
+physics.producers.generator.RandomTimeOffset: 1600.
+
+#physics.producers.generator.fseed: [ 314159 ]
+physics.producers.generator.PDG: [ 13 ]
+physics.producers.generator.P0: [ 1.3 ]
+physics.producers.generator.SigmaP: [ 1.0 ]
+physics.producers.generator.PosDist: [ 0 ]
+physics.producers.generator.PDist: [ 0 ]
+physics.producers.generator.X0: [ 125. ]
+physics.producers.generator.SigmaX0: [ 140. ]
+physics.producers.generator.Y0: [ 200. ]
+physics.producers.generator.SigmaY0: [ 10. ]
+physics.producers.generator.Z0: [ 500. ]
+physics.producers.generator.SigmaZ0: [ 600. ]
+physics.producers.generator.Theta0XZ: [ 0. ]
+physics.producers.generator.Theta0YZ: [ -90. ]
+physics.producers.generator.SigmaThetaYZ: [ 30. ]
+physics.producers.generator.SigmaThetaYZ: [ 30. ]
