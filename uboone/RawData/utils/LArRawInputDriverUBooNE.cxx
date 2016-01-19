@@ -859,11 +859,12 @@ namespace lris {
     ::art::ServiceHandle< util::TimeService > timeService;
     ::art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     
-    // pmt channel map is assumed to be time dependent. therefore we need eventn time to set correct map.
+    // pmt channel map is assumed to be time dependent. therefore we need event time to set correct map.
     ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
     uint32_t seconds=global_header.getSeconds();
     time_t mytime = (time_t)seconds;
     if ( mytime==0 ) {
+      // some events seem o be missing time stamp. use run number in this case.
       std::cout << "[LArRawInputDriverUBooNE::fillPMTData] event epoch time 0 (!?). using run to set channel map" << std::endl;
       ub_pmt_channel_map->SetOpMapRun( global_header.getRunNumber() );
     }

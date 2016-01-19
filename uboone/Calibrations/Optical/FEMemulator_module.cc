@@ -46,6 +46,9 @@
 // Pulse finding
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"
 
+// Trigger Emulator Code
+#include "FEMBasicTriggerAlgo.h"
+
 
 class FEMemulator;
 
@@ -68,7 +71,7 @@ public:
 private:
 
   // basic trigger
-  void basicTrigger( int BeamWinSize, int NChannels, const std::vector< std::vector<int> >& chwfms, std::vector<int>& vmaxdiff, std::vector<int>& vmulti );
+  //void basicTrigger( int BeamWinSize, int NChannels, const std::vector< std::vector<int> >& chwfms, std::vector<int>& vmaxdiff, std::vector<int>& vmulti );
 
   // Declare member data here.
 
@@ -92,6 +95,7 @@ private:
   int fDiscr3deadtime;
 
   // Output tree and variables
+  fememu::BasicTriggerConfig fFEMconfig;
 
   // Beam Window Tree
   TTree* fTwindow;
@@ -125,7 +129,7 @@ FEMemulator::FEMemulator(fhicl::ParameterSet const & p)
   fMinReadoutTicks = p.get<int>( "MinReadoutTicks", 500 );
   fFrontBuffer     = p.get<int>( "FrontPorchBuffer", 0 );
   fDiscr0precount  = p.get<int>( "Discr0precount", 2 );
-
+  
   fDiscr0threshold = p.get<int>( "Discr0threshold", 5 );
   fDiscr0width     = p.get<int>( "Discr0width", 5 );
   fDiscr0delay     = p.get<int>( "Discr0delay", 5 );
@@ -136,6 +140,21 @@ FEMemulator::FEMemulator(fhicl::ParameterSet const & p)
   fDiscr3delay     = p.get<int>( "Discr3delay", 4 );
   fDiscr3deadtime  = p.get<int>( "Discr3deadtime", 4 );
 
+  // Setup config instance
+  //fFEMconfig.fBeamWinSize = fBeamWinSize;
+  fFEMconfig.fMinReadoutTicks = fMinReadoutTicks;
+  fFEMconfig.fFrontBuffer = fFrontBuffer;
+  fFEMconfig.fDiscr0delay = fDiscr0delay;
+  fFEMconfig.fDiscr0width = fDiscr0width;
+  fFEMconfig.fDiscr0threshold = fDiscr0threshold;
+  fFEMconfig.fDiscr0deadtime = fDiscr0deadtime;
+  fFEMconfig.fDiscr0precount = fDiscr0precount;
+  fFEMconfig.fDiscr3delay = fDiscr3delay;
+  fFEMconfig.fDiscr3width = fDiscr3width;
+  fFEMconfig.fDiscr3threshold = fDiscr3threshold;
+  fFEMconfig.fDiscr3deadtime = fDiscr3deadtime;
+  
+  
   // Setup Output Trees
 
   // save configuration
@@ -210,7 +229,7 @@ void FEMemulator::analyze(art::Event const & evt)
   // below is for the basic trigger
   std::vector<int> vmaxdiff;
   std::vector<int> vmulti;
-  basicTrigger( fBeamWinSize, fNChannels, wfms, vmaxdiff, vmulti );
+  fememu::basicTrigger( fBeamWinSize, fNChannels, fFEMconfig, wfms, vmaxdiff, vmulti );
   for (int i=0; i<(int)vmaxdiff.size(); i++) {
     winid = i;
     maxdiff = vmaxdiff.at(i);
@@ -220,108 +239,107 @@ void FEMemulator::analyze(art::Event const & evt)
 
   // NN trigger
 
-
   // ZO trigger
 
 }
 
 // Maybe these various triggers should go elsewhere
-void FEMemulator::basicTrigger( int BeamWinSize, int NChannels, const std::vector< std::vector<int> >& chwfms, std::vector<int>& vmaxdiff, std::vector<int>& vmulti ) {
+// void FEMemulator::basicTrigger( int BeamWinSize, int NChannels, const std::vector< std::vector<int> >& chwfms, std::vector<int>& vmaxdiff, std::vector<int>& vmulti ) {
 
-  //std::cout << __PRETTY_FUNCTION__ << std::endl;
+//   //std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-  // first calculate accumulators for each waveform
-  std::vector<int> chdiff[NChannels];
-  std::vector<int> chhit[NChannels];
-  for (int ch=0; ch<NChannels; ch++) {
+//   // first calculate accumulators for each waveform
+//   std::vector<int> chdiff[NChannels];
+//   std::vector<int> chhit[NChannels];
+//   for (int ch=0; ch<NChannels; ch++) {
 
-    const std::vector<int>& wfm = chwfms[ch];
+//     const std::vector<int>& wfm = chwfms[ch];
 
-    chdiff[ch].resize( wfm.size(), 0 );
-    chhit[ch].resize( wfm.size(), 0 );
+//     chdiff[ch].resize( wfm.size(), 0 );
+//     chhit[ch].resize( wfm.size(), 0 );
 
-    // memory for diff vectors
-    std::vector<int> diff0( (int)wfm.size(), 0 );
-    std::vector<int> diff3( (int)wfm.size(), 0 );
-    for (int tick=fDiscr0delay; tick<(int)wfm.size(); tick++)
-      diff0.at(tick) = wfm.at(tick)-wfm.at(tick-fDiscr0delay);
-    for (int tick=fDiscr3delay; tick<(int)wfm.size(); tick++)
-      diff3.at(tick) = wfm.at(tick)-wfm.at(tick-fDiscr3delay);
+//     // memory for diff vectors
+//     std::vector<int> diff0( (int)wfm.size(), 0 );
+//     std::vector<int> diff3( (int)wfm.size(), 0 );
+//     for (int tick=fDiscr0delay; tick<(int)wfm.size(); tick++)
+//       diff0.at(tick) = wfm.at(tick)-wfm.at(tick-fDiscr0delay);
+//     for (int tick=fDiscr3delay; tick<(int)wfm.size(); tick++)
+//       diff3.at(tick) = wfm.at(tick)-wfm.at(tick-fDiscr3delay);
 
 
-    // determine triggers and fill accumulators
-    std::vector<int> ttrig0;
-    std::vector<int> ttrig3;
+//     // determine triggers and fill accumulators
+//     std::vector<int> ttrig0;
+//     std::vector<int> ttrig3;
     
-    for (int tick=0; tick<(int)wfm.size(); tick++) {
-      // discr0 must fire first: acts as pre-trigger. won't fire again until all discs are no longer active
-      if ( diff0.at(tick)>=fDiscr0threshold ) {
-	if ( (ttrig0.size()==0 || ttrig0.at( ttrig0.size()-1 )+fDiscr0precount<tick )
-	     && ( ttrig3.size()==0 || ttrig3.at( ttrig3.size()-1 )+fDiscr3deadtime < tick ) ) {
-	  // form discr0 trigger
-	  ttrig0.push_back( tick );
-	}
-      } // end of if discr0 fires
+//     for (int tick=0; tick<(int)wfm.size(); tick++) {
+//       // discr0 must fire first: acts as pre-trigger. won't fire again until all discs are no longer active
+//       if ( diff0.at(tick)>=fDiscr0threshold ) {
+// 	if ( (ttrig0.size()==0 || ttrig0.at( ttrig0.size()-1 )+fDiscr0precount<tick )
+// 	     && ( ttrig3.size()==0 || ttrig3.at( ttrig3.size()-1 )+fDiscr3deadtime < tick ) ) {
+// 	  // form discr0 trigger
+// 	  ttrig0.push_back( tick );
+// 	}
+//       } // end of if discr0 fires
 
-      // discr3 fire
-      if ( diff3.at(tick)>=fDiscr3threshold ) {
-	// must be within discr0 prewindow and outside of past discr3 deadtime
-	if ( ( ttrig0.size()>0 && tick-ttrig0.at( ttrig0.size()-1 ) < fDiscr0deadtime )
-	     && ( ttrig3.size()==0 || ttrig3.at( ttrig3.size()-1 ) + fDiscr3deadtime < tick ) ) {
-	  ttrig3.push_back( tick );
-	  // find maxdiff
-	  int tmaxdiff = diff3.at(tick);
-	  for (int t=tick; t<std::min( tick+fDiscr3width, (int)diff3.size() ); t++) {
-	    if ( tmaxdiff<diff3.at(t) )
-	      tmaxdiff = diff3.at(t);
-	  }
-	  // fill the accumulators
-	  int tend = std::min( tick+fDiscr3deadtime, (int)diff3.size() );
-	  for (int t=tick; t<tend; t++) {
-	    chdiff[ch].at( t ) = tmaxdiff;
-	    chhit[ch].at( t ) = 1;
-	  }
-	}
-      }
-    }//end of wfm loop for trigger and accumulators
-  }//end of channel loop
+//       // discr3 fire
+//       if ( diff3.at(tick)>=fDiscr3threshold ) {
+// 	// must be within discr0 prewindow and outside of past discr3 deadtime
+// 	if ( ( ttrig0.size()>0 && tick-ttrig0.at( ttrig0.size()-1 ) < fDiscr0deadtime )
+// 	     && ( ttrig3.size()==0 || ttrig3.at( ttrig3.size()-1 ) + fDiscr3deadtime < tick ) ) {
+// 	  ttrig3.push_back( tick );
+// 	  // find maxdiff
+// 	  int tmaxdiff = diff3.at(tick);
+// 	  for (int t=tick; t<std::min( tick+fDiscr3width, (int)diff3.size() ); t++) {
+// 	    if ( tmaxdiff<diff3.at(t) )
+// 	      tmaxdiff = diff3.at(t);
+// 	  }
+// 	  // fill the accumulators
+// 	  int tend = std::min( tick+fDiscr3deadtime, (int)diff3.size() );
+// 	  for (int t=tick; t<tend; t++) {
+// 	    chdiff[ch].at( t ) = tmaxdiff;
+// 	    chhit[ch].at( t ) = 1;
+// 	  }
+// 	}
+//       }
+//     }//end of wfm loop for trigger and accumulators
+//   }//end of channel loop
 
-  // break up waveform into windows and calculate trigger vars for each window
-  int wfmsize = (int)chwfms.at(0).size();
-  if ( wfmsize < fMinReadoutTicks ) {
-    std::cout << "Beam readout window size is too small! (" << wfmsize << " < " << fMinReadoutTicks << ")" << std::endl;
-    return;
-  }
+//   // break up waveform into windows and calculate trigger vars for each window
+//   int wfmsize = (int)chwfms.at(0).size();
+//   if ( wfmsize < fMinReadoutTicks ) {
+//     std::cout << "Beam readout window size is too small! (" << wfmsize << " < " << fMinReadoutTicks << ")" << std::endl;
+//     return;
+//   }
 
-  int nwindows = (wfmsize-1-fFrontBuffer)/fBeamWinSize;
-  vmaxdiff.clear();
-  vmulti.clear();
+//   int nwindows = (wfmsize-1-fFrontBuffer)/fBeamWinSize;
+//   vmaxdiff.clear();
+//   vmulti.clear();
 
-  for (int iwin=0; iwin<nwindows; iwin++) {
-    int winstart = fFrontBuffer + iwin*fBeamWinSize;
-    int winend   = fFrontBuffer + (iwin+1)*fBeamWinSize;
-    winid = iwin;
-    int winmaxmulti = 0;
-    int winmaxdiff = 0;
-    for (int tick=winstart; tick<winend; tick++) {
-      int maxdiff_ = 0;
-      int nhit_ = 0;
-      for (int ch=0; ch<NChannels; ch++) {
-	maxdiff_ += chdiff[ch].at(tick);
-	nhit_    += chhit[ch].at(tick);
-      }
-      if ( winmaxdiff < maxdiff_ )
-	winmaxdiff = maxdiff_;
-      if ( winmaxmulti < nhit_ )
-	winmaxmulti = nhit_;
-    }
+//   for (int iwin=0; iwin<nwindows; iwin++) {
+//     int winstart = fFrontBuffer + iwin*fBeamWinSize;
+//     int winend   = fFrontBuffer + (iwin+1)*fBeamWinSize;
+//     winid = iwin;
+//     int winmaxmulti = 0;
+//     int winmaxdiff = 0;
+//     for (int tick=winstart; tick<winend; tick++) {
+//       int maxdiff_ = 0;
+//       int nhit_ = 0;
+//       for (int ch=0; ch<NChannels; ch++) {
+// 	maxdiff_ += chdiff[ch].at(tick);
+// 	nhit_    += chhit[ch].at(tick);
+//       }
+//       if ( winmaxdiff < maxdiff_ )
+// 	winmaxdiff = maxdiff_;
+//       if ( winmaxmulti < nhit_ )
+// 	winmaxmulti = nhit_;
+//     }
 
-    // store for the window
-    vmaxdiff.push_back( winmaxdiff );
-    vmulti.push_back( winmaxmulti );
+//     // store for the window
+//     vmaxdiff.push_back( winmaxdiff );
+//     vmulti.push_back( winmaxmulti );
     
-  }
+//   }
   
-}
+// }
 
 DEFINE_ART_MODULE(FEMemulator)
