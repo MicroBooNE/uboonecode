@@ -120,6 +120,10 @@ namespace larlite {
     /// Function to be called @ end or beginning of each event
     void EventClear();
 
+    /// Method to define a integer key per data product
+    template <class T>
+    void ProducePtrMapKey(const art::Ptr<T>& ptr, size_t& key1, size_t& key2);
+
     /// Method to generate a data product ID for a specified type (through template) and producer module label's index
     template <class T>
     const ::larlite::product_id ProductID(size_t name_index) const;
@@ -137,7 +141,7 @@ namespace larlite {
 
     /// Accessor to art::Ptr map ... used to locate associated data product location
     template <class T>
-    std::map<art::Ptr<T>,std::pair<size_t,size_t> >& GetPtrMap();
+    std::map<art::Ptr<T>,std::pair<size_t,size_t> >& GetPtrMap(size_t key1=0, size_t key2=0);
 
     /// Utility function to link LArSoft data product type to LArLite enum
     template <class T>
@@ -164,33 +168,33 @@ namespace larlite {
     std::vector<std::map<std::string,bool> > fDataReadFlag_v;
 
     // art::Ptr local storage. Value = index of data product & index of label
-    std::map<art::Ptr<::simb::MCTruth>,     std::pair<size_t,size_t> > fPtrIndex_mctruth;
-    std::map<art::Ptr<::simb::GTruth>,      std::pair<size_t,size_t> > fPtrIndex_gtruth;
-    std::map<art::Ptr<::simb::MCFlux>,      std::pair<size_t,size_t> > fPtrIndex_mcflux;
-    std::map<art::Ptr<::simb::MCParticle>,  std::pair<size_t,size_t> > fPtrIndex_mcpart;
-    std::map<art::Ptr<::sim::SimChannel>,   std::pair<size_t,size_t> > fPtrIndex_simch;
-    std::map<art::Ptr<::sim::MCShower>,     std::pair<size_t,size_t> > fPtrIndex_mcshower;
-    std::map<art::Ptr<::sim::MCTrack>,      std::pair<size_t,size_t> > fPtrIndex_mctrack;
-    std::map<art::Ptr<::raw::RawDigit>,     std::pair<size_t,size_t> > fPtrIndex_rawdigit;
-    std::map<art::Ptr<::raw::OpDetWaveform>,std::pair<size_t,size_t> > fPtrIndex_opdigit;
-    std::map<art::Ptr<::raw::Trigger>,      std::pair<size_t,size_t> > fPtrIndex_trigger;
-    std::map<art::Ptr<::recob::Wire>,       std::pair<size_t,size_t> > fPtrIndex_wire;
-    std::map<art::Ptr<::recob::Hit>,        std::pair<size_t,size_t> > fPtrIndex_hit;
-    std::map<art::Ptr<::recob::OpHit>,      std::pair<size_t,size_t> > fPtrIndex_ophit;
-    std::map<art::Ptr<::recob::OpFlash>,    std::pair<size_t,size_t> > fPtrIndex_opflash;
-    std::map<art::Ptr<::recob::Cluster>,    std::pair<size_t,size_t> > fPtrIndex_cluster;
-    std::map<art::Ptr<::recob::Shower>,     std::pair<size_t,size_t> > fPtrIndex_shower;
-    std::map<art::Ptr<::recob::Vertex>,     std::pair<size_t,size_t> > fPtrIndex_vertex;
-    std::map<art::Ptr<::recob::Track>,      std::pair<size_t,size_t> > fPtrIndex_track;
-    std::map<art::Ptr<::anab::CosmicTag>,   std::pair<size_t,size_t> > fPtrIndex_cosmictag;
-    std::map<art::Ptr<::anab::Calorimetry>, std::pair<size_t,size_t> > fPtrIndex_calo;
-    std::map<art::Ptr<::recob::SpacePoint>, std::pair<size_t,size_t> > fPtrIndex_sps;
-    std::map<art::Ptr<::recob::EndPoint2D>, std::pair<size_t,size_t> > fPtrIndex_end2d;
-    std::map<art::Ptr<::recob::Seed>,       std::pair<size_t,size_t> > fPtrIndex_seed;
-    std::map<art::Ptr<::anab::ParticleID>,  std::pair<size_t,size_t> > fPtrIndex_partid;
-    std::map<art::Ptr<::recob::PFParticle>, std::pair<size_t,size_t> > fPtrIndex_pfpart;
-    std::map<art::Ptr<::recob::PCAxis>,     std::pair<size_t,size_t> > fPtrIndex_pcaxis;
-    std::map<art::Ptr<::anab::FlashMatch>,  std::pair<size_t,size_t> > fPtrIndex_fmatch;
+    std::vector< std::vector< std::map< art::Ptr<::simb::MCTruth>,     std::pair<size_t,size_t> > > > fPtrIndex_mctruth;
+    std::vector< std::vector< std::map< art::Ptr<::simb::GTruth>,      std::pair<size_t,size_t> > > > fPtrIndex_gtruth;
+    std::vector< std::vector< std::map< art::Ptr<::simb::MCFlux>,      std::pair<size_t,size_t> > > > fPtrIndex_mcflux;
+    std::vector< std::vector< std::map< art::Ptr<::simb::MCParticle>,  std::pair<size_t,size_t> > > > fPtrIndex_mcpart;
+    std::vector< std::vector< std::map< art::Ptr<::sim::SimChannel>,   std::pair<size_t,size_t> > > > fPtrIndex_simch;
+    std::vector< std::vector< std::map< art::Ptr<::sim::MCShower>,     std::pair<size_t,size_t> > > > fPtrIndex_mcshower;
+    std::vector< std::vector< std::map< art::Ptr<::sim::MCTrack>,      std::pair<size_t,size_t> > > > fPtrIndex_mctrack;
+    std::vector< std::vector< std::map< art::Ptr<::raw::RawDigit>,     std::pair<size_t,size_t> > > > fPtrIndex_rawdigit;
+    std::vector< std::vector< std::map< art::Ptr<::raw::OpDetWaveform>,std::pair<size_t,size_t> > > > fPtrIndex_opdigit;
+    std::vector< std::vector< std::map< art::Ptr<::raw::Trigger>,      std::pair<size_t,size_t> > > > fPtrIndex_trigger;
+    std::vector< std::vector< std::map< art::Ptr<::recob::Wire>,       std::pair<size_t,size_t> > > > fPtrIndex_wire;
+    std::vector< std::vector< std::map< art::Ptr<::recob::Hit>,        std::pair<size_t,size_t> > > > fPtrIndex_hit;
+    std::vector< std::vector< std::map< art::Ptr<::recob::OpHit>,      std::pair<size_t,size_t> > > > fPtrIndex_ophit;
+    std::vector< std::vector< std::map< art::Ptr<::recob::OpFlash>,    std::pair<size_t,size_t> > > > fPtrIndex_opflash;
+    std::vector< std::vector< std::map< art::Ptr<::recob::Cluster>,    std::pair<size_t,size_t> > > > fPtrIndex_cluster;
+    std::vector< std::vector< std::map< art::Ptr<::recob::Shower>,     std::pair<size_t,size_t> > > > fPtrIndex_shower;
+    std::vector< std::vector< std::map< art::Ptr<::recob::Vertex>,     std::pair<size_t,size_t> > > > fPtrIndex_vertex;
+    std::vector< std::vector< std::map< art::Ptr<::recob::Track>,      std::pair<size_t,size_t> > > > fPtrIndex_track;
+    std::vector< std::vector< std::map< art::Ptr<::anab::CosmicTag>,   std::pair<size_t,size_t> > > > fPtrIndex_cosmictag;
+    std::vector< std::vector< std::map< art::Ptr<::anab::Calorimetry>, std::pair<size_t,size_t> > > > fPtrIndex_calo;
+    std::vector< std::vector< std::map< art::Ptr<::recob::SpacePoint>, std::pair<size_t,size_t> > > > fPtrIndex_sps;
+    std::vector< std::vector< std::map< art::Ptr<::recob::EndPoint2D>, std::pair<size_t,size_t> > > > fPtrIndex_end2d;
+    std::vector< std::vector< std::map< art::Ptr<::recob::Seed>,       std::pair<size_t,size_t> > > > fPtrIndex_seed;
+    std::vector< std::vector< std::map< art::Ptr<::anab::ParticleID>,  std::pair<size_t,size_t> > > > fPtrIndex_partid;
+    std::vector< std::vector< std::map< art::Ptr<::recob::PFParticle>, std::pair<size_t,size_t> > > > fPtrIndex_pfpart;
+    std::vector< std::vector< std::map< art::Ptr<::recob::PCAxis>,     std::pair<size_t,size_t> > > > fPtrIndex_pcaxis;
+    std::vector< std::vector< std::map< art::Ptr<::anab::FlashMatch>,  std::pair<size_t,size_t> > > > fPtrIndex_fmatch;
   };
 }
 
