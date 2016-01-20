@@ -17,8 +17,8 @@ microboone_optical_fem_sim:
   # high-gain values, with a 10x adjustment for any thresholds. An FEM
   # expert needs to go through these numbers and adjust them.
   
-  DiscriminatorThreshold0:[   2,   2] # Lower limit of discriminator 0, units=ADC counts 
-  DiscriminatorThreshold1:[   4,   8] # Lower limit of discriminator 1, units=ADC counts 
+  DiscriminatorThreshold0:[   5,   5] # Lower limit of discriminator 0, units=ADC counts 
+  DiscriminatorThreshold1:[  50,  90] # Lower limit of discriminator 1, units=ADC counts 
   DiscriminatorThreshold3:[  20,   2] # Lower limit of discriminator 3, units=ADC counts
   Discriminator0Window:   [   6,   6] # Disc 0 must have fired within this many time slices for disc1 to fire.
   PMTDelay0:              [   4,   4] # Delay used to subtract the signal from itself, units=time slices
@@ -28,13 +28,13 @@ microboone_optical_fem_sim:
   BeamWordsNuMI:          [1500,1500] # Number of time slices to write for each NuMI beam gate
   BeamDelayBNB:           [ 256, 256] # Number of time slices to include before start of BNB beam gate
   BeamDelayNuMI:          [ 256, 256] # Number of time slices to include before start of NuMI beam gate
-  PMTWords:               [  20,  20] # Number of time slices to write when disc 1 fires.
+  PMTWords:               [  40,  40] # Number of time slices to write when disc 1 fires.
   BeamThreshold:          [  40,   4] # Total number of ADC counts among all selected channels for PMT beam trigger
   CosmicThreshold:        [ 800,  80] # Total number of ADC counts among all selected channels for PMT cosmic trigger
   BeamMultiplicity:       [   1,   1] # Number of channels whose sum must be over threshold for a PMT beam trigger
   CosmicMultiplicity:     [   5,   5] # Number of channels whose sum must be over threshold for a PMT cosmic trigger
-  PMTPrecount:            [   2,   2] # Number of inactive time slices between successive discriminator 0 firings.
-  Discriminator1DeadTime: [ 256,  24] # Dead time for discriminator 1, units=time slices
+  PMTPrecount:            [   1,   1] # Number of inactive time slices between successive discriminator 0 firings.
+  Discriminator1DeadTime: [  45,  45] # Dead time for discriminator 1, units=time slices
   Discriminator3DeadTime: [  24,  24] # Dead time for discriminator 3, units=time slices
   Discriminator1Width:    [   7,   7] # Pulse width for discriminator 1, units=time slices
   Discriminator3Width:    [   7,   7] # Pulse width for discriminator 3, units=time slices
@@ -71,9 +71,9 @@ microboone_optical_adc_sim:
 
   EnableSpread: true
 
-  Duration:     6.85e3
+  Duration:     7.25e3
 
-  G4StartTime:  -3.65e6
+  G4StartTime:  -4.05e6
 
   LogicPulseAmplitude: 3000
 
