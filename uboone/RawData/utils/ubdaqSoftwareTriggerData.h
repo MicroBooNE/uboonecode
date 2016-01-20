@@ -28,42 +28,31 @@ namespace raw{
 class ubdaqSoftwareTriggerData {
 
  public:
-//  static const uint8_t DAQ_version_number = gov::fnal::uboone::datatypes::constants::VERSION;
-  ubdaqSoftwareTriggerData();
-  //~daqSoftwareTriggerData();
-//  daqSoftwareTriggerData(daqSoftwareTriggerData &td) { pass= td.pass;  } //copy constructor?
+  ubdaqSoftwareTriggerData(); // standard constructor
 
   bool getPass() { return pass; }
-  uint32_t getPhmax() { return PHMAX; }
-  uint32_t getMultiplicity() { return multiplicity; }
-  uint32_t getTriggerTick() { return triggerTick; }
+  uint32_t getPhmax() { return PHMAX; } // max adc sum at (software) trigger firing time
+  uint32_t getMultiplicity() { return multiplicity; } // multiplicity at (software) trigger firing time
+  uint32_t getTriggerTick() { return triggerTick; }  // tick since the beam-gate opened
+  double getTimeSinceTrigger() { return triggerTime; } // time since the event (hardware) trigger, in us
   std::string getTriggerAlgorithm() { return algorithm; }
 
   void setPass(bool passFail) {pass = passFail;}
   void setPhmax(uint32_t phmax) {PHMAX = phmax;}
   void setMultiplicity(uint32_t mult) {multiplicity = mult;}
-  void setTriggerTick(uint32_t tick) {triggerTick = tick;}
+  void setTriggerTick(uint32_t tick) {triggerTick = tick;} // Does not affect trigger time number - needs to be set independently
+  void setTimeSinceTrigger(double time) { triggerTime = time; } // Does not affect trigger tick number - needs to be set independently
   void setAlgorithm(std::string algo) {algorithm = algo;}
 
  private:
-  uint32_t trigger_event_num;
 
   bool pass;
-  uint32_t PHMAX;
-  uint32_t multiplicity;
-  uint32_t triggerTick;
+  uint32_t PHMAX; // max adc sum at (software) trigger firing time
+  uint32_t multiplicity; // multiplicity at (software) trigger firing time
+  uint32_t triggerTick; // tick since the beam-gate opened
+  double triggerTime; // time since the event (hardware) trigger, in us
   std::string algorithm;
-//  friend class boost::serialization::access;
-//  
-//  template<class Archive>
-//    void serialize(Archive & ar, const unsigned int version)
-//    {
-//      if( version >0 )
-//	ar & bt_trigger_data.trig_event_num
-//	   & bt_trigger_data.trig_event_type
-//	   & bt_trigger_data.frame
-//	   & bt_trigger_data.clock;
-//    }
+
 };
 
 

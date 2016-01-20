@@ -1167,6 +1167,8 @@ namespace lris {
       triggerBitPMTBeam = trig_bits & 0x1;
       triggerBitPMTCosmic = trig_bits & 0x2;
       triggerTime = trigger_time;
+
+      std::cout << "trigger frame, sample, time = " << triggerFrame << ", " << triggerSample << ", " << triggerTime << std::endl;
       
 //      if (triggerBitBNB){std::cout << "BNB Trigger issued" << std::endl;}
 //      if (triggerBitNuMI){std::cout << "NuMI Trigger issued" << std::endl;}
@@ -1181,6 +1183,8 @@ namespace lris {
   void LArRawInputDriverUBooNE::fillSWTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 						raw::ubdaqSoftwareTriggerData& trigInfo)
   {
+    ::art::ServiceHandle< util::TimeService > timeService;
+
     try {
       // Software trigger data pulled from DAQ software trigger
       ub_FEMBeamTriggerOutput swTrig = event_record.getSWTriggerOutputVector().at(0);
@@ -1190,6 +1194,14 @@ namespace lris {
       trigInfo.setMultiplicity(swTrig.multiplicity);
       trigInfo.setTriggerTick(swTrig.time);
       trigInfo.setAlgorithm("");
+      
+      double time_since_run_start = timeService->OpticalClock().Time( swTrig.time, triggerFrame );
+ 
+      std::cout << "SW trigger frame, sample, time = " << triggerFrame << ", " << swTrig.time << ", " << time_since_run_start << std::endl;
+      std::cout << "PHMAX = " << trigInfo.getPhmax() << std::endl;
+      std::cout << "setting swTrigInfo time to " << trigInfo.getTimeSinceTrigger() << std::endl;
+      trigInfo.setTimeSinceTrigger(time_since_run_start - triggerTime);
+      
     }
     catch(...){
       std::cout << "failed to obtain software trigger object from binary file - setting all values to default" << std::endl;
@@ -1198,7 +1210,9 @@ namespace lris {
       trigInfo.setMultiplicity(0);
       trigInfo.setTriggerTick(0);
       trigInfo.setAlgorithm("NoSWTriggerData");
+      trigInfo.setTimeSinceTrigger(-999);
     }
+
   }
     
 
