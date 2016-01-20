@@ -99,6 +99,8 @@ namespace lris {
 
     void checkTimeStampConsistency(void);
 
+    double _trigger_beam_window_time;
+
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;
     std::ifstream                  fInputStream;

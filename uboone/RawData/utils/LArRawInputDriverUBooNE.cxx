@@ -485,7 +485,7 @@ namespace lris {
     //std::cout<<event_record.debugInfo()<<std::endl;
     //set granularity 
     //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
-      
+    _trigger_beam_window_time = std::numeric_limits<double>::max();
     fillTriggerData(event_record, trigInfo);
     //if (skipEvent){return false;} // check that trigger data doesn't suggest we should skip event. // commented out because this doesn't work at the moment
     fillDAQHeaderData(event_record, daqHeader);
@@ -1186,24 +1186,85 @@ namespace lris {
     ::art::ServiceHandle< util::TimeService > timeService;
 
     try {
+
       // Software trigger data pulled from DAQ software trigger
       ub_FEMBeamTriggerOutput swTrig = event_record.getSWTriggerOutputVector().at(0);
       // set art data product values
       trigInfo.setPass(swTrig.pass);
+      if (swTrig.pass == 0){ // if failed, set to default values
+        trigInfo.setPhmax(0);
+        trigInfo.setMultiplicity(0);
+        trigInfo.setTriggerTick(0);
+        trigInfo.setTimeSinceTrigger(-999);
+        trigInfo.setAlgorithm("");
+        return;
+      }
+      // passed, so fill with correct values
       trigInfo.setPhmax(swTrig.amplitude);
       trigInfo.setMultiplicity(swTrig.multiplicity);
       trigInfo.setTriggerTick(swTrig.time);
-      trigInfo.setAlgorithm("");
+      trigInfo.setAlgorithm(""); // not implemented at this time
+
+      //
+      // Figure out time w.r.t. Trigger - dirty but works.
+      //
+      auto const& opt_clock = timeService->OpticalClock();
+      auto const& trg_clock = timeService->TriggerClock();
+      auto const& tpc_clock = timeService->TPCClock();
+      auto const& trig_map  = event_record.getTRIGSEBMap();
+      auto const& trig_header = trig_map.begin()->second.getTriggerHeader();
+      auto const& trig_data = trig_map.begin()->second.getTriggerCardData().getTriggerData();
+
+      uint64_t trig_sample_number = trig_header.get2MHzSampleNumber() * 32;
+      trig_sample_number += trig_header.get16MHzRemainderNumber() * 4;
+      trig_sample_number += trig_data.getPhase();
+
+      double trigger_time = (double)(trig_header.getFrame() * opt_clock.FramePeriod());
+      trigger_time += ((double)trig_sample_number) * opt_clock.TickPeriod();
+
+      uint64_t trig_tick = trig_sample_number + trig_header.getFrame() * opt_clock.FrameTicks();
+
+      auto const& crate_data = event_record.getPMTSEBMap().begin()->second;
+      auto const& pmt_card    = crate_data.getCards().at(0);
       
-      double time_since_run_start = timeService->OpticalClock().Time( swTrig.time, triggerFrame );
- 
-      std::cout << "SW trigger frame, sample, time = " << triggerFrame << ", " << swTrig.time << ", " << time_since_run_start << std::endl;
-      std::cout << "PHMAX = " << trigInfo.getPhmax() << std::endl;
-      std::cout << "setting swTrigInfo time to " << trigInfo.getTimeSinceTrigger() << std::endl;
-      trigInfo.setTimeSinceTrigger(time_since_run_start - triggerTime);
+      uint64_t beam_ro_tick = 0;
+      auto const& card_data = crate_data.getCards().front();
+      uint64_t min_dt = 1e12; //FIXME this should be set to max integer value from compiler
+      // First search the target timing
+      for(auto const& ch_data : card_data.getChannels()){
+	
+        for(auto const& window : ch_data.getWindows()) {
+       
+          if(window.header().getDiscriminantor()!=ub_PMT_DiscriminatorTypes_v6::BEAM && 
+             window.header().getDiscriminantor()!=ub_PMT_DiscriminatorTypes_v6::BEAM_GATE){
+            continue; //ignore non-BEAM signals
+          }
+        
+          uint64_t window_time = RollOver(card_data.getFrame(), window.header().getFrame(), 3) * 102400;
+          window_time += window.header().getSample();
+          uint64_t window_trigger_dt = 
+            ( window_time < trig_tick ? trig_tick - window_time : window_time - trig_tick );
+          
+          if( min_dt > window_trigger_dt ) {
+            min_dt       = window_trigger_dt;
+            beam_ro_tick = window_time;
+          }
+	    }
+      }
+
+      if(beam_ro_tick > trig_tick){
+        _trigger_beam_window_time = beam_ro_tick - trig_tick;
+      }
+      else{
+        _trigger_beam_window_time = trig_tick - beam_ro_tick;
+        _trigger_beam_window_time *= -1.;
+      }
+      _trigger_beam_window_time += swTrig.time * opt_clock.TickPeriod();
       
+      //finally, set the time since trigger to the correct value
+      trigInfo.setTimeSinceTrigger(_trigger_beam_window_time);
     }
-    catch(...){
+    catch(...){ // softwrare trigger data product not present in binary file (because it's too old probably).  Just set values to a default
       std::cout << "failed to obtain software trigger object from binary file - setting all values to default" << std::endl;
       trigInfo.setPass(0);
       trigInfo.setPhmax(0);
