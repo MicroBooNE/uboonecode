@@ -25,6 +25,8 @@ microboone_simwire:
  TestIndex:           [6400]
  TestCharge:          [20000] 
  Sample:              -1           # no test: 0-3 generates test output
+
+ MakeNoiseDists:      false
 }
 #microboone_simwireana: @local::standard_simwireana
 microboone_simwireana:

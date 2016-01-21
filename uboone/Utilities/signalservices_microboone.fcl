@@ -2,15 +2,22 @@ BEGIN_PROLOG
 
 microboone_signalshapingservice:
 {
+
+  NConfigs:  2  # if set to 1, you get the same config for all channels
+                # otherwise, you need to supply the map of channel <-> config... see GetConfig()
+
   ADCPerPCAtLowestASICGain: 9390 #ADC/pC
   # ASICGains:           [4.7, 7.8, 14, 25] #Default: 7.8
-  ASICGainInMVPerFC:  [7.8, 7.8, 7.8] #mV/fC for U, Y & Y planes
+  #mV/fC for different configs and U, V & Y planes
+  ASICGainInMVPerFC: [ [14.0, 14.0, 14.0], [4.7, 14.0, 14.0] ]  
 
-  ShapeTimeConst:  [ 2.0, 2.0, 2.0] #Peaking time (microseconds) for U, V & Y planes
+
+  #Vector of peaking time (microseconds) for differet configs and U, V & Y planes
+  ShapeTimeConst:  [ [2.0, 2.0, 2.0], [ 1.0, 2.0, 2.0] ] 
   
   #Noise Factor - rms ADCs @ lowest ASIC Gain (4.7 mV/fC)
   #Entries listed per shaping time, in increasing order(for 0.5, 1.0, 2.0, 3.0 us)
-  NoiseFactVec:         [[ 1.12, 0.86, 0.60, 0.55 ], [ 1.12, 0.86, 0.60, 0.55 ], [ 0.89, 0.66, 0.48, 0.43 ]]
+  NoiseFactVec:    [ [ 1.12, 0.86, 0.60, 0.55 ], [ 1.12, 0.86, 0.60, 0.55 ], [ 0.89, 0.66, 0.48, 0.43 ] ]
 
   # to turn off noise
   #NoiseFactVec:         [[ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ], [ 0.0, 0.0, 0.0, 0.0 ]]
@@ -20,14 +27,30 @@ microboone_signalshapingservice:
   ViewIndex:             [0, 1, 2]  # gives the larsoft plane number corresponding to each local plane number
   ViewForNormalization:   2         # lets say this is the local plane number, may need to rethink
 
+
   FieldRespAmpVec:  [1.0, 1.0, 1.0]
+
+  # there is commented code in SignalShapingService to test vector of vector of vectors... works!
+  #TestParams:       [[[1.0, 2.0],[3.0, 4.0]], [[5.0,6.0],[7.0, 8.0]]]
+
+
+#-------------------------------------------------------------
+# Switching between Calibrated and Old field response
+
+#UseCalibratedResponses: true
+#FieldResponseFNameBase: "uboone_response_70kV"
+#CalibResponseTOffset: [-21.61, -21.61, -21.61]   # in us time offset to align all three planes
+			
+UseCalibratedResponses: false
+FieldResponseFNameBase: "uboone_response"
+CalibResponseTOffset: [0, 0, 0]   # in us time offset to align all three planes
+
 
 #---------------------------------------------------------------
 # Settings for old-style responses (no dynamic induced charge)
 
   NResponses:           [ [1, 1, 1], [1, 1, 1] ]  # number of responses per view, including primary. 1 is current number
   NActiveResponses:     [ [1, 1, 1], [1, 1, 1] ]  # number of active responses per view, including primary. 1 is current number
-  CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
   FieldResponseFVersion:  [ "v0.1", "v0.1" ]
   
   DefaultEField:       0.5
@@ -36,17 +59,16 @@ microboone_signalshapingservice:
   TimeScaleParams:   [ 1.0, 0.806 ] # this does the scaling from full- to half-field
                                       # good to ~0.2% over the range of the velocity ratio for 1-0.4 in the field
                                       # and <2% between views (calibrated on the Y view)
+                                      #  not used for calibrated responses
 
   DeconNorm: 200.
 
 # Settings for synthesized response, including adjacent wires
 
-  #NResponses:           [ [5, 5, 5], [5, 5, 5] ]  # number of responses per view, including primary.
+  #NResponses:            [ [5, 5, 5], [5, 5, 5] ]  # number of responses per view, including primary.
   ##NActiveResponses:     [ [5, 3, 4], [5, 3, 4] ]  # number of active responses per view, including primary.
-  #NActiveResponses:     [ [5, 5, 5], [5, 5, 5] ]  # number of active responses per view, including primary.
-  #CalibResponseTOffset: [0.0, 0.0, 0.0] # in us time offset to align all three planes
-  #FieldResponseFVersion:   [ "v2.1", "v2.1" ]
-  #DeconNorm: 200.
+  #NActiveResponses:      [ [5, 5, 5], [5, 5, 5] ]  # number of active responses per view, including primary.
+  #FieldResponseFVersion: [ "v2.1", "v2.1" ]
 
 #----------------------------------------------------------------
 
@@ -58,18 +80,13 @@ microboone_signalshapingservice:
   FieldResponseHNameBase: "FieldResponse"
 
   DeconvPol:       [ -1, 1, 1 ] #Switch for RawDigit-RecobWire normalization. Entry 0,1,2 are U,V,Y respectively
-                             #-1 means normalizes to min ADC count, +1 to max
+                                #-1 means normalizes to min ADC count, +1 to max
 
-  # For IndFilter and ColFilter, frequency (x) is measured in
+  # For the filters, frequency (x) is measured in
   # cycles/microsecond.  The conversion to frequency bin depends on FFT size
   # samping rate.
 
   FilterFuncVec:  [ "(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])" ]   
-  #FilterParamsVec:  [ [ 0.05, 0.0, 0.1875, 0.25, 8.0 ], [ .454, 0.0, 0.1875, 0.25, 8.0 ], [ 79258.0, 0.0, 0.1875, 1.5 ] ]  # what is this?
-  #FilterParamsVec:   [ [ 0.05, 0.0, 0.1875, 0.25, 8.0 ], [ 0.05, 0.0, 0.1875, 0.25, 8.0 ], [ 0.0792580, 0.0, 0.1875, 1.5 ] ] #Used for MCC5
-  #New parameters optimized for different shaping time for U(1us), V(1us) & Y(2us)-Planes
-  #FilterParamsVec:   [ [ 1.67, 1.69, 1.55, 0.19, 3.75 ], [ 1.62, 1.46, 1.33, 0.23, 4.89 ], [ 1.00, 0.08, 0.15, 2.17 ] ]
-  #FilterParamsVec:   [ [ 1.73, 1.69, 1.55, 0.19, 3.75 ], [ 1.74, 1.46, 1.33, 0.23, 4.89 ], [ 1.03, 0.08, 0.15, 2.17 ] ]
   FilterParamsVec:   [ [ 1.803396, 1.69, 1.55, 0.19, 3.75 ], [ 1.849030, 1.46, 1.33, 0.23, 4.89 ], [ 1.034516, 0.08, 0.15, 2.17 ] ]
 
   FilterFuncVecICTime:  [ "(x>0.0)*(gaus+[5]*(x+0.005)+[6]*pow((x+0.005),[7]))*exp(-0.5*pow((x+0.005)/[3],[4]))", "(x>0.0)*(gaus+[5]*(x+0.005)+[6]*pow((x+0.005),[7]))*exp(-0.5*pow((x+0.005)/[3],[4]))", "(x>0.0)*[0]*exp(-0.5*((((x+0.005)-[1])/[2])^2)^[3])" ]
@@ -86,19 +103,6 @@ microboone_signalshapingservice:
   FilterHistoName:	"noisefilter_%d"       
 
   PrintResponses: false  
-
-# The following stuff isn't straighted out yet  
-
-  UseFunctionFieldShape: false
-  UseHistogramFieldShape: true
-  FieldResponseFname:     "uboone_response_v1.3.root"
-  FieldResponseHistoName: "FieldResponse"
-  IndUFieldShape: "[0]*(1.0+[3]*tanh(x-[4]))*([4]-x)*exp(-0.5*((x-[4])/[2])^2.0)"
-  IndUFieldParams:  [.00843,.1534,1.77,0.,0.5]    #last parameter needs to be half of FFT vector, correct for in code
-  IndVFieldShape: "[0]*(1.0+[3]*tanh(x-[4]))*([4]-x)*exp(-0.5*((x-[4])/[2])^2.0)"
-  IndVFieldParams:  [.00843,.1534,1.77,0.,0.5]    #last parameter needs to be half of FFT vector, correct for in code
-  ColFieldShape: "x^[2]/(1.0+(x/[0])^[1])"
-  ColFieldParams: [ 8.0,16.0,.75 ]
 
 }
 
