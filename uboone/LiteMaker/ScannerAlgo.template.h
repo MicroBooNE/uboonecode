@@ -434,6 +434,8 @@ namespace larlite {
       lite_mct.Process ( mct_ptr->Process() );
       lite_mct.Start   ( ::larlite::mcstep( mct_ptr->Start().Position(), mct_ptr->Start().Momentum() )  );
       lite_mct.End     ( ::larlite::mcstep( mct_ptr->End().Position(),   mct_ptr->End().Momentum()   )  );
+      lite_mct.dEdx( mct_ptr->dEdx() );
+      lite_mct.dQdx( mct_ptr->dQdx() );
 
       lite_mct.MotherPdgCode ( mct_ptr->MotherPdgCode() );
       lite_mct.MotherTrackID ( mct_ptr->MotherTrackID() );
