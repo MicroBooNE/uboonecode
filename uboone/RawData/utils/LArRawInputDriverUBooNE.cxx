@@ -1206,8 +1206,8 @@ namespace lris {
       // Figure out time w.r.t. Trigger - dirty but works.
       //
       auto const& opt_clock = timeService->OpticalClock();
-      auto const& trg_clock = timeService->TriggerClock();
-      auto const& tpc_clock = timeService->TPCClock();
+      //auto const& trg_clock = timeService->TriggerClock();
+      //auto const& tpc_clock = timeService->TPCClock();
       auto const& trig_map  = event_record.getTRIGSEBMap();
       auto const& trig_header = trig_map.begin()->second.getTriggerHeader();
       auto const& trig_data = trig_map.begin()->second.getTriggerCardData().getTriggerData();
@@ -1222,7 +1222,7 @@ namespace lris {
       uint64_t trig_tick = trig_sample_number + trig_header.getFrame() * opt_clock.FrameTicks();
 
       auto const& crate_data = event_record.getPMTSEBMap().begin()->second;
-      auto const& pmt_card    = crate_data.getCards().at(0);
+      //auto const& pmt_card    = crate_data.getCards().at(0);
       
       uint64_t beam_ro_tick = 0;
       auto const& card_data = crate_data.getCards().front();
