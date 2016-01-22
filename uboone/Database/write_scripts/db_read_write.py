@@ -48,12 +48,34 @@ def help_me():
   This routine expects start and end times in integer seconds since the 
   start of the unix epoch in UTC.
   
+  
+  ----------------------------------------------------
+  File Format
+  ---------------------------------------------------- 
+  Files that are written to the database via the -i(--input) option must be 
+  formatted as follows (N columns, M channels, <> indicate substitution required):
+  
+  # time <t>
+  # channel <column name 1> <column name 2> ... <column name N>
+  <chan# 1> <number 1,1>    <number 1,2>    ... <number 1,N>
+  <chan# 2> <number 2,1>    <number 2,2>    ... <number 2,N>
+  ...
+  <chan# M> <number M,1>    <number M,2>    ... <number M,N>
+  
+  Note that <t> is the start of the interval of validity for the file 
+  contents in time since the start of the unix epoch.  The column names 
+  should match those of the folder that is being written to (specified by 
+  -f(--folder)). Also, channel numbers are not required to start at 1 or 
+  be consecutive.  If a column is an array, the array contents should be contained 
+  in {} and separated by commas without whitespace.
+  
+  
   ----------------------------------------------------
   Examples:
   ----------------------------------------------------
   
   #creates a folder called detpedestals in the production database
-  python db_read_write.py --action create --folder detpedestals --production
+  python db_read_write.py --action create --folder detpedestals --production -i format_file.txt
   
   
   #prints the contents of folder pmtgains_data in the development database 
@@ -118,7 +140,7 @@ def main():
   override_future = 'no'
   is_playlist     = False
   
-  start_sec = -1
+  start_sec = 0
 
 
   #-----------------------------------------------------

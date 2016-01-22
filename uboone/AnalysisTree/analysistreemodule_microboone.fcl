@@ -14,6 +14,7 @@ microboone_analysistree:
  ClusterModuleLabel:       "linecluster"
  OpFlashModuleLabel:       "opflash"
  MCShowerModuleLabel:      "mcreco" 
+ MCTrackModuleLabel:      "mcreco" 
  CalorimetryModuleLabel:   [ "calo" ]
  ParticleIDModuleLabel:    [ "pid" ]
  FlashT0FinderLabel:       ["t0"]
@@ -30,7 +31,9 @@ microboone_analysistree:
  SaveGenieInfo:            true
  SaveGeantInfo:            true
  SaveMCShowerInfo:         true 
+ SaveMCTrackInfo:          true 
  SaveHitInfo:              true
+ SaveRawDigitInfo:         false  //set this to false by default since not everyone want rawdigits.
  SaveTrackInfo:            true
  SaveVertexInfo:           true
  SaveClusterInfo:          true

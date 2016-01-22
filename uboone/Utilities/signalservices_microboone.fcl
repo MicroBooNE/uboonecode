@@ -4,7 +4,7 @@ microboone_signalshapingservice:
 {
   ADCPerPCAtLowestASICGain: 9390 #ADC/pC
   # ASICGains:           [4.7, 7.8, 14, 25] #Default: 7.8
-  ASICGainInMVPerFC:  [7.8, 7.8, 7.8] #mV/fC for U, Y & Y planes
+  ASICGainInMVPerFC:  [14, 14, 14] #JZ implemented fix [7.8, 7.8, 7.8] #mV/fC for U, Y & Y planes
 
   ShapeTimeConst:  [ 2.0, 2.0, 2.0] #Peaking time (microseconds) for U, V & Y planes
   

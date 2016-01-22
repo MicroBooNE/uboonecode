@@ -281,6 +281,7 @@
 #include "Geometry/Geometry.h"
 #include "SimulationBase/MCTruth.h"
 #include "MCBase/MCShower.h"
+#include "MCBase/MCTrack.h"
 #include "MCBase/MCStep.h"
 #include "SimulationBase/MCFlux.h"
 #include "Simulation/SimChannel.h"
@@ -288,7 +289,9 @@
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/ParticleID.h"
 #include "RawData/RawDigit.h"
+#include "RawData/raw.h"
 #include "RawData/BeamInfo.h"
+#include "RawData/TriggerData.h"
 #include "Utilities/LArProperties.h"
 #include "Utilities/AssociationUtil.h"
 #include "Utilities/DetectorProperties.h"
@@ -604,7 +607,9 @@ namespace microboone {
       tdFlash = 0x80,
       tdShower = 0x100,
       tdMCshwr = 0x200,
-      tdCluster = 0x400,
+      tdMCtrk  = 0x400,
+      tdCluster = 0x800,
+      tdRawDigit = 0x1000,
       tdDefault = 0
     }; // DataBits_t
     
@@ -634,9 +639,17 @@ namespace microboone {
   //  Double_t   pot;                  //protons on target moved in subrun data
     Double_t   taulife;              //electron lifetime
     Char_t     isdata;               //flag, 0=MC 1=data
+    unsigned int triggernumber;      //trigger counter
+    Double_t     triggertime;        //trigger time w.r.t. electronics clock T0
+    Double_t     beamgatetime;       //beamgate time w.r.t. electronics clock T0
+    unsigned int triggerbits;        //trigger bits
+    Double_t     potbnb;             //pot per event (BNB E:TOR860)
+    Double_t     potnumitgt;         //pot per event (NuMI E:TORTGT)
+    Double_t     potnumi101;         //pot per event (NuMI E:TOR101)
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
+    Int_t    no_hits_stored;                  //number of hits actually stored in the tree    
     Short_t  hit_plane[kMaxHits];      //plane number
     Short_t  hit_wire[kMaxHits];       //wire number
     Short_t  hit_channel[kMaxHits];    //channel ID
@@ -645,6 +658,7 @@ namespace microboone {
     Float_t  hit_ph[kMaxHits];         //amplitude
     Float_t  hit_startT[kMaxHits];     //hit start time
     Float_t  hit_endT[kMaxHits];       //hit end time
+    Float_t  hit_rms[kMaxHits];       //hit rms from the hit object
     Float_t  hit_goodnessOfFit[kMaxHits]; //chi2/dof goodness of fit 
     Short_t  hit_multiplicity[kMaxHits];  //multiplicity of the given hit					 
     Float_t  hit_trueX[kMaxHits];      // hit true X (cm)
@@ -654,6 +668,12 @@ namespace microboone {
     Short_t  hit_trkKey[kMaxHits];      //is this hit associated with a reco track,  if so associate a unique track key ID?
     Short_t  hit_clusterid[kMaxHits];  //is this hit associated with a reco cluster?
     Short_t  hit_clusterKey[kMaxHits];  //is this hit associated with a reco cluster, if so associate a unique cluster key ID?
+
+    Float_t rawD_ph[kMaxHits];  
+    Float_t rawD_peakT[kMaxHits];  
+    Float_t rawD_charge[kMaxHits];  
+    Float_t rawD_fwhh[kMaxHits];  
+    Double_t rawD_rms[kMaxHits]; 
 
     //Cluster Information
     Short_t nclusters;				      //number of clusters in a given event
@@ -885,8 +905,41 @@ namespace microboone {
     std::vector<Float_t>     mcshwr_AncestorendX;      //MC Shower's ancestor  G4 endX  
     std::vector<Float_t>     mcshwr_AncestorendY;      //MC Shower's ancestor  G4 endY  
     std::vector<Float_t>     mcshwr_AncestorendZ;      //MC Shower's ancestor  G4 endZ  
-						       
-
+    
+    //MC track information
+    Int_t     no_mctracks;                         //number of MC tracks in this event.
+    //MC track particle information
+    std::vector<Int_t>       mctrk_origin;	    //MC track origin information.  
+    std::vector<Int_t>       mctrk_pdg;	    //MC track particle PDG code.   
+    std::vector<Int_t>       mctrk_TrackId;        //MC track particle G4 track ID.
+    std::vector<std::string> mctrk_Process;	    //MC track particle's creation process. 
+    std::vector<Float_t>     mctrk_startX;	    //MC track particle G4 startX 
+    std::vector<Float_t>     mctrk_startY;	    //MC track particle G4 startY 
+    std::vector<Float_t>     mctrk_startZ;	    //MC track particle G4 startZ 
+    std::vector<Float_t>     mctrk_endX;		//MC track particle G4 endX 
+    std::vector<Float_t>     mctrk_endY;		//MC track particle G4 endY 
+    std::vector<Float_t>     mctrk_endZ;		//MC track particle G4 endZ  
+    //MC Track mother information
+    std::vector<Int_t>       mctrk_Motherpdg;       //MC Track's mother PDG code. 
+    std::vector<Int_t>       mctrk_MotherTrkId;     //MC Track's mother G4 track ID.
+    std::vector<std::string> mctrk_MotherProcess;   //MC Track's mother creation process. 
+    std::vector<Float_t>     mctrk_MotherstartX;    //MC Track's mother  G4 startX .
+    std::vector<Float_t>     mctrk_MotherstartY;    //MC Track's mother  G4 startY .
+    std::vector<Float_t>     mctrk_MotherstartZ;    //MC Track's mother  G4 startZ .
+    std::vector<Float_t>     mctrk_MotherendX;	     //MC Track's mother  G4 endX   .
+    std::vector<Float_t>     mctrk_MotherendY;	     //MC Track's mother  G4 endY   .
+    std::vector<Float_t>     mctrk_MotherendZ;	     //MC Track's mother  G4 endZ   .
+    //MC Track ancestor information
+    std::vector<Int_t>       mctrk_Ancestorpdg;       //MC Track's ancestor PDG code. 
+    std::vector<Int_t>       mctrk_AncestorTrkId;     //MC Track's ancestor G4 track ID.
+    std::vector<std::string> mctrk_AncestorProcess;   //MC Track's ancestor creation process. 
+    std::vector<Float_t>     mctrk_AncestorstartX;    //MC Track's ancestor  G4 startX
+    std::vector<Float_t>     mctrk_AncestorstartY;    //MC Track's ancestor  G4 startY
+    std::vector<Float_t>     mctrk_AncestorstartZ;    //MC Track's ancestor  G4 startZ
+    std::vector<Float_t>     mctrk_AncestorendX;      //MC Track's ancestor  G4 endX  
+    std::vector<Float_t>     mctrk_AncestorendY;      //MC Track's ancestor  G4 endY  
+    std::vector<Float_t>     mctrk_AncestorendZ;      //MC Track's ancestor  G4 endZ    
+						      
     // Auxiliary detector variables saved for each geant track
     // This data is saved as a vector (one item per GEANT particle) of C arrays
     // (wrapped in a BoxedArray for technical reasons), one item for each
@@ -923,8 +976,14 @@ namespace microboone {
     /// Returns whether we have MCShower data
     bool hasMCShowerInfo() const { return bits & tdMCshwr; }
     
+     /// Returns whether we have MCTrack data
+    bool hasMCTrackInfo() const { return bits & tdMCtrk; }
+    
     /// Returns whether we have Hit data
     bool hasHitInfo() const { return bits & tdHit; }
+
+    /// Returns whether we have Hit data
+    bool hasRawDigitInfo() const { return bits & tdRawDigit; }
 
     /// Returns whether we have Track data
     bool hasTrackInfo() const { return bits & tdTrack; }
@@ -996,6 +1055,9 @@ namespace microboone {
     
     /// Resize the data strutcure for  MC Showers
     void ResizeMCShower(int nMCShowers);
+    
+    /// Resize the data strutcure for  MC Tracks
+    void ResizeMCTrack(int nMCTracks);
     
     /// Connect this object with a tree
     void SetAddresses(
@@ -1182,6 +1244,7 @@ namespace microboone {
     std::string fClusterModuleLabel;
     std::string fOpFlashModuleLabel;
     std::string fMCShowerModuleLabel;
+    std::string fMCTrackModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
     std::vector<std::string> fVertexModuleLabel;
     std::vector<std::string> fShowerModuleLabel;
@@ -1197,7 +1260,9 @@ namespace microboone {
     bool fSaveGenieInfo; ///whether to extract and save Genie information
     bool fSaveGeantInfo; ///whether to extract and save Geant information
     bool fSaveMCShowerInfo; ///whether to extract and save MC Shower information
+    bool fSaveMCTrackInfo; ///whether to extract and save MC Track information
     bool fSaveHitInfo; ///whether to extract and save Hit information
+    bool fSaveRawDigitInfo; ///whether to extract and save Raw Digit information
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
     bool fSaveClusterInfo;  ///whether to extract and save Shower information
@@ -1234,7 +1299,9 @@ namespace microboone {
           fData->SetBits(AnalysisTreeDataStruct::tdGenie,  !fSaveGenieInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdGeant,  !fSaveGeantInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdMCshwr, !fSaveMCShowerInfo); 
+          fData->SetBits(AnalysisTreeDataStruct::tdMCtrk,  !fSaveMCTrackInfo); 
           fData->SetBits(AnalysisTreeDataStruct::tdHit,    !fSaveHitInfo);
+          fData->SetBits(AnalysisTreeDataStruct::tdRawDigit,    !fSaveRawDigitInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdFlash,  !fSaveFlashInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);
           fData->SetBits(AnalysisTreeDataStruct::tdCluster,!fSaveClusterInfo);
@@ -1883,8 +1950,16 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   beamtime = -99999;
   isdata = -99;
   taulife = -99999;
+  triggernumber = 0;
+  triggertime = -99999;
+  beamgatetime = -99999;
+  triggerbits = 0;
+  potbnb = 0;
+  potnumitgt = 0;
+  potnumi101 = 0;
 
   no_hits = 0;
+  no_hits_stored = 0;  
   
   std::fill(hit_plane, hit_plane + sizeof(hit_plane)/sizeof(hit_plane[0]), -9999);
   std::fill(hit_wire, hit_wire + sizeof(hit_wire)/sizeof(hit_wire[0]), -9999);
@@ -1894,6 +1969,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_ph, hit_ph + sizeof(hit_ph)/sizeof(hit_ph[0]), -99999.);
   std::fill(hit_startT, hit_startT + sizeof(hit_startT)/sizeof(hit_startT[0]), -99999.);
   std::fill(hit_endT, hit_endT + sizeof(hit_endT)/sizeof(hit_endT[0]), -99999.);
+  std::fill(hit_rms, hit_rms + sizeof(hit_rms)/sizeof(hit_rms[0]), -99999.);
   std::fill(hit_trueX, hit_trueX + sizeof(hit_trueX)/sizeof(hit_trueX[0]), -99999.);
   std::fill(hit_goodnessOfFit, hit_goodnessOfFit + sizeof(hit_goodnessOfFit)/sizeof(hit_goodnessOfFit[0]), -99999.);
   std::fill(hit_multiplicity, hit_multiplicity + sizeof(hit_multiplicity)/sizeof(hit_multiplicity[0]), -99999.);
@@ -1903,6 +1979,12 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(hit_clusterKey, hit_clusterKey + sizeof(hit_clusterKey)/sizeof(hit_clusterKey[0]), -9999);
   std::fill(hit_nelec, hit_nelec + sizeof(hit_nelec)/sizeof(hit_nelec[0]), -99999.);
   std::fill(hit_energy, hit_energy + sizeof(hit_energy)/sizeof(hit_energy[0]), -99999.);
+  //raw digit information
+  std::fill(rawD_ph, rawD_ph + sizeof(rawD_ph)/sizeof(rawD_ph[0]), -99999.);
+  std::fill(rawD_peakT, rawD_peakT + sizeof(rawD_peakT)/sizeof(rawD_peakT[0]), -99999.);
+  std::fill(rawD_charge, rawD_charge + sizeof(rawD_charge)/sizeof(rawD_charge[0]), -99999.);
+  std::fill(rawD_fwhh, rawD_fwhh + sizeof(rawD_fwhh)/sizeof(rawD_fwhh[0]), -99999.);
+  std::fill(rawD_rms, rawD_rms + sizeof(rawD_rms)/sizeof(rawD_rms[0]), -99999.);
 
   no_flashes = 0;
   std::fill(flash_time, flash_time + sizeof(flash_time)/sizeof(flash_time[0]), -9999);
@@ -1994,6 +2076,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   geant_list_size=0;
   geant_list_size_in_tpcAV = 0;
   no_mcshowers = 0;
+  no_mctracks = 0;
   
   FillWith(pdg, -99999);
   FillWith(status, -99999);
@@ -2286,6 +2369,40 @@ void microboone::AnalysisTreeDataStruct::ResizeMCShower(int nMCShowers) {
 
 } // microboone::AnalysisTreeDataStruct::ResizeMCShower()
 
+void microboone::AnalysisTreeDataStruct::ResizeMCTrack(int nMCTracks) {
+  mctrk_origin.resize(nMCTracks);		
+  mctrk_pdg.resize(nMCTracks);		
+  mctrk_TrackId.resize(nMCTracks); 	
+  mctrk_Process.resize(nMCTracks); 
+  mctrk_startX.resize(nMCTracks); 	
+  mctrk_startY.resize(nMCTracks);	 
+  mctrk_startZ.resize(nMCTracks);	 
+  mctrk_endX.resize(nMCTracks);	 
+  mctrk_endY.resize(nMCTracks);	 
+  mctrk_endZ.resize(nMCTracks);
+  mctrk_Motherpdg.resize(nMCTracks);	
+  mctrk_MotherTrkId.resize(nMCTracks);	
+  mctrk_MotherProcess.resize(nMCTracks);
+  mctrk_MotherstartX.resize(nMCTracks);	 
+  mctrk_MotherstartY.resize(nMCTracks);	 
+  mctrk_MotherstartZ.resize(nMCTracks);	 
+  mctrk_MotherendX.resize(nMCTracks);	 
+  mctrk_MotherendY.resize(nMCTracks);	 
+  mctrk_MotherendZ.resize(nMCTracks);	   	
+  mctrk_Ancestorpdg.resize(nMCTracks);	
+  mctrk_AncestorTrkId.resize(nMCTracks);	
+  mctrk_AncestorProcess.resize(nMCTracks); 
+  mctrk_AncestorstartX.resize(nMCTracks);	 
+  mctrk_AncestorstartY.resize(nMCTracks);	 
+  mctrk_AncestorstartZ.resize(nMCTracks);	 
+  mctrk_AncestorendX.resize(nMCTracks);	 
+  mctrk_AncestorendY.resize(nMCTracks);	 
+  mctrk_AncestorendZ.resize(nMCTracks);	 
+  
+} // microboone::AnalysisTreeDataStruct::ResizeMCTrack()
+  
+
+
 void microboone::AnalysisTreeDataStruct::SetAddresses(
   TTree* pTree,
   const std::vector<std::string>& trackers,
@@ -2303,28 +2420,44 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("pot",&SubRunData.pot,"pot/D");
   CreateBranch("isdata",&isdata,"isdata/B");
   CreateBranch("taulife",&taulife,"taulife/D");
+  CreateBranch("triggernumber",&triggernumber,"triggernumber/i");
+  CreateBranch("triggertime",&triggertime,"triggertime/D");
+  CreateBranch("beamgatetime",&beamgatetime,"beamgatetime/D");
+  CreateBranch("triggerbits",&triggerbits,"triggerbits/i");
+  CreateBranch("potbnb",&potbnb,"potbnb/D");
+  CreateBranch("potnumitgt",&potnumitgt,"potnumitgt/D");
+  CreateBranch("potnumi101",&potnumi101,"potnumi101/D");
 
-  if (hasHitInfo()){
+  if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
-    CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits]/S");
-    CreateBranch("hit_wire",hit_wire,"hit_wire[no_hits]/S");
-    CreateBranch("hit_channel",hit_channel,"hit_channel[no_hits]/S");
-    CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits]/F");
-    CreateBranch("hit_charge",hit_charge,"hit_charge[no_hits]/F");
-    CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits]/F");
-    CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits]/F");
-    CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits]/F");
-    CreateBranch("hit_trueX",hit_trueX,"hit_trueX[no_hits]/F");    
-    CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits]/F");    
-    CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits]/S");    
-    CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits]/S");
-    CreateBranch("hit_trkKey",hit_trkKey,"hit_trkKey[no_hits]/S");   
-    CreateBranch("hit_clusterid",hit_clusterid,"hit_clusterid[no_hits]/S");
-    CreateBranch("hit_clusterKey",hit_clusterKey,"hit_clusterKey[no_hits]/S");
+    CreateBranch("no_hits_stored",&no_hits_stored,"no_hits_stored/I");    
+    CreateBranch("hit_plane",hit_plane,"hit_plane[no_hits_stored]/S");
+    CreateBranch("hit_wire",hit_wire,"hit_wire[no_hits_stored]/S");
+    CreateBranch("hit_channel",hit_channel,"hit_channel[no_hits_stored]/S");
+    CreateBranch("hit_peakT",hit_peakT,"hit_peakT[no_hits_stored]/F");
+    CreateBranch("hit_charge",hit_charge,"hit_charge[no_hits_stored]/F");
+    CreateBranch("hit_ph",hit_ph,"hit_ph[no_hits_stored]/F");
+    CreateBranch("hit_startT",hit_startT,"hit_startT[no_hits_stored]/F");
+    CreateBranch("hit_endT",hit_endT,"hit_endT[no_hits_stored]/F");
+    CreateBranch("hit_rms",hit_rms,"hit_rms[no_hits_stored]/F"); 
+    CreateBranch("hit_trueX",hit_trueX,"hit_trueX[no_hits_stored]/F");    
+    CreateBranch("hit_goodnessOfFit",hit_goodnessOfFit,"hit_goodnessOfFit[no_hits_stored]/F");    
+    CreateBranch("hit_multiplicity",hit_multiplicity,"hit_multiplicity[no_hits_stored]/S");    
+    CreateBranch("hit_trkid",hit_trkid,"hit_trkid[no_hits_stored]/S");
+    CreateBranch("hit_trkKey",hit_trkKey,"hit_trkKey[no_hits_stored]/S");   
+    CreateBranch("hit_clusterid",hit_clusterid,"hit_clusterid[no_hits_stored]/S");
+    CreateBranch("hit_clusterKey",hit_clusterKey,"hit_clusterKey[no_hits_stored]/S");
     if (!isCosmics){
-      CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits]/F");
-      CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits]/F");
+      CreateBranch("hit_nelec",hit_nelec,"hit_nelec[no_hits_stored]/F");
+      CreateBranch("hit_energy",hit_energy,"hit_energy[no_hits_stored]/F");
     }
+    if (hasRawDigitInfo()){
+      CreateBranch("rawD_ph",rawD_ph,"rawD_ph[no_hits_stored]/F");  
+      CreateBranch("rawD_peakT",rawD_peakT,"rawD_peakT[no_hits_stored]/F");
+      CreateBranch("rawD_charge",rawD_charge,"rawD_charge[no_hits_stored]/F");
+      CreateBranch("rawD_fwhh",rawD_fwhh,"rawD_fwhh[no_hits_stored]/F");
+      CreateBranch("rawD_rms",rawD_rms,"rawD_rms[no_hits_stored]/D"); 
+    }  
   }
 
   if (hasClusterInfo()){
@@ -2567,6 +2700,38 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("mcshwr_AncestorendY",mcshwr_AncestorendY,"mcshwr_AncestorendY[no_mcshowers]/F");
     CreateBranch("mcshwr_AncestorendZ",mcshwr_AncestorendZ,"mcshwr_AncestorendZ[no_mcshowers]/F");
   }   
+  
+   if (hasMCTrackInfo()){
+    CreateBranch("no_mctracks",&no_mctracks,"no_mctracks/I");  
+    CreateBranch("mctrk_origin",mctrk_origin,"mctrk_origin[no_mctracks]/I");
+    CreateBranch("mctrk_pdg",mctrk_pdg,"mctrk_pdg[no_mctracks]/I");
+    CreateBranch("mctrk_TrackId",mctrk_TrackId,"mctrk_TrackId[no_mctracks]/I");
+    CreateBranch("mctrk_Process",mctrk_Process);
+    CreateBranch("mctrk_startX",mctrk_startX,"mctrk_startX[no_mctracks]/F");
+    CreateBranch("mctrk_startY",mctrk_startY,"mctrk_startY[no_mctracks]/F");
+    CreateBranch("mctrk_startZ",mctrk_startZ,"mctrk_startZ[no_mctracks]/F");
+    CreateBranch("mctrk_endX",mctrk_endX,"mctrk_endX[no_mctracks]/F");
+    CreateBranch("mctrk_endY",mctrk_endY,"mctrk_endY[no_mctracks]/F");
+    CreateBranch("mctrk_endZ",mctrk_endZ,"mctrk_endZ[no_mctracks]/F");
+    CreateBranch("mctrk_Motherpdg",mctrk_Motherpdg,"mctrk_Motherpdg[no_mctracks]/I");
+    CreateBranch("mctrk_MotherTrkId",mctrk_MotherTrkId,"mctrk_MotherTrkId[no_mctracks]/I");
+    CreateBranch("mctrk_MotherProcess",mctrk_MotherProcess);
+    CreateBranch("mctrk_MotherstartX",mctrk_MotherstartX,"mctrk_MotherstartX[no_mctracks]/F");
+    CreateBranch("mctrk_MotherstartY",mctrk_MotherstartY,"mctrk_MotherstartY[no_mctracks]/F");
+    CreateBranch("mctrk_MotherstartZ",mctrk_MotherstartZ,"mctrk_MotherstartZ[no_mctracks]/F");
+    CreateBranch("mctrk_MotherendX",mctrk_MotherendX,"mctrk_MotherendX[no_mctracks]/F");
+    CreateBranch("mctrk_MotherendY",mctrk_MotherendY,"mctrk_MotherendY[no_mctracks]/F");
+    CreateBranch("mctrk_MotherendZ",mctrk_MotherendZ,"mctrk_MotherendZ[no_mctracks]/F");    
+    CreateBranch("mctrk_Ancestorpdg",mctrk_Ancestorpdg,"mctrk_Ancestorpdg[no_mctracks]/I");
+    CreateBranch("mctrk_AncesotorTrkId",mctrk_AncestorTrkId,"mctrk_AncestorTrkId[no_mctracks]/I");
+    CreateBranch("mctrk_AncesotorProcess",mctrk_AncestorProcess);   
+    CreateBranch("mctrk_AncestorstartX",mctrk_AncestorstartX,"mctrk_AncestorstartX[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorstartY",mctrk_AncestorstartY,"mctrk_AncestorstartY[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorstartZ",mctrk_AncestorstartZ,"mctrk_AncestorstartZ[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorendX",mctrk_AncestorendX,"mctrk_AncestorendX[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorendY",mctrk_AncestorendY,"mctrk_AncestorendY[no_mctracks]/F");
+    CreateBranch("mctrk_AncestorendZ",mctrk_AncestorendZ,"mctrk_AncestorendZ[no_mctracks]/F");
+  }  
 
   if (hasAuxDetector()) {
     // Geant information is required to fill aux detector information.
@@ -2616,6 +2781,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")     ),
   fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
   fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
+  fMCTrackModuleLabel      (pset.get< std::string >("MCTrackModuleLabel")     ),  
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
   fVertexModuleLabel        (pset.get< std::vector<std::string> >("VertexModuleLabel")),
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
@@ -2631,7 +2797,9 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveGenieInfo	    (pset.get< bool >("SaveGenieInfo", false)), 
   fSaveGeantInfo	    (pset.get< bool >("SaveGeantInfo", false)), 
   fSaveMCShowerInfo	    (pset.get< bool >("SaveMCShowerInfo", false)), 
+  fSaveMCTrackInfo	    (pset.get< bool >("SaveMCTrackInfo", false)), 
   fSaveHitInfo	            (pset.get< bool >("SaveHitInfo", false)), 
+  fSaveRawDigitInfo	            (pset.get< bool >("SaveRawDigitInfo", false)), 
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
   fSaveClusterInfo	    (pset.get< bool >("SaveClusterInfo", false)),
@@ -2645,6 +2813,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fG4minE                   (pset.get< float>("G4minE",0.01))
 {
   if (fSaveAuxDetInfo == true) fSaveGeantInfo = true;
+  if (fSaveRawDigitInfo == true) fSaveHitInfo = true;
   mf::LogInfo("AnalysisTree") << "Configuration:"
     << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
     ;
@@ -2786,6 +2955,15 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (fSaveMCShowerInfo && mcshowerh.isValid())
   	nMCShowers = mcshowerh->size();
 	
+  // *MC Track information
+  art::Handle< std::vector<sim::MCTrack> > mctrackh;
+  if (isMC)
+    evt.getByLabel(fMCTrackModuleLabel, mctrackh);
+  
+  int nMCTracks = 0;
+  if (fSaveMCTrackInfo && mctrackh.isValid())
+  	nMCTracks = mctrackh->size();	
+	
   art::Ptr<simb::MCTruth> mctruthcry;
   int nCryPrimaries = 0;
    
@@ -2852,7 +3030,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   if (fSaveGeantInfo)    
     fData->ResizeGEANT(nGEANTparticles);  
   if (fSaveMCShowerInfo)
-    fData->ResizeMCShower(nMCShowers);   
+    fData->ResizeMCShower(nMCShowers); 
+  if (fSaveMCTrackInfo)
+    fData->ResizeMCTrack(nMCTracks);     
     
   fData->ClearLocalData(); // don't bother clearing tracker data yet
   
@@ -2871,6 +3051,19 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   fData->SubRunData = SubRunData;
 
   fData->isdata = int(!isMC);
+
+  // * raw trigger
+  art::Handle< std::vector<raw::Trigger>> triggerListHandle;
+  std::vector<art::Ptr<raw::Trigger>> triggerlist;
+  if (evt.getByLabel(fDigitModuleLabel, triggerListHandle))
+    art::fill_ptr_vector(triggerlist, triggerListHandle);
+
+  if (triggerlist.size()){
+    fData->triggernumber = triggerlist[0]->TriggerNumber();
+    fData->triggertime   = triggerlist[0]->TriggerTime();
+    fData->beamgatetime  = triggerlist[0]->BeamGateTime();
+    fData->triggerbits   = triggerlist[0]->TriggerBits();
+  }
 
   // * vertices
   std::vector< art::Handle< std::vector<recob::Vertex> > > vertexListHandle(NVertexAlgos);
@@ -2943,10 +3136,21 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   //copied from MergeDataPaddles.cxx
   art::Handle< raw::BeamInfo > beam;
-  if (evt.getByLabel("beam",beam)){
+  if (evt.getByLabel("beamdata",beam)){
     fData->beamtime = (double)beam->get_t_ms();
     fData->beamtime/=1000.; //in second
+    std::map<std::string, std::vector<double>> datamap = beam->GetDataMap();
+    if (datamap["E:TOR860"].size()){
+      fData->potbnb = datamap["E:TOR860"][0];
+    }
+    if (datamap["E:TORTGT"].size()){
+      fData->potnumitgt = datamap["E:TORTGT"][0];
+    }
+    if (datamap["E:TOR101"].size()){
+      fData->potnumi101 = datamap["E:TOR101"][0];
+    }
   }
+
 
 //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
 //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;
@@ -2955,6 +3159,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   //hit information
   if (fSaveHitInfo){
     fData->no_hits = (int) NHits;
+    fData->no_hits_stored = TMath::Min( (int) NHits, (int) kMaxHits);    
     if (NHits > kMaxHits) {
       // got this error? consider increasing kMaxHits
       // (or ask for a redesign using vectors)
@@ -2970,6 +3175,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->hit_ph[i]  = hitlist[i]->PeakAmplitude();
       fData->hit_startT[i] = hitlist[i]->PeakTimeMinusRMS();
       fData->hit_endT[i] = hitlist[i]->PeakTimePlusRMS();
+      fData->hit_rms[i] = hitlist[i]->RMS();
       fData->hit_goodnessOfFit[i] = hitlist[i]->GoodnessOfFit();
       fData->hit_multiplicity[i] = hitlist[i]->Multiplicity();
       //std::vector<double> xyz = bt->HitToXYZ(hitlist[i]);
@@ -2998,6 +3204,48 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           hit_trkid[it][i] = 0;
       }
       */
+      
+    if (fSaveRawDigitInfo){
+      //Hit to RawDigit information	       
+      art::FindManyP<raw::RawDigit> fmrd(hitListHandle,evt,fHitsModuleLabel);
+      if (hitlist[i]->WireID().Plane==2)
+      {
+      int dataSize = fmrd.at(i)[0]->Samples();
+      short ped = fmrd.at(i)[0]->GetPedestal();
+     
+      std::vector<short> rawadc(dataSize);
+      raw::Uncompress(fmrd.at(i)[0]->ADCs(), rawadc, fmrd.at(i)[0]->Compression());
+      int t0 = hitlist[i]->PeakTime() - 3*(hitlist[i]->RMS());
+      if (t0<0) t0 = 0;
+      int t1 = hitlist[i]->PeakTime() + 3*(hitlist[i]->RMS());
+      if (t1>=dataSize) t1 = dataSize-1;
+      fData->rawD_ph[i] = -1;
+      fData->rawD_peakT[i] = -1;
+      for (int j = t0; j<=t1; ++j){
+        if (rawadc[j]-ped>fData->rawD_ph[i]){
+          fData->rawD_ph[i] = rawadc[j]-ped;
+          fData->rawD_peakT[i] = j;
+        }
+      }
+      fData->rawD_charge[i] = 0;
+      fData->rawD_fwhh[i] = 0;
+      double mean_t = 0.0;
+      double mean_t2 = 0.0;
+      for (int j = t0; j<=t1; ++j){
+        if (rawadc[j]-ped>=0.5*fData->rawD_ph[i]){
+          ++fData->rawD_fwhh[i];
+        }
+        if (rawadc[j]-ped>=0.1*fData->rawD_ph[i]){
+          fData->rawD_charge[i] += rawadc[j]-ped;
+          mean_t += (double)j*(rawadc[j]-ped);
+          mean_t2 += (double)j*(double)j*(rawadc[j]-ped);
+        }
+      }
+      mean_t/=fData->rawD_charge[i];
+      mean_t2/=fData->rawD_charge[i];
+      fData->rawD_rms[i] = sqrt(mean_t2-mean_t*mean_t);
+   }   }
+      
 
       if (!evt.isRealData()&&!isCosmics){
          fData -> hit_nelec[i] = 0;
@@ -3664,7 +3912,50 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
        fData->mcshwr_Process.resize(shwr);
        fData->mcshwr_MotherProcess.resize(shwr);
        fData->mcshwr_AncestorProcess.resize(shwr);
-    }//End if (fSaveMCShowerInfo){   
+    }//End if (fSaveMCShowerInfo){  
+    
+    //Extract MC Track information and fill the Shower branches
+    if (fSaveMCTrackInfo){
+       fData->no_mctracks = nMCTracks;       
+       size_t trk = 0;
+       for(std::vector<sim::MCTrack>::const_iterator imctrk = mctrackh->begin();    
+    	 imctrk != mctrackh->end(); ++imctrk) {
+    	  const sim::MCTrack& mctrk = *imctrk;
+	  fData->mctrk_origin[trk]          = mctrk.Origin();
+    	  fData->mctrk_pdg[trk]	            = mctrk.PdgCode();	   
+    	  fData->mctrk_TrackId[trk]	    = mctrk.TrackID();	   
+    	  fData->mctrk_Process[trk]	    = mctrk.Process();	   
+    	  fData->mctrk_startX[trk]          = mctrk.Start().X();	    
+    	  fData->mctrk_startY[trk]          = mctrk.Start().Y();      	 
+    	  fData->mctrk_startZ[trk]          = mctrk.Start().Z();      	 
+    	  fData->mctrk_endX[trk]            = mctrk.End().X();      	 
+    	  fData->mctrk_endY[trk]            = mctrk.End().Y();      	 
+    	  fData->mctrk_endZ[trk]            = mctrk.End().Z(); 
+	  fData->mctrk_Motherpdg[trk]       = mctrk.MotherPdgCode(); 
+    	  fData->mctrk_MotherTrkId[trk]     = mctrk.MotherTrackID();    
+    	  fData->mctrk_MotherProcess[trk]   = mctrk.MotherProcess(); 
+	  fData->mctrk_MotherstartX[trk]    = mctrk.MotherStart().X();     
+    	  fData->mctrk_MotherstartY[trk]    = mctrk.MotherStart().Y();	  
+    	  fData->mctrk_MotherstartZ[trk]    = mctrk.MotherStart().Z();	  
+    	  fData->mctrk_MotherendX[trk]      = mctrk.MotherEnd().X(); 	  
+    	  fData->mctrk_MotherendY[trk]      = mctrk.MotherEnd().Y(); 	  
+    	  fData->mctrk_MotherendZ[trk]      = mctrk.MotherEnd().Z();  
+    	  fData->mctrk_Ancestorpdg[trk]     = mctrk.AncestorPdgCode();  
+    	  fData->mctrk_AncestorTrkId[trk]   = mctrk.AncestorTrackID();  
+    	  fData->mctrk_AncestorProcess[trk] = mctrk.AncestorProcess();
+	  fData->mctrk_AncestorstartX[trk]  = mctrk.AncestorStart().X();	  
+    	  fData->mctrk_AncestorstartY[trk]  = mctrk.AncestorStart().Y();		 
+    	  fData->mctrk_AncestorstartZ[trk]  = mctrk.AncestorStart().Z();		 
+    	  fData->mctrk_AncestorendX[trk]    = mctrk.AncestorEnd().X();	 
+    	  fData->mctrk_AncestorendY[trk]    = mctrk.AncestorEnd().Y();	 
+    	  fData->mctrk_AncestorendZ[trk]    = mctrk.AncestorEnd().Z();
+    	  ++trk; 
+       }
+       fData->mctrk_Process.resize(trk);
+       fData->mctrk_MotherProcess.resize(trk);
+       fData->mctrk_AncestorProcess.resize(trk);
+    }//End if (fSaveMCTrackInfo){  
+	  
 
       //GEANT particles information
       if (fSaveGeantInfo){ 
@@ -3929,12 +4220,15 @@ void microboone::AnalysisTree::FillShower(
   showerData.shwr_starty[iShower]     = pos_start.Y();
   showerData.shwr_startz[iShower]     = pos_start.Z();
   
-  std::copy_n
-    (shower.Energy().begin(),    kNplanes, &showerData.shwr_totEng[iShower][0]);
-  std::copy_n
-    (shower.dEdx().begin(),      kNplanes, &showerData.shwr_dedx[iShower][0]);
-  std::copy_n
-    (shower.MIPEnergy().begin(), kNplanes, &showerData.shwr_mipEng[iShower][0]);
+  if (shower.Energy().size() == kNplanes)
+    std::copy_n
+      (shower.Energy().begin(),    kNplanes, &showerData.shwr_totEng[iShower][0]);
+  if (shower.dEdx().size() == kNplanes)
+    std::copy_n
+      (shower.dEdx().begin(),      kNplanes, &showerData.shwr_dedx[iShower][0]);
+  if (shower.MIPEnergy().size() == kNplanes)
+    std::copy_n
+      (shower.MIPEnergy().begin(), kNplanes, &showerData.shwr_mipEng[iShower][0]);
   
 } // microboone::AnalysisTree::FillShower()
 
