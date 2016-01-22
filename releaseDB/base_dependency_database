@@ -964,6 +964,7 @@ uboonecode : lardata : AnalysisBase/T0.h
 uboonecode : lardata : MCBase/MCLimits.h
 uboonecode : lardata : MCBase/MCShower.h
 uboonecode : lardata : MCBase/MCStep.h
+uboonecode : lardata : MCBase/MCTrack.h
 uboonecode : lardata : OpticalDetectorData/ChannelData.h
 uboonecode : lardata : OpticalDetectorData/ChannelDataGroup.h
 uboonecode : lardata : OpticalDetectorData/FIFOChannel.h
@@ -1064,6 +1065,13 @@ uboonecode : uboonecode : uboone/BeamDAQ/beamIFDBInterface.h
 uboonecode : uboonecode : uboone/BeamDAQ/beamRun.h
 uboonecode : uboonecode : uboone/BeamDAQ/beamRunHeader.h
 uboonecode : uboonecode : uboone/BeamDAQ/httpResponse.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/ChannelGroups.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitBinAverageAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitCharacterizationAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitCorrelatedCorrectionAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitFFTAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitFilterAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitNoiseFilterDefs.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg_CalibrationPulseFinder.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg_DigitAboveBaseline.h
@@ -1071,6 +1079,7 @@ uboonecode : uboonecode : uboone/CalData/ROIAlg_DigitAboveThreshold.h
 uboonecode : uboonecode : uboone/CalData/RawDigitAndWireComparisonAlg.h
 uboonecode : uboonecode : uboone/CalData/WaveformPropertiesAlg.h
 uboonecode : uboonecode : uboone/Calibrations/CalibrationTPC_Algs.h
+uboonecode : uboonecode : uboone/Calibrations/Optical/FEMBasicTriggerAlgo.h
 uboonecode : uboonecode : uboone/Calibrations/Optical/LogicPulseFinder.h
 uboonecode : uboonecode : uboone/Calibrations/Optical/PulseRecoTemplate.h
 uboonecode : uboonecode : uboone/Geometry/ChannelMapUBooNEAlg.h
