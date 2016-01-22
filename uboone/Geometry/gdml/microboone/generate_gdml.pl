@@ -1721,7 +1721,6 @@ sub gen_CRT()
     close FILE;
 }
 
-
 # Parameterize the cryostat's surroundings.
 sub gen_enclosure()
 {
@@ -1968,7 +1967,7 @@ EOF
     print GDML <VPF>;
   }
 
-  if ( $CRT_switch eq "on" ) {
+ if ( $CRT_switch eq "on" ) {
     my $CRTvolumePlacementFile = 'gdml_CRT_volumePlacement_file.gdml';
     open VPF, "< $CRTvolumePlacementFile" or die "Can't open $CRTvolumePlacementFile : $!";
     print GDML <VPF>;

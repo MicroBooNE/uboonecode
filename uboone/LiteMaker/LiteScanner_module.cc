@@ -462,11 +462,13 @@ template<class T> void LiteScanner::SaveAssociationSource(const art::Event& evt)
     evt.getByLabel(name,dh);
     if(!dh.isValid() || !(dh->size())) continue;
 
-    auto& ptr_map = fAlg.GetPtrMap<T>();
-
     for(size_t j=0; j<dh->size(); ++j) {
 
       const art::Ptr<T> ptr(dh,j);
+
+      size_t key1, key2;
+      fAlg.ProducePtrMapKey(ptr,key1,key2);
+      auto& ptr_map = fAlg.GetPtrMap<T>(key1,key2);
 
       ptr_map[ptr] = std::make_pair(j,i);
 

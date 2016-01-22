@@ -21,6 +21,7 @@
 #include "datatypes/raw_data_access.h"
 #include <boost/archive/binary_iarchive.hpp>
 #include "datatypes/ub_EventRecord.h"
+#include "uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "Utilities/DatabaseUtil.h" // lardata
@@ -81,7 +82,8 @@ namespace lris {
 			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo,
-			  std::vector<raw::Trigger>& trigInfo);
+			  std::vector<raw::Trigger>& trigInfo,
+              raw::ubdaqSoftwareTriggerData& sw_trigInfo);
     void fillDAQHeaderData(gov::fnal::uboone::datatypes::ub_EventRecord& event_record,
 			   raw::DAQHeader& daqHeader);
     void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
@@ -92,7 +94,12 @@ namespace lris {
 		      raw::BeamInfo& beamInfo);
     void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 			 std::vector<raw::Trigger>& trigInfo);
+    void fillSWTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
+                        raw::ubdaqSoftwareTriggerData& trigInfo);
+
     void checkTimeStampConsistency(void);
+
+    double _trigger_beam_window_time;
 
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;

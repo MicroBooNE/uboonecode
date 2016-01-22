@@ -11,6 +11,7 @@ evttypes.cpp
 globalHeader.cpp
 gps.cpp
 triggerData.cpp
+daqSoftwareTriggerData.cpp
 crateData.cpp
 crateHeader.cpp
 cardData.cpp
@@ -48,6 +49,7 @@ set_source_files_properties(cardDataPMT.cpp PROPERTIES COMPILE_FLAGS "-Wno-unuse
 set_source_files_properties(windowHeaderPMT.cpp PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-deprecated-declarations -Wno-unused-function -Wno-sign-compare -Wno-unused-parameter -Wno-format -Wno-format-y2k -Wno-unused-but-set-variable -Wno-return-type")
 set_source_files_properties(triggerHeader.cpp PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-deprecated-declarations -Wno-unused-function -Wno-sign-compare -Wno-unused-parameter -Wno-format -Wno-format-y2k -Wno-unused-but-set-variable -Wno-return-type")
 set_source_files_properties(triggerData.cpp PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-deprecated-declarations -Wno-unused-function -Wno-sign-compare -Wno-unused-parameter -Wno-format -Wno-format-y2k -Wno-unused-but-set-variable -Wno-return-type")
+set_source_files_properties(daqSoftwareTriggerData.cpp PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-deprecated-declarations -Wno-unused-function -Wno-sign-compare -Wno-unused-parameter -Wno-format -Wno-format-y2k -Wno-unused-but-set-variable -Wno-return-type")
 
 set_source_files_properties(eventRecord.cpp PROPERTIES COMPILE_FLAGS "-Wno-unused-variable -Wno-deprecated-declarations -Wno-unused-function -Wno-sign-compare -Wno-unused-parameter -Wno-format -Wno-format-y2k -Wno-unused-but-set-variable -Wno-return-type")
 

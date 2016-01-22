@@ -4220,12 +4220,15 @@ void microboone::AnalysisTree::FillShower(
   showerData.shwr_starty[iShower]     = pos_start.Y();
   showerData.shwr_startz[iShower]     = pos_start.Z();
   
-  std::copy_n
-    (shower.Energy().begin(),    kNplanes, &showerData.shwr_totEng[iShower][0]);
-  std::copy_n
-    (shower.dEdx().begin(),      kNplanes, &showerData.shwr_dedx[iShower][0]);
-  std::copy_n
-    (shower.MIPEnergy().begin(), kNplanes, &showerData.shwr_mipEng[iShower][0]);
+  if (shower.Energy().size() == kNplanes)
+    std::copy_n
+      (shower.Energy().begin(),    kNplanes, &showerData.shwr_totEng[iShower][0]);
+  if (shower.dEdx().size() == kNplanes)
+    std::copy_n
+      (shower.dEdx().begin(),      kNplanes, &showerData.shwr_dedx[iShower][0]);
+  if (shower.MIPEnergy().size() == kNplanes)
+    std::copy_n
+      (shower.MIPEnergy().begin(), kNplanes, &showerData.shwr_mipEng[iShower][0]);
   
 } // microboone::AnalysisTree::FillShower()
 

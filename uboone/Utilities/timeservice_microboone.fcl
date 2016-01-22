@@ -6,14 +6,14 @@ microboone_timeservice: @local::standard_timeservice
 
 microboone_timeservice.TrigModuleName:     "triggersim"
 microboone_timeservice.InheritClockConfig: true
-microboone_timeservice.G4RefTime:        -3.65e3 # G4 time [us] where electronics clock counting start
+microboone_timeservice.G4RefTime:        -4.05e3 # G4 time [us] where electronics clock counting start
 microboone_timeservice.TriggerOffsetTPC: -1.6e3 # Time [us] for TPC readout start w.r.t. trigger time
 microboone_timeservice.FramePeriod:       1.6e3 # Frame period [us]
 microboone_timeservice.ClockSpeedTPC:     2.    # TPC clock speed in MHz
 microboone_timeservice.ClockSpeedOptical: 64.   # Optical clock speed in MHz
 microboone_timeservice.ClockSpeedTrigger: 16.   # Trigger clock speed in MHz
-microboone_timeservice.DefaultTrigTime:   3650. # Default trigger time [us].
-microboone_timeservice.DefaultBeamTime:   3650. # Default beam time [us].
+microboone_timeservice.DefaultTrigTime:   4050. # Default trigger time [us].
+microboone_timeservice.DefaultBeamTime:   4050. # Default beam time [us].
 
 microboone_timeservice_1window: @local::microboone_timeservice
 microboone_timeservice_1window.G4RefTime:       0
