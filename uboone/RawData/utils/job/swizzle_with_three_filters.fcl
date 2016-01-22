@@ -40,7 +40,7 @@ microboone_tfile_metadata:
 }
 
 # Database settings
-services.user.DatabaseUtil.DBHostName:    "ifdb02.fnal.gov"
+services.user.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
 services.user.DatabaseUtil.DBName:        "hootgibson_prod"
 services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
 services.user.DatabaseUtil.Port:          5444
