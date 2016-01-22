@@ -1,0 +1,4 @@
+<lcgdict>
+ <class name="raw::ubdaqSoftwareTriggerData"/>
+ <class name="art::Wrapper<raw::ubdaqSoftwareTriggerData>"/>
+</lcgdict>
