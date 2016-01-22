@@ -14,7 +14,7 @@ fi
 # This script runs the full mc+reco chain using standard released fcl files.
 
 input=''
-for fcl in prod_muminus_0.5-5.0GeV_25degf_uboone.fcl standard_g4_uboone.fcl standard_detsim_uboone.fcl reco_uboone_stage_1.fcl reco_uboone_stage_2_w_cluster3d.fcl standard_ana_uboone.fcl
+for fcl in prod_muminus_0.5-5.0GeV_25degf_uboone.fcl standard_g4_uboone.fcl standard_detsim_uboone.fcl reco_uboone_data_minimal_driver.fcl standard_ana_uboone_data_minimal.fcl
 do
   output=`basename $fcl .fcl`.root
   out=`basename $fcl .fcl`.out
