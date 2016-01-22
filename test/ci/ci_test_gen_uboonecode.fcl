@@ -8,7 +8,9 @@ physics.producers.generator.FluxFiles:     ["numode_bnb_470m_r200.root"]
 services.user.SeedService.policy: "preDefinedSeed"
 services.user.SeedService.baseSeed: 1234
 services.user.SeedService.generator: 1234
-services.user.SeedService.cry: 1234
+#services.user.SeedService.cry: 1234
+services.user.SeedService.corsika: 1234
+
 
 services.RandomNumberGenerator.restoreFrom: "GenRandomSeeds_Ref.dat"
 services.RandomNumberGenerator.saveTo: "GenRandomSeeds.dat"
