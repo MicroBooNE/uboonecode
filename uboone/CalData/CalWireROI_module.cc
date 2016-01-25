@@ -254,10 +254,9 @@ void CalWireROI::produce(art::Event& evt)
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double deconNorm = sss->GetDeconNorm();
-  
-    size_t transformSize = 0;
-  
 
+    // We'll need to set the transform size once we get the waveform and know its size
+    size_t transformSize = 0;
     
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
@@ -292,14 +291,14 @@ void CalWireROI::produce(art::Event& evt)
             
             // Set up the deconvolution and the vector to deconvolve
           
-          // Set up the deconvolution and the vector to deconvolve
-          // This is called only once per event, but under the hood nothing happens 
-          //   unless the FFT vector length changes (which it shouldn't for a run)
-          if (!transformSize)
-          {
-            sss->SetDecon(dataSize, channel);
-            transformSize = fFFT->FFTSize();
-          }
+            // Set up the deconvolution and the vector to deconvolve
+            // This is called only once per event, but under the hood nothing happens
+            //   unless the FFT vector length changes (which it shouldn't for a run)
+            if (!transformSize)
+            {
+                sss->SetDecon(dataSize, channel);
+                transformSize = fFFT->FFTSize();
+            }
             //sss->SetDecon(dataSize, channel);
             //size_t transformSize = fFFT->FFTSize();
             
