@@ -49,69 +49,6 @@
 
 #include "WaveformPropertiesAlg.h"
 
-/* unused function
-namespace {
-
-	void DumpWire(const recob::Wire& wire) {
-		
-		const size_t pagesize = 10;
-		mf::LogDebug log("DumpWire");
-		
-		const recob::Wire::RegionsOfInterest_t& wireSignalRoI = wire.SignalROI();
-		
-		log << "\nDumpWire: wire on view " << ((int) wire.View())
-			<< " channel " << wire.Channel()
-			<< " with " << wireSignalRoI.n_ranges() << " regions of interest:";
-		size_t iRoI = 0;
-		auto RoI = wireSignalRoI.begin_range(), rend = wireSignalRoI.end_range();
-		while (RoI != rend) {
-			++iRoI;
-			log << "\nDumpWire: [RoI " << iRoI << "] starts at " << RoI->begin_index()
-				<< ", " << RoI->size() << " samples:";
-			size_t iSample = 0;
-			for (auto sample: *RoI) {
-				if (iSample % pagesize == 0)
-					log << "\nDumpWire: [RoI " << iRoI << "/" << iSample << "]";
-				log << '\t' << sample;
-				++iSample;
-			} // for sample
-			++RoI;
-		} // for RoI
-		
-		
-		const recob::Wire::RegionsOfInterest_t& wireSignal = wireSignalRoI;
-		std::vector<float> buffer(pagesize), prev_buffer;
-		log << "\nDumpWire: wire on view " << ((int)wire.View())
-			<< " channel " << wire.Channel()
-			<< " with " << wireSignal.size() << " samples:";
-		size_t i = 0, nSame = 0;
-		auto iSample = wireSignal.begin(), send = wireSignal.end();
-		while (iSample < send) {
-			i += prev_buffer.size();
-			buffer.assign(iSample, std::min(iSample + pagesize, send));
-			iSample += buffer.size();
-			if (buffer == prev_buffer) {
-				++nSame;
-			}
-			else {
-				if (nSame > 0) {
-					log << "\nDumpWire: [" << i << "]  ... and " << nSame << " more";
-					nSame = 0;
-				}
-				
-				if (i % pagesize == 0) log << "\nDumpWire: [" << i << "]";
-				for (auto value: buffer) log << '\t' << value;
-				buffer.swap(prev_buffer);
-			}
-		} // while
-		if (nSame > 0) {
-			log << "\nDumpWire: [" << i << "]  ... and " << nSame << " more to the end";
-			nSame = 0;
-		}
-	} // DumpWire()
-}
-*/
-
 ///creation of calibrated signals on wires
 namespace caldata {
 
@@ -299,7 +236,6 @@ void CalWireROI::produce(art::Event& evt)
     art::ServiceHandle<util::LArFFT> fFFT;
     reconfFFT(fFFTSize);
     
-    
     // make a collection of Wires
     std::unique_ptr<std::vector<recob::Wire> > wirecol(new std::vector<recob::Wire>);
     // ... and an association set
@@ -313,12 +249,15 @@ void CalWireROI::produce(art::Event& evt)
     if (!digitVecHandle->size())  return;
     
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
-    unsigned int bin(0);     // time bin loop variable
     
     const lariov::IChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::IChannelStatusService>()->GetProvider();
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
-    double DeconNorm = sss->GetDeconNorm();
+    double deconNorm = sss->GetDeconNorm();
+  
+    size_t transformSize = 0;
+  
+
     
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
@@ -327,8 +266,6 @@ void CalWireROI::produce(art::Event& evt)
         // vector that will be moved into the Wire object
         recob::Wire::RegionsOfInterest_t ROIVec;
       
-        // the starting position and length of each ROI in the packed holder vector
-        std::vector<std::pair<size_t, size_t>> holderInfo;
         // vector of ROI begin and end bins
         std::vector<std::pair<size_t, size_t>> rois;
       
@@ -341,27 +278,35 @@ void CalWireROI::produce(art::Event& evt)
 
         // Testing an idea about rejecting channels
         if (digitVec->GetPedestal() < 0.) continue;
-
-        size_t dataSize = digitVec->Samples();
-        // vector holding uncompressed adc values
-        std::vector<short> rawadc(dataSize);
-      
-        std::vector<geo::WireID> wids = geom->ChannelToWire(channel);
-        size_t thePlane = wids[0].Plane;
-        //unsigned int theWire = wids[0].Wire;
-      
-        // use short pedestal for testing the 1st induction plane
-        // unsigned short sPed = abs(fThreshold[thePlane]);
-    
-        // Find minimum separation between ROIs including the padding.
-        // Use the longer pad
-        // unsigned int minSepPad = fMinSep + fPreROIPad[thePlane];
-        //if(fPostROIPad[thePlane] > fPreROIPad[thePlane])
-        //  minSepPad = fMinSep + fPostROIPad[thePlane];
-      
+        
         // skip bad channels
         if( chanFilt.Status(channel) >= fMinAllowedChanStatus)
         {
+            size_t dataSize = digitVec->Samples();
+            
+            // vector holding uncompressed adc values
+            std::vector<short> rawadc(dataSize);
+            
+            std::vector<geo::WireID> wids     = geom->ChannelToWire(channel);
+            size_t                   thePlane = wids[0].Plane;
+            
+            // Set up the deconvolution and the vector to deconvolve
+          
+          // Set up the deconvolution and the vector to deconvolve
+          // This is called only once per event, but under the hood nothing happens 
+          //   unless the FFT vector length changes (which it shouldn't for a run)
+          if (!transformSize)
+          {
+            sss->SetDecon(dataSize, channel);
+            transformSize = fFFT->FFTSize();
+          }
+            //sss->SetDecon(dataSize, channel);
+            //size_t transformSize = fFFT->FFTSize();
+            
+            std::vector<float> rawAdcLessPedVec;
+            
+            rawAdcLessPedVec.resize(transformSize,0.);
+            
             // uncompress the data
             raw::Uncompress(digitVec->ADCs(), rawadc, digitVec->Compression());
             
@@ -375,17 +320,22 @@ void CalWireROI::produce(art::Event& evt)
             if      (fNoiseSource == 1) raw_noise = rms_noise;
             else if (fNoiseSource != 2) raw_noise = std::max(raw_noise,rms_noise);
             
-            size_t startBin(0);
-            size_t stopBin(numBins);
+            size_t binOffset(0);
+            
+            if (transformSize > dataSize) binOffset = (transformSize - dataSize) / 2;
+            
+            size_t startBin(binOffset);
+            size_t stopBin(binOffset+numBins);
             
             float startThreshold = sqrt(float(numBins)) * (fNumSigma[thePlane] * raw_noise + fThreshold[thePlane]);
             float stopThreshold  = startThreshold;
             
-            std::vector<float> rawAdcLessPedVec(rawadc.size());
+            // Get the pedestal subtracted data, centered in the deconvolution vector
+            std::transform(rawadc.begin(),rawadc.end(),rawAdcLessPedVec.begin()+startBin,[pdstl](const short& adc){return std::round(float(adc) - pdstl);});
+            std::fill(rawAdcLessPedVec.begin(),rawAdcLessPedVec.begin()+startBin,0.);        //rawAdcLessPedVec.at(startBin));
+            std::fill(rawAdcLessPedVec.begin()+startBin+dataSize,rawAdcLessPedVec.end(),0.); //rawAdcLessPedVec.at(startBin+dataSize-1));
             
-            std::transform(rawadc.begin(),rawadc.end(),rawAdcLessPedVec.begin(),[pdstl](const short& adc){return float(adc) - pdstl;});
-            
-            float runningSum = std::accumulate(rawAdcLessPedVec.begin(),rawAdcLessPedVec.begin() + stopBin, 0.);
+            float runningSum = std::accumulate(rawAdcLessPedVec.begin()+startBin,rawAdcLessPedVec.begin()+stopBin, 0.);
             
             size_t roiStartBin(0);
             bool   roiCandStart(false);
@@ -393,7 +343,7 @@ void CalWireROI::produce(art::Event& evt)
             // search for ROIs - follow prescription from Bruce B using a running sum to make faster
             // Note that we start in the middle of the running sum... if we find an ROI padding will extend
             // past this to take care of ends of the waveform
-            for(bin = fNumBinsHalf; bin < dataSize - fNumBinsHalf; ++bin)
+            for(size_t bin = fNumBinsHalf + 1; bin < dataSize - fNumBinsHalf; bin++)
             {
                 // handle the running sum
                 // Case, we are at start of waveform
@@ -407,7 +357,7 @@ void CalWireROI::produce(art::Event& evt)
                 {
                     if (fabs(runningSum) < stopThreshold)
                     {
-                        if (bin - roiStartBin > 1) rois.push_back(std::make_pair(roiStartBin, bin));
+                        if (bin - roiStartBin > 2) rois.push_back(std::make_pair(roiStartBin, bin));
                         
                         roiCandStart = false;
                     }
@@ -431,7 +381,7 @@ void CalWireROI::produce(art::Event& evt)
             }
 
             // skip deconvolution if there are no ROIs
-            if(rois.empty()) continue;
+            if(rois.size() == 0) continue;
 
             // pad the ROIs
             for(size_t ii = 0; ii < rois.size(); ++ii)
@@ -469,114 +419,47 @@ void CalWireROI::produce(art::Event& evt)
                 
                 // Make sure to get the last one
                 trois.push_back(std::pair<size_t,size_t>(startRoi,stopRoi));
-
+	  
                 rois = trois;
             }
             
-            holderInfo.clear();
-
-            for (unsigned int ir = 0; ir < rois.size(); ++ir)
+            // Strategy is to run deconvolution on the entire channel and then pick out the ROI's we found above
+            sss->Deconvolute(channel,rawAdcLessPedVec);
+            
+            std::vector<float> holder;
+            
+            for(const auto roi : rois)
             {
-                size_t roiLen = rois[ir].second - rois[ir].first + 1;
-                size_t roiStart = rois[ir].first;
-	  
-                int flag =1;
-                float tempPre=0,tempPost=0;
-                std::vector<float> holder;
-                while(flag)
+                // First up: copy out the relevent ADC bins into the ROI holder
+                size_t roiLen = roi.second - roi.first;
+                
+                holder.resize(roiLen);
+                
+                std::copy(rawAdcLessPedVec.begin()+binOffset+roi.first, rawAdcLessPedVec.begin()+binOffset+roi.second, holder.begin());
+                std::transform(holder.begin(),holder.end(),holder.begin(),[deconNorm](float& deconVal){return deconVal/deconNorm;});
+                
+                // Now we do the baseline determination (and I'm left wondering if there is a better way using the entire waveform?)
+                float base=0.;
+                if(fDoBaselineSub && fPreROIPad[thePlane] > 0 )
                 {
-                    unsigned int transformSize = fFFTSize; //current transformsize
-                    //if ROI length is longer, take ROI length
-                    if (roiLen > transformSize) transformSize = roiLen;
-	    
-                    // Get signal shaping service.
-                    sss->SetDecon(transformSize);
-                    transformSize = fFFT->FFTSize();
-                    
-                    // temporary vector of signals
-                    holder.resize(transformSize,0.);
-	    
-                    // Apparently the transformSize gets reset in the call to SetDecon so make sure we are not running off the
-                    // end of the waveform here...
-                    size_t copySize(holder.size());
-                    size_t leftoverSize(0);
-                    
-                    if (roiStart + copySize > dataSize)
-                    {
-                        leftoverSize  = roiStart + copySize - dataSize;
-                        copySize     -= leftoverSize;
-                        flag          = 0;
-                    }
-                    
-                    std::copy(rawAdcLessPedVec.begin() + roiStart, rawAdcLessPedVec.begin() + roiStart + copySize, holder.begin());
-                    
-                    if (leftoverSize > 0)
-                        std::copy(rawAdcLessPedVec.begin(), rawAdcLessPedVec.begin() + leftoverSize, holder.begin() + copySize);
-
-                    sss->Deconvolute(channel,holder);
-                    for(bin = 0; bin < holder.size(); ++bin) holder[bin]=holder[bin]/DeconNorm;
-
                     //1. Check Baseline match?
                     // If not, include next ROI(if none, go to the end of signal)
                     // If yes, proceed
-                    tempPre=0,tempPost=0;
-                    for(unsigned int bin = 0; bin < 20; ++bin)
-                    {
-                        tempPre  += holder[bin];
-                        tempPost += holder[roiLen -1 - bin];
-                    }
-                    tempPre = tempPre/20.;
-                    tempPost = tempPost/20.;
-	    
-                    double deconNoise = sss->GetDeconNoise(channel)/sqrt(10.)*4;
-	    
-                    if (fabs(tempPost-tempPre)<deconNoise){
-                        flag = 0;
-                    }else{
-                        if (tempPre > tempPost && roiStart <= 2){
-                            //if (tempPre > tempPost){
-                            flag = 0;
-                        }else{
-                            if (ir+1<rois.size()){
-                                roiLen += 100;
-                                if (roiLen >= rois[ir+1].first - roiStart + 1)
-                                    roiLen = rois[++ir].second - roiStart + 1;
-                            }else{
-                                roiLen += 100;
-                                if (roiLen>dataSize-roiStart)
-                                    roiLen = dataSize - roiStart;
-                            }
-                        }
-                    }
-                }
-	  
-                // transfer the ROI and start bins into the vector that will be
-                // put into the event
-                std::vector<float> sigTemp;
-                unsigned int bBegin = 0;
-                //unsigned int theROI =ir;
-                unsigned int bEnd = bBegin + roiLen;
-                float basePre = 0., basePost = 0.;
-
-                float base=0;
-                if(fDoBaselineSub && fPreROIPad[thePlane] > 0 )
-                {
-                    basePre =tempPre;
-                    basePost=tempPost;
-                    base = SubtractBaseline(holder, basePre,basePost,roiStart,roiLen,dataSize);
+                    size_t binsToAve(20);
+                    float  basePre  = std::accumulate(holder.begin(),holder.begin()+binsToAve,0.) / float(binsToAve);
+                    float  basePost = std::accumulate(holder.end()-binsToAve,holder.end(),0.) / float(binsToAve);
+                   
+                    base = SubtractBaseline(holder, basePre,basePost,roi.first,roiLen,dataSize);
                 } // fDoBaselineSub ...
                 else if(fDoBaselineSub_WaveformPropertiesAlg)
                 {
-                    holder.resize(roiLen);
                     base = fROIPropertiesAlg.GetWaveformPedestal(holder);
                 }
+                
+                std::transform(holder.begin(),holder.end(),holder.begin(),[base](float& adcVal){return adcVal - base;});
 
-                for(unsigned int jj = bBegin; jj < bEnd; ++jj)
-                    sigTemp.push_back(holder[jj]-base);
-	        
                 // add the range into ROIVec
-                ROIVec.add_range(roiStart, std::move(sigTemp));
-	  
+                ROIVec.add_range(roi.first, std::move(holder));
             }
         } // end if not a bad channel
 

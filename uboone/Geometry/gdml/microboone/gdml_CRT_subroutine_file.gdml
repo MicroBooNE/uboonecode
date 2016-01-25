@@ -66,7 +66,7 @@
   
   <structure>
     
-    <volume name="volSci_Layer_Under">
+    <volume name="volAuxDet_Sci_Layer_Under">
       <materialref ref="Polystyrene"/>
       <solidref ref="Sci_Layer_Under"/>
     </volume>
@@ -77,7 +77,7 @@
     </volume>
 
 
-    <volume name="volSci_Layer_FT_Side">
+    <volume name="volAuxDet_Sci_Layer_FT_Side">
       <materialref ref="Polystyrene"/>
       <solidref ref="Sci_Layer_FT_Side"/>
     </volume>
@@ -88,7 +88,7 @@
     </volume>
 
 
-    <volume name="volSci_Layer_Pipe_Side">
+    <volume name="volAuxDet_Sci_Layer_Pipe_Side">
       <materialref ref="Polystyrene"/>
       <solidref ref="UnionSci_Pipe_Side"/>
     </volume>
@@ -98,7 +98,7 @@
       <solidref ref="UnionAl_Pipe_Side"/>
     </volume>
 
-    <volume name="volSci_Layer_Top">
+    <volume name="volAuxDet_Sci_Layer_Top">
       <materialref ref="Polystyrene"/>
       <solidref ref="UnionSci_Top"/>
     </volume>
