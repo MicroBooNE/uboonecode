@@ -6,7 +6,7 @@
 </physvol>
 
 <physvol>
-<volumeref ref="volSci_Layer_Under"/>
+<volumeref ref="volAuxDet_Sci_Layer_Under"/>
 <position name="posUnder1" unit="cm" x="0" y="-236.3" z="-116.45"/>
 </physvol>
 
@@ -21,7 +21,7 @@
 </physvol>
 
 <physvol>
-<volumeref ref="volSci_Layer_Under"/>
+<volumeref ref="volAuxDet_Sci_Layer_Under"/>
 <position name="posUnder4" unit="cm" x="0" y="-237.9" z="-116.45"/>
 </physvol>
 
@@ -43,7 +43,7 @@
 </physvol>
 
 <physvol>
-<volumeref ref="volSci_Layer_FT_Side"/>
+<volumeref ref="volAuxDet_Sci_Layer_FT_Side"/>
 <position name="posFT_Side1" unit="cm" x="-265.3" y="0" z="0"/>
 </physvol>
 
@@ -58,7 +58,7 @@
 </physvol>
 
 <physvol>
-<volumeref ref="volSci_Layer_FT_Side"/>
+<volumeref ref="volAuxDet_Sci_Layer_FT_Side"/>
 <position name="posFT_Side4" unit="cm" x="-266.9" y="0" z="0"/>
 </physvol>
 
@@ -78,7 +78,7 @@
 </physvol>
 
 <physvol>
-<volumeref ref="volSci_Layer_Pipe_Side"/>
+<volumeref ref="volAuxDet_Sci_Layer_Pipe_Side"/>
 <position name="posPipe_Side1" unit="cm" x="250.3" y="0" z="0"/>
 </physvol>
 
@@ -93,7 +93,7 @@
 </physvol>
 
 <physvol>
-<volumeref ref="volSci_Layer_Pipe_Side"/>
+<volumeref ref="volAuxDet_Sci_Layer_Pipe_Side"/>
 <position name="posPipe_Side4" unit="cm" x="251.9" y="0" z="0"/>
 </physvol>
 
@@ -114,7 +114,7 @@
 </physvol>
 
 <physvol>
-<volumeref ref="volSci_Layer_Top"/>
+<volumeref ref="volAuxDet_Sci_Layer_Top"/>
 <position name="posTop1" unit="cm" x="0" y="657.50" z="0"/>
 </physvol>
 
@@ -129,7 +129,7 @@
 </physvol>
 
 <physvol>
-<volumeref ref="volSci_Layer_Top"/>
+<volumeref ref="volAuxDet_Sci_Layer_Top"/>
 <position name="posTop4" unit="cm" x="0" y="659.1" z="0"/>
 </physvol>
 

@@ -117,8 +117,8 @@ if ( $granite_block eq "on" ) {  gen_granite(); } # physical volumes defined in 
 #gen_testbox();
 if ( $enclosureExtras eq "on" ) {  gen_enclosureExtras(); } #generation of insulation, etc. will happen if specified
 gen_cryostat();
-if ( $vetoWall_switch eq "off" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
-if ( $CRT_switch eq "off" ) {  gen_CRT();  } # physical volumes defined in gen_CRT()
+if ( $vetoWall_switch eq "on" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
+if ( $CRT_switch eq "on" ) {  gen_CRT();  } # physical volumes defined in gen_CRT()
 
 gen_enclosure();
 gen_world();
