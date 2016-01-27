@@ -1168,14 +1168,6 @@ namespace lris {
       triggerBitPMTCosmic = trig_bits & 0x2;
       triggerTime = trigger_time;
 
-      std::cout << "trigger frame, sample, time = " << triggerFrame << ", " << triggerSample << ", " << triggerTime << std::endl;
-      
-//      if (triggerBitBNB){std::cout << "BNB Trigger issued" << std::endl;}
-//      if (triggerBitNuMI){std::cout << "NuMI Trigger issued" << std::endl;}
-//      if (triggerBitEXT){std::cout << "EXT Trigger issued" << std::endl;}
-//      std::cout << "trigger frame, sample = " << frame << "," << sample_64MHz << std::endl;
-      
-      
     }
   }
 
@@ -1252,33 +1244,16 @@ namespace lris {
     }
     
     for (unsigned int i(0); i < swTrig_vect.size(); ++i){ // loop through swtrigger algos filling info
-      ub_FEMBeamTriggerOutput swTrig = swTrig_vect.at(i);
-//      trigInfo.setPass(i,swTrig.pass_algo);
-
-      trigInfo.addAlgorithm(swTrig.algo_instance_name, swTrig.pass_algo, swTrig.amplitude, swTrig.multiplicity, swTrig.time, _trigger_beam_window_time + swTrig.time * opt_clock.TickPeriod(), swTrig.prescale_weight);
-
-//      if (swTrig.pass_algo == 0){ // if failed, set to default values
-//        trigInfo.setPhmax(i,0);
-//        trigInfo.setMultiplicity(i,0);
-//        trigInfo.setTriggerTick(i,0);
-//        trigInfo.setTimeSinceTrigger(i,-999);
-//        trigInfo.setAlgorithm(swTrig.algo_instance_name);
-//        trigInfo.setPrescaleWeight(i,swTrig.prescale_weight);
-//      }
-//      else{
-//        trigInfo.setPhmax(i,swTrig.amplitude);
-//        trigInfo.setMultiplicity(i,swTrig.multiplicity);
-//        trigInfo.setTriggerTick(i,swTrig.time);
-//        trigInfo.setAlgorithm(i,swTrig.algorithm); 
-//        trigInfo.setTimeSinceTrigger(i,_trigger_beam_window_time + swTrig.time * opt_clock.TickPeriod());
-//        trigInfo.setAlgorithm(i,swTrig.algo_instance_name);
-//        trigInfo.setPrescaleWeight(i,swTrig.prescale_weight);
-//        trigInfo.setPrescale(swTrig.pass_prescale);
-//      
-//      } // end setting info
-
+      ub_FEMBeamTriggerOutput swTrig = swTrig_vect.at(i); // fetch algorithm
+      
+      trigInfo.addAlgorithm(swTrig.algo_instance_name, // add algorithm to art data product
+                            swTrig.pass_algo, 
+                            swTrig.amplitude, 
+                            swTrig.multiplicity, 
+                            swTrig.time, 
+                            _trigger_beam_window_time + swTrig.time * opt_clock.TickPeriod(), 
+                            swTrig.prescale_weight);
     } // end loop over swtrigger algos
-
   }
     
 
