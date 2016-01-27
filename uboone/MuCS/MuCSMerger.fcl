@@ -1,0 +1,59 @@
+
+#
+#     The main fhcl file to execute MuCSMerger 
+#     Leonidas N. Kalousis, kalousis@vt.edu 
+#     May 2015
+#
+
+#include "services_microboone.fcl"
+#include "merger_microboone.fcl"
+
+process_name: MuCSMerger
+
+services:
+{
+  TFileService:               { fileName: "/uboone/data/users/kalousis/MuCS/merged/mucs_merger_hist_myrun_mygroup.root" }
+  Timing:                     {}
+  # SimpleMemoryCheck:          { ignoreTotal: 1 }
+  RandomNumberGenerator:      {} 
+  message:                    @local::standard_info
+  # FileCatalogMetadata:        @local::art_file_catalog_mc
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents: 200000     
+}
+
+physics:
+{
+ producers:
+ {
+   rns: { module_type: RandomNumberSaver }
+   merger: @local::standard_mucsmerger
+ }
+ 
+ merge: [ rns,merger ]
+ stream1:  [ out1 ]
+ trigger_paths: [ merge ] 
+ end_paths: [ stream1 ]  
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   # fileName: "%ifb_%tc_merged.root"
+   fileName: "/uboone/data/users/kalousis/MuCS/merged/%ifb_myrun_mygroup_merged.root"
+   dataTier: "mucs_merged"
+   compressionLevel: 1
+ }
+}
+
+#### !!! ---> #include "triggeralgo_service.fcl"
+# services.DatabaseUtil.ShouldConnect: false
+
+physics.producers.merger.group : mygroup
+physics.producers.merger.run : myrun
