@@ -99,8 +99,7 @@ namespace detsim {
 
     std::vector<TH1D*>      fNoiseDist;     ///< distribution of noise counts, one per plane
     bool                    fGetNoiseFromHisto; ///< if True -> Noise from Histogram of Freq. spectrum
-    bool                    fGenNoiseInTime;    ///< if True -> Noise with Gaussian dsitribution in Time-domain 	 	    
-    bool                    fGenNoise;          ///< if True -> Gen Noise. if False -> Skip noise generation entirely
+    unsigned short          fGenNoise;          ///< 0 -> no noise, 1: time domain, 2: freq domain, 3: postfilter
     std::string             fNoiseFileFname;
     std::string             fNoiseHistoName;
     TH1D*                   fNoiseHist;         ///< distribution of noise counts

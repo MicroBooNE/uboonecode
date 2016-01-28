@@ -1,0 +1,20 @@
+
+BEGIN_PROLOG
+
+standard_mucsmerger:
+{
+  module_type: "MuCSMerger"
+  group: 0
+  run: 0
+  SwizzlerProducerLabel: "daq"
+}
+
+standard_mucsreco:
+{
+  module_type: "MuCSReco"
+  InputDB: "input.sqlite"
+  TopBoxy: 0.0
+  
+}
+
+END_PROLOG
