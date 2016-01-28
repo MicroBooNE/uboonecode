@@ -849,9 +849,41 @@ namespace microboone {
     std::vector<Float_t>  StartPointx_tpcAV;
     std::vector<Float_t>  StartPointy_tpcAV;
     std::vector<Float_t>  StartPointz_tpcAV;
+    std::vector<Float_t>  StartT_tpcAV;
+    std::vector<Float_t>  StartE_tpcAV;
+    std::vector<Float_t>  StartP_tpcAV;
+    std::vector<Float_t>  StartPx_tpcAV;
+    std::vector<Float_t>  StartPy_tpcAV;
+    std::vector<Float_t>  StartPz_tpcAV;
     std::vector<Float_t>  EndPointx_tpcAV;
     std::vector<Float_t>  EndPointy_tpcAV;
     std::vector<Float_t>  EndPointz_tpcAV;
+    std::vector<Float_t>  EndT_tpcAV;
+    std::vector<Float_t>  EndE_tpcAV;
+    std::vector<Float_t>  EndP_tpcAV;
+    std::vector<Float_t>  EndPx_tpcAV;
+    std::vector<Float_t>  EndPy_tpcAV;
+    std::vector<Float_t>  EndPz_tpcAV;
+    std::vector<Float_t>  pathlen_drifted;    
+    std::vector<Int_t>    inTPCDrifted;    
+    std::vector<Float_t>  StartPointx_drifted;
+    std::vector<Float_t>  StartPointy_drifted;
+    std::vector<Float_t>  StartPointz_drifted;
+    std::vector<Float_t>  StartT_drifted;
+    std::vector<Float_t>  StartE_drifted;
+    std::vector<Float_t>  StartP_drifted;
+    std::vector<Float_t>  StartPx_drifted;
+    std::vector<Float_t>  StartPy_drifted;
+    std::vector<Float_t>  StartPz_drifted;
+    std::vector<Float_t>  EndPointx_drifted;
+    std::vector<Float_t>  EndPointy_drifted;
+    std::vector<Float_t>  EndPointz_drifted;
+    std::vector<Float_t>  EndT_drifted;
+    std::vector<Float_t>  EndE_drifted;
+    std::vector<Float_t>  EndP_drifted;
+    std::vector<Float_t>  EndPx_drifted;
+    std::vector<Float_t>  EndPy_drifted;
+    std::vector<Float_t>  EndPz_drifted;
     std::vector<Int_t>    NumberDaughters;
     std::vector<Int_t>    TrackId;
     std::vector<Int_t>    Mother;
@@ -920,7 +952,18 @@ namespace microboone {
     std::vector<Float_t>     mctrk_startZ;	    //MC track particle G4 startZ 
     std::vector<Float_t>     mctrk_endX;		//MC track particle G4 endX 
     std::vector<Float_t>     mctrk_endY;		//MC track particle G4 endY 
-    std::vector<Float_t>     mctrk_endZ;		//MC track particle G4 endZ  
+    std::vector<Float_t>     mctrk_endZ;		//MC track particle G4 endZ
+    std::vector<Float_t>     mctrk_startX_drifted;        //MC track particle first step in TPC x
+    std::vector<Float_t>     mctrk_startY_drifted;        //MC track particle first step in TPC y
+    std::vector<Float_t>     mctrk_startZ_drifted;        //MC track particle first step in TPC z
+    std::vector<Float_t>     mctrk_endX_drifted;          //MC track particle last step in TPC x
+    std::vector<Float_t>     mctrk_endY_drifted;          //MC track particle last step in TPC y
+    std::vector<Float_t>     mctrk_endZ_drifted;          //MC track particle last step in TPC z
+    std::vector<Float_t>     mctrk_len_drifted;           //MC track length within TPC
+    std::vector<Float_t>     mctrk_p_drifted;             //MC track momentum at start point in TPC
+    std::vector<Float_t>     mctrk_px_drifted;            //MC track x momentum at start point in TPC
+    std::vector<Float_t>     mctrk_py_drifted;            //MC track y momentum at start point in TPC
+    std::vector<Float_t>     mctrk_pz_drifted;            //MC track z momentum at start point in TPC
     //MC Track mother information
     std::vector<Int_t>       mctrk_Motherpdg;       //MC Track's mother PDG code. 
     std::vector<Int_t>       mctrk_MotherTrkId;     //MC Track's mother G4 track ID.
@@ -1224,7 +1267,9 @@ namespace microboone {
 
     void   HitsPurity(std::vector< art::Ptr<recob::Hit> > const& hits, Int_t& trackid, Float_t& purity, double& maxe);
     double length(const recob::Track& track);
-    double length(const simb::MCParticle& part, TVector3& start, TVector3& end);
+    double driftedLength(const simb::MCParticle& part, TLorentzVector& start, TLorentzVector& end, unsigned int &starti, unsigned int &endi);
+    double driftedLength(const sim::MCTrack& mctrack, TLorentzVector& tpcstart, TLorentzVector& tpcend, TLorentzVector& tpcmom);
+    double length(const simb::MCParticle& part, TLorentzVector& start, TLorentzVector& end, unsigned int &starti, unsigned int &endi);
     double bdist(const TVector3& pos);
 
     TTree* fTree;
@@ -2109,9 +2154,41 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   FillWith(StartPointx_tpcAV, -99999.);
   FillWith(StartPointy_tpcAV, -99999.);
   FillWith(StartPointz_tpcAV, -99999.);
+  FillWith(StartT_tpcAV, -99999.);
+  FillWith(StartE_tpcAV, -99999.);
+  FillWith(StartP_tpcAV, -99999.);
+  FillWith(StartPx_tpcAV, -99999.);
+  FillWith(StartPy_tpcAV, -99999.);
+  FillWith(StartPz_tpcAV, -99999.);
   FillWith(EndPointx_tpcAV, -99999.);
   FillWith(EndPointy_tpcAV, -99999.);
-  FillWith(EndPointz_tpcAV, -99999.);  
+  FillWith(EndPointz_tpcAV, -99999.);
+  FillWith(EndT_tpcAV, -99999.);
+  FillWith(EndE_tpcAV, -99999.);
+  FillWith(EndP_tpcAV, -99999.);
+  FillWith(EndPx_tpcAV, -99999.);
+  FillWith(EndPy_tpcAV, -99999.);
+  FillWith(EndPz_tpcAV, -99999.);
+  FillWith(pathlen_drifted, -99999.);
+  FillWith(inTPCDrifted, -99999);
+  FillWith(StartPointx_drifted, -99999.);
+  FillWith(StartPointy_drifted, -99999.);
+  FillWith(StartPointz_drifted, -99999.);
+  FillWith(StartT_drifted, -99999.);
+  FillWith(StartE_drifted, -99999.);
+  FillWith(StartP_drifted, -99999.);
+  FillWith(StartPx_drifted, -99999.);
+  FillWith(StartPy_drifted, -99999.);
+  FillWith(StartPz_drifted, -99999.);
+  FillWith(EndPointx_drifted, -99999.);
+  FillWith(EndPointy_drifted, -99999.);
+  FillWith(EndPointz_drifted, -99999.); 
+  FillWith(EndT_drifted, -99999.);
+  FillWith(EndE_drifted, -99999.);
+  FillWith(EndP_drifted, -99999.); 
+  FillWith(EndPx_drifted, -99999.); 
+  FillWith(EndPy_drifted, -99999.); 
+  FillWith(EndPz_drifted, -99999.); 
   FillWith(NumberDaughters, -99999);
   FillWith(Mother, -99999);
   FillWith(TrackId, -99999);
@@ -2262,9 +2339,41 @@ void microboone::AnalysisTreeDataStruct::ResizeGEANT(int nParticles) {
   StartPointx_tpcAV.resize(MaxGEANTparticles);
   StartPointy_tpcAV.resize(MaxGEANTparticles);
   StartPointz_tpcAV.resize(MaxGEANTparticles);
+  StartT_tpcAV.resize(MaxGEANTparticles);
+  StartE_tpcAV.resize(MaxGEANTparticles);
+  StartP_tpcAV.resize(MaxGEANTparticles);
+  StartPx_tpcAV.resize(MaxGEANTparticles);
+  StartPy_tpcAV.resize(MaxGEANTparticles);
+  StartPz_tpcAV.resize(MaxGEANTparticles);
   EndPointx_tpcAV.resize(MaxGEANTparticles);
   EndPointy_tpcAV.resize(MaxGEANTparticles);
-  EndPointz_tpcAV.resize(MaxGEANTparticles);    
+  EndPointz_tpcAV.resize(MaxGEANTparticles); 
+  EndT_tpcAV.resize(MaxGEANTparticles);
+  EndE_tpcAV.resize(MaxGEANTparticles);
+  EndP_tpcAV.resize(MaxGEANTparticles);
+  EndPx_tpcAV.resize(MaxGEANTparticles);
+  EndPy_tpcAV.resize(MaxGEANTparticles);
+  EndPz_tpcAV.resize(MaxGEANTparticles);
+  pathlen_drifted.resize(MaxGEANTparticles);
+  inTPCDrifted.resize(MaxGEANTparticles);
+  StartPointx_drifted.resize(MaxGEANTparticles);
+  StartPointy_drifted.resize(MaxGEANTparticles);
+  StartPointz_drifted.resize(MaxGEANTparticles);
+  StartT_drifted.resize(MaxGEANTparticles);
+  StartE_drifted.resize(MaxGEANTparticles);
+  StartP_drifted.resize(MaxGEANTparticles);
+  StartPx_drifted.resize(MaxGEANTparticles);
+  StartPy_drifted.resize(MaxGEANTparticles);
+  StartPz_drifted.resize(MaxGEANTparticles);
+  EndPointx_drifted.resize(MaxGEANTparticles);
+  EndPointy_drifted.resize(MaxGEANTparticles);
+  EndPointz_drifted.resize(MaxGEANTparticles); 
+  EndT_drifted.resize(MaxGEANTparticles);   
+  EndE_drifted.resize(MaxGEANTparticles);   
+  EndP_drifted.resize(MaxGEANTparticles);   
+  EndPx_drifted.resize(MaxGEANTparticles);   
+  EndPy_drifted.resize(MaxGEANTparticles);   
+  EndPz_drifted.resize(MaxGEANTparticles);   
   NumberDaughters.resize(MaxGEANTparticles);
   Mother.resize(MaxGEANTparticles);
   TrackId.resize(MaxGEANTparticles);
@@ -2384,6 +2493,17 @@ void microboone::AnalysisTreeDataStruct::ResizeMCTrack(int nMCTracks) {
   mctrk_endX.resize(nMCTracks);	 
   mctrk_endY.resize(nMCTracks);	 
   mctrk_endZ.resize(nMCTracks);
+  mctrk_startX_drifted.resize(nMCTracks);
+  mctrk_startY_drifted.resize(nMCTracks);
+  mctrk_startZ_drifted.resize(nMCTracks);
+  mctrk_endX_drifted.resize(nMCTracks);  
+  mctrk_endY_drifted.resize(nMCTracks);  
+  mctrk_endZ_drifted.resize(nMCTracks);  
+  mctrk_len_drifted.resize(nMCTracks);
+  mctrk_p_drifted.resize(nMCTracks);
+  mctrk_px_drifted.resize(nMCTracks);
+  mctrk_py_drifted.resize(nMCTracks);
+  mctrk_pz_drifted.resize(nMCTracks);
   mctrk_Motherpdg.resize(nMCTracks);	
   mctrk_MotherTrkId.resize(nMCTracks);	
   mctrk_MotherProcess.resize(nMCTracks);
@@ -2650,9 +2770,41 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("StartPointx_tpcAV",StartPointx_tpcAV,"StartPointx_tpcAV[geant_list_size]/F");
     CreateBranch("StartPointy_tpcAV",StartPointy_tpcAV,"StartPointy_tpcAV[geant_list_size]/F");
     CreateBranch("StartPointz_tpcAV",StartPointz_tpcAV,"StartPointz_tpcAV[geant_list_size]/F");
+    CreateBranch("StartT_tpcAV",StartT_tpcAV,"StartT_tpcAV[geant_list_size]/F");
+    CreateBranch("StartE_tpcAV",StartE_tpcAV,"StartE_tpcAV[geant_list_size]/F");
+    CreateBranch("StartP_tpcAV",StartP_tpcAV,"StartP_tpcAV[geant_list_size]/F");
+    CreateBranch("StartPx_tpcAV",StartPx_tpcAV,"StartPx_tpcAV[geant_list_size]/F");
+    CreateBranch("StartPy_tpcAV",StartPy_tpcAV,"StartPy_tpcAV[geant_list_size]/F");
+    CreateBranch("StartPz_tpcAV",StartPz_tpcAV,"StartPz_tpcAV[geant_list_size]/F");
     CreateBranch("EndPointx_tpcAV",EndPointx_tpcAV,"EndPointx_tpcAV[geant_list_size]/F");
     CreateBranch("EndPointy_tpcAV",EndPointy_tpcAV,"EndPointy_tpcAV[geant_list_size]/F");
     CreateBranch("EndPointz_tpcAV",EndPointz_tpcAV,"EndPointz_tpcAV[geant_list_size]/F");
+    CreateBranch("EndT_tpcAV",EndT_tpcAV,"EndT_tpcAV[geant_list_size]/F");
+    CreateBranch("EndE_tpcAV",EndE_tpcAV,"EndE_tpcAV[geant_list_size]/F");
+    CreateBranch("EndP_tpcAV",EndP_tpcAV,"EndP_tpcAV[geant_list_size]/F");
+    CreateBranch("EndPx_tpcAV",EndPx_tpcAV,"EndPx_tpcAV[geant_list_size]/F");
+    CreateBranch("EndPy_tpcAV",EndPy_tpcAV,"EndPy_tpcAV[geant_list_size]/F");
+    CreateBranch("EndPz_tpcAV",EndPz_tpcAV,"EndPz_tpcAV[geant_list_size]/F");
+    CreateBranch("pathlen_drifted",pathlen_drifted,"pathlen_drifted[geant_list_size]/F");
+    CreateBranch("inTPCDrifted",inTPCDrifted,"inTPCDrifted[geant_list_size]/I");  
+    CreateBranch("StartPointx_drifted",StartPointx_drifted,"StartPointx_drifted[geant_list_size]/F");
+    CreateBranch("StartPointy_drifted",StartPointy_drifted,"StartPointy_drifted[geant_list_size]/F");
+    CreateBranch("StartPointz_drifted",StartPointz_drifted,"StartPointz_drifted[geant_list_size]/F");
+    CreateBranch("StartT_drifted",StartT_drifted,"StartT_drifted[geant_list_size]/F");
+    CreateBranch("StartE_drifted",StartE_drifted,"StartE_drifted[geant_list_size]/F");
+    CreateBranch("StartP_drifted",StartP_drifted,"StartP_drifted[geant_list_size]/F");
+    CreateBranch("StartPx_drifted",StartPx_drifted,"StartPx_drifted[geant_list_size]/F");
+    CreateBranch("StartPy_drifted",StartPy_drifted,"StartPy_drifted[geant_list_size]/F");
+    CreateBranch("StartPz_drifted",StartPz_drifted,"StartPz_drifted[geant_list_size]/F");
+    CreateBranch("EndPointx_drifted",EndPointx_drifted,"EndPointx_drifted[geant_list_size]/F");
+    CreateBranch("EndPointy_drifted",EndPointy_drifted,"EndPointy_drifted[geant_list_size]/F");
+    CreateBranch("EndPointz_drifted",EndPointz_drifted,"EndPointz_drifted[geant_list_size]/F");
+    CreateBranch("EndT_drifted",EndT_drifted,"EndT_drifted[geant_list_size]/F");
+    CreateBranch("EndE_drifted",EndE_drifted,"EndE_drifted[geant_list_size]/F");
+    CreateBranch("EndP_drifted",EndP_drifted,"EndP_drifted[geant_list_size]/F");
+    CreateBranch("EndPx_drifted",EndPx_drifted,"EndPx_drifted[geant_list_size]/F");
+    CreateBranch("EndPy_drifted",EndPy_drifted,"EndPy_drifted[geant_list_size]/F");
+    CreateBranch("EndPz_drifted",EndPz_drifted,"EndPz_drifted[geant_list_size]/F");
     CreateBranch("NumberDaughters",NumberDaughters,"NumberDaughters[geant_list_size]/I");
     CreateBranch("Mother",Mother,"Mother[geant_list_size]/I");
     CreateBranch("TrackId",TrackId,"TrackId[geant_list_size]/I");
@@ -2719,6 +2871,17 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("mctrk_endX",mctrk_endX,"mctrk_endX[no_mctracks]/F");
     CreateBranch("mctrk_endY",mctrk_endY,"mctrk_endY[no_mctracks]/F");
     CreateBranch("mctrk_endZ",mctrk_endZ,"mctrk_endZ[no_mctracks]/F");
+    CreateBranch("mctrk_startX_drifted",mctrk_startX_drifted,"mctrk_startX_drifted[no_mctracks]/F");
+    CreateBranch("mctrk_startY_drifted",mctrk_startY_drifted,"mctrk_startY_drifted[no_mctracks]/F");
+    CreateBranch("mctrk_startZ_drifted",mctrk_startZ_drifted,"mctrk_startZ_drifted[no_mctracks]/F");
+    CreateBranch("mctrk_endX_drifted",mctrk_endX_drifted,"mctrk_endX_drifted[no_mctracks]/F");      
+    CreateBranch("mctrk_endY_drifted",mctrk_endY_drifted,"mctrk_endY_drifted[no_mctracks]/F");      
+    CreateBranch("mctrk_endZ_drifted",mctrk_endZ_drifted,"mctrk_endZ_drifted[no_mctracks]/F");      
+    CreateBranch("mctrk_len_drifted",mctrk_len_drifted,"mctrk_len_drifted[no_mctracks]/F");
+    CreateBranch("mctrk_p_drifted",mctrk_p_drifted,"mctrk_p_drifted[no_mctracks]/F");
+    CreateBranch("mctrk_px_drifted",mctrk_px_drifted,"mctrk_px_drifted[no_mctracks]/F");
+    CreateBranch("mctrk_py_drifted",mctrk_py_drifted,"mctrk_py_drifted[no_mctracks]/F");
+    CreateBranch("mctrk_pz_drifted",mctrk_pz_drifted,"mctrk_pz_drifted[no_mctracks]/F");
     CreateBranch("mctrk_Motherpdg",mctrk_Motherpdg,"mctrk_Motherpdg[no_mctracks]/I");
     CreateBranch("mctrk_MotherTrkId",mctrk_MotherTrkId,"mctrk_MotherTrkId[no_mctracks]/I");
     CreateBranch("mctrk_MotherProcess",mctrk_MotherProcess);
@@ -3926,10 +4089,11 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     if (fSaveMCTrackInfo){
        fData->no_mctracks = nMCTracks;       
        size_t trk = 0;
-       for(std::vector<sim::MCTrack>::const_iterator imctrk = mctrackh->begin();    
-    	 imctrk != mctrackh->end(); ++imctrk) {
+       for(std::vector<sim::MCTrack>::const_iterator imctrk = mctrackh->begin();imctrk != mctrackh->end(); ++imctrk) {
     	  const sim::MCTrack& mctrk = *imctrk;
-	  fData->mctrk_origin[trk]          = mctrk.Origin();
+        TLorentzVector tpcstart, tpcend, tpcmom;
+        double plen = driftedLength(mctrk, tpcstart, tpcend, tpcmom);
+        fData->mctrk_origin[trk]          = mctrk.Origin();
     	  fData->mctrk_pdg[trk]	            = mctrk.PdgCode();	   
     	  fData->mctrk_TrackId[trk]	    = mctrk.TrackID();	   
     	  fData->mctrk_Process[trk]	    = mctrk.Process();	   
@@ -3957,8 +4121,24 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     	  fData->mctrk_AncestorendX[trk]    = mctrk.AncestorEnd().X();	 
     	  fData->mctrk_AncestorendY[trk]    = mctrk.AncestorEnd().Y();	 
     	  fData->mctrk_AncestorendZ[trk]    = mctrk.AncestorEnd().Z();
+        
+        fData->mctrk_len_drifted[trk]       = plen;
+
+        if (plen != 0){	  
+	      fData->mctrk_startX_drifted[trk] = tpcstart.X();
+	      fData->mctrk_startY_drifted[trk] = tpcstart.Y();
+	      fData->mctrk_startZ_drifted[trk] = tpcstart.Z();
+	      fData->mctrk_endX_drifted[trk]   = tpcend.X();
+	      fData->mctrk_endY_drifted[trk]   = tpcend.Y();
+	      fData->mctrk_endZ_drifted[trk]   = tpcend.Z();
+	      fData->mctrk_p_drifted[trk]      = tpcmom.Vect().Mag();
+	      fData->mctrk_px_drifted[trk]     = tpcmom.X();
+	      fData->mctrk_py_drifted[trk]     = tpcmom.Y();
+	      fData->mctrk_pz_drifted[trk]     = tpcmom.Z();
+	    }
     	  ++trk; 
        }
+       
        fData->mctrk_Process.resize(trk);
        fData->mctrk_MotherProcess.resize(trk);
        fData->mctrk_AncestorProcess.resize(trk);
@@ -3998,10 +4178,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	    if (pPart->E()<fG4minE&&(!isPrimary)) continue;
 	    if (isPrimary) ++primary;
 	    
-	    TVector3 mcstart, mcend;
-	    double plen = length(*pPart, mcstart, mcend);
+	    TLorentzVector mcstart, mcend, mcstartdrifted, mcenddrifted;
+      unsigned int pstarti, pendi, pstartdriftedi, penddriftedi; //mcparticle indices for starts and ends in tpc or drifted volumes
+	    double plen = length(*pPart, mcstart, mcend, pstarti, pendi);
+	    double plendrifted = driftedLength(*pPart, mcstartdrifted, mcenddrifted, pstartdriftedi, penddriftedi);
 	    
 	    bool isActive = plen != 0;
+	    bool isDrifted = plendrifted!= 0;
 	    if (plen) ++active;
 
 	    fData->process_primary[geant_particle] = int(isPrimary);
@@ -4030,8 +4213,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	    fData->theta_xz[geant_particle] = std::atan2(pPart->Px(), pPart->Pz());
 	    fData->theta_yz[geant_particle] = std::atan2(pPart->Py(), pPart->Pz());
 	    fData->pathlen[geant_particle]  = plen;
+	    fData->pathlen_drifted[geant_particle]  = plendrifted;
 	    fData->NumberDaughters[geant_particle]=pPart->NumberDaughters();
 	    fData->inTPCActive[geant_particle] = int(isActive);
+	    fData->inTPCDrifted[geant_particle] = int(isDrifted);
 	    art::Ptr<simb::MCTruth> const& mc_truth = bt->ParticleToMCTruth(pPart);
 	    if (mc_truth){
 	      fData->origin[geant_particle] = mc_truth->Origin();
@@ -4041,11 +4226,43 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	      fData->StartPointx_tpcAV[geant_particle] = mcstart.X();
 	      fData->StartPointy_tpcAV[geant_particle] = mcstart.Y();
 	      fData->StartPointz_tpcAV[geant_particle] = mcstart.Z();
+	      fData->StartT_tpcAV[geant_particle] = mcstart.T();
+        fData->StartE_tpcAV[geant_particle] = pPart->E(pstarti);
+        fData->StartP_tpcAV[geant_particle] = pPart->P(pstarti);
+        fData->StartPx_tpcAV[geant_particle] = pPart->Px(pstarti);
+        fData->StartPy_tpcAV[geant_particle] = pPart->Py(pstarti);
+        fData->StartPz_tpcAV[geant_particle] = pPart->Pz(pstarti);
 	      fData->EndPointx_tpcAV[geant_particle] = mcend.X();
 	      fData->EndPointy_tpcAV[geant_particle] = mcend.Y();
 	      fData->EndPointz_tpcAV[geant_particle] = mcend.Z();
-	    }		       
-            //access auxiliary detector parameters
+	      fData->EndT_tpcAV[geant_particle] = mcend.T();
+        fData->EndE_tpcAV[geant_particle] = pPart->E(pendi);
+        fData->EndP_tpcAV[geant_particle] = pPart->P(pendi);
+        fData->EndPx_tpcAV[geant_particle] = pPart->Px(pendi);
+        fData->EndPy_tpcAV[geant_particle] = pPart->Py(pendi);
+        fData->EndPz_tpcAV[geant_particle] = pPart->Pz(pendi);
+	    }
+	    if (isDrifted){	  
+	      fData->StartPointx_drifted[geant_particle] = mcstartdrifted.X();
+	      fData->StartPointy_drifted[geant_particle] = mcstartdrifted.Y();
+	      fData->StartPointz_drifted[geant_particle] = mcstartdrifted.Z();
+	      fData->StartT_drifted[geant_particle] = mcstartdrifted.T();
+        fData->StartE_drifted[geant_particle] = pPart->E(pstartdriftedi);
+        fData->StartP_drifted[geant_particle] = pPart->P(pstartdriftedi);
+        fData->StartPx_drifted[geant_particle] = pPart->Px(pstartdriftedi);
+        fData->StartPy_drifted[geant_particle] = pPart->Py(pstartdriftedi);
+        fData->StartPz_drifted[geant_particle] = pPart->Pz(pstartdriftedi);
+	      fData->EndPointx_drifted[geant_particle] = mcenddrifted.X();
+	      fData->EndPointy_drifted[geant_particle] = mcenddrifted.Y();
+	      fData->EndPointz_drifted[geant_particle] = mcenddrifted.Z();
+	      fData->EndT_drifted[geant_particle] = mcenddrifted.T();
+        fData->EndE_drifted[geant_particle] = pPart->E(penddriftedi);
+        fData->EndP_drifted[geant_particle] = pPart->P(penddriftedi);
+        fData->EndPx_drifted[geant_particle] = pPart->Px(penddriftedi);
+        fData->EndPy_drifted[geant_particle] = pPart->Py(penddriftedi);
+        fData->EndPz_drifted[geant_particle] = pPart->Pz(penddriftedi);
+	    }	            
+      //access auxiliary detector parameters
             if (fSaveAuxDetInfo) {
               unsigned short nAD = 0; // number of cells that particle hit
               
@@ -4354,97 +4571,130 @@ double microboone::AnalysisTree::length(const recob::Track& track)
   return result;
 }
 
-// Length of MC particle, trajectory by trajectory (with the manual shifting for x correction)
-double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
-{
+
+double microboone::AnalysisTree::driftedLength(const sim::MCTrack& mctrack, TLorentzVector& tpcstart, TLorentzVector& tpcend, TLorentzVector& tpcmom){
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
-  //art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::DetectorProperties> detprop;
   art::ServiceHandle<util::LArProperties> larprop;
-  // Get active volume boundary.
-  double xmin = 0.;
-  double xmax = 2.*geom->DetHalfWidth();
-  double ymin = -geom->DetHalfHeight();
-  double ymax = geom->DetHalfHeight();
-  double zmin = 0.;
-  double zmax = geom->DetLength();
-  //double vDrift = 160*pow(10,-6);
+  
+  //compute the drift x range
   double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
+  double xrange[2] = {detprop->ConvertTicksToX(0,0,0,0),detprop->ConvertTicksToX(detprop->NumberTimeSamples(),0,0,0)};
+  
+  // Get active volume boundary.
+  double bnd[6] = {0.,2.*geom->DetHalfWidth(),-geom->DetHalfHeight(),geom->DetHalfHeight(),0.,geom->DetLength()};
 
   double result = 0.;
   TVector3 disp;
-  int n = part.NumberTrajectoryPoints();
   bool first = true;
 
-  for(int i = 0; i < n; ++i) {
+  for(auto step: mctrack) {
     // check if the particle is inside a TPC
-   double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
-   if (mypos[0] >= xmin && mypos[0] <= xmax && mypos[1] >= ymin && mypos[1] <= ymax && mypos[2] >= zmin && mypos[2] <= zmax){
-     double xGen   = part.Vx(i);
-     double tGen   = part.T(i);
+   if (step.X() >= bnd[0] && step.X() <= bnd[1] && step.Y() >= bnd[2] && step.Y() <= bnd[3] && step.Z() >= bnd[4] && step.Z() <= bnd[5]){
      // Doing some manual shifting to account for
      // an interaction not occuring with the beam dump
      // we will reconstruct an x distance different from
      // where the particle actually passed to to the time
      // being different from in-spill interactions
-     double newX = xGen+(tGen*vDrift);
-     if (newX < -xmax || newX > (2*xmax)) continue;
+     double newX = step.X()+(step.T()*vDrift);
+     if (newX < xrange[0] || newX > xrange[1]) continue;
      
-     TVector3 pos(newX,part.Vy(i),part.Vz(i));
+     TLorentzVector pos(newX,step.Y(),step.Z(),step.T());
      if(first){
-      start = pos;
+      tpcstart = pos;
+      tpcmom = step.Momentum();
+      first = false;
      }
      else {
-      disp -= pos;
+      disp -= pos.Vect();
       result += disp.Mag();
      }
-     first = false;
-     disp = pos;
-     end = pos;
+     disp = pos.Vect();
+     tpcend = pos;
    }
   }
   return result;
 }
 
-/*// Length of MC particle, trajectory by trajectory (with out the manual shifting for x correction)
-double microboone::AnalysisTree::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
+// Length of MC particle, trajectory by trajectory (with the manual shifting for x correction)
+double microboone::AnalysisTree::driftedLength(const simb::MCParticle& p, TLorentzVector& start, TLorentzVector& end, unsigned int &starti, unsigned int &endi)
 {
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
-  //art::ServiceHandle<util::DetectorProperties> detprop;
+  art::ServiceHandle<util::DetectorProperties> detprop;
   art::ServiceHandle<util::LArProperties> larprop;
   
+  //compute the drift x range
+  double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
+  double xrange[2] = {detprop->ConvertTicksToX(0,0,0,0),detprop->ConvertTicksToX(detprop->NumberTimeSamples(),0,0,0)};
+  
   // Get active volume boundary.
-  double xmin = 0.;
-  double xmax = 2.*geom->DetHalfWidth();
-  double ymin = -geom->DetHalfHeight();
-  double ymax = geom->DetHalfHeight();
-  double zmin = 0.;
-  double zmax = geom->DetLength();
+  double bnd[6] = {0.,2.*geom->DetHalfWidth(),-geom->DetHalfHeight(),geom->DetHalfHeight(),0.,geom->DetLength()};
 
   double result = 0.;
   TVector3 disp;
-  int n = part.NumberTrajectoryPoints();
   bool first = true;
 
-  for(int i = 0; i < n; ++i) {
+  for(unsigned int i = 0; i < p.NumberTrajectoryPoints(); ++i) {
     // check if the particle is inside a TPC
-   double mypos[3] = {part.Vx(i), part.Vy(i), part.Vz(i)};
-   if (mypos[0] >= xmin && mypos[0] <= xmax && mypos[1] >= ymin && mypos[1] <= ymax && mypos[2] >= zmin && mypos[2] <= zmax){
+   if (p.Vx(i) >= bnd[0] && p.Vx(i) <= bnd[1] && p.Vy(i) >= bnd[2] && p.Vy(i) <= bnd[3] && p.Vz(i) >= bnd[4] && p.Vz(i) <= bnd[5]){
+     // Doing some manual shifting to account for
+     // an interaction not occuring with the beam dump
+     // we will reconstruct an x distance different from
+     // where the particle actually passed to to the time
+     // being different from in-spill interactions
+     double newX = p.Vx(i)+(p.T(i)*vDrift);
+     if (newX < xrange[0] || newX > xrange[1]) continue;
+     TLorentzVector pos(newX,p.Vy(i),p.Vz(i),p.T());
      if(first){
-      start = mypos;
+      start = pos;
+      starti=i;
+      first = false;
      }
      else {
-      disp -= mypos;
+      disp -= pos.Vect();
       result += disp.Mag();
      }
-     first = false;
-     disp = mypos;
-     end = mypos;
+     disp = pos.Vect();
+     end = pos;
+     endi = i;
    }
   }
   return result;
-}*/
+}
+
+// Length of MC particle, trajectory by trajectory (with out the manual shifting for x correction)
+double microboone::AnalysisTree::length(const simb::MCParticle& p, TLorentzVector& start, TLorentzVector& end, unsigned int &starti, unsigned int &endi)
+{
+  // Get geometry.
+  art::ServiceHandle<geo::Geometry> geom;
+  art::ServiceHandle<util::LArProperties> larprop;
+  
+  // Get active volume boundary.
+  double bnd[6] = {0.,2.*geom->DetHalfWidth(),-geom->DetHalfHeight(),geom->DetHalfHeight(),0.,geom->DetLength()};
+  double result = 0.;
+  TVector3 disp;
+  bool first = true;
+
+  for(unsigned int i = 0; i < p.NumberTrajectoryPoints(); ++i) {
+    // check if the particle is inside a TPC
+   if (p.Vx(i) >= bnd[0] && p.Vx(i) <= bnd[1] && p.Vy(i) >= bnd[2] && p.Vy(i) <= bnd[3] && p.Vz(i) >= bnd[4] && p.Vz(i) <= bnd[5]){
+     if(first){
+      start = p.Position(i);
+      first = false;
+      starti = i;
+     }else{
+      disp -= p.Position(i).Vect();
+      result += disp.Mag();
+     }
+     disp = p.Position(i).Vect();
+     end = p.Position(i);
+     endi = i;
+   }
+  }
+  return result;
+}
 
 
 
