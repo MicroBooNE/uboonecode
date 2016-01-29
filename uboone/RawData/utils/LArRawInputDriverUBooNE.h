@@ -79,11 +79,13 @@ namespace lris {
     //Other functions
 
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
-			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
+			  std::map< opdet::UBOpticalChannelCategory_t,
+			  std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo,
 			  std::vector<raw::Trigger>& trigInfo,
-              raw::ubdaqSoftwareTriggerData& sw_trigInfo);
+			  raw::ubdaqSoftwareTriggerData& sw_trigInfo,
+			  uint32_t& event_number);
     void fillDAQHeaderData(gov::fnal::uboone::datatypes::ub_EventRecord& event_record,
 			   raw::DAQHeader& daqHeader);
     void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 

@@ -392,9 +392,11 @@ namespace lris {
     ADCwords_crate8 = 0;
     ADCwords_crate9 = 0;
 
+    uint32_t event_number = 0;
+
     bool res=false;
 
-    res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info, *sw_trig_info );
+    res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info, *sw_trig_info, event_number);
 
     if (res) {
       fEventCounter++;
@@ -413,12 +415,12 @@ namespace lris {
       /*
 	std::cout<<"\033[93mAbout to make a principal for run: " << fCurrentSubRunID.run()
 	<<" subrun: " << fCurrentSubRunID.subRun()
-	<<" event: " << daq_header->GetEvent()
+	<<" event: " << event_number
 	<<"\033[00m"<< std::endl;
       */
       outE = fSourceHelper.makeEventPrincipal(fCurrentSubRunID.run(),
 					      fCurrentSubRunID.subRun(),
-					      daq_header->GetEvent(),
+					      event_number,
 					      tstamp);
       //std::cout<<"\033[93mDone\033[00m"<<std::endl;
 
@@ -453,7 +455,8 @@ namespace lris {
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo,
-                         raw::ubdaqSoftwareTriggerData& sw_trigInfo)
+						 raw::ubdaqSoftwareTriggerData& sw_trigInfo,
+						 uint32_t& event_number)
   {  
      triggerFrame = -999;
      TPCframe = -999;
@@ -493,6 +496,8 @@ namespace lris {
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
     fillSWTriggerData(event_record, sw_trigInfo);
+
+    event_number = event_record.getGlobalHeader().getEventNumber()+1;
 
     checkTimeStampConsistency();
 
