@@ -17,6 +17,7 @@ art_make( BASENAME_ONLY
 			RecoAlg
 			uboonecode_uboone_MuCS
 			SignalShapingServiceMicroBooNE_service
+			AnalysisBase
       ${SIMULATIONBASE}
       ${LARRECO_LIB}
       ${LARDATA_LIB}
@@ -39,6 +40,6 @@ art_make( BASENAME_ONLY
 			${SQLITE3}
         )
 
-# install_headers()
 install_fhicl()
 install_source()
+install_headers()
