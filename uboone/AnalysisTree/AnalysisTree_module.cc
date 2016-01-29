@@ -708,6 +708,7 @@ namespace microboone {
     Float_t  flash_zcenter[kMaxFlashes];//z center of flash
     Float_t  flash_ywidth[kMaxFlashes]; //y width of flash
     Float_t  flash_zwidth[kMaxFlashes]; //z width of flash
+    Float_t  flash_timewidth[kMaxFlashes]; //time of flash
 
     //track information
     Char_t   kNTracker;
@@ -1995,6 +1996,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(flash_zcenter, flash_zcenter + sizeof(flash_zcenter)/sizeof(flash_zcenter[0]), -9999);
   std::fill(flash_ywidth, flash_ywidth + sizeof(flash_ywidth)/sizeof(flash_ywidth[0]), -9999);
   std::fill(flash_zwidth, flash_zwidth + sizeof(flash_zwidth)/sizeof(flash_zwidth[0]), -9999);
+  std::fill(flash_timewidth, flash_timewidth + sizeof(flash_timewidth)/sizeof(flash_timewidth[0]), -9999);
 
   nclusters = 0;
   std::fill(clusterId, clusterId + sizeof(clusterId)/sizeof(clusterId[0]), -9999);
@@ -2496,6 +2498,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("flash_zcenter",flash_zcenter,"flash_zcenter[no_flashes]/F");
     CreateBranch("flash_ywidth",flash_ywidth,"flash_ywidth[no_flashes]/F");
     CreateBranch("flash_zwidth",flash_zwidth,"flash_zwidth[no_flashes]/F");
+    CreateBranch("flash_timewidth",flash_timewidth,"flash_timewidth[no_flashes]/F");
   }
   
   if (hasTrackInfo()){
@@ -3366,6 +3369,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->flash_zcenter[i]    = flashlist[i]->ZCenter();
       fData->flash_ywidth[i]     = flashlist[i]->YWidth();
       fData->flash_zwidth[i]     = flashlist[i]->ZWidth();
+      fData->flash_timewidth[i]  = flashlist[i]->TimeWidth();
     }
   }
   
