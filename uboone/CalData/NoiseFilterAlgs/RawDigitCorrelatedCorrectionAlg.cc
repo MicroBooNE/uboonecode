@@ -217,7 +217,7 @@ void RawDigitCorrelatedCorrectionAlg::removeCorrelatedNoise(RawDigitAdcIdxPair& 
     size_t baseWireIdx(wireToRawDigitVecMap.begin()->first - wireToRawDigitVecMap.begin()->first % fNumWiresToGroup[viewIdx]);
     
     // Should we turn on our diagnostics blocks?
-    bool doFFTCorrection(baseWireIdx / fNumWiresToGroup[viewIdx] == fFFTHistsWireGroup[viewIdx]);
+    bool doFFTCorrection(fFillFFTHistograms && baseWireIdx / fNumWiresToGroup[viewIdx] == fFFTHistsWireGroup[viewIdx]);
     
     // Keep track of the "waveform" for the correction
     std::vector<float> origCorValVec;
