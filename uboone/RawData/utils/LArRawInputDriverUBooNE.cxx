@@ -604,7 +604,7 @@ namespace lris {
       //Special to the crate, there is a special header that the DAQ attaches. You can access this
       //like so. The type here is a unique ptr to a ub_CrateHeader_v6 struct. That has useful info
       //like the local host time, which may or may not be set properly right now...
-      auto const& tpc_crate_DAQ_header = tpc_crate.crateHeader(); // I think auto should be tpc_crate_data_t::ub_CrateHeader_t --NJT
+      //auto const& tpc_crate_DAQ_header = tpc_crate.crateHeader(); // I think auto should be tpc_crate_data_t::ub_CrateHeader_t --NJT
       //     ub_LocalHostTime this_time = tpc_crate_DAQ_header->local_host_time;
       
       //The Crate Data is split up into Cards. You use the "getCards()" command to get access to
@@ -1197,8 +1197,8 @@ namespace lris {
     // Figure out time w.r.t. Trigger - dirty but works.
     //
     auto const& opt_clock = timeService->OpticalClock();
-    auto const& trg_clock = timeService->TriggerClock();
-    auto const& tpc_clock = timeService->TPCClock();
+    //auto const& trg_clock = timeService->TriggerClock();
+    //auto const& tpc_clock = timeService->TPCClock();
     auto const& trig_map  = event_record.getTRIGSEBMap();
     auto const& trig_header = trig_map.begin()->second.getTriggerHeader();
     auto const& trig_data = trig_map.begin()->second.getTriggerCardData().getTriggerData();
@@ -1213,7 +1213,7 @@ namespace lris {
     uint64_t trig_tick = trig_sample_number + trig_header.getFrame() * opt_clock.FrameTicks();
 
     auto const& crate_data = event_record.getPMTSEBMap().begin()->second;
-    auto const& pmt_card    = crate_data.getCards().at(0);
+    //auto const& pmt_card    = crate_data.getCards().at(0);
     
     uint64_t beam_ro_tick = 0;
     auto const& card_data = crate_data.getCards().front();
