@@ -254,10 +254,9 @@ void CalWireROI::produce(art::Event& evt)
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double deconNorm = sss->GetDeconNorm();
-  
-    size_t transformSize = 0;
-  
 
+    // We'll need to set the transform size once we get the waveform and know its size
+    size_t transformSize = 0;
     
     // loop over all wires
     wirecol->reserve(digitVecHandle->size());
@@ -292,14 +291,14 @@ void CalWireROI::produce(art::Event& evt)
             
             // Set up the deconvolution and the vector to deconvolve
           
-          // Set up the deconvolution and the vector to deconvolve
-          // This is called only once per event, but under the hood nothing happens 
-          //   unless the FFT vector length changes (which it shouldn't for a run)
-          if (!transformSize)
-          {
-            sss->SetDecon(dataSize, channel);
-            transformSize = fFFT->FFTSize();
-          }
+            // Set up the deconvolution and the vector to deconvolve
+            // This is called only once per event, but under the hood nothing happens
+            //   unless the FFT vector length changes (which it shouldn't for a run)
+            if (!transformSize)
+            {
+                sss->SetDecon(dataSize, channel);
+                transformSize = fFFT->FFTSize();
+            }
             //sss->SetDecon(dataSize, channel);
             //size_t transformSize = fFFT->FFTSize();
             
@@ -437,9 +436,10 @@ void CalWireROI::produce(art::Event& evt)
                 
                 std::copy(rawAdcLessPedVec.begin()+binOffset+roi.first, rawAdcLessPedVec.begin()+binOffset+roi.second, holder.begin());
                 std::transform(holder.begin(),holder.end(),holder.begin(),[deconNorm](float& deconVal){return deconVal/deconNorm;});
-                
+
                 // Now we do the baseline determination (and I'm left wondering if there is a better way using the entire waveform?)
-                float base=0.;
+                bool  baseSet(false);
+                float base(0.);
                 if(fDoBaselineSub && fPreROIPad[thePlane] > 0 )
                 {
                     //1. Check Baseline match?
@@ -449,14 +449,16 @@ void CalWireROI::produce(art::Event& evt)
                     float  basePre  = std::accumulate(holder.begin(),holder.begin()+binsToAve,0.) / float(binsToAve);
                     float  basePost = std::accumulate(holder.end()-binsToAve,holder.end(),0.) / float(binsToAve);
                    
-                    base = SubtractBaseline(holder, basePre,basePost,roi.first,roiLen,dataSize);
+                    baseSet = true;
+                    base    = SubtractBaseline(holder, basePre,basePost,roi.first,roiLen,dataSize);
                 } // fDoBaselineSub ...
                 else if(fDoBaselineSub_WaveformPropertiesAlg)
                 {
-                    base = fROIPropertiesAlg.GetWaveformPedestal(holder);
+                    baseSet = true;
+                    base    = fROIPropertiesAlg.GetWaveformPedestal(holder);
                 }
                 
-                std::transform(holder.begin(),holder.end(),holder.begin(),[base](float& adcVal){return adcVal - base;});
+                if (baseSet) std::transform(holder.begin(),holder.end(),holder.begin(),[base](float& adcVal){return adcVal - base;});
 
                 // add the range into ROIVec
                 ROIVec.add_range(roi.first, std::move(holder));
