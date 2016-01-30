@@ -2,11 +2,11 @@
 
 BEGIN_PROLOG
 
-litemaker_reco3d_kalmanhitcc: @local::litemaker_base
+litemc_reco3d_kalmanhitcc: @local::litemaker_base
 
-litemaker_reco3d_kalmanhitcc.out_filename: "larlite_reco3d_kalmanhitcc.root"
+litemc_reco3d_kalmanhitcc.out_filename: "larlite_reco3d_kalmanhitcc.root"
 
-litemaker_reco3d_kalmanhitcc.DataLookUpMap:
+litemc_reco3d_kalmanhitcc.DataLookUpMap:
 {
   sps:        ["trackkalmanhitcc"]
   vertex:     []
@@ -23,7 +23,7 @@ litemaker_reco3d_kalmanhitcc.DataLookUpMap:
                "trackkalmanhitpidcc"]
 }
 
-litemaker_reco3d_kalmanhitcc.AssociationLookUpMap:
+litemc_reco3d_kalmanhitcc.AssociationLookUpMap:
 {
   hit:        ["cccluster"]
   cluster:    ["cccluster"]

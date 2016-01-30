@@ -2,13 +2,13 @@
 
 BEGIN_PROLOG
 
-litemaker_mcinfo: @local::litemaker_base
+litemc_mcinfo: @local::litemaker_base
 
-litemaker_mcinfo.out_filename: "larlite_mcinfo.root"
+litemc_mcinfo.out_filename: "larlite_mcinfo.root"
 
-litemaker_mcinfo.pot_labels: ["generator"]
+litemc_mcinfo.pot_labels: ["generator"]
 
-litemaker_mcinfo.DataLookUpMap:
+litemc_mcinfo.DataLookUpMap:
 {
   potsummary: ["generator"]
   gtruth:     ["generator"]
@@ -18,7 +18,7 @@ litemaker_mcinfo.DataLookUpMap:
   mcshower:   ["mcreco"]
 }
 
-litemaker_mcinfo.AssociationLookUpMap: {
+litemc_mcinfo.AssociationLookUpMap: {
   mctruth: ["generator"]
 }
 

@@ -1,0 +1,76 @@
+#include "litemaker_base.fcl"
+BEGIN_PROLOG
+
+litembass_reco3d_pandoraNu: @local::litemaker_base
+litembass_reco3d_pandoraNu.out_filename: "larlite_mbass_reco3d_pandoraNu.root"
+litembass_reco3d_pandoraNu.DataLookUpMap:
+{
+  sps : [ 
+    "pandoraNu",
+    "pandoraNuKHit"
+  ]
+  track : [ 
+    "pandoraNu",
+    "pandoraNuKHit"
+  ]
+  pfpart : [ 
+    "pandoraNu"
+  ]
+  vertex : [ 
+    "pandoraNu"
+  ]
+  cosmictag : [ 
+    "pandoraNuKHittag"
+  ]
+  seed : [ 
+    "pandoraNu"
+  ]
+}
+
+litembass_reco3d_pandoraNu.AssociationLookUpMap:
+{
+  hit : [ 
+    "pandoraCosmicKHitRemoval"
+  ]
+  cluster : [ 
+    "pandoraCosmic",
+    "pandoraNu"
+  ]
+  pfpart : [ 
+    "pandoraCosmicKHitPFPart",
+    "pandoraCosmic",
+    "pandoraNu",
+    "pandoraCosmicKHit",
+    "pandoraNuKHit"
+  ]
+  track : [ 
+    "pandoraCosmicKHitPFPart",
+    "pandoraCosmicKHittag",
+    "pandoraNuKHittag",
+    "pandoraCosmic",
+    "pandoraCosmicKHit",
+    "pandoraNu",
+    "pandoraNuKHit"
+  ]
+  sps : [ 
+    "pandoraCosmic",
+    "pandoraCosmicKHit",
+    "pandoraNu",
+    "pandoraNuKHit"
+  ]
+  vertex : [ 
+    "pandoraCosmic",
+    "pandoraNu"
+  ]
+  cosmictag : [ 
+    "pandoraCosmicKHitPFPart",
+    "pandoraCosmicKHittag",
+    "pandoraNuKHittag"
+  ]
+  seed : [ 
+    "pandoraCosmic",
+    "pandoraNu"
+  ]
+}
+
+END_PROLOG

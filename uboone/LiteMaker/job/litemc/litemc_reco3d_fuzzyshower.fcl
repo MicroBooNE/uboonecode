@@ -2,11 +2,11 @@
 
 BEGIN_PROLOG
 
-litemaker_reco3d_fuzzyshower: @local::litemaker_base
+litemc_reco3d_fuzzyshower: @local::litemaker_base
 
-litemaker_reco3d_fuzzyshower.out_filename: "larlite_reco3d_fuzzyshower.root"
+litemc_reco3d_fuzzyshower.out_filename: "larlite_reco3d_fuzzyshower.root"
 
-litemaker_reco3d_fuzzyshower.DataLookUpMap:
+litemc_reco3d_fuzzyshower.DataLookUpMap:
 {
   sps:        []
   pcaxis:     []
@@ -17,7 +17,7 @@ litemaker_reco3d_fuzzyshower.DataLookUpMap:
   pfpart:     []
 }
 
-litemaker_reco3d_fuzzyshower.AssociationLookUpMap:
+litemc_reco3d_fuzzyshower.AssociationLookUpMap:
 {
   hit:        ["gaushit"]
   cluster:    ["fuzzyclustermerger"]

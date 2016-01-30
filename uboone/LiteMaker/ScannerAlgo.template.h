@@ -1106,6 +1106,13 @@ namespace larlite {
     key2 = (size_t)(ptr->WireID().Wire) / 200;
   }
 
+  template <> void ScannerAlgo::ProducePtrMapKey(const art::Ptr< ::recob::OpHit>& ptr, size_t& key1, size_t& key2)
+  {
+    key1 = ptr->OpChannel();
+    key2 = 0;
+    //key2 = (size_t)(ptr->PeakTime() / 1000.);
+  }
+
   template <> void ScannerAlgo::ProducePtrMapKey(const art::Ptr< ::recob::Cluster>& ptr, size_t& key1, size_t& key2)
   {
     key1 = 0;

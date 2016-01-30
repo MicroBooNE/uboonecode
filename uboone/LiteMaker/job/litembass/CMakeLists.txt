@@ -6,7 +6,3 @@ install_fhicl()
 
 FILE(GLOB fcl_files *.fcl)
 install_source( EXTRAS ${fcl_files} )
-
-add_subdirectory(litemc)
-add_subdirectory(litedata)
-add_subdirectory(litembass)

@@ -2,11 +2,11 @@
 
 BEGIN_PROLOG
 
-litemaker_reco3d_kalmanhit: @local::litemaker_base
+litemc_reco3d_kalmanhit: @local::litemaker_base
 
-litemaker_reco3d_kalmanhit.out_filename: "larlite_reco3d_kalmanhit.root"
+litemc_reco3d_kalmanhit.out_filename: "larlite_reco3d_kalmanhit.root"
 
-litemaker_reco3d_kalmanhit.DataLookUpMap:
+litemc_reco3d_kalmanhit.DataLookUpMap:
 {
   sps:        ["trackkalmanhit"]
   pcaxis:     []
@@ -23,7 +23,7 @@ litemaker_reco3d_kalmanhit.DataLookUpMap:
                "stitchkalmanhitpid"]
 }
 
-litemaker_reco3d_kalmanhit.AssociationLookUpMap:
+litemc_reco3d_kalmanhit.AssociationLookUpMap:
 {
   hit:        ["gaushit"]
   cluster:    ["fuzzycluster"]

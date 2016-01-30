@@ -1,0 +1,43 @@
+#include "litemaker_base.fcl"
+BEGIN_PROLOG
+
+litembass_reco3d_kalmanhitcc: @local::litemaker_base
+litembass_reco3d_kalmanhitcc.out_filename: "larlite_mbass_reco3d_kalmanhitcc.root"
+litembass_reco3d_kalmanhitcc.DataLookUpMap:
+{
+  sps : [ 
+    "trackkalmanhitcc"
+  ]
+  track : [ 
+    "trackkalmanhitcc"
+  ]
+  vertex : [ 
+    "linecluster"
+  ]
+  cosmictag : [ 
+    "trackkalmanhittagcc"
+  ]
+}
+
+litembass_reco3d_kalmanhitcc.AssociationLookUpMap:
+{
+  cluster : [ 
+    "linecluster"
+  ]
+  wire : [ 
+#    "cchit",
+    "linecluster"
+  ]
+  pfpart : [ 
+    "trackkalmanhitcc"
+  ]
+  track : [ 
+    "trackkalmanhitcc"
+  ]
+  sps : [ 
+    "trackkalmanhitcc"
+  ]
+}
+
+
+END_PROLOG

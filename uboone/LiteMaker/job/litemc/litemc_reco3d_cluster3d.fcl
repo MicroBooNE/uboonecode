@@ -2,11 +2,11 @@
 
 BEGIN_PROLOG
 
-litemaker_reco3d_cluster3d: @local::litemaker_base
+litemc_reco3d_cluster3d: @local::litemaker_base
 
-litemaker_reco3d_cluster3d.out_filename: "larlite_reco3d_cluster3d.root"
+litemc_reco3d_cluster3d.out_filename: "larlite_reco3d_cluster3d.root"
 
-litemaker_reco3d_cluster3d.DataLookUpMap:
+litemc_reco3d_cluster3d.DataLookUpMap:
 {
   sps:        ["cluster3d"]
   pcaxis:     ["cluster3d"]
@@ -24,7 +24,7 @@ litemaker_reco3d_cluster3d.DataLookUpMap:
                "stitchkalmanhitpidc3d"]
 }
 
-litemaker_reco3d_cluster3d.AssociationLookUpMap:
+litemc_reco3d_cluster3d.AssociationLookUpMap:
 {
   hit:        ["gaushit"]
   cluster:    ["fuzzycluster"]

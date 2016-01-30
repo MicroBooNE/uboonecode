@@ -226,6 +226,7 @@ void LiteScanner::analyze(art::Event const & e)
   SaveAssociationSource<recob::Cluster>(e);
   SaveAssociationSource<recob::EndPoint2D>(e);
   SaveAssociationSource<recob::SpacePoint>(e);
+  SaveAssociationSource<recob::OpHit>(e);
   SaveAssociationSource<recob::OpFlash>(e);
   SaveAssociationSource<anab::CosmicTag>(e);
   SaveAssociationSource<recob::Track>(e);
@@ -353,10 +354,11 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanAssociation<recob::PFParticle>(e,j); break;
       case ::larlite::data::kMCParticle:
 	ScanAssociation<simb::MCParticle>(e,j); break;
+      case ::larlite::data::kOpFlash:
+	ScanAssociation<recob::OpFlash>(e,j); break;
 	// Currently associations FROM the followings are not supported
       case ::larlite::data::kMCTruth:
-      case ::larlite::data::kOpHit:
-      case ::larlite::data::kOpFlash:
+      case ::larlite::data::kOpHit: 
       case ::larlite::data::kSimChannel:
       case ::larlite::data::kSimPhotons:
       case ::larlite::data::kMCShower:
@@ -514,7 +516,9 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
     fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
     break;
   case ::larlite::data::kOpHit:        break;
-  case ::larlite::data::kOpFlash:      break;
+  case ::larlite::data::kOpFlash:
+    fAlg.ScanAssociation<T, recob::OpHit      > (evt,dh,lite_ass);
+    break;
   case ::larlite::data::kCluster:
     fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);

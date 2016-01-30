@@ -1,0 +1,27 @@
+#include "litemaker_base.fcl"
+BEGIN_PROLOG
+
+litembass_opreco: @local::litemaker_base
+litembass_opreco.out_filename: "larlite_mbass_opreco.root"
+litembass_opreco.DataLookUpMap:
+{
+
+  ophit: ["opflash","opflashSat","ophitT","ophitFW","ophitSW","ophitCFD",
+          "ophitSatT","ophitSatFW","ophitSatSW","ophitSatCFD"]
+
+  opflash: ["opflash","opflashSat",
+            "sflashT","sflashFW","sflashSW","sflashCFD",
+            "sflashSatT","sflashSatFW","sflashSatSW","sflashSatCFD"]
+}
+
+litembass_opreco.AssociationLookUpMap:
+{
+  ophit: ["opflash","opflashSat","ophitT","ophitFW","ophitSW","ophitCFD",
+          "ophitSatT","ophitSatFW","ophitSatSW","ophitSatCFD"]
+
+  opflash: ["opflash","opflashSat",
+            "sflashT","sflashFW","sflashSW","sflashCFD",
+            "sflashSatT","sflashSatFW","sflashSatSW","sflashSatCFD"]
+}
+
+END_PROLOG

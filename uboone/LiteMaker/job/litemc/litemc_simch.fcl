@@ -2,11 +2,11 @@
 
 BEGIN_PROLOG
 
-litemaker_simch: @local::litemaker_base
+litemc_simch: @local::litemaker_base
 
-litemaker_simch.out_filename: "larlite_simch.root"
+litemc_simch.out_filename: "larlite_simch.root"
 
-litemaker_simch.DataLookUpMap:
+litemc_simch.DataLookUpMap:
 {
   # Producer names specified below would be looked up & stored in
   # the output larlite file. The key represents the data product
