@@ -71,7 +71,7 @@ physics:
 
  analyzers:
  {
-   wire:          @local::litembass_wire
+   #wire:          @local::litembass_wire
    opdigit:       @local::litembass_opdigit
    opreco:        @local::litembass_opreco
    reco2d:        @local::litembass_reco2d
@@ -94,7 +94,7 @@ physics:
          opflashCosmicLow
        ]
 
- analyzeIt: [ wire,
+ analyzeIt: [ #wire,
               opdigit,
               opreco,
               reco2d,

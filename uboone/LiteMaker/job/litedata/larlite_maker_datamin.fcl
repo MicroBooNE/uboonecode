@@ -33,7 +33,7 @@ physics:
 
  analyzers:
  {
-   wire:          @local::litedatamin_wire
+   #wire:          @local::litedatamin_wire
    opdigit:       @local::litedatamin_opdigit
    opreco:        @local::litedatamin_opreco
    reco2d:        @local::litedatamin_reco2d
@@ -44,7 +44,7 @@ physics:
    pandoraNu:     @local::litedatamin_reco3d_pandoraNu
  }
 
- analyzeIt: [ wire,
+ analyzeIt: [ #wire,
               opdigit,
               opreco,
               reco2d,
