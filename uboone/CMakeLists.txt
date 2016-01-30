@@ -1,8 +1,7 @@
 
-cet_find_library( BOOST_SERIALIZATION NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
-cet_find_library( BOOST_DATE_TIME     NAMES boost_date_time     PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
-
+set( UBOONEDAQ_DATATYPES_DIR $ENV{UBOONEDAQ_DATATYPES_DIR} )
 set( IFDH_ART_DIR $ENV{IFDH_ART_DIR} )
+
 add_subdirectory(Geometry)
 if ( IFDH_ART_DIR )
     add_subdirectory(BeamData)
@@ -27,6 +26,7 @@ add_subdirectory(SpaceCharge)
 add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(DataScanner)
 #add_subdirectory(LiteMaker)
+add_subdirectory(MuCS)
 
 # Respect the order specified in lar_build, which is:
 #

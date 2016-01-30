@@ -45,13 +45,13 @@ namespace geo {
     void         GetLogicChannelList( std::vector< unsigned int >& channels ) const;
     opdet::UBOpticalChannelType_t     GetChannelType( unsigned int opchannel ) const;
     opdet::UBOpticalChannelCategory_t GetChannelCategory( unsigned int opChannel ) const;
+    std::set< unsigned int > GetReadoutChannelSet() const { return fReadoutChannelSet; }
     unsigned int GetNumberOfChannelsInCategory( opdet::UBOpticalChannelCategory_t category ) const;
     unsigned int GetChannelNumberFromCrateSlotFEMCh( unsigned int crate, unsigned int slot, unsigned int femch ) const;
     void GetCrateSlotFEMChFromReadoutChannel( unsigned int readoutch, unsigned int& crate, unsigned int& slot, unsigned int& femch ) const;
     void SetOpMapTime( time_t t ) { requested_time = t; user_set_run=false; CheckValidity(); };
     void SetOpMapRun( int run ) { requested_run = run; user_set_run=true; CheckValidity(); };
-    const std::set<unsigned int>& GetReadoutChannelSet() const
-    { return fReadoutChannelSet; }
+
   private:
     void CheckValidity();
     void LoadOpticalReadoutMapData( fhicl::ParameterSet const& p);

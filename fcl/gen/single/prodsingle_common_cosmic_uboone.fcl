@@ -1,6 +1,7 @@
 #include "services_microboone.fcl"
 #include "singles_microboone.fcl"
 #include "cry_microboone.fcl"
+#include "corsika_microboone.fcl"
 
 process_name: SinglesGen
 
@@ -35,13 +36,14 @@ physics:
  producers:
  {
    generator: @local::microboone_singlep
-   cry:       @local::microboone_cry
+#   cry:       @local::microboone_cry
+   corsika:       @local::microboone_corsika_cmc
    rns:       { module_type: "RandomNumberSaver" }
  }
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ rns, generator, cry ]
+ simulate: [ rns, generator, corsika ]
 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]

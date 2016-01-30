@@ -1,13 +1,13 @@
 #include "services_microboone.fcl"
-#include "cry_microboone.fcl"
+#include "corsika_microboone.fcl"
 
-process_name: CosmicsGen
+process_name: CosmicsCorsikaProtonGen
 
 services:
 {
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "cosmics_hist.root" }
+  TFileService: { fileName: "cosmics_corsika_p_hist.root" }
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
@@ -33,7 +33,7 @@ physics:
 
  producers:
  {
-   generator: @local::microboone_cry
+   generator: @local::microboone_corsika_p
    rns:       { module_type: "RandomNumberSaver" }
  }
 
@@ -61,8 +61,9 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "prodcosmics_uboone_%tc_gen.root"
+   fileName:    "prodcosmics_corsika_p_uboone_%tc_gen.root"
    dataTier:    "generated"
    compressionLevel: 1
  }
 }
+

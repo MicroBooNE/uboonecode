@@ -68,6 +68,22 @@ microboone_g4_services.PhotonVisibilityService: @local::microboone_photonvisibil
 microboone_g4_services.LArProperties.ScintYield:          29000   # DocDB 4914, @MToups
 microboone_g4_services.LArProperties.ScintPreScale:        0.0093 # DocDB 4914, @MToups
                                                                   # MUST match between g4 and detsim
+microboone_g4_services.LArProperties.ScintYieldRatio: 0.23
+
+microboone_g4_services.LArProperties.ScintByParticleType: true
+microboone_g4_services.LArProperties.MuonScintYield: 29000
+microboone_g4_services.LArProperties.MuonScintYieldRatio: 0.23
+microboone_g4_services.LArProperties.PionScintYield: 29000
+microboone_g4_services.LArProperties.PionScintYieldRatio: 0.23
+microboone_g4_services.LArProperties.ElectronScintYield: 29000
+microboone_g4_services.LArProperties.ElectronScintYieldRatio: 0.23
+microboone_g4_services.LArProperties.KaonScintYield: 29000
+microboone_g4_services.LArProperties.KaonScintYieldRatio: 0.23
+microboone_g4_services.LArProperties.ProtonScintYield: 29000
+microboone_g4_services.LArProperties.ProtonScintYieldRatio: 0.23
+microboone_g4_services.LArProperties.AlphaScintYield: 29000
+microboone_g4_services.LArProperties.AlphaScintYieldRatio: 0.23
+
 microboone_g4_services.LArProperties.EnableCerenkovLight: false # Cerenkov light OFF by default
 microboone_g4_services.LArG4Parameters.UseCustomPhysics:  true
 microboone_g4_services.LArG4Parameters.EnabledPhysics:    [ "Em",

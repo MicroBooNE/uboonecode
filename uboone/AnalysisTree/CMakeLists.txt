@@ -11,6 +11,7 @@ art_make( BASENAME_ONLY
 			RecoObjects  
 			RecoAlg
 			SignalShapingServiceMicroBooNE_service
+			DetectorProperties_service
                         ${SIMULATIONBASE}
                         ${LARRECO_LIB}
                         ${LARDATA_LIB}

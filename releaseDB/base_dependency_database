@@ -348,6 +348,7 @@ lareventdisplay : lareventdisplay : EventDisplay/AnalysisBaseDrawer.h
 lareventdisplay : lareventdisplay : EventDisplay/AnalysisDrawingOptions.h
 lareventdisplay : lareventdisplay : EventDisplay/CalorPad.h
 lareventdisplay : lareventdisplay : EventDisplay/CalorView.h
+lareventdisplay : lareventdisplay : EventDisplay/ChangeTrackers.h
 lareventdisplay : lareventdisplay : EventDisplay/ColorDrawingOptions.h
 lareventdisplay : lareventdisplay : EventDisplay/Display3DPad.h
 lareventdisplay : lareventdisplay : EventDisplay/Display3DView.h
@@ -506,9 +507,9 @@ larpandora : larpandora : LArPandoraInterface/LArPandoraBase.h
 larpandora : larpandora : LArPandoraInterface/LArPandoraCollector.h
 larpandora : larpandora : LArPandoraInterface/LArPandoraHelper.h
 larpandora : larpandora : LArPandoraInterface/LArPandoraParticleCreator.h
-larpandora : larpandora : LArPandoraInterface/MicroBooNEPseudoLayerPlugin.h
-larpandora : larpandora : LArPandoraInterface/MicroBooNETransformationPlugin.h
 larpandora : larpandora : LArPandoraInterface/PFParticleStitcher.h
+larpandora : larpandora : MicroBooNEPandora/MicroBooNEPseudoLayerPlugin.h
+larpandora : larpandora : MicroBooNEPandora/MicroBooNETransformationPlugin.h
 larpandora : larreco : ClusterFinder/ClusterCreator.h
 larpandora : larreco : RecoAlg/ClusterParamsImportWrapper.h
 larpandora : larreco : RecoAlg/ClusterRecoUtil/CRUException.h
@@ -766,6 +767,7 @@ larreco : larreco : RecoAlg/PMAlg/PmaHit3D.h
 larreco : larreco : RecoAlg/PMAlg/PmaNode3D.h
 larreco : larreco : RecoAlg/PMAlg/PmaSegment3D.h
 larreco : larreco : RecoAlg/PMAlg/PmaTrack3D.h
+larreco : larreco : RecoAlg/PMAlg/PmaTrkCandidate.h
 larreco : larreco : RecoAlg/PMAlg/PmaVtxCandidate.h
 larreco : larreco : RecoAlg/PMAlg/SortedObjects.h
 larreco : larreco : RecoAlg/PMAlg/Utilities.h
@@ -962,6 +964,7 @@ uboonecode : lardata : AnalysisBase/T0.h
 uboonecode : lardata : MCBase/MCLimits.h
 uboonecode : lardata : MCBase/MCShower.h
 uboonecode : lardata : MCBase/MCStep.h
+uboonecode : lardata : MCBase/MCTrack.h
 uboonecode : lardata : OpticalDetectorData/ChannelData.h
 uboonecode : lardata : OpticalDetectorData/ChannelDataGroup.h
 uboonecode : lardata : OpticalDetectorData/FIFOChannel.h
@@ -1062,6 +1065,13 @@ uboonecode : uboonecode : uboone/BeamDAQ/beamIFDBInterface.h
 uboonecode : uboonecode : uboone/BeamDAQ/beamRun.h
 uboonecode : uboonecode : uboone/BeamDAQ/beamRunHeader.h
 uboonecode : uboonecode : uboone/BeamDAQ/httpResponse.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/ChannelGroups.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitBinAverageAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitCharacterizationAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitCorrelatedCorrectionAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitFFTAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitFilterAlg.h
+uboonecode : uboonecode : uboone/CalData/NoiseFilterAlgs/RawDigitNoiseFilterDefs.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg_CalibrationPulseFinder.h
 uboonecode : uboonecode : uboone/CalData/ROIAlg_DigitAboveBaseline.h
@@ -1069,6 +1079,9 @@ uboonecode : uboonecode : uboone/CalData/ROIAlg_DigitAboveThreshold.h
 uboonecode : uboonecode : uboone/CalData/RawDigitAndWireComparisonAlg.h
 uboonecode : uboonecode : uboone/CalData/WaveformPropertiesAlg.h
 uboonecode : uboonecode : uboone/Calibrations/CalibrationTPC_Algs.h
+uboonecode : uboonecode : uboone/Calibrations/Optical/FEMBasicTriggerAlgo.h
+uboonecode : uboonecode : uboone/Calibrations/Optical/LogicPulseFinder.h
+uboonecode : uboonecode : uboone/Calibrations/Optical/PulseRecoTemplate.h
 uboonecode : uboonecode : uboone/Geometry/ChannelMapUBooNEAlg.h
 uboonecode : uboonecode : uboone/Geometry/UBOpChannelTypes.h
 uboonecode : uboonecode : uboone/Geometry/UBOpReadoutMap.h
