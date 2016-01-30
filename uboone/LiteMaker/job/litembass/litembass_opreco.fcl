@@ -5,10 +5,10 @@ litembass_opreco: @local::litemaker_base
 litembass_opreco.out_filename: "larlite_mbass_opreco.root"
 litembass_opreco.DataLookUpMap:
 {
-
+  mucsdata: ["merger"]
+  mucsreco: ["mucsreco"]
   ophit: ["opflash","opflashSat","ophitT","ophitFW","ophitSW","ophitCFD",
           "ophitSatT","ophitSatFW","ophitSatSW","ophitSatCFD"]
-
   opflash: ["opflash","opflashSat",
             "sflashT","sflashFW","sflashSW","sflashCFD",
             "sflashSatT","sflashSatFW","sflashSatSW","sflashSatCFD"]
