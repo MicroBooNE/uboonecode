@@ -28,6 +28,8 @@
 // LArSoft includes
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
+#include "uboone/MuCS/MuCSData.h"
+#include "uboone/MuCS/MuCSRecoData.h"
 #include "Utilities/TimeService.h"
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
@@ -238,7 +240,6 @@ void LiteScanner::analyze(art::Event const & e)
   SaveAssociationSource<anab::ParticleID>(e);
   SaveAssociationSource<recob::PCAxis>(e);
   SaveAssociationSource<anab::FlashMatch>(e);
-
   //
   // Loop over data type to store data & locally art::Ptr
   //
@@ -311,6 +312,10 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<recob::PCAxis>(e,j); break;
       case ::larlite::data::kFlashMatch:
 	ScanData<anab::FlashMatch>(e,j); break;
+      case ::larlite::data::kMuCSData:
+	ScanData<MuCS::MuCSData>(e,j); break;
+      case ::larlite::data::kMuCSReco:
+	ScanData<MuCS::MuCSRecoData>(e,j); break;
 	//case ::larlite::data::kPOTSummary:
 	//break;
       case ::larlite::data::kUndefined:
@@ -357,6 +362,8 @@ void LiteScanner::analyze(art::Event const & e)
       case ::larlite::data::kOpFlash:
 	ScanAssociation<recob::OpFlash>(e,j); break;
 	// Currently associations FROM the followings are not supported
+      case ::larlite::data::kMuCSData:
+      case ::larlite::data::kMuCSReco:
       case ::larlite::data::kMCTruth:
       case ::larlite::data::kOpHit: 
       case ::larlite::data::kSimChannel:
@@ -509,6 +516,8 @@ template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const
   case ::larlite::data::kTrigger:       break;
   case ::larlite::data::kWire:          break;
   case ::larlite::data::kHit:           break;
+  case ::larlite::data::kMuCSData:      break;
+  case ::larlite::data::kMuCSReco:      break;
   case ::larlite::data::kCosmicTag:
     fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
     fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);

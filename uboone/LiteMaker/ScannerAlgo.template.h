@@ -35,7 +35,8 @@
 #include "DataFormat/minos.h"
 #include "DataFormat/pcaxis.h"
 #include "DataFormat/flashmatch.h"
-
+#include "DataFormat/mucsdata.h"
+#include "DataFormat/mucsreco.h"
 #include <TStopwatch.h>
 /*
   This file defines certain specilization of templated functions.
@@ -501,6 +502,63 @@ namespace larlite {
       //fPtrIndex_simch[sch_ptr] = std::make_pair(lite_data->size(),name_index);
 
       lite_data->push_back(lite_sch);
+    }
+
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::MuCS::MuCSData> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    auto lite_data = (::larlite::event_mucsdata*)lite_dh;
+
+    for(size_t i=0; i<dh->size(); ++i ) {
+      
+      const art::Ptr<::MuCS::MuCSData> mucs_ptr(dh,i);
+      
+      auto adc1 = mucs_ptr->ADC1();
+      auto adc2 = mucs_ptr->ADC2();
+      auto adc3 = mucs_ptr->ADC3();
+      auto adc7 = mucs_ptr->ADC7();
+      auto hits1 = mucs_ptr->Hits1();
+      auto hits2 = mucs_ptr->Hits2();
+      auto hits3 = mucs_ptr->Hits3();
+      auto hits7 = mucs_ptr->Hits7();
+      
+      larlite::mucsdata lite_mucs( mucs_ptr->T0(), 
+				   &(adc1[0]), &(adc2[0]), &(adc3[0]), &(adc7[0]),
+				   hits1, hits2, hits3, hits7);
+
+      lite_data->push_back(lite_mucs);
+    }
+
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::MuCS::MuCSRecoData> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    auto lite_data = (::larlite::event_mucsreco*)lite_dh;
+
+    for(size_t i=0; i<dh->size(); ++i ) {
+      
+      const art::Ptr<::MuCS::MuCSRecoData> mucs_ptr(dh,i);
+
+      larlite::mucsreco lite_mucs(mucs_ptr->theta_xy(),
+				  mucs_ptr->theta_xy_rms(),
+				  mucs_ptr->x(),
+				  mucs_ptr->x_rms(),
+				  mucs_ptr->theta_yz(),
+				  mucs_ptr->theta_yz_rms(),
+				  mucs_ptr->z(),
+				  mucs_ptr->z_rms(),
+				  mucs_ptr->y(),
+				  mucs_ptr->xmatches(),
+				  mucs_ptr->zmatches());
+
+      lite_data->push_back(lite_mucs);
     }
 
   }
@@ -1366,7 +1424,11 @@ namespace larlite {
   { return ::larlite::data::kParticleID; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::anab::FlashMatch> () const
   { return ::larlite::data::kFlashMatch; }
-
+  // MuCS
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSData> () const
+  { return ::larlite::data::kMuCSData; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSRecoData> () const
+  { return ::larlite::data::kMuCSReco; }
   //
   // LocateLiteProduct implementation
   //

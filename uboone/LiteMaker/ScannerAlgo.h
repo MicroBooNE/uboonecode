@@ -17,6 +17,8 @@
 #include "DataFormat/storage_manager.h"
 
 // LArSoft includes
+#include "uboone/MuCS/MuCSData.h"
+#include "uboone/MuCS/MuCSRecoData.h"
 #include "Geometry/Geometry.h"
 #include "RawData/RawDigit.h"
 #include "RawData/OpDetWaveform.h"
