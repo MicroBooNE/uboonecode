@@ -58,3 +58,5 @@ physics:
  end_paths:     [ analyzeIt ]
 }
 
+services.user.TimeService.TrigModuleName: "daq"
+services.user.TimeService.InheritClockConfig: false
