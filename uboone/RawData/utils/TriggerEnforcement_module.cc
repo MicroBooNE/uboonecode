@@ -151,7 +151,7 @@ bool TriggerEnforcement::filter(art::Event & e)
 
   art::Handle<std::vector<raw::Trigger> > hardware_trigger_handle;
   e.getByLabel(_hardware_trigger_producer,hardware_trigger_handle);
-  art::Handle<std::vector<raw::ubdaqSoftwareTriggerData> > software_trigger_handle;
+  art::Handle<raw::ubdaqSoftwareTriggerData> software_trigger_handle;
   e.getByLabel(_software_trigger_producer,software_trigger_handle);
 
   if(!hardware_trigger_handle.isValid()) {
@@ -183,13 +183,11 @@ bool TriggerEnforcement::filter(art::Event & e)
     }
   }
 
-  for(auto const& t : *software_trigger_handle) {
-    
-    if ( t.vetoAlgos( _exclude_software_trig_v) ) return false;
+  if( software_trigger_handle->vetoAlgos( _exclude_software_trig_v) )
+    return false;
 
-    if ( t.passedAlgos( _include_software_trig_v) ) software_decision=true;
-
-  }								       
+  if( software_trigger_handle->passedAlgos( _include_software_trig_v) )
+    software_decision=true;
     
   return (software_decision && hardware_decision) ;
 }
