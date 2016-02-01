@@ -17,31 +17,31 @@ class ubdaqSoftwareTriggerData {
 
   void addAlgorithm(std::string name, bool pass, uint32_t phmax, uint32_t multiplicity, uint32_t triggerTick, double triggerTime, float prescale);
 
-  int getNumberOfAlgorithms(void);
-  std::vector<std::string> getListOfAlgorithms(void);
+  int getNumberOfAlgorithms(void) const;
+  std::vector<std::string> getListOfAlgorithms(void) const;
   
   // pass/veto by name
-  bool passedAlgo(std::string algo);
-  bool vetoAlgo(std::string algo);
-  bool passedAlgos(std::vector<std::string> algos);
-  bool vetoAlgos(std::vector<std::string> algos);
+  bool passedAlgo(std::string algo) const;
+  bool vetoAlgo(std::string algo) const;
+  bool passedAlgos(std::vector<std::string> algos) const;
+  bool vetoAlgos(std::vector<std::string> algos) const;
 
   //getters by entry index
-  bool getPass(int i);
-  uint32_t getPhmax(int i);
-  uint32_t getMultiplicity(int i);
-  uint32_t getTriggerTick(int i);
-  double getTimeSinceTrigger(int i);
-  std::string getTriggerAlgorithm(int i);
-  float getPrescale(int i);
+  bool getPass(int i) const;
+  uint32_t getPhmax(int i) const;
+  uint32_t getMultiplicity(int i) const;
+  uint32_t getTriggerTick(int i) const;
+  double getTimeSinceTrigger(int i) const;
+  std::string getTriggerAlgorithm(int i) const;
+  float getPrescale(int i) const;
 
   //getters by name
-  uint32_t getPhmax(std::string algo);  // max adc sum at (software) trigger firing time
-  uint32_t getMultiplicity(std::string algo);  // multiplicity at (software) trigger firing time
-  uint32_t getTriggerTick(std::string algo);   // tick since the beam-gate opened
-  double getTimeSinceTrigger(std::string algo);  // time since the event (hardware) trigger, in us
-  int getID(std::string algo); // get the index of a given algorithm
-  float getPrescale(std::string algo); // returns prescale_weight (see below)
+  uint32_t getPhmax(std::string algo) const;  // max adc sum at (software) trigger firing time
+  uint32_t getMultiplicity(std::string algo) const;  // multiplicity at (software) trigger firing time
+  uint32_t getTriggerTick(std::string algo) const;   // tick since the beam-gate opened
+  double getTimeSinceTrigger(std::string algo) const;  // time since the event (hardware) trigger, in us
+  int getID(std::string algo) const; // get the index of a given algorithm
+  float getPrescale(std::string algo) const; // returns prescale_weight (see below)
 
  private:
 

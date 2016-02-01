@@ -23,7 +23,7 @@ void raw::ubdaqSoftwareTriggerData::addAlgorithm(std::string name_, bool pass_, 
 
 //-----------------------------------------------------------------------------------
 
-std::vector<std::string> raw::ubdaqSoftwareTriggerData::getListOfAlgorithms(void){
+std::vector<std::string> raw::ubdaqSoftwareTriggerData::getListOfAlgorithms(void) const{
   std::vector<std::string> list;
   for (auto const algoPair: passAlgo){
     list.push_back(algoPair.first);
@@ -33,27 +33,27 @@ std::vector<std::string> raw::ubdaqSoftwareTriggerData::getListOfAlgorithms(void
 
 //-----------------------------------------------------------------------------------
 
-int raw::ubdaqSoftwareTriggerData::getNumberOfAlgorithms(void){
+int raw::ubdaqSoftwareTriggerData::getNumberOfAlgorithms(void) const{
   return passAlgo.size();
 }
 
 
 //-----------------------------------------------------------------------------------
 
-bool raw::ubdaqSoftwareTriggerData::passedAlgo(std::string algo){
+bool raw::ubdaqSoftwareTriggerData::passedAlgo(std::string algo) const{
   int id = getID(algo);
   return getPass(id);
 }
 
 //-----------------------------------------------------------------------------------
 
-bool raw::ubdaqSoftwareTriggerData::vetoAlgo(std::string algo){
+bool raw::ubdaqSoftwareTriggerData::vetoAlgo(std::string algo) const{
   return not passedAlgo(algo);
 }
 
 //-----------------------------------------------------------------------------------
 
-bool raw::ubdaqSoftwareTriggerData::passedAlgos(std::vector<std::string> algos){
+bool raw::ubdaqSoftwareTriggerData::passedAlgos(std::vector<std::string> algos) const{
   for (auto const &algo: algos){
     if (passedAlgo(algo)){
       return true;
@@ -64,41 +64,41 @@ bool raw::ubdaqSoftwareTriggerData::passedAlgos(std::vector<std::string> algos){
 
 //-----------------------------------------------------------------------------------
 
-bool raw::ubdaqSoftwareTriggerData::vetoAlgos(std::vector<std::string> algos){
+bool raw::ubdaqSoftwareTriggerData::vetoAlgos(std::vector<std::string> algos) const{
   return not passedAlgos(algos);
 }
 
 //-----------------------------------------------------------------------------------
 
-uint32_t raw::ubdaqSoftwareTriggerData::getPhmax(std::string algo){  // max adc sum at (software) trigger firing time
+uint32_t raw::ubdaqSoftwareTriggerData::getPhmax(std::string algo) const{  // max adc sum at (software) trigger firing time
   int id = getID(algo);
   return getPhmax(id);
 }
 
 //-----------------------------------------------------------------------------------
 
-uint32_t raw::ubdaqSoftwareTriggerData::getMultiplicity(std::string algo){  // multiplicity at (software) trigger firing time
+uint32_t raw::ubdaqSoftwareTriggerData::getMultiplicity(std::string algo) const{  // multiplicity at (software) trigger firing time
   int id = getID(algo);
   return getMultiplicity(id);
 }
 
 //-----------------------------------------------------------------------------------
 
-uint32_t raw::ubdaqSoftwareTriggerData::getTriggerTick(std::string algo){   // tick since the beam-gate opened
+uint32_t raw::ubdaqSoftwareTriggerData::getTriggerTick(std::string algo) const{   // tick since the beam-gate opened
   int id = getID(algo);
   return getTriggerTick(id);
 }
 
 //-----------------------------------------------------------------------------------
 
-double raw::ubdaqSoftwareTriggerData::getTimeSinceTrigger(std::string algo){  // time since the event (hardware) trigger, in us
+double raw::ubdaqSoftwareTriggerData::getTimeSinceTrigger(std::string algo) const{  // time since the event (hardware) trigger, in us
   int id = getID(algo);
   return getTimeSinceTrigger(id);
 }
 
 //-----------------------------------------------------------------------------------
 
-int raw::ubdaqSoftwareTriggerData::getID(std::string algo){
+int raw::ubdaqSoftwareTriggerData::getID(std::string algo) const{
   for (unsigned int i(0); i < passAlgo.size(); ++i){
     if (passAlgo.at(i).first == algo){ // correct algorithm
       return i;
@@ -110,14 +110,14 @@ int raw::ubdaqSoftwareTriggerData::getID(std::string algo){
 
 //-----------------------------------------------------------------------------------
 
-float raw::ubdaqSoftwareTriggerData::getPrescale(std::string algo){
+float raw::ubdaqSoftwareTriggerData::getPrescale(std::string algo) const{
   int id = getID(algo);
   return getPrescale(id);
 }
 
 //-----------------------------------------------------------------------------------
 
-bool raw::ubdaqSoftwareTriggerData::getPass(int i) { 
+bool raw::ubdaqSoftwareTriggerData::getPass(int i) const { 
   if (i >= 0){
     if ((unsigned)i >= passAlgo.size()){
       std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl;
@@ -132,7 +132,7 @@ bool raw::ubdaqSoftwareTriggerData::getPass(int i) {
 //-----------------------------------------------------------------------------------
 
 
-uint32_t raw::ubdaqSoftwareTriggerData::getPhmax(int i) {
+uint32_t raw::ubdaqSoftwareTriggerData::getPhmax(int i) const{
   if (i >= 0){
     if ((unsigned)i >= PHMAX.size()){
       std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl;
@@ -147,7 +147,7 @@ uint32_t raw::ubdaqSoftwareTriggerData::getPhmax(int i) {
 
 //-----------------------------------------------------------------------------------
 
-uint32_t raw::ubdaqSoftwareTriggerData::getMultiplicity(int i) {
+uint32_t raw::ubdaqSoftwareTriggerData::getMultiplicity(int i) const{
   if (i >= 0){
     if ((unsigned)i >= multiplicity.size()){
       std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl;
@@ -161,7 +161,7 @@ uint32_t raw::ubdaqSoftwareTriggerData::getMultiplicity(int i) {
 
 //-----------------------------------------------------------------------------------
 
-uint32_t raw::ubdaqSoftwareTriggerData::getTriggerTick(int i) {
+uint32_t raw::ubdaqSoftwareTriggerData::getTriggerTick(int i) const{
   if (i >= 0){
     if ((unsigned)i >= triggerTick.size()){
       std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl;
@@ -175,7 +175,7 @@ uint32_t raw::ubdaqSoftwareTriggerData::getTriggerTick(int i) {
 
 //-----------------------------------------------------------------------------------
 
-double raw::ubdaqSoftwareTriggerData::getTimeSinceTrigger(int i) {
+double raw::ubdaqSoftwareTriggerData::getTimeSinceTrigger(int i) const{
   if (i >= 0){
     if ((unsigned)i >= triggerTime.size()){
       std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl;
@@ -189,7 +189,7 @@ double raw::ubdaqSoftwareTriggerData::getTimeSinceTrigger(int i) {
 
 //-----------------------------------------------------------------------------------
 
-std::string raw::ubdaqSoftwareTriggerData::getTriggerAlgorithm(int i) {
+std::string raw::ubdaqSoftwareTriggerData::getTriggerAlgorithm(int i) const{
   if (i >= 0){
     if ((unsigned)i >= passAlgo.size()){
       std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl;
@@ -203,7 +203,7 @@ std::string raw::ubdaqSoftwareTriggerData::getTriggerAlgorithm(int i) {
 
 //-----------------------------------------------------------------------------------
 
-float raw::ubdaqSoftwareTriggerData::getPrescale(int i){
+float raw::ubdaqSoftwareTriggerData::getPrescale(int i) const{
   if (i >= 0){
     if ((unsigned)i >= prescale_weight.size()){
       std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl;
