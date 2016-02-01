@@ -448,6 +448,38 @@ void CalWireROI::produce(art::Event& evt)
                     size_t binsToAve(20);
                     float  basePre  = std::accumulate(holder.begin(),holder.begin()+binsToAve,0.) / float(binsToAve);
                     float  basePost = std::accumulate(holder.end()-binsToAve,holder.end(),0.) / float(binsToAve);
+                    
+                    // emulate method for determining baseline from original version of CalWireROI
+                    float deconNoise = 1.26491 * sss->GetDeconNoise(channel);    // 4./sqrt(10) * noise
+                    bool  goodBase(false);
+                    int   nTries(0);
+                    
+                    while(!goodBase)
+                    {
+                        if (!(fabs(basePre - basePost) < deconNoise) && nTries++ < 3)
+                        {
+                            size_t nBinsToAdd(100);
+                            size_t roiLenAddition = std::min(nBinsToAdd, dataSize - roi.second - binOffset);
+                            
+                            if (roiLenAddition > 0)
+                            {
+                                std::vector<float> additionVec(roiLenAddition);
+                            
+                                std::copy(rawAdcLessPedVec.begin()+binOffset+roi.first + roiLen,
+                                          rawAdcLessPedVec.begin()+binOffset+roi.first + roiLen + roiLenAddition,
+                                          additionVec.begin());
+                                
+                                holder.resize(holder.size() + roiLenAddition);
+                                std::transform(additionVec.begin(),additionVec.end(),holder.begin() + roiLen,[deconNorm](float& deconVal){return deconVal/deconNorm;});
+                                
+                                basePost = std::accumulate(holder.end()-binsToAve,holder.end(),0.) / float(binsToAve);
+                            
+                                roiLen = holder.size();
+                            }
+                            else goodBase = true;
+                        }
+                        else goodBase = true;
+                    }
                    
                     baseSet = true;
                     base    = SubtractBaseline(holder, basePre,basePost,roi.first,roiLen,dataSize);
