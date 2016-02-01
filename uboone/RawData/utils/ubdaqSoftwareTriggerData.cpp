@@ -59,7 +59,7 @@ bool raw::ubdaqSoftwareTriggerData::passedAlgos(std::vector<std::string> algos) 
       return true;
     }
   }
-  return false;
+  return (algos.size() == 0);
 }
 
 //-----------------------------------------------------------------------------------

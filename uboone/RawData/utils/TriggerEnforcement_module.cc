@@ -183,11 +183,13 @@ bool TriggerEnforcement::filter(art::Event & e)
     }
   }
 
-  if( software_trigger_handle->vetoAlgos( _exclude_software_trig_v) )
-    return false;
+  if(hardware_decision) {
+    if( software_trigger_handle->vetoAlgos( _exclude_software_trig_v) )
+      return false;
 
-  if( software_trigger_handle->passedAlgos( _include_software_trig_v) )
-    software_decision=true;
+    if( software_trigger_handle->passedAlgos( _include_software_trig_v) )
+      software_decision=true;
+  }
     
   return (software_decision && hardware_decision) ;
 }
