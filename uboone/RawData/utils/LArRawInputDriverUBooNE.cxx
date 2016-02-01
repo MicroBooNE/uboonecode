@@ -1252,7 +1252,7 @@ namespace lris {
       ub_FEMBeamTriggerOutput swTrig = swTrig_vect.at(i); // fetch algorithm
       
       trigInfo.addAlgorithm(swTrig.algo_instance_name, // add algorithm to art data product
-                            swTrig.pass_algo, 
+                            swTrig.pass,
                             swTrig.amplitude, 
                             swTrig.multiplicity, 
                             swTrig.time, 
