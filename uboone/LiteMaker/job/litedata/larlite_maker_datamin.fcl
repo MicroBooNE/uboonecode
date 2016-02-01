@@ -1,0 +1,62 @@
+#include "services_microboone.fcl"
+#include "litedatamin_wire.fcl"
+#include "litedatamin_opdigit.fcl"
+#include "litedatamin_opreco.fcl"
+#include "litedatamin_reco2d.fcl"
+#include "litedatamin_reco2d_cc.fcl"
+#include "litedatamin_reco3d_kalmanhit.fcl"
+#include "litedatamin_reco3d_kalmanhitcc.fcl"
+#include "litedatamin_reco3d_pandoraCosmic.fcl"
+#include "litedatamin_reco3d_pandoraNu.fcl"
+
+process_name: LiteMaker
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "ana_hist.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_warning
+  #message:      @local::standard_debug # If you turn this on, uncomment the debug lines below
+  user:         @local::microboone_simulation_services 	     
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  -1        # Number of events to create
+}
+
+physics:
+{
+
+ analyzers:
+ {
+   #wire:          @local::litedatamin_wire
+   opdigit:       @local::litedatamin_opdigit
+   opreco:        @local::litedatamin_opreco
+   reco2d:        @local::litedatamin_reco2d
+   reco2dcc:      @local::litedatamin_reco2d_cc
+   kalmanhit:     @local::litedatamin_reco3d_kalmanhit
+   kalmanhitcc:   @local::litedatamin_reco3d_kalmanhitcc
+   pandoraCosmic: @local::litedatamin_reco3d_pandoraCosmic
+   pandoraNu:     @local::litedatamin_reco3d_pandoraNu
+ }
+
+ analyzeIt: [ #wire,
+              opdigit,
+              opreco,
+              reco2d,
+              reco2dcc,
+              kalmanhit,
+              kalmanhitcc,
+              pandoraCosmic,
+              pandoraNu
+            ]
+
+ end_paths:     [ analyzeIt ]
+}
+
+services.user.TimeService.TrigModuleName: "daq"
+services.user.TimeService.InheritClockConfig: false

@@ -1,0 +1,20 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemc_mcpart: @local::litemaker_base
+
+litemc_mcpart.out_filename: "larlite_mcpart.root"
+
+litemc_mcpart.AssociationLookUpMap: 
+{
+  mctruth: ["generator"]
+  mcpart: ["generator"]
+}
+
+litemc_mcpart.DataLookUpMap:
+{
+  mcpart:     ["largeant"]
+}
+
+END_PROLOG
