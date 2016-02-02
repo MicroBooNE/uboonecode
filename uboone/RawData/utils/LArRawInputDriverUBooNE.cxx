@@ -1253,6 +1253,7 @@ namespace lris {
       
       trigInfo.addAlgorithm(swTrig.algo_instance_name, // add algorithm to art data product
                             swTrig.pass_algo, 
+                            swTrig.pass_prescale, 
                             swTrig.amplitude, 
                             swTrig.multiplicity, 
                             swTrig.time, 

@@ -8,12 +8,14 @@ raw::ubdaqSoftwareTriggerData::ubdaqSoftwareTriggerData() {
 
 }
 
-void raw::ubdaqSoftwareTriggerData::addAlgorithm(std::string name_, bool pass_, uint32_t phmax_, uint32_t multiplicity_, uint32_t triggerTick_, double triggerTime_, float prescale_){
+void raw::ubdaqSoftwareTriggerData::addAlgorithm(std::string name_, bool pass_, bool pass_prescale_, uint32_t phmax_, uint32_t multiplicity_, uint32_t triggerTick_, double triggerTime_, float prescale_){
   std::pair<std::string, bool> tmp_pair;
+  std::pair<std::string, bool> tmp_pair_prescale;
   tmp_pair.first = name_;
   tmp_pair.second = pass_;
   
   passAlgo.push_back(tmp_pair);
+  passPrescale.push_back(pass_prescale_);
   PHMAX.push_back(phmax_);
   multiplicity.push_back(multiplicity_);
   triggerTick.push_back(triggerTick_);
@@ -47,6 +49,13 @@ bool raw::ubdaqSoftwareTriggerData::passedAlgo(std::string algo) const{
 
 //-----------------------------------------------------------------------------------
 
+bool raw::ubdaqSoftwareTriggerData::passedPrescaleAlgo(std::string algo) const{
+  int id = getID(algo);
+  return getPassPrescale(id);
+}
+
+//-----------------------------------------------------------------------------------
+
 bool raw::ubdaqSoftwareTriggerData::vetoAlgo(std::string algo) const{
   return not passedAlgo(algo);
 }
@@ -61,6 +70,7 @@ bool raw::ubdaqSoftwareTriggerData::passedAlgos(std::vector<std::string> algos) 
   }
   return (algos.size() == 0);
 }
+
 
 //-----------------------------------------------------------------------------------
 
@@ -124,6 +134,19 @@ bool raw::ubdaqSoftwareTriggerData::getPass(int i) const {
       return 0;
     }
     return passAlgo.at(i).second;
+  }
+  std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl; // negative index;
+  return 0;
+}
+//-----------------------------------------------------------------------------------
+
+bool raw::ubdaqSoftwareTriggerData::getPassPrescale(int i) const { 
+  if (i >= 0){
+    if ((unsigned)i >= passAlgo.size()){
+      std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl;
+      return 0;
+    }
+    return passPrescale.at(i);
   }
   std::cout << "WARNING - asked for information on a trigger algorithm that isn't present!" << std::endl; // negative index;
   return 0;
