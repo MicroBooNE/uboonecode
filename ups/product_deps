@@ -33,7 +33,7 @@ table_fragment_end
 product          version
 larsoft         v04_35_00
 ubutil          v01_37_04
-uboone_data     v01_03_00
+uboone_data     v01_04_00
 uboonedaq_datatypes v6_18_01_e9
 
 cetbuildtools	v4_18_02	-	only_for_build
