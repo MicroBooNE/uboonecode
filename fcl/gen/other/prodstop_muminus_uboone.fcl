@@ -41,12 +41,12 @@ physics:
    generator:    @local::microboone_singlep
    largeant:     @local::microboone_largeant
    mcreco:       @local::standard_mcreco
-   #backtrack:    @local::standard_backtrackerloader
-   #optdigitizer: @local::microboone_optical_adc_sim
-   #optfem:       @local::microboone_optical_fem_sim
-   #triggersim:   @local::ubtrigger_singlep
-   #optreadout:   @local::microboone_optical_dram_readout_sim
-   #daq:          @local::microboone_simwire
+   backtrack:    @local::standard_backtrackerloader
+   optdigitizer: @local::microboone_optical_adc_sim
+   optfem:       @local::microboone_optical_fem_sim
+   triggersim:   @local::ubtrigger_singlep
+   optreadout:   @local::microboone_optical_dram_readout_sim
+   daq:          @local::microboone_simwire
  }
 
  analyzers:
@@ -64,7 +64,7 @@ physics:
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ generator, largeant,  mcreco, stoppingmu ]#, backtrack, optdigitizer, optfem, triggersim, optreadout, daq ]
+ simulate: [ generator, largeant,  mcreco, stoppingmu , backtrack, optdigitizer, optfem, triggersim, optreadout, daq ]
  #filter1: [ stoppingmu ]
  analyzeIt:  [ largana ]
  #define the output stream, there could be more than one if using filters 
