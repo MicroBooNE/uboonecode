@@ -65,24 +65,24 @@ microboone_simulation_dark_services.IChannelStatusService:          @local::micr
 # Define microboone_g4_services ... (1*)
 microboone_g4_services:                         @local::microboone_g4_dark_services
 microboone_g4_services.PhotonVisibilityService: @local::microboone_photonvisibilityservice
-microboone_g4_services.LArProperties.ScintYield:          29000   # DocDB 4914, @MToups
+microboone_g4_services.LArProperties.ScintYield:          40000   # DocDB 4914, @MToups
 microboone_g4_services.LArProperties.ScintPreScale:        0.0093 # DocDB 4914, @MToups
                                                                   # MUST match between g4 and detsim
 microboone_g4_services.LArProperties.ScintYieldRatio: 0.23
 
 microboone_g4_services.LArProperties.ScintByParticleType: true
-microboone_g4_services.LArProperties.MuonScintYield: 29000
+microboone_g4_services.LArProperties.MuonScintYield: 40000
 microboone_g4_services.LArProperties.MuonScintYieldRatio: 0.23
-microboone_g4_services.LArProperties.PionScintYield: 29000
+microboone_g4_services.LArProperties.PionScintYield: 40000
 microboone_g4_services.LArProperties.PionScintYieldRatio: 0.23
-microboone_g4_services.LArProperties.ElectronScintYield: 29000
-microboone_g4_services.LArProperties.ElectronScintYieldRatio: 0.23
-microboone_g4_services.LArProperties.KaonScintYield: 29000
+microboone_g4_services.LArProperties.ElectronScintYield: 33333
+microboone_g4_services.LArProperties.ElectronScintYieldRatio: 0.27
+microboone_g4_services.LArProperties.KaonScintYield: 40000
 microboone_g4_services.LArProperties.KaonScintYieldRatio: 0.23
-microboone_g4_services.LArProperties.ProtonScintYield: 29000
-microboone_g4_services.LArProperties.ProtonScintYieldRatio: 0.23
-microboone_g4_services.LArProperties.AlphaScintYield: 29000
-microboone_g4_services.LArProperties.AlphaScintYieldRatio: 0.23
+microboone_g4_services.LArProperties.ProtonScintYield: 32000
+microboone_g4_services.LArProperties.ProtonScintYieldRatio: 0.29
+microboone_g4_services.LArProperties.AlphaScintYield: 28000
+microboone_g4_services.LArProperties.AlphaScintYieldRatio: 0.56
 
 microboone_g4_services.LArProperties.EnableCerenkovLight: false # Cerenkov light OFF by default
 microboone_g4_services.LArG4Parameters.UseCustomPhysics:  true
