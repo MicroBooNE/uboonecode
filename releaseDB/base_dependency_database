@@ -23,6 +23,7 @@ larana : larana : OpticalDetector/PMTPulseRecoBase.h
 larana : larana : OpticalDetector/PulseRecoManager.h
 larana : larana : OpticalDetector/SimPhotonCounter.h
 larana : larana : OpticalDetector/SimPhotonCounterAlg.h
+larana : larana : ParticleIdentification/MVAAlg.h
 larana : larana : ParticleIdentification/PIDAAlg.h
 larana : larcore : Geometry/AuxDetGeo.h
 larana : larcore : Geometry/AuxDetSensitiveGeo.h
@@ -45,6 +46,7 @@ larana : lardata : AnalysisAlg/Chi2PIDAlg.h
 larana : lardata : AnalysisBase/Calorimetry.h
 larana : lardata : AnalysisBase/CosmicTag.h
 larana : lardata : AnalysisBase/FlashMatch.h
+larana : lardata : AnalysisBase/MVAPIDResult.h
 larana : lardata : AnalysisBase/ParticleID.h
 larana : lardata : AnalysisBase/T0.h
 larana : lardata : MCBase/MCBaseException.h
@@ -166,6 +168,7 @@ lardata : lardata : AnalysisAlg/Chi2PIDAlg.h
 lardata : lardata : AnalysisBase/Calorimetry.h
 lardata : lardata : AnalysisBase/CosmicTag.h
 lardata : lardata : AnalysisBase/FlashMatch.h
+lardata : lardata : AnalysisBase/MVAPIDResult.h
 lardata : lardata : AnalysisBase/ParticleID.h
 lardata : lardata : AnalysisBase/T0.h
 lardata : lardata : AnalysisBase/classes.h
@@ -982,8 +985,10 @@ uboonecode : lardata : RecoBase/EndPoint2D.h
 uboonecode : lardata : RecoBase/Hit.h
 uboonecode : lardata : RecoBase/OpFlash.h
 uboonecode : lardata : RecoBase/OpHit.h
+uboonecode : lardata : RecoBase/PFParticle.h
 uboonecode : lardata : RecoBase/Seed.h
 uboonecode : lardata : RecoBase/Shower.h
+uboonecode : lardata : RecoBase/SpacePoint.h
 uboonecode : lardata : RecoBase/Track.h
 uboonecode : lardata : RecoBase/Vertex.h
 uboonecode : lardata : RecoBase/Wire.h
@@ -1044,12 +1049,14 @@ uboonecode : larevt : CalibrationDBI/Providers/DetPedestalRetrievalAlg.h
 uboonecode : larevt : CalibrationDBI/Providers/SIOVChannelStatusProvider.h
 uboonecode : larevt : Filters/ChannelFilter.h
 uboonecode : larreco : RecoAlg/RootMathFunctor.h
+uboonecode : larreco : RecoAlg/SpacePointAlg.h
 uboonecode : larreco : RecoAlg/TrackMomentumCalculator.h
 uboonecode : larsim : MCCheater/BackTracker.h
 uboonecode : larsim : Simulation/AuxDetSimChannel.h
 uboonecode : larsim : Simulation/BeamGateInfo.h
 uboonecode : larsim : Simulation/BeamTypes.h
 uboonecode : larsim : Simulation/EveIdCalculator.h
+uboonecode : larsim : Simulation/LArG4Parameters.h
 uboonecode : larsim : Simulation/LArVoxelData.h
 uboonecode : larsim : Simulation/LArVoxelID.h
 uboonecode : larsim : Simulation/LArVoxelList.h
@@ -1086,6 +1093,9 @@ uboonecode : uboonecode : uboone/Geometry/ChannelMapUBooNEAlg.h
 uboonecode : uboonecode : uboone/Geometry/UBOpChannelTypes.h
 uboonecode : uboonecode : uboone/Geometry/UBOpReadoutMap.h
 uboonecode : uboonecode : uboone/Geometry/UBooNEGeometryHelper.h
+uboonecode : uboonecode : uboone/MuCS/MuCSData.h
+uboonecode : uboonecode : uboone/MuCS/MuCSRecoData.h
+uboonecode : uboonecode : uboone/MuCS/classes.h
 uboonecode : uboonecode : uboone/OpticalDetectorAna/OpDetWaveformAna.h
 uboonecode : uboonecode : uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/CFDFire.hh
 uboonecode : uboonecode : uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/CFDiscConfig.hh
@@ -1116,6 +1126,8 @@ uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoDigitizedSPE.h
 uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoPedestal.h
 uboonecode : uboonecode : uboone/OpticalDetectorSim/WFAlgoSPEBase.h
 uboonecode : uboonecode : uboone/RawData/utils/LArRawInputDriverUBooNE.h
+uboonecode : uboonecode : uboone/RawData/utils/classes.h
+uboonecode : uboonecode : uboone/RawData/utils/ubdaqSoftwareTriggerData.h
 uboonecode : uboonecode : uboone/TPCNeutrinoIDFilter/Cluster2DNuAlg.h
 uboonecode : uboonecode : uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h
 uboonecode : uboonecode : uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h

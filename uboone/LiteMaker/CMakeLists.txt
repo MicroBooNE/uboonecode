@@ -16,6 +16,7 @@ art_make( BASENAME_ONLY
 	  LIB_LIBRARIES
 	  	   Geometry
 		   uboone_Geometry
+		   uboonecode_uboone_MuCS
 		   Geometry_service
 	   	   Simulation
 		   SimulationBase
@@ -51,7 +52,8 @@ art_make( BASENAME_ONLY
 		   ${ROOT_BASIC_LIB_LIST}
 
           MODULE_LIBRARIES 	  		   
-		   uboonecode_uboone_LiteMaker
+		   uboonecode_uboone_LiteMaker	   
+		   uboonecode_uboone_MuCS
 		   Geometry
 		   uboone_Geometry
 		   Geometry_service

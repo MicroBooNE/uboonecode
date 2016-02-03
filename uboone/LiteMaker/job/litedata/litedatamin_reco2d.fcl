@@ -1,0 +1,32 @@
+#include "litemaker_base.fcl"
+BEGIN_PROLOG
+
+litedatamin_reco2d: @local::litemaker_base
+litedatamin_reco2d.out_filename: "larlite_datamin_reco2d.root"
+litedatamin_reco2d.DataLookUpMap:
+{
+  hit : [ 
+    "gaushit",
+    "pandoraCosmicKHitRemoval"
+  ]
+  cluster : [ 
+    "fuzzycluster",
+    "pandoraCosmic",
+    "pandoraNu"
+  ]
+}
+
+litedatamin_reco2d.AssociationLookUpMap:
+{
+  hit : [ 
+    "gaushit",
+    "pandoraCosmicKHitRemoval"
+  ]
+  cluster : [ 
+    "fuzzycluster",
+    "pandoraCosmic",
+    "pandoraNu"
+  ]
+}
+
+END_PROLOG

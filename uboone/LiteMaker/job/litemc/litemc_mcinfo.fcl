@@ -1,0 +1,25 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemc_mcinfo: @local::litemaker_base
+
+litemc_mcinfo.out_filename: "larlite_mcinfo.root"
+
+litemc_mcinfo.pot_labels: ["generator"]
+
+litemc_mcinfo.DataLookUpMap:
+{
+  potsummary: ["generator"]
+  gtruth:     ["generator"]
+  mcflux:     ["generator"]
+  mctruth:    ["generator"]
+  mctrack:    ["mcreco"]
+  mcshower:   ["mcreco"]
+}
+
+litemc_mcinfo.AssociationLookUpMap: {
+  mctruth: ["generator"]
+}
+
+END_PROLOG
