@@ -14,9 +14,9 @@ microboone_pedestalretrievalalg:
     UseDB: false
     UseFile: false
     
-    DefaultCollMean: 400.0
+    DefaultCollMean: 473.0
     DefaultCollRms:  0.3
-    DefaultIndMean:  2048.0
+    DefaultIndMean:  2046.0
     DefaultIndRms:   0.3
     DefaultMeanErr:  0.0
     DefaultRmsErr:   0.0
