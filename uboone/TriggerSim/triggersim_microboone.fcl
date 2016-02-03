@@ -23,15 +23,20 @@ ubtrigger_standard:
   Mask:     [0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0x0,   0x30  ] # Trigger condition bit mask
   Prescale: [false, false, false, false, false, false, false, false, false] # Trigger prescale bit mask
 
-  BNBGateWidth:    102 # BNB gate width in number of samples (Optical clock)
-  BNBGateDelay:    256 # BNB gate delay in number of samples (Optical clock)
+  BNBGateWidth:    104 # BNB gate width in number of samples (Optical clock)
+  BNBGateDelay:    220 # BNB gate delay in number of samples (Optical clock)
   BNBCosmicStart:  8   # Cosmic allow start w.r.t. BNB pulse timing in number of frames
   BNBCosmicEnd:    34  # Cosmic allow start w.r.t. BNB pulse timing in number of frames
 
   NuMIGateWidth:   640 # NuMI gate width in number of samples (Optical clock)
-  NuMIGateDelay:   256 # NuMI gate delay in number of samples (Optical clock)
+  NuMIGateDelay:   770 # NuMI gate delay in number of samples (Optical clock)
   NuMICosmicStart: 8   # Cosmic allow start w.r.t. NuMI pulse timing in number of frames
   NuMICosmicEnd:   823 # Cosmic allow start w.r.t. NuMI pulse timing in number of frames
+
+  # Fire time for BNB/NuMI if there's a BeamGate present (in G4 ns unit)
+  # It used to use BeamGateTime but it should not be referred to real beam spill timing
+  BNBFireTime:  -343.75
+  NuMIFireTime: -343.75
   
   # Configuration to force a readout trigger per event in G4 clock [ns]
   # Note if you are running NuMI or BNB beam simulation which generates BeamGateInfo,
@@ -45,12 +50,13 @@ ubtrigger_standard:
 }
 
 microboone_triggersim: @local::ubtrigger_standard
+microboone_triggersim.Mask:  [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x30]
 
 #
 # Single-particle trigger: use DAQ trigger fired @ G4 T=0
 #
 ubtrigger_singlep:            @local::ubtrigger_standard
-ubtrigger_singlep.PCTrigger:  [0]
+ubtrigger_singlep.ExtTrigger: [0]
 ubtrigger_singlep.Mask:       [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x8]
 
 #

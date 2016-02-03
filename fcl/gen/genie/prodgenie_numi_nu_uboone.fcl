@@ -5,6 +5,7 @@ process_name: GenieGen
 outputs.out1.fileName: "prodgenie_simple_numi_nu_uboone_%tc_gen.root"
 
 physics.producers.generator: @local::microboone_genie_simple_numi
-physics.producers.generator.GlobalTimeOffset: 0.
+physics.producers.generator.GlobalTimeOffset: 11718.75
 physics.producers.generator.RandomTimeOffset: 9600.
 physics.producers.generator.TopVolume: "volCryostat"
+physics.producers.generator.BeamName: "numi"

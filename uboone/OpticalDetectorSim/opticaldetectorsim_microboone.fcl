@@ -26,8 +26,8 @@ microboone_optical_fem_sim:
                                       # the disc 0 fire if we're saving time slices due to disc 1 firing.
   BeamWordsBNB:           [1500,1500] # Number of time slices to write for each BNB beam gate
   BeamWordsNuMI:          [1500,1500] # Number of time slices to write for each NuMI beam gate
-  BeamDelayBNB:           [ 256, 256] # Number of time slices to include before start of BNB beam gate
-  BeamDelayNuMI:          [ 256, 256] # Number of time slices to include before start of NuMI beam gate
+  BeamDelayBNB:           [ 200, 200] # Number of time slices to include before start of BNB beam gate
+  BeamDelayNuMI:          [ 750, 750] # Number of time slices to include before start of NuMI beam gate
   PMTWords:               [  40,  40] # Number of time slices to write when disc 1 fires.
   BeamThreshold:          [  40,   4] # Total number of ADC counts among all selected channels for PMT beam trigger
   CosmicThreshold:        [ 800,  80] # Total number of ADC counts among all selected channels for PMT cosmic trigger
