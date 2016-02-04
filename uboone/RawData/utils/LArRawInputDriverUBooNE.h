@@ -79,11 +79,14 @@ namespace lris {
     //Other functions
 
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
-			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
+			  std::map< opdet::UBOpticalChannelCategory_t,
+			  std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo,
 			  std::vector<raw::Trigger>& trigInfo,
-              raw::ubdaqSoftwareTriggerData& sw_trigInfo);
+			  raw::ubdaqSoftwareTriggerData& sw_trigInfo,
+			  uint32_t& event_number,
+			  bool skip);
     void fillDAQHeaderData(gov::fnal::uboone::datatypes::ub_EventRecord& event_record,
 			   raw::DAQHeader& daqHeader);
     void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
@@ -108,7 +111,9 @@ namespace lris {
     uint32_t                       fEventCounter; 
     uint32_t                       fNumberEventsInFile;
     bool                           fHuffmanDecode;
-    util::UBChannelMap_t           fChannelMap;   
+    util::UBChannelMap_t           fChannelMap;
+    int                            fMaxEvents; //fhicl parameter.  Maximum number of events.
+    int                            fSkipEvents; // fhicl parameter.  Number of events to skip.
     int                            fDataTakingTime; //fhicl parameter. Optional to override raw data's internal time stamp.
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
     bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data

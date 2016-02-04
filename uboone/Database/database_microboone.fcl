@@ -11,7 +11,7 @@ microboone_pedestalretrievalalg:
 {
     DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg   
     
-    UseDB: false
+    UseDB: true
     UseFile: false
     
     DefaultCollMean: 473.0
@@ -35,7 +35,7 @@ microboone_channelstatus_provider:
 {
   DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg
   
-  UseDB: false
+  UseDB: true
   UseFile: false
 }
 microboone_channelstatus_provider.DatabaseRetrievalAlg.DBFolderName: "channelstatus_data"

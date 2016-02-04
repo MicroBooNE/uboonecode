@@ -1,0 +1,65 @@
+#include "services_microboone.fcl"
+
+process_name: DumpTriggers
+
+services:
+{
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  TFileService: { fileName: "daq_hist.root" }
+  ExptGeoHelperInterface:  @local::microboone_geometry_helper
+  Geometry:                @local::microboone_geo
+  UBOpReadoutMap:          @local::microboone_opreadoutmap
+  TimeService:             @local::microboone_timeservice
+  DatabaseUtil:            @local::microboone_database
+  message:                 @local::standard_info
+}
+
+# Database settings
+services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: true
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
+source:
+{
+  fileNames:       []
+  module_type:	   LArRawInputSourceUBooNE
+  maxEvents:       -1
+  huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTrigger:  true
+
+  swizzleTriggerType: ALL ## This is the only option that works currently!
+#  swizzleTriggerType: BNB
+#  swizzleTriggerType: EXT
+#  swizzleTriggerType: NuMI
+#  swizzleTriggerType: CALIB
+  beam_histograms: [ "E:TOR101, 100, 0, 50",
+                     "E:TORTGT, 100, 0, 50",
+                     "E:TOR860, 100, 0, 5",
+                     "E:TOR875, 100, 0, 5" ]
+}
+
+physics:
+{
+
+ analyzers: {
+  dump: {
+    module_type: "TriggerDumper"
+    HardwareTriggerProducer: "daq"
+    SoftwareTriggerProducer: "daq"
+    NumDump: 1000
+  }
+ }
+
+ ana:  [ dump ]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ ana ]
+}
+
