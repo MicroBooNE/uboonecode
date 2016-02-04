@@ -75,6 +75,7 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
                         OpticalDetectorData
                         RawData
                         SummaryData
+			uboone_RawData
 			${UBDut}
                         ${PQ}
 			${Boost_SERIALIZATION_LIBRARY}
