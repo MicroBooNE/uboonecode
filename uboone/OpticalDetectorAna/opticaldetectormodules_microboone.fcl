@@ -14,7 +14,7 @@ microboone_opflash_lowgain:
    InputModule:     "pmtreadout"
    InputLabels:     [ "" ]
    BinWidth:         1   # us | Pulse finding parameters
-   FlashThreshold:   2   # PE
+   FlashThreshold:   5   # PE
    HitThreshold:     0.2 # PE
    WidthTolerance:   0.5 # unitless
    TrigCoinc:        2.5 # in microseconds!
