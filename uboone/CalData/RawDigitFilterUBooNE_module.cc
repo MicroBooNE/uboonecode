@@ -386,7 +386,11 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
             }
             
             // Add this wire to the map and try to do some classification here
-            fCharacterizationAlg.classifyRawDigitVec(rawadc, view, wire, truncRmsWireVec[wireIdx], minMaxWireVec[wireIdx], meanWireVec[wireIdx], skewnessWireVec[wireIdx], neighborRatioWireVec[wireIdx], groupToDigitIdxPairMap);
+            if (!fCharacterizationAlg.classifyRawDigitVec(rawadc, view, wire, truncRmsWireVec[wireIdx], minMaxWireVec[wireIdx], meanWireVec[wireIdx],skewnessWireVec[wireIdx], neighborRatioWireVec[wireIdx], groupToDigitIdxPairMap))
+            {
+                // If the waveform was not classified then we need to baseline correct...
+                std::transform(rawadc.begin(),rawadc.end(),rawadc.begin(),std::bind2nd(std::minus<short>(),pedCorWireVec[wireIdx]));
+            }
 
             // Are we at the correct boundary for dealing with the noise?
             if (!((wireIdx + 1) % fNumWiresToGroup[view]))
