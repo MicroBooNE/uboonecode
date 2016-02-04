@@ -104,6 +104,7 @@ private:
     bool                 fTruncateTicks;         ///< If true then drop channels off ends of wires
     unsigned int         fWindowSize;            ///< # ticks to keep in window
     unsigned int         fNumTicksToDropFront;   ///< # ticks to drop from front of waveform
+    bool                 fProcessNoise;          ///< Process the noise
 
     // Statistics.
     int fNumEvent;        ///< Number of events seen.
@@ -186,6 +187,7 @@ void RawDigitFilterUBooNE::reconfigure(fhicl::ParameterSet const & pset)
     fTruncateTicks         = pset.get<bool>               ("TruncateTicks",                                           false);
     fWindowSize            = pset.get<size_t>             ("WindowSize",                                               6400);
     fNumTicksToDropFront   = pset.get<size_t>             ("NumTicksToDropFront",                                      2250);
+    fProcessNoise          = pset.get<bool>               ("ProcessNoise",                                             true);
 }
 
 //----------------------------------------------------------------------------
@@ -340,12 +342,15 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                 raw::Uncompress(rawDigit->ADCs(), rawadc, rawDigit->Compression());
             }
             
+            // This allows the module to be used simply to truncate waveforms with no noise processing
+            if (!fProcessNoise)
+            {
+                saveRawDigits(filteredRawDigit, channel, rawadc, truncMeanWireVec[wireIdx], truncRmsWireVec[wireIdx]);
+                continue;
+            }
+            
             // Apply the high frequency filter
             if (fApplyBinAverage) fBinAverageAlg.doTwoBinAverage(rawadc);
-            
-            // Apply the top hat filter
-//            if (fApplyTopHatFilter) doTopHatFilter(rawadc);
-//            if (fApplyTopHatFilter) doAdaptiveFilter(rawadc);
             
             // Get the kitchen sink
             fCharacterizationAlg.getWaveformParams(rawadc,
@@ -406,7 +411,6 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                 for (size_t locWireIdx = 0; locWireIdx < fNumWiresToGroup[view]; locWireIdx++)
                 {
                     // Try baseline correction?
-//                    if (fApplyTopHatFilter && view < 2 && skewnessWireVec[locWireIdx] != 0.) doTopHatFilter(rawDataWireTimeVec[locWireIdx]);
                     if (fApplyTopHatFilter && view != 2 && skewnessWireVec[locWireIdx] > 0.)
                     {
                         //doAdaptiveFilter(rawDataWireTimeVec[locWireIdx]);
