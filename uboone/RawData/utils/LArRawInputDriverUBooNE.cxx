@@ -145,8 +145,8 @@ namespace lris {
     fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
     fSwizzleTrigger = ps.get<bool>("swizzleTrigger",true);
     fSwizzleTriggerType = ps.get<std::string>("swizzleTriggerType"); // Only use ALL for this option, other options will not work
-    fMaxEvents = ps.get<uint32_t>("maxEvents", -1);
-    fSkipEvents = ps.get<uint32_t>("skipEvents", 0);
+    fMaxEvents = ps.get<int>("maxEvents", -1);
+    fSkipEvents = ps.get<int>("skipEvents", 0);
 
     //temporary kazuTestSwizzleTrigger
     kazuTestSwizzleTrigger = ps.get<bool>("kazuTestSwizzleTrigger",true);
@@ -362,7 +362,7 @@ namespace lris {
       return false; //tells readNext that you're done reading all of the events in this file.
     }
 
-    if (fMaxEvents > 0 && fEventCounter == fMaxEvents)
+    if (fMaxEvents > 0 && fEventCounter == unsigned(fMaxEvents))
       return false;
 
     mf::LogInfo(__FUNCTION__)<<"Attempting to read event: "<<fEventCounter<<std::endl;

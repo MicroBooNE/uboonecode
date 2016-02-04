@@ -112,8 +112,8 @@ namespace lris {
     uint32_t                       fNumberEventsInFile;
     bool                           fHuffmanDecode;
     util::UBChannelMap_t           fChannelMap;
-    uint32_t                       fMaxEvents; //fhicl parameter.  Maximum number of events.
-    uint32_t                       fSkipEvents; // fhicl parameter.  Number of events to skip.
+    int                            fMaxEvents; //fhicl parameter.  Maximum number of events.
+    int                            fSkipEvents; // fhicl parameter.  Number of events to skip.
     int                            fDataTakingTime; //fhicl parameter. Optional to override raw data's internal time stamp.
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
     bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data
