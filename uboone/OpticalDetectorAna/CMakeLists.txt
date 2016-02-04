@@ -41,5 +41,5 @@ art_make( BASENAME_ONLY
 install_headers()
 install_source()
 install_fhicl()
-add_subdirectory(job)
+#add_subdirectory(job)
 add_subdirectory(OpticalSubEvents)
