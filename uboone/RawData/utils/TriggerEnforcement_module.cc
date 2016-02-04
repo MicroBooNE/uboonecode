@@ -184,11 +184,21 @@ bool TriggerEnforcement::filter(art::Event & e)
   }
 
   if(hardware_decision) {
-    if( software_trigger_handle->vetoAlgos( _exclude_software_trig_v) )
-      return false;
+    for(auto const& t: _exclude_software_trig_v) {
+      bool pass_algo = software_trigger_handle->passedAlgo(t);
+      bool pass_prescale = software_trigger_handle->passedPrescaleAlgo(t);
+      bool pass = pass_algo && pass_prescale;
+      if(pass)
+	return false;
+    }
 
-    if( software_trigger_handle->passedAlgos( _include_software_trig_v) )
-      software_decision=true;
+    for(auto const& t: _include_software_trig_v) {
+      bool pass_algo = software_trigger_handle->passedAlgo(t);
+      bool pass_prescale = software_trigger_handle->passedPrescaleAlgo(t);
+      bool pass = pass_algo && pass_prescale;
+      if(pass)
+	software_decision=true;
+    }
   }
     
   return (software_decision && hardware_decision) ;
