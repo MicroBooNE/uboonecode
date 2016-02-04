@@ -15,19 +15,21 @@ class ubdaqSoftwareTriggerData {
  public:
   ubdaqSoftwareTriggerData(); // standard constructor
 
-  void addAlgorithm(std::string name, bool pass, uint32_t phmax, uint32_t multiplicity, uint32_t triggerTick, double triggerTime, float prescale);
+  void addAlgorithm(std::string name, bool pass, bool pass_prescale, uint32_t phmax, uint32_t multiplicity, uint32_t triggerTick, double triggerTime, float prescale);
 
   int getNumberOfAlgorithms(void) const;
   std::vector<std::string> getListOfAlgorithms(void) const;
   
   // pass/veto by name
-  bool passedAlgo(std::string algo) const;
-  bool vetoAlgo(std::string algo) const;
-  bool passedAlgos(std::vector<std::string> algos) const;
-  bool vetoAlgos(std::vector<std::string> algos) const;
+  bool passedAlgo(std::string algo) const; // passed this algorithm
+  bool passedPrescaleAlgo(std::string algo) const; // passed this algorithms prescale
+  bool vetoAlgo(std::string algo) const; // NOT passAlgo
+  bool passedAlgos(std::vector<std::string> algos) const; // passed any on a list of these algorithms
+  bool vetoAlgos(std::vector<std::string> algos) const; // NOT passedAlgos
 
   //getters by entry index
   bool getPass(int i) const;
+  bool getPassPrescale(int i) const;
   uint32_t getPhmax(int i) const;
   uint32_t getMultiplicity(int i) const;
   uint32_t getTriggerTick(int i) const;
@@ -46,6 +48,7 @@ class ubdaqSoftwareTriggerData {
  private:
 
   std::vector<std::pair<std::string,bool> > passAlgo; // list of algorithms and corresponding bools for pass/fail
+  std::vector<bool> passPrescale; // list of algorithms and corresponding bools for pass/fail
   std::vector<uint32_t> PHMAX; // max adc sum at (software) trigger firing time
   std::vector<uint32_t> multiplicity; // multiplicity at (software) trigger firing time
   std::vector<uint32_t> triggerTick; // tick since the beam-gate opened
