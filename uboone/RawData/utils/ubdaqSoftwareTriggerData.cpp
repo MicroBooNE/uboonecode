@@ -74,6 +74,18 @@ bool raw::ubdaqSoftwareTriggerData::passedAlgos(std::vector<std::string> algos) 
 
 //-----------------------------------------------------------------------------------
 
+bool raw::ubdaqSoftwareTriggerData::passedPrescaleAlgos(std::vector<std::string> algos) const{
+  for (auto const &algo: algos){
+    if (passedPrescaleAlgo(algo)){
+      return true;
+    }
+  }
+  return (algos.size() == 0);
+}
+
+
+//-----------------------------------------------------------------------------------
+
 bool raw::ubdaqSoftwareTriggerData::vetoAlgos(std::vector<std::string> algos) const{
   return not passedAlgos(algos);
 }
