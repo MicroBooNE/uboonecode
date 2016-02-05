@@ -20,10 +20,12 @@ services:
 services.DatabaseUtil.ShouldConnect: false
 
 # Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
-services.DetectorProperties.NumberTimeSamples:                                   6400
-services.DetectorProperties.ReadOutWindowSize:                                   6400
-services.TimeService.InheritClockConfig:                                         false
-services.TimeService.TriggerOffsetTPC:                                           -0.475e3
+#services.DetectorProperties.NumberTimeSamples:                                   6400
+#services.DetectorProperties.ReadOutWindowSize:                                   6400
+#services.TimeService.InheritClockConfig:                                         false
+#services.TimeService.TriggerOffsetTPC:                                           -0.475e3
+
+#include "uboone_data_runSettings.fcl"
 
 #source is a root file
 source:
