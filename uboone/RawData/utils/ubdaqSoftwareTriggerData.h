@@ -26,6 +26,7 @@ class ubdaqSoftwareTriggerData {
   bool vetoAlgo(std::string algo) const; // NOT passAlgo
   bool passedAlgos(std::vector<std::string> algos) const; // passed any on a list of these algorithms
   bool vetoAlgos(std::vector<std::string> algos) const; // NOT passedAlgos
+  bool passedPrescaleAlgos(std::vector<std::string> algos) const; //passed any on a list of these prescales
 
   //getters by entry index
   bool getPass(int i) const;
