@@ -147,7 +147,7 @@ bool TriggerEnforcement::filter(art::Event & e)
   if(_hardware_trigger_producer.empty()) hardware_decision=true;
   if(_software_trigger_producer.empty()) software_decision=true;
 
-  if (hardware_decision && software_decision) return true;
+  if (hardware_decision && software_decision ) return true;
 
   art::Handle<std::vector<raw::Trigger> > hardware_trigger_handle;
   e.getByLabel(_hardware_trigger_producer,hardware_trigger_handle);
@@ -163,6 +163,10 @@ bool TriggerEnforcement::filter(art::Event & e)
     std::cerr<<"\033[93mInvalid Producer Label: \033[00m" <<_software_trigger_producer.c_str()<<std::endl;
     throw std::exception();
   }
+
+  //for ( auto const& _the_list: software_trigger_handle->getListOfAlgorithms()) {
+  //  std::cerr<< "Trigger Algo " << _the_list.c_str() << " and with a pass value of " << software_trigger_handle->passedAlgo(_the_list) << " and a prescale of " << software_trigger_handle->passedPrescaleAlgo(_the_list) << std::endl;
+  //}
 
   for(auto const& t : *hardware_trigger_handle) {
 
@@ -184,6 +188,7 @@ bool TriggerEnforcement::filter(art::Event & e)
   }
 
   if(hardware_decision) {
+
     for(auto const& t: _exclude_software_trig_v) {
       bool pass_algo = software_trigger_handle->passedAlgo(t);
       bool pass_prescale = software_trigger_handle->passedPrescaleAlgo(t);

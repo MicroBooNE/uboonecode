@@ -143,6 +143,16 @@ outputs:
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_ext_unbiased ] }
   }
+ outmucs:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_mucs.root"
+   dataTier: "raw"
+   streamName: "outmucs"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_mucs ] }
+  }
  outnotpc:
   {
    module_type: RootOutput
@@ -173,6 +183,7 @@ physics:
  path_numi_unbiased: [ swtrignumiunbiased ]
  path_ext_bnb:       [ swtrigextbnb ]
  path_ext_numi:      [ swtrigextnumi ]
+ path_mucs:          [ trigmucs ]
  path_ext_unbiased:  [ swtrigextunbiased ]
 
  stream_notpc:         [ outnotpc ]
@@ -183,6 +194,7 @@ physics:
  stream_ext_bnb:       [ outextbnb ]
  stream_ext_numi:      [ outextnumi ]
  stream_ext_unbiased:  [ outextunbiased ]
+ stream_mucs:          [ outmucs ]
 
  trigger_paths: [ path_notpc,
                   path_bnb,
@@ -191,7 +203,8 @@ physics:
                   path_numi_unbiased,
                   path_ext_bnb,
                   path_ext_numi,
-                  path_ext_unbiased ]
+                  path_ext_unbiased,
+		  path_mucs ]
 
  end_paths:     [ stream_notpc,
                   stream_bnb,
@@ -200,7 +213,8 @@ physics:
                   stream_numi_unbiased,
                   stream_ext_bnb,
                   stream_ext_numi,
-                  stream_ext_unbiased ]
+                  stream_ext_unbiased,
+		  stream_mucs ]
 }
 
 services.TimeService.TrigModuleName: "daq"
