@@ -17,6 +17,8 @@ services:
   @table::microboone_reco_mcc7_services
 }
 
+process_name: McRecoCommon
+
 services.DatabaseUtil.ShouldConnect: false
 
 # Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
@@ -63,6 +65,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
+   dataTier: "reconstructed"
    compressionLevel: 1
  }
 }
