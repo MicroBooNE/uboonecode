@@ -4,6 +4,8 @@
 #include "services_microboone.fcl"
 #include "reco_uboone_data_Feb2016.fcl"
 
+process_name: DataFeb2016RecoCommon
+
 services:
 {
   scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
@@ -65,6 +67,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
+   dataTier: "reconstructed-2d"
    compressionLevel: 1
  }
 }
