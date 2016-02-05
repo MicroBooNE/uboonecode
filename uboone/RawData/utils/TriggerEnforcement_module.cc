@@ -189,16 +189,21 @@ bool TriggerEnforcement::filter(art::Event & e)
 
   if(hardware_decision) {
 
-    if( software_trigger_handle->vetoAlgos( _exclude_software_trig_v) )
-      return false;
-
-    for ( auto const& _the_list: _include_software_trig_v ) {
-
-      if ( (software_trigger_handle->passedAlgo(_the_list) ) && 
-	   ( software_trigger_handle->passedPrescaleAlgo(_the_list) ) ) software_decision=true;
-
+    for(auto const& t: _exclude_software_trig_v) {
+      bool pass_algo = software_trigger_handle->passedAlgo(t);
+      bool pass_prescale = software_trigger_handle->passedPrescaleAlgo(t);
+      bool pass = pass_algo && pass_prescale;
+      if(pass)
+	return false;
     }
-    
+
+    for(auto const& t: _include_software_trig_v) {
+      bool pass_algo = software_trigger_handle->passedAlgo(t);
+      bool pass_prescale = software_trigger_handle->passedPrescaleAlgo(t);
+      bool pass = pass_algo && pass_prescale;
+      if(pass)
+	software_decision=true;
+    }
   }
     
   return (software_decision && hardware_decision) ;

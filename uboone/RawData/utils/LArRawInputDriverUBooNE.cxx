@@ -123,7 +123,9 @@ namespace lris {
     fSourceHelper(pm),
     fCurrentSubRunID(),
     fEventCounter(0),
-    fHuffmanDecode(ps.get<bool>("huffmanDecode",false))
+    fHuffmanDecode(ps.get<bool>("huffmanDecode",false)),
+    fMaxEvents(-1),
+    fSkipEvents(0)
   {
     ::peek_at_next_event<ub_TPC_CardData_v6>(false);
     ::peek_at_next_event<ub_PMT_CardData_v6>(false);
@@ -143,6 +145,8 @@ namespace lris {
     fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
     fSwizzleTrigger = ps.get<bool>("swizzleTrigger",true);
     fSwizzleTriggerType = ps.get<std::string>("swizzleTriggerType"); // Only use ALL for this option, other options will not work
+    fMaxEvents = ps.get<int>("maxEvents", -1);
+    fSkipEvents = ps.get<int>("skipEvents", 0);
 
     //temporary kazuTestSwizzleTrigger
     kazuTestSwizzleTrigger = ps.get<bool>("kazuTestSwizzleTrigger",true);
@@ -357,7 +361,10 @@ namespace lris {
 
       return false; //tells readNext that you're done reading all of the events in this file.
     }
-    
+
+    if (fMaxEvents > 0 && fEventCounter == unsigned(fMaxEvents))
+      return false;
+
     mf::LogInfo(__FUNCTION__)<<"Attempting to read event: "<<fEventCounter<<std::endl;
     // Create empty result, then fill it from current file:
     std::unique_ptr<raw::DAQHeader> daq_header(new raw::DAQHeader);
@@ -394,9 +401,16 @@ namespace lris {
 
     uint32_t event_number = 0;
 
-    bool res=false;
+    bool res = false;
+    bool done = false;
 
-    res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info, *sw_trig_info, event_number);
+    while(!done) {
+      res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info, *sw_trig_info, event_number, fSkipEvents > 0);
+      if(fSkipEvents > 0)
+	--fSkipEvents;
+      else
+	done = true;
+    }
 
     if (res) {
       fEventCounter++;
@@ -456,7 +470,8 @@ namespace lris {
                                                  raw::BeamInfo& beamInfo,
 						 std::vector<raw::Trigger>& trigInfo,
 						 raw::ubdaqSoftwareTriggerData& sw_trigInfo,
-						 uint32_t& event_number)
+						 uint32_t& event_number,
+						 bool skip)
   {  
      triggerFrame = -999;
      TPCframe = -999;
@@ -485,6 +500,8 @@ namespace lris {
     boost::archive::binary_iarchive ia(fInputStream); 
     ubdaq::ub_EventRecord event_record;  
     ia >> event_record;
+    if(skip)
+      return false;
     //std::cout<<event_record.debugInfo()<<std::endl;
     //set granularity 
     //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
