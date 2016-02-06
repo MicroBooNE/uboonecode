@@ -1,0 +1,57 @@
+#include "opticaldetectormodules.fcl"
+
+BEGIN_PROLOG
+#
+# Pedestal algorithms
+#
+
+ubopt_algo_pedestal_edges: @local::standard_algo_pedestal_edges
+ubopt_algo_pedestal_edges.NumSampleFront:  3
+ubopt_algo_pedestal_edges.NumSampleTail:   3
+ubopt_algo_pedestal_edges.NumSampleMethod: 2
+
+ubopt_algo_pedestal_rollingmean: @local::standard_algo_pedestal_rollingmean
+ubopt_algo_pedestal_rollingmean.SampleSize:  2
+ubopt_algo_pedestal_rollingmean.MaxSigma:    0.5
+ubopt_algo_pedestal_rollingmean.PedRangeMax: 2150
+ubopt_algo_pedestal_rollingmean.PedRangeMin: 100
+
+ubopt_algo_pedestal_ub: @local::standard_algo_pedestal_ub
+ubopt_algo_pedestal_ub.BeamGateSamples: 1500
+ubopt_algo_pedestal_ub.SampleSize:      2
+ubopt_algo_pedestal_ub.PedRangeMax:     2150
+ubopt_algo_pedestal_ub.PedRangeMin:     100
+ubopt_algo_pedestal_ub.Threshold:       4
+ubopt_algo_pedestal_ub.DiffBetweenGapsThreshold: 2
+ubopt_algo_pedestal_ub.DiffADCCounts:   2
+ubopt_algo_pedestal_ub.NPrePostSamples: 5
+
+#
+# Hit Algorithms
+#
+ubopt_algo_hit_threshold: @local::standard_algo_threshold
+ubopt_algo_hit_threshold.StartADCThreshold    : 3
+ubopt_algo_hit_threshold.EndADCThreshold      : 2
+ubopt_algo_hit_threshold.NSigmaThresholdStart : 5
+ubopt_algo_hit_threshold.NSigmaThresholdEnd   : 3
+
+ubopt_algo_hit_fixedwindow: @local::standard_algo_fixedwindow
+ubopt_algo_hit_fixedwindow.StartIndex: 0
+ubopt_algo_hit_fixedwindow.EndIndex:   20
+
+ubopt_algo_hit_slidingwindow: @local::standard_algo_slidingwindow
+ubopt_algo_hit_slidingwindow.NumPreSample:       3
+ubopt_algo_hit_slidingwindow.ADCThreshold:       4
+ubopt_algo_hit_slidingwindow.NSigmaThreshold:    4
+ubopt_algo_hit_slidingwindow.EndADCThreshold:    2
+ubopt_algo_hit_slidingwindow.EndNSigmaThreshold: 1
+ubopt_algo_hit_slidingwindow.Verbosity:          false
+
+ubopt_algo_hit_cfd: @local::standard_algo_cfd
+ubopt_algo_hit_cfd.Fraction:    0.9
+ubopt_algo_hit_cfd.Delay:       2
+ubopt_algo_hit_cfd.PeakThresh:  7.5
+ubopt_algo_hit_cfd.StartThresh: 5.0
+ubopt_algo_hit_cfd.EndThresh:   1.5 
+
+END_PROLOG

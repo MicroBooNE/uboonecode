@@ -3,6 +3,7 @@ art_make( BASENAME_ONLY
 	  LIBRARY_NAME  uboone_OpticalDetectorAna
 	  LIB_LIBRARIES
 			OpticalDetector
+			OpHitFinder
                         ${ROOT_BASIC_LIB_LIST}
 
 	  MODULE_LIBRARIES Geometry

@@ -6,6 +6,8 @@ microboone_largeantparameters: @local::standard_largeantparameters
 
 microboone_largeantparameters.ElectronClusterSize: 20.0
 
+#microboone_largeantparameters.IonAndScintCalculator: "NEST"
+
 microboone_larvoxelcalculator: @local::standard_larvoxelcalculator
 
 END_PROLOG
