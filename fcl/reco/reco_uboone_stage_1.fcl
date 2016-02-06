@@ -7,6 +7,7 @@
 #include "cluster_microboone.fcl"
 #include "trackfindermodules_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "correct_saturation.fcl"
 #include "pandoramodules_microboone.fcl"
 #include "triggeralgo_service.fcl"
 #include "cosmicremovalmodules.fcl"
@@ -49,11 +50,37 @@ physics:
   ### random number saver
   rns:                 { module_type: RandomNumberSaver }
 
+  ### OpHit finders
+  ophitT   : @local::ub_ophitfinder_t
+  ophitFW  : @local::ub_ophitfinder_fw
+  ophitSW  : @local::ub_ophitfinder_sw
+  ophitCFD : @local::ub_ophitfinder_cfd
+
+  ophitSatT   : @local::ub_ophitfinder_satt
+  ophitSatFW  : @local::ub_ophitfinder_satfw
+  ophitSatSW  : @local::ub_ophitfinder_satsw
+  ophitSatCFD : @local::ub_ophitfinder_satcfd
+
+  ### Saturation correction module
+  saturation : @local::correct_saturation
+
   ### flash finders
   opflash          : @local::microboone_opflash_beam_highgain
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+
+  sflashT   : @local::ub_sflash_t
+  sflashFW  : @local::ub_sflash_fw
+  sflashSW  : @local::ub_sflash_sw
+  sflashCFD : @local::ub_sflash_cfd
+
+  opflashSat   : @local::microboone_opflash_saturation
+
+  sflashSatT   : @local::ub_sflash_satt
+  sflashSatFW  : @local::ub_sflash_satfw
+  sflashSatSW  : @local::ub_sflash_satsw
+  sflashSatCFD : @local::ub_sflash_satcfd
 
   ### calwire producers
   caldata:             @local::microboone_calroi
@@ -82,7 +109,13 @@ physics:
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
+         saturation,
+         ophitT, ophitFW, ophitSW, ophitCFD,
+         sflashT, sflashFW, sflashSW, sflashCFD,
+         ophitSatT, ophitSatFW, ophitSatSW, ophitSatCFD,
+         sflashSatT, sflashSatFW, sflashSatSW, sflashSatCFD,
          opflash,
+         opflashSat,
          opflashLow,
          opflashCosmic,
          opflashCosmicLow,
@@ -123,6 +156,9 @@ outputs:
 
 
 ### Here, we overwrite ALL module labels with the ones defined above.
+
+physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 

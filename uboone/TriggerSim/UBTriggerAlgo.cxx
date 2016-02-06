@@ -145,6 +145,7 @@ namespace trigger{
     //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
 
     clock += _bnb_delay;
+    //clock -= _bnb_delay;
 
     return clock;
   }
@@ -158,6 +159,7 @@ namespace trigger{
     //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
 
     clock += _numi_delay;
+    //clock -= _numi_delay;
 
     return clock;
   }
@@ -617,7 +619,7 @@ namespace trigger{
 	}
 	if(numi) {
 	  numi_gate.first.SetTime((*sample_iter).first, (*frame_iter).first);
-	  numi_gate.second.SetTime(numi_gate.first.Time() + _trig_clock.Time(_bnb_gate_width));
+	  numi_gate.second.SetTime(numi_gate.first.Time() + _trig_clock.Time(_numi_gate_width));
 	}
 	
 	auto const bnb_gate_active  = InWindow(trig_time, bnb_gate);  // true = this trigger is within bnb gate
@@ -714,7 +716,7 @@ namespace trigger{
 	  // Store trigger object
 	  triggers.push_back( raw::Trigger(_trigger_counter,
 					   (*sample_iter).second.TriggerTime(),
-					   (*sample_iter).second.BeamGateTime(),
+					   (*sample_iter).second.TriggerTime(),//(*sample_iter).second.BeamGateTime(),
 					   (*sample_iter).second.TriggerBits()) 
 			      );
 	  _trigger_counter++;

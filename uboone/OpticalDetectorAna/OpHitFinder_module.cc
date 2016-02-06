@@ -19,11 +19,14 @@
 
 #include <memory>
 
-#include "OpticalDetector/AlgoThreshold.h"
-#include "OpticalDetector/AlgoFixedWindow.h"
-#include "OpticalDetector/AlgoSlidingWindow.h"
-#include "OpticalDetector/AlgoPedestal.h"
-#include "OpticalDetector/PulseRecoManager.h"
+#include "OpticalDetector/OpHitFinder/AlgoThreshold.h"
+#include "OpticalDetector/OpHitFinder/AlgoFixedWindow.h"
+#include "OpticalDetector/OpHitFinder/AlgoSlidingWindow.h"
+#include "OpticalDetector/OpHitFinder/AlgoCFD.h"
+#include "OpticalDetector/OpHitFinder/PedAlgoEdges.h"
+#include "OpticalDetector/OpHitFinder/PedAlgoRollingMean.h"
+#include "OpticalDetector/OpHitFinder/PedAlgoUB.h"
+#include "OpticalDetector/OpHitFinder/PulseRecoManager.h"
 #include "RecoBase/OpHit.h"
 #include "Geometry/Geometry.h"
 #include "Utilities/TimeService.h"
@@ -75,22 +78,37 @@ OpHitFinder::OpHitFinder(fhicl::ParameterSet const & p)
 
   _verbose  = p.get<bool>("Verbosity");
 
+  /*
   _preco_mgr.SetPedAlgo(pmtana::kHEAD);
   _preco_mgr.SePedSampleCosmic (  3 );
   _preco_mgr.SetPedSampleBeam  ( 10 );
+  */
 
-  auto const pset = p.get<fhicl::ParameterSet>("HitAlgoPset");
-
-  std::string hit_alg_name = pset.get<std::string>("HitFinder");
-
-  if(hit_alg_name == "Threshold")
-    _preco_alg = new pmtana::AlgoThreshold(pset);
-  else if(hit_alg_name == "FixedWindow")
-    _preco_alg = new pmtana::AlgoFixedWindow(pset);
-  else if(hit_alg_name == "SlidingWindow")
-    _preco_alg = new pmtana::AlgoSlidingWindow(pset);
-
+  auto const hit_alg_pset = p.get<fhicl::ParameterSet>("HitAlgoPset");
+  std::string hit_alg_name = hit_alg_pset.get<std::string>("Name");
+  if      (hit_alg_name == "Threshold")
+    _preco_alg = new pmtana::AlgoThreshold(hit_alg_pset);
+  //else if (hit_alg_name == "SiPM")
+  //_preco_alg = new pmtana::AlgoSiPM(hit_alg_pset);
+  else if (hit_alg_name == "SlidingWindow")
+    _preco_alg = new pmtana::AlgoSlidingWindow(hit_alg_pset);
+  else if (hit_alg_name == "FixedWindow")
+    _preco_alg = new pmtana::AlgoFixedWindow(hit_alg_pset);
+  else if (hit_alg_name == "CFD" )
+    _preco_alg = new pmtana::AlgoCFD(hit_alg_pset);
+  else throw art::Exception(art::errors::UnimplementedFeature)
+	 << "Cannot find implementation for "
+	 << hit_alg_name << " algorithm.\n";
   _preco_mgr.AddRecoAlgo(_preco_alg);
+
+  auto const ped_alg_pset = p.get<fhicl::ParameterSet>("PedAlgoPset");
+  std::string ped_alg_name = ped_alg_pset.get<std::string>("Name");
+  if      (ped_alg_name == "Edges")
+    _preco_mgr.SetDefaultPedAlgo(new pmtana::PedAlgoEdges(ped_alg_pset));
+  else if (ped_alg_name == "RollingMean")
+    _preco_mgr.SetDefaultPedAlgo(new pmtana::PedAlgoRollingMean(ped_alg_pset));
+  else if (ped_alg_name == "UB"   )
+    _preco_mgr.SetDefaultPedAlgo(new pmtana::PedAlgoUB(ped_alg_pset));
   
 }
 
@@ -126,7 +144,7 @@ void OpHitFinder::produce(art::Event & e)
       continue;
     }
 
-    if(!_preco_mgr.RecoPulse(wf_ptr)) {
+    if(!_preco_mgr.Reconstruct(wf_ptr)) {
 
       std::cout << "\033[95m[WARNING]\033[00m PulseFinder algorithm returned invalid status! (Ch. " << Channel << ")" << std::endl;
 

@@ -30,9 +30,9 @@ physics:
 
  producers:
  { 
-    ophitThreshold     : @local::ophitfinder_microboone 
-    ophitSlidingWindow : @local::ophitfinder_microboone 
-    ophitFixedWindow   : @local::ophitfinder_microboone 
+    ophitThreshold     : @local::microboone_ophitfinder
+    ophitSlidingWindow : @local::microboone_ophitfinder
+    ophitFixedWindow   : @local::microboone_ophitfinder
  }
 
  analyzers:

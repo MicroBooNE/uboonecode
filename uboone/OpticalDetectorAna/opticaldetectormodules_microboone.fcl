@@ -1,11 +1,78 @@
 #include "opticaldetectormodules.fcl"
-
+#include "ophitfindermodule.fcl"
 BEGIN_PROLOG
 
 microboone_simphotoncounter: @local::standard_simphotoncounter
 microboone_opdigi:           @local::standard_opdigi
 microboone_tracktimeassoc:   @local::standard_tracktimeassoc
-microboone_algo_slidingwindow: @local::standard_algo_slidingwindow
+
+#
+# OpHitFinder module
+#
+ub_ophitfinder_fw: @local::microboone_ophitfinder
+ub_ophitfinder_fw.HitAlgoPset: @local::ubopt_algo_hit_fixedwindow
+
+ub_ophitfinder_t: @local::microboone_ophitfinder
+ub_ophitfinder_t.HitAlgoPset: @local::ubopt_algo_hit_threshold
+
+ub_ophitfinder_sw: @local::microboone_ophitfinder
+ub_ophitfinder_sw.HitAlgoPset: @local::ubopt_algo_hit_slidingwindow
+
+ub_ophitfinder_cfd: @local::microboone_ophitfinder
+ub_ophitfinder_cfd.HitAlgoPset: @local::ubopt_algo_hit_cfd
+
+ub_ophitfinder_satfw: @local::ub_ophitfinder_fw
+ub_ophitfinder_satfw.OpDetWaveformProducer: "saturation"
+ub_ophitfinder_satfw.OpDetWaveformLabel:    ""
+
+ub_ophitfinder_satt: @local::ub_ophitfinder_t
+ub_ophitfinder_satt.OpDetWaveformProducer: "saturation"
+ub_ophitfinder_satt.OpDetWaveformLabel:    ""
+
+ub_ophitfinder_satsw: @local::ub_ophitfinder_sw
+ub_ophitfinder_satsw.OpDetWaveformProducer: "saturation"
+ub_ophitfinder_satsw.OpDetWaveformLabel:    ""
+
+ub_ophitfinder_satcfd: @local::ub_ophitfinder_cfd
+ub_ophitfinder_satcfd.OpDetWaveformProducer: "saturation"
+ub_ophitfinder_satcfd.OpDetWaveformLabel:    ""
+
+#
+# SimpleFlashFinder module
+#
+microboone_simple_flash:
+{
+ module_type   : "SimpleFlashFinder"
+ OpHitProducer : "opflash"
+}
+
+ub_sflash_t: @local::microboone_simple_flash
+ub_sflash_t.OpHitProducer: "ophitT"
+
+ub_sflash_fw: @local::microboone_simple_flash
+ub_sflash_fw.OpHitProducer: "ophitFW"
+
+ub_sflash_sw: @local::microboone_simple_flash
+ub_sflash_sw.OpHitProducer: "ophitSW"
+
+ub_sflash_cfd: @local::microboone_simple_flash
+ub_sflash_cfd.OpHitProducer: "ophitCFD"
+
+ub_sflash_satt: @local::microboone_simple_flash
+ub_sflash_satt.OpHitProducer: "ophitSatT"
+
+ub_sflash_satfw: @local::microboone_simple_flash
+ub_sflash_satfw.OpHitProducer: "ophitSatFW"
+
+ub_sflash_satsw: @local::microboone_simple_flash
+ub_sflash_satsw.OpHitProducer: "ophitSatSW"
+
+ub_sflash_satcfd: @local::microboone_simple_flash
+ub_sflash_satcfd.OpHitProducer: "ophitSatCFD"
+
+#
+# OpFlashFinder module
+#
 
 microboone_opflash_lowgain:
 {
@@ -14,23 +81,16 @@ microboone_opflash_lowgain:
    InputModule:     "pmtreadout"
    InputLabels:     [ "" ]
    BinWidth:         1   # us | Pulse finding parameters
-   FlashThreshold:   2   # PE
+   FlashThreshold:   5   # PE
    HitThreshold:     0.2 # PE
    WidthTolerance:   0.5 # unitless
    TrigCoinc:        2.5 # in microseconds!
    AreaToPE:         true # Use area to calculate number of PEs
    SPEArea:          12.0  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
-   algo_threshold:   @local::microboone_algo_slidingwindow
+   HitAlgoPset:      @local::ubopt_algo_hit_slidingwindow
+   PedAlgoPset:      @local::ubopt_algo_pedestal_ub
 }
-
-microboone_opflash_lowgain.algo_threshold.NumPreSample: 3
-microboone_opflash_lowgain.algo_threshold.ADCThreshold: 8
-microboone_opflash_lowgain.algo_threshold.NSigmaThreshold: 5
-microboone_opflash_lowgain.algo_threshold.EndADCThreshold: 2
-microboone_opflash_lowgain.algo_threshold.EndNSigmaThreshold: 1
-microboone_opflash_lowgain.algo_threshold.MinWindowSize: 5
-microboone_opflash_lowgain.algo_threshold.MaxSigma: 1.0
 
 microboone_opflash_highgain:
 {
@@ -46,16 +106,9 @@ microboone_opflash_highgain:
    AreaToPE:         true # Use area to calculate number of PEs
    SPEArea:          120  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
    reco_man:         @local::standard_preco_manager
-   algo_threshold:   @local::microboone_algo_slidingwindow
+   HitAlgoPset:      @local::ubopt_algo_hit_slidingwindow
+   PedAlgoPset:      @local::ubopt_algo_pedestal_ub
 }
-
-microboone_opflash_highgain.algo_threshold.NumPreSample: 3
-microboone_opflash_highgain.algo_threshold.ADCThreshold: 8
-microboone_opflash_lowgain.algo_threshold.EndADCThreshold: 3
-microboone_opflash_lowgain.algo_threshold.EndNSigmaThreshold: 1
-microboone_opflash_highgain.algo_threshold.NSigmaThreshold: 5
-microboone_opflash_highgain.algo_threshold.MinWindowSize: 5
-microboone_opflash_highgain.algo_threshold.MaxSigma: 1.0
 
 microboone_opflash_beam_highgain: @local::microboone_opflash_highgain
 microboone_opflash_beam_highgain.InputLabels:  ["OpdetBeamHighGain"]
@@ -74,6 +127,19 @@ microboone_opflash_cosmic_lowgain.InputLabels:  ["OpdetCosmicLowGain"]
 microboone_opflash_cosmic_lowgain.ChannelMasks: [ 332,  333,  334,  335,  336,  337,  338,  339,  340,  342,  342,  343,  344,  345,  346,  347]
 
 microboone_opflash: @local::microboone_opflash_beam_highgain
+
+#
+# OpFlash on saturation output
+#
+microboone_opflash_saturation: @local::microboone_opflash
+microboone_opflash_saturation.InputModule: "saturation"
+microboone_opflash_saturation.InputLabels:  [""]
+microboone_opflash_saturation.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
+                                              100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+                                              110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                                              120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+                                              130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
+                                              140, 141, 142, 143, 144, 145, 146, 147 ]
 
 microboone_opdigiana:        @local::standard_opdigiana
 microboone_opflashana:       @local::standard_opflashana

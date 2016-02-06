@@ -3,5 +3,6 @@
 BEGIN_PROLOG
 
 microboone_photonvisibilityservice: @local::standard_photonvisibilityservice
+microboone_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/uboone_photon_library_v5.root"
 
 END_PROLOG
