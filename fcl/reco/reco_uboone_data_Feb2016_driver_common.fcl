@@ -1,0 +1,107 @@
+## 
+##  Shared art job configuartions for data uboone reco
+##
+#include "services_microboone.fcl"
+#include "reco_uboone_data_Feb2016.fcl"
+
+process_name: DataFeb2016RecoCommon
+
+services:
+{
+  scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  # Load the service that manages root files for histograms.
+  TFileService:            { }
+  Timing:                  {}
+  SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
+  RandomNumberGenerator:   {} #ART native random number generator
+  message:                 @local::microboone_message_services_prod_debug
+  FileCatalogMetadata:     @local::art_file_catalog_mc
+  @table::microboone_reco_data_services
+}
+
+services.DatabaseUtil.ShouldConnect: false
+
+# Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
+#services.DetectorProperties.NumberTimeSamples:                                   6400
+#services.DetectorProperties.ReadOutWindowSize:                                   6400
+#services.TimeService.InheritClockConfig:                                         false
+#services.TimeService.TriggerOffsetTPC:                                           -0.475e3
+
+#include "uboone_data_runSettings.fcl"
+
+#source is a root file
+source:
+{
+  module_type: RootInput
+  maxEvents:  10        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ producers:
+ {
+  @table::microboone_reco_data_producers
+ }
+
+ filters:
+ { 
+  @table::microboone_reco_data_filters
+ }
+
+ #reco sequence and trigger_paths to be defined elsewhere
+
+ stream1:  [ out1 ]
+ end_paths:     [stream1]  
+
+}
+
+#block to define where the output goes.  if you defined a filter in the physics
+#block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+#entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   dataTier: "reconstructed-2d"
+   compressionLevel: 1
+ }
+}
+
+### Here we try to suppress known and pointless messages
+services.message.destinations :
+{
+  STDCOUT: 
+  {
+     type:      "cout"      #tells the message service to output this destination to cout
+     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
+     append:     true       #says to append all messages to the output
+     categories:
+     {
+       ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       default:
+       {
+         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
+         reportEvery: 1
+       }
+     }
+  }
+}

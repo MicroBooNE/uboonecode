@@ -20,6 +20,7 @@
 
 #include <memory>
 #include "RawData/TriggerData.h"
+#include "uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 #include <string>
 
@@ -46,7 +47,11 @@ private:
   const size_t _bit_v_size;
   std::vector<bool> _exclude_bit_v;
   std::vector<bool> _include_bit_v;
-  std::string _trigger_producer;
+  std::vector<std::string> _include_software_trig_v;
+  std::vector<std::string> _exclude_software_trig_v;
+  std::string _hardware_trigger_producer;
+  std::string _software_trigger_producer;
+
   bool _verbose;
 
 };
@@ -56,7 +61,8 @@ TriggerEnforcement::TriggerEnforcement(fhicl::ParameterSet const & p)
 : _bit_v_size(32)
 {
 
-  _trigger_producer = p.get<std::string>("TriggerProducer");
+  _hardware_trigger_producer = p.get<std::string>("HardwareTriggerProducer");
+  _software_trigger_producer = p.get<std::string>("SoftwareTriggerProducer");
   _verbose = p.get<bool>("Verbose");
   _exclude_bit_v.clear();
   _exclude_bit_v.resize(_bit_v_size,false);
@@ -105,6 +111,10 @@ TriggerEnforcement::TriggerEnforcement(fhicl::ParameterSet const & p)
       throw std::exception();
     }
     
+    _include_software_trig_v = p.get<std::vector<std::string> >("includeSoftwareTriggers");
+
+    _exclude_software_trig_v = p.get<std::vector<std::string> >("excludeSoftwareTriggers");
+
   }
   if(_verbose) {
     std::cout<<"\033[93m["<<__FUNCTION__<<"]\033[00m bits to be excluded: ";
@@ -115,6 +125,13 @@ TriggerEnforcement::TriggerEnforcement(fhicl::ParameterSet const & p)
     for(size_t i=0; i<_include_bit_v.size(); ++i)
       if(_include_bit_v[i]) std::cout<< i << " ";
     std::cout<<std::endl;
+      
+    for (auto const& name : _exclude_software_trig_v) {
+      std::cout<<"\033[93m["<<__FUNCTION__<<"]\033[00m excluding: "<<name.c_str()<<std::endl;
+    }
+    for (auto const& name : _include_software_trig_v) {
+      std::cout<<"\033[93m["<<__FUNCTION__<<"]\033[00m including after exclusion: "<<name.c_str()<<std::endl;
+    }
   }
 }
 
@@ -122,21 +139,36 @@ bool TriggerEnforcement::filter(art::Event & e)
 {
   ::art::ServiceHandle< util::TimeService > ts;
 
+  bool hardware_decision=false;
+  bool software_decision=false;
+
   ts->preProcessEvent(e);
 
-  if(_trigger_producer.empty()) return true;
+  if(_hardware_trigger_producer.empty()) hardware_decision=true;
+  if(_software_trigger_producer.empty()) software_decision=true;
 
-  art::Handle<std::vector<raw::Trigger> > trigger_handle;
-  e.getByLabel(_trigger_producer,trigger_handle);
+  if (hardware_decision && software_decision ) return true;
 
-  if(!trigger_handle.isValid()) {
-    std::cerr<<"\033[93mInvalid Producer Label: \033[00m" <<_trigger_producer.c_str()<<std::endl;
+  art::Handle<std::vector<raw::Trigger> > hardware_trigger_handle;
+  e.getByLabel(_hardware_trigger_producer,hardware_trigger_handle);
+  art::Handle<raw::ubdaqSoftwareTriggerData> software_trigger_handle;
+  e.getByLabel(_software_trigger_producer,software_trigger_handle);
+
+  if(!hardware_trigger_handle.isValid()) {
+    std::cerr<<"\033[93mInvalid Producer Label: \033[00m" <<_hardware_trigger_producer.c_str()<<std::endl;
     throw std::exception();
   }
 
-  bool passes_include_bit = false;
-  
-  for(auto const& t : *trigger_handle) {
+  if(!software_trigger_handle.isValid()) {
+    std::cerr<<"\033[93mInvalid Producer Label: \033[00m" <<_software_trigger_producer.c_str()<<std::endl;
+    throw std::exception();
+  }
+
+  //for ( auto const& _the_list: software_trigger_handle->getListOfAlgorithms()) {
+  //  std::cerr<< "Trigger Algo " << _the_list.c_str() << " and with a pass value of " << software_trigger_handle->passedAlgo(_the_list) << " and a prescale of " << software_trigger_handle->passedPrescaleAlgo(_the_list) << std::endl;
+  //}
+
+  for(auto const& t : *hardware_trigger_handle) {
 
     for(size_t i=0; i<_bit_v_size; ++i) {
 
@@ -146,18 +178,35 @@ bool TriggerEnforcement::filter(art::Event & e)
 	return false;
       }
 
-      if(passes_include_bit) continue;
+      if(hardware_decision) continue;
       if(t.Triggered(bit_index) && _include_bit_v[i]) {
 	if(_verbose) std::cout<<"Including by the bit: "<< i <<std::endl;
-	passes_include_bit = true;
+	hardware_decision = true;
       }
 
-      
-      
     }
   }
 
-  return passes_include_bit;
+  if(hardware_decision) {
+
+    for(auto const& t: _exclude_software_trig_v) {
+      bool pass_algo = software_trigger_handle->passedAlgo(t);
+      bool pass_prescale = software_trigger_handle->passedPrescaleAlgo(t);
+      bool pass = pass_algo && pass_prescale;
+      if(pass)
+	return false;
+    }
+
+    for(auto const& t: _include_software_trig_v) {
+      bool pass_algo = software_trigger_handle->passedAlgo(t);
+      bool pass_prescale = software_trigger_handle->passedPrescaleAlgo(t);
+      bool pass = pass_algo && pass_prescale;
+      if(pass)
+	software_decision=true;
+    }
+  }
+    
+  return (software_decision && hardware_decision) ;
 }
 
 DEFINE_ART_MODULE(TriggerEnforcement)

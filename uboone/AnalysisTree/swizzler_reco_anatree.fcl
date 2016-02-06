@@ -1,0 +1,411 @@
+#include "geometry_microboone.fcl"
+#include "timeservice_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
+#include "seedservice_microboone.fcl"
+
+#include "services_microboone.fcl"
+#include "calibration_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "trackfindermodules_microboone.fcl"
+#include "calorimetry_microboone.fcl"
+#include "pandoramodules_microboone.fcl"
+#include "triggeralgo_service.fcl"
+#include "cosmicremovalmodules.fcl"
+
+#include "particleid_microboone.fcl"
+#include "analysistreemodule_microboone.fcl"
+#include "filters.fcl"
+#include "signalservices_microboone.fcl"
+#include "showerfindermodules.fcl"
+###include "opticaldetectormodules.fcl"
+#include "vertexfindermodules.fcl"
+#include "photpropservices_microboone.fcl"
+#include "photoncountert0matching.fcl"
+#include "beamdata_microboone.fcl"
+
+process_name: SwizzlerRecoAnatree
+services:
+{
+  scheduler: { fileMode: NOMERGE }
+  TFileService: { fileName: "SwizRecoAna_hist.root" }
+  TimeTracker:         {}
+  MemoryTracker:       {}
+  RandomNumberGenerator: {} 
+  SeedService:  @local::microboone_seedservice
+  FileCatalogMetadata:    @local::art_file_catalog_data
+  PhotonVisibilityService: @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties  
+  @table::microboone_full_services
+  IFDH: {} #comment this line for grid jobs
+}
+
+microboone_tfile_metadata:
+{
+  JSONFileName:          "SwizRecoAna_hist.root.json"
+  GenerateTFileMetadata: false
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
+}
+
+services.ExptGeoHelperInterface: @local::microboone_geometry_helper
+services.Geometry:               @local::microboone_geo
+services.UBOpReadoutMap:           @local::microboone_opreadoutmap
+services.TimeService:            @local::microboone_timeservice
+services.DatabaseUtil:           @local::microboone_database
+# Database settings
+services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: false
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
+services.DetectorProperties.InheritNumberTimeSamples: false
+
+source:
+{
+  fileNames:       []
+  module_type:	   LArRawInputSourceUBooNE
+  maxEvents:       -1
+  huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTriggerType: ALL
+  beam_histograms: [ "E:TOR101, 100, 0, 50",
+                     "E:TORTGT, 100, 0, 50",
+                     "E:TOR860, 100, 0, 5",
+                     "E:TOR875, 100, 0, 5" ]
+}
+
+physics:
+{
+  producers: {
+          beamdata: @local::microboone_beamdata
+  ### flash finders
+  opflash          : @local::microboone_opflash_beam_highgain
+  #opflashLow       : @local::microboone_opflash_beam_lowgain
+  #opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  #opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  rns:                 { module_type: RandomNumberSaver }
+  digitfilter:          @local::microboone_rawdigitfilter
+  caldata:		@local::microboone_calroi
+  cchit:		@local::microboone_clustercrawlerhit
+  gaushit:              @local::microboone_gaushitfinder
+  linecluster: 	        @local::microboone_linecluster
+  pandoraCosmicKHitPFPart:      @local::microboone_cosmicpfparticletagger
+  pandoraCosmic:        @local::microboone_pandora
+  pandoraNu:            @local::microboone_pandora
+  trackkalmanhitcc:     @local::microboone_track3Dkalmanhit 
+  trackkalmanhitcctag:  @local::microboone_cosmictracktagger
+  trackkalmanhitcalocc: @local::microboone_calomc		   
+  pandoraCosmicKHit:    @local::microboone_track3Dkalmanhit 
+  pandoraCosmicKHittag: @local::microboone_cosmictracktagger
+  pandoraCosmicKHitcalo:@local::microboone_calomc
+  pandoraCosmicKHitFlashMatch:  @local::microboone_beamflashtrackmatchtagger
+  pandoraCosmicKHitRemoval:     @local::microboone_crhitremoval
+  pandoraNuKHit:        @local::microboone_track3Dkalmanhit
+  pandoraNuKHittag:     @local::microboone_cosmictracktagger
+  pandoraNuKHitcalo:    @local::microboone_calomc
+ }
+ 
+ analyzers:
+ {
+ }
+
+ #define the producer and filter modules for this path, order matters, 
+ #filters reject all following items.  see lines starting physics.producers below
+ reco: [ rns, 
+ 	opflash, 
+	#opflashLow, 
+	#opflashCosmic, 
+	#opflashCosmicLow, 
+	beamdata, 
+	digitfilter, 
+	caldata, 
+	cchit, 
+#         gaushit,
+	linecluster,
+        pandoraCosmic, 
+        trackkalmanhitcc, 
+        trackkalmanhitcctag,
+        trackkalmanhitcalocc,
+        pandoraCosmicKHit, 
+        pandoraCosmicKHittag,
+        pandoraCosmicKHitcalo,
+        pandoraCosmicKHitPFPart,
+        pandoraCosmicKHitRemoval,
+        pandoraNu,
+        pandoraNuKHit,
+        pandoraNuKHittag,
+        pandoraNuKHitcalo]
+       
+ ana: [analysistree]      
+
+ #define the output stream, there could be more than one if using filters 
+ stream1:  [ out1 ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [reco] 
+# end_paths: [ stream1,ana ]
+ end_paths: [ ana ]
+
+}
+
+#block to define where the output goes.  if you defined a filter in the physics
+#block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+#entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+ out1:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc.root"
+   dataTier: "reconstructed"
+   streamName: "all"      
+   compressionLevel: 3
+  }
+}
+
+services.TimeService.TrigModuleName: "daq"
+
+### Here we include the file giving us run/data dependent overrides
+##include "uboone_data_prebeam_runSettings.fcl"
+################
+#This fhicl file is ONLY to be used for +70kV RUNS during 
+#the period 21 September and 14 October.
+#
+# Shaping time and gain settings
+#
+#services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 2.0, 2.0, 2.0 ]
+#services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 1.0, 1.0, 1.0 ]
+#services.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: [ 14.0, 14.0, 14.0 ]
+#
+# Database access for pedestals
+#
+services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
+services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
+services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:        "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+
+# Notes on August 25, 2015
+# According to Leon the three parameters below are:
+# 1) E field for TPC in kV/cm
+# 2) Wire bias U to V in kV/cm
+# 3) Wire bias V to W in kV/cm
+# Plane space is 0.3cm
+#
+# Note that run 1591 forward, bias is -158V and +237V (from 8/13/15)
+#services.LArProperties.Efield:          [0.273,0.527,0.79] # 0.273 corresponds to 70 kV
+
+# Note that run 3426 forward, bias is -110V and +230V (from 10/16/15, 10:30 AM)
+services.LArProperties.Efield:          [0.273,0.367,0.767] # 0.273 corresponds to 70 kV
+
+services.LArProperties.Electronlifetime: 8.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
+
+services.TimeService.TrigModuleName:     "daq"
+################
+
+
+#physics.producers.digitfilter.TruncMeanFraction:                0.1
+
+physics.producers.caldata.DigitModuleLabel:                     "digitfilter"
+physics.producers.caldata.MaxAllowedChannelStatus:                         1
+
+# Below are the origial numbers for reference
+#services.SignalShapingServiceMicroBooNE.NoiseFactVec:      [[ 1.12, 0.86, 0.60, 0.55 ], [ 1.12, 0.86, 0.60, 0.55 ], [ 0.89, 0.66, 0.48, 0.43 ]]
+#services.SignalShapingServiceMicroBooNE.NoiseFactVec:      [[ 1.12, 1.50, 2.00, 0.55 ], [ 1.12, 1.50, 2.00, 0.55 ], [ 0.89, 1.32, 0.75, 0.43 ]]
+
+physics.producers.caldata.DoBaselineSub:                        false
+physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:  true
+
+physics.producers.caldata.Threshold: [5, 5, 5]
+#physics.producers.cchit.CCHitFinderAlg.MinSigInd: 5
+#physics.producers.cchit.CCHitFinderAlg.MinSigCol: 5
+#physics.producers.cchit.CCHitFinderAlg.MinRMSInd: 1
+#physics.producers.cchit.CCHitFinderAlg.MinRMSCol: 1
+#physics.producers.cchit.CCHitFinderAlg.ChiSplit: 100
+#physics.producers.cchit.CCHitFinderAlg.MaxXtraHits: 0
+physics.producers.gaushit.CalDataModuleLabel:                    "caldata"
+physics.producers.gaushit.MinSig:                                [ 8.0,    8.0,   8.0]
+
+physics.producers.pandoraCosmic.GeantModuleLabel:               "largeant"
+physics.producers.pandoraCosmic.HitFinderModuleLabel:           "linecluster"
+physics.producers.pandoraCosmic.ConfigFile:                     "PandoraSettings_MicroBooNE_Cosmic.xml"
+physics.producers.linecluster.HitFinderModuleLabel: "cchit"
+#physics.producers.linecluster.ClusterCrawlerAlg.MinAmp: 10
+#physics.producers.linecluster.ClusterCrawlerAlg.NumPass: 1
+#physics.producers.linecluster.ClusterCrawlerAlg.DoMerge: [true]
+#physics.producers.linecluster.ClusterCrawlerAlg.MaxHitsFit: [20]
+#physics.producers.linecluster.ClusterCrawlerAlg.MinHits: [10]
+#physics.producers.linecluster.ClusterCrawlerAlg.ChgCut: [0.8]
+#physics.producers.linecluster.ClusterCrawlerAlg.MergeChgCut: [4]
+#physics.producers.linecluster.ClusterCrawlerAlg.TimeDelta: [20]
+#physics.producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire: 80
+#physics.producers.linecluster.ClusterCrawlerAlg.MaxWirSkip: [80]
+#physics.producers.linecluster.ClusterCrawlerAlg.KinkAngCut: [0.4, 0.4, 0.4]
+#physics.producers.linecluster.ClusterCrawlerAlg.Vertex3DCut: 5 # now an error cut
+#physics.producers.linecluster.ClusterCrawlerAlg.FindStarVertices: true
+#physics.producers.linecluster.ClusterCrawlerAlg.VtxClusterSplit: true
+#physics.producers.linecluster.ClusterCrawlerAlg.uBCode: true
+
+physics.producers.cchit.CCHitFinderAlg.MaxBumps:                           5
+physics.producers.cchit.CCHitFinderAlg.MinPeak:                            [8, 8, 8]
+physics.producers.cchit.CCHitFinderAlg.MinRMS:                             [1, 1, 1]
+physics.producers.cchit.CCHitFinderAlg.ChiSplit:                           100
+physics.producers.cchit.CCHitFinderAlg.MaxXtraHits:                        0
+
+#This is from a fcl file from Bruce but with only the actual overrides here (to avoid confusion)
+physics.producers.linecluster.ClusterCrawlerAlg.NHitsAve:                  [ 2,  2, 0 ]      # number of hits to find the average charge and width
+                                                                                             # at the end of the cluster. NHitsAve should be 1 or 2
+physics.producers.linecluster.ClusterCrawlerAlg.ChgCut:                    [ 6, 6, .8 ]      # max fractional hit charge difference for adding hits
+physics.producers.linecluster.ClusterCrawlerAlg.ChiCut:                    [ 10., 10., 10. ] # stop adding hits to clusters if ChiCut is reached
+physics.producers.linecluster.ClusterCrawlerAlg.MaxWirSkip:                [ 80, 8, 2 ]      # max number of wires to skip without adding a hit
+physics.producers.linecluster.ClusterCrawlerAlg.KinkAngCut:                [ 1.0, 1.0, 0.4 ] # kink angle cut (radians) used to follow and merge
+physics.producers.linecluster.ClusterCrawlerAlg.MergeChgCut:               [ 6, 6, 0.8 ]     # max charge ratio for cluster merging
+physics.producers.linecluster.ClusterCrawlerAlg.HitMergeChiCut:            2.5               # Merge cluster hit-multiplets if the separation chisq
+                                                                                             # is < cut. Set < 0 for no merging
+physics.producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire:            80                # Allow skipping N wires w no hits (if poor purity)
+physics.producers.linecluster.ClusterCrawlerAlg.uBCode:                    true              # use MicroBooNE-specific code
+
+
+physics.producers.trackkalmanhitcc.HitModuleLabel:                    "linecluster"
+physics.producers.trackkalmanhitcc.ClusterModuleLabel:                "linecluster"
+
+physics.producers.trackkalmanhitcctag.ClusterModuleLabel:           "linecluster"
+physics.producers.trackkalmanhitcctag.TrackModuleLabel:             "trackkalmanhitcc"
+physics.producers.trackkalmanhitcctag.TPCXBoundary:                   10
+physics.producers.trackkalmanhitcctag.TPCYBoundary:                   10
+physics.producers.trackkalmanhitcctag.TPCZBoundary:                   10
+
+physics.producers.trackkalmanhitcalocc.TrackModuleLabel:                    "trackkalmanhitcc"
+physics.producers.trackkalmanhitcalocc.SpacePointModuleLabel:               "trackkalmanhitcc"
+
+physics.producers.pandoraCosmicKHit.HitModuleLabel:                 "linecluster"
+physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
+physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
+physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
+physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
+
+physics.producers.pandoraCosmicKHittag.TrackModuleLabel:            "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHittag.TPCXBoundary:		   10
+physics.producers.pandoraCosmicKHittag.TPCYBoundary:		   10
+physics.producers.pandoraCosmicKHittag.TPCZBoundary:		   10
+
+physics.producers.pandoraCosmicKHitcalo.TrackModuleLabel:                    "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitcalo.SpacePointModuleLabel:               "pandoraCosmicKHit"
+
+physics.producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:             "pandoraCosmic"
+physics.producers.pandoraCosmicKHitPFPart.TrackModuleLabel:                  "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitPFPart.TPCXBoundary:                      10
+physics.producers.pandoraCosmicKHitPFPart.TPCYBoundary:                      10
+physics.producers.pandoraCosmicKHitPFPart.TPCZBoundary:                      10
+
+physics.producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:              "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:              "opflash"
+physics.producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+
+physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:                 "linecluster"
+physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:             ["pandoraCosmicKHitPFPart"]
+physics.producers.pandoraCosmicKHitRemoval.FlashProducerLabel:               "pandoraCosmicKHitFlashMatch"
+physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel:          "pandoraCosmic"
+physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabel:               "pandoraCosmicKHit"
+
+physics.producers.pandoraNu.GeantModuleLabel:                                "largeant"
+physics.producers.pandoraNu.HitFinderModuleLabel:                            "pandoraCosmicKHitRemoval"
+physics.producers.pandoraNu.ConfigFile:                                      "PandoraSettings_MicroBooNE_Neutrino.xml"
+
+physics.producers.pandoraNuKHit.HitModuleLabel:                              "pandoraCosmicKHitRemoval"
+physics.producers.pandoraNuKHit.UseClusterHits:                              false
+physics.producers.pandoraNuKHit.UsePFParticleHits:                           true
+physics.producers.pandoraNuKHit.PFParticleModuleLabel:                       "pandoraNu"
+physics.producers.pandoraNuKHit.ClusterModuleLabel:                          "pandoraNu"
+physics.producers.pandoraNuKHit.HitFinderModuleLabel:                        "pandoraCosmicKHitRemoval"
+
+physics.producers.pandoraNuKHittag.TrackModuleLabel:                         "pandoraNuKHit"
+physics.producers.pandoraNuKHittag.TPCXBoundary:                             10
+physics.producers.pandoraNuKHittag.TPCYBoundary:                             10
+physics.producers.pandoraNuKHittag.TPCZBoundary:                             10
+
+physics.producers.pandoraNuKHitcalo.TrackModuleLabel:                        "pandoraNuKHit"
+physics.producers.pandoraNuKHitcalo.SpacePointModuleLabel:                   "pandoraNuKHit"
+
+
+#ANALYSIS TREE STUFF
+physics.analyzers.analysistree:  @local::microboone_analysistree
+physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhitcc", "pandoraCosmicKHit", "pandoraNuKHit"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalocc", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo"]
+
+physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0"]
+physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0"]
+
+physics.analyzers.analysistree.VertexModuleLabel:               ["linecluster", "pandoraCosmic", "pandoraNu"]
+
+physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
+physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
+physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "trackkalmanhitpid", "trackkalmanhitpid"]
+
+physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhitcctag", "pandoraCosmicKHittag", "pandoraNuKHittag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
+
+#physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
+
+physics.analyzers.analysistree.CryGenModuleLabel: "generator"
+physics.analyzers.analysistree.HitsModuleLabel: "linecluster"
+physics.analyzers.analysistree.ClusterModuleLabel: "linecluster"
+physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
+physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
+physics.analyzers.analysistree.MCTrackModuleLabel: "mcreco"
+physics.analyzers.analysistree.IgnoreMissingShowers: true
+physics.analyzers.analysistree.POTModuleLabel: "beamdata"
+
+physics.analyzers.analysistree.SaveCryInfo: false
+physics.analyzers.analysistree.SaveGenieInfo: false
+physics.analyzers.analysistree.SaveMCShowerInfo: false
+physics.analyzers.analysistree.SaveShowerInfo: false
+physics.analyzers.analysistree.SaveGeantInfo: false
+physics.analyzers.analysistree.SaveAuxDetInfo: false
+physics.analyzers.analysistree.SaveFlashInfo: true
+physics.analyzers.analysistree.SaveCaloCosmics: true
+physics.analyzers.analysistree.SaveRawDigitInfo: false
+
+### Here we try to suppress known and pointless messages
+services.message.destinations :
+{
+  STDCOUT: 
+  {
+     type:      "cout"      #tells the message service to output this destination to cout
+     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
+     append:     true       #says to append all messages to the output
+     categories:
+     {
+       ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       default:
+       {
+         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
+         reportEvery: 1
+       }
+     }
+  }
+}
