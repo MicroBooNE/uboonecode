@@ -1,4 +1,7 @@
 <lcgdict>
  <class name="raw::ubdaqSoftwareTriggerData"/>
  <class name="art::Wrapper<raw::ubdaqSoftwareTriggerData>"/>
+ <class name="std::pair<std::string, bool>"/>
+ <class name="std::vector<bool>"/>
+ <class name="std::vector<std::pair<std::string, bool> >"/>
 </lcgdict>

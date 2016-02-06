@@ -427,8 +427,10 @@ void CalWireROI::produce(art::Event& evt)
             
             std::vector<float> holder;
             
-            for(const auto roi : rois)
+            for(size_t roiIdx = 0; roiIdx < rois.size(); roiIdx++)
             {
+                const auto roi = rois[roiIdx];
+                
                 // First up: copy out the relevent ADC bins into the ROI holder
                 size_t roiLen = roi.second - roi.first;
                 
@@ -448,6 +450,48 @@ void CalWireROI::produce(art::Event& evt)
                     size_t binsToAve(20);
                     float  basePre  = std::accumulate(holder.begin(),holder.begin()+binsToAve,0.) / float(binsToAve);
                     float  basePost = std::accumulate(holder.end()-binsToAve,holder.end(),0.) / float(binsToAve);
+                    
+                    // emulate method for refining baseline from original version of CalWireROI
+                    float deconNoise = 1.26491 * sss->GetDeconNoise(channel);    // 4./sqrt(10) * noise
+
+                    // If the estimated baseline from the front of the roi does not agree well with that from the end
+                    // of the roi then we'll extend the roi hoping for good agreement
+                    if (!(fabs(basePre - basePost) < deconNoise))
+                    {
+                        int   nTries(0);
+
+                        // get start of roi and find the maximum we can extend to
+                        std::vector<float>::iterator rawAdcRoiStartItr = rawAdcLessPedVec.begin() + binOffset + roi.first;
+                        std::vector<float>::iterator rawAdcMaxItr      = rawAdcLessPedVec.end()   - binOffset;
+
+                        // if this is not the last roi then limit max range to start of next roi
+                        if (roiIdx < rois.size() - 1)
+                            rawAdcMaxItr = rawAdcLessPedVec.begin() + binOffset + rois[roiIdx+1].first;
+
+                        // Basically, allow roi to be extended until we get good agreement unless it seems pointless
+                        while (!(fabs(basePre - basePost) < deconNoise) && nTries++ < 3)
+                        {
+                            size_t nBinsToAdd(100);
+                            int    nBinsLeft      = std::distance(rawAdcRoiStartItr+roiLen,rawAdcMaxItr) > 0
+                                                  ? std::distance(rawAdcRoiStartItr+roiLen,rawAdcMaxItr) : 0;
+                            size_t roiLenAddition = std::min(nBinsToAdd, size_t(nBinsLeft));
+                        
+                            if (roiLenAddition > 0)
+                            {
+                                std::vector<float> additionVec(roiLenAddition);
+                        
+                                std::copy(rawAdcRoiStartItr + roiLen, rawAdcRoiStartItr + roiLen + roiLenAddition, additionVec.begin());
+                            
+                                holder.resize(holder.size() + roiLenAddition);
+                                std::transform(additionVec.begin(),additionVec.end(),holder.begin() + roiLen,[deconNorm](float& deconVal){return deconVal/deconNorm;});
+                            
+                                basePost = std::accumulate(holder.end()-binsToAve,holder.end(),0.) / float(binsToAve);
+                        
+                                roiLen = holder.size();
+                            }
+                            else break;
+                        }
+                    }
                    
                     baseSet = true;
                     base    = SubtractBaseline(holder, basePre,basePost,roi.first,roiLen,dataSize);

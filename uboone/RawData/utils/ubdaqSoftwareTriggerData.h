@@ -4,64 +4,64 @@
 #include <inttypes.h>
 //#include "evttypes.h"
 #include <string>
-//#include "share/boonetypes.h"
-//
-//#include <boost/serialization/list.hpp>
-//#include <boost/serialization/string.hpp>
-//#include <boost/serialization/version.hpp>
-//#include "boost/date_time/gregorian/gregorian.hpp"
-//#include "boost/date_time/posix_time/posix_time.hpp"
-//#include "boost/date_time/gregorian/greg_serialize.hpp"
-//#include "boost/date_time/posix_time/time_serialize.hpp"
-//#include "constants.h"
+#include <vector>
+#include <iostream>
+#include "uboone/TriggerSim/UBTriggerTypes.h"
 
 namespace raw{
-
-//using namespace gov::fnal::uboone;
-
-/**
-   Note: this is the serialization class for the otherwise hardcoded trigger_data_t struct,
-   located in share/boonetypes. IF changes are made to trigger_data_t, the appropriate changes
-   should be made here as well, and the version number should be increased.
- **/
 
 class ubdaqSoftwareTriggerData {
 
  public:
   ubdaqSoftwareTriggerData(); // standard constructor
 
-  bool getPass() { return pass; }
-  uint32_t getPhmax() { return PHMAX; } // max adc sum at (software) trigger firing time
-  uint32_t getMultiplicity() { return multiplicity; } // multiplicity at (software) trigger firing time
-  uint32_t getTriggerTick() { return triggerTick; }  // tick since the beam-gate opened
-  double getTimeSinceTrigger() { return triggerTime; } // time since the event (hardware) trigger, in us
-  std::string getTriggerAlgorithm() { return algorithm; }
+  void addAlgorithm(std::string name, bool pass, bool pass_prescale, uint32_t phmax, uint32_t multiplicity, uint32_t triggerTick, double triggerTime, float prescale);
 
-  void setPass(bool passFail) {pass = passFail;}
-  void setPhmax(uint32_t phmax) {PHMAX = phmax;}
-  void setMultiplicity(uint32_t mult) {multiplicity = mult;}
-  void setTriggerTick(uint32_t tick) {triggerTick = tick;} // Does not affect trigger time number - needs to be set independently
-  void setTimeSinceTrigger(double time) { triggerTime = time; } // Does not affect trigger tick number - needs to be set independently
-  void setAlgorithm(std::string algo) {algorithm = algo;}
+  int getNumberOfAlgorithms(void) const;
+  std::vector<std::string> getListOfAlgorithms(void) const;
+  
+  // pass/veto by name
+  bool passedAlgo(std::string algo) const; // passed this algorithm
+  bool passedPrescaleAlgo(std::string algo) const; // passed this algorithms prescale
+  bool vetoAlgo(std::string algo) const; // NOT passAlgo
+  bool passedAlgos(std::vector<std::string> algos) const; // passed any on a list of these algorithms
+  bool vetoAlgos(std::vector<std::string> algos) const; // NOT passedAlgos
+  bool passedPrescaleAlgos(std::vector<std::string> algos) const; //passed any on a list of these prescales
+
+  //getters by entry index
+  bool getPass(int i) const;
+  bool getPassPrescale(int i) const;
+  uint32_t getPhmax(int i) const;
+  uint32_t getMultiplicity(int i) const;
+  uint32_t getTriggerTick(int i) const;
+  double getTimeSinceTrigger(int i) const;
+  std::string getTriggerAlgorithm(int i) const;
+  float getPrescale(int i) const;
+
+  //getters by name
+  uint32_t getPhmax(std::string algo) const;  // max adc sum at (software) trigger firing time
+  uint32_t getMultiplicity(std::string algo) const;  // multiplicity at (software) trigger firing time
+  uint32_t getTriggerTick(std::string algo) const;   // tick since the beam-gate opened
+  double getTimeSinceTrigger(std::string algo) const;  // time since the event (hardware) trigger, in us
+  int getID(std::string algo) const; // get the index of a given algorithm
+  float getPrescale(std::string algo) const; // returns prescale_weight (see below)
 
  private:
 
-  bool pass;
-  uint32_t PHMAX; // max adc sum at (software) trigger firing time
-  uint32_t multiplicity; // multiplicity at (software) trigger firing time
-  uint32_t triggerTick; // tick since the beam-gate opened
-  double triggerTime; // time since the event (hardware) trigger, in us
-  std::string algorithm;
+  std::vector<std::pair<std::string,bool> > passAlgo; // list of algorithms and corresponding bools for pass/fail
+  std::vector<bool> passPrescale; // list of algorithms and corresponding bools for pass/fail
+  std::vector<uint32_t> PHMAX; // max adc sum at (software) trigger firing time
+  std::vector<uint32_t> multiplicity; // multiplicity at (software) trigger firing time
+  std::vector<uint32_t> triggerTick; // tick since the beam-gate opened
+  std::vector<double> triggerTime; // time since the event (hardware) trigger, in us
+  std::vector<float> prescale_weight; // 1/prescale_weight gives the fraction of events that are let through
 
 };
 
 
 }  // end of namespace raw
 
-// This MACRO must be outside any namespaces.
-//BOOST_CLASS_VERSION(gov::fnal::uboone::datatypes::daqSoftwareTriggerData, gov::fnal::uboone::datatypes::constants::VERSION)    
-
-#endif /* #ifndef BOONETYPES_H */
+#endif 
 
 
 

@@ -1,0 +1,14 @@
+#include "litemaker_base.fcl"
+BEGIN_PROLOG
+
+litembass_wire: @local::litemaker_base
+litembass_wire.out_filename: "larlite_mbass_wire.root"
+litembass_wire.DataLookUpMap:
+{
+  wire:       ["caldata"]
+}
+
+litembass_wire.AssociationLookUpMap:
+{}
+
+END_PROLOG

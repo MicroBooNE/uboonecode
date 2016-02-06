@@ -1,0 +1,15 @@
+#include "litemaker_base.fcl"
+BEGIN_PROLOG
+
+litembass_opdigit: @local::litemaker_base
+litembass_opdigit.out_filename: "larlite_mbass_opdigit.root"
+litembass_opdigit.DataLookUpMap:
+{
+  opdigit: ["pmtreadout","saturation"]
+  trigger: ["daq"]
+}
+
+litembass_opdigit.AssociationLookUpMap:
+{}
+
+END_PROLOG

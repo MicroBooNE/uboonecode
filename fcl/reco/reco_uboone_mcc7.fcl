@@ -1,0 +1,400 @@
+## 
+##  Uboone reco on MC for MCC7 (Feb 2016)
+##
+
+#include "services_microboone.fcl"
+#include "caldata_microboone.fcl"
+#include "hitfindermodules_microboone.fcl"
+#include "cluster_microboone.fcl"
+#include "trackfindermodules_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "triggeralgo_service.fcl"
+#include "cosmicremovalmodules.fcl"
+#include "calorimetry_microboone.fcl"
+#include "particleid_microboone.fcl"
+#include "showerreco3d_microboone.fcl"
+#include "showerquality_microboone.fcl"
+#include "pandoramodules_microboone.fcl"
+#include "photpropservices_microboone.fcl"
+#include "correct_saturation.fcl"
+
+#include "mchitmodules.fcl"
+#include "mcreco.fcl"
+
+BEGIN_PROLOG
+
+microboone_reco_mcc7_services:
+{
+  PhotonVisibilityService:    @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties
+                              @table::microboone_services_reco
+}
+
+### This is the complete list of all producers! ###
+
+microboone_reco_mcc7_producers:
+{
+
+  ### random number saver
+  rns:                 { module_type: RandomNumberSaver }
+
+  ### OpHit finders
+  ophitT   : @local::ub_ophitfinder_t
+  ophitFW  : @local::ub_ophitfinder_fw
+  ophitSW  : @local::ub_ophitfinder_sw
+  ophitCFD : @local::ub_ophitfinder_cfd
+  ophitSatT   : @local::ub_ophitfinder_satt
+  ophitSatFW  : @local::ub_ophitfinder_satfw
+  ophitSatSW  : @local::ub_ophitfinder_satsw
+  ophitSatCFD : @local::ub_ophitfinder_satcfd
+
+
+  ### Saturation correction module
+  saturation : @local::correct_saturation
+
+### flash finders
+  opflash          : @local::microboone_opflash_beam_highgain
+  opflashLow       : @local::microboone_opflash_beam_lowgain
+  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+
+  sflashT   : @local::ub_sflash_t
+  sflashFW  : @local::ub_sflash_fw
+  sflashSW  : @local::ub_sflash_sw
+  sflashCFD : @local::ub_sflash_cfd
+  opflashSat   : @local::microboone_opflash_saturation
+  sflashSatT   : @local::ub_sflash_satt
+  sflashSatFW  : @local::ub_sflash_satfw
+  sflashSatSW  : @local::ub_sflash_satsw
+  sflashSatCFD : @local::ub_sflash_satcfd
+
+  ### noise filtering (if needed)
+  digitfilter:                 @local::microboone_rawdigitfilter
+
+  ### calwire producers
+  caldata:                     @local::microboone_calroi
+
+  ### hit-finder producers
+  gaushit:                     @local::microboone_gaushitfinder
+
+  ### cluster-finder producers
+  fuzzycluster:                @local::microboone_fuzzycluster
+  fuzzyclustermerger:          @local::microboone_fuzzyclustermerger
+  linecluster:                 @local::microboone_linecluster
+
+  ### pandora cosmic pass
+  pandoraCosmic:               @local::microboone_pandora
+
+  ### mc producers
+  mchitfinder:                 @local::standard_mchitfinder
+
+  ### pandora core modules
+  pandoraNu:                   @local::microboone_pandora
+
+  ### pandora cosmic kalmanhit
+  pandoraCosmicKHit:           @local::microboone_track3Dkalmanhit
+  pandoraNuKHit:               @local::microboone_track3Dkalmanhit
+
+  ### pandora cosmic kalmanhit
+  pandoraCosmicPMAlg:          @local::microboone_pmalgtrackmaker
+  pandoraNuPMAlg:              @local::microboone_pmalgtrackmaker
+
+  ### pandora cosmic pfparticle
+  pandoraCosmicKHitPFPart:     @local::microboone_cosmicpfparticletagger
+
+  ### pandora analysis
+  pandoraCosmicKHittag:        @local::microboone_cosmictracktagger
+  pandoraCosmicKHitcalo:       @local::microboone_calomc
+  pandoraCosmicKHitpid:        @local::microboone_chi2pid
+  pandoraCosmicKHitFlashMatch: @local::microboone_beamflashtrackmatchtagger
+  pandoraCosmicKHitRemoval:    @local::microboone_crhitremoval
+  pandoraNuKHittag:            @local::microboone_cosmictracktagger
+  pandoraNuKHitcalo:           @local::microboone_calomc
+  pandoraNuKHitpid:            @local::microboone_chi2pid
+  pandoraNuKHitFlashMatch:     @local::microboone_beamflashtrackmatchtagger
+  
+  ### track fit producers
+  trackkalmanhit:              @local::microboone_track3Dkalmanhit        # Track fit for fuzzy cluster
+  trackkalmanhitcc:            @local::microboone_track3Dkalmanhit        # Track fit for Cluster Crawler (Track Maker)
+  
+  ### track stitching
+  stitchkalmanhit:             @local::microboone_trackstitcher
+  stitchkalmanhitcc:           @local::microboone_trackstitcher
+
+  ### shower reco producers
+  showerrecofuzzy:             @local::showerreco3d_uboone
+  showerrecopandora:           @local::showerreco3d_uboone_pandora
+
+  ### calorimetry producers
+  trackkalmanhitcalo:          @local::microboone_calomc                  # Calorimetry for fuzzy cluster
+  stitchkalmanhitcalo:         @local::microboone_calomc
+  trackkalmanhitcalocc:        @local::microboone_calomc                  # Calorimeter for Cluster Crawler
+  stitchkalmanhitcalocc:       @local::microboone_calomc
+
+  ### PID producers
+  trackkalmanhitpid:           @local::microboone_chi2pid
+  stitchkalmanhitpid:          @local::microboone_chi2pid
+  trackkalmanhitpidcc:         @local::microboone_chi2pid
+  stitchkalmanhitpidcc:        @local::microboone_chi2pid
+
+  ### track-tagging producers
+  trackkalmanhittag:           @local::microboone_cosmictracktagger
+  stitchkalmanhittag:          @local::microboone_cosmictracktagger
+  trackkalmanhittagcc:         @local::microboone_cosmictracktagger
+  stitchkalmanhittagcc:        @local::microboone_cosmictracktagger
+
+}
+
+microboone_reco_mcc7_filters:
+{ 
+}
+
+
+### Below are a list of convenient sequences that can be used for production/typical users. ###
+
+microboone_reco_mcc7_optical: [ saturation,
+                                ophitT, ophitFW, ophitSW, ophitCFD,
+                                sflashT, sflashFW, sflashSW, sflashCFD,
+                                ophitSatT, ophitSatFW, ophitSatSW, ophitSatCFD,
+                                sflashSatT, sflashSatFW, sflashSatSW, sflashSatCFD,
+                                opflash,
+                                opflashSat,
+                                opflashLow,
+                                opflashCosmic,
+                                opflashCosmicLow ]
+
+microboone_reco_mcc7_signalprocessing: [ digitfilter,
+                                         caldata,
+                                         gaushit ]
+
+microboone_reco_mcc7_fuzzycluster: [     fuzzycluster,
+                                         fuzzyclustermerger ]
+
+microboone_reco_mcc7_fuzzytracks: [      trackkalmanhit,
+                                         stitchkalmanhit,
+                                         trackkalmanhitcalo,
+                                         stitchkalmanhitcalo,
+                                         trackkalmanhitpid,
+                                         stitchkalmanhitpid,
+                                         trackkalmanhittag,
+                                         stitchkalmanhittag,
+                                         showerrecofuzzy ]
+
+microboone_reco_mcc7_fuzzypath: [        @sequence::microboone_reco_mcc7_fuzzycluster,
+                                         @sequence::microboone_reco_mcc7_fuzzytracks ]
+
+microboone_reco_mcc7_clustercrawler: [   linecluster ]
+
+microboone_reco_mcc7_cctracks: [         trackkalmanhitcc,
+                                         stitchkalmanhitcc,
+                                         trackkalmanhitcalocc,
+                                         stitchkalmanhitcalocc,
+                                         trackkalmanhitpidcc,
+                                         stitchkalmanhitpidcc,
+                                         trackkalmanhittagcc,
+                                         stitchkalmanhittagcc ]
+
+microboone_reco_mcc7_ccpath: [           @sequence::microboone_reco_mcc7_clustercrawler,
+                                         @sequence::microboone_reco_mcc7_cctracks ]
+
+microboone_reco_mcc7_pandoraCosmic: [    pandoraCosmic,
+                                         pandoraCosmicKHit,
+                                         pandoraCosmicKHittag,
+#                                         pandoraCosmicPMAlg,
+                                         pandoraCosmicKHitcalo,
+                                         pandoraCosmicKHitpid,
+                                         pandoraCosmicKHitPFPart,
+                                         pandoraCosmicKHitFlashMatch,
+                                         pandoraCosmicKHitRemoval ]
+
+microboone_reco_mcc7_pandoraNu: [        pandoraNu,
+                                         pandoraNuKHit,
+#                                         pandoraNuPMAlg,
+                                         pandoraNuKHittag,
+                                         pandoraNuKHitcalo,
+                                         pandoraNuKHitpid,
+                                         pandoraNuKHitFlashMatch,
+                                         showerrecopandora ]
+				  
+microboone_reco_mcc7_pandora: [          @sequence::microboone_reco_mcc7_pandoraCosmic, @sequence::microboone_reco_mcc7_pandoraNu ]
+
+microboone_reco_mcc7_mcreco: [           mchitfinder ]
+
+microboone_reco_mcc7: [                  rns,
+#                                         @sequence::microboone_reco_mcc7_mcreco,
+                                         @sequence::microboone_reco_mcc7_optical,
+                                         @sequence::microboone_reco_mcc7_signalprocessing,
+                                         @sequence::microboone_reco_mcc7_fuzzypath,
+                                         @sequence::microboone_reco_mcc7_ccpath,
+                                         @sequence::microboone_reco_mcc7_pandora ]
+
+microboone_reco_mcc7_stage1: [           rns,
+#                                         @sequence::microboone_reco_mcc7_mcreco,
+                                         @sequence::microboone_reco_mcc7_optical,
+                                         @sequence::microboone_reco_mcc7_signalprocessing,
+                                         @sequence::microboone_reco_mcc7_fuzzypath ]
+
+microboone_reco_mcc7_stage2: [           rns,
+                                         @sequence::microboone_reco_mcc7_pandora,
+                                         @sequence::microboone_reco_mcc7_ccpath ]
+
+microboone_reco_mcc7_core: [             rns,
+#                                         @sequence::microboone_reco_mcc7_mcreco,
+                                         @sequence::microboone_reco_mcc7_optical,
+                                         @sequence::microboone_reco_mcc7_signalprocessing ]
+
+microboone_reco_mcc7_2D: [               rns,
+                                         @sequence::microboone_reco_mcc7_fuzzycluster,
+                                         @sequence::microboone_reco_mcc7_clustercrawler ]
+
+microboone_reco_mcc7_3D: [               rns,
+                                         @sequence::microboone_reco_mcc7_fuzzytracks,
+                                         @sequence::microboone_reco_mcc7_cctracks,
+                                         @sequence::microboone_reco_mcc7_pandora ]
+
+### Below we include overrides for the modules above
+### These are for MCC 7
+
+physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
+
+microboone_reco_mcc7_producers.caldata.DigitModuleLabel:                         "digitfilter"
+
+microboone_reco_mcc7_producers.gaushit.CalDataModuleLabel:                       "caldata"
+microboone_reco_mcc7_producers.gaushit.MinSig:                                   [8.0, 8.0, 8.0]
+
+microboone_reco_mcc7_producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
+microboone_reco_mcc7_producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
+
+#This is from a fcl file from Bruce but with only the actual overrides here (to avoid confusion)
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [ 2,  2, 0 ]      # number of hits to find the average charge and width
+# at the end of the cluster. NHitsAve should be 1 or 2
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.ChgCut:             [ 6, 6, .8 ]      # max fractional hit charge difference for adding hits
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.ChiCut:             [ 10., 10., 10. ] # stop adding hits to clusters if ChiCut is reached
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.MaxWirSkip:         [ 80, 8, 2 ]      # max number of wires to skip without adding a hit
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.KinkAngCut:         [ 1.0, 1.0, 0.4 ] # kink angle cut (radians) used to follow and merge
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.MergeChgCut:        [ 6, 6, 0.8 ]     # max charge ratio for cluster merging
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.HitMergeChiCut:     2.5               # Merge cluster hit-multiplets if the separation chisq
+# is < cut. Set < 0 for no merging
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire:     80                # Allow skipping N wires w no hits (if poor purity)
+microboone_reco_mcc7_producers.linecluster.ClusterCrawlerAlg.uBCode:             true              # use MicroBooNE-specific code
+
+# Fuzzy Cluster related
+microboone_reco_mcc7_producers.trackkalmanhit.HitModuleLabel:                    "gaushit"
+microboone_reco_mcc7_producers.trackkalmanhit.ClusterModuleLabel:                "fuzzycluster"
+
+microboone_reco_mcc7_producers.stitchkalmanhit.TrackModuleLabel:                 "trackkalmanhit"
+microboone_reco_mcc7_producers.stitchkalmanhit.SpptModuleLabel:                  "trackkalmanhit"
+
+microboone_reco_mcc7_producers.trackkalmanhitcalo.TrackModuleLabel:              "trackkalmanhit"
+microboone_reco_mcc7_producers.trackkalmanhitcalo.SpacePointModuleLabel:         "trackkalmanhit"
+
+microboone_reco_mcc7_producers.stitchkalmanhitcalo.TrackModuleLabel:             "stitchkalmanhit"
+microboone_reco_mcc7_producers.stitchkalmanhitcalo.SpacePointModuleLabel:        "trackkalmanhit"
+
+microboone_reco_mcc7_producers.trackkalmanhitpid.CalorimetryModuleLabel:         "trackkalmanhitcalo"
+microboone_reco_mcc7_producers.trackkalmanhitpid.TrackModuleLabel:               "trackkalmanhit"
+
+microboone_reco_mcc7_producers.stitchkalmanhitpid.CalorimetryModuleLabel:        "stitchkalmanhitcalo"
+microboone_reco_mcc7_producers.stitchkalmanhitpid.TrackModuleLabel:              "stitchkalmanhit"
+
+microboone_reco_mcc7_producers.trackkalmanhittag.ClusterModuleLabel:             "fuzzycluster"
+microboone_reco_mcc7_producers.trackkalmanhittag.TrackModuleLabel:               "trackkalmanhit"
+
+microboone_reco_mcc7_producers.stitchkalmanhittag.ClusterModuleLabel:            "fuzzycluster"
+microboone_reco_mcc7_producers.stitchkalmanhittag.TrackModuleLabel:              "stitchkalmanhit"
+
+# ClusterCrawler / Track Maker related
+microboone_reco_mcc7_producers.trackkalmanhitcc.HitModuleLabel:                  "linecluster"
+microboone_reco_mcc7_producers.trackkalmanhitcc.ClusterModuleLabel:              "linecluster"
+
+microboone_reco_mcc7_producers.stitchkalmanhitcc.TrackModuleLabel:               "trackkalmanhitcc"
+microboone_reco_mcc7_producers.stitchkalmanhitcc.SpptModuleLabel:                "trackkalmanhitcc"
+
+microboone_reco_mcc7_producers.trackkalmanhitcalocc.TrackModuleLabel:            "trackkalmanhitcc"
+microboone_reco_mcc7_producers.trackkalmanhitcalocc.SpacePointModuleLabel:       "trackkalmanhitcc"
+
+microboone_reco_mcc7_producers.stitchkalmanhitcalocc.TrackModuleLabel:           "stitchkalmanhitcc"
+microboone_reco_mcc7_producers.stitchkalmanhitcalocc.SpacePointModuleLabel:      "trackkalmanhitcc"
+
+microboone_reco_mcc7_producers.trackkalmanhitpidcc.CalorimetryModuleLabel:       "trackkalmanhitcalocc"
+microboone_reco_mcc7_producers.trackkalmanhitpidcc.TrackModuleLabel:             "trackkalmanhitcc"
+
+microboone_reco_mcc7_producers.stitchkalmanhitpidcc.CalorimetryModuleLabel:      "stitchkalmanhitcccalo"
+microboone_reco_mcc7_producers.stitchkalmanhitpidcc.TrackModuleLabel:            "stitchkalmanhitcc"
+
+microboone_reco_mcc7_producers.trackkalmanhittagcc.ClusterModuleLabel:           "linecluster"
+microboone_reco_mcc7_producers.trackkalmanhittagcc.TrackModuleLabel:             "trackkalmanhitcc"
+
+microboone_reco_mcc7_producers.stitchkalmanhittagcc.ClusterModuleLabel:          "linecluster"
+microboone_reco_mcc7_producers.stitchkalmanhittagcc.TrackModuleLabel:            "stitchkalmanhitcc"
+
+# Pandora related
+microboone_reco_mcc7_producers.pandoraCosmic.GeantModuleLabel:                   "largeant"
+microboone_reco_mcc7_producers.pandoraCosmic.HitFinderModuleLabel:               "gaushit"
+microboone_reco_mcc7_producers.pandoraCosmic.ConfigFile:                         "PandoraSettings_MicroBooNE_Cosmic.xml"
+
+microboone_reco_mcc7_producers.pandoraCosmicKHit.UseClusterHits:                 false
+microboone_reco_mcc7_producers.pandoraCosmicKHit.UsePFParticleHits:              true
+microboone_reco_mcc7_producers.pandoraCosmicKHit.SelfSeed:                       true
+microboone_reco_mcc7_producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
+microboone_reco_mcc7_producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
+
+microboone_reco_mcc7_producers.pandoraCosmicPMAlg.HitModuleLabel:                "gaushit"
+microboone_reco_mcc7_producers.pandoraCosmicPMAlg.ClusterModuleLabel:            "pandoraCosmic"
+microboone_reco_mcc7_producers.pandoraCosmicPMAlg.PFParticleModuleLabel:         "pandoraCosmic"
+microboone_reco_mcc7_producers.pandoraCosmicPMAlg.CluMatchingAlg:                2
+
+microboone_reco_mcc7_producers.pandoraCosmicKHittag.TrackModuleLabel:            "pandoraCosmicKHit"
+
+microboone_reco_mcc7_producers.pandoraCosmicKHitcalo.TrackModuleLabel:           "pandoraCosmicKHit"
+microboone_reco_mcc7_producers.pandoraCosmicKHitcalo.SpacePointModuleLabel:      "pandoraCosmicKHit"
+
+microboone_reco_mcc7_producers.pandoraCosmicKHitpid.CalorimetryModuleLabel:      "pandoraCosmicKHitcalo"
+microboone_reco_mcc7_producers.pandoraCosmicKHitpid.TrackModuleLabel:            "pandoraCosmicKHit"
+
+microboone_reco_mcc7_producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:    "pandoraCosmic"
+microboone_reco_mcc7_producers.pandoraCosmicKHitPFPart.TrackModuleLabel:         "pandoraCosmicKHit"
+
+microboone_reco_mcc7_producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosmicKHit"
+microboone_reco_mcc7_producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "opflash"
+microboone_reco_mcc7_producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+
+microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKHitPFPart"]
+microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.FlashProducerLabel:      "pandoraCosmicKHitFlashMatch"
+microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
+microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.TrackProducerLabel:      "pandoraCosmicKHit"
+
+microboone_reco_mcc7_producers.pandoraNu.GeantModuleLabel:                       "largeant"
+microboone_reco_mcc7_producers.pandoraNu.HitFinderModuleLabel:                   "pandoraCosmicKHitRemoval"
+microboone_reco_mcc7_producers.pandoraNu.ConfigFile:                             "PandoraSettings_MicroBooNE_Neutrino.xml"
+
+microboone_reco_mcc7_producers.pandoraNuKHit.UseClusterHits:                     false
+microboone_reco_mcc7_producers.pandoraNuKHit.UsePFParticleHits:                  true
+microboone_reco_mcc7_producers.pandoraNuKHit.SelfSeed:                           true
+microboone_reco_mcc7_producers.pandoraNuKHit.PFParticleModuleLabel:              "pandoraNu"
+microboone_reco_mcc7_producers.pandoraNuKHit.ClusterModuleLabel:                 "pandoraNu"
+microboone_reco_mcc7_producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
+
+microboone_reco_mcc7_producers.pandoraNuPMAlg.HitModuleLabel:                    "pandoraCosmicKHitRemoval"
+microboone_reco_mcc7_producers.pandoraNuPMAlg.ClusterModuleLabel:                "pandoraNu"
+microboone_reco_mcc7_producers.pandoraNuPMAlg.PFParticleModuleLabel:             "pandoraNu"
+microboone_reco_mcc7_producers.pandoraNuPMAlg.CluMatchingAlg:                    2
+
+microboone_reco_mcc7_producers.pandoraNuKHittag.TrackModuleLabel:                "pandoraNuKHit"
+
+microboone_reco_mcc7_producers.pandoraNuKHitcalo.TrackModuleLabel:               "pandoraNuKHit"
+microboone_reco_mcc7_producers.pandoraNuKHitcalo.SpacePointModuleLabel:          "pandoraNuKHit"
+
+microboone_reco_mcc7_producers.pandoraNuKHitpid.CalorimetryModuleLabel:          "pandoraNuKHitcalo"
+microboone_reco_mcc7_producers.pandoraNuKHitpid.TrackModuleLabel:                "pandoraNuKHit"
+
+microboone_reco_mcc7_producers.pandoraNuKHitFlashMatch.TrackModuleLabel:         "pandoraNuKHit"
+microboone_reco_mcc7_producers.pandoraNuKHitFlashMatch.FlashModuleLabel:         "opflash"
+microboone_reco_mcc7_producers.pandoraNuKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
+
+microboone_reco_mcc7_producers.showerrecofuzzy.InputProducer:                    "fuzzyclustermerger"
+microboone_reco_mcc7_producers.showerrecopandora.InputProducer:                  "pandoraNu"
+
+END_PROLOG

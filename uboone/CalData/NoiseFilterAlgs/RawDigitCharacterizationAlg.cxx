@@ -120,19 +120,19 @@ void RawDigitCharacterizationAlg::initializeHists(art::ServiceHandle<art::TFileS
 
 // Basic waveform mean, rms and pedestal offset
 void RawDigitCharacterizationAlg::getWaveformParams(const RawDigitVector& rawWaveform,
-                                             unsigned int          channel,
-                                             unsigned int          view,
-                                             unsigned int          wire,
-                                             float&                truncMean,
-                                             float&                truncRms,
-                                             short&                mean,
-                                             short&                median,
-                                             short&                mode,
-                                             float&                skewness,
-                                             float&                rms,
-                                             short&                minMax,
-                                             float&                neighborRatio,
-                                             float&                pedCorVal) const
+                                                    unsigned int          channel,
+                                                    unsigned int          view,
+                                                    unsigned int          wire,
+                                                    float&                truncMean,
+                                                    float&                truncRms,
+                                                    short&                mean,
+                                                    short&                median,
+                                                    short&                mode,
+                                                    float&                skewness,
+                                                    float&                rms,
+                                                    short&                minMax,
+                                                    float&                neighborRatio,
+                                                    float&                pedCorVal) const
 {
     // We start by finding the most likely baseline which is most easily done by
     // finding the most populated bin and the average using the neighboring bins
@@ -300,12 +300,12 @@ void RawDigitCharacterizationAlg::getWaveformParams(const RawDigitVector& rawWav
 }
 
 void RawDigitCharacterizationAlg::getMeanRmsAndPedCor(const RawDigitVector& rawWaveform,
-                                               unsigned int          channel,
-                                               unsigned int          view,
-                                               unsigned int          wire,
-                                               float&                truncMean,
-                                               float&                rmsVal,
-                                               float&                pedCorVal) const
+                                                      unsigned int          channel,
+                                                      unsigned int          view,
+                                                      unsigned int          wire,
+                                                      float&                truncMean,
+                                                      float&                rmsVal,
+                                                      float&                pedCorVal) const
 {
     // The strategy for finding the average for a given wire will be to
     // find the most populated bin and the average using the neighboring bins
@@ -418,9 +418,9 @@ void RawDigitCharacterizationAlg::getMeanRmsAndPedCor(const RawDigitVector& rawW
 }
 
 void RawDigitCharacterizationAlg::getMeanAndRms(const RawDigitVector& rawWaveform,
-                                         float&                aveVal,
-                                         float&                rmsVal,
-                                         float                 fracBins) const
+                                                float&                aveVal,
+                                                float&                rmsVal,
+                                                float                 fracBins) const
 {
     // The strategy for finding the average for a given wire will be to
     // find the most populated bin and the average using the neighboring bins
@@ -505,19 +505,20 @@ void RawDigitCharacterizationAlg::getMeanAndRms(const RawDigitVector& rawWavefor
     return;
 }
 
-void RawDigitCharacterizationAlg::classifyRawDigitVec(RawDigitVector&  rawWaveform,
-                                               unsigned int            viewIdx,
-                                               unsigned int            wire,
-                                               float                   truncRms,
-                                               short                   minMax,
-                                               short                   mean,
-                                               float                   skewness,
-                                               float                   neighborRatio,
-                                               GroupToDigitIdxPairMap& groupToDigitIdxPairMap) const
+bool RawDigitCharacterizationAlg::classifyRawDigitVec(RawDigitVector&  rawWaveform,
+                                                      unsigned int            viewIdx,
+                                                      unsigned int            wire,
+                                                      float                   truncRms,
+                                                      short                   minMax,
+                                                      short                   mean,
+                                                      float                   skewness,
+                                                      float                   neighborRatio,
+                                                      GroupToDigitIdxPairMap& groupToDigitIdxPairMap) const
 {
     // This simply classifies the input waveform:
     // a) determines if it should be added to the list of waveforms to process
     // b) if to be analyzed, places in the group of wires to process
+    bool classified(false);
     
     // Dereference the selection/rejection cut
     float selectionCut = fMinMaxSelectionCut[viewIdx];
@@ -566,9 +567,11 @@ void RawDigitCharacterizationAlg::classifyRawDigitVec(RawDigitVector&  rawWavefo
                 if (threshIndex > 60) wireToAdcIdxMap[wire].second = rawWaveform.size() - threshIndex;
             }
         }
+        
+        classified = true;
     }
     
-    return;
+    return classified;
 }
 
 template<class T> T RawDigitCharacterizationAlg::getMedian(std::vector<T>& valuesVec, T defaultValue) const

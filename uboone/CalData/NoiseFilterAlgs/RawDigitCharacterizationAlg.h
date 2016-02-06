@@ -85,7 +85,7 @@ public:
                            float&                neighborRatio,
                            float&                pedCorVal) const;
     
-    void classifyRawDigitVec(RawDigitVector&         rawWaveform,
+    bool classifyRawDigitVec(RawDigitVector&         rawWaveform,
                              unsigned int            viewIdx,
                              unsigned int            wire,
                              float                   truncRms,

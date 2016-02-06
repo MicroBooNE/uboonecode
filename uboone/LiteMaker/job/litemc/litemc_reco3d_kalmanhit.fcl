@@ -1,0 +1,45 @@
+#include "litemaker_base.fcl"
+
+BEGIN_PROLOG
+
+litemc_reco3d_kalmanhit: @local::litemaker_base
+
+litemc_reco3d_kalmanhit.out_filename: "larlite_reco3d_kalmanhit.root"
+
+litemc_reco3d_kalmanhit.DataLookUpMap:
+{
+  sps:        ["trackkalmanhit"]
+  pcaxis:     []
+  vertex:     []
+  track:      ["trackkalmanhit", "stitchkalmanhit"]
+  seed:       []
+  shower:     []
+  pfpart:     []
+  cosmictag:  ["stitchkalmanhittag",
+               "trackkalmanhittag"]
+  calo:       ["trackkalmanhitcalo",
+               "stitchkalmanhitcalo"]
+  partid:     ["trackkalmanhitpid",
+               "stitchkalmanhitpid"]
+}
+
+litemc_reco3d_kalmanhit.AssociationLookUpMap:
+{
+  hit:        ["gaushit"]
+  cluster:    ["fuzzycluster"]
+  endpoint2d: []
+  sps:        ["trackkalmanhit"]
+  pcaxis:     []
+  vertex:     []
+  track:      ["trackkalmanhit", "stitchkalmanhit"]
+  seed:       []
+  shower:     []
+  pfpart:     []
+  cosmictag:  ["stitchkalmanhittag",
+               "trackkalmanhittag"]
+  calo:       ["trackkalmanhitcalo",
+               "stitchkalmanhitcalo"]
+  partid:     ["trackkalmanhitpid",
+               "stitchkalmanhitpid"]
+}
+END_PROLOG

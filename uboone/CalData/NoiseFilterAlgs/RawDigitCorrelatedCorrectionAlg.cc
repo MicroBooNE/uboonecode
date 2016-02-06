@@ -198,14 +198,14 @@ void RawDigitCorrelatedCorrectionAlg::smoothCorrectionVec(std::vector<float>& co
 }
 
 void RawDigitCorrelatedCorrectionAlg::removeCorrelatedNoise(RawDigitAdcIdxPair& digitIdxPair,
-                                                 unsigned int        viewIdx,
-                                                 std::vector<float>& truncMeanWireVec,
-                                                 std::vector<float>& truncRmsWireVec,
-                                                 std::vector<short>& minMaxWireVec,
-                                                 std::vector<short>& meanWireVec,
-                                                 std::vector<float>& skewnessWireVec,
-                                                 std::vector<float>& neighborRatioWireVec,
-                                                 std::vector<float>& pedCorWireVec) const
+                                                            unsigned int        viewIdx,
+                                                            std::vector<float>& truncMeanWireVec,
+                                                            std::vector<float>& truncRmsWireVec,
+                                                            std::vector<short>& minMaxWireVec,
+                                                            std::vector<short>& meanWireVec,
+                                                            std::vector<float>& skewnessWireVec,
+                                                            std::vector<float>& neighborRatioWireVec,
+                                                            std::vector<float>& pedCorWireVec) const
 {
     // This method represents and enhanced implementation of "Corey's Algorithm" for correcting the
     // correlated noise across a group of wires. The primary enhancement involves using a FFT to

@@ -72,7 +72,7 @@ SimpleFlashFinder::SimpleFlashFinder(fhicl::ParameterSet const & p)
 // Initialize member data here.
 {
   produces< std::vector<recob::OpFlash>   >();
-  fOpHitProducer = p.get<std::string>("OpFlashProducer");
+  fOpHitProducer = p.get<std::string>("OpHitProducer");
   
   _PE_min_flash = 10;//50;
   _PE_min_hit   = 1;
