@@ -13,13 +13,13 @@ litemc_mcinfo.DataLookUpMap:
   potsummary: ["generator"]
   gtruth:     ["generator"]
   mcflux:     ["generator"]
-  mctruth:    ["generator"]
+  mctruth:    ["generator","corsika"]
   mctrack:    ["mcreco"]
   mcshower:   ["mcreco"]
 }
 
 litemc_mcinfo.AssociationLookUpMap: {
-  mctruth: ["generator"]
+  mctruth: ["generator","corsika"]
 }
 
 END_PROLOG
