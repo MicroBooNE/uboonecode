@@ -259,8 +259,6 @@ physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.
                                                 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 
-microboone_reco_mcc7_producers.digitfilter.TruncateTicks:                        true
-
 microboone_reco_mcc7_producers.caldata.DigitModuleLabel:                         "digitfilter"
 
 microboone_reco_mcc7_producers.gaushit.CalDataModuleLabel:                       "caldata"
