@@ -48,7 +48,7 @@ void RawDigitCorrelatedCorrectionAlg::reconfigure(fhicl::ParameterSet const & ps
     fTruncMeanFraction     = pset.get<float>              ("TruncMeanFraction",                                        0.15);
     fApplyCorSmoothing     = pset.get<bool>               ("ApplyCorSmoothing",                                        true);
     fApplyFFTCorrection    = pset.get<bool>               ("ApplyFFTCorrection",                                       true);
-    fFillFFTHistograms     = pset.get<bool>               ("FillFFTHistograms",                                        true);
+    fFillFFTHistograms     = pset.get<bool>               ("FillFFTHistograms",                                       false);
     fFFTHistsWireGroup     = pset.get<std::vector<size_t>>("FFTHistsWireGroup",         std::vector<size_t>() = {1, 33, 34});
     fFFTNumHists           = pset.get<std::vector<size_t>>("FFTNumWaveHistograms",       std::vector<size_t>() = {10,48,48});
     fFFTHistsStartTick     = pset.get<std::vector<double>>("FFTWaveHistsStartTick", std::vector<double>() = {96.,96.,7670.});
@@ -339,7 +339,7 @@ void RawDigitCorrelatedCorrectionAlg::removeCorrelatedNoise(RawDigitAdcIdxPair& 
     }
     
     // Final diagnostics block
-    if (doFFTCorrection)
+    if (doFFTCorrection && !origCorValVec.empty())
     {
         double sampleFreq  = 1000000. / fDetectorProperties->SamplingRate();
         double readOutSize = fDetectorProperties->ReadOutWindowSize();
