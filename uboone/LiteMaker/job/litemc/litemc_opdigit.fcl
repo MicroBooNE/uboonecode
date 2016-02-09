@@ -8,7 +8,9 @@ litemc_opdigit.out_filename: "larlite_opdigit.root"
 
 litemc_opdigit.DataLookUpMap:
 {
-  opdigit: ["daq"]
+  opdigit:    ["pmtreadout","saturation"]
+  simphotons: ["largeant"]
+  trigger:    ["triggersim"]
 }
 
 litemc_opdigit.AssociationLookUpMap:

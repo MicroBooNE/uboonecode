@@ -2,7 +2,7 @@
 BEGIN_PROLOG
 
 litemc_opreco: @local::litemaker_base
-litemc_opreco.out_filename: "larlite_mc_opreco.root"
+litemc_opreco.out_filename: "larlite_opreco.root"
 litemc_opreco.DataLookUpMap:
 {
 

@@ -70,6 +70,11 @@ namespace trigger {
     /// Algorithm
     UBTriggerAlgo fAlg;
 
+    /// BNB delay
+    double fBNBFireTime;
+    /// NuMI delay
+    double fNuMIFireTime;
+
     /// Module labels for event generator(s) that produced sim::BeamGateInfo data product
     std::vector<std::string> fBeamModName;
 
@@ -142,9 +147,13 @@ namespace trigger {
 								      std::vector<double>()) 
 				     );
 
+    fBNBFireTime  = pset.get<double>("BNBFireTime");
+    fNuMIFireTime = pset.get<double>("NuMIFireTime");
+
     // Store user-defined trigger timings to the attributes
     art::ServiceHandle<util::TimeService> ts;
     auto clock = ts->OpticalClock();
+
     fTriggerCalib.clear();
     fTriggerExt.clear();
     fTriggerPC.clear();
@@ -219,12 +228,18 @@ namespace trigger {
       if(!(beamArray.isValid())) continue;
       for(size_t i=0; i<beamArray->size(); ++i) {
 	art::Ptr<sim::BeamGateInfo> beam_ptr (beamArray,i);
-	auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
-	clock.SetTime(clock.Sample(elec_time),clock.Frame(elec_time));
-	if(beam_ptr->BeamType() == sim::kBNB) 
+	if(beam_ptr->BeamType() == sim::kBNB) {
+	  //auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
+	  auto const elec_time = ts->G4ToElecTime(fBNBFireTime);
+	  clock.SetTime(clock.Sample(elec_time),clock.Frame(elec_time));
 	  fAlg.AddTriggerBNB(clock);
-	else if(beam_ptr->BeamType() == sim::kNuMI)
+	}
+	else if(beam_ptr->BeamType() == sim::kNuMI) {
+	  //auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
+	  auto const elec_time = ts->G4ToElecTime(fNuMIFireTime);
+	  clock.SetTime(clock.Sample(elec_time),clock.Frame(elec_time));
 	  fAlg.AddTriggerBNB(clock);
+	}
 	else
 	  throw UBTrigException(Form("Beam type %d not supported!",beam_ptr->BeamType()));
       }

@@ -17,9 +17,10 @@ namespace pmtana {
     ClearEvent();
     ClearWaveform();
     _preco_mgr.AddRecoAlgo(&_preco_alg);
-    _preco_mgr.SetPedAlgo(pmtana::kHEAD);
-    _preco_mgr.SePedSampleCosmic (  3 );
-    _preco_mgr.SetPedSampleBeam   ( 10 );
+
+    //_preco_mgr.SetPedAlgo(pmtana::kHEAD);
+    //_preco_mgr.SePedSampleCosmic (  3 );
+    //_preco_mgr.SetPedSampleBeam   ( 10 );
   }
 
   void OpDetWaveformAna::TickPeriod   ( const double period )
@@ -46,8 +47,7 @@ namespace pmtana {
     _t_wrt_trigger = time_wrt_trigger;
 
     //_preco_mgr.RecoPulse(wf);
-    _ped_mean = _preco_alg.PedMean();
-    _ped_rms  = _preco_alg.PedRms();
+
     /*
     for(size_t i = 0; i<_preco_alg.GetNPulse(); ++i) {
       auto const& p = _preco_alg.GetPulse(i);
@@ -58,6 +58,9 @@ namespace pmtana {
 
       _q   = p.area;
       _amp = p.peak;
+
+      _ped_mean = p.ped_mean;
+      _ped_rms  = p.ped_sigma;
 
       if(_hitana_tree) _hitana_tree->Fill();
     }
