@@ -20,6 +20,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -61,6 +62,7 @@ outputs:
    module_type: RootOutput
    fileName:    "%ifb_%tc_g4.root"
    dataTier:    "simulated"
+   saveMemoryObjectThreshold: 0
    compressionLevel: 1
  }
 }
