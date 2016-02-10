@@ -107,6 +107,7 @@ microboone_rawdigitfilter:
     SmoothCorrelatedNoise: true
     NumWiresToGroup:       [48, 48, 96]  # these correspond to observed groupings
     FillHistograms:        false
+    FillFFTHistograms:     false
     RunFFTInputWires:      false
     RunFFTCorrectedWires:  false
     TruncateTicks:         false

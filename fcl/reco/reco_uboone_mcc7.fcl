@@ -221,7 +221,7 @@ microboone_reco_mcc7_pandora: [          @sequence::microboone_reco_mcc7_pandora
 microboone_reco_mcc7_mcreco: [           mchitfinder ]
 
 microboone_reco_mcc7: [                  rns,
-#                                         @sequence::microboone_reco_mcc7_mcreco,
+                                         @sequence::microboone_reco_mcc7_mcreco,
                                          @sequence::microboone_reco_mcc7_optical,
                                          @sequence::microboone_reco_mcc7_signalprocessing,
                                          @sequence::microboone_reco_mcc7_fuzzypath,
@@ -229,7 +229,7 @@ microboone_reco_mcc7: [                  rns,
                                          @sequence::microboone_reco_mcc7_pandora ]
 
 microboone_reco_mcc7_stage1: [           rns,
-#                                         @sequence::microboone_reco_mcc7_mcreco,
+                                         @sequence::microboone_reco_mcc7_mcreco,
                                          @sequence::microboone_reco_mcc7_optical,
                                          @sequence::microboone_reco_mcc7_signalprocessing,
                                          @sequence::microboone_reco_mcc7_fuzzypath ]
@@ -239,7 +239,7 @@ microboone_reco_mcc7_stage2: [           rns,
                                          @sequence::microboone_reco_mcc7_ccpath ]
 
 microboone_reco_mcc7_core: [             rns,
-#                                         @sequence::microboone_reco_mcc7_mcreco,
+                                         @sequence::microboone_reco_mcc7_mcreco,
                                          @sequence::microboone_reco_mcc7_optical,
                                          @sequence::microboone_reco_mcc7_signalprocessing ]
 
