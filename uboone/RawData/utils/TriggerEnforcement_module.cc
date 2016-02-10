@@ -204,6 +204,9 @@ bool TriggerEnforcement::filter(art::Event & e)
       if(pass)
 	software_decision=true;
     }
+
+    if(_include_software_trig_v.empty())
+      software_decision = true;
   }
     
   return (software_decision && hardware_decision) ;
