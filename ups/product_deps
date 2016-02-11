@@ -31,7 +31,7 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
-larsoft         v04_36_00
+larsoft         v05_00_00
 ubutil          v01_37_05
 uboone_data     v01_04_00
 uboonedaq_datatypes v6_18_01_e9
@@ -47,9 +47,6 @@ qualifier	larsoft		ubutil		uboone_data	uboonedaq_datatypes	notes
 e9:debug	e9:debug	e9:debug	-nq-		e9:debug
 e9:opt		e9:opt		e9:opt		-nq-        	e9:opt
 e9:prof		e9:prof		e9:prof		-nq-        	e9:prof
-e9:noifdh:debug	e9:noifdh:debug	e9:debug	-nq-  		e9:debug
-e9:noifdh:opt	e9:noifdh:opt	e9:opt		-nq-  		e9:opt
-e9:noifdh:prof	e9:noifdh:prof	e9:prof		-nq- 		e9:prof
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:

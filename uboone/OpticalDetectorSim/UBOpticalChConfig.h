@@ -14,7 +14,7 @@
 #ifndef UBOPTICALCHCONFIG_H
 #define UBOPTICALCHCONFIG_H
 
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 #include "SimpleChConfig.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"

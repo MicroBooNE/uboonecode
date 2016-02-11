@@ -1,10 +1,10 @@
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES
-                        Utilities
-                        TimeService_service
-                        Filters
-                        RawData
-			SummaryData
+                        lardata_Utilities
+                        lardata_Utilities_TimeService_service
+                        larevt_Filters
+                        lardata_RawData
+			larcore_SummaryData
 			${UB_DATA_TYPES}
 			${Boost_SERIALIZATION_LIBRARY}
                         ${SEEDSERVICE_SERVICE} # artextensions

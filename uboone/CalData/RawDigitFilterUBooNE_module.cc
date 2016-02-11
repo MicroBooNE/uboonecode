@@ -45,12 +45,12 @@
 #include "art/Persistency/Common/Ptr.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
-#include "Utilities/SimpleTimeService.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/Utilities/TimeService.h"
+#include "lardata/Utilities/SimpleTimeService.h"
+#include "larevt/CalibrationDBI/Interface/IDetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/IDetPedestalProvider.h"
 
 #include "NoiseFilterAlgs/RawDigitNoiseFilterDefs.h"
 #include "NoiseFilterAlgs/RawDigitBinAverageAlg.h"

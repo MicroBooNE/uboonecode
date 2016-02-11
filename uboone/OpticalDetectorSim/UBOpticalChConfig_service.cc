@@ -2,9 +2,9 @@
 #define UBOPTICALCHCONFIG_CXX
 
 #include "UBOpticalChConfig.h"
-#include "Utilities/LArProperties.h"
+#include "lardata/Utilities/LArProperties.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "Geometry/Geometry.h" // larcore
+#include "larcore/Geometry/Geometry.h" // larcore
 #include "uboone/Geometry/UBOpReadoutMap.h" // uboonecode
 
 namespace opdet {

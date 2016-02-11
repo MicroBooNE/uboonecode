@@ -24,13 +24,13 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 
-#include "Utilities/LArFFT.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "lardata/Utilities/LArFFT.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "larevt/CalibrationDBI/Interface/IDetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/IDetPedestalProvider.h"
 
 namespace calibration {
 

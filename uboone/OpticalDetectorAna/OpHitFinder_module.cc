@@ -19,18 +19,18 @@
 
 #include <memory>
 
-#include "OpticalDetector/OpHitFinder/AlgoThreshold.h"
-#include "OpticalDetector/OpHitFinder/AlgoFixedWindow.h"
-#include "OpticalDetector/OpHitFinder/AlgoSlidingWindow.h"
-#include "OpticalDetector/OpHitFinder/AlgoCFD.h"
-#include "OpticalDetector/OpHitFinder/PedAlgoEdges.h"
-#include "OpticalDetector/OpHitFinder/PedAlgoRollingMean.h"
-#include "OpticalDetector/OpHitFinder/PedAlgoUB.h"
-#include "OpticalDetector/OpHitFinder/PulseRecoManager.h"
-#include "RecoBase/OpHit.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/TimeService.h"
-#include "RawData/OpDetWaveform.h"
+#include "larana/OpticalDetector/OpHitFinder/AlgoThreshold.h"
+#include "larana/OpticalDetector/OpHitFinder/AlgoFixedWindow.h"
+#include "larana/OpticalDetector/OpHitFinder/AlgoSlidingWindow.h"
+#include "larana/OpticalDetector/OpHitFinder/AlgoCFD.h"
+#include "larana/OpticalDetector/OpHitFinder/PedAlgoEdges.h"
+#include "larana/OpticalDetector/OpHitFinder/PedAlgoRollingMean.h"
+#include "larana/OpticalDetector/OpHitFinder/PedAlgoUB.h"
+#include "larana/OpticalDetector/OpHitFinder/PulseRecoManager.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/TimeService.h"
+#include "lardata/RawData/OpDetWaveform.h"
 #include <string>
 
 class OpHitFinder;

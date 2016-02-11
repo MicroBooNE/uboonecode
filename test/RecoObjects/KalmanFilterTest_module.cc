@@ -11,12 +11,12 @@
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 
-#include "RecoObjects/KHitWireX.h"
-#include "RecoObjects/SurfYZPlane.h"
-#include "RecoObjects/PropYZPlane.h"
-#include "RecoObjects/KHitMulti.h"
+#include "lardata/RecoObjects/KHitWireX.h"
+#include "lardata/RecoObjects/SurfYZPlane.h"
+#include "lardata/RecoObjects/PropYZPlane.h"
+#include "lardata/RecoObjects/KHitMulti.h"
 
 namespace trkf
 {

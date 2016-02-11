@@ -19,8 +19,8 @@
 #include <vector>
 
 //LArSoft
-#include "RawData/TriggerData.h"
-#include "Utilities/ElecClock.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/Utilities/ElecClock.h"
 #include "UBTrigException.h"
 
 namespace trigger

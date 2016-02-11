@@ -15,21 +15,21 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME     uboonecode_uboone_LiteMaker
 	  LIB_LIBRARIES
-	  	   Geometry
+	  	   larcore_Geometry
 		   uboone_Geometry
 		   uboonecode_uboone_MuCS
-		   Geometry_service
-	   	   Simulation
+		   larcore_Geometry_Geometry_service
+	   	   larsim_Simulation
 		   SimulationBase
-		   Utilities
-		   TimeService_service
-		   RawData
-		   MCBase
-		   SummaryData
-		   RecoBase
-		   RecoObjects
-		   LArProperties_service
-		   DetectorProperties_service
+		   lardata_Utilities
+		   lardata_Utilities_TimeService_service
+		   lardata_RawData
+		   lardata_MCBase
+		   larcore_SummaryData
+		   lardata_RecoBase
+		   lardata_RecoObjects
+		   lardata_Utilities_LArProperties_service
+		   lardata_Utilities_DetectorProperties_service
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}
@@ -55,20 +55,20 @@ art_make( EXCLUDE LLMetaMaker_service.cc
           MODULE_LIBRARIES 	  		   
 		   uboonecode_uboone_LiteMaker	   
 		   uboonecode_uboone_MuCS
-		   Geometry
+		   larcore_Geometry
 		   uboone_Geometry
-		   Geometry_service
-		   TimeService_service
-		   Simulation
+		   larcore_Geometry_Geometry_service
+		   lardata_Utilities_TimeService_service
+		   larsim_Simulation
 		   SimulationBase
-		   Utilities
-		   MCBase
-		   SummaryData
-		   RawData
-		   RecoBase
-		   RecoObjects
-		   LArProperties_service
-		   DetectorProperties_service
+		   lardata_Utilities
+		   lardata_MCBase
+		   larcore_SummaryData
+		   lardata_RawData
+		   lardata_RecoBase
+		   lardata_RecoObjects
+		   lardata_Utilities_LArProperties_service
+		   lardata_Utilities_DetectorProperties_service
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}

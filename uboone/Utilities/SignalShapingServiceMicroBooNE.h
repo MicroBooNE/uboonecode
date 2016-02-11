@@ -83,15 +83,15 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "Utilities/SignalShaping.h"
+#include "lardata/Utilities/SignalShaping.h"
 #include "TF1.h"
 #include "TH1D.h"
 
 // LArSoft include
-#include "Geometry/Geometry.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Utilities/TimeService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "lardata/Utilities/TimeService.h"
 
 using DoubleVec  = std::vector<double>;
 using DoubleVec2 = std::vector< DoubleVec >;

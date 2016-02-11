@@ -14,8 +14,8 @@
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Utilities/InputTag.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
 #include "fhiclcpp/ParameterSet.h"
 #include <iostream>
 

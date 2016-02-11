@@ -31,13 +31,13 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
-#include "Utilities/SimpleTimeService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/Utilities/TimeService.h"
+#include "lardata/Utilities/SimpleTimeService.h"
 
-#include "RecoBase/Track.h"
-#include "RecoBase/Vertex.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Vertex.h"
 
 // Includes for the interface to our algorithms and their creator
 #include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h"

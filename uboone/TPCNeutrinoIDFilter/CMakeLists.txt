@@ -4,12 +4,12 @@
 art_make(BASENAME_ONLY
 	LIBRARY_NAME TPCNeutrinoIDFilter
 	LIB_LIBRARIES 
-		     RecoBase
-		     AnalysisBase
-		     Geometry
-		     Geometry_service
-		     LArProperties_service
-		     Utilities
+		     lardata_RecoBase
+		     lardata_AnalysisBase
+		     larcore_Geometry
+		     larcore_Geometry_Geometry_service
+		     lardata_Utilities_LArProperties_service
+		     lardata_Utilities
 		     ${ART_PERSISTENCY_COMMON}
 		     ${ART_PERSISTENCY_PROVENANCE}
 		     ${ART_FRAMEWORK_CORE}
@@ -27,13 +27,13 @@ art_make(BASENAME_ONLY
 		     ${Boost_SYSTEM_LIBRARY}
 	MODULE_LIBRARIES
 		     TPCNeutrinoIDFilter
-		     RecoBase
-		     AnalysisBase
-		     Geometry
-		     Geometry_service
-		     LArProperties_service
-		     DetectorProperties_service
-		     Utilities
+		     lardata_RecoBase
+		     lardata_AnalysisBase
+		     larcore_Geometry
+		     larcore_Geometry_Geometry_service
+		     lardata_Utilities_LArProperties_service
+		     lardata_Utilities_DetectorProperties_service
+		     lardata_Utilities
 		     ${ART_PERSISTENCY_COMMON}
 		     ${ART_PERSISTENCY_PROVENANCE}
 		     ${ART_FRAMEWORK_CORE}

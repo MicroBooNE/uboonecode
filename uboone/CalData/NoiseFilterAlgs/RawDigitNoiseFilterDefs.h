@@ -13,8 +13,8 @@
 #include <vector>
 #include <map>
 
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
 
 namespace caldata
 {

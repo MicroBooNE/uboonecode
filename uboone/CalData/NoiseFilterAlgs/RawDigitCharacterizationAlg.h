@@ -28,10 +28,10 @@
 
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "larevt/CalibrationDBI/Interface/IDetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/IDetPedestalProvider.h"
 
 #include "ChannelGroups.h"
 

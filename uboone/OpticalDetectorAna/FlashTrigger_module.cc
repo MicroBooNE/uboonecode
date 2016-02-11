@@ -23,9 +23,9 @@
 
 #include "SimulationBase/MCParticle.h"
 #include "SimulationBase/MCTruth.h"
-#include "RecoBase/OpFlash.h"
-#include "Geometry/Geometry.h"
-#include "RawData/TriggerData.h"
+#include "lardata/RecoBase/OpFlash.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/RawData/TriggerData.h"
 #include <limits>
 #include <climits>
 #include <TFile.h>

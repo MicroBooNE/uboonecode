@@ -34,16 +34,16 @@
 #include "art/Utilities/Exception.h"
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "Geometry/Geometry.h"
-#include "Filters/ChannelFilter.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "RecoBase/Wire.h"
-#include "RecoBaseArt/WireCreator.h"
-#include "Utilities/AssociationUtil.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/Geometry/Geometry.h"
+#include "larevt/Filters/ChannelFilter.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RecoBaseArt/WireCreator.h"
+#include "lardata/Utilities/AssociationUtil.h"
+#include "larevt/CalibrationDBI/Interface/IDetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/IDetPedestalProvider.h"
 
 ///creation of calibrated signals on wires
 namespace caldata {

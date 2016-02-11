@@ -1,13 +1,13 @@
 art_make( BASENAME_ONLY
-          MODULE_LIBRARIES Geometry
-                        Geometry_service
-                        Simulation
-                        Utilities
-                        TimeService_service
-                        Filters
-                        RawData
+          MODULE_LIBRARIES larcore_Geometry
+                        larcore_Geometry_Geometry_service
+                        larsim_Simulation
+                        lardata_Utilities
+                        lardata_Utilities_TimeService_service
+                        larevt_Filters
+                        lardata_RawData
                         SignalShapingServiceMicroBooNE_service
-			CalibrationDBI_Providers
+			larevt_CalibrationDBI_Providers
                         ${SEEDSERVICE_SERVICE} # artextensions
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}

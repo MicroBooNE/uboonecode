@@ -24,13 +24,13 @@
 #include <iostream>
 
 // LArSoft
-#include "RawData/OpDetWaveform.h"
-#include "RecoBase/OpFlash.h"
-#include "RecoBase/OpHit.h"
-#include "Utilities/AssociationUtil.h"
-#include "Utilities/TimeService.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/OpDetGeo.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "lardata/RecoBase/OpFlash.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/Utilities/TimeService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/OpDetGeo.h"
 
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/FlashList.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEvent.hh"

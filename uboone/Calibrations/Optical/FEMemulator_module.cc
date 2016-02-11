@@ -30,18 +30,18 @@
 #include "TH1D.h"
 
 // LArSoft 
-#include "SimpleTypesAndConstants/RawTypes.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "Utilities/TimeService.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "lardata/Utilities/TimeService.h"
 
 //Optical Channel Maps
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
 
 //RawDigits
-#include "RawData/raw.h"
-#include "RawData/RawDigit.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/OpDetWaveform.h"
 
 // Pulse finding
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"

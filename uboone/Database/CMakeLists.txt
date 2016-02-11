@@ -1,5 +1,5 @@
 art_make( BASENAME_ONLY
-	  SERVICE_LIBRARIES CalibrationDBI_Providers
+	  SERVICE_LIBRARIES larevt_CalibrationDBI_Providers
                       ${ART_FRAMEWORK_PRINCIPAL}
                       ${ART_FRAMEWORK_SERVICES_REGISTRY}
                       ${ART_PERSISTENCY_COMMON}
@@ -10,10 +10,10 @@ art_make( BASENAME_ONLY
                       ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
                       ${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}
                       ${ART_UTILITIES}
-	                    CalibrationDBI_IOVData
-			    RawData
-			    Geometry
-			    Geometry_service
+	                    larevt_CalibrationDBI_IOVData
+			    lardata_RawData
+			    larcore_Geometry
+			    larcore_Geometry_Geometry_service
 			    ${ART_FRAMEWORK_SERVICES_REGISTRY}
 			    ${ART_FRAMEWORK_CORE}
                             ${ART_FRAMEWORK_PRINCIPAL}

@@ -12,9 +12,9 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/LArFFT.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/Utilities/LArProperties.h"
+#include "lardata/Utilities/LArFFT.h"
 #include "TFile.h"
 
 #include <fstream>

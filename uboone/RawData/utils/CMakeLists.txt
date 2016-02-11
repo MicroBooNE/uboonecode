@@ -15,8 +15,8 @@ simple_plugin( LArRawInputSourceUBooNE
 
 simple_plugin( RawDigitWriter "module"
 	       UBOpReadoutMap_service
-	       DatabaseUtil_service
-	       RawData
+	       lardata_Utilities_DatabaseUtil_service
+	       lardata_RawData
                ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
                ${ART_FRAMEWORK_PRINCIPAL}
@@ -33,16 +33,16 @@ simple_plugin( RawDigitWriter "module"
 art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME uboone_RawData
-	  LIB_LIBRARIES DatabaseUtil_service
-                        Geometry
-	  	        Geometry_service
-		        Utilities
-	       	        TimeService_service
+	  LIB_LIBRARIES lardata_Utilities_DatabaseUtil_service
+                        larcore_Geometry
+	  	        larcore_Geometry_Geometry_service
+		        lardata_Utilities
+	       	        lardata_Utilities_TimeService_service
 	                uboone_Geometry
 			UBOpReadoutMap_service
-                        OpticalDetectorData
-                        RawData
-                        SummaryData
+                        lardata_OpticalDetectorData
+                        lardata_RawData
+                        larcore_SummaryData
 			${UBDut}
                         ${PQ}
 			${Boost_SERIALIZATION_LIBRARY}
@@ -65,16 +65,16 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
 
-	  MODULE_LIBRARIES DatabaseUtil_service
-                        Geometry
-	  	        Geometry_service
-		        Utilities
-	       	        TimeService_service
+	  MODULE_LIBRARIES lardata_Utilities_DatabaseUtil_service
+                        larcore_Geometry
+	  	        larcore_Geometry_Geometry_service
+		        lardata_Utilities
+	       	        lardata_Utilities_TimeService_service
 	                uboone_Geometry
 			UBOpReadoutMap_service
-                        OpticalDetectorData
-                        RawData
-                        SummaryData
+                        lardata_OpticalDetectorData
+                        lardata_RawData
+                        larcore_SummaryData
 			uboone_RawData
 			${UBDut}
                         ${PQ}

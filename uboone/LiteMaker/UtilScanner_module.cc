@@ -19,15 +19,15 @@
 #include "art/Persistency/Common/PtrVector.h"
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Geometry/OpDetGeo.h"
-#include "Geometry/WireGeo.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/GeometryUtilities.h"
-#include "Utilities/DetectorProperties.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "larcore/Geometry/OpDetGeo.h"
+#include "larcore/Geometry/WireGeo.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/LArProperties.h"
+#include "lardata/Utilities/GeometryUtilities.h"
+#include "lardata/Utilities/DetectorProperties.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
 
 // LArLite

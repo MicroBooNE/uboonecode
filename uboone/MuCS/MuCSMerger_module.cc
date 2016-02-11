@@ -40,7 +40,7 @@
 #include <iostream>
 #include "MuCSData.h"
 #include "vector"
-#include "RawData/TriggerData.h"
+#include "lardata/RawData/TriggerData.h"
 #include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"

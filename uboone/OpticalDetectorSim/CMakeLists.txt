@@ -3,9 +3,9 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME  uboonecode_uboone_OpticalDetectorSim
           LIB_LIBRARIES UBOpticalChConfig_service
-			RawData
-			Utilities
-			Geometry
+			lardata_RawData
+			lardata_Utilities
+			larcore_Geometry
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
@@ -21,13 +21,13 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
 	                ${FHICLCPP}
 			${CETLIB}
                         ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES Simulation
-			OpticalDetectorData
+          MODULE_LIBRARIES larsim_Simulation
+			lardata_OpticalDetectorData
 			UBOpticalChConfig_service
 			UBOpReadoutMap_service
 			uboonecode_uboone_OpticalDetectorSim
-			TimeService_service
-			Utilities
+			lardata_Utilities_TimeService_service
+			lardata_Utilities
 			UBooNEGeometryHelper_service
 			uboone_Geometry
                         ${SIMULATIONBASE}
@@ -51,8 +51,8 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc
 simple_plugin(UBOpticalChConfig "service"
 	      uboone_Geometry
 	      UBOpReadoutMap_service	
-	      Geometry_service
-	      Geometry
+	      larcore_Geometry_Geometry_service
+	      larcore_Geometry
 #	      uboonecode_uboone_OpticalDetectorSim
 	      ${ART_UTILITIES}
 	      ${MF_MESSAGELOGGER}

@@ -33,14 +33,14 @@
 /// LArSoft
 #include "UBTrigException.h"
 #include "UBTriggerAlgo.h"
-#include "RawData/TriggerData.h"
-#include "OpticalDetectorData/PMTTrigger.h"
-#include "Utilities/AssociationUtil.h"
-#include "Utilities/ElecClock.h"
-#include "Utilities/TimeService.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/OpticalDetectorData/PMTTrigger.h"
+#include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/Utilities/ElecClock.h"
+#include "lardata/Utilities/TimeService.h"
 
 /// nutools
-#include "Simulation/BeamGateInfo.h"
+#include "larsim/Simulation/BeamGateInfo.h"
 
 namespace trigger {
   /**

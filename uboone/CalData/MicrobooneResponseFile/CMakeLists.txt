@@ -1,8 +1,8 @@
 
 simple_plugin(MicrobooneResp "module"
-                        LArFFT_service
-                        Geometry_service
-                        Geometry
+                        lardata_Utilities_LArFFT_service
+                        larcore_Geometry_Geometry_service
+                        larcore_Geometry
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
