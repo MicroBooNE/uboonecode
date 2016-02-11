@@ -255,6 +255,9 @@ microboone_reco_mcc7_3D: [               rns,
 ### Below we include overrides for the modules above
 ### These are for MCC 7
 
+# this turns on the truncation of the RawDigits
+microboone_reco_mcc7_producers.digitfilter.TruncateTicks:                        true
+
 physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                                 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
