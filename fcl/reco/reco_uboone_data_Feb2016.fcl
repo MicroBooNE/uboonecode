@@ -28,6 +28,10 @@ microboone_reco_data_services:
 }
 
 ### This is the complete list of all producers! ###
+microboone_reco_mcc7_data.DetectorProperties.NumberTimeSamples: 6400
+microboone_reco_mcc7_data.DetectorProperties.ReadOutWindowSize: 6400
+microboone_reco_mcc7_data.TimeService.InheritClockConfig:       false
+microboone_reco_mcc7_data.TimeService.TriggerOffsetTPC:         -0.400e3
 
 microboone_reco_data_producers:
 {
