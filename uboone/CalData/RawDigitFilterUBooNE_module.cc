@@ -186,7 +186,7 @@ void RawDigitFilterUBooNE::reconfigure(fhicl::ParameterSet const & pset)
     fRunFFTCorrected       = pset.get<bool>               ("RunFFTCorrectedWires",                                    false);
     fTruncateTicks         = pset.get<bool>               ("TruncateTicks",                                           false);
     fWindowSize            = pset.get<size_t>             ("WindowSize",                                               6400);
-    fNumTicksToDropFront   = pset.get<size_t>             ("NumTicksToDropFront",                                      2250);
+    fNumTicksToDropFront   = pset.get<size_t>             ("NumTicksToDropFront",                                      2400);
     fProcessNoise          = pset.get<bool>               ("ProcessNoise",                                             true);
 }
 
