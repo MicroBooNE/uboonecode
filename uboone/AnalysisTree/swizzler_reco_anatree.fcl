@@ -43,7 +43,7 @@ services:
   PhotonVisibilityService: @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties  
   @table::microboone_full_services
-  IFDH: {} #comment this line for grid jobs
+  IFDH: {}
 }
 
 microboone_tfile_metadata:
@@ -99,13 +99,14 @@ physics:
   caldata:		@local::microboone_calroi
   cchit:		@local::microboone_clustercrawlerhit
   gaushit:              @local::microboone_gaushitfinder
+  fuzzycluster:         @local::microboone_fuzzycluster
   linecluster: 	        @local::microboone_linecluster
   pandoraCosmicKHitPFPart:      @local::microboone_cosmicpfparticletagger
   pandoraCosmic:        @local::microboone_pandora
   pandoraNu:            @local::microboone_pandora
-  trackkalmanhitcc:     @local::microboone_track3Dkalmanhit 
-  trackkalmanhitcctag:  @local::microboone_cosmictracktagger
-  trackkalmanhitcalocc: @local::microboone_calomc		   
+  trackkalmanhit:     @local::microboone_track3Dkalmanhit 
+  trackkalmanhittag:  @local::microboone_cosmictracktagger
+  trackkalmanhitcalo: @local::microboone_calomc		   
   pandoraCosmicKHit:    @local::microboone_track3Dkalmanhit 
   pandoraCosmicKHittag: @local::microboone_cosmictracktagger
   pandoraCosmicKHitcalo:@local::microboone_calomc
@@ -130,13 +131,14 @@ physics:
 	beamdata, 
 	digitfilter, 
 	caldata, 
-	cchit, 
-#         gaushit,
+#	cchit, 
+        gaushit,
+	fuzzycluster,
 	linecluster,
         pandoraCosmic, 
-        trackkalmanhitcc, 
-        trackkalmanhitcctag,
-        trackkalmanhitcalocc,
+        trackkalmanhit, 
+        trackkalmanhittag,
+        trackkalmanhitcalo,
         pandoraCosmicKHit, 
         pandoraCosmicKHittag,
         pandoraCosmicKHitcalo,
@@ -208,7 +210,7 @@ services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:
 # Note that run 3426 forward, bias is -110V and +230V (from 10/16/15, 10:30 AM)
 services.LArProperties.Efield:          [0.273,0.367,0.767] # 0.273 corresponds to 70 kV
 
-services.LArProperties.Electronlifetime: 8.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
+services.LArProperties.Electronlifetime: 13.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
 
 services.TimeService.TrigModuleName:     "daq"
 ################
@@ -235,11 +237,12 @@ physics.producers.caldata.Threshold: [5, 5, 5]
 #physics.producers.cchit.CCHitFinderAlg.MaxXtraHits: 0
 physics.producers.gaushit.CalDataModuleLabel:                    "caldata"
 physics.producers.gaushit.MinSig:                                [ 8.0,    8.0,   8.0]
-
+physics.producers.fuzzycluster.HitsModuleLabel:                 "gaushit"
+physics.producers.fuzzycluster.CalDataModuleLabel:              "caldata"
 physics.producers.pandoraCosmic.GeantModuleLabel:               "largeant"
 physics.producers.pandoraCosmic.HitFinderModuleLabel:           "linecluster"
 physics.producers.pandoraCosmic.ConfigFile:                     "PandoraSettings_MicroBooNE_Cosmic.xml"
-physics.producers.linecluster.HitFinderModuleLabel: "cchit"
+physics.producers.linecluster.HitFinderModuleLabel: "gaushit"
 #physics.producers.linecluster.ClusterCrawlerAlg.MinAmp: 10
 #physics.producers.linecluster.ClusterCrawlerAlg.NumPass: 1
 #physics.producers.linecluster.ClusterCrawlerAlg.DoMerge: [true]
@@ -276,19 +279,21 @@ physics.producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire:            80   
 physics.producers.linecluster.ClusterCrawlerAlg.uBCode:                    true              # use MicroBooNE-specific code
 
 
-physics.producers.trackkalmanhitcc.HitModuleLabel:                    "linecluster"
-physics.producers.trackkalmanhitcc.ClusterModuleLabel:                "linecluster"
+#physics.producers.trackkalmanhitcc.HitModuleLabel:                    "linecluster"
+physics.producers.trackkalmanhit.HitModuleLabel:		       "gaushit"
+#physics.producers.trackkalmanhitcc.ClusterModuleLabel:                "linecluster"
+physics.producers.trackkalmanhit.ClusterModuleLabel:		       "fuzzycluster"
+physics.producers.trackkalmanhittag.ClusterModuleLabel:           "fuzzycluster"
+physics.producers.trackkalmanhittag.TrackModuleLabel:             "trackkalmanhit"
+physics.producers.trackkalmanhittag.TPCXBoundary:                   10
+physics.producers.trackkalmanhittag.TPCYBoundary:                   10
+physics.producers.trackkalmanhittag.TPCZBoundary:                   10
 
-physics.producers.trackkalmanhitcctag.ClusterModuleLabel:           "linecluster"
-physics.producers.trackkalmanhitcctag.TrackModuleLabel:             "trackkalmanhitcc"
-physics.producers.trackkalmanhitcctag.TPCXBoundary:                   10
-physics.producers.trackkalmanhitcctag.TPCYBoundary:                   10
-physics.producers.trackkalmanhitcctag.TPCZBoundary:                   10
+physics.producers.trackkalmanhitcalo.TrackModuleLabel:                    "trackkalmanhit"
+physics.producers.trackkalmanhitcalo.SpacePointModuleLabel:               "trackkalmanhit"
+physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [2.5143e-3, 2.53e-3, 7e-3]
 
-physics.producers.trackkalmanhitcalocc.TrackModuleLabel:                    "trackkalmanhitcc"
-physics.producers.trackkalmanhitcalocc.SpacePointModuleLabel:               "trackkalmanhitcc"
-
-physics.producers.pandoraCosmicKHit.HitModuleLabel:                 "linecluster"
+physics.producers.pandoraCosmicKHit.HitModuleLabel:                 "gaushit"
 physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
 physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
 physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
@@ -312,7 +317,7 @@ physics.producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:              "pa
 physics.producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:              "opflash"
 physics.producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
-physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:                 "linecluster"
+physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:                 "gaushit"
 physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:             ["pandoraCosmicKHitPFPart"]
 physics.producers.pandoraCosmicKHitRemoval.FlashProducerLabel:               "pandoraCosmicKHitFlashMatch"
 physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel:          "pandoraCosmic"
@@ -340,8 +345,8 @@ physics.producers.pandoraNuKHitcalo.SpacePointModuleLabel:                   "pa
 
 #ANALYSIS TREE STUFF
 physics.analyzers.analysistree:  @local::microboone_analysistree
-physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhitcc", "pandoraCosmicKHit", "pandoraNuKHit"]
-physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalocc", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo"]
+physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "pandoraCosmicKHit", "pandoraNuKHit"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo"]
 
 physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0"]
 physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0"]
@@ -352,7 +357,7 @@ physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
 physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "trackkalmanhitpid", "trackkalmanhitpid"]
 
-physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhitcctag", "pandoraCosmicKHittag", "pandoraNuKHittag"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmicKHittag", "pandoraNuKHittag"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
 
 #physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
