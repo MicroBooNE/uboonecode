@@ -27,11 +27,18 @@ microboone_reco_data_services:
                               @table::microboone_services_reco
 }
 
+microboone_reco_data_services_fullrawdigits:
+{
+  PhotonVisibilityService:    @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties
+                              @table::microboone_services_reco
+}
+
 ### This is the complete list of all producers! ###
-microboone_reco_mcc7_data.DetectorProperties.NumberTimeSamples: 6400
-microboone_reco_mcc7_data.DetectorProperties.ReadOutWindowSize: 6400
-microboone_reco_mcc7_data.TimeService.InheritClockConfig:       false
-microboone_reco_mcc7_data.TimeService.TriggerOffsetTPC:         -0.400e3
+microboone_reco_data_services.DetectorProperties.NumberTimeSamples: 6400
+microboone_reco_data_services.DetectorProperties.ReadOutWindowSize: 6400
+microboone_reco_data_services.TimeService.InheritClockConfig:       false
+microboone_reco_data_services.TimeService.TriggerOffsetTPC:         -0.400e3
 
 microboone_reco_data_producers:
 {

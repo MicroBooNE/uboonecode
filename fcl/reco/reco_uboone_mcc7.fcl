@@ -34,6 +34,13 @@ microboone_reco_mcc7_services.DetectorProperties.ReadOutWindowSize: 6400
 microboone_reco_mcc7_services.TimeService.InheritClockConfig:       false
 microboone_reco_mcc7_services.TimeService.TriggerOffsetTPC:         -0.400e3
 
+microboone_reco_mcc7_services_fullrawdigits:
+{
+  PhotonVisibilityService:    @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties
+                              @table::microboone_services_reco
+}
+
 ### This is the complete list of all producers! ###
 
 microboone_reco_mcc7_producers:
