@@ -32,12 +32,18 @@ process_name: McRecoCommon
 
 services.DatabaseUtil.ShouldConnect: false
 
+# Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
+#THIS IS DONE IN reco_uboone_mcc7.fcl
+#services.DetectorProperties.NumberTimeSamples: 6400
+#services.DetectorProperties.ReadOutWindowSize: 6400
+#services.TimeService.InheritClockConfig:       false
+#services.TimeService.TriggerOffsetTPC:         -0.400e3
+
 #source is a root file
 source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
-  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -72,7 +78,6 @@ outputs:
  {
    module_type: RootOutput
    dataTier: "reconstructed"
-   saveMemoryObjectThreshold: 0
    compressionLevel: 1
  }
 }

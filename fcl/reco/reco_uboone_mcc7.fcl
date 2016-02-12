@@ -29,6 +29,17 @@ microboone_reco_mcc7_services:
   OpDigiProperties:           @local::microboone_opdigiproperties
                               @table::microboone_services_reco
 }
+microboone_reco_mcc7_services.DetectorProperties.NumberTimeSamples: 6400
+microboone_reco_mcc7_services.DetectorProperties.ReadOutWindowSize: 6400
+microboone_reco_mcc7_services.TimeService.InheritClockConfig:       false
+microboone_reco_mcc7_services.TimeService.TriggerOffsetTPC:         -0.400e3
+
+microboone_reco_mcc7_services_fullrawdigits:
+{
+  PhotonVisibilityService:    @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties
+                              @table::microboone_services_reco
+}
 
 ### This is the complete list of all producers! ###
 
@@ -255,6 +266,9 @@ microboone_reco_mcc7_3D: [               rns,
 ### Below we include overrides for the modules above
 ### These are for MCC 7
 
+# this turns on the truncation of the RawDigits
+microboone_reco_mcc7_producers.digitfilter.TruncateTicks:                        true
+
 physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                                 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
@@ -262,7 +276,7 @@ physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.
 microboone_reco_mcc7_producers.caldata.DigitModuleLabel:                         "digitfilter"
 
 microboone_reco_mcc7_producers.gaushit.CalDataModuleLabel:                       "caldata"
-microboone_reco_mcc7_producers.gaushit.MinSig:                                   [8.0, 8.0, 8.0]
+microboone_reco_mcc7_producers.gaushit.MinSig:                                   [5.0, 5.0, 5.0]
 
 microboone_reco_mcc7_producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
 microboone_reco_mcc7_producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
