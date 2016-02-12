@@ -56,6 +56,13 @@ physics:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
+### Use this to set the frame size for truncated readout
+services.DetectorProperties.NumberTimeSamples:                             6400
+services.DetectorProperties.ReadOutWindowSize:                             6400
+services.TimeService.InheritClockConfig:                                   false
+services.TimeService.TriggerOffsetTPC:                                     -0.400e3
+services.RawDrawingOptions.TotalTicks:                                     6400
+
 services.RawDrawingOptions.RawDataLabel: "digitfilter"
 services.RawDrawingOptions.TotalTicks: 9600
 services.RawDrawingOptions.MinimumSignal: 20
