@@ -13,6 +13,7 @@ services:
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_data
+  BackTracker:   @local::microboone_backtracker
   #user:         @local::microboone_services_ana
   @table::microboone_reco_data_services
 }
