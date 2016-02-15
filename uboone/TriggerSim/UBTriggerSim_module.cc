@@ -31,13 +31,14 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "UBTrigException.h"
 #include "UBTriggerAlgo.h"
 #include "lardata/RawData/TriggerData.h"
 #include "lardata/OpticalDetectorData/PMTTrigger.h"
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/ElecClock.h"
-#include "lardata/Utilities/TimeService.h"
+#include "lardata/DetectorInfo/ElecClock.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 /// nutools
 #include "larsim/Simulation/BeamGateInfo.h"
@@ -82,11 +83,11 @@ namespace trigger {
     std::string fOpticalFEMMod;
 
     //-- ElecClock for user-defined trigger times --//
-    std::vector<util::ElecClock> fTriggerCalib; ///< user-defined calibration trigger (per-event)
-    std::vector<util::ElecClock> fTriggerPC;    ///< user-defined PC trigger (per-event)
-    std::vector<util::ElecClock> fTriggerExt;   ///< user-defined Ext trigger (per-event)
-    std::vector<util::ElecClock> fTriggerBNB;   ///< user-defined BNB trigger (per-event)
-    std::vector<util::ElecClock> fTriggerNuMI;  ///< user-defined NuMI trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerCalib; ///< user-defined calibration trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerPC;    ///< user-defined PC trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerExt;   ///< user-defined Ext trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerBNB;   ///< user-defined BNB trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerNuMI;  ///< user-defined NuMI trigger (per-event)
 
   };
 
@@ -151,7 +152,7 @@ namespace trigger {
     fNuMIFireTime = pset.get<double>("NuMIFireTime");
 
     // Store user-defined trigger timings to the attributes
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto clock = ts->OpticalClock();
 
     fTriggerCalib.clear();
@@ -209,7 +210,7 @@ namespace trigger {
   //#########################################
   {
     // Initialize
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     std::unique_ptr< std::vector<raw::Trigger>   >  triggers(new std::vector<raw::Trigger>);
     fAlg.ClearInputTriggers();
     auto clock = ts->OpticalClock();
@@ -280,4 +281,3 @@ namespace trigger {
   }
 } 
 /** @} */ // end of doxygen group 
-

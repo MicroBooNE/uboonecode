@@ -5,18 +5,18 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "larevt/CalibrationDBI/Interface/IDetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Providers/DetPedestalRetrievalAlg.h"
 
 namespace lariov{
 
   /**
      \class UbooneDetPedestalService
-     art service implementation of IDetPedestalService.  Implements 
+     art service implementation of DetPedestalService.  Implements 
      a detector pedestal retrieval service for database scheme in which 
      all elements in a database folder share a common interval of validity
   */
-  class UbooneDetPedestalService : public IDetPedestalService {
+  class UbooneDetPedestalService : public DetPedestalService {
   
     public:
     
@@ -35,7 +35,7 @@ namespace lariov{
      
     private:
     
-      const IDetPedestalProvider& DoGetPedestalProvider() const override {
+      const DetPedestalProvider& DoGetPedestalProvider() const override {
         return fProvider;
       }    
     
@@ -43,7 +43,7 @@ namespace lariov{
   };
 }//end namespace lariov
       
-DECLARE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneDetPedestalService, lariov::IDetPedestalService, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneDetPedestalService, lariov::DetPedestalService, LEGACY)
       
 
 namespace lariov{
@@ -57,6 +57,6 @@ namespace lariov{
 
 }//end namespace lariov
 
-DEFINE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneDetPedestalService, lariov::IDetPedestalService)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneDetPedestalService, lariov::DetPedestalService)
 
 #endif

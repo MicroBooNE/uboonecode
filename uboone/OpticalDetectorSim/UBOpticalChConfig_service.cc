@@ -2,9 +2,8 @@
 #define UBOPTICALCHCONFIG_CXX
 
 #include "UBOpticalChConfig.h"
-#include "lardata/Utilities/LArProperties.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "larcore/Geometry/Geometry.h" // larcore
 #include "uboone/Geometry/UBOpReadoutMap.h" // uboonecode
 
 namespace opdet {
@@ -28,7 +27,6 @@ namespace opdet {
   void UBOpticalChConfig::reconfigure(fhicl::ParameterSet const& pset)
   //-----------------------------------------------------------
   {
-    art::ServiceHandle<geo::Geometry> geom;
     art::ServiceHandle<geo::UBOpReadoutMap> chanmap;
     
     std::vector< std::vector< float    > > tmp_float_params;
@@ -71,7 +69,7 @@ namespace opdet {
     // ------------------------------------------------------------------------------------------------------
     
     // Correct QE by prescaling set in LArProperties
-    art::ServiceHandle<util::LArProperties>   LarProp;
+    auto const* LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
     auto tmp_QE = tmp_float_params.at( kQE );
     for (unsigned int i = 0; i < tmp_QE.size(); i++) {
 

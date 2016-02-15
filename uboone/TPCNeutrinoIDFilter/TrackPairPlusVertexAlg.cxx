@@ -17,9 +17,9 @@
 #include "art/Framework/Core/FindManyP.h"
 
 // LArSoft includes
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/Utilities/LArProperties.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "larcore/Geometry/PlaneGeo.h"
 #include "larcore/Geometry/WireGeo.h"
 #include "lardata/Utilities/AssociationUtil.h"
@@ -40,11 +40,8 @@ TrackPairPlusVertexAlg::TrackPairPlusVertexAlg(fhicl::ParameterSet const &pset) 
 {
     this->reconfigure(pset);
     
-    art::ServiceHandle<geo::Geometry>            geometry;
-    art::ServiceHandle<util::DetectorProperties> detectorProperties;
-    
-    m_geometry = &*geometry;
-    m_detector = &*detectorProperties;
+    m_geometry = lar::providerFrom<geo::Geometry>();
+    m_detector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

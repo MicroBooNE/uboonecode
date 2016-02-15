@@ -8,7 +8,6 @@ art_make(BASENAME_ONLY
 		     lardata_AnalysisBase
 		     larcore_Geometry
 		     larcore_Geometry_Geometry_service
-		     lardata_Utilities_LArProperties_service
 		     lardata_Utilities
 		     ${ART_PERSISTENCY_COMMON}
 		     ${ART_PERSISTENCY_PROVENANCE}
@@ -31,8 +30,6 @@ art_make(BASENAME_ONLY
 		     lardata_AnalysisBase
 		     larcore_Geometry
 		     larcore_Geometry_Geometry_service
-		     lardata_Utilities_LArProperties_service
-		     lardata_Utilities_DetectorProperties_service
 		     lardata_Utilities
 		     ${ART_PERSISTENCY_COMMON}
 		     ${ART_PERSISTENCY_PROVENANCE}

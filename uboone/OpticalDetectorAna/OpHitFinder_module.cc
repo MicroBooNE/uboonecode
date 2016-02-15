@@ -29,7 +29,7 @@
 #include "larana/OpticalDetector/OpHitFinder/PulseRecoManager.h"
 #include "lardata/RecoBase/OpHit.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/Utilities/TimeService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/RawData/OpDetWaveform.h"
 #include <string>
 
@@ -128,7 +128,7 @@ void OpHitFinder::produce(art::Event & e)
   }
 
   art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::TimeService> ts;
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
   for(auto const& wf_ptr : *wfHandle) {
 

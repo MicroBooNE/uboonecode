@@ -50,9 +50,9 @@
 #include "lardata/OpticalDetectorData/OpticalTypes.h"
 #include "lardata/MCBase/MCShower.h"
 #include "lardata/MCBase/MCTrack.h"
-#include "lardata/Utilities/LArProperties.h"
+#include "lardata/DetectorInfo/LArProperties.h"
 #include "lardata/Utilities/GeometryUtilities.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
 
 // std 
 #include <vector>

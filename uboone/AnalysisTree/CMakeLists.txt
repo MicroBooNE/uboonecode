@@ -11,7 +11,6 @@ art_make(
 			lardata_RecoObjects  
 			larreco_RecoAlg
 			SignalShapingServiceMicroBooNE_service
-			lardata_Utilities_DetectorProperties_service
                         ${SIMULATIONBASE}
                         ${LARRECO_LIB}
                         ${LARDATA_LIB}
@@ -36,4 +35,3 @@ art_make(
 # install_headers()
 install_fhicl()
 install_source()
-

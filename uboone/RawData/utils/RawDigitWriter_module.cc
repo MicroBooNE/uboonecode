@@ -30,7 +30,8 @@
 #include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 #include "larevt/Filters/ChannelFilter.h"
-#include "lardata/Utilities/TimeService.h" // lardata
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 // RawDigits
 #include "lardata/RawData/raw.h" // raw::Uncompress()
 #include "lardata/RawData/RawDigit.h"
@@ -39,7 +40,7 @@
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
 // TPC Channel Map
-#include "lardata/Utilities/DatabaseUtil.h" // lardata
+#include "lardata/Utilities/DatabaseUtil.h"
 
 // ROOT
 #include "TTree.h"
@@ -247,7 +248,7 @@ namespace zmqds {
 
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     fTrigTimeStamp = ts->TriggerTime();
     fBeamTimeStamp = ts->BeamGateTime();
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;

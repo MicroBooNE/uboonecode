@@ -1,5 +1,5 @@
 #include "geometry_microboone.fcl"
-#include "timeservice_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 
@@ -15,7 +15,7 @@ services:
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
-          TimeService:            @local::microboone_timeservice
+          DetectorClocksService:            @local::microboone_detectorclocks
           DatabaseUtil:           @local::microboone_database
 	  UBOpReadoutMap:         @local::microboone_opreadoutmap
           }

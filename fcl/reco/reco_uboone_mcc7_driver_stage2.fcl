@@ -2,7 +2,7 @@
 
 process_name: McRecoStage2
 
-services.TimeService.InheritClockConfig:  false
+services.DetectorClocksService.InheritClockConfig:  false
 
 services.TFileService.fileName: "reco_stage_2_hist.root"
 physics.reco: [ @sequence::microboone_reco_mcc7_stage2 ]

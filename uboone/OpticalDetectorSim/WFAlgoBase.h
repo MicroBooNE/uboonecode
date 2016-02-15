@@ -15,7 +15,7 @@
 #define WFALGOBASE_H
 
 #include <vector>
-#include "lardata/Utilities/TimeService.h"
+#include "lardata/DetectorInfo/ElecClock.h"
 #include "UBOpticalException.h"
 
 namespace opdet {
@@ -36,11 +36,11 @@ namespace opdet {
     /**
        Core function: the algorithm is supposed to add relevant singal/noise ADC
        values to the input vector std::vector<float> wf. The tick=0 timing is 
-       provided by util::ElecClock start_time input variable which can also used
+       provided by detinfo::ElecClock start_time input variable which can also used
        to retrieve G4 time offset to electronics clock counting.
      */
     virtual void Process(std::vector<float> &wf,
-			 const ::util::ElecClock &start_time) = 0;
+			 const ::detinfo::ElecClock &start_time) = 0;
 
     virtual void Reset() {}
 
@@ -61,4 +61,3 @@ namespace opdet {
 
 #endif
 /** @} */ // end of doxygen group 
-

@@ -34,9 +34,8 @@
 #include "lardata/RawData/RawDigit.h"
 #include "lardata/RawData/raw.h"
 #include "lardata/RawData/BeamInfo.h"
-#include "lardata/Utilities/LArProperties.h"
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "larcore/SummaryData/POTSummary.h"
 #include "larsim/MCCheater/BackTracker.h"
 #include "lardata/RecoBase/Track.h"
@@ -508,10 +507,8 @@ void microboone::Diffusion::analyze(const art::Event& evt)
   }  
 
   //services
-  art::ServiceHandle<geo::Geometry> geom;  
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   art::ServiceHandle<cheat::BackTracker> bt;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> LArProp;
   
   //associations
   if (fSaveTrackInfo){
@@ -1047,7 +1044,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
    }//if (mcevts_truth)
   }//if (!isdata) 
   
-  taulife = LArProp->ElectronLifetime();
+  taulife = detprop->ElectronLifetime();
   fTree->Fill();
 }
 
@@ -1106,8 +1103,7 @@ double microboone::Diffusion::length(const recob::Track& track)
 double microboone::Diffusion::length(const simb::MCParticle& part, TVector3& start, TVector3& end)
 {
   // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
+  auto const* geom = lar::providerFrom<geo::Geometry>();
   
   // Get active volume boundary.
   double xmin = 0.;
@@ -1335,5 +1331,3 @@ namespace microboone{
 } 
 
 #endif
-
-

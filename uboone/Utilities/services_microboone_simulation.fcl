@@ -48,15 +48,15 @@ microboone_g4_dark_services.LArG4Parameters.UseModBoxRecomb: true
 microboone_detsim_dark_services:                                @local::microboone_basic_services
 microboone_detsim_dark_services.LArFFT:                         @local::microboone_larfft
 microboone_detsim_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
-microboone_detsim_dark_services.IDetPedestalService:            @local::microboone_detpedestalservice
-microboone_detsim_dark_services.IChannelStatusService:          @local::microboone_channelstatus_service
+microboone_detsim_dark_services.DetPedestalService:            @local::microboone_detpedestalservice
+microboone_detsim_dark_services.ChannelStatusService:          @local::microboone_channelstatus_service
 
 # Define microboone_simulation_dark ... (all) = (0) + (1) + (2)
 microboone_simulation_dark_services:                                @local::microboone_g4_dark_services
 microboone_simulation_dark_services.LArFFT:                         @local::microboone_larfft
 microboone_simulation_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
-microboone_simulation_dark_services.IDetPedestalService:            @local::microboone_detpedestalservice
-microboone_simulation_dark_services.IChannelStatusService:          @local::microboone_channelstatus_service
+microboone_simulation_dark_services.DetPedestalService:            @local::microboone_detpedestalservice
+microboone_simulation_dark_services.ChannelStatusService:          @local::microboone_channelstatus_service
 
 #
 # Define optical simulation included ones
@@ -65,26 +65,27 @@ microboone_simulation_dark_services.IChannelStatusService:          @local::micr
 # Define microboone_g4_services ... (1*)
 microboone_g4_services:                         @local::microboone_g4_dark_services
 microboone_g4_services.PhotonVisibilityService: @local::microboone_photonvisibilityservice
-microboone_g4_services.LArProperties.ScintYield:    40000  # 40000 ph/MeV DocDB 4914, @MToups
-microboone_g4_services.LArProperties.ScintPreScale: 0.0093 # 40000 ph/MeV DocDB 4914, @MToups
+microboone_g4_services.LArPropertiesService.ScintYield:    40000  # 40000 ph/MeV DocDB 4914, @MToups
+microboone_g4_services.LArPropertiesService.ScintPreScale: 0.0093 # 40000 ph/MeV DocDB 4914, @MToups
                                                                   # MUST match between g4 and detsim
-microboone_g4_services.LArProperties.ScintYieldRatio: 0.23
 
-microboone_g4_services.LArProperties.ScintByParticleType: true
-microboone_g4_services.LArProperties.MuonScintYield: 40000
-microboone_g4_services.LArProperties.MuonScintYieldRatio: 0.23
-microboone_g4_services.LArProperties.PionScintYield: 40000
-microboone_g4_services.LArProperties.PionScintYieldRatio: 0.23
-microboone_g4_services.LArProperties.ElectronScintYield: 33333
-microboone_g4_services.LArProperties.ElectronScintYieldRatio: 0.27
-microboone_g4_services.LArProperties.KaonScintYield: 40000
-microboone_g4_services.LArProperties.KaonScintYieldRatio: 0.23
-microboone_g4_services.LArProperties.ProtonScintYield: 32000
-microboone_g4_services.LArProperties.ProtonScintYieldRatio: 0.29
-microboone_g4_services.LArProperties.AlphaScintYield: 28000
-microboone_g4_services.LArProperties.AlphaScintYieldRatio: 0.56
+microboone_g4_services.LArPropertiesService.ScintYieldRatio: 0.23
 
-microboone_g4_services.LArProperties.EnableCerenkovLight: false # Cerenkov light OFF by default
+microboone_g4_services.LArPropertiesService.MuonScintYield: 40000
+microboone_g4_services.LArPropertiesService.MuonScintYieldRatio: 0.23
+microboone_g4_services.LArPropertiesService.ScintByParticleType: true
+microboone_g4_services.LArPropertiesService.PionScintYield: 40000
+microboone_g4_services.LArPropertiesService.PionScintYieldRatio: 0.23
+microboone_g4_services.LArPropertiesService.ElectronScintYield: 33333
+microboone_g4_services.LArPropertiesService.ElectronScintYieldRatio: 0.27
+microboone_g4_services.LArPropertiesService.KaonScintYield: 40000
+microboone_g4_services.LArPropertiesService.KaonScintYieldRatio: 0.23
+microboone_g4_services.LArPropertiesService.ProtonScintYield: 32000
+microboone_g4_services.LArPropertiesService.ProtonScintYieldRatio: 0.29
+microboone_g4_services.LArPropertiesService.AlphaScintYield: 28000
+microboone_g4_services.LArPropertiesService.AlphaScintYieldRatio: 0.56
+
+microboone_g4_services.LArPropertiesService.EnableCerenkovLight: false # Cerenkov light OFF by default
 microboone_g4_services.LArG4Parameters.UseCustomPhysics:  true
 microboone_g4_services.LArG4Parameters.EnabledPhysics:    [ "Em",
                                                             "FastOptical",
@@ -99,7 +100,7 @@ microboone_g4_services.LArG4Parameters.EnabledPhysics:    [ "Em",
 # Define microboone_detsim_services ... (2*)
 microboone_detsim_services:                   @local::microboone_detsim_dark_services
 microboone_detsim_services.UBOpticalChConfig: @local::microboone_optical_ch_config
-microboone_detsim_services.LArProperties.ScintPreScale:        0.0093   # DocDB 4914, @MToups
+microboone_detsim_services.LArPropertiesService.ScintPreScale:        0.0093   # DocDB 4914, @MToups
 microboone_detsim_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
 microboone_detsim_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
                                                                       # MUST match between g4 and detsim
@@ -111,7 +112,7 @@ microboone_simulation_services.SignalShapingServiceMicroBooNE:  @local::microboo
 microboone_simulation_services.UBOpticalChConfig:               @local::microboone_optical_ch_config
 microboone_simulation_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
 microboone_simulation_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
-microboone_simulation_services.IDetPedestalService:             @local::microboone_detpedestalservice
-microboone_simulation_services.IChannelStatusService:           @local::microboone_channelstatus_service
+microboone_simulation_services.DetPedestalService:             @local::microboone_detpedestalservice
+microboone_simulation_services.ChannelStatusService:           @local::microboone_channelstatus_service
 
 END_PROLOG

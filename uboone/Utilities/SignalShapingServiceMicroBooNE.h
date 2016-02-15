@@ -38,7 +38,7 @@
 ///                    which the input field responses are obtained
 ///                 4. Convolute the field and electronic responses,
 ///                    and then sample the convoluted function with
-///                    the nominal sampling rate (util::DetectorProperties).
+///                    the nominal sampling rate (detinfo::DetectorPropertiesService).
 ///                    NOTE: Currently this doesn't include the filter 
 ///                    function and the deconvolution kernel.
 ///                    We may want to include them later?
@@ -91,7 +91,6 @@
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/TPCGeo.h"
 #include "larcore/Geometry/PlaneGeo.h"
-#include "lardata/Utilities/TimeService.h"
 
 using DoubleVec  = std::vector<double>;
 using DoubleVec2 = std::vector< DoubleVec >;
@@ -380,4 +379,3 @@ template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute
 
 DECLARE_ART_SERVICE(util::SignalShapingServiceMicroBooNE, LEGACY)
 #endif
-

@@ -15,7 +15,7 @@
 #define OPTICALDETECTORANA_OPDETWAVEFORMANA_H
 
 #include "larana/OpticalDetector/OpHitFinder/AlgoThreshold.h"
-//#include "OpticalDetector/OpHitFinder/AlgoPedestal.h"
+// #include "larana/OpticalDetector/OpHitFinder/AlgoPedestal.h"
 #include "larana/OpticalDetector/OpHitFinder/PulseRecoManager.h"
 
 #include <TTree.h>
@@ -84,4 +84,3 @@ namespace pmtana {
 
 #endif
 /** @} */ // end of doxygen group 
-

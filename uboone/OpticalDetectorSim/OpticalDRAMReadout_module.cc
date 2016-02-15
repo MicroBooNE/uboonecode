@@ -19,8 +19,8 @@
 #include "lardata/OpticalDetectorData/FIFOChannel.h"
 #include "lardata/OpticalDetectorData/OpticalRawDigit.h"
 #include "lardata/RawData/TriggerData.h"
-#include "lardata/RawData/OpDetWaveform.h" // from lardata
-#include "lardata/Utilities/TimeService.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this code is non-portable
 #include "uboone/OpticalDetectorSim/UBOpticalException.h"
 #include "larcore/Geometry/Geometry.h" // larcore
 #include "uboone/Geometry/UBOpChannelTypes.h"  // uboonecode
@@ -139,12 +139,7 @@ namespace opdet {
     
     fReadoutFrameOffset = p.get<std::vector<optdata::Frame_t> >("ReadoutFrameOffset");
 
-    try {
-      fDataProductsStemName = p.get<std::string>( "OpDataProductStemName" );
-    }
-    catch (...) {
-      fDataProductsStemName = "opdrammcreadout";
-    }
+    fDataProductsStemName = p.get<std::string>( "OpDataProductStemName", "opdrammcreadout");
 
     // do we want to give user option to name data?
     // do this here
@@ -165,9 +160,11 @@ namespace opdet {
     // Get needed services
 
     // Obtain optical clock to be used for sample/frame number generation
-    art::ServiceHandle<util::TimeService> ts;
-    ts->preProcessEvent(event); // sets trigger time
-    ::util::ElecClock clock = ts->OpticalClock();
+    // FIXME: this code is non-portable
+    art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
+    tss->preProcessEvent(event); // sets trigger time
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksServiceStandard>();
+    ::detinfo::ElecClock clock = ts->OpticalClock();
     //std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
     // geometry and channel map services
@@ -194,7 +191,7 @@ namespace opdet {
 		<< "\033[95m" << "<<" << __PRETTY_FUNCTION__ << ">>" << "\033[00m"
 		<< std::endl << "  "
 		<< "\033[93m"
-		<< " No trigger data exists => will use the default trigger time set in TimeService..."
+		<< " No trigger data exists => will use the default trigger time set in DetectorClocksService..."
 		<< "\033[00m"
 		<< std::endl;
 

@@ -292,9 +292,8 @@
 #include "lardata/RawData/raw.h"
 #include "lardata/RawData/BeamInfo.h"
 #include "lardata/RawData/TriggerData.h"
-#include "lardata/Utilities/LArProperties.h"
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "larcore/SummaryData/POTSummary.h"
 #include "larsim/MCCheater/BackTracker.h"
 #include "lardata/RecoBase/Track.h"
@@ -3074,10 +3073,8 @@ void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
 void microboone::AnalysisTree::analyze(const art::Event& evt)
 {
   //services
-  art::ServiceHandle<geo::Geometry> geom;
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   art::ServiceHandle<cheat::BackTracker> bt;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> LArProp;
 
   // collect the sizes which might me needed to resize the tree data structure:
   bool isMC = !evt.isRealData();
@@ -4383,7 +4380,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       } // if (fSaveGeantInfo) 
     }//if (mcevts_truth)
   }//if (isMC){
-  fData->taulife = LArProp->ElectronLifetime();
+  fData->taulife = detprop->ElectronLifetime();
   fTree->Fill();
   
   if (mf::isDebugEnabled()) {
@@ -4546,7 +4543,7 @@ void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > co
 double microboone::AnalysisTree::bdist(const TVector3& pos)
 {
   // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
+  auto const* geom = lar::providerFrom<geo::Geometry>();
 
   double d1 = pos.X();                             // Distance to right side (wires).
   double d2 = 2.*geom->DetHalfWidth() - pos.X();   // Distance to left side (cathode).
@@ -4578,12 +4575,11 @@ double microboone::AnalysisTree::length(const recob::Track& track)
 
 double microboone::AnalysisTree::driftedLength(const sim::MCTrack& mctrack, TLorentzVector& tpcstart, TLorentzVector& tpcend, TLorentzVector& tpcmom){
   // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> larprop;
-  
+  auto const* geom = lar::providerFrom<geo::Geometry>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+
   //compute the drift x range
-  double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
+  double vDrift = detprop->DriftVelocity()*1e-3; //cm/ns
   double xrange[2] = {detprop->ConvertTicksToX(0,0,0,0),detprop->ConvertTicksToX(detprop->NumberTimeSamples(),0,0,0)};
   
   // Get active volume boundary.
@@ -4625,12 +4621,11 @@ double microboone::AnalysisTree::driftedLength(const sim::MCTrack& mctrack, TLor
 double microboone::AnalysisTree::driftedLength(const simb::MCParticle& p, TLorentzVector& start, TLorentzVector& end, unsigned int &starti, unsigned int &endi)
 {
   // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> larprop;
+  auto const* geom = lar::providerFrom<geo::Geometry>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   
   //compute the drift x range
-  double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
+  double vDrift = detprop->DriftVelocity()*1e-3; //cm/ns
   double xrange[2] = {detprop->ConvertTicksToX(0,0,0,0),detprop->ConvertTicksToX(detprop->NumberTimeSamples(),0,0,0)};
   
   // Get active volume boundary.
@@ -4673,7 +4668,6 @@ double microboone::AnalysisTree::length(const simb::MCParticle& p, TLorentzVecto
 {
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::LArProperties> larprop;
   
   // Get active volume boundary.
   double bnd[6] = {0.,2.*geom->DetHalfWidth(),-geom->DetHalfHeight(),geom->DetHalfHeight(),0.,geom->DetLength()};

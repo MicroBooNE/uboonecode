@@ -4,6 +4,10 @@ BEGIN_PROLOG
 
 microboone_detproperties:                   @local::standard_detproperties
 microboone_detproperties.ElectronsToADC:    6.8906513e-3 # 1fC = 43.008 ADC counts for MicroBooNE  
+microboone_detproperties.Temperature:      89
+microboone_detproperties.Electronlifetime: 8.0e3 # Canonical word for the current lifetime, per Ben Carls
+microboone_detproperties.Efield:           [0.273, 0.367,0.767] # 0.273 corresponds to 70 kV, wirebias taken from ECL#9266
+
 microboone_detproperties.NumberTimeSamples: 9600
 microboone_detproperties.TimeOffsetU:       0.
 microboone_detproperties.TimeOffsetV:       0.

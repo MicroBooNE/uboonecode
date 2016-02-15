@@ -15,7 +15,9 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "lardata/Utilities/TimeService.h"
+// #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+// #include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: not portable
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <memory>
@@ -137,7 +139,9 @@ TriggerEnforcement::TriggerEnforcement(fhicl::ParameterSet const & p)
 
 bool TriggerEnforcement::filter(art::Event & e)
 {
-  ::art::ServiceHandle< util::TimeService > ts;
+  
+  /// @bug This code is not portable and requires redesign
+  ::art::ServiceHandle< detinfo::DetectorClocksServiceStandard > ts;
 
   bool hardware_decision=false;
   bool software_decision=false;

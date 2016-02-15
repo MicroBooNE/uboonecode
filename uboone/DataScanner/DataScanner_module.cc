@@ -47,9 +47,9 @@
 #include "lardata/OpticalDetectorData/OpticalTypes.h"
 #include "lardata/MCBase/MCShower.h"
 //#include "RecoAlg/ClusterParamsAlg.h"
-#include "lardata/Utilities/LArProperties.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/Utilities/GeometryUtilities.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -228,9 +228,8 @@ namespace datascanner {
     Double_t _readout_size;   ///< Readout window size in readout time thick
 
     // Service modules
-    art::ServiceHandle<util::DetectorProperties> _detp;
-    art::ServiceHandle<util::LArProperties> _larp;
-    art::ServiceHandle<geo::Geometry> _geo;
+    detinfo::DetectorProperties const* _detp;
+    geo::GeometryCore const* _geo;
 
   };
 
@@ -253,16 +252,18 @@ namespace datascanner {
   //#######################################################################################################
   {
 
+    _detp = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    _geo = lar::providerFrom<geo::Geometry>();
+    
     //fCParamsAlg.reconfigure(pset.get< fhicl::ParameterSet >("ClusterParamsAlg"));
 
     // Set detector boundaries
-    art::ServiceHandle<geo::Geometry> geo;
-    _y_max = geo->DetHalfHeight();
+    _y_max = _geo->DetHalfHeight();
     _y_min = (-1.) * _y_max;
     _z_min = 0;
-    _z_max = geo->DetLength();
+    _z_max = _geo->DetLength();
     _x_min = 0;
-    _x_max = 2.*(geo->DetHalfWidth());
+    _x_max = 2.*(_geo->DetHalfWidth());
 
     // These should be obtained from time service
     _readout_startT = -1.6e-3;
@@ -767,7 +768,7 @@ namespace datascanner {
   {
     // Some detector constants
     CONV_WIRE2CM = _geo->WirePitch(0,1,0);    //wire pitch in cm
-    CONV_TIME2CM = (_detp->SamplingRate()/1000.) * _larp->DriftVelocity(_larp->Efield(),_larp->Temperature());
+    CONV_TIME2CM = (_detp->SamplingRate()/1000.) * _detp->DriftVelocity(_detp->Efield(),_detp->Temperature());
   }
 
   //#######################################################################################################

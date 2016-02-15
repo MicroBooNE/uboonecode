@@ -27,8 +27,6 @@ art_make( BASENAME_ONLY
 			   lardata_RawData
 			   lardata_RecoBase
 			   lardata_RecoObjects
-			   lardata_Utilities_LArProperties_service
-			   lardata_Utilities_DetectorProperties_service
 			   ${UBOONECODE_LIB}
 			   ${SIMULATIONBASE}
 			   ${LARRECO_LIB}

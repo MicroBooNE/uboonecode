@@ -18,9 +18,9 @@
 #include "larsim/Simulation/LArG4Parameters.h"
 
 
-#include "lardata/Utilities/LArProperties.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
 
 #include "larcore/Geometry/Geometry.h"
@@ -91,6 +91,8 @@
 #include "TLorentzVector.h"
 
 #include "TVector3.h"
+
+#include "TFile.h"
 
 
 #include <map>

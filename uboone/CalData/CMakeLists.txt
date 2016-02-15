@@ -12,7 +12,6 @@ art_make( BASENAME_ONLY
   	  		NoiseFilterAlgs
 	  		larcore_Geometry_Geometry_service
 	                lardata_Utilities
-			lardata_Utilities_DetectorProperties_service
 			larevt_Filters
 			lardata_RawData
 			larevt_CalibrationDBI_IOVData

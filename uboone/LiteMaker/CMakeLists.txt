@@ -21,15 +21,6 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   larcore_Geometry_Geometry_service
 	   	   larsim_Simulation
 		   SimulationBase
-		   lardata_Utilities
-		   lardata_Utilities_TimeService_service
-		   lardata_RawData
-		   lardata_MCBase
-		   larcore_SummaryData
-		   lardata_RecoBase
-		   lardata_RecoObjects
-		   lardata_Utilities_LArProperties_service
-		   lardata_Utilities_DetectorProperties_service
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}
@@ -58,7 +49,6 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   larcore_Geometry
 		   uboone_Geometry
 		   larcore_Geometry_Geometry_service
-		   lardata_Utilities_TimeService_service
 		   larsim_Simulation
 		   SimulationBase
 		   lardata_Utilities
@@ -67,8 +57,6 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   lardata_RawData
 		   lardata_RecoBase
 		   lardata_RecoObjects
-		   lardata_Utilities_LArProperties_service
-		   lardata_Utilities_DetectorProperties_service
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}

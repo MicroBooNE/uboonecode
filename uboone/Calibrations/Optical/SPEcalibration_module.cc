@@ -33,12 +33,13 @@
 // ROOT
 #include "TDirectory.h"
 #include "TTree.h"
+#include "TFile.h"
 #include "TH1D.h"
 
 // LArSoft 
 #include "larcore/SimpleTypesAndConstants/RawTypes.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/Utilities/TimeService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //Optical Channel Maps
@@ -507,7 +508,7 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 {
   // initialize data handles and services
   art::ServiceHandle<geo::UBOpReadoutMap> ub_PMT_channel_map;
-  art::ServiceHandle<util::TimeService> ts;
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
   art::Handle< std::vector< raw::OpDetWaveform > > LogicHandle;
   art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
   art::Handle< raw::DAQHeader > dhHandle;

@@ -33,11 +33,13 @@
 #include "lardata/RecoBase/Track.h"
 #include "lardata/RecoBase/Vertex.h"
 #include "lardata/AnalysisBase/CosmicTag.h"
-#include "larcore/Geometry/Geometry.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/Utilities/TimeService.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "larcore/Geometry/GeometryCore.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/Utilities/AssociationUtil.h"
-#include "lardata/Utilities/DetectorProperties.h"
 
 // ROOT includes. Note: To look up the properties of the ROOT classes,
 // use the ROOT web site; e.g.,
@@ -100,8 +102,8 @@ private:
     int fSubRun;
 
     // Other variables that will be shared between different methods.
-    art::ServiceHandle<geo::Geometry>            fGeometry;       // pointer to Geometry service
-    art::ServiceHandle<util::DetectorProperties> fDetectorProperties;
+    geo::GeometryCore const*             fGeometry;           ///< pointer to the Geometry service
+    detinfo::DetectorProperties const* fDetectorProperties; ///< Pointer to the detector properties
 
 }; // class  TPCNeutrinoIDAna
 
@@ -157,6 +159,9 @@ void  TPCNeutrinoIDAna::reconfigure(fhicl::ParameterSet const& pset)
     // For now require that we input the fully qualified input file name, including full path to file
     // **TODO** learn how to recover from art framework
     fInputFileName = pset.get<std::string>("FullyQualifiedInputFile");
+    
+    fGeometry = lar::providerFrom<geo::Geometry>();
+    fDetectorProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     
     return;
 }

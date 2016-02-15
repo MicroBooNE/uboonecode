@@ -1,7 +1,6 @@
 art_make( BASENAME_ONLY
           MODULE_LIBRARIES
                         lardata_Utilities
-                        lardata_Utilities_TimeService_service
                         larevt_Filters
                         lardata_RawData
 			larcore_SummaryData
@@ -28,4 +27,3 @@ art_make( BASENAME_ONLY
 # install_headers()
 install_fhicl()
 install_source()
-

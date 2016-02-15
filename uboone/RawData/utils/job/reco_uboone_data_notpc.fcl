@@ -1,5 +1,5 @@
 #include "geometry_microboone.fcl"
-#include "timeservice_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
@@ -17,7 +17,7 @@ microboone_reco_notpc_services:
   ExptGeoHelperInterface: @local::microboone_geometry_helper
   Geometry:               @local::microboone_geo
   UBOpReadoutMap:           @local::microboone_opreadoutmap
-  TimeService:            @local::microboone_timeservice
+  DetectorClocksService:            @local::microboone_detectorclocks
   user:
   {
     IFDH:                   {}
@@ -68,7 +68,7 @@ microboone_reco_notpc_filters: {
 
 microboone_reco_notpc: [ opflash, beamdata ]
 
-microboone_reco_notpc_services.TimeService.TrigModuleName: "daq"
+microboone_reco_notpc_services.DetectorClocksService.TrigModuleName: "daq"
 
 microboone_reco_notpc_filters.trigbnb.HardwareTriggerProducer: "daq"
 microboone_reco_notpc_filters.trigbnb.SoftwareTriggerProducer: "daq"

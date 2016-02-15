@@ -36,9 +36,10 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
-#include "lardata/OpticalDetectorData/ChannelDataGroup.h" // from lardata
-#include "larcore/Geometry/Geometry.h" // larcore
-#include "larsim/Simulation/SimPhotons.h" // larsim
+#include "lardata/OpticalDetectorData/ChannelDataGroup.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larsim/Simulation/SimPhotons.h"
 #include "UBOpticalADC.h" // uboonecode
 #include "UBLogicPulseADC.h" // uboonecode
 #include "uboone/Geometry/UBOpReadoutMap.h" // uboone
@@ -146,14 +147,14 @@ namespace opdet {
     // Get services
     //
     ::art::ServiceHandle<geo::Geometry> geom;
-    ::art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
     // allocate the container
     ::std::unique_ptr< optdata::ChannelDataGroup > wfs(new optdata::ChannelDataGroup);
     ::std::unique_ptr< std::vector<sim::BeamGateInfo > > beam_info_ptr(new std::vector<sim::BeamGateInfo>);
 
     // get the clock definition
-    ::util::ElecClock clock = ts->OpticalClock();
+    ::detinfo::ElecClock clock = ts->OpticalClock();
     clock.SetTime(ts->G4ToElecTime(fG4StartTime));
     if(clock.Time()<0)
       throw UBOpticalException(Form("Cannot start readout @ %g (before Electronics Clock start time %g)",
@@ -331,4 +332,3 @@ namespace opdet {
   }
 } 
 /** @} */ // end of doxygen group 
-

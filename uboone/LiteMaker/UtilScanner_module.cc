@@ -25,9 +25,9 @@
 #include "larcore/Geometry/OpDetGeo.h"
 #include "larcore/Geometry/WireGeo.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/Utilities/LArProperties.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/Utilities/GeometryUtilities.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
 
 // LArLite
@@ -269,8 +269,8 @@ namespace ana {
   {
     if(_detp_tree) return;
     art::ServiceHandle<art::TFileService>  fileService;    
-    art::ServiceHandle<util::DetectorProperties> _detp;
-    art::ServiceHandle<geo::Geometry> _geom;
+    auto const* _detp = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    auto const* _geom = lar::providerFrom<geo::Geometry>();
     TTree* _detp_tree = fileService->make<TTree>("DetectorProperties","");
 
     //--- Fill Variables ---//
@@ -306,14 +306,15 @@ namespace ana {
   void UtilScanner::SaveLArProperties(fhicl::ParameterSet const& pset)
   {
     if(_larp_tree) return;
-    art::ServiceHandle<util::LArProperties> _larp;
-    art::ServiceHandle<geo::Geometry> _geom;
+    auto const* _larp = lar::providerFrom<detinfo::LArPropertiesService>();
+    auto const* _detp = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    auto const* _geom = lar::providerFrom<geo::Geometry>();
 
     //--- Fill Variables ---//
     std::vector< Double_t >          fEfield(_geom->Nplanes(),0);
-    for(size_t i=0; i<fEfield.size(); ++i) { fEfield[i]=_larp->Efield(i);}
-    Double_t                         fTemperature = _larp->Temperature();
-    Double_t                         fElectronlifetime = _larp->ElectronLifetime(); ///< microseconds
+    for(size_t i=0; i<fEfield.size(); ++i) { fEfield[i]=_detp->Efield(i);}
+    Double_t                         fTemperature = _detp->Temperature();
+    Double_t                         fElectronlifetime = _detp->ElectronLifetime(); ///< microseconds
     Double_t                         fRadiationLength = _larp->RadiationLength();  ///< g/cm^2
 
     Double_t                         fArgon39DecayRate = _larp->Argon39DecayRate(); ///<  decays per cm^3 per second
@@ -436,5 +437,3 @@ namespace ana {
 
 
 } // namespace opdet
-
-

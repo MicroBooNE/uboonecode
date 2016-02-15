@@ -3,11 +3,11 @@ set( UBOONEDAQ_DATATYPES_DIR $ENV{UBOONEDAQ_DATATYPES_DIR} )
 set( IFDH_ART_DIR $ENV{IFDH_ART_DIR} )
 
 add_subdirectory(Geometry)
-if ( IFDH_ART_DIR )
-    add_subdirectory(BeamData)
-endif()
-add_subdirectory(BeamDAQ)
 add_subdirectory(RawData)
+if( UBOONEDAQ_DATATYPES_DIR )
+	add_subdirectory(BeamData)
+	add_subdirectory(BeamDAQ)
+endif()
 add_subdirectory(BeamAna)
 add_subdirectory(Utilities)
 add_subdirectory(Database)
@@ -30,8 +30,6 @@ add_subdirectory(MuCS)
 
 # Respect the order specified in lar_build, which is:
 #
-#     "SoftRelTools",
-#     "SRT_LAR",
 #     "SimpleTypesAndConstants",
 #     "larcore_Geometry",
 #     "larcore_SummaryData",

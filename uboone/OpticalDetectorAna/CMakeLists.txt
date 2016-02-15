@@ -9,7 +9,6 @@ art_make( BASENAME_ONLY
 	  MODULE_LIBRARIES larcore_Geometry
 	  	        larcore_Geometry_Geometry_service
 		        lardata_Utilities
-	       	        lardata_Utilities_TimeService_service
 	                uboone_Geometry
                         lardata_OpticalDetectorData
 			larana_OpticalDetector

@@ -27,14 +27,8 @@
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-
-#include "larcore/Geometry/Geometry.h"
-#include "lardata/Utilities/DetectorProperties.h"
-#include "lardata/Utilities/TimeService.h"
-#include "lardata/Utilities/SimpleTimeService.h"
 
 #include "lardata/RecoBase/Track.h"
 #include "lardata/RecoBase/Vertex.h"
@@ -67,9 +61,6 @@ private:
     // Pointer to the algorithm to do the work
     std::unique_ptr< neutrinoid::NeutrinoIDAlgBase > fNeutrinoIDPtr;        ///< Algorithm to to the work
     
-    // Useful services, keep copies for now (we can update during begin run periods)
-    art::ServiceHandle<geo::Geometry>                fGeometry;             ///< pointer to Geometry service
-    art::ServiceHandle<util::DetectorProperties>     fDetectorProperties;   ///< Detector properties service
 };
 
 DEFINE_ART_MODULE(TPCNeutrinoID)

@@ -32,7 +32,7 @@
 // LArSoft 
 #include "larcore/SimpleTypesAndConstants/RawTypes.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/Utilities/TimeService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 //Optical Channel Maps
 #include "uboone/Geometry/UBOpChannelTypes.h"

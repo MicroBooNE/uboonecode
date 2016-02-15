@@ -59,9 +59,8 @@ extern "C" {
 #include "larsim/Simulation/SimChannel.h"
 #include "lardata/RawData/RawDigit.h"
 #include "lardata/RawData/raw.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/Utilities/LArFFT.h"
-#include "lardata/Utilities/LArProperties.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 
 namespace art {
@@ -157,7 +156,7 @@ namespace detsim{
     fSigTime          = p.get< std::vector<int>           >("SigTime");
     fSigUnit          = p.get< bool                       >("SigUnit");
     fChannel          = p.get< unsigned int               >("Channel");
-    art::ServiceHandle<util::DetectorProperties> detprop;
+    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     fSampleRate       = detprop->SamplingRate();
     fNSamplesReadout  = detprop->NumberTimeSamples();
     fShapingTimeOrder = { {0.5, 0}, {1.0, 1}, {2.0, 2}, {3.0, 3} };
@@ -345,5 +344,3 @@ namespace detsim{
 }
 
 #endif // RAWDIGITSIMULATOR_H
-
-

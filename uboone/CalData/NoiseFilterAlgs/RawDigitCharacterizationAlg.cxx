@@ -20,7 +20,7 @@ RawDigitCharacterizationAlg::RawDigitCharacterizationAlg(fhicl::ParameterSet con
                       fHistsInitialized(false),
                       fFirstEvent(true),
                       fChannelGroups(pset),
-                      fPedestalRetrievalAlg(art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider())
+                      fPedestalRetrievalAlg(art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider())
 
 {
     reconfigure(pset);
