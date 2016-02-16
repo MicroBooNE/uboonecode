@@ -69,12 +69,18 @@
 #include "DataFormat/simphotons.h"
 
 #include "ScannerAlgo.h"
+#include "LLMetaMaker.h"
 //#include "ScannerAlgo.template.h"
 
 // std 
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
+
+// ROOT
+#include <TTimeStamp.h>
+#include <TString.h>
 
 class LiteScanner;
 
@@ -120,6 +126,10 @@ private:
   bool fStoreAss;
   /// POTSummary producer label
   std::vector<std::string> fPOTSummaryLabel_v;
+  /// Boolean to enable unique file name
+  std::string fOutFileName;
+  /// Stream name
+  std::string fStreamName;
 };
 
 
@@ -128,9 +138,20 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
   , fAlg()
  // More initializers here.
 {
+  fStreamName = p.get<std::string>("stream");
+
   //  fDataReadFlag.resize((size_t)(::larlite::data::kDATA_TYPE_MAX),std::map<std::string,
   fStoreAss = p.get<bool>("store_association");
-  _mgr.set_out_filename(p.get<std::string>("out_filename","annonymous.root"));
+
+  fOutFileName = p.get<std::string>("out_filename","annonymous.root");
+  if(p.get<bool>("unique_filename")) {
+    TString tmp_fname(p.get<std::string>("out_filename","annonymous.root"));
+    tmp_fname.ReplaceAll(".root","");
+    TTimeStamp ts;
+    fOutFileName = Form("%s_%08d_%06d_%06d.root",tmp_fname.Data(),ts.GetDate(),ts.GetTime(), (int)(ts.GetNanoSec()/1.e3));
+  }
+  _mgr.set_out_filename(fOutFileName);
+
   auto const data_pset = p.get<fhicl::ParameterSet>("DataLookUpMap");
   auto const ass_pset = p.get<fhicl::ParameterSet>("AssociationLookUpMap");
   for(size_t i = 0; i<(size_t)(::larlite::data::kDATA_TYPE_MAX); ++i) {
@@ -180,6 +201,17 @@ void LiteScanner::beginJob() {
 
 void LiteScanner::endJob() {
   _mgr.close();
+  //
+  // Create meta data
+  //
+  art::ServiceHandle<util::LLMetaMaker> meta_maker;
+
+  std::string content = meta_maker->GetContent(fStreamName);
+
+  std::string json_fname = fOutFileName + ".json";
+  std::ofstream fout(json_fname);
+  fout << content.c_str() << std::endl;
+  fout.close();
 }
 
 void LiteScanner::beginSubRun(const art::SubRun& sr)

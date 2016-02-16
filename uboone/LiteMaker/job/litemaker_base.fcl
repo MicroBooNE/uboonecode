@@ -10,6 +10,10 @@ litemaker_base:
   pot_labels: []
   # output file name
   out_filename:      "larlite_empty.root"
+  # for SAM metadata
+  stream: "empty"
+  # boolean to enable "unique" filename ... suffix becomes YYYYMMDD_HHMMSS_MICROSECONDS.root
+  unique_filename: true
 
   # Producer names specified below would be looked up & stored in
   # the output larlite file. The key represents the data product

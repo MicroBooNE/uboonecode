@@ -1,5 +1,6 @@
 #include "services_microboone.fcl"
 #include "litemc_mcinfo.fcl"
+#include "litemc_mcpart.fcl"
 #include "litemc_simch.fcl"
 #include "litemc_wire.fcl"
 #include "litemc_opdigit.fcl"
@@ -37,8 +38,9 @@ physics:
 
  analyzers:
  {
-   simch:     @local::litemc_simch
    mcinfo:    @local::litemc_mcinfo
+   mcpart:    @local::litemc_mcpart
+   simch:     @local::litemc_simch
    wire:      @local::litemc_wire
    reco2d:    @local::litemc_reco2d
    reco2dcc:  @local::litemc_reco2d_cc
@@ -53,8 +55,8 @@ physics:
    fuzzyshower: @local::litemc_reco3d_fuzzyshower
  }
 
- analyzeIt: [ simch,
-              mcinfo,
+ analyzeIt: [ mcinfo,
+              simch,
               wire,
               opdigit,
               opreco,
@@ -70,3 +72,34 @@ physics:
 
  end_paths:     [ analyzeIt ]
 }
+
+physics.analyzers.mcinfo.stream:      "mcinfo"
+physics.analyzers.mcpart.stream:      "mcpart"
+physics.analyzers.simch.stream:       "simch"
+physics.analyzers.wire.stream:        "wire"
+physics.analyzers.reco2d.stream:      "reco2d"
+physics.analyzers.reco2dcc.stream:    "reco2dcc"
+physics.analyzers.opdigit.stream:     "opdigit"
+physics.analyzers.opreco.stream:      "opreco"
+physics.analyzers.cluster3d.stream:   "cluster3d"
+physics.analyzers.kalmanhit.stream:   "kalmanhit"
+physics.analyzers.kalmanhitcc.stream: "kalmanhitcc"
+physics.analyzers.cctrack.stream:     "cctrack"
+physics.analyzers.pandora.stream:     "pandora"
+physics.analyzers.fuzzyshower.stream: "fuzzyshower"
+
+physics.analyzers.mcinfo.out_filename:      "larlite_mcinfo.root"
+physics.analyzers.mcpart.out_filename:      "larlite_mcpart.root"
+physics.analyzers.simch.out_filename:       "larlite_simch.root"
+physics.analyzers.wire.out_filename:        "larlite_wire.root"
+physics.analyzers.reco2d.out_filename:      "larlite_reco2d.root"
+physics.analyzers.reco2dcc.out_filename:    "larlite_reco2dcc.root"
+physics.analyzers.opdigit.out_filename:     "larlite_opdigit.root"
+physics.analyzers.opreco.out_filename:      "larlite_opreco.root"
+physics.analyzers.cluster3d.out_filename:   "larlite_cluster3d.root"
+physics.analyzers.kalmanhit.out_filename:   "larlite_kalmanhit.root"
+physics.analyzers.kalmanhitcc.out_filename: "larlite_kalmanhitcc.root"
+physics.analyzers.cctrack.out_filename:     "larlite_cctrack.root"
+physics.analyzers.pandora.out_filename:     "larlite_pandora.root"
+physics.analyzers.fuzzyshower.out_filename: "larlite_fuzzyshower.root"
+
