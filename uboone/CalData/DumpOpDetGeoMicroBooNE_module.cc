@@ -17,9 +17,9 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Geometry/Geometry.h"
-#include "Geometry/OpDetGeo.h"
-#include "Geometry/geo.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/OpDetGeo.h"
+#include "larcore/Geometry/geo.h"
 
 #include <iostream>
 

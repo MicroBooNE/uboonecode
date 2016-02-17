@@ -27,10 +27,10 @@
 #include "RawDigitBinAverageAlg.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
 #include "TH1.h"
 #include "TH2.h"
@@ -80,8 +80,8 @@ private:
     
     // Useful services, keep copies for now (we can update during begin run periods)
     art::ServiceHandle<geo::Geometry>            fGeometry;             ///< pointer to Geometry service
-    art::ServiceHandle<util::DetectorProperties> fDetectorProperties;   ///< Detector properties service
-    const lariov::IDetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
+    detinfo::DetectorProperties const* fDetectorProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();   ///< Detector properties service
+    const lariov::DetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
 };
 
 } // end of caldata namespace

@@ -1,12 +1,11 @@
 cet_enable_asserts()
 
-set( uboone_util_lib_list LArFFT_service
-                        LArProperties_service
-			Geometry
-			HitFinder
-			RecoBase
-			Geometry_service
-			Utilities
+set( uboone_util_lib_list lardata_Utilities_LArFFT_service
+			larcore_Geometry
+			larreco_HitFinder
+			lardata_RecoBase
+			larcore_Geometry_Geometry_service
+			lardata_Utilities
 			${SEEDSERVICE_SERVICE} # artextensions
   			${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
@@ -59,7 +58,9 @@ simple_plugin( FileCatalogMetadataRawDigit "plugin"
 install_headers()
 # do not install duplicate standard_reco_uboone.fcl file
 # hack until install_fhicl( EXCLUDES standard_reco_uboone.fcl ) does the right thing
+# (issue #11708)
 install_fhicl( LIST databaseutil_microboone.fcl
+		    detectorclocks_microboone.fcl
 		    detectorproperties_microboone.fcl
 		    evdservices_microboone.fcl
 		    tinyhitfinderana_microboone.fcl
@@ -79,4 +80,3 @@ install_fhicl( LIST databaseutil_microboone.fcl
 install_source()
 
 add_subdirectory(test)
-

@@ -51,17 +51,16 @@ extern "C" {
 #include "artextensions/SeedService/SeedService.hh"
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Simulation/sim.h"
-#include "Simulation/SimChannel.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArFFT.h"
-#include "Utilities/LArProperties.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "larsim/Simulation/sim.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/Utilities/LArFFT.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
 
 namespace art {
@@ -157,7 +156,7 @@ namespace detsim{
     fSigTime          = p.get< std::vector<int>           >("SigTime");
     fSigUnit          = p.get< bool                       >("SigUnit");
     fChannel          = p.get< unsigned int               >("Channel");
-    art::ServiceHandle<util::DetectorProperties> detprop;
+    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     fSampleRate       = detprop->SamplingRate();
     fNSamplesReadout  = detprop->NumberTimeSamples();
     fShapingTimeOrder = { {0.5, 0}, {1.0, 1}, {2.0, 2}, {3.0, 3} };
@@ -345,5 +344,3 @@ namespace detsim{
 }
 
 #endif // RAWDIGITSIMULATOR_H
-
-

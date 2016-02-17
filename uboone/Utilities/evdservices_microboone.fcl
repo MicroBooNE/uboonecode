@@ -61,8 +61,8 @@ microboone_disp:
 {
  ExptGeoHelperInterface:   @local::microboone_geometry_helper
  Geometry:                 @local::microboone_geo 
- LArProperties:            @local::microboone_properties
- DetectorProperties:       @local::microboone_detproperties
+ LArPropertiesService:     @local::microboone_properties
+ DetectorPropertiesService: @local::microboone_detproperties
  DatabaseUtil:		   @local::microboone_database   
  ColorDrawingOptions:      @local::microboone_colordrawingopt
  SimulationDrawingOptions: @local::microboone_simdrawingopt  
@@ -75,14 +75,14 @@ microboone_disp:
  LArG4Parameters:          @local::microboone_largeantparameters
  LArVoxelCalculator:       @local::microboone_larvoxelcalculator
  InfoTransfer: 		   @local::microboone_infotransfer
- TimeService:              @local::microboone_timeservice
- IDetPedestalService:      @local::microboone_detpedestalservice
- IChannelStatusService:    @local::microboone_channelstatus_service
+ DetectorClocksService:    @local::microboone_detectorclocks
+ DetPedestalService:      @local::microboone_detpedestalservice
+ ChannelStatusService:    @local::microboone_channelstatus_service
  LArFFT:                   @local::microboone_larfft
  SignalShapingServiceMicroBooNE:   @local::microboone_signalshapingservice
 }
 
-#microboone_disp.IDetPedestalService: @local::microboone_detpedestalservice
+#microboone_disp.DetPedestalService: @local::microboone_detpedestalservice
 #microboone_disp.LArFFT:                   @local::microboone_larfft
 #microboone_disp.SignalShapingServiceMicroBooNE:   @local::microboone_signalshapingservice
 

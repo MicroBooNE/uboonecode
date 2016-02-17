@@ -9,8 +9,8 @@
 // Geometry --> uboone/Geometry
 #include "uboone/Geometry/UBooNEGeometryHelper.h"
 
-#include "Geometry/ChannelMapAlg.h"
-#include "Geometry/GeometryCore.h" // larcore. geo::GeometryData_t
+#include "larcore/Geometry/ChannelMapAlg.h"
+#include "larcore/Geometry/GeometryCore.h" // larcore. geo::GeometryData_t
 
 // Migration note:
 // Geometry --> uboone/Geometry for the two below

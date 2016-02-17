@@ -19,8 +19,8 @@
 #include <vector>
 
 //LArSoft
-#include "RawData/TriggerData.h"
-#include "Utilities/ElecClock.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/DetectorInfo/ElecClock.h"
 #include "UBTrigException.h"
 
 namespace trigger
@@ -39,7 +39,7 @@ namespace trigger
   private:
     
     /// Utility data type to store time window
-    typedef std::pair<util::ElecClock,util::ElecClock> time_window_t;
+    typedef std::pair<detinfo::ElecClock,detinfo::ElecClock> time_window_t;
 
   public:
 
@@ -62,10 +62,10 @@ namespace trigger
     void ShowCandidateTriggers() const;
 
     /// Given trigger time, return BNB beam gate window start time
-    util::ElecClock BNBStartTime(const util::ElecClock& time) const;
+    detinfo::ElecClock BNBStartTime(const detinfo::ElecClock& time) const;
 
     /// Given trigger time, return NuMI beam gate window start time
-    util::ElecClock NuMIStartTime(const util::ElecClock& time) const;
+    detinfo::ElecClock NuMIStartTime(const detinfo::ElecClock& time) const;
     
   public:
 
@@ -102,25 +102,25 @@ namespace trigger
 		       unsigned short cosmic_max);
     
     /// Function to add calibration trigger with G4 time input
-    void AddTriggerCalib(const util::ElecClock& time);
+    void AddTriggerCalib(const detinfo::ElecClock& time);
 
     /// Function to add External trigger with G4 time input
-    void AddTriggerExt(const util::ElecClock& time);
+    void AddTriggerExt(const detinfo::ElecClock& time);
 
     /// Function to add PC trigger with G4 time input
-    void AddTriggerPC(const util::ElecClock& time);
+    void AddTriggerPC(const detinfo::ElecClock& time);
 
     /// Functon to add BNB beam gate input
-    void AddTriggerBNB(const util::ElecClock& time);
+    void AddTriggerBNB(const detinfo::ElecClock& time);
 
     /// Function to add NuMI beam gate input
-    void AddTriggerNuMI(const util::ElecClock& time);
+    void AddTriggerNuMI(const detinfo::ElecClock& time);
 
     /// Function to add PMT trigger input from G4 time
-    void AddTriggerPMTCosmic(const util::ElecClock& time);
+    void AddTriggerPMTCosmic(const detinfo::ElecClock& time);
 
     /// Function to add PMT trigger input from G4 time
-    void AddTriggerPMTBeam(const util::ElecClock& time);
+    void AddTriggerPMTBeam(const detinfo::ElecClock& time);
 
   protected:
     
@@ -138,7 +138,7 @@ namespace trigger
        Utility function to check if the given time stamp is inside the provided time_window_t
        assuming sample number provided and used in time_window_t is in trigger clock unit
     */
-    bool InWindow(const util::ElecClock &time,
+    bool InWindow(const detinfo::ElecClock &time,
 		  const time_window_t  &window) const
     { return ( time <= window.second && time >= window.first ); }
 
@@ -148,9 +148,9 @@ namespace trigger
     std::map<unsigned int, std::map<unsigned int,raw::Trigger> > _candidates;
 
     /// Various clocks
-    util::ElecClock _tpc_clock;
-    util::ElecClock _pmt_clock;
-    util::ElecClock _trig_clock;
+    detinfo::ElecClock _tpc_clock;
+    detinfo::ElecClock _pmt_clock;
+    detinfo::ElecClock _trig_clock;
     
     unsigned int   _trigger_counter; ///< Trigger counter
     bool           _debug_mode; ///< Verbose mode for debugging
@@ -173,19 +173,19 @@ namespace trigger
     unsigned short _numi_cosmic_allow_max; ///< NUMI cosmic allow window end after NUMI
 
     /// Predefined BNB trigger timings ... not cleared by ClearInputTriggers
-    std::vector<util::ElecClock> _bnb_timings;
+    std::vector<detinfo::ElecClock> _bnb_timings;
 
     /// Predefined NuMI trigger timings ... not cleared by ClearInputTriggers
-    std::vector<util::ElecClock> _numi_timings;
+    std::vector<detinfo::ElecClock> _numi_timings;
 
     ///< Predefined External trigger timings ... not cleared by ClearInputTriggers
-    std::vector<util::ElecClock> _ext_timings;
+    std::vector<detinfo::ElecClock> _ext_timings;
 
     ///< Predefined PC trigger timings ... not cleared by ClearInputTriggers
-    std::vector<util::ElecClock> _pc_timings;
+    std::vector<detinfo::ElecClock> _pc_timings;
 
     ///< Predefined Calibration trigger timings ... not cleared by ClearInputTriggers
-    std::vector<util::ElecClock> _calib_timings;
+    std::vector<detinfo::ElecClock> _calib_timings;
 
   }; // class UBTriggerAlgo
   

@@ -24,10 +24,10 @@ art_make( LIBRARY_NAME OpticalSubEvents
 simple_plugin( SubEventBuilder "module"
 	       OpticalSubEvents
 	       uboone_OpticalDetectorAna_OpticalSubEvents_dict
-	       RecoBase
-	       Geometry
-	       Geometry_service
-	       Utilities
+	       lardata_RecoBase
+	       larcore_Geometry
+	       larcore_Geometry_Geometry_service
+	       lardata_Utilities
                ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
                ${ART_FRAMEWORK_PRINCIPAL}

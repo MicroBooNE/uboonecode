@@ -30,41 +30,41 @@
 #include "uboone/Geometry/UBOpReadoutMap.h"
 #include "uboone/MuCS/MuCSData.h"
 #include "uboone/MuCS/MuCSRecoData.h"
-#include "Utilities/TimeService.h"
-#include "Geometry/Geometry.h"
-#include "RawData/RawDigit.h"
-#include "RawData/OpDetWaveform.h"
-#include "Simulation/SimPhotons.h"
-#include "RawData/TriggerData.h"
-#include "RecoBase/Wire.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/OpHit.h"
-#include "RecoBase/OpFlash.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/SpacePoint.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/Vertex.h"
-#include "RecoBase/EndPoint2D.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/PCAxis.h"
-#include "AnalysisBase/ParticleID.h"
-#include "AnalysisBase/Calorimetry.h"
-#include "AnalysisBase/CosmicTag.h"
-#include "AnalysisBase/FlashMatch.h"
-#include "Simulation/SimChannel.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "larsim/Simulation/SimPhotons.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "lardata/RecoBase/OpFlash.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/Shower.h"
+#include "lardata/RecoBase/Vertex.h"
+#include "lardata/RecoBase/EndPoint2D.h"
+#include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBase/PCAxis.h"
+#include "lardata/AnalysisBase/ParticleID.h"
+#include "lardata/AnalysisBase/Calorimetry.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
+#include "lardata/AnalysisBase/FlashMatch.h"
+#include "larsim/Simulation/SimChannel.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/GTruth.h"
 #include "SimulationBase/MCTruth.h"
 #include "SimulationBase/MCParticle.h"
-#include "OpticalDetectorData/FIFOChannel.h"
-#include "OpticalDetectorData/OpticalTypes.h"
-#include "MCBase/MCShower.h"
-#include "MCBase/MCTrack.h"
-#include "SummaryData/POTSummary.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/GeometryUtilities.h"
-#include "Utilities/DetectorProperties.h"
+#include "lardata/OpticalDetectorData/FIFOChannel.h"
+#include "lardata/OpticalDetectorData/OpticalTypes.h"
+#include "lardata/MCBase/MCShower.h"
+#include "lardata/MCBase/MCTrack.h"
+#include "larcore/SummaryData/POTSummary.h"
+#include "lardata/DetectorInfo/LArProperties.h"
+#include "lardata/Utilities/GeometryUtilities.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
 
 #include "DataFormat/simphotons.h"
 
@@ -213,7 +213,7 @@ void LiteScanner::analyze(art::Event const & e)
   _mgr.set_id(e.id().run(),
 	      e.id().subRun(),
 	      e.id().event());
-  art::ServiceHandle<util::TimeService> ts;
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
   ts->preProcessEvent(e);
   /*
   std::cout<<" Run: " << _mgr.run_id() << " ... "
@@ -399,7 +399,7 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
     fAlg.ScanData(dh,lite_data);
   }else{
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
     evt.getByLabel(lite_id.second, dh);

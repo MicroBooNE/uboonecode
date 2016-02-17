@@ -16,7 +16,7 @@
 #include <exception>
 
 #include "fhiclcpp/ParameterSet.h"
-#include "Utilities/UniqueRangeSet.h"
+#include "lardata/Utilities/UniqueRangeSet.h"
 
 /*!
  * When you add a new ROIAlg, you should do the following:

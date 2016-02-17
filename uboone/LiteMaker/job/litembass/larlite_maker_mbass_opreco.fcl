@@ -123,5 +123,5 @@ outputs:
  }
 }
 
-services.user.TimeService.TrigModuleName: "daq"
-services.user.TimeService.InheritClockConfig: false
+services.user.DetectorClocksService.TrigModuleName: "daq"
+services.user.DetectorClocksService.InheritClockConfig: false

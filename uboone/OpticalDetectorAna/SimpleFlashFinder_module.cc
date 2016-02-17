@@ -18,8 +18,8 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // data-products
-#include "RecoBase/OpHit.h"
-#include "RecoBase/OpFlash.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "lardata/RecoBase/OpFlash.h"
 
 #include <memory>
 #include <iostream>

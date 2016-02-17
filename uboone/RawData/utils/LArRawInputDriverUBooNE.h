@@ -24,7 +24,7 @@
 #include "uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 
 #include "uboone/Geometry/UBOpChannelTypes.h"
-#include "Utilities/DatabaseUtil.h" // lardata
+#include "lardata/Utilities/DatabaseUtil.h" // lardata
 
 #include <fstream>
 #include <vector>

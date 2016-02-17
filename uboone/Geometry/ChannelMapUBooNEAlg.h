@@ -19,8 +19,8 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "Geometry/ChannelMapStandardAlg.h" // larcore
-#include "Geometry/GeoObjectSorterStandard.h" //  larcore
+#include "larcore/Geometry/ChannelMapStandardAlg.h" // larcore
+#include "larcore/Geometry/GeoObjectSorterStandard.h" //  larcore
 #include "uboone/Geometry/UBOpChannelTypes.h" // uboonecode
 
 namespace geo {

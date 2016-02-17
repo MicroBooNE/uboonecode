@@ -10,7 +10,8 @@
 #include <iostream>
 #include <sstream>
 #include <TString.h>
-#include "Utilities/TimeService.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "UBTriggerTypes.h"
 #include "UBTriggerAlgo.h"
 
@@ -21,7 +22,7 @@ namespace trigger{
 				   _prescale(9,false)
   //##############################################################
   {
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     _trig_clock = ts->TriggerClock();
     _pmt_clock  = ts->OpticalClock();
     _tpc_clock  = ts->TPCClock();
@@ -137,12 +138,12 @@ namespace trigger{
   }
 
   //############################################################################
-  util::ElecClock UBTriggerAlgo::BNBStartTime(const util::ElecClock& time) const
+  detinfo::ElecClock UBTriggerAlgo::BNBStartTime(const detinfo::ElecClock& time) const
   //############################################################################
   {
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto clock = ts->OpticalClock(_pmt_clock.Time(time.Time()));
-    //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
+    //auto clock = detinfo::DetectorClocksService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
 
     clock += _bnb_delay;
     //clock -= _bnb_delay;
@@ -151,12 +152,12 @@ namespace trigger{
   }
 
   //#############################################################################
-  util::ElecClock UBTriggerAlgo::NuMIStartTime(const util::ElecClock& time) const
+  detinfo::ElecClock UBTriggerAlgo::NuMIStartTime(const detinfo::ElecClock& time) const
   //#############################################################################
   {
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto clock = ts->OpticalClock(_pmt_clock.Time(time.Time()));
-    //auto clock = util::TimeService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
+    //auto clock = detinfo::DetectorClocksService::GetME().OpticalClock(_pmt_clock.Time(time.Time()));
 
     clock += _numi_delay;
     //clock -= _numi_delay;
@@ -165,7 +166,7 @@ namespace trigger{
   }
 
   //##############################################################
-  void UBTriggerAlgo::AddTriggerCalib(const util::ElecClock &time)
+  void UBTriggerAlgo::AddTriggerCalib(const detinfo::ElecClock &time)
   //##############################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -179,7 +180,7 @@ namespace trigger{
   }
 
   //############################################################
-  void UBTriggerAlgo::AddTriggerExt(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerExt(const detinfo::ElecClock& time)
   //############################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -193,7 +194,7 @@ namespace trigger{
   }
 
   //###########################################################
-  void UBTriggerAlgo::AddTriggerPC(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerPC(const detinfo::ElecClock& time)
   //###########################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -336,7 +337,7 @@ namespace trigger{
 	  if(_debug_mode) Report(Form("    Combined bit %d ... now %d",i,res_bits));
 	}
     }
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto trig_time = ts->OpticalClock( res_sample,  res_frame  );
     auto beam_time = ts->OpticalClock( beam_sample, beam_frame );
     return raw::Trigger(res_number,
@@ -383,7 +384,7 @@ namespace trigger{
   }
 
   //##################################################################
-  void UBTriggerAlgo::AddTriggerPMTCosmic(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerPMTCosmic(const detinfo::ElecClock& time)
   //##################################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -404,7 +405,7 @@ namespace trigger{
   }
 
   //################################################################
-  void UBTriggerAlgo::AddTriggerPMTBeam(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerPMTBeam(const detinfo::ElecClock& time)
   //################################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -425,7 +426,7 @@ namespace trigger{
   }
 
   //############################################################
-  void UBTriggerAlgo::AddTriggerBNB(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerBNB(const detinfo::ElecClock& time)
   //############################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -443,7 +444,7 @@ namespace trigger{
   }
 
   //#############################################################
-  void UBTriggerAlgo::AddTriggerNuMI(const util::ElecClock& time)
+  void UBTriggerAlgo::AddTriggerNuMI(const detinfo::ElecClock& time)
   //#############################################################
   {
     _pmt_clock.SetTime(_pmt_clock.Time(time.Time()));
@@ -539,8 +540,8 @@ namespace trigger{
       ShowCandidateTriggers();
 
     // Just make sure trigger clock is only used for sample/frame getter (i.e. no time used)
-    _trig_clock.SetTime(::util::kTIME_MAX);
-    util::ElecClock trig_time = _trig_clock;
+    _trig_clock.SetTime(::detinfo::kTIME_MAX);
+    detinfo::ElecClock trig_time = _trig_clock;
 
     time_window_t bnb_active  (_trig_clock,_trig_clock);
     time_window_t numi_active (_trig_clock,_trig_clock);

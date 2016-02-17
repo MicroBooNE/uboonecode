@@ -18,13 +18,13 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
-#include "SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "Geometry/Geometry.h"
-#include "RecoBase/Wire.h"
-#include "RawData/RawDigit.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RawData/RawDigit.h"
 
 #include "TH1.h"
 #include "TH2.h"
@@ -193,7 +193,7 @@ void cal::ShowWire::SetHistogram(TH1F* hist,
 void cal::ShowWire::FillWaveforms(recob::Wire const& wire, raw::RawDigit const& rawdigit, TH1F* h_wire, TH1F* h_raw){
   
   //get pedestal conditions
-  const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+  const lariov::DetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
   float pedestal = pedestalRetrievalAlg.PedMean(rawdigit.Channel());
 
   size_t begin_iter=0;

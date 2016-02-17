@@ -21,7 +21,7 @@ RawDigitFilterAlg::RawDigitFilterAlg(fhicl::ParameterSet const & pset) :
     fHistsInitialized(false),
     fCharacterizationAlg(pset),
     fBinAverageAlg(pset),
-    fPedestalRetrievalAlg(art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider())
+    fPedestalRetrievalAlg(art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider())
 {
     reconfigure(pset);
 

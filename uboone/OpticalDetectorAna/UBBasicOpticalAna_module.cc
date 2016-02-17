@@ -19,9 +19,9 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
-#include "RawData/OpDetWaveform.h"
+#include "lardata/RawData/OpDetWaveform.h"
 #include "OpDetWaveformAna.h"
-#include "Utilities/TimeService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h" // lardata
 #include <vector>
 #include <string>
 
@@ -88,7 +88,7 @@ void UBBasicOpticalAna::beginJob()
 
 void UBBasicOpticalAna::analyze(art::Event const & e)
 {
-  art::ServiceHandle< util::TimeService > ts;
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
   // Implementation of required member function here.
   for(size_t i=0; i<_module_v.size(); ++i) {

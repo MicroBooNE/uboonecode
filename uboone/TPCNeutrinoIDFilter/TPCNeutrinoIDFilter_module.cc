@@ -14,29 +14,14 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "art/Framework/Services/Optional/TFileDirectory.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib/exception.h"
 #include "art/Persistency/Common/Ptr.h"
 #include "art/Framework/Core/FindManyP.h"
 
-// LArSoft includes
-#include "Geometry/Geometry.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/AssociationUtil.h"
-#include "Utilities/DetectorProperties.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-
-// LArSoft data definitions
-#include "RecoBase/Track.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/EndPoint2D.h"
-#include "RecoBase/Vertex.h"
-#include "RecoBase/OpFlash.h"
-#include "AnalysisBase/CosmicTag.h"
-#include "AnalysisBase/FlashMatch.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/Vertex.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
 
 // root
 #include "TH1D.h"

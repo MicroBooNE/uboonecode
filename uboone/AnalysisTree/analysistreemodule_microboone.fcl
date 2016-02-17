@@ -2,7 +2,7 @@ BEGIN_PROLOG
 
 microboone_analysistree:
 { 
- module_type:              "AnalysisTree"
+ module_type:              "uboone/AnalysisTree/AnalysisTree"
  DigitModuleLabel:         "daq"
  HitsModuleLabel:          "gaushit"
  LArGeantModuleLabel:      "largeant"

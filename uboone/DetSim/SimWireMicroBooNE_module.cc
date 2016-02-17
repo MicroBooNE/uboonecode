@@ -44,21 +44,20 @@
 #include "artextensions/SeedService/SeedService.hh"
 
 // LArSoft libraries
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "RawData/TriggerData.h"
-#include "Simulation/SimChannel.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/LArFFT.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/TriggerData.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/LArFFT.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "Simulation/sim.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
-#include "CalibrationDBI/Interface/IChannelStatusService.h"
-#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+#include "larsim/Simulation/sim.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
 
 ///Detector simulation of raw signals on wires
@@ -123,7 +122,7 @@ namespace detsim {
     //be made a fcl parameter but not likely to ever change
     const float adcsaturation = 4095;
 
-    ::util::ElecClock fClock; ///< TPC electronics clock
+    ::detinfo::ElecClock fClock; ///< TPC electronics clock
 
     TH1D* hTest[5] = {0, 0, 0, 0, 0};
 
@@ -239,7 +238,7 @@ namespace detsim {
 
     }
     //detector properties information
-    art::ServiceHandle<util::DetectorProperties> detprop;
+    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     fSampleRate    = detprop->SamplingRate();
     fNTimeSamples  = detprop->NumberTimeSamples();
 
@@ -325,16 +324,16 @@ namespace detsim {
     //--------------------------------------------------------------------
     
     //get pedestal conditions
-    const lariov::IDetPedestalProvider& pedestalRetrievalAlg 
-       = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+    const lariov::DetPedestalProvider& pedestalRetrievalAlg 
+       = art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
     
     //get rng for pedestals
     art::ServiceHandle<art::RandomNumberGenerator> rng;
     CLHEP::HepRandomEngine &engine = rng->getEngine("pedestal");   
     
     //channel status for simulating dead channels
-    const lariov::IChannelStatusProvider& ChannelStatusProvider
-       = art::ServiceHandle<lariov::IChannelStatusService>()->GetProvider();
+    const lariov::ChannelStatusProvider& ChannelStatusProvider
+       = art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider();
 
     //get the FFT
     art::ServiceHandle<util::LArFFT> fFFT;
@@ -353,9 +352,10 @@ namespace detsim {
     art::ServiceHandle<art::TFileService> tfs;
 
     //TimeService
-    art::ServiceHandle<util::TimeService> ts;
+    art::ServiceHandle<detinfo::DetectorClocksServiceStandard> tss;
     // In case trigger simulation is run in the same job...
-    ts->preProcessEvent(evt);
+    tss->preProcessEvent(evt);
+    auto const* ts = tss->provider();
 
     // Check if trigger data product exists or not. If not, throw a warning
     art::Handle< std::vector<raw::Trigger> > trig_array;
@@ -881,4 +881,3 @@ namespace detsim {
   }
   
 }
-

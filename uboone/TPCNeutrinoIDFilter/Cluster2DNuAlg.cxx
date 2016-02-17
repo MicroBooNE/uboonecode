@@ -26,16 +26,16 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
-#include "Geometry/PlaneGeo.h"
-#include "Geometry/WireGeo.h"
-#include "Utilities/AssociationUtil.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "larcore/Geometry/WireGeo.h"
+#include "lardata/Utilities/AssociationUtil.h"
 
-#include "RecoBase/Hit.h"
-#include "RecoBase/Cluster.h"
-#include "AnalysisBase/CosmicTag.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -48,11 +48,8 @@ Cluster2DNuAlg::Cluster2DNuAlg(fhicl::ParameterSet const &pset) : fMyProducerMod
 {
     this->reconfigure(pset);
     
-    art::ServiceHandle<geo::Geometry>            geometry;
-    art::ServiceHandle<util::DetectorProperties> detectorProperties;
-    
-    m_geometry = &*geometry;
-    m_detector = &*detectorProperties;
+    m_geometry = lar::providerFrom<geo::Geometry>();
+    m_detector = lar::providerFrom<detinfo::DetectorPropertiesService>();
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------

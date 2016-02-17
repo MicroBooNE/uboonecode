@@ -38,7 +38,7 @@ namespace opdet {
     virtual void Reset();
 
     /// Setter for waveform start time & duration
-    void SetTimeInfo(const util::ElecClock &start_freq,
+    void SetTimeInfo(const detinfo::ElecClock &start_freq,
 		     double duration);
 
   protected:
@@ -50,7 +50,7 @@ namespace opdet {
   protected:
 
     /// Time information (digitization frequency & waveform start time)
-    ::util::ElecClock fTimeInfo;
+    ::detinfo::ElecClock fTimeInfo;
 
     /// Length of waveform
     double fDuration;

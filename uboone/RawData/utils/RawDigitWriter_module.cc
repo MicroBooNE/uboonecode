@@ -27,19 +27,20 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // LArSoft includes
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "Filters/ChannelFilter.h"
-#include "Utilities/TimeService.h" // lardata
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "larevt/Filters/ChannelFilter.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 // RawDigits
-#include "RawData/raw.h" // raw::Uncompress()
-#include "RawData/RawDigit.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/RawData/raw.h" // raw::Uncompress()
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/OpDetWaveform.h"
 // Optical Channel Maps
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
 // TPC Channel Map
-#include "Utilities/DatabaseUtil.h" // lardata
+#include "lardata/Utilities/DatabaseUtil.h"
 
 // ROOT
 #include "TTree.h"
@@ -247,7 +248,7 @@ namespace zmqds {
 
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     fTrigTimeStamp = ts->TriggerTime();
     fBeamTimeStamp = ts->BeamGateTime();
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;

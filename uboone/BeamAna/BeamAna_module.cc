@@ -17,7 +17,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "SummaryData/POTSummary.h"
+#include "larcore/SummaryData/POTSummary.h"
 
 #include <string>
 

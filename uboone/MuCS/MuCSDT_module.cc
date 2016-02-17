@@ -13,48 +13,48 @@
 #define MuCSDT_Module
 
 
-#include "Simulation/SimChannel.h"
+#include "larsim/Simulation/SimChannel.h"
 
-#include "Simulation/LArG4Parameters.h"
-
-
-#include "Utilities/LArProperties.h"
-
-#include "Utilities/DetectorProperties.h"
+#include "larsim/Simulation/LArG4Parameters.h"
 
 
-#include "Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
-#include "Geometry/OpDetGeo.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+
+
+#include "larcore/Geometry/Geometry.h"
+
+#include "larcore/Geometry/OpDetGeo.h"
 
 #include "SimulationBase/MCParticle.h"
 
 #include "SimulationBase/MCTruth.h"
 
-#include "SimpleTypesAndConstants/geo_types.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
 
 
-#include "RecoBase/Hit.h"
+#include "lardata/RecoBase/Hit.h"
 
-#include "RecoAlg/SpacePointAlg.h"
+#include "larreco/RecoAlg/SpacePointAlg.h"
 
-#include "RecoBase/Cluster.h"
+#include "lardata/RecoBase/Cluster.h"
 
-#include "RecoBase/Track.h"
+#include "lardata/RecoBase/Track.h"
 
-#include "RecoBase/PFParticle.h"  
+#include "lardata/RecoBase/PFParticle.h"  
 
-#include "RecoBase/SpacePoint.h"  
+#include "lardata/RecoBase/SpacePoint.h"  
 
-#include "RecoBase/OpHit.h"  
+#include "lardata/RecoBase/OpHit.h"  
 
-#include "RecoBase/OpFlash.h"  
+#include "lardata/RecoBase/OpFlash.h"  
 
-#include "RecoObjects/BezierTrack.h"
+#include "lardata/RecoObjects/BezierTrack.h"
 
-#include "RecoAlg/TrackMomentumCalculator.h"
+#include "larreco/RecoAlg/TrackMomentumCalculator.h"
 
-#include "RawData/TriggerData.h"
+#include "lardata/RawData/TriggerData.h"
 
 
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -91,6 +91,8 @@
 #include "TLorentzVector.h"
 
 #include "TVector3.h"
+
+#include "TFile.h"
 
 
 #include <map>
