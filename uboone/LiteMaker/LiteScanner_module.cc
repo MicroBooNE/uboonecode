@@ -152,6 +152,9 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
   }
   _mgr.set_out_filename(fOutFileName);
 
+  art::ServiceHandle<util::LLMetaMaker> metamaker;
+  metamaker->addJson(fOutFileName,fStreamName);
+
   auto const data_pset = p.get<fhicl::ParameterSet>("DataLookUpMap");
   auto const ass_pset = p.get<fhicl::ParameterSet>("AssociationLookUpMap");
   for(size_t i = 0; i<(size_t)(::larlite::data::kDATA_TYPE_MAX); ++i) {
@@ -201,17 +204,6 @@ void LiteScanner::beginJob() {
 
 void LiteScanner::endJob() {
   _mgr.close();
-  //
-  // Create meta data
-  //
-  art::ServiceHandle<util::LLMetaMaker> meta_maker;
-
-  std::string content = meta_maker->GetContent(fStreamName);
-
-  std::string json_fname = fOutFileName + ".json";
-  std::ofstream fout(json_fname);
-  fout << content.c_str() << std::endl;
-  fout.close();
 }
 
 void LiteScanner::beginSubRun(const art::SubRun& sr)
@@ -275,11 +267,11 @@ void LiteScanner::analyze(art::Event const & e)
   //
   // Loop over data type to store data & locally art::Ptr
   //
-  auto const& labels_v = fAlg.ModuleLabels();
+  auto const& data_labels_v = fAlg.ModuleLabels();
 
-  for(size_t i=0; i<labels_v.size(); ++i) {
+  for(size_t i=0; i<data_labels_v.size(); ++i) {
 
-    auto const& labels = labels_v[i];
+    auto const& labels = data_labels_v[i];
     ::larlite::data::DataType_t lite_type = (::larlite::data::DataType_t)i;
 
     for(size_t j=0; j<labels.size(); ++j) {
@@ -358,12 +350,13 @@ void LiteScanner::analyze(art::Event const & e)
     }
   }
 
+  auto const& ass_labels_v = fAlg.AssLabels();
   //
   // Loop over data type to store association
   //
-  for(size_t i=0; fStoreAss && i<labels_v.size(); ++i) {
+  for(size_t i=0; fStoreAss && i<ass_labels_v.size(); ++i) {
 
-    auto const& labels = labels_v[i];
+    auto const& labels = ass_labels_v[i];
     ::larlite::data::DataType_t lite_type = (::larlite::data::DataType_t)i;
 
     for(size_t j=0; j<labels.size(); ++j) {
@@ -524,7 +517,7 @@ template<class T> void LiteScanner::SaveAssociationSource(const art::Event& evt)
 //-------------------------------------------------------------------------------------------------
 template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const size_t name_index)
 { 
-  auto lite_id = fAlg.ProductID<T>(name_index);
+  auto lite_id = fAlg.AssProductID<T>(name_index);
   //auto lite_data = _mgr.get_data(lite_id.first,lite_id.second);
   auto lite_ass = (::larlite::event_ass*)(_mgr.get_data(::larlite::data::kAssociation,lite_id.second));
   art::Handle<std::vector<T> > dh;

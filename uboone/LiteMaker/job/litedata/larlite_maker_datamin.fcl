@@ -18,9 +18,26 @@ services:
   Timing:       {}
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::standard_warning
-  #message:      @local::standard_debug # If you turn this on, uncomment the debug lines below
-  user:         @local::microboone_simulation_services 	     
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  LLMetaMaker: {Enable: true}
+  @table::microboone_simulation_services
 }
+
+services.FileCatalogMetadata.applicationVersion: "develop"
+services.FileCatalogMetadata.fileType: "mc"
+services.FileCatalogMetadata.runType: "physics"
+services.FileCatalogMetadataMicroBooNE: {
+  FCLName: "run_larlite_maker_mc.fcl"
+  FCLVersion: "develop"
+  ProjectName: "LiteMC"
+  ProjectStage: "LiteMaker"
+  ProjectVersion: "develop"
+}
+
+services.DetectorProperties.NumberTimeSamples: 6400
+services.DetectorProperties.ReadOutWindowSize: 6400
+services.TimeService.InheritClockConfig:       false
+services.TimeService.TriggerOffsetTPC:         -0.400e3
 
 source:
 {
@@ -60,3 +77,27 @@ physics:
 
 services.user.TimeService.TrigModuleName: "daq"
 services.user.TimeService.InheritClockConfig: false
+
+physics.analyzers.wire.stream:        "wire"
+physics.analyzers.reco2d.stream:      "reco2d"
+physics.analyzers.reco2dcc.stream:    "reco2dcc"
+physics.analyzers.opdigit.stream:     "opdigit"
+physics.analyzers.opreco.stream:      "opreco"
+physics.analyzers.cluster3d.stream:   "cluster3d"
+physics.analyzers.kalmanhit.stream:   "kalmanhit"
+physics.analyzers.kalmanhitcc.stream: "kalmanhitcc"
+physics.analyzers.cctrack.stream:     "cctrack"
+physics.analyzers.pandoraCosmic.stream: "pandoraCosmic"
+physics.analyzers.pandoraNu.stream:     "pandoraNu"
+
+physics.analyzers.wire.out_filename:          "larlite_wire.root"
+physics.analyzers.reco2d.out_filename:        "larlite_reco2d.root"
+physics.analyzers.reco2dcc.out_filename:      "larlite_reco2dcc.root"
+physics.analyzers.opdigit.out_filename:       "larlite_opdigit.root"
+physics.analyzers.opreco.out_filename:        "larlite_opreco.root"
+physics.analyzers.cluster3d.out_filename:     "larlite_cluster3d.root"
+physics.analyzers.kalmanhit.out_filename:     "larlite_kalmanhit.root"
+physics.analyzers.kalmanhitcc.out_filename:   "larlite_kalmanhitcc.root"
+physics.analyzers.cctrack.out_filename:       "larlite_cctrack.root"
+physics.analyzers.pandoraCosmic.out_filename: "larlite_pandoraCosmic.root"
+physics.analyzers.pandoraNu.out_filename:     "larlite_pandoraNu.root"

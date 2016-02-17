@@ -15,10 +15,10 @@ namespace larlite {
       std::string version;
       std::string data_tier;
       std::string data_stream;
-      FCLMetaData_t() : name        ("\" \"")
-		      , version     ("\" \"")
-		      , data_tier   ("\" \"")
-		      , data_stream ("\" \"")
+      FCLMetaData_t() : name        (" ")
+		      , version     (" ")
+		      , data_tier   (" ")
+		      , data_stream (" ")
       {}
     };
 
@@ -26,9 +26,9 @@ namespace larlite {
       std::string project_name;
       std::string project_stage;
       std::string project_version;
-      UBMetaData_t() : project_name    ("\" \"")
-		     , project_stage   ("\" \"")
-		     , project_version ("\" \"")
+      UBMetaData_t() : project_name    (" ")
+		     , project_stage   (" ")
+		     , project_version (" ")
       {}
     };
 
@@ -40,11 +40,11 @@ namespace larlite {
       std::string application_name;
       std::string application_version;
       FileCatalogMetaData_t() : file_format ("larlite")
-			      , file_type   ("\" \"")
-			      , group       ("\" \"")
-			      , application_family  ("\" \"")
-			      , application_name    ("\" \"")
-			      , application_version ("\" \"")
+			      , file_type   (" ")
+			      , group       (" ")
+			      , application_family  (" ")
+			      , application_name    (" ")
+			      , application_version (" ")
 
       {}
     };
@@ -52,7 +52,7 @@ namespace larlite {
     struct RunMetaData_t {
       std::string run_type;
       std::set<size_t> subruns;
-      RunMetaData_t() : run_type("\" \"")
+      RunMetaData_t() : run_type(" ")
 		      , subruns()
       {}
     };
@@ -68,8 +68,8 @@ namespace larlite {
       SAMBuiltInMetaData_t() : first_event (0)
 			     , last_event  (0)
 			     , event_count (0)
-			     , start_time  ("\" \"")
-			     , end_time    ("\" \"")
+			     , start_time  (" ")
+			     , end_time    (" ")
 			     , parents     ()
 			     , runs_m      ()
       {}

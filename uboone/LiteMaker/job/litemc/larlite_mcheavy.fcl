@@ -11,11 +11,22 @@ services:
   Timing:       {}
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::standard_warning
-  #message:      @local::standard_debug # If you turn this on, uncomment the debug lines below
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  LLMetaMaker: {Enable: true}
   @table::microboone_simulation_services
 }
 
-services.LLMetaMaker: {}
+services.FileCatalogMetadata.applicationVersion: "develop"
+services.FileCatalogMetadata.fileType: "mc"
+services.FileCatalogMetadata.runType: "physics"
+services.FileCatalogMetadataMicroBooNE: {
+  FCLName: "run_larlite_maker_mc.fcl"
+  FCLVersion: "develop"
+  ProjectName: "LiteMC"
+  ProjectStage: "LiteMaker"
+  ProjectVersion: "develop"
+}
+
 services.DetectorProperties.NumberTimeSamples: 6400
 services.DetectorProperties.ReadOutWindowSize: 6400
 services.TimeService.InheritClockConfig:       false

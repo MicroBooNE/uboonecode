@@ -6,26 +6,28 @@
 #include "LLMetaMaker.h"
 #include <TTimeStamp.h>
 #include <sstream>
-
+#include <fstream>
 
 //-----------------------------------------------------------------------------------------
 util::LLMetaMaker::LLMetaMaker(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+  : _quiet(true)
 //----------------------------------------------------------------------------------------
 {
-
+  _json_v.clear();
   reconfigure(pset);
 
-  reg.sPostOpenFile.watch     (this, &LLMetaMaker::postOpenFile     );
-
-  reg.sPreBeginRun.watch      (this, &LLMetaMaker::preBeginRun      );
-  reg.sPostBeginRun.watch     (this, &LLMetaMaker::postBeginRun     );
-
-  reg.sPreProcessEvent.watch  (this, &LLMetaMaker::preProcessEvent  );
-  reg.sPostProcessEvent.watch (this, &LLMetaMaker::postProcessEvent );
-
-  reg.sPostBeginJob.watch     (this, &LLMetaMaker::postBeginJob );
-  reg.sPostEndJob.watch       (this, &LLMetaMaker::postEndJob   );
-
+  if(!_quiet) {
+    reg.sPostOpenFile.watch     (this, &LLMetaMaker::postOpenFile     );
+    
+    reg.sPreBeginRun.watch      (this, &LLMetaMaker::preBeginRun      );
+    reg.sPostBeginRun.watch     (this, &LLMetaMaker::postBeginRun     );
+    
+    reg.sPreProcessEvent.watch  (this, &LLMetaMaker::preProcessEvent  );
+    reg.sPostProcessEvent.watch (this, &LLMetaMaker::postProcessEvent );
+    
+    reg.sPostBeginJob.watch     (this, &LLMetaMaker::postBeginJob );
+    reg.sPostEndJob.watch       (this, &LLMetaMaker::postEndJob   );
+  }
   /*
   ::larlite::sam::FCLMetaData_t         _fcl_meta;
   ::larlite::sam::UBMetaData_t          _ub_meta;
@@ -42,7 +44,9 @@ util::LLMetaMaker::LLMetaMaker(fhicl::ParameterSet const& pset, art::ActivityReg
 //------------------------------------------------------------------
 void util::LLMetaMaker::reconfigure(fhicl::ParameterSet const& pset)
 //------------------------------------------------------------------
-{}
+{
+  _quiet = !(pset.get<bool>("Enable",false));
+}
 
 //------------------------------------------------------------------
 void util::LLMetaMaker::postBeginJob()
@@ -78,6 +82,23 @@ void util::LLMetaMaker::postEndJob()
   _ub_meta.project_name    = ubmeta_handle->ProjectName();
   _ub_meta.project_stage   = ubmeta_handle->ProjectStage();
   _ub_meta.project_version = ubmeta_handle->ProjectVersion();
+
+
+  //
+  // Create json
+  //
+  for(size_t json_index=0; json_index < _json_v.size(); ++json_index) {
+
+    auto const& json_name = _json_v[json_index];
+    auto const& strm_name = _stream_v[json_index];
+
+    std::string content = this->GetContent(strm_name);
+    
+    std::ofstream fout(json_name);
+    fout << content.c_str() << std::endl;
+    fout.close();
+  }
+
 }
 
 //------------------------------------------------------------
@@ -147,7 +168,7 @@ std::string util::LLMetaMaker::GetContent(std::string stream_name) const
       << "    \"family\"  : " << _fcat_meta.application_family  << ",\n"
       << "    \"name\"    : " << _fcat_meta.application_name    << ",\n"
       << "    \"version\" : " << _fcat_meta.application_version << "\n"
-      << "  }\n"
+      << "  },\n"
       << "  \"file_format\" : \"" << _fcat_meta.file_format << "\",\n"
       << "  \"file_type\"   : "   << _fcat_meta.file_type   << ",\n"
       << "  \"group\"       : "   << _fcat_meta.group       << ",\n"
@@ -167,24 +188,36 @@ std::string util::LLMetaMaker::GetContent(std::string stream_name) const
       << "  \"last_event\"  : "   << _sam_meta.last_event  << ",\n"
       << "  \"event_count\" : "   << _sam_meta.event_count << ",\n"
       << "  \"parents\"     : [\n";
-  
+
+  size_t ctr=0;
   for(auto const& parent : _sam_meta.parents) {
-    
     size_t name_start = parent.rfind("/");
     if(name_start > parent.length()) name_start = 0;
     else ++name_start;
-    msg << "    {  \"file_name\" : \"" << parent.substr(name_start) << "\"  }\n";
+    msg << "    {  \"file_name\" : \"" << parent.substr(name_start) << "\"  }";
+    ++ctr;
+    if(ctr==_sam_meta.parents.size()) msg << "\n";
+    else msg << ",\n";
   }
   
-  msg << "  ]\n"
+  msg << "  ],\n"
       << "  \"runs\" : [\n";
-  for(auto const& run_meta : _sam_meta.runs_m) {
 
+  ctr=0;
+  for(auto const& run_meta : _sam_meta.runs_m) {
+    ++ctr;
+    size_t subrun_ctr=0;
     auto const& run = run_meta.first;
     auto const& run_type = run_meta.second.run_type;
-    for(auto const& subrun : run_meta.second.subruns)
-
-      msg << "    [  " << run << ",  " << subrun << ",  " << run_type << "]\n";
+    for(auto const& subrun : run_meta.second.subruns) {
+      
+      msg << "    [  " << run << ",  " << subrun << ",  " << run_type << "]";
+      ++subrun_ctr;
+      if(ctr == _sam_meta.runs_m.size() && subrun_ctr == run_meta.second.subruns.size())
+	msg << "\n";
+      else
+	msg << ",\n";
+    }
   }
   msg << "  ]\n"
       << "}\n";

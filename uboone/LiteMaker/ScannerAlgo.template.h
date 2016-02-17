@@ -1470,7 +1470,7 @@ namespace larlite {
     // Instantiate association container. length = # of producers for associated data type
     std::vector< ::larlite::AssSet_t> ass_set_v(fAssModuleLabel_v[ass_type_b].size(),
 						::larlite::AssSet_t());
-
+    
     // Return if there's no data products stored for associated data type
     if(!(ass_set_v.size())) return;
 
@@ -1631,6 +1631,20 @@ namespace larlite {
 	<< " is " << fModuleLabel_v[(size_t)data_type].size()
 	<< " while you requested " << name_index;
     return ::larlite::product_id(data_type,fModuleLabel_v[(size_t)(data_type)][name_index]);
+  }
+
+  //
+  // Associated ProductID
+  //
+  template <class T>
+  const ::larlite::product_id ScannerAlgo::AssProductID(size_t name_index) const
+  { auto data_type = LiteDataType<T>();
+    if(fAssModuleLabel_v[(size_t)data_type].size() <= name_index)
+      throw cet::exception(__PRETTY_FUNCTION__)
+	<< "Length of registered products for data type " << ::larlite::data::kDATA_TREE_NAME[data_type].c_str()
+	<< " is " << fAssModuleLabel_v[(size_t)data_type].size()
+	<< " while you requested " << name_index;
+    return ::larlite::product_id(data_type,fAssModuleLabel_v[(size_t)(data_type)][name_index]);
   }
 }
 #endif

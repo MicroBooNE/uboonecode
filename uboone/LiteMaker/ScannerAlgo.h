@@ -130,6 +130,10 @@ namespace larlite {
     template <class T>
     const ::larlite::product_id ProductID(size_t name_index) const;
 
+    /// Method to generate a association data product ID for a specified type (through template) and producer module label's index
+    template <class T>
+    const ::larlite::product_id AssProductID(size_t name_index) const;
+
     /// Core method: convert LArSoft data product (dh) to LArLite (lite_dh)
     template <class T>
     void ScanData(art::Handle<std::vector<T> > const &dh,
