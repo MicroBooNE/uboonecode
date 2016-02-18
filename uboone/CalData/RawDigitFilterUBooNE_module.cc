@@ -45,18 +45,20 @@
 #include "art/Persistency/Common/Ptr.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
-#include "Utilities/SimpleTimeService.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
 #include "NoiseFilterAlgs/RawDigitNoiseFilterDefs.h"
 #include "NoiseFilterAlgs/RawDigitBinAverageAlg.h"
 #include "NoiseFilterAlgs/RawDigitCharacterizationAlg.h"
 #include "NoiseFilterAlgs/RawDigitCorrelatedCorrectionAlg.h"
 #include "NoiseFilterAlgs/RawDigitFilterAlg.h"
+
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+
 
 class RawDigitFilterUBooNE : public art::EDProducer
 {
@@ -116,9 +118,9 @@ private:
     caldata::RawDigitFilterAlg                   fFilterAlg;
     
     // Useful services, keep copies for now (we can update during begin run periods)
-    art::ServiceHandle<geo::Geometry>            fGeometry;             ///< pointer to Geometry service
-    art::ServiceHandle<util::DetectorProperties> fDetectorProperties;   ///< Detector properties service
-    const lariov::IDetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
+    geo::GeometryCore const* fGeometry;                         ///< pointer to Geometry service
+    detinfo::DetectorProperties const* fDetectorProperties;   ///< Detector properties service
+    const lariov::DetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
 };
 
 DEFINE_ART_MODULE(RawDigitFilterUBooNE)
@@ -136,9 +138,12 @@ RawDigitFilterUBooNE::RawDigitFilterUBooNE(fhicl::ParameterSet const & pset) :
                       fCharacterizationAlg(pset),
                       fCorCorrectAlg(pset),
                       fFilterAlg(pset),
-                      fPedestalRetrievalAlg(art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider())
-
+                      fPedestalRetrievalAlg(*lar::providerFrom<lariov::DetPedestalService>())
 {
+    
+    fGeometry = lar::providerFrom<geo::Geometry>();
+    fDetectorProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    
     reconfigure(pset);
     produces<std::vector<raw::RawDigit> >();
 

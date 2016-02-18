@@ -9,7 +9,7 @@ services:
   ExptGeoHelperInterface:  @local::microboone_geometry_helper
   Geometry:                @local::microboone_geo
   UBOpReadoutMap:          @local::microboone_opreadoutmap
-  TimeService:             @local::microboone_timeservice
+  DetectorClocksService:             @local::microboone_detectorclocks
   DatabaseUtil:            @local::microboone_database
   message:                 @local::standard_info
 }

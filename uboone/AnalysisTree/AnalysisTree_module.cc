@@ -278,38 +278,37 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 #include "SimulationBase/MCTruth.h"
-#include "MCBase/MCShower.h"
-#include "MCBase/MCTrack.h"
-#include "MCBase/MCStep.h"
+#include "lardata/MCBase/MCShower.h"
+#include "lardata/MCBase/MCTrack.h"
+#include "lardata/MCBase/MCStep.h"
 #include "SimulationBase/MCFlux.h"
-#include "Simulation/SimChannel.h"
-#include "Simulation/AuxDetSimChannel.h"
-#include "AnalysisBase/Calorimetry.h"
-#include "AnalysisBase/ParticleID.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "RawData/BeamInfo.h"
-#include "RawData/TriggerData.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/AssociationUtil.h"
-#include "Utilities/DetectorProperties.h"
-#include "SummaryData/POTSummary.h"
-#include "MCCheater/BackTracker.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/Cluster.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/EndPoint2D.h"
-#include "RecoBase/Vertex.h"
-#include "RecoBase/OpFlash.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "RecoObjects/BezierTrack.h"
-#include "RecoAlg/TrackMomentumCalculator.h"
-#include "AnalysisBase/CosmicTag.h"
-#include "AnalysisBase/FlashMatch.h"
-#include "AnalysisBase/T0.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "larsim/Simulation/AuxDetSimChannel.h"
+#include "lardata/AnalysisBase/Calorimetry.h"
+#include "lardata/AnalysisBase/ParticleID.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/BeamInfo.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larcore/SummaryData/POTSummary.h"
+#include "larsim/MCCheater/BackTracker.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Shower.h"
+#include "lardata/RecoBase/Cluster.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/EndPoint2D.h"
+#include "lardata/RecoBase/Vertex.h"
+#include "lardata/RecoBase/OpFlash.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "lardata/RecoObjects/BezierTrack.h"
+#include "larreco/RecoAlg/TrackMomentumCalculator.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
+#include "lardata/AnalysisBase/FlashMatch.h"
+#include "lardata/AnalysisBase/T0.h"
 
 
 #include <cstddef> // std::ptrdiff_t
@@ -3074,10 +3073,8 @@ void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
 void microboone::AnalysisTree::analyze(const art::Event& evt)
 {
   //services
-  art::ServiceHandle<geo::Geometry> geom;
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   art::ServiceHandle<cheat::BackTracker> bt;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> LArProp;
 
   // collect the sizes which might me needed to resize the tree data structure:
   bool isMC = !evt.isRealData();
@@ -4383,7 +4380,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       } // if (fSaveGeantInfo) 
     }//if (mcevts_truth)
   }//if (isMC){
-  fData->taulife = LArProp->ElectronLifetime();
+  fData->taulife = detprop->ElectronLifetime();
   fTree->Fill();
   
   if (mf::isDebugEnabled()) {
@@ -4546,7 +4543,7 @@ void microboone::AnalysisTree::HitsPurity(std::vector< art::Ptr<recob::Hit> > co
 double microboone::AnalysisTree::bdist(const TVector3& pos)
 {
   // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
+  auto const* geom = lar::providerFrom<geo::Geometry>();
 
   double d1 = pos.X();                             // Distance to right side (wires).
   double d2 = 2.*geom->DetHalfWidth() - pos.X();   // Distance to left side (cathode).
@@ -4578,12 +4575,11 @@ double microboone::AnalysisTree::length(const recob::Track& track)
 
 double microboone::AnalysisTree::driftedLength(const sim::MCTrack& mctrack, TLorentzVector& tpcstart, TLorentzVector& tpcend, TLorentzVector& tpcmom){
   // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> larprop;
-  
+  auto const* geom = lar::providerFrom<geo::Geometry>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+
   //compute the drift x range
-  double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
+  double vDrift = detprop->DriftVelocity()*1e-3; //cm/ns
   double xrange[2] = {detprop->ConvertTicksToX(0,0,0,0),detprop->ConvertTicksToX(detprop->NumberTimeSamples(),0,0,0)};
   
   // Get active volume boundary.
@@ -4625,12 +4621,11 @@ double microboone::AnalysisTree::driftedLength(const sim::MCTrack& mctrack, TLor
 double microboone::AnalysisTree::driftedLength(const simb::MCParticle& p, TLorentzVector& start, TLorentzVector& end, unsigned int &starti, unsigned int &endi)
 {
   // Get geometry.
-  art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::DetectorProperties> detprop;
-  art::ServiceHandle<util::LArProperties> larprop;
+  auto const* geom = lar::providerFrom<geo::Geometry>();
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   
   //compute the drift x range
-  double vDrift = larprop->DriftVelocity()*1e-3; //cm/ns
+  double vDrift = detprop->DriftVelocity()*1e-3; //cm/ns
   double xrange[2] = {detprop->ConvertTicksToX(0,0,0,0),detprop->ConvertTicksToX(detprop->NumberTimeSamples(),0,0,0)};
   
   // Get active volume boundary.
@@ -4673,7 +4668,6 @@ double microboone::AnalysisTree::length(const simb::MCParticle& p, TLorentzVecto
 {
   // Get geometry.
   art::ServiceHandle<geo::Geometry> geom;
-  art::ServiceHandle<util::LArProperties> larprop;
   
   // Get active volume boundary.
   double bnd[6] = {0.,2.*geom->DetHalfWidth(),-geom->DetHalfHeight(),geom->DetHalfHeight(),0.,geom->DetLength()};

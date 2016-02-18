@@ -1,5 +1,5 @@
 #include "geometry_microboone.fcl"
-#include "timeservice_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 #include "opcalibration_microboone.fcl"
@@ -12,7 +12,7 @@ services:
   user: {
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
-          TimeService:            @local::microboone_timeservice
+          DetectorClocksService:            @local::microboone_detectorclocks
 	  UBOpReadoutMap:         @local::microboone_opreadoutmap
          }
 }
@@ -28,7 +28,7 @@ services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: false
 services.user.DatabaseUtil.TableName: "main_run"
 
-services.user.TimeService.TrigModuleName: "daq"
+services.user.DetectorClocksService.TrigModuleName: "daq"
 
 
 outputs:

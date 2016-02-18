@@ -1,22 +1,21 @@
 art_make( BASENAME_ONLY
           LIBRARY_NAME NoiseFilterAlgs
           LIB_LIBRARIES 
-			RawData
-                        RecoBase
-	                Utilities
+			lardata_RawData
+                        lardata_RecoBase
+	                lardata_Utilities
 	                ${FHICLCPP}
 			${CETLIB}
 			${ROOT_BASIC_LIB_LIST}
-	                Geometry
-	  		Geometry_service
-	                Utilities
-			DetectorProperties_service
-			Filters
-			RawData
-			CalibrationDBI_IOVData
-			CalibrationDBI_Providers
-			RecoBase
-			RecoBaseArt
+	                larcore_Geometry
+	  		larcore_Geometry_Geometry_service
+	                lardata_Utilities
+			larevt_Filters
+			lardata_RawData
+			larevt_CalibrationDBI_IOVData
+			larevt_CalibrationDBI_Providers
+			lardata_RecoBase
+			lardata_RecoBaseArt
 			SignalShapingServiceMicroBooNE_service
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}

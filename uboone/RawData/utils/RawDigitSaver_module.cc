@@ -15,7 +15,7 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "RawData/RawDigit.h"
+#include "lardata/RawData/RawDigit.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <memory>

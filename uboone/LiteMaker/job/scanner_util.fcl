@@ -6,8 +6,8 @@ process_name: ScanUtil
 standard_utilscanner:
 {
     module_type:              "UtilScanner"
-    DetectorProperties:       @local::microboone_detproperties
-    LArProperties:            @local::microboone_properties
+    DetectorPropertiesService:       @local::microboone_detproperties
+    LArPropertiesService:            @local::microboone_properties
     Geometry:                 @local::microboone_geo
 }
 

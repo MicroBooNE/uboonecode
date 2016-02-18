@@ -33,19 +33,19 @@
 #include "art/Utilities/Exception.h"
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "Geometry/Geometry.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "RecoBase/Wire.h"
-#include "RecoBaseArt/WireCreator.h"
-#include "Utilities/LArFFT.h"
-#include "Utilities/AssociationUtil.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RecoBaseArt/WireCreator.h"
+#include "lardata/Utilities/LArFFT.h"
+#include "lardata/Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
-#include "CalibrationDBI/Interface/IChannelStatusService.h"
-#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
 #include "WaveformPropertiesAlg.h"
 
@@ -227,7 +227,7 @@ void CalWireROI::endJob()
 void CalWireROI::produce(art::Event& evt)
 {
     //get pedestal conditions
-    const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+    const lariov::DetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
   
     // get the geometry
     art::ServiceHandle<geo::Geometry> geom;
@@ -250,7 +250,7 @@ void CalWireROI::produce(art::Event& evt)
     
     raw::ChannelID_t channel = raw::InvalidChannelID; // channel number
     
-    const lariov::IChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::IChannelStatusService>()->GetProvider();
+    const lariov::ChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider();
 
     art::ServiceHandle<util::SignalShapingServiceMicroBooNE> sss;
     double deconNorm = sss->GetDeconNorm();

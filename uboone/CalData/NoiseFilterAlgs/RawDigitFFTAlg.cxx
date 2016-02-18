@@ -6,8 +6,8 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
 
 #include <cmath>
 #include <algorithm>

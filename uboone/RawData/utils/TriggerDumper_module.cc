@@ -16,7 +16,7 @@
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "RawData/TriggerData.h"
+#include "lardata/RawData/TriggerData.h"
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 #include "uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 

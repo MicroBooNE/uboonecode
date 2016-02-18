@@ -9,16 +9,16 @@
 
 //LArSoft 
 #include "uboone/RawData/utils/LArRawInputDriverUBooNE.h"
-#include "RawData/RawDigit.h"
-#include "RawData/TriggerData.h"
-#include "RawData/DAQHeader.h"
-#include "RawData/BeamInfo.h"
-#include "RawData/OpDetWaveform.h"
-#include "Geometry/Geometry.h"
-#include "SummaryData/RunData.h"
-#include "Utilities/TimeService.h"
-#include "Utilities/ElecClock.h" // lardata
-#include "OpticalDetectorData/OpticalTypes.h" // lardata -- I want to move the enums we use back to UBooNE as they are UBooNE-specific
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/RawData/DAQHeader.h"
+#include "lardata/RawData/BeamInfo.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "larcore/SummaryData/RunData.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfo/ElecClock.h"
+#include "lardata/OpticalDetectorData/OpticalTypes.h" // I want to move the enums we use back to UBooNE as they are UBooNE-specific
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //ART, ...
@@ -886,8 +886,7 @@ namespace lris {
     
     //crate -> card -> channel -> window
 
-    ::art::ServiceHandle<geo::Geometry> geom;
-    ::art::ServiceHandle< util::TimeService > timeService;
+    auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
     ::art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     
     // pmt channel map is assumed to be time dependent. therefore we need event time to set correct map.
@@ -1114,7 +1113,7 @@ namespace lris {
 						std::vector<raw::Trigger>& trigInfo)
   {
 
-    ::art::ServiceHandle< util::TimeService > timeService;
+    auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
 
     for(auto const& it_trig_map : event_record.getTRIGSEBMap()){
 
@@ -1150,7 +1149,7 @@ namespace lris {
       unsigned int sample_64MHz = (trig_header.get2MHzSampleNumber() * 32) + (trig_header.get16MHzRemainderNumber() * 4) + trig_data.getPhase();
       unsigned int frame = trig_header.getFrame();
       //std::cout << "Trigger frame: " << frame << " ... sample : " << sample_64MHz << std::endl;
-      util::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
+      detinfo::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
 
       double trigger_time = trig_clock.Time();
       double beam_time = -1;
@@ -1194,7 +1193,7 @@ namespace lris {
   void LArRawInputDriverUBooNE::fillSWTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 						raw::ubdaqSoftwareTriggerData& trigInfo)
   {
-    ::art::ServiceHandle< util::TimeService > timeService;
+    auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
     
     std::vector<ub_FEMBeamTriggerOutput> swTrig_vect;
     try {
@@ -1379,4 +1378,3 @@ namespace lris {
   // =====================================================================  
 
 }//<---Endlris
-

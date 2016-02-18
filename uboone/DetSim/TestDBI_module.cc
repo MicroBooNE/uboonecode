@@ -20,14 +20,14 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "RawData/TriggerData.h"
-#include "Simulation/SimChannel.h"
-#include "Geometry/Geometry.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/TriggerData.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "larcore/Geometry/Geometry.h"
 
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
 
 // ROOT
@@ -91,7 +91,7 @@ void TestDBI::analyze(art::Event const & evt)
     }
   }//end loop over digits
 
-  const lariov::IDetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider();
+  const lariov::DetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
   std::cout<<"PEDESTAL "<<pedestalRetrievalAlg.PedMean(8100)<<std::endl;   
 
 

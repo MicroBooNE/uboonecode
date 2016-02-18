@@ -272,12 +272,10 @@ namespace geo {
 
     for ( unsigned int icat=0; icat<(unsigned int)opdet::NumUBOpticalChannelCategories; icat++ ) {
       std::vector< unsigned int > cat_channels;
-      try {
-	cat_channels = pset.get< std::vector<unsigned int> >( opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)icat ) );
-      }
-      catch (...) {
-	continue;
-      }
+      if (!pset.get_if_present<std::vector<unsigned int>>
+       (opdet::UBOpChannelEnumName( (opdet::UBOpticalChannelCategory_t)icat ), cat_channels)
+       )
+        continue;
 
       fNReadoutChannels += cat_channels.size();
 

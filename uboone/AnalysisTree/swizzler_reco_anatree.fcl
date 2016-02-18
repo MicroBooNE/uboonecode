@@ -1,5 +1,5 @@
 #include "geometry_microboone.fcl"
-#include "timeservice_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
@@ -57,7 +57,7 @@ microboone_tfile_metadata:
 services.ExptGeoHelperInterface: @local::microboone_geometry_helper
 services.Geometry:               @local::microboone_geo
 services.UBOpReadoutMap:           @local::microboone_opreadoutmap
-services.TimeService:            @local::microboone_timeservice
+services.DetectorClocksService:            @local::microboone_detectorclocks
 services.DatabaseUtil:           @local::microboone_database
 # Database settings
 services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
@@ -68,7 +68,7 @@ services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file.
 services.DatabaseUtil.ToughErrorTreatment: false
 services.DatabaseUtil.ShouldConnect: true
 services.DatabaseUtil.TableName: "main_run"
-services.DetectorProperties.InheritNumberTimeSamples: false
+services.DetectorPropertiesService.InheritNumberTimeSamples: false
 
 source:
 {
@@ -177,7 +177,7 @@ outputs:
   }
 }
 
-services.TimeService.TrigModuleName: "daq"
+services.DetectorClocksService.TrigModuleName: "daq"
 
 ### Here we include the file giving us run/data dependent overrides
 ##include "uboone_data_prebeam_runSettings.fcl"
@@ -193,9 +193,9 @@ services.TimeService.TrigModuleName: "daq"
 #
 # Database access for pedestals
 #
-services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
-services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
-services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:        "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
+services.DetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
+services.DetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:        "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
 
 # Notes on August 25, 2015
 # According to Leon the three parameters below are:
@@ -205,14 +205,14 @@ services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:
 # Plane space is 0.3cm
 #
 # Note that run 1591 forward, bias is -158V and +237V (from 8/13/15)
-#services.LArProperties.Efield:          [0.273,0.527,0.79] # 0.273 corresponds to 70 kV
+#services.DetectorPropertiesService.Efield:          [0.273,0.527,0.79] # 0.273 corresponds to 70 kV
 
 # Note that run 3426 forward, bias is -110V and +230V (from 10/16/15, 10:30 AM)
-services.LArProperties.Efield:          [0.273,0.367,0.767] # 0.273 corresponds to 70 kV
+services.DetectorPropertiesService.Efield:          [0.273,0.367,0.767] # 0.273 corresponds to 70 kV
 
 services.LArProperties.Electronlifetime: 13.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
 
-services.TimeService.TrigModuleName:     "daq"
+services.DetectorClocksService.TrigModuleName:     "daq"
 ################
 
 

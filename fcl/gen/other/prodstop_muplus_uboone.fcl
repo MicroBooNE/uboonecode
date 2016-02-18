@@ -98,7 +98,7 @@ outputs:
 #process_name: GenieGen
 
 # set quantum efficiency supressed scint yield to 0.03 * 24000
-services.user.LArProperties.ScintYield: 29000
+services.user.LArPropertiesService.ScintYield: 29000
 
 # enable optical physics in LArG4
 services.user.LArG4Parameters.EnabledPhysics: [ "Em",
@@ -115,7 +115,7 @@ services.user.LArG4Parameters.EnabledPhysics: [ "Em",
 services.user.LArG4Parameters.UseCustomPhysics: true
 
 # disable cerenkov light
-services.user.LArProperties.EnableCerenkovLight: false
+services.user.LArPropertiesService.EnableCerenkovLight: false
 
 outputs.out1.fileName: "prodstopmu_uboone_%tc_gen.root"
 

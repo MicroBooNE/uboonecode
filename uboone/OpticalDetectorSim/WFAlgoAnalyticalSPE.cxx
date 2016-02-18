@@ -3,6 +3,8 @@
 
 #include "WFAlgoAnalyticalSPE.h"
 
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+
 namespace opdet {
   
   //----------------------------------------------------------
@@ -21,13 +23,13 @@ namespace opdet {
 
   //--------------------------------------------------------------------
   void WFAlgoAnalyticalSPE::Process(std::vector<float> &wf,
-				    const ::util::ElecClock &start_time)
+				    const ::detinfo::ElecClock &start_time)
   //--------------------------------------------------------------------
   {
     // Predefine variables to save time later
-    ::util::ElecClock rel_spe_start = start_time;
+    ::detinfo::ElecClock rel_spe_start = start_time;
 
-    ::art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
     rel_spe_start.SetTime(0);
 
@@ -38,7 +40,7 @@ namespace opdet {
       //
 
       // Time in electronics clock frame (with T0)
-      //double time = ::util::TimeService::GetME().G4ToElecTime(t);
+      //double time = ::detinfo::DetectorClocksService::GetME().G4ToElecTime(t);
       double time = ts->G4ToElecTime(t);
 
       if(fEnableSpread) time += RandomServer::GetME().Gaus(fT0,fT0Sigma) * 1.e-3;

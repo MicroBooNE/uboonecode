@@ -1,5 +1,5 @@
 #include "geometry_microboone.fcl"
-#include "timeservice_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
@@ -177,8 +177,8 @@ physics:
  end_paths:     [ stream_notpc, stream_bnb, stream_numi, stream_ext, stream_mucs, stream_prescale ]
 }
 
-services.TimeService.TrigModuleName: "daq"
-services.DetectorProperties.InheritNumberTimeSamples: false
+services.DetectorClocksService.TrigModuleName: "daq"
+services.DetectorPropertiesService.InheritNumberTimeSamples: false
 
 physics.filters.opflashfilter.OpFlashModule : "opflash"
 physics.filters.opflashfilter.DisableFilter: false

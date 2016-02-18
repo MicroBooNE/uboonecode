@@ -8,7 +8,7 @@
 
 #include "RawDigitAndWireComparisonAlg.h"
 
-#include "RawData/raw.h" // raw::Uncompress()
+#include "lardata/RawData/raw.h" // raw::Uncompress()
 
 caldata::RawDigitAndWireComparisonAlg::RawDigitAndWireComparisonAlg(fhicl::ParameterSet const& p):
   fRawDigitPropertiesAlg(p.get<fhicl::ParameterSet>("RawDigitPropertiesAlg")),

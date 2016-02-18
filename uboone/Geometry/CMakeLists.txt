@@ -1,12 +1,12 @@
 
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME uboone_Geometry
-	  LIB_LIBRARIES Geometry
+	  LIB_LIBRARIES larcore_Geometry
                         ${MF_MESSAGELOGGER}
                         ${CETLIB}
                         ${FHICLCPP}
                         ${ROOT_BASIC_LIB_LIST}
-	  SERVICE_LIBRARIES Geometry
+	  SERVICE_LIBRARIES larcore_Geometry
 	  		uboone_Geometry
 			${MF_UTILITIES}
 	                ${FHICLCPP}

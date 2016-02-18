@@ -24,10 +24,10 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "SummaryData/POTSummary.h"
-#include "RawData/BeamInfo.h"
-#include "RawData/DAQHeader.h"
-#include "RawData/TriggerData.h"
+#include "larcore/SummaryData/POTSummary.h"
+#include "lardata/RawData/BeamInfo.h"
+#include "lardata/RawData/DAQHeader.h"
+#include "lardata/RawData/TriggerData.h"
 #include "datatypes/raw_data_access.h"
 
 #include "../BeamDAQ/beamRun.h"

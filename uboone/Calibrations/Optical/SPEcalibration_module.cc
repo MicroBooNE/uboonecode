@@ -33,12 +33,13 @@
 // ROOT
 #include "TDirectory.h"
 #include "TTree.h"
+#include "TFile.h"
 #include "TH1D.h"
 
 // LArSoft 
-#include "SimpleTypesAndConstants/RawTypes.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "Utilities/TimeService.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //Optical Channel Maps
@@ -46,11 +47,11 @@
 #include "uboone/Geometry/UBOpReadoutMap.h"
 
 //RawDigits
-#include "RawData/raw.h"
-#include "RawData/RawDigit.h"
-#include "RawData/OpDetWaveform.h"
-#include "RawData/DAQHeader.h"
-#include "RawData/TriggerData.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "lardata/RawData/DAQHeader.h"
+#include "lardata/RawData/TriggerData.h"
 
 // Pulse finding
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"
@@ -507,7 +508,7 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 {
   // initialize data handles and services
   art::ServiceHandle<geo::UBOpReadoutMap> ub_PMT_channel_map;
-  art::ServiceHandle<util::TimeService> ts;
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
   art::Handle< std::vector< raw::OpDetWaveform > > LogicHandle;
   art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
   art::Handle< raw::DAQHeader > dhHandle;

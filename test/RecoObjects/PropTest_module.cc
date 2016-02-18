@@ -13,11 +13,11 @@
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "RecoObjects/KETrack.h"
-#include "RecoObjects/SurfYZLine.h"
-#include "RecoObjects/SurfYZPlane.h"
-#include "RecoObjects/SurfXYZPlane.h"
-#include "RecoObjects/PropAny.h"
+#include "lardata/RecoObjects/KETrack.h"
+#include "lardata/RecoObjects/SurfYZLine.h"
+#include "lardata/RecoObjects/SurfYZPlane.h"
+#include "lardata/RecoObjects/SurfXYZPlane.h"
+#include "lardata/RecoObjects/PropAny.h"
 
 #include "TMath.h"
 

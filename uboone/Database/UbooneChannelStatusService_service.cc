@@ -5,23 +5,23 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "CalibrationDBI/Interface/IChannelStatusService.h"
-#include "CalibrationDBI/Providers/SIOVChannelStatusProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Providers/SIOVChannelStatusProvider.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
 
 namespace lariov{
 
   /**
      \class UbooneChannelStatusService
-     art service implementation of IChannelStatusService.  Implements 
+     art service implementation of ChannelStatusService.  Implements 
      a channel status retrieval service for database scheme in which 
      all elements in a database folder share a common interval of validity
   */
-  class UbooneChannelStatusService : public IChannelStatusService {
+  class UbooneChannelStatusService : public ChannelStatusService {
   
     public:
     
@@ -32,11 +32,11 @@ namespace lariov{
      
     private:
     
-      const IChannelStatusProvider& DoGetProvider() const override {
+      const ChannelStatusProvider& DoGetProvider() const override {
         return fProvider;
       }    
       
-      const IChannelStatusProvider* DoGetProviderPtr() const override {
+      const ChannelStatusProvider* DoGetProviderPtr() const override {
         return &fProvider;
       }
       
@@ -50,7 +50,7 @@ namespace lariov{
   };
 }//end namespace lariov
       
-DECLARE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneChannelStatusService, lariov::IChannelStatusService, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneChannelStatusService, lariov::ChannelStatusService, LEGACY)
       
 
 namespace lariov{
@@ -211,6 +211,6 @@ namespace lariov{
 
 }//end namespace lariov
 
-DEFINE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneChannelStatusService, lariov::IChannelStatusService)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneChannelStatusService, lariov::ChannelStatusService)
 
 #endif

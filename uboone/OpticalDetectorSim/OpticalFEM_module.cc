@@ -9,14 +9,14 @@
 // <http://microboone-docdb.fnal.gov:8080/cgi-bin/ShowDocument?docid=2465>
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
-#include "OpticalDetectorData/OpticalTypes.h"
-#include "OpticalDetectorData/ChannelData.h"
-#include "OpticalDetectorData/ChannelDataGroup.h"
-#include "OpticalDetectorData/FIFOChannel.h"
-#include "OpticalDetectorData/PMTTrigger.h"
-#include "Simulation/BeamGateInfo.h"
-#include "Utilities/TimeService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/OpticalDetectorData/OpticalTypes.h"
+#include "lardata/OpticalDetectorData/ChannelData.h"
+#include "lardata/OpticalDetectorData/ChannelDataGroup.h"
+#include "lardata/OpticalDetectorData/FIFOChannel.h"
+#include "lardata/OpticalDetectorData/PMTTrigger.h"
+#include "larsim/Simulation/BeamGateInfo.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "UBOpticalChConfig.h"
 #include "UBOpticalConstants.h"
 #include "uboone/Geometry/UBOpChannelTypes.h"
@@ -168,8 +168,8 @@ namespace opdet {
   {
     
     // Obtain optical clock to be used for sample/frame number generation
-    art::ServiceHandle<util::TimeService> ts;
-    ::util::ElecClock clock = ts->OpticalClock();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
+    ::detinfo::ElecClock clock = ts->OpticalClock();
     size_t numberOfGates = beamGates.size();
 
     // Determine the "begin" and "end" bin of the beam-gate
@@ -277,8 +277,8 @@ namespace opdet {
   void OpticalFEM::produce(art::Event& event)
   {
     // Obtain optical clock to be used for sample/frame number generation
-    art::ServiceHandle<util::TimeService> ts;
-    ::util::ElecClock clock = ts->OpticalClock();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
+    ::detinfo::ElecClock clock = ts->OpticalClock();
 
     // The collection of channels we'll write in response to beam
     // gates and cosmic signals.

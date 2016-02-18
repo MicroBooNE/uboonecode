@@ -11,7 +11,7 @@ services:
   FileCatalogMetadata:  @local::art_file_catalog_data
   DatabaseUtil:         @local::microboone_database
   user: {
-          TimeService:            @local::microboone_timeservice
+          DetectorClocksService:            @local::microboone_detectorclocks
           UBOpReadoutMap:         @local::microboone_opreadoutmap
 	}
 }

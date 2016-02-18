@@ -11,8 +11,8 @@
  */
 
 #include <vector>
-#include "RawData/RawDigit.h"
-#include "Utilities/UniqueRangeSet.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/Utilities/UniqueRangeSet.h"
 #include <map>
 
 
@@ -21,7 +21,7 @@
 #include "TF1.h"
 #include "TGraphErrors.h"
 
-#include "Utilities/LArFFT.h"
+#include "lardata/Utilities/LArFFT.h"
 
 namespace calibration{
 

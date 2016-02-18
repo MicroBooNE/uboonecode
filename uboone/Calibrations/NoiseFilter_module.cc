@@ -24,13 +24,12 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 
-#include "Utilities/LArFFT.h"
-#include "RawData/RawDigit.h"
-#include "RawData/raw.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
-#include "CalibrationDBI/Interface/IDetPedestalService.h"
-#include "CalibrationDBI/Interface/IDetPedestalProvider.h"
+#include "lardata/Utilities/LArFFT.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
+#include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
 namespace calibration {
 
@@ -92,7 +91,7 @@ namespace calibration {
     TH1F *currentHist;
     TH1F *currentFFTHist;
 
-    const lariov::IDetPedestalProvider&  fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
+    const lariov::DetPedestalProvider&  fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
   }; //end class Noise
 
 
@@ -100,7 +99,7 @@ namespace calibration {
   NoiseFilter::NoiseFilter(fhicl::ParameterSet const& pset)
     : EDProducer(),
     fMaxTicks(9595),
-    fPedestalRetrievalAlg(art::ServiceHandle<lariov::IDetPedestalService>()->GetPedestalProvider())
+    fPedestalRetrievalAlg(art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider())
     {
     this->reconfigure(pset);
     produces<std::vector<raw::RawDigit> >();
@@ -161,9 +160,8 @@ namespace calibration {
   void NoiseFilter::produce(art::Event & evt){
     LOG_INFO ("NoiseFilter Module") << "Processing Run " << fRun << ", Subrun " << fSubrun << ", Event " << fEvent;
 
-    art::ServiceHandle<art::TFileService> tfs;
-    art::ServiceHandle<geo::Geometry> fGeometry;
-    art::ServiceHandle<util::DetectorProperties> fDetectorProperties;
+    auto const* fGeometry = lar::providerFrom<geo::Geometry>();
+  //  auto const* fDetectorProperties = lar::providerFrom<detinfo::DetectorPropertiesService>();
     
     //filtered raw digits	
     std::unique_ptr<std::vector<raw::RawDigit> > filteredRawDigit(new std::vector<raw::RawDigit>);
@@ -990,4 +988,3 @@ void NoiseFilter::RemoveFilterFlags(TH1F *filtHist)
 } //end namespace noise
 
 #endif //NOISEFILTER_H
-

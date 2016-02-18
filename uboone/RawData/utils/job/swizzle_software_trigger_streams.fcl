@@ -1,5 +1,5 @@
 #include "geometry_microboone.fcl"
-#include "timeservice_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
@@ -217,7 +217,7 @@ physics:
 		  stream_mucs ]
 }
 
-services.TimeService.TrigModuleName: "daq"
+services.DetectorClocksService.TrigModuleName: "daq"
 
 #physics.filters.opflashfilter.OpFlashModule : "opflash"
 #physics.filters.opflashfilter.DisableFilter: false

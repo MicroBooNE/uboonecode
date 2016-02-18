@@ -35,11 +35,11 @@ namespace opdet {
     /**
        Core function: the algorithm is supposed to add relevant singal/noise ADC
        values to the input vector std::vector<float> wf. The tick=0 timing is 
-       provided by util::ElecClock start_time input variable which can also used
+       provided by detinfo::ElecClock start_time input variable which can also used
        to retrieve G4 time offset to electronics clock counting.
      */
     virtual void Process(std::vector<float> &wf,
-			 const ::util::ElecClock &start_time);
+			 const ::detinfo::ElecClock &start_time);
 
     void SetPedestal(double mean, double sigma);
 
