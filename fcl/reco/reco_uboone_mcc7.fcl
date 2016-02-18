@@ -29,6 +29,17 @@ microboone_reco_mcc7_services:
   OpDigiProperties:           @local::microboone_opdigiproperties
                               @table::microboone_services_reco
 }
+microboone_reco_mcc7_services.DetectorPropertiesService.NumberTimeSamples: 6400
+microboone_reco_mcc7_services.DetectorPropertiesService.ReadOutWindowSize: 6400
+microboone_reco_mcc7_services.DetectorClocksService.InheritClockConfig:       false
+microboone_reco_mcc7_services.DetectorClocksService.TriggerOffsetTPC:         -0.400e3
+
+microboone_reco_mcc7_services_fullrawdigits:
+{
+  PhotonVisibilityService:    @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties
+                              @table::microboone_services_reco
+}
 
 ### This is the complete list of all producers! ###
 
@@ -265,7 +276,8 @@ physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.
 microboone_reco_mcc7_producers.caldata.DigitModuleLabel:                         "digitfilter"
 
 microboone_reco_mcc7_producers.gaushit.CalDataModuleLabel:                       "caldata"
-microboone_reco_mcc7_producers.gaushit.MinSig:                                   [8.0, 8.0, 8.0]
+microboone_reco_mcc7_producers.gaushit.MinSig:                                   [5.0, 5.0, 5.0]
+microboone_reco_mcc7_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
 
 microboone_reco_mcc7_producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
 microboone_reco_mcc7_producers.fuzzycluster.CalDataModuleLabel:                  "caldata"

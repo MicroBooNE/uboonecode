@@ -210,7 +210,7 @@ services.DetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl: 
 # Note that run 3426 forward, bias is -110V and +230V (from 10/16/15, 10:30 AM)
 services.DetectorPropertiesService.Efield:          [0.273,0.367,0.767] # 0.273 corresponds to 70 kV
 
-services.LArProperties.Electronlifetime: 13.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
+services.DetectorPropertiesService.Electronlifetime: 13.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
 
 services.DetectorClocksService.TrigModuleName:     "daq"
 ################

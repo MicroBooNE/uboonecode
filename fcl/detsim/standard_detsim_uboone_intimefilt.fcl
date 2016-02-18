@@ -25,6 +25,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -46,8 +47,8 @@ physics:
  filters:
  {
     timefilter: { module_type: "FilterSimPhotonTime"
-             SimPhotonsCollectionLabel: largeant
-     TimeWindows: [ [3125,4725] ]
+                  SimPhotonsCollectionLabel: largeant
+                  TimeWindows: [ [3125,4725] ]
                   MinPhotonEnergy: -1
                   MinTotalEnergy: 0
     }	  
@@ -78,8 +79,9 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "%ifb_%tc_detsim.root"
+   SelectEvents: { SelectEvents: [ simulate ] }
    dataTier:    "detector-simulated"
+   saveMemoryObjectThreshold: 0
    compressionLevel: 1
  }
 }
-

@@ -1,5 +1,6 @@
 #include "services_microboone.fcl"
 #include "analysistreemodule_microboone.fcl"
+#include "reco_uboone_mcc7.fcl"
 
 process_name: Ana
 
@@ -12,7 +13,9 @@ services:
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_services_ana
+  BackTracker: @local::microboone_backtracker
+  #user:         @local::microboone_services_ana
+  @table::microboone_reco_mcc7_services
 }
 
 #source is now a root file

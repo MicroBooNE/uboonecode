@@ -8,8 +8,19 @@ services:
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "g4_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  TimeTracker: { 
+    printSummary : true
+    dbOutput     : {
+      filename   :  "time.db"
+      overwrite  :  true
+    }
+  }
+  MemoryTracker: {
+    ignoreTotal       : 1 # no. of events to exclude - '1' by default
+    printSummaries    : ["*"] # or any combination of ["general","event","module"]
+    includeMallocInfo : true
+    filename          : "mem.db" 
+  }
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_g4_services
@@ -20,6 +31,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -61,6 +73,7 @@ outputs:
    module_type: RootOutput
    fileName:    "%ifb_%tc_g4.root"
    dataTier:    "simulated"
+   saveMemoryObjectThreshold: 0
    compressionLevel: 1
  }
 }

@@ -213,6 +213,7 @@ microboone_reco_minimal_producers.caldata.MaxAllowedChannelStatus:              
 
 microboone_reco_minimal_producers.gaushit.CalDataModuleLabel:                              "caldata"
 microboone_reco_minimal_producers.gaushit.MinSig:                                          [ 8.0,    8.0,   8.0]
+microboone_reco_minimal_producers.gaushit.MinWidth:                                        [ 1.0,    1.0,   1.0]
 
 microboone_reco_minimal_producers.cchit.CCHitFinderAlg.MaxBumps:                           5
 microboone_reco_minimal_producers.cchit.CCHitFinderAlg.MinPeak:                            [8, 8, 8]

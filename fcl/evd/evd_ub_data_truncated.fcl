@@ -56,8 +56,14 @@ physics:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-services.RawDrawingOptions.RawDataLabel: "digitfilter"
-services.RawDrawingOptions.TotalTicks: 9600
-services.RawDrawingOptions.MinimumSignal: 20
-services.RawDrawingOptions.DrawRawDataOrCalibWires: 2
+### Use this to set the frame size for truncated readout
+services.DetectorPropertiesService.NumberTimeSamples:            6400
+services.DetectorPropertiesService.ReadOutWindowSize:            6400
+services.DetectorClocksService.InheritClockConfig:                  false
+services.DetectorClocksService.TriggerOffsetTPC:                    -0.400e3
+services.RawDrawingOptions.TotalTicks:                    6400
+
+services.RawDrawingOptions.RawDataLabel:                  "digitfilter"
+services.RawDrawingOptions.MinimumSignal:                 10
+services.RawDrawingOptions.DrawRawDataOrCalibWires:       2
 

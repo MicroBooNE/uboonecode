@@ -1,0 +1,11 @@
+#include "reco_uboone_mcc7_fullrawdigits_driver_common.fcl"
+
+process_name: McRecoStage2
+
+services.DetectorClocksService.InheritClockConfig:  false
+
+services.TFileService.fileName: "reco_stage_2_hist.root"
+physics.reco: [ @sequence::microboone_reco_mcc7_stage2 ]
+physics.trigger_paths: [ reco ]
+outputs.out1.fileName: "%ifb_%tc_reco2.root"
+outputs.out1.dataTier: "reconstructed"

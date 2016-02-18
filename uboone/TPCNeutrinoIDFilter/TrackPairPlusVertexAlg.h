@@ -11,7 +11,7 @@
 
 // LArSoft includes
 #include "larcore/Geometry/GeometryCore.h"
-#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
 // Root includes
 #include "TH1D.h"

@@ -27,10 +27,10 @@ services.FileCatalogMetadataMicroBooNE: {
   ProjectVersion: "develop"
 }
 
-services.DetectorProperties.NumberTimeSamples: 6400
-services.DetectorProperties.ReadOutWindowSize: 6400
-services.TimeService.InheritClockConfig:       false
-services.TimeService.TriggerOffsetTPC:         -0.400e3
+services.DetectorPropertiesService.NumberTimeSamples: 6400
+services.DetectorPropertiesService.ReadOutWindowSize: 6400
+services.DetectorClocksService.InheritClockConfig:       false
+services.DetectorClocksService.TriggerOffsetTPC:         -0.400e3
 
 source:
 {
