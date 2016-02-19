@@ -17,6 +17,8 @@
 #include "art/Persistency/Common/Ptr.h"
 #include "art/Persistency/Common/PtrVector.h"
 
+#include "LLMetaData.h"
+
 namespace util{
 
   class LLMetaMaker {
@@ -44,9 +46,18 @@ namespace util{
     void postBeginJob();
     void postEndJob();
 
-  protected:
+    std::string GetContent(std::string stream_name) const;
 
-    std::vector<std::string> _litefile_v;
+    void addJson(const std::string fname, const std::string strm) { _json_v.push_back(fname + ".json"); _stream_v.push_back(strm); }
+
+  protected:
+    bool _quiet;
+    std::vector<std::string>              _json_v;
+    std::vector<std::string>              _stream_v;
+    ::larlite::sam::FCLMetaData_t         _fcl_meta;
+    ::larlite::sam::UBMetaData_t          _ub_meta;
+    ::larlite::sam::FileCatalogMetaData_t _fcat_meta;
+    ::larlite::sam::SAMBuiltInMetaData_t  _sam_meta;
 
   }; // class LLMetaMaker
 

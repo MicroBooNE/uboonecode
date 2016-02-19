@@ -62,19 +62,25 @@
 #include "lardata/MCBase/MCShower.h"
 #include "lardata/MCBase/MCTrack.h"
 #include "larcore/SummaryData/POTSummary.h"
-#include "lardata/DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/Utilities/GeometryUtilities.h"
-#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
 #include "DataFormat/simphotons.h"
 
 #include "ScannerAlgo.h"
+#include "LLMetaMaker.h"
 //#include "ScannerAlgo.template.h"
 
 // std 
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
+
+// ROOT
+#include <TTimeStamp.h>
+#include <TString.h>
 
 class LiteScanner;
 
@@ -120,6 +126,10 @@ private:
   bool fStoreAss;
   /// POTSummary producer label
   std::vector<std::string> fPOTSummaryLabel_v;
+  /// Boolean to enable unique file name
+  std::string fOutFileName;
+  /// Stream name
+  std::string fStreamName;
 };
 
 
@@ -128,9 +138,23 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
   , fAlg()
  // More initializers here.
 {
+  fStreamName = p.get<std::string>("stream");
+
   //  fDataReadFlag.resize((size_t)(::larlite::data::kDATA_TYPE_MAX),std::map<std::string,
   fStoreAss = p.get<bool>("store_association");
-  _mgr.set_out_filename(p.get<std::string>("out_filename","annonymous.root"));
+
+  fOutFileName = p.get<std::string>("out_filename","annonymous.root");
+  if(p.get<bool>("unique_filename")) {
+    TString tmp_fname(p.get<std::string>("out_filename","annonymous.root"));
+    tmp_fname.ReplaceAll(".root","");
+    TTimeStamp ts;
+    fOutFileName = Form("%s_%08d_%06d_%06d.root",tmp_fname.Data(),ts.GetDate(),ts.GetTime(), (int)(ts.GetNanoSec()/1.e3));
+  }
+  _mgr.set_out_filename(fOutFileName);
+
+  art::ServiceHandle<util::LLMetaMaker> metamaker;
+  metamaker->addJson(fOutFileName,fStreamName);
+
   auto const data_pset = p.get<fhicl::ParameterSet>("DataLookUpMap");
   auto const ass_pset = p.get<fhicl::ParameterSet>("AssociationLookUpMap");
   for(size_t i = 0; i<(size_t)(::larlite::data::kDATA_TYPE_MAX); ++i) {
@@ -243,11 +267,11 @@ void LiteScanner::analyze(art::Event const & e)
   //
   // Loop over data type to store data & locally art::Ptr
   //
-  auto const& labels_v = fAlg.ModuleLabels();
+  auto const& data_labels_v = fAlg.ModuleLabels();
 
-  for(size_t i=0; i<labels_v.size(); ++i) {
+  for(size_t i=0; i<data_labels_v.size(); ++i) {
 
-    auto const& labels = labels_v[i];
+    auto const& labels = data_labels_v[i];
     ::larlite::data::DataType_t lite_type = (::larlite::data::DataType_t)i;
 
     for(size_t j=0; j<labels.size(); ++j) {
@@ -326,12 +350,13 @@ void LiteScanner::analyze(art::Event const & e)
     }
   }
 
+  auto const& ass_labels_v = fAlg.AssLabels();
   //
   // Loop over data type to store association
   //
-  for(size_t i=0; fStoreAss && i<labels_v.size(); ++i) {
+  for(size_t i=0; fStoreAss && i<ass_labels_v.size(); ++i) {
 
-    auto const& labels = labels_v[i];
+    auto const& labels = ass_labels_v[i];
     ::larlite::data::DataType_t lite_type = (::larlite::data::DataType_t)i;
 
     for(size_t j=0; j<labels.size(); ++j) {
@@ -492,7 +517,7 @@ template<class T> void LiteScanner::SaveAssociationSource(const art::Event& evt)
 //-------------------------------------------------------------------------------------------------
 template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const size_t name_index)
 { 
-  auto lite_id = fAlg.ProductID<T>(name_index);
+  auto lite_id = fAlg.AssProductID<T>(name_index);
   //auto lite_data = _mgr.get_data(lite_id.first,lite_id.second);
   auto lite_ass = (::larlite::event_ass*)(_mgr.get_data(::larlite::data::kAssociation,lite_id.second));
   art::Handle<std::vector<T> > dh;

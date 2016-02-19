@@ -11,9 +11,26 @@ services:
   Timing:       {}
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::standard_warning
-  #message:      @local::standard_debug # If you turn this on, uncomment the debug lines below
-  user:         @local::microboone_services 	     
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  LLMetaMaker: {Enable: true}
+  @table::microboone_simulation_services
 }
+
+services.FileCatalogMetadata.applicationVersion: "develop"
+services.FileCatalogMetadata.fileType: "mc"
+services.FileCatalogMetadata.runType: "physics"
+services.FileCatalogMetadataMicroBooNE: {
+  FCLName: "run_larlite_maker_mc.fcl"
+  FCLVersion: "develop"
+  ProjectName: "LiteMC"
+  ProjectStage: "LiteMaker"
+  ProjectVersion: "develop"
+}
+
+services.DetectorPropertiesService.NumberTimeSamples: 6400
+services.DetectorPropertiesService.ReadOutWindowSize: 6400
+services.DetectorClocksService.InheritClockConfig:       false
+services.DetectorClocksService.TriggerOffsetTPC:         -0.400e3
 
 source:
 {
@@ -37,3 +54,8 @@ physics:
  end_paths:     [ analyzeIt ]
 }
 
+physics.analyzers.mcpart.stream:      "mcpart"
+physics.analyzers.simch.stream:       "simch"
+
+physics.analyzers.mcpart.out_filename:      "larlite_mcpart.root"
+physics.analyzers.simch.out_filename:       "larlite_simch.root"

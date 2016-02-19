@@ -6,8 +6,8 @@
 
 BEGIN_PROLOG
 
-microboone_timeservice: @local::microboone_detectorclocks
+microboone_detectorclocks: @local::microboone_detectorclocks
 
-microboone_timeservice_1window: @local::microboone_detectorclocks_1window
+microboone_detectorclocks_1window: @local::microboone_detectorclocks_1window
 
 END_PROLOG

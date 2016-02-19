@@ -9,8 +9,19 @@ services:
   scheduler:               { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService:            { }
-  Timing:                  {}
-  SimpleMemoryCheck:       { ignoreTotal: 1 } # default is one
+  TimeTracker: { 
+    printSummary : true
+    dbOutput     : {
+      filename   :  "time.db"
+      overwrite  :  true
+    }
+  }
+  MemoryTracker: {
+    ignoreTotal       : 1 # no. of events to exclude - '1' by default
+    printSummaries    : ["*"] # or any combination of ["general","event","module"]
+    includeMallocInfo : true
+    filename          : "mem.db" 
+  }
   RandomNumberGenerator:   {} #ART native random number generator
   message:                 @local::microboone_message_services_prod_debug
   FileCatalogMetadata:     @local::art_file_catalog_mc
@@ -20,6 +31,13 @@ services:
 process_name: McRecoCommon
 
 services.DatabaseUtil.ShouldConnect: false
+
+# Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
+#THIS IS DONE IN reco_uboone_mcc7.fcl
+#services.DetectorPropertiesService.NumberTimeSamples: 6400
+#services.DetectorPropertiesService.ReadOutWindowSize: 6400
+#services.DetectorClocksService.InheritClockConfig:    false
+#services.DetectorClocksService.TriggerOffsetTPC:      -0.400e3
 
 #source is a root file
 source:

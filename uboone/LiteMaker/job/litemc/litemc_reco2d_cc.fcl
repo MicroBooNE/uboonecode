@@ -8,16 +8,16 @@ litemc_reco2d_cc.out_filename: "larlite_reco2d_cc.root"
 
 litemc_reco2d_cc.DataLookUpMap:
 {
-  hit:        ["cccluster"]
-  cluster:    ["cccluster"]
+  hit:        ["lineluster"]
+  cluster:    ["lineluster"]
   vertex:     []
   endpoint2d: []
 }
 
 litemc_reco2d_cc.AssociationLookUpMap:
 {
-  hit:        ["cccluster"]
-  cluster:    ["cccluster"]
+  hit:        ["linecluster"]
+  cluster:    ["linecluster"]
   vertex:     []
   endpoint2d: []
 }

@@ -45,6 +45,9 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 
           MODULE_LIBRARIES 	  		   
 		   uboonecode_uboone_LiteMaker	   
+	      	   TFileMetadataMicroBooNE_service
+	      	   FileCatalogMetadataMicroBooNE_service
+		   LLMetaMaker_service
 		   uboonecode_uboone_MuCS
 		   larcore_Geometry
 		   uboone_Geometry
@@ -81,6 +84,9 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		)
 
 simple_plugin(LLMetaMaker "service"
+	      TFileMetadataMicroBooNE_service
+	      FileCatalogMetadataMicroBooNE_service
+	      ${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}	      
 	      ${ART_UTILITIES}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
