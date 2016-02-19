@@ -83,16 +83,16 @@ outputs:
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_bnb ] }
   }
- #outbnbunbiased:
- # {
- #  module_type: RootOutput
- #  fileName: "%ifb_%tc_bnb_unbiased.root"
- #  dataTier: "raw"
- #  streamName: "outbnbunbiased"
- #  compressionLevel: 3
- #  saveMemoryObjectThreshold: 0
- #  SelectEvents: { SelectEvents: [ path_bnb_unbiased ] }
- # }
+ outbnbunbiased:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_bnb_unbiased.root"
+   dataTier: "raw"
+   streamName: "outbnbunbiased"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_bnb_unbiased ] }
+  }
  outnumi:
   {
    module_type: RootOutput
@@ -103,16 +103,16 @@ outputs:
    saveMemoryObjectThreshold: 0
    SelectEvents: { SelectEvents: [ path_numi ] }
   }
- #outnumiunbiased:
- # {
- #  module_type: RootOutput
- #  fileName: "%ifb_%tc_numi_unbiased.root"
- #  dataTier: "raw"
- #  streamName: "outnumiunbiased"
- #  compressionLevel: 3
- #  saveMemoryObjectThreshold: 0
- #  SelectEvents: { SelectEvents: [ path_numi_unbiased ] }
- # }
+ outnumiunbiased:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_numi_unbiased.root"
+   dataTier: "raw"
+   streamName: "outnumiunbiased"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_numi_unbiased ] }
+  }
  outextbnb:
   {
    module_type: RootOutput
@@ -178,9 +178,9 @@ physics:
 
  path_notpc:         [ @sequence::microboone_reco_notpc ]
  path_bnb:           [ swtrigbnb ]
- #path_bnb_unbiased:  [ swtrigbnbunbiased ]
+ path_bnb_unbiased:  [ swtrigbnbunbiased ]
  path_numi:          [ swtrignumi ]
- #path_numi_unbiased: [ swtrignumiunbiased ]
+ path_numi_unbiased: [ swtrignumiunbiased ]
  path_ext_bnb:       [ swtrigextbnb ]
  path_ext_numi:      [ swtrigextnumi ]
  path_mucs:          [ trigmucs ]
@@ -188,9 +188,9 @@ physics:
 
  stream_notpc:         [ outnotpc ]
  stream_bnb:           [ outbnb ]
- #stream_bnb_unbiased:  [ outbnbunbiased ]
+ stream_bnb_unbiased:  [ outbnbunbiased ]
  stream_numi:          [ outnumi ]
- #stream_numi_unbiased: [ outnumiunbiased ]
+ stream_numi_unbiased: [ outnumiunbiased ]
  stream_ext_bnb:       [ outextbnb ]
  stream_ext_numi:      [ outextnumi ]
  stream_ext_unbiased:  [ outextunbiased ]
@@ -198,9 +198,9 @@ physics:
 
  trigger_paths: [ path_notpc,
                   path_bnb,
-                  #path_bnb_unbiased,
+                  path_bnb_unbiased,
                   path_numi,
-                  #path_numi_unbiased,
+                  path_numi_unbiased,
                   path_ext_bnb,
                   path_ext_numi,
                   path_ext_unbiased,
@@ -208,9 +208,9 @@ physics:
 
  end_paths:     [ stream_notpc,
                   stream_bnb,
-                  #stream_bnb_unbiased,
+                  stream_bnb_unbiased,
                   stream_numi,
-                  #stream_numi_unbiased,
+                  stream_numi_unbiased,
                   stream_ext_bnb,
                   stream_ext_numi,
                   stream_ext_unbiased,
