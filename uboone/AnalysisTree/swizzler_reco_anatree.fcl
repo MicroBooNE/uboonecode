@@ -43,7 +43,7 @@ services:
   PhotonVisibilityService: @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties  
   @table::microboone_full_services
-  IFDH: {}
+  IFDH: {}  #comment this out for grid production
 }
 
 microboone_tfile_metadata:
@@ -180,53 +180,22 @@ outputs:
 services.DetectorClocksService.TrigModuleName: "daq"
 
 ### Here we include the file giving us run/data dependent overrides
-##include "uboone_data_prebeam_runSettings.fcl"
-################
-#This fhicl file is ONLY to be used for +70kV RUNS during 
-#the period 21 September and 14 October.
-#
-# Shaping time and gain settings
-#
-#services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 2.0, 2.0, 2.0 ]
-#services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 1.0, 1.0, 1.0 ]
-#services.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: [ 14.0, 14.0, 14.0 ]
-#
-# Database access for pedestals
-#
-services.DetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
-services.DetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
-services.DetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:        "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
-
-# Notes on August 25, 2015
-# According to Leon the three parameters below are:
-# 1) E field for TPC in kV/cm
-# 2) Wire bias U to V in kV/cm
-# 3) Wire bias V to W in kV/cm
-# Plane space is 0.3cm
-#
-# Note that run 1591 forward, bias is -158V and +237V (from 8/13/15)
-#services.DetectorPropertiesService.Efield:          [0.273,0.527,0.79] # 0.273 corresponds to 70 kV
-
-# Note that run 3426 forward, bias is -110V and +230V (from 10/16/15, 10:30 AM)
-services.DetectorPropertiesService.Efield:          [0.273,0.367,0.767] # 0.273 corresponds to 70 kV
-
-services.DetectorPropertiesService.Electronlifetime: 13.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
 
 services.DetectorClocksService.TrigModuleName:     "daq"
 ################
 
-
-#physics.producers.digitfilter.TruncMeanFraction:                0.1
+### Set the following if you want to run truncated RawDigits from the RawDigitFilter
+physics.producers.digitfilter.TruncateTicks:                    true
+services.DetectorPropertiesService.NumberTimeSamples:           6400
+services.DetectorPropertiesService.ReadOutWindowSize:           6400
+services.DetectorClocksService.InheritClockConfig:              false
+services.DetectorClocksService.TriggerOffsetTPC:                -0.400e3
 
 physics.producers.caldata.DigitModuleLabel:                     "digitfilter"
-physics.producers.caldata.MaxAllowedChannelStatus:                         1
 
 # Below are the origial numbers for reference
 #services.SignalShapingServiceMicroBooNE.NoiseFactVec:      [[ 1.12, 0.86, 0.60, 0.55 ], [ 1.12, 0.86, 0.60, 0.55 ], [ 0.89, 0.66, 0.48, 0.43 ]]
 #services.SignalShapingServiceMicroBooNE.NoiseFactVec:      [[ 1.12, 1.50, 2.00, 0.55 ], [ 1.12, 1.50, 2.00, 0.55 ], [ 0.89, 1.32, 0.75, 0.43 ]]
-
-physics.producers.caldata.DoBaselineSub:                        false
-physics.producers.caldata.DoBaselineSub_WaveformPropertiesAlg:  true
 
 physics.producers.caldata.Threshold: [5, 5, 5]
 #physics.producers.cchit.CCHitFinderAlg.MinSigInd: 5
@@ -237,6 +206,7 @@ physics.producers.caldata.Threshold: [5, 5, 5]
 #physics.producers.cchit.CCHitFinderAlg.MaxXtraHits: 0
 physics.producers.gaushit.CalDataModuleLabel:                    "caldata"
 physics.producers.gaushit.MinSig:                                [ 8.0,    8.0,   8.0]
+physics.producers.gaushit.MinWidth:                              [ 1.0,    1.0,   1.0]
 physics.producers.fuzzycluster.HitsModuleLabel:                 "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:              "caldata"
 physics.producers.pandoraCosmic.GeantModuleLabel:               "largeant"
@@ -291,7 +261,7 @@ physics.producers.trackkalmanhittag.TPCZBoundary:                   10
 
 physics.producers.trackkalmanhitcalo.TrackModuleLabel:                    "trackkalmanhit"
 physics.producers.trackkalmanhitcalo.SpacePointModuleLabel:               "trackkalmanhit"
-physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [2.5143e-3, 2.53e-3, 7e-3]
+physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 
 physics.producers.pandoraCosmicKHit.HitModuleLabel:                 "gaushit"
 physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
@@ -306,6 +276,7 @@ physics.producers.pandoraCosmicKHittag.TPCZBoundary:		   10
 
 physics.producers.pandoraCosmicKHitcalo.TrackModuleLabel:                    "pandoraCosmicKHit"
 physics.producers.pandoraCosmicKHitcalo.SpacePointModuleLabel:               "pandoraCosmicKHit"
+physics.producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 
 physics.producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:             "pandoraCosmic"
 physics.producers.pandoraCosmicKHitPFPart.TrackModuleLabel:                  "pandoraCosmicKHit"
@@ -341,6 +312,7 @@ physics.producers.pandoraNuKHittag.TPCZBoundary:                             10
 
 physics.producers.pandoraNuKHitcalo.TrackModuleLabel:                        "pandoraNuKHit"
 physics.producers.pandoraNuKHitcalo.SpacePointModuleLabel:                   "pandoraNuKHit"
+physics.producers.pandoraNuKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 
 
 #ANALYSIS TREE STUFF
