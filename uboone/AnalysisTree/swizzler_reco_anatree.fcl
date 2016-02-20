@@ -210,7 +210,7 @@ physics.producers.gaushit.MinWidth:                              [ 1.0,    1.0, 
 physics.producers.fuzzycluster.HitsModuleLabel:                 "gaushit"
 physics.producers.fuzzycluster.CalDataModuleLabel:              "caldata"
 physics.producers.pandoraCosmic.GeantModuleLabel:               "largeant"
-physics.producers.pandoraCosmic.HitFinderModuleLabel:           "linecluster"
+physics.producers.pandoraCosmic.HitFinderModuleLabel:           "gaushit"
 physics.producers.pandoraCosmic.ConfigFile:                     "PandoraSettings_MicroBooNE_Cosmic.xml"
 physics.producers.linecluster.HitFinderModuleLabel: "gaushit"
 #physics.producers.linecluster.ClusterCrawlerAlg.MinAmp: 10
@@ -335,8 +335,8 @@ physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit",
 #physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
 
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
-physics.analyzers.analysistree.HitsModuleLabel: "linecluster"
-physics.analyzers.analysistree.ClusterModuleLabel: "linecluster"
+physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
+physics.analyzers.analysistree.ClusterModuleLabel: "fuzzycluster"
 physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
 physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
 physics.analyzers.analysistree.MCTrackModuleLabel: "mcreco"
