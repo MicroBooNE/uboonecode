@@ -10,6 +10,7 @@ art_make(
 			lardata_RecoBase
 			lardata_RecoObjects  
 			larreco_RecoAlg
+			larpandora_LArPandoraInterface
 			SignalShapingServiceMicroBooNE_service
                         ${SIMULATIONBASE}
                         ${LARRECO_LIB}
