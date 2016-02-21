@@ -340,7 +340,6 @@ physics.analyzers.analysistree.VertexModuleLabel:               ["linecluster", 
 
 physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
-physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "trackkalmanhitpid", "trackkalmanhitpid"]
 
 physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmicKHittag", "pandoraNuKHittag"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
