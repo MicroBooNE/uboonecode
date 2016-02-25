@@ -119,6 +119,10 @@ physics:
   pandoraNuKHittag:     @local::microboone_cosmictracktagger
   pandoraNuKHitcalo:    @local::microboone_calomc
   pandoraNuKHitpid:     @local::microboone_chi2pid
+  pmtrack:              @local::standard_pmalgtrackmaker
+  pmtracktag:           @local::microboone_cosmictracktagger
+  pmtrackcalo:          @local::microboone_calomc
+  pmtrackpid:           @local::microboone_chi2pid
  }
  
  analyzers:
@@ -138,7 +142,6 @@ physics:
 #	cchit, 
         gaushit,
 	fuzzycluster,
-	linecluster,
         pandoraCosmic, 
         trackkalmanhit, 
         trackkalmanhittag,
@@ -154,7 +157,12 @@ physics:
         pandoraNuKHit,
         pandoraNuKHittag,
         pandoraNuKHitcalo,
-        pandoraNuKHitpid]
+        pandoraNuKHitpid,
+	linecluster,
+        pmtrack,
+        pmtracktag,
+        pmtrackcalo,
+        pmtrackpid]
        
  ana: [analysistree]      
 
@@ -219,7 +227,7 @@ physics.producers.fuzzycluster.CalDataModuleLabel:              "caldata"
 physics.producers.pandoraCosmic.GeantModuleLabel:               "largeant"
 physics.producers.pandoraCosmic.HitFinderModuleLabel:           "gaushit"
 physics.producers.pandoraCosmic.ConfigFile:                     "PandoraSettings_MicroBooNE_Cosmic.xml"
-physics.producers.linecluster.HitFinderModuleLabel: "gaushit"
+physics.producers.linecluster.HitFinderModuleLabel: "pandoraCosmicKHitRemoval"
 #physics.producers.linecluster.ClusterCrawlerAlg.MinAmp: 10
 #physics.producers.linecluster.ClusterCrawlerAlg.NumPass: 1
 #physics.producers.linecluster.ClusterCrawlerAlg.DoMerge: [true]
@@ -327,31 +335,45 @@ physics.producers.pandoraNuKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-
 physics.producers.pandoraNuKHitpid.CalorimetryModuleLabel:                   "pandoraNuKHitcalo"
 physics.producers.pandoraNuKHitpid.TrackModuleLabel:                         "pandoraNuKHit"
 
+physics.producers.pmtrack.ClusterModuleLabel: "linecluster"
+physics.producers.pmtrack.HitModuleLabel:     "linecluster"
+physics.producers.pmtrack.RunVertexing:       true
+physics.producers.pmtrack.FlipToBeam:         true
+physics.producers.pmtracktag.TrackModuleLabel:                         "pmtrack"
+physics.producers.pmtracktag.TPCXBoundary:                             10
+physics.producers.pmtracktag.TPCYBoundary:                             10
+physics.producers.pmtracktag.TPCZBoundary:                             10
+physics.producers.pmtrackcalo.TrackModuleLabel:                        "pmtrack"
+physics.producers.pmtrackcalo.SpacePointModuleLabel:                   "pmtrack"
+physics.producers.pmtrackcalo.CaloAlg.CalAreaConstants:                [6.93e-3, 5.34e-3, 6.9e-3]
+physics.producers.pmtrackpid.CalorimetryModuleLabel:                   "pmtrackcalo"
+physics.producers.pmtrackpid.TrackModuleLabel:                         "pmtrack"
+
 
 #ANALYSIS TREE STUFF
 physics.analyzers.analysistree:  @local::microboone_analysistree
-physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "pandoraCosmicKHit", "pandoraNuKHit"]
-physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo"]
-physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "pandoraCosmicKHitpid", "pandoraNuKHitpid"]
-physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0"]
-physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0"]
+physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "pandoraCosmicKHit", "pandoraNuKHit", "pmtrack"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo", "pmtrackcalo"]
+physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "pandoraCosmicKHitpid", "pandoraNuKHitpid", "pmtrackpid"]
+physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0", "t0"]
+physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0", "mct0"]
 
-physics.analyzers.analysistree.VertexModuleLabel:               ["linecluster", "pandoraCosmic", "pandoraNu"]
+physics.analyzers.analysistree.VertexModuleLabel:               ["linecluster", "pandoraCosmic", "pandoraNu", "pmtrack"]
 
 physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
 
-physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmicKHittag", "pandoraNuKHittag"]
-physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmicKHittag", "pandoraNuKHittag", "pmtracktag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
 
 #physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
 
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
 physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
 physics.analyzers.analysistree.ClusterModuleLabel: "fuzzycluster"
-physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
-physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
-physics.analyzers.analysistree.MCTrackModuleLabel: "mcreco"
+#physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
+#physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
+#physics.analyzers.analysistree.MCTrackModuleLabel: "mcreco"
 physics.analyzers.analysistree.IgnoreMissingShowers: true
 physics.analyzers.analysistree.POTModuleLabel: "beamdata"
 
