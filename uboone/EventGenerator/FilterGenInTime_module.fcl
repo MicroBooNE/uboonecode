@@ -1,0 +1,13 @@
+BEGIN_PROLOG
+
+microboone_FilterGenInTime:
+{ 
+ module_type:              "FilterGenInTime"
+ KeepOnlyMuons: true
+ MinKE:     0.1
+ MinT:        0.0e3
+ MaxT:        1.6e3
+}
+
+END_PROLOG
+
