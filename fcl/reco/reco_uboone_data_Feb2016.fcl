@@ -270,18 +270,43 @@ microboone_reco_data_producers.gaushit.MinWidth:                                
 microboone_reco_data_producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
 microboone_reco_data_producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
 
-#This is from a fcl file from Bruce but with only the actual overrides here (to avoid confusion)
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.NHitsAve:           [ 2,  2, 0 ]      # number of hits to find the average charge and width
-# at the end of the cluster. NHitsAve should be 1 or 2
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.ChgCut:             [ 6, 6, .8 ]      # max fractional hit charge difference for adding hits
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.ChiCut:             [ 10., 10., 10. ] # stop adding hits to clusters if ChiCut is reached
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MaxWirSkip:         [ 80, 8, 2 ]      # max number of wires to skip without adding a hit
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.KinkAngCut:         [ 1.0, 1.0, 0.4 ] # kink angle cut (radians) used to follow and merge
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MergeChgCut:        [ 6, 6, 0.8 ]     # max charge ratio for cluster merging
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.HitMergeChiCut:     2.5               # Merge cluster hit-multiplets if the separation chisq
-# is < cut. Set < 0 for no merging
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire:     80                # Allow skipping N wires w no hits (if poor purity)
-microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.uBCode:             true              # use MicroBooNE-specific code
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.NumPass:               3  # number of passes through the hit list. 0 = no cluster reco
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MaxHitsFit: [ 100,  8, 4] # number of hits fitted to a line
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MinHits:     [ 50,  8, 3] # minimum size of a cluster
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.NHitsAve:    [ 20,  8, 2] # number of hits to find the average charge and width
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.ChgCut:     [ .8, .8, .8] # max fractional hit charge difference for adding hits
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.ChiCut:       [ 4, 8, 10] # stop adding hits to clusters if ChiCut is reached
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MaxWirSkip: [300, 300, 2] # max number of wires to skip without adding a hit
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MinWirAfterSkip: [2, 2, 1] # min reqd number of consecutive wires with a hit after a skip
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.KinkChiRat: [1.2, 1.2, 0.] # Max consecutive chisq increase for the last 3 hits on the cluster
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.KinkAngCut: [0.4, 0.4, 0.4] # kink angle cut (radians) used to follow or merge
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.DoMerge:   [false, true, true] # run cluster merging code?
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.TimeDelta: [10., 10., 10.] # max time difference for cluster merging
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.FindVertices: [true, true, true]  # make 2D vertices after clustering?
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.LACrawl: [true, true, true]  # crawl Large Angle clusters?
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.LAClusAngleCut:       60 # Large cluster angle cut (0 < 90 degrees). <0 to turn off
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.LAClusMaxHitsFit:   		4 # Max hits fit on Large Angle clusters
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MinHitFrac: 				  0.6 # Drop clusters having < (#hits/#wires)
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MinAmp: 						    5 # Min hit signal amplitude for merging
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.HitMergeChiCut:        6 # Merge cluster hit-multiplets if the separation chisq
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MergeAllHits:       true # merge all hits before reconstructing clusters
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MergeOverlapAngCut:  0.1 # Set <= 0 to turn off overlapping cluster merging
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.ChkClusterDS:      false # Check reconstruction at DS end of clusters?
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.KillGarbageClusters: 0.1 # Kill ghost clusters, etc
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.VtxClusterSplit:    true # Split clusters that cross vertices
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.FindStarVertices:  false # Find vertices with a star topology
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.HitErrFac:           0.8 # hit time error for fitting = fHitErrFac * (hit width)
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.HitMinAmp:             2 # ignore hits with PH < this value (seed clusters)
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.ClProjErrFac:          6 # cluster projection error factor
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.AllowNoHitWire:        5 # Allow skipping N wires w no hits
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.Vertex2DCut:          20 # Max equiv dTick cut for attaching a cluster to a vtx
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.fVertex2DWireErrCut:	  3 # Max wire error on the fitted vertex position
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.Vertex3DCut:          10 # 2D vtx -> 3D vtx matching cut (chisq)
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.FindHammerClusters: false # look for hammer type clusters
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.RefineVertexClusters:  false
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.DebugPlane:         -1  # print info only in this plane
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.DebugWire:          -1  # set to the Begin Wire and Hit of a cluster to print
+microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.DebugHit:            -1 # out detailed information while crawling
 
 # Fuzzy Cluster related
 microboone_reco_data_producers.trackkalmanhit.HitModuleLabel:                    "gaushit"
