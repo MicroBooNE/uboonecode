@@ -75,7 +75,8 @@ install_fhicl( LIST databaseutil_microboone.fcl
 		    services_microboone_simulation.fcl
 		    signalservices_microboone.fcl
 		    seedservice_microboone.fcl
-		    timeservice_microboone.fcl )
+		    timeservice_microboone.fcl 
+		    time_memory_tracker_microboone.fcl )
 install_source()
 
 add_subdirectory(test)
