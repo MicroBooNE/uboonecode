@@ -185,7 +185,7 @@ outputs:
  out1:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_root.root"
+   fileName: "%ifb_%tc_reco.root"
    dataTier: "reconstructed"
    streamName: "all"      
    compressionLevel: 3
