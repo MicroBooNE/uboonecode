@@ -11,7 +11,7 @@
 /// \author  taritree@mit.edu
 ////////////////////////////////////////////////////////////////////////
 
-#include "uboonecode/uboone/Geometry/ChannelMapUBooNEAlg.h"
+#include "uboone/Geometry/ChannelMapUBooNEAlg.h"
 #include "larcore/Geometry/AuxDetGeo.h"
 #include "larcore/Geometry/CryostatGeo.h"
 #include "larcore/Geometry/TPCGeo.h"
