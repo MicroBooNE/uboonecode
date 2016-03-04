@@ -116,11 +116,12 @@ private:
     caldata::RawDigitCharacterizationAlg         fCharacterizationAlg;
     caldata::RawDigitCorrelatedCorrectionAlg     fCorCorrectAlg;
     caldata::RawDigitFilterAlg                   fFilterAlg;
+    caldata::RawDigitFFTAlg                      fFFTAlg;
     
     // Useful services, keep copies for now (we can update during begin run periods)
-    geo::GeometryCore const* fGeometry;                         ///< pointer to Geometry service
+    geo::GeometryCore const*           fGeometry;             ///< pointer to Geometry service
     detinfo::DetectorProperties const* fDetectorProperties;   ///< Detector properties service
-    const lariov::DetPedestalProvider&          fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
+    const lariov::DetPedestalProvider& fPedestalRetrievalAlg; ///< Keep track of an instance to the pedestal retrieval alg
 };
 
 DEFINE_ART_MODULE(RawDigitFilterUBooNE)
@@ -138,6 +139,7 @@ RawDigitFilterUBooNE::RawDigitFilterUBooNE(fhicl::ParameterSet const & pset) :
                       fCharacterizationAlg(pset),
                       fCorCorrectAlg(pset),
                       fFilterAlg(pset),
+                      fFFTAlg(pset.get<fhicl::ParameterSet>("FFTAlg")),
                       fPedestalRetrievalAlg(*lar::providerFrom<lariov::DetPedestalService>())
 {
     
@@ -206,6 +208,7 @@ void RawDigitFilterUBooNE::beginJob()
     fCharacterizationAlg.initializeHists(tfs);
     fCorCorrectAlg.initializeHists(tfs);
     fFilterAlg.initializeHists(tfs);
+    fFFTAlg.initializeHists(tfs);
     
     return;
 }
@@ -347,15 +350,13 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                 raw::Uncompress(rawDigit->ADCs(), rawadc, rawDigit->Compression());
             }
             
-            // This allows the module to be used simply to truncate waveforms with no noise processing
-            if (!fProcessNoise)
-            {
-                saveRawDigits(filteredRawDigit, channel, rawadc, truncMeanWireVec[wireIdx], truncRmsWireVec[wireIdx]);
-                continue;
-            }
+            // Recover the database version of the pedestal
+            float pedestal = fPedestalRetrievalAlg.PedMean(channel);
+            
+            fFFTAlg.filterFFT(rawadc, view, wire, pedestal);
             
             // Apply the high frequency filter
-            if (fApplyBinAverage) fBinAverageAlg.doTwoBinAverage(rawadc);
+//            if (fApplyBinAverage) fBinAverageAlg.doTwoBinAverage(rawadc);
             
             // Get the kitchen sink
             fCharacterizationAlg.getWaveformParams(rawadc,
@@ -372,6 +373,13 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                                                    minMaxWireVec[wireIdx],
                                                    neighborRatioWireVec[wireIdx],
                                                    pedCorWireVec[wireIdx]);
+            
+            // This allows the module to be used simply to truncate waveforms with no noise processing
+            if (!fProcessNoise)
+            {
+                saveRawDigits(filteredRawDigit, channel, rawadc, truncMeanWireVec[wireIdx], truncRmsWireVec[wireIdx]);
+                continue;
+            }
             
             // If we are not performing noise corrections then we are done with this wire
             // Store it and move on
