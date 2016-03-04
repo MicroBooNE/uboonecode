@@ -122,6 +122,8 @@ microboone_reco_mcc7_producers:
   pandoraNuKHittag:            @local::microboone_cosmictracktagger
   pandoraNuKHitcalo:           @local::microboone_calomc
   pandoraNuKHitpid:            @local::microboone_chi2pid
+  pandoraNuPMAcalo:            @local::microboone_calomc
+  pandoraNuPMApid:             @local::microboone_chi2pid
   pandoraNuKHitFlashMatch:     @local::microboone_beamflashtrackmatchtagger
   
   ### track fit producers
@@ -211,7 +213,7 @@ microboone_reco_mcc7_ccpath: [           @sequence::microboone_reco_mcc7_cluster
 microboone_reco_mcc7_pandoraCosmic: [    pandoraCosmic,
                                          pandoraCosmicKHit,
                                          pandoraCosmicKHittag,
-#                                         pandoraCosmicPMAlg,
+                                         pandoraCosmicPMAlg,
                                          pandoraCosmicKHitcalo,
                                          pandoraCosmicKHitpid,
                                          pandoraCosmicKHitPFPart,
@@ -220,10 +222,12 @@ microboone_reco_mcc7_pandoraCosmic: [    pandoraCosmic,
 
 microboone_reco_mcc7_pandoraNu: [        pandoraNu,
                                          pandoraNuKHit,
-#                                         pandoraNuPMAlg,
+                                         pandoraNuPMAlg,
                                          pandoraNuKHittag,
                                          pandoraNuKHitcalo,
                                          pandoraNuKHitpid,
+                                         pandoraNuPMAcalo,
+                                         pandoraNuPMApid,
                                          pandoraNuKHitFlashMatch,
                                          showerrecopandora ]
 				  
@@ -430,6 +434,12 @@ microboone_reco_mcc7_producers.pandoraNuKHitcalo.SpacePointModuleLabel:         
 
 microboone_reco_mcc7_producers.pandoraNuKHitpid.CalorimetryModuleLabel:          "pandoraNuKHitcalo"
 microboone_reco_mcc7_producers.pandoraNuKHitpid.TrackModuleLabel:                "pandoraNuKHit"
+
+microboone_reco_mcc7_producers.pandoraNuPMAcalo.TrackModuleLabel:                "pandoraNuPMAlg"
+microboone_reco_mcc7_producers.pandoraNuPMAcalo.SpacePointModuleLabel:           "pandoraNuPMAlg"
+
+microboone_reco_mcc7_producers.pandoraNuPMApid.CalorimetryModuleLabel:           "pandoraNuPMAcalo"
+microboone_reco_mcc7_producers.pandoraNuPMApid.TrackModuleLabel:                 "pandoraNuPMAlg"
 
 microboone_reco_mcc7_producers.pandoraNuKHitFlashMatch.TrackModuleLabel:         "pandoraNuKHit"
 microboone_reco_mcc7_producers.pandoraNuKHitFlashMatch.FlashModuleLabel:         "opflash"

@@ -116,6 +116,8 @@ microboone_reco_data_producers:
   pandoraNuKHittag:            @local::microboone_cosmictracktagger
   pandoraNuKHitcalo:           @local::microboone_calomc
   pandoraNuKHitpid:            @local::microboone_chi2pid
+  pandoraNuPMAcalo:            @local::microboone_calomc
+  pandoraNuPMApid:             @local::microboone_chi2pid
   pandoraNuKHitFlashMatch:     @local::microboone_beamflashtrackmatchtagger
   
   ### track fit producers
@@ -214,10 +216,12 @@ microboone_reco_data_pandoraCosmic: [    pandoraCosmic,
 
 microboone_reco_data_pandoraNu: [        pandoraNu,
                                          pandoraNuKHit,
-#                                         pandoraNuPMAlg,
+                                         pandoraNuPMAlg,
                                          pandoraNuKHittag,
                                          pandoraNuKHitcalo,
                                          pandoraNuKHitpid,
+                                         pandoraNuPMAcalo,
+                                         pandoraNuPMApid,
                                          pandoraNuKHitFlashMatch,
                                          showerrecopandora ]
 				  
@@ -418,6 +422,12 @@ microboone_reco_data_producers.pandoraNuKHitcalo.SpacePointModuleLabel:         
 
 microboone_reco_data_producers.pandoraNuKHitpid.CalorimetryModuleLabel:          "pandoraNuKHitcalo"
 microboone_reco_data_producers.pandoraNuKHitpid.TrackModuleLabel:                "pandoraNuKHit"
+
+microboone_reco_data_producers.pandoraNuPMAcalo.TrackModuleLabel:                "pandoraNuPMA"
+microboone_reco_data_producers.pandoraNuPMAcalo.SpacePointModuleLabel:           "pandoraNuPMA"
+
+microboone_reco_data_producers.pandoraNuPMApid.CalorimetryModuleLabel:           "pandoraNuPMAcalo"
+microboone_reco_data_producers.pandoraNuPMApid.TrackModuleLabel:                 "pandoraNuPMA"
 
 microboone_reco_data_producers.pandoraNuKHitFlashMatch.TrackModuleLabel:         "pandoraNuKHit"
 microboone_reco_data_producers.pandoraNuKHitFlashMatch.FlashModuleLabel:         "opflash"
