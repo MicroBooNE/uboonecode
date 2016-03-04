@@ -113,6 +113,14 @@ microboone_rawdigitfilter:
     TruncateTicks:         false
     WindowSize:            6400
     NumTicksToDropFront:   2400   # these values will put 70 kV drift time in "middle"
+    FFTAlg:
+    {
+        TransformViewVec:  [true, false, false]
+        ZigZagCorrectVec:  [true, true,  false]
+        ZigZagCorrectBin:  2800
+        FillHistograms:    false
+        HistDirName:       "FFTAlg"
+    }
 }
 
 
