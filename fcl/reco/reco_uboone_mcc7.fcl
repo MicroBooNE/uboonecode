@@ -407,7 +407,7 @@ microboone_reco_mcc7_producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:    
 microboone_reco_mcc7_producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
 microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKHitPFPart"]
-microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.FlashProducerLabel:      "pandoraCosmicKHitFlashMatch"
+microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.FlashProducerLabel:      "" # don't do flash matching
 microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
 microboone_reco_mcc7_producers.pandoraCosmicKHitRemoval.TrackProducerLabel:      "pandoraCosmicKHit"
 
