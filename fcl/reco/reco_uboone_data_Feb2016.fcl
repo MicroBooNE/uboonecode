@@ -101,8 +101,8 @@ microboone_reco_data_producers:
   pandoraNuKHit:               @local::microboone_track3Dkalmanhit
 
   ### pandora cosmic kalmanhit
-  pandoraCosmicPMAlg:          @local::microboone_pmalgtrackmaker
-  pandoraNuPMAlg:              @local::microboone_pmalgtrackmaker
+  pandoraCosmicPMA:          @local::microboone_pmalgtrackmaker
+  pandoraNuPMA:              @local::microboone_pmalgtrackmaker
 
   ### pandora cosmic pfparticle
   pandoraCosmicKHitPFPart:     @local::microboone_cosmicpfparticletagger
@@ -113,9 +113,13 @@ microboone_reco_data_producers:
   pandoraCosmicKHitpid:        @local::microboone_chi2pid
   pandoraCosmicKHitFlashMatch: @local::microboone_beamflashtrackmatchtagger
   pandoraCosmicKHitRemoval:    @local::microboone_crhitremoval
+  pandoraNutag:                @local::microboone_cosmictracktagger
+  pandoraNucalo:               @local::microboone_calomc
+  pandoraNupid:                @local::microboone_chi2pid
   pandoraNuKHittag:            @local::microboone_cosmictracktagger
   pandoraNuKHitcalo:           @local::microboone_calomc
   pandoraNuKHitpid:            @local::microboone_chi2pid
+  pandoraNuPMAtag:             @local::microboone_cosmictracktagger
   pandoraNuPMAcalo:            @local::microboone_calomc
   pandoraNuPMApid:             @local::microboone_chi2pid
   pandoraNuKHitFlashMatch:     @local::microboone_beamflashtrackmatchtagger
@@ -207,7 +211,7 @@ microboone_reco_data_ccpath: [           @sequence::microboone_reco_data_cluster
 microboone_reco_data_pandoraCosmic: [    pandoraCosmic,
                                          pandoraCosmicKHit,
                                          pandoraCosmicKHittag,
-#                                         pandoraCosmicPMAlg,
+#                                         pandoraCosmicPMA,
                                          pandoraCosmicKHitcalo,
                                          pandoraCosmicKHitpid,
                                          pandoraCosmicKHitPFPart,
@@ -216,10 +220,14 @@ microboone_reco_data_pandoraCosmic: [    pandoraCosmic,
 
 microboone_reco_data_pandoraNu: [        pandoraNu,
                                          pandoraNuKHit,
-                                         pandoraNuPMAlg,
+                                         pandoraNuPMA,
+                                         pandoraNutag,
+                                         pandoraNucalo,
+                                         pandoraNupid,
                                          pandoraNuKHittag,
                                          pandoraNuKHitcalo,
                                          pandoraNuKHitpid,
+                                         pandoraNuPMAtag,
                                          pandoraNuPMAcalo,
                                          pandoraNuPMApid,
                                          pandoraNuKHitFlashMatch,
@@ -374,10 +382,9 @@ microboone_reco_data_producers.pandoraCosmicKHit.SelfSeed:                      
 microboone_reco_data_producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
 microboone_reco_data_producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
 
-microboone_reco_data_producers.pandoraCosmicPMAlg.HitModuleLabel:                "gaushit"
-microboone_reco_data_producers.pandoraCosmicPMAlg.ClusterModuleLabel:            "pandoraCosmic"
-microboone_reco_data_producers.pandoraCosmicPMAlg.PFParticleModuleLabel:         "pandoraCosmic"
-microboone_reco_data_producers.pandoraCosmicPMAlg.CluMatchingAlg:                2
+microboone_reco_data_producers.pandoraCosmicPMA.HitModuleLabel:                  "gaushit"
+microboone_reco_data_producers.pandoraCosmicPMA.PFParticleModuleLabel:           "pandoraCosmic"
+microboone_reco_data_producers.pandoraCosmicPMA.CluMatchingAlg:                  3
 
 microboone_reco_data_producers.pandoraCosmicKHittag.TrackModuleLabel:            "pandoraCosmicKHit"
 
@@ -410,10 +417,19 @@ microboone_reco_data_producers.pandoraNuKHit.PFParticleModuleLabel:             
 microboone_reco_data_producers.pandoraNuKHit.ClusterModuleLabel:                 "pandoraNu"
 microboone_reco_data_producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
 
-microboone_reco_data_producers.pandoraNuPMAlg.HitModuleLabel:                    "pandoraCosmicKHitRemoval"
-microboone_reco_data_producers.pandoraNuPMAlg.ClusterModuleLabel:                "pandoraNu"
-microboone_reco_data_producers.pandoraNuPMAlg.PFParticleModuleLabel:             "pandoraNu"
-microboone_reco_data_producers.pandoraNuPMAlg.CluMatchingAlg:                    2
+microboone_reco_data_producers.pandoraNuPMA.HitModuleLabel:                    "pandoraCosmicKHitRemoval"
+microboone_reco_data_producers.pandoraNuPMA.PFParticleModuleLabel:             "pandoraNu"
+microboone_reco_data_producers.pandoraNuPMA.CluMatchingAlg:                    3
+microboone_reco_data_producers.pandoraNuPMA.FlipDownward:                      false
+microboone_reco_data_producers.pandoraNuPMA.FlipToBeam:                        true
+
+microboone_reco_data_producers.pandoraNutag.TrackModuleLabel:                  "pandoraNu"
+
+microboone_reco_data_producers.pandoraNucalo.TrackModuleLabel:                 "pandoraNu"
+microboone_reco_data_producers.pandoraNucalo.SpacePointModuleLabel:            "pandoraNu"
+
+microboone_reco_data_producers.pandoraNupid.CalorimetryModuleLabel:            "pandoraNucalo"
+microboone_reco_data_producers.pandoraNupid.TrackModuleLabel:                  "pandoraNu"
 
 microboone_reco_data_producers.pandoraNuKHittag.TrackModuleLabel:                "pandoraNuKHit"
 
@@ -422,6 +438,8 @@ microboone_reco_data_producers.pandoraNuKHitcalo.SpacePointModuleLabel:         
 
 microboone_reco_data_producers.pandoraNuKHitpid.CalorimetryModuleLabel:          "pandoraNuKHitcalo"
 microboone_reco_data_producers.pandoraNuKHitpid.TrackModuleLabel:                "pandoraNuKHit"
+
+microboone_reco_data_producers.pandoraNuPMAtag.TrackModuleLabel:                 "pandoraNuPMA"
 
 microboone_reco_data_producers.pandoraNuPMAcalo.TrackModuleLabel:                "pandoraNuPMA"
 microboone_reco_data_producers.pandoraNuPMAcalo.SpacePointModuleLabel:           "pandoraNuPMA"
