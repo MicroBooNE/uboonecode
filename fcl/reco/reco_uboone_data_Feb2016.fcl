@@ -109,18 +109,18 @@ microboone_reco_data_producers:
 
   ### pandora analysis
   pandoraCosmicKHittag:        @local::microboone_cosmictracktagger
-  pandoraCosmicKHitcalo:       @local::microboone_calomc
+  pandoraCosmicKHitcalo:       @local::microboone_calodata
   pandoraCosmicKHitpid:        @local::microboone_chi2pid
   pandoraCosmicKHitFlashMatch: @local::microboone_beamflashtrackmatchtagger
   pandoraCosmicKHitRemoval:    @local::microboone_crhitremoval
   pandoraNutag:                @local::microboone_cosmictracktagger
-  pandoraNucalo:               @local::microboone_calomc
+  pandoraNucalo:               @local::microboone_calodata
   pandoraNupid:                @local::microboone_chi2pid
   pandoraNuKHittag:            @local::microboone_cosmictracktagger
-  pandoraNuKHitcalo:           @local::microboone_calomc
+  pandoraNuKHitcalo:           @local::microboone_calodata
   pandoraNuKHitpid:            @local::microboone_chi2pid
   pandoraNuPMAtag:             @local::microboone_cosmictracktagger
-  pandoraNuPMAcalo:            @local::microboone_calomc
+  pandoraNuPMAcalo:            @local::microboone_calodata
   pandoraNuPMApid:             @local::microboone_chi2pid
   pandoraNuKHitFlashMatch:     @local::microboone_beamflashtrackmatchtagger
   
@@ -137,10 +137,10 @@ microboone_reco_data_producers:
   showerrecopandora:           @local::showerreco3d_uboone_pandora
 
   ### calorimetry producers
-  trackkalmanhitcalo:          @local::microboone_calomc                  # Calorimetry for fuzzy cluster
-  stitchkalmanhitcalo:         @local::microboone_calomc
-  trackkalmanhitcalocc:        @local::microboone_calomc                  # Calorimeter for Cluster Crawler
-  stitchkalmanhitcalocc:       @local::microboone_calomc
+  trackkalmanhitcalo:          @local::microboone_calodata                  # Calorimetry for fuzzy cluster
+  stitchkalmanhitcalo:         @local::microboone_calodata
+  trackkalmanhitcalocc:        @local::microboone_calodata                  # Calorimeter for Cluster Crawler
+  stitchkalmanhitcalocc:       @local::microboone_calodata
 
   ### PID producers
   trackkalmanhitpid:           @local::microboone_chi2pid
