@@ -105,6 +105,9 @@ physics:
   pandoraCosmicKHitPFPart:      @local::microboone_cosmicpfparticletagger
   pandoraCosmic:        @local::microboone_pandora
   pandoraNu:            @local::microboone_pandora
+  pandoraNutag:         @local::microboone_cosmictracktagger
+  pandoraNucalo:        @local::microboone_calodata
+  pandoraNupid:         @local::microboone_chi2pid
   trackkalmanhit:     @local::microboone_track3Dkalmanhit 
   trackkalmanhittag:  @local::microboone_cosmictracktagger
   trackkalmanhitcalo: @local::microboone_calodata	
@@ -119,7 +122,11 @@ physics:
   pandoraNuKHittag:     @local::microboone_cosmictracktagger
   pandoraNuKHitcalo:    @local::microboone_calodata
   pandoraNuKHitpid:     @local::microboone_chi2pid
-  pmtrack:              @local::standard_pmalgtrackmaker
+  pandoraNuPMA:         @local::microboone_pmalgtrackmaker
+  pandoraNuPMAtag:      @local::microboone_cosmictracktagger
+  pandoraNuPMAcalo:     @local::microboone_calodata
+  pandoraNuPMApid:      @local::microboone_chi2pid
+  pmtrack:              @local::microboone_pmalgtrackmaker
   pmtracktag:           @local::microboone_cosmictracktagger
   pmtrackcalo:          @local::microboone_calodata
   pmtrackpid:           @local::microboone_chi2pid
@@ -154,10 +161,17 @@ physics:
         pandoraCosmicKHitPFPart,
         pandoraCosmicKHitRemoval,
         pandoraNu,
+        pandoraNutag,
+        pandoraNucalo,
+        pandoraNupid,
         pandoraNuKHit,
         pandoraNuKHittag,
         pandoraNuKHitcalo,
         pandoraNuKHitpid,
+        pandoraNuPMA,
+        pandoraNuPMAtag,
+        pandoraNuPMAcalo,
+        pandoraNuPMApid,
 	linecluster,
         pmtrack,
         pmtracktag,
@@ -299,7 +313,6 @@ physics.producers.trackkalmanhittag.TrackModuleLabel:             "trackkalmanhi
 physics.producers.trackkalmanhittag.TPCXBoundary:                   10
 physics.producers.trackkalmanhittag.TPCYBoundary:                   20
 physics.producers.trackkalmanhittag.TPCZBoundary:                   10
-
 physics.producers.trackkalmanhitcalo.TrackModuleLabel:                    "trackkalmanhit"
 physics.producers.trackkalmanhitcalo.SpacePointModuleLabel:               "trackkalmanhit"
 #physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
@@ -311,12 +324,10 @@ physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
 physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
 physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
 physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
-
 physics.producers.pandoraCosmicKHittag.TrackModuleLabel:            "pandoraCosmicKHit"
 physics.producers.pandoraCosmicKHittag.TPCXBoundary:		   10
 physics.producers.pandoraCosmicKHittag.TPCYBoundary:		   20
 physics.producers.pandoraCosmicKHittag.TPCZBoundary:		   10
-
 physics.producers.pandoraCosmicKHitcalo.TrackModuleLabel:                    "pandoraCosmicKHit"
 physics.producers.pandoraCosmicKHitcalo.SpacePointModuleLabel:               "pandoraCosmicKHit"
 #physics.producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
@@ -335,13 +346,22 @@ physics.producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeO
 
 physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:                 "gaushit"
 physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:             ["pandoraCosmicKHitPFPart"]
-physics.producers.pandoraCosmicKHitRemoval.FlashProducerLabel:               "pandoraCosmicKHitFlashMatch"
+physics.producers.pandoraCosmicKHitRemoval.FlashProducerLabel:               "" #"pandoraCosmicKHitFlashMatch"
 physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel:          "pandoraCosmic"
 physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabel:               "pandoraCosmicKHit"
 
 physics.producers.pandoraNu.GeantModuleLabel:                                "largeant"
 physics.producers.pandoraNu.HitFinderModuleLabel:                            "pandoraCosmicKHitRemoval"
 physics.producers.pandoraNu.ConfigFile:                                      "PandoraSettings_MicroBooNE_Neutrino.xml"
+physics.producers.pandoraNutag.TrackModuleLabel:                             "pandoraNu"
+physics.producers.pandoraNutag.TPCXBoundary:                                 10
+physics.producers.pandoraNutag.TPCYBoundary:                                 20
+physics.producers.pandoraNutag.TPCZBoundary:                                 10
+physics.producers.pandoraNucalo.TrackModuleLabel:                            "pandoraNu"
+physics.producers.pandoraNucalo.SpacePointModuleLabel:                       "pandoraNu"
+#physics.producers.pandoraNucalo.CaloAlg.CalAreaConstants:                   [6.93e-3, 5.34e-3, 6.9e-3]
+physics.producers.pandoraNupid.CalorimetryModuleLabel:                       "pandoraNucalo"
+physics.producers.pandoraNupid.TrackModuleLabel:                             "pandoraNu"
 
 physics.producers.pandoraNuKHit.HitModuleLabel:                              "pandoraCosmicKHitRemoval"
 physics.producers.pandoraNuKHit.UseClusterHits:                              false
@@ -349,17 +369,31 @@ physics.producers.pandoraNuKHit.UsePFParticleHits:                           tru
 physics.producers.pandoraNuKHit.PFParticleModuleLabel:                       "pandoraNu"
 physics.producers.pandoraNuKHit.ClusterModuleLabel:                          "pandoraNu"
 physics.producers.pandoraNuKHit.HitFinderModuleLabel:                        "pandoraCosmicKHitRemoval"
-
 physics.producers.pandoraNuKHittag.TrackModuleLabel:                         "pandoraNuKHit"
 physics.producers.pandoraNuKHittag.TPCXBoundary:                             10
 physics.producers.pandoraNuKHittag.TPCYBoundary:                             20
 physics.producers.pandoraNuKHittag.TPCZBoundary:                             10
-
 physics.producers.pandoraNuKHitcalo.TrackModuleLabel:                        "pandoraNuKHit"
 physics.producers.pandoraNuKHitcalo.SpacePointModuleLabel:                   "pandoraNuKHit"
 #physics.producers.pandoraNuKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 physics.producers.pandoraNuKHitpid.CalorimetryModuleLabel:                   "pandoraNuKHitcalo"
 physics.producers.pandoraNuKHitpid.TrackModuleLabel:                         "pandoraNuKHit"
+
+physics.producers.pandoraNuPMA.HitModuleLabel:                    "pandoraCosmicKHitRemoval"
+physics.producers.pandoraNuPMA.ClusterModuleLabel:                "pandoraNu"
+physics.producers.pandoraNuPMA.PFParticleModuleLabel:             "pandoraNu"
+physics.producers.pandoraNuPMA.CluMatchingAlg:                    3
+physics.producers.pandoraNuPMA.FlipDownward:                      false
+physics.producers.pandoraNuPMA.FlipToBeam:                        true
+physics.producers.pandoraNuPMAtag.TrackModuleLabel:                         "pandoraNuPMA"
+physics.producers.pandoraNuPMAtag.TPCXBoundary:                             10
+physics.producers.pandoraNuPMAtag.TPCYBoundary:                             20
+physics.producers.pandoraNuPMAtag.TPCZBoundary:                             10
+physics.producers.pandoraNuPMAcalo.TrackModuleLabel:                        "pandoraNuPMA"
+physics.producers.pandoraNuPMAcalo.SpacePointModuleLabel:                   "pandoraNuPMA"
+#physics.producers.pandoraNuPMAcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
+physics.producers.pandoraNuPMApid.CalorimetryModuleLabel:                   "pandoraNuPMAcalo"
+physics.producers.pandoraNuPMApid.TrackModuleLabel:                         "pandoraNuPMA"
 
 physics.producers.pmtrack.ClusterModuleLabel: "linecluster"
 physics.producers.pmtrack.HitModuleLabel:     "linecluster"
@@ -379,19 +413,19 @@ physics.producers.pmtrackpid.TrackModuleLabel:                         "pmtrack"
 
 #ANALYSIS TREE STUFF
 physics.analyzers.analysistree:  @local::microboone_analysistree
-physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "pandoraCosmicKHit", "pandoraNuKHit", "pmtrack"]
-physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo", "pmtrackcalo"]
-physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "pandoraCosmicKHitpid", "pandoraNuKHitpid", "pmtrackpid"]
-physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0", "t0"]
-physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0", "mct0"]
+physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "pandoraCosmicKHit", "pandoraNuKHit", "pmtrack", "pandoraNu", "pandoraNuPMA"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo", "pmtrackcalo", "pandoraNucalo", "pandoraNuPMAcalo"]
+physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "pandoraCosmicKHitpid", "pandoraNuKHitpid", "pmtrackpid", "pandoraNupid", "pandoraNuPMApid"]
+physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0", "t0","t0","t0"]
+physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0", "mct0", "mct0", "mct0"]
 
 physics.analyzers.analysistree.VertexModuleLabel:               ["linecluster", "pandoraCosmic", "pandoraNu", "pmtrack"]
 
 physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
 
-physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmicKHittag", "pandoraNuKHittag", "pmtracktag"]
-physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmicKHittag", "pandoraNuKHittag", "pmtracktag", "pandoraNutag", "pandoraNuPMAtag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
 
 #physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
 
