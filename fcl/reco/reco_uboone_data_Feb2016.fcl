@@ -154,6 +154,11 @@ microboone_reco_data_producers:
   trackkalmanhittagcc:         @local::microboone_cosmictracktagger
   stitchkalmanhittagcc:        @local::microboone_cosmictracktagger
 
+  ### PMA 
+  pmtrack:                     @local::standard_pmalgtrackmaker
+  pmtracktag:                  @local::microboone_cosmictracktagger
+  pmtrackcalo:                 @local::microboone_calodata
+  pmtrackpid:                  @local::microboone_chi2pid
 }
 
 microboone_reco_data_filters:
@@ -196,14 +201,18 @@ microboone_reco_data_fuzzypath: [        @sequence::microboone_reco_data_fuzzycl
 
 microboone_reco_data_clustercrawler: [   linecluster ]
 
-microboone_reco_data_cctracks: [         trackkalmanhitcc,
-                                         stitchkalmanhitcc,
-                                         trackkalmanhitcalocc,
-                                         stitchkalmanhitcalocc,
-                                         trackkalmanhitpidcc,
-                                         stitchkalmanhitpidcc,
-                                         trackkalmanhittagcc,
-                                         stitchkalmanhittagcc ]
+microboone_reco_data_cctracks: [         #trackkalmanhitcc,
+                                         #stitchkalmanhitcc,
+                                         #trackkalmanhitcalocc,
+                                         #stitchkalmanhitcalocc,
+                                         #trackkalmanhitpidcc,
+                                         #stitchkalmanhitpidcc,
+                                         #trackkalmanhittagcc,
+                                         #stitchkalmanhittagcc 
+                                         pmtrack,
+                                         pmtracktag,
+                                         pmtrackcalo,
+                                         pmtrackpid]
 
 microboone_reco_data_ccpath: [           @sequence::microboone_reco_data_clustercrawler,
                                          @sequence::microboone_reco_data_cctracks ]
@@ -282,6 +291,7 @@ microboone_reco_data_producers.gaushit.MinWidth:                                
 microboone_reco_data_producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
 microboone_reco_data_producers.fuzzycluster.CalDataModuleLabel:                  "caldata"
 
+microboone_reco_data_producers.linecluster.HitFinderModuleLabel: "pandoraCosmicKHitRemoval"
 microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.NumPass:               3  # number of passes through the hit list. 0 = no cluster reco
 microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MaxHitsFit: [ 100,  8, 4] # number of hits fitted to a line
 microboone_reco_data_producers.linecluster.ClusterCrawlerAlg.MinHits:     [ 50,  8, 3] # minimum size of a cluster
@@ -383,6 +393,7 @@ microboone_reco_data_producers.pandoraCosmicKHit.ClusterModuleLabel:            
 microboone_reco_data_producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
 
 microboone_reco_data_producers.pandoraCosmicPMA.HitModuleLabel:                  "gaushit"
+microboone_reco_data_producers.pandoraCosmicPMA.ClusterModuleLabel:              "pandoraCosmic"
 microboone_reco_data_producers.pandoraCosmicPMA.PFParticleModuleLabel:           "pandoraCosmic"
 microboone_reco_data_producers.pandoraCosmicPMA.CluMatchingAlg:                  3
 
@@ -418,6 +429,7 @@ microboone_reco_data_producers.pandoraNuKHit.ClusterModuleLabel:                
 microboone_reco_data_producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
 
 microboone_reco_data_producers.pandoraNuPMA.HitModuleLabel:                    "pandoraCosmicKHitRemoval"
+microboone_reco_data_producers.pandoraNuPMA.ClusterModuleLabel:                "pandoraNu"
 microboone_reco_data_producers.pandoraNuPMA.PFParticleModuleLabel:             "pandoraNu"
 microboone_reco_data_producers.pandoraNuPMA.CluMatchingAlg:                    3
 microboone_reco_data_producers.pandoraNuPMA.FlipDownward:                      false
@@ -453,5 +465,17 @@ microboone_reco_data_producers.pandoraNuKHitFlashMatch.BeamFlashTrackMatchAlgPar
 
 microboone_reco_data_producers.showerrecofuzzy.InputProducer:                    "fuzzyclustermerger"
 microboone_reco_data_producers.showerrecopandora.InputProducer:                  "pandoraNu"
+
+microboone_reco_data_producers.pmtrack.ClusterModuleLabel: "linecluster"
+microboone_reco_data_producers.pmtrack.HitModuleLabel:     "linecluster"
+microboone_reco_data_producers.pmtrack.RunVertexing:       true
+microboone_reco_data_producers.pmtrack.FlipToBeam:         true
+microboone_reco_data_producers.pmtrack.StitchBetweenTPCs:  false
+microboone_reco_data_producers.pmtracktag.TrackModuleLabel:                         "pmtrack"
+microboone_reco_data_producers.pmtrackcalo.TrackModuleLabel:                        "pmtrack"
+microboone_reco_data_producers.pmtrackcalo.SpacePointModuleLabel:                   "pmtrack"
+microboone_reco_data_producers.pmtrackpid.CalorimetryModuleLabel:                   "pmtrackcalo"
+microboone_reco_data_producers.pmtrackpid.TrackModuleLabel:                         "pmtrack"
+
 
 END_PROLOG
