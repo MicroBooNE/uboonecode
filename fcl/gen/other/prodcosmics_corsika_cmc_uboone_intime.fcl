@@ -1,27 +1,40 @@
 #include "services_microboone.fcl"
-#include "largeantmodules_microboone.fcl"
-#include "mcreco.fcl"
-#include "time_memory_tracker_microboone.fcl"
-process_name: G4
+#include "corsika_microboone.fcl"
+#include "FilterGenInTime_module.fcl"
+
+process_name: CosmicsCorsikaCMCGen
 
 services:
 {
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "g4_hist.root" }
-  TimeTracker:             @local::microboone_time_tracker
-  MemoryTracker:           @local::microboone_memory_tracker
+  TFileService: { fileName: "cosmics_corsika_cmc_hist.root" }
+  TimeTracker: { 
+    printSummary : true
+    dbOutput     : {
+      filename   :  "time.db"
+      overwrite  :  true
+    }
+  }
+  MemoryTracker: {
+    ignoreTotal       : 1 # no. of events to exclude - '1' by default
+    printSummaries    : ["*"] # or any combination of ["general","event","module"]
+    includeMallocInfo : true
+    filename          : "mem.db" 
+  }
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_g4_services
+  user:         @local::microboone_gen_services
 }
 
-#source is now a root file
+#Start each new event with an empty event.
 source:
 {
-  module_type: RootInput
-  maxEvents:  10        # Number of events to create
-  saveMemoryObjectThreshold: 0
+  module_type: EmptyEvent
+  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
+  maxEvents:   10          # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  1           # number of first event in the file
 }
 
 # Define and configure some modules to do work on each event.
@@ -32,14 +45,15 @@ physics:
 
  producers:
  {
-   largeant: @local::microboone_largeant
-   mcreco:   @local::standard_mcreco
-   rns:      { module_type: "RandomNumberSaver" }
+   generator: @local::microboone_corsika_cmc
+   rns:       { module_type: "RandomNumberSaver" }
  }
+ 
+ filters:       { GenInTimeFilter : @local::microboone_FilterGenInTime}
 
  #define the producer and filter modules for this path, order matters, 
- #filters reject all following items.  see lines starting physics.producers below
- simulate: [ rns, largeant, mcreco ]
+ #filters reject all following items.  see lines starting physics.producers below 
+ simulate: [ rns, generator, GenInTimeFilter] 
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -61,13 +75,12 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_%tc_g4.root"
-   dataTier:    "simulated"
-   saveMemoryObjectThreshold: 0
+   fileName:    "prodcosmics_corsika_cmc_uboone_%tc_gen_intime.root"
+   dataTier:    "generated"
    compressionLevel: 1
+   SelectEvents: { SelectEvents: [ simulate ] }
  }
 }
 
-physics.producers.largeant.KeepParticlesInVolumes: ["volCryostat"] #only keep MCParticles that cross the cryostat
-physics.producers.mcreco.MCRecoPart.SavePathPDGList: [13,-13,211,-211,111,311,310,130,321,-321,2212,2112,2224,2214,2114,1114,3122,
-                                                      1000010020,1000010030,1000020030,1000020040]
+
+
