@@ -11,7 +11,7 @@ microboone_analysistree:
  G4ModuleLabel:            "largeant"
  TrackModuleLabel:         [ "track3d" ]
  VertexModuleLabel:        [ "vertex3d" ]
- PandoraNumuVertexModuleLabel: "pandoraNu"
+ PandoraNuVertexModuleLabel: "pandoraNu"
  ClusterModuleLabel:       "linecluster"
  OpFlashModuleLabel:       "opflash"
  MCShowerModuleLabel:      "mcreco" 
@@ -37,7 +37,7 @@ microboone_analysistree:
  SaveRawDigitInfo:         false  #set this to false by default since not everyone want rawdigits.
  SaveTrackInfo:            true
  SaveVertexInfo:           true
- SavePandoraNumuVertexInfo: true
+ SavePandoraNuVertexInfo: true
  SaveClusterInfo:          true
  SaveFlashInfo:            true
  SaveShowerInfo:           true

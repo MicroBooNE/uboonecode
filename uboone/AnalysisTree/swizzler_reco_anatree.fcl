@@ -448,7 +448,7 @@ physics.analyzers.analysistree.SaveAuxDetInfo: false
 physics.analyzers.analysistree.SaveFlashInfo: true
 physics.analyzers.analysistree.SaveCaloCosmics: true
 physics.analyzers.analysistree.SaveRawDigitInfo: false
-physics.analyzers.analysistree.SavePandoraNumuVertexInfo:       true
+physics.analyzers.analysistree.SavePandoraNuVertexInfo:       true
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :

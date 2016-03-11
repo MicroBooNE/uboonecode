@@ -614,7 +614,7 @@ namespace microboone {
 	tdMCtrk  = 0x400,
 	tdCluster = 0x800,
 	tdRawDigit = 0x1000,
-        tdPandoraNumuVertex = 0x2000,
+        tdPandoraNuVertex = 0x2000,
 	tdDefault = 0
 	}; // DataBits_t
     
@@ -680,11 +680,12 @@ namespace microboone {
     Float_t rawD_fwhh[kMaxHits];  
     Double_t rawD_rms[kMaxHits]; 
 
-    //Pandora Numu Vertex information
-    Short_t nnumuvtx;
-    Float_t numuvtxx[kMaxVertices];
-    Float_t numuvtxy[kMaxVertices];
-    Float_t numuvtxz[kMaxVertices];
+    //Pandora Nu Vertex information
+    Short_t nnuvtx;
+    Float_t nuvtxx[kMaxVertices];
+    Float_t nuvtxy[kMaxVertices];
+    Float_t nuvtxz[kMaxVertices];
+    Short_t nuvtxpdg[kMaxVertices];
 
     //Cluster Information
     Short_t nclusters;				      //number of clusters in a given event
@@ -1054,8 +1055,8 @@ namespace microboone {
     /// Returns whether we have Cluster data
     bool hasClusterInfo() const { return bits & tdCluster; }
 
-    /// Returns whether we have Pandora Numu Vertex data
-    bool hasPandoraNumuVertexInfo() const { return bits & tdPandoraNumuVertex; }
+    /// Returns whether we have Pandora Nu Vertex data
+    bool hasPandoraNuVertexInfo() const { return bits & tdPandoraNuVertex; }
     
     /// Returns whether we have Geant data
     bool hasGeantInfo() const { return bits & tdGeant; }
@@ -1304,7 +1305,7 @@ namespace microboone {
     std::string fCryGenModuleLabel;
     std::string fG4ModuleLabel;
     std::string fClusterModuleLabel;
-    std::string fPandoraNumuVertexModuleLabel;
+    std::string fPandoraNuVertexModuleLabel;
     std::string fOpFlashModuleLabel;
     std::string fMCShowerModuleLabel;
     std::string fMCTrackModuleLabel;
@@ -1329,7 +1330,7 @@ namespace microboone {
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
     bool fSaveClusterInfo;  ///whether to extract and save Cluster information
-    bool fSavePandoraNumuVertexInfo; ///whether to extract and save numu vertex information from Pandora
+    bool fSavePandoraNuVertexInfo; ///whether to extract and save nu vertex information from Pandora
     bool fSaveFlashInfo;  ///whether to extract and save Flash information
     bool fSaveShowerInfo;  ///whether to extract and save Shower information
 
@@ -1369,7 +1370,7 @@ namespace microboone {
 	fData->SetBits(AnalysisTreeDataStruct::tdFlash,  !fSaveFlashInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdCluster,!fSaveClusterInfo);
-        fData->SetBits(AnalysisTreeDataStruct::tdPandoraNumuVertex,!fSavePandoraNumuVertexInfo);
+        fData->SetBits(AnalysisTreeDataStruct::tdPandoraNuVertex,!fSavePandoraNuVertexInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdTrack,  !fSaveTrackInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdVertex, !fSaveVertexInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fSaveAuxDetInfo);
@@ -2095,10 +2096,11 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(clucosmicscore_tagger, clucosmicscore_tagger + sizeof(clucosmicscore_tagger)/sizeof(clucosmicscore_tagger[0]), -99999.);
   std::fill(clucosmictype_tagger , clucosmictype_tagger  + sizeof(clucosmictype_tagger )/sizeof(clucosmictype_tagger [0]), -9999);
 
-  nnumuvtx = 0;
-  std::fill(numuvtxx, numuvtxx + sizeof(numuvtxx)/sizeof(numuvtxx[0]), -9999);
-  std::fill(numuvtxy, numuvtxy + sizeof(numuvtxy)/sizeof(numuvtxy[0]), -9999);
-  std::fill(numuvtxz, numuvtxz + sizeof(numuvtxz)/sizeof(numuvtxz[0]), -9999);
+  nnuvtx = 0;
+  std::fill(nuvtxx, nuvtxx + sizeof(nuvtxx)/sizeof(nuvtxx[0]), -99999.);
+  std::fill(nuvtxy, nuvtxy + sizeof(nuvtxy)/sizeof(nuvtxy[0]), -99999.);
+  std::fill(nuvtxz, nuvtxz + sizeof(nuvtxz)/sizeof(nuvtxz[0]), -99999.);
+  std::fill(nuvtxpdg, nuvtxpdg + sizeof(nuvtxpdg)/sizeof(nuvtxpdg[0]), -99999);
 
   mcevts_truth = -99999;
   mcevts_truthcry = -99999;
@@ -2620,11 +2622,12 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     }  
   }
 
-  if (hasPandoraNumuVertexInfo()){
-    CreateBranch("nnumuvtx", &nnumuvtx, "nnumuvtx/S");
-    CreateBranch("numuvtxx", numuvtxx, "numuvtxx[nnumuvtx]/F");
-    CreateBranch("numuvtxy", numuvtxy, "numuvtxy[nnumuvtx]/F");
-    CreateBranch("numuvtxz", numuvtxz, "numuvtxz[nnumuvtx]/F");
+  if (hasPandoraNuVertexInfo()){
+    CreateBranch("nnuvtx", &nnuvtx, "nnuvtx/S");
+    CreateBranch("nuvtxx", nuvtxx, "nuvtxx[nnuvtx]/F");
+    CreateBranch("nuvtxy", nuvtxy, "nuvtxy[nnuvtx]/F");
+    CreateBranch("nuvtxz", nuvtxz, "nuvtxz[nnuvtx]/F");
+    CreateBranch("nuvtxpdg", nuvtxpdg, "nuvtxpdg[nnuvtx]/S");
   }
 
   if (hasClusterInfo()){
@@ -2992,7 +2995,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fCryGenModuleLabel        (pset.get< std::string >("CryGenModuleLabel")       ), 
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
   fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")     ),
-  fPandoraNumuVertexModuleLabel (pset.get< std::string >("PandoraNumuVertexModuleLabel")     ),
+  fPandoraNuVertexModuleLabel (pset.get< std::string >("PandoraNuVertexModuleLabel")     ),
   fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
   fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
   fMCTrackModuleLabel      (pset.get< std::string >("MCTrackModuleLabel")     ),  
@@ -3017,7 +3020,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
   fSaveClusterInfo	    (pset.get< bool >("SaveClusterInfo", false)),
-  fSavePandoraNumuVertexInfo        (pset.get< bool >("SavePandoraNumuVertexInfo", false)),
+  fSavePandoraNuVertexInfo        (pset.get< bool >("SavePandoraNuVertexInfo", false)),
   fSaveFlashInfo            (pset.get< bool >("SaveFlashInfo", false)),
   fSaveShowerInfo           (pset.get< bool >("SaveShowerInfo", false)),
   fCosmicTaggerAssocLabel   (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
@@ -3515,32 +3518,32 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   }// end (fSaveHitInfo)
 
 
-   if(fSavePandoraNumuVertexInfo) {
+   if(fSavePandoraNuVertexInfo) {
      lar_pandora::PFParticleVector particleVector;
-     lar_pandora::LArPandoraHelper::CollectPFParticles(evt, fPandoraNumuVertexModuleLabel, particleVector);
+     lar_pandora::LArPandoraHelper::CollectPFParticles(evt, fPandoraNuVertexModuleLabel, particleVector);
      lar_pandora::VertexVector vertexVector;
      lar_pandora::PFParticlesToVertices particlesToVertices;
-     lar_pandora::LArPandoraHelper::CollectVertices(evt, fPandoraNumuVertexModuleLabel, vertexVector, particlesToVertices);
+     lar_pandora::LArPandoraHelper::CollectVertices(evt, fPandoraNuVertexModuleLabel, vertexVector, particlesToVertices);
  
      short nprim = 0;
      for (unsigned int n = 0; n < particleVector.size(); ++n) {
          const art::Ptr<recob::PFParticle> particle = particleVector.at(n);
-         if(particle->IsPrimary() && particle->PdgCode() == 14) nprim++;
+         if(particle->IsPrimary()) nprim++;
      }
  
      if (nprim > kMaxVertices){
        // got this error? consider increasing kMaxClusters
        // (or ask for a redesign using vectors)
        mf::LogError("AnalysisTree:limits") << "event has " << nprim
-                                           << " numu neutrino vertices, only kMaxVertices=" << kMaxVertices << " stored in tree";
+                                           << " nu neutrino vertices, only kMaxVertices=" << kMaxVertices << " stored in tree";
      }
  
-     fData->nnumuvtx = nprim;
+     fData->nnuvtx = nprim;
  
      short iv = 0;
      for (unsigned int n = 0; n < particleVector.size(); ++n) {
          const art::Ptr<recob::PFParticle> particle = particleVector.at(n);
-         if(particle->IsPrimary() && particle->PdgCode() == 14) {
+         if(particle->IsPrimary()) {
              lar_pandora::PFParticlesToVertices::const_iterator vIter = particlesToVertices.find(particle);
              if (particlesToVertices.end() != vIter)
              {
@@ -3551,9 +3554,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
                         const art::Ptr<recob::Vertex> vertex = *(vertexVector.begin());
                         double xyz[3] = {0.0, 0.0, 0.0} ;
                         vertex->XYZ(xyz);
-                        fData->numuvtxx[iv] = xyz[0];
-                        fData->numuvtxy[iv] = xyz[1];
-                        fData->numuvtxz[iv] = xyz[2];
+                        fData->nuvtxx[iv] = xyz[0];
+                        fData->nuvtxy[iv] = xyz[1];
+                        fData->nuvtxz[iv] = xyz[2];
+                        fData->nuvtxpdg[iv] = particle->PdgCode();
                         iv++;
                      }
                  }
