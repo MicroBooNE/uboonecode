@@ -124,6 +124,8 @@ namespace lris {
     fCurrentSubRunID(),
     fEventCounter(0),
     fHuffmanDecode(ps.get<bool>("huffmanDecode",false)),
+    fUseGPS(ps.get<bool>("UseGPS",false)),
+    fUseNTP(ps.get<bool>("UseNTP",false)),
     fMaxEvents(-1),
     fSkipEvents(0)
   {
@@ -535,7 +537,11 @@ namespace lris {
                                                   raw::DAQHeader& daqHeader)
   {
     ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
-      
+    if(fUseGPS)
+      global_header.useGPSTime();
+    else if(fUseNTP)
+      global_header.useLocalHostTime();
+
     // art::Timestamp is an unsigned long long. The conventional 
     // use is for the upper 32 bits to have the seconds since 1970 epoch 
     // and the lower 32 bits to be the number of nanoseconds within the 
@@ -892,6 +898,10 @@ namespace lris {
     
     // pmt channel map is assumed to be time dependent. therefore we need event time to set correct map.
     ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
+    if(fUseGPS)
+      global_header.useGPSTime();
+    else if(fUseNTP)
+      global_header.useLocalHostTime();
     uint32_t seconds=global_header.getSeconds();
     //uint32_t nano_seconds=global_header.getNanoSeconds()+global_header.getMicroSeconds()*1000;
     //time_t mytime = ((time_t)seconds<<32) | nano_seconds;
