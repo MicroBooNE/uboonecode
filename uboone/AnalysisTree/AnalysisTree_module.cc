@@ -457,7 +457,10 @@ namespace microboone {
       TrackData_t<Float_t> trkendz;       // ending z position.
       TrackData_t<Float_t> trkendd;       // ending distance to boundary.
       TrackData_t<Float_t> trkflashT0;   // t0 per track from matching tracks to flashes (in ns)
-      TrackData_t<Float_t> trktrueT0;    // t0 per track from truth information (in ns)    
+      TrackData_t<Float_t> trktrueT0;    // t0 per track from truth information (in ns)
+      TrackData_t<Float_t> trkpurity;    // track purity based on hit information
+      TrackData_t<Float_t> trkcompleteness; //track completeness based on hit information
+      TrackData_t<int> trkg4id;        //true g4 track id for the reconstructed track
       TrackData_t<Float_t> trktheta;      // theta.
       TrackData_t<Float_t> trkphi;        // phi.
       TrackData_t<Float_t> trkstartdcosx;
@@ -1581,6 +1584,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkendd      , -99999.);
   FillWith(trkflashT0   , -99999.);  
   FillWith(trktrueT0    , -99999.);  
+  FillWith(trkg4id      , -99999 );
+  FillWith(trkpurity    , -99999.);
+  FillWith(trkcompleteness, -99999.);
   FillWith(trktheta     , -99999.);
   FillWith(trkphi       , -99999.);
   FillWith(trkstartdcosx, -99999.);
@@ -1741,6 +1747,15 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
 
   BranchName = "trktrueT0_" + TrackLabel;
   CreateBranch(BranchName, trktrueT0, BranchName + NTracksIndexStr + "/F");
+
+  BranchName = "trkg4id_" + TrackLabel;
+  CreateBranch(BranchName, trkg4id, BranchName + NTracksIndexStr + "/I");
+  
+  BranchName = "trkpurity_" + TrackLabel;
+  CreateBranch(BranchName, trkpurity, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkcompleteness_" + TrackLabel;
+  CreateBranch(BranchName, trkcompleteness, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trktheta_" + TrackLabel;
   CreateBranch(BranchName, trktheta, BranchName + NTracksIndexStr + "/F");
@@ -3655,7 +3670,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     
       //call the track momentum algorithm that gives you momentum based on track range
       trkf::TrackMomentumCalculator trkm;
-       
+      trkm.SetMinLength(10); //change the minimal track length requirement to 10 cm
+
       for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
       
         //save t0 from reconstructed flash track matching for every track
