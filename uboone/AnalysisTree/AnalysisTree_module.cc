@@ -335,7 +335,7 @@
 #include "TTimeStamp.h"
 
 #include "RecoBase/PFParticle.h"
-#include "LArPandoraInterface/LArPandoraHelper.h" // [JAW]
+#include "LArPandoraInterface/LArPandoraHelper.h"
 
 constexpr int kNplanes       = 3;     //number of wire planes
 constexpr int kMaxHits       = 40000; //maximum number of hits;
@@ -349,11 +349,9 @@ constexpr int kMaxShowerHits = 10000;  //maximum number of hits on a shower
 constexpr int kMaxTruth      = 10;     //maximum number of neutrino truth interactions
 constexpr int kMaxClusters   = 1000;   //maximum number of clusters;
 
-//-------------------------------------------------------------------------------------------------------------------------------------[JAW]
 constexpr int kMaxNDaughtersPerPFP = 10; //maximum number of daughters per PFParticle
 constexpr int kMaxNClustersPerPFP  = 10; //maximum number of clusters per PFParticle
 constexpr int kMaxNPFPNeutrinos    = 5;  //maximum number of reconstructed neutrino PFParticles
-//------------------------------------------------------------------------------------------------------------------------------------[JAW]
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -614,8 +612,6 @@ namespace microboone {
       
     }; // class ShowerDataStruct
     
-    //---------------------------------------------------------------------------------------------------------------------------------[JAW]
-    
     class PFParticleDataStruct {
     public:
       /* Data structure size:
@@ -646,17 +642,18 @@ namespace microboone {
       PFParticleData_t<Short_t> pfp_parentID;     ///< the ID of this PFParticle's immediate parent
       
       PFParticleData_t<Short_t> pfp_vertexID;     ///< the ID of the vertex belonging to this PFParticle
-      PFParticleData_t<Short_t> pfp_isShower;     ///< whether this PFParticle corresponds to a shower, as opposed to a track
+      PFParticleData_t<Short_t> pfp_isShower;     ///< whether this PFParticle corresponds to a shower
+      PFParticleData_t<Short_t> pfp_isTrack;      ///< whether this PFParticle corresponds to a track
       PFParticleData_t<Short_t> pfp_trackID;      ///< the ID of the track object corresponding to this PFParticle, if !isShower
       PFParticleData_t<Short_t> pfp_showerID;     ///< the ID of the shower object corresponding to this PFParticle, if isShower
       
-      PFParticleData_t<Short_t>   pfp_isNeutrino;   ///< whether this PFParticle is a neutrino
+      PFParticleData_t<Short_t> pfp_isNeutrino;   ///< whether this PFParticle is a neutrino
       PFParticleData_t<Int_t>   pfp_pdgCode;      ///< the preliminary estimate of the PFParticle type using the PDG code
       
       PFParticleData_t<Short_t> pfp_numClusters;  ///< the number of associated clusters
       ClusterData_t<Short_t>    pfp_clusterIDs;   ///< the IDs of any associated clusters
       
-      Short_t                   pfp_numNeutrinos;   ///< the number of reconstructed neutrinos
+      Short_t                   pfp_numNeutrinos; ///< the number of reconstructed neutrinos
       Short_t pfp_neutrinoIDs[kMaxNPFPNeutrinos]; ///< the PFParticle IDs of the neutrinos
       /// @}
       
@@ -677,8 +674,6 @@ namespace microboone {
         { return (size_t) kMaxNClustersPerPFP; }
       
     }; // class PFParticleDataStruct
-    
-    //--------------------------------------------------------------------------------------------------------------------------------[/JAW]   
 
     enum DataBits_t: unsigned int {
       tdAuxDet = 0x01,
@@ -695,10 +690,7 @@ namespace microboone {
 	tdCluster = 0x800,
 	tdRawDigit = 0x1000,
         tdPandoraNuVertex = 0x2000,
-//-------------------------------------------------------------------------------------------------------------------------------[JAW]
          tdPFParticle = 0x4000,
-    //------------------------------------------------------------------------------------------------------------------------------[/JAW]
-
 	tdDefault = 0
 	}; // DataBits_t
     
@@ -817,10 +809,9 @@ namespace microboone {
     // shower information
     Char_t   kNShowerAlgos;
     std::vector<ShowerDataStruct> ShowerData;
-    //---------------------------------------------------------------------------------------------------------------------------------[JAW]
-    // PFParticle information (only one Pandora algorithm)
+
+    // PFParticle information
     PFParticleDataStruct PFParticleData;
-    //--------------------------------------------------------------------------------------------------------------------------------[/JAW]    
 
     //mctruth information
     Int_t     mcevts_truth;    //number of neutrino Int_teractions in the spill
@@ -1140,10 +1131,8 @@ namespace microboone {
     /// Returns whether we have Vertex data
     bool hasVertexInfo() const { return bits & tdVertex; }
 
-//---------------------------------------------------------------------------------------------------------------------------------[JAW]
     /// Returns whether we have PFParticle data
     bool hasPFParticleInfo() const { return bits & tdPFParticle; }
-    //--------------------------------------------------------------------------------------------------------------------------------[/JAW]
     
     /// Returns whether we have Cluster data
     bool hasClusterInfo() const { return bits & tdCluster; }
@@ -1182,13 +1171,10 @@ namespace microboone {
     const VertexDataStruct& GetVertexData(size_t iVertex) const
     { return VertexData.at(iVertex); }
 
-
-//---------------------------------------------------------------------------------------------------------------------------------[JAW]
     PFParticleDataStruct& GetPFParticleData()
       { return PFParticleData; }
     const PFParticleDataStruct& GetPFParticleData() const
       { return PFParticleData; }
-    //--------------------------------------------------------------------------------------------------------------------------------[/JAW]
     
     /// Clear all fields if this object (not the tracker algorithm data)
     void ClearLocalData();
@@ -1227,9 +1213,6 @@ namespace microboone {
 		      std::vector<std::string> const& trackers,
 		      std::vector<std::string> const& vertexalgos,
 		      std::vector<std::string> const& showeralgos,
-              //-------------------------------------------------------------------------------------------------------------------------------[JAW]
-      /* bool isPFParticle, */ // is this necessary?
-      //------------------------------------------------------------------------------------------------------------------------------[/JAW]
 		      bool isCosmics
 		      );
     
@@ -1414,11 +1397,7 @@ namespace microboone {
     std::string fMCShowerModuleLabel;
     std::string fMCTrackModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
-
-    //-------------------------------------------------------------------------------------------------------------------------------[JAW]
     std::string fPFParticleModuleLabel;
-//------------------------------------------------------------------------------------------------------------------------------[/JAW]
-
     std::vector<std::string> fVertexModuleLabel;
     std::vector<std::string> fShowerModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
@@ -1442,10 +1421,7 @@ namespace microboone {
     bool fSavePandoraNuVertexInfo; ///whether to extract and save nu vertex information from Pandora
     bool fSaveFlashInfo;  ///whether to extract and save Flash information
     bool fSaveShowerInfo;  ///whether to extract and save Shower information
-
-//---------------------------------------------------------------------------------------------------------------------------------[JAW]
     bool fSavePFParticleInfo; ///whether to extract and save PFParticle information
-    //--------------------------------------------------------------------------------------------------------------------------------[/JAW]
 
     std::vector<std::string> fCosmicTaggerAssocLabel;
     std::vector<std::string> fFlashMatchAssocLabel;
@@ -1487,19 +1463,12 @@ namespace microboone {
 	fData->SetBits(AnalysisTreeDataStruct::tdTrack,  !fSaveTrackInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdVertex, !fSaveVertexInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdAuxDet, !fSaveAuxDetInfo);
-
-//---------------------------------------------------------------------------------------------------------------------------[JAW]
-    fData->SetBits(AnalysisTreeDataStruct::tdPFParticle, !fSavePFParticleInfo);
-          //--------------------------------------------------------------------------------------------------------------------------[/JAW]
-
+        fData->SetBits(AnalysisTreeDataStruct::tdPFParticle, !fSavePFParticleInfo);
       }
       else {
 	fData->SetTrackers(GetNTrackers());
 	fData->SetVertexAlgos(GetNVertexAlgos());
 	fData->SetShowerAlgos(GetShowerAlgos());
-//---------------------------------------------------------------------------------------------------------------------------[JAW]
-          // do we need a PFParticle thing here?
-          //--------------------------------------------------------------------------------------------------------------------------[/JAW]
 
 	if (bClearData) fData->Clear();
       }
@@ -1553,7 +1522,6 @@ namespace microboone {
       fData->GetShowerData(iShower).SetAddresses(fTree);
     } // SetShowerAddresses()
 
-//--------------------------------------------------------------------------------------------------------------------------------[JAW]
     /// Sets the addresses of the tree branch of the PFParticle,
     /// creating it if missing
     void SetPFParticleAddress()
@@ -1561,8 +1529,6 @@ namespace microboone {
       CheckData(__func__); CheckTree(__func__);
       fData->GetPFParticleData().SetAddresses(fTree);
     } // SetPFParticleAddress()
-    //-------------------------------------------------------------------------------------------------------------------------------[/JAW]
-
     
     /// Create the output tree and the data structures, if needed
     void CreateTree(bool bClearData = false);
@@ -2021,8 +1987,6 @@ void microboone::AnalysisTreeDataStruct::VertexDataStruct::SetAddresses(
   CreateBranch(BranchName, vtxz, BranchName + NVertexIndexStr + "/F");
 }
 
-
-//--------------------------------------------------------------------------------------------------------------------------------[JAW]
 //------------------------------------------------------------------------------
 //---  AnalysisTreeDataStruct::PFParticleDataStruct
 //---
@@ -2038,6 +2002,7 @@ void microboone::AnalysisTreeDataStruct::PFParticleDataStruct::Resize(size_t nPF
   pfp_parentID.resize(MaxPFParticles);
   pfp_vertexID.resize(MaxPFParticles);
   pfp_isShower.resize(MaxPFParticles);
+  pfp_isTrack.resize(MaxPFParticles);
   pfp_trackID.resize(MaxPFParticles);
   pfp_showerID.resize(MaxPFParticles);
   pfp_pdgCode.resize(MaxPFParticles);
@@ -2056,6 +2021,7 @@ void microboone::AnalysisTreeDataStruct::PFParticleDataStruct::Clear() {
   FillWith(pfp_parentID, -9999);
   FillWith(pfp_vertexID, -9999);
   FillWith(pfp_isShower, -9999);
+  FillWith(pfp_isTrack, -9999);
   FillWith(pfp_trackID, -9999);
   FillWith(pfp_showerID, -9999);
   FillWith(pfp_pdgCode, -9999);
@@ -2117,6 +2083,9 @@ void microboone::AnalysisTreeDataStruct::PFParticleDataStruct::SetAddresses(
   
   BranchName = "pfp_isShower";
   CreateBranch(BranchName, pfp_isShower, BranchName + NPFParticleIndexStr + "/S");
+
+  BranchName = "pfp_isTrack";
+  CreateBranch(BranchName, pfp_isTrack, BranchName + NPFParticleIndexStr + "/S");
   
   BranchName = "pfp_trackID";
   CreateBranch(BranchName, pfp_trackID, BranchName + NPFParticleIndexStr + "/S");
@@ -2140,9 +2109,8 @@ void microboone::AnalysisTreeDataStruct::PFParticleDataStruct::SetAddresses(
   CreateBranch(BranchName, &pfp_numNeutrinos, BranchName + "/S");
   
   BranchName = "pfp_neutrinoIDs";
-  CreateBranch(BranchName, pfp_neutrinoIDs, BranchName + NPFParticleIndexStr + MaxNNeutrinosIndexStr + "/S");
+  CreateBranch(BranchName, pfp_neutrinoIDs, BranchName + MaxNNeutrinosIndexStr + "/S");
 }
-//-------------------------------------------------------------------------------------------------------------------------------[/JAW]
 
 //------------------------------------------------------------------------------
 //---  AnalysisTreeDataStruct::ShowerDataStruct
@@ -2834,11 +2802,6 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 						      const std::vector<std::string>& trackers,
 						      const std::vector<std::string>& vertexalgos,
 						      const std::vector<std::string>& showeralgos,
-//--------------------------------------------------------------------------------------------------------------------------------[JAW]
-  /* Is this needed?
-  bool isPFParticle,
-   */
-//-------------------------------------------------------------------------------------------------------------------------------[/JAW]
 						      bool isCosmics
 						      ) {
   BranchCreator CreateBranch(pTree);
@@ -2968,12 +2931,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     } // for showers
   } // if we have shower algos
 
-//--------------------------------------------------------------------------------------------------------------------------------[JAW]
   if (hasPFParticleInfo()){
     //CreateBranch("kNVertexAlgos",&kNVertexAlgos,"kNVertexAlgos/B"); // What would be the PFParticle equivalent of this? There's only 1 algo!
     PFParticleData.SetAddresses(pTree);
   }
-//-------------------------------------------------------------------------------------------------------------------------------[/JAW]
 
   if (hasGenieInfo()){
     CreateBranch("mcevts_truth",&mcevts_truth,"mcevts_truth/I");
@@ -3276,11 +3237,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
   fMCTrackModuleLabel      (pset.get< std::string >("MCTrackModuleLabel")     ),  
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
-
-  //--------------------------------------------------------------------------------------------------------------------------------[JAW]
   fPFParticleModuleLabel   (pset.get<std::string>("PFParticleModuleLabel")),
-//-------------------------------------------------------------------------------------------------------------------------------[/JAW]
-
   fVertexModuleLabel        (pset.get< std::vector<std::string> >("VertexModuleLabel")),
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
@@ -3304,11 +3261,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSavePandoraNuVertexInfo        (pset.get< bool >("SavePandoraNuVertexInfo", false)),
   fSaveFlashInfo            (pset.get< bool >("SaveFlashInfo", false)),
   fSaveShowerInfo            (pset.get< bool >("SaveShowerInfo", false)),
-
-  //--------------------------------------------------------------------------------------------------------------------------------[JAW]  
   fSavePFParticleInfo	    (pset.get< bool >("SavePFParticleInfo", false)),
-//-------------------------------------------------------------------------------------------------------------------------------[/JAW]
-
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
   fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
   bIgnoreMissingShowers     (pset.get< bool >("IgnoreMissingShowers", false)),
@@ -3575,13 +3528,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       art::fill_ptr_vector(vertexlist[it], vertexListHandle[it]);
   }
 
-//--------------------------------------------------------------------------------------------------------------------------------[JAW] 
   // * PFParticles
   lar_pandora::PFParticleVector pfparticlelist;
   lar_pandora::PFParticlesToClusters pfParticleToClusterMap;
   lar_pandora::LArPandoraHelper::CollectPFParticles(evt, fPFParticleModuleLabel, pfparticlelist, pfParticleToClusterMap);
-
-  //-------------------------------------------------------------------------------------------------------------------------------[/JAW] 
   
   // * tracks
   std::vector< art::Handle< std::vector<recob::Track> > > trackListHandle(NTrackers);
@@ -3938,9 +3888,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     } // for iShowerAlgo
     
   } // if fSaveShowerInfo
-
-
-//---------------------------------------------------------------------------------------------------------------------------------[JAW]
   
   //Save PFParticle information
   if (fSavePFParticleInfo){
@@ -3988,12 +3935,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     lar_pandora::PFParticlesToShowers pfParticleToShowerMap;
     lar_pandora::LArPandoraHelper::CollectShowers(evt, fPFParticleModuleLabel, allPfParticleShowers, pfParticleToShowerMap);
     
-/*
-    // Get a PFParticle-to-cluster map.
-    lar_pandora::ClusterVector allPfParticleClusters;
-    lar_pandora::PFParticlesToClusters pfParticleToClusterMap;
-    lar_pandora::LArPandoraHelper::CollectClusters(evt, fPFParticleModuleLabel, allPfParticleClusters, pfParticleToClusterMap);
-*/
     for (size_t i = 0; i < NPFParticles && i < PFParticleData.GetMaxPFParticles() ; ++i){
       PFParticleData.pfp_selfID[i] = pfparticlelist[i]->Self();
       PFParticleData.pfp_isPrimary[i] = (Short_t)pfparticlelist[i]->IsPrimary();
@@ -4016,13 +3957,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           if (pfParticleVertices.size() == 1)
             PFParticleData.pfp_vertexID[i] = pfParticleVertices.at(0)->ID();
           else
-            std::cerr << "Warning: there was more than one vertex found for this PFParticle" << std::endl;
+            std::cerr << "Warning: there was more than one vertex found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
       }
       else
-        std::cerr << "Warning: there was no vertex found for this PFParticle" << std::endl;
+        std::cerr << "Warning: there was no vertex found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
       
-      if (lar_pandora::LArPandoraHelper::IsTrack(pfparticlelist[i])) {
-        PFParticleData.pfp_isShower[i] = 0;
+      if (lar_pandora::LArPandoraHelper::IsTrack(pfparticlelist[i])){
+        PFParticleData.pfp_isTrack[i] = 1;
         
         // Set the track ID.
         auto trackMapIter = pfParticleToTrackMap.find(pfparticlelist[i]);
@@ -4032,13 +3973,15 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             if (pfParticleTracks.size() == 1)
               PFParticleData.pfp_trackID[i] = pfParticleTracks.at(0)->ID();
             else
-              std::cerr << "Warning: there was more than one track found for this PFParticle" << std::endl;
+              std::cerr << "Warning: there was more than one track found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
         }
         else
-          std::cerr << "Warning: there was no track found for this track-like PFParticle" << std::endl;
+          std::cerr << "Warning: there was no track found for track-like PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
       }
+      else
+        PFParticleData.pfp_isTrack[i] = 0;
       
-      else if (lar_pandora::LArPandoraHelper::IsShower(pfparticlelist[i])) {
+      if (lar_pandora::LArPandoraHelper::IsShower(pfparticlelist[i])) {
         PFParticleData.pfp_isShower[i] = 1;
         // Set the shower ID.
         auto showerMapIter = pfParticleToShowerMap.find(pfparticlelist[i]);
@@ -4048,14 +3991,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           if (pfParticleShowers.size() == 1)
             PFParticleData.pfp_showerID[i] = pfParticleShowers.at(0)->ID();
           else
-            std::cerr << "Warning: there was more than one shower found for this PFParticle" << std::endl;
+            std::cerr << "Warning: there was more than one shower found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
         }
         else
-          std::cerr << "Warning: there was no shower found for this shower-like PFParticle" << std::endl;
+          std::cerr << "Warning: there was no shower found for shower-like PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
       }
-      
       else
-          std::cerr << "Warning: PFParticle was neither a track nor a shower" << std::endl;
+        PFParticleData.pfp_isShower[i] = 0;
       
       // Set the cluster IDs.
       auto clusterMapIter = pfParticleToClusterMap.find(pfparticlelist[i]);
@@ -4066,11 +4008,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           for (size_t j = 0; j < pfParticleClusters.size(); ++j) 
             PFParticleData.pfp_clusterIDs[i][j] = pfParticleClusters[j]->ID();
       }
-      else
-        std::cerr << "Warning: there were no clusters found for this PFParticle" << std::endl;
+      //else
+      //  std::cerr << "Warning: there were no clusters found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
     }
   } // if fSavePFParticleInfo
-//---------------------------------------------------------------------------------------------------------------------------------[/JAW] 
 
   //track information for multiple trackers
   if (fSaveTrackInfo) {
