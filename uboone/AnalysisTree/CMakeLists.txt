@@ -12,6 +12,8 @@ art_make(
 			larreco_RecoAlg
 			larpandora_LArPandoraInterface
 			SignalShapingServiceMicroBooNE_service
+			DetectorProperties_service
+			LArPandoraInterface
                         ${SIMULATIONBASE}
                         ${LARRECO_LIB}
                         ${LARDATA_LIB}
