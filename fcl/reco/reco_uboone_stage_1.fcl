@@ -36,6 +36,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -151,6 +152,7 @@ outputs:
    fileName:    "%ifb_%tc_reco1.root"
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
+   saveMemoryObjectThreshold: 0
  }
 }
 
