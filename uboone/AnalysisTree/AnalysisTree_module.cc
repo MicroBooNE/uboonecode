@@ -572,7 +572,7 @@ namespace microboone {
       /// @{
       /// @name Branch data structures
       Short_t  nshowers;                      ///< number of showers
-      ShowerData_t<Int_t>    showerID;        ///< Shower ID
+      ShowerData_t<Short_t>  showerID;        ///< Shower ID
       ShowerData_t<Short_t>  shwr_bestplane;  ///< Shower best plane
       ShowerData_t<Float_t>  shwr_length;     ///< Shower length
       ShowerData_t<Float_t>  shwr_startdcosx; ///< X directional cosine at start of shower
@@ -2209,7 +2209,7 @@ void microboone::AnalysisTreeDataStruct::ShowerDataStruct::SetAddresses
   std::string NShowerIndexStr = "[" + BranchName + "]";
   
   BranchName = "showerID_" + ShowerLabel;
-  CreateBranch(BranchName, showerID, BranchName + NShowerIndexStr + "/I");
+  CreateBranch(BranchName, showerID, BranchName + NShowerIndexStr + "/S");
   
   BranchName = "shwr_bestplane_" + ShowerLabel;
   CreateBranch(BranchName, shwr_bestplane, BranchName + NShowerIndexStr + "/S");
