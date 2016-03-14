@@ -334,9 +334,6 @@
 #include "TTree.h"
 #include "TTimeStamp.h"
 
-#include "RecoBase/PFParticle.h"
-#include "LArPandoraInterface/LArPandoraHelper.h"
-
 constexpr int kNplanes       = 3;     //number of wire planes
 constexpr int kMaxHits       = 40000; //maximum number of hits;
 constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
@@ -529,6 +526,7 @@ namespace microboone {
       size_t MaxVertices; ///< maximum number of storable vertices
 
       Short_t  nvtx;             //number of reconstructed tracks
+      VertexData_t<Short_t> vtxId;    // the vertex ID.
       VertexData_t<Float_t> vtxx;     // x position.
       VertexData_t<Float_t> vtxy;     // y position.
       VertexData_t<Float_t> vtxz;     // z position.
@@ -1946,7 +1944,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
 void microboone::AnalysisTreeDataStruct::VertexDataStruct::Resize(size_t nVertices)
 {
   MaxVertices = nVertices;
-
+  vtxId.resize(MaxVertices);
   vtxx.resize(MaxVertices);
   vtxy.resize(MaxVertices);
   vtxz.resize(MaxVertices);
@@ -1956,6 +1954,7 @@ void microboone::AnalysisTreeDataStruct::VertexDataStruct::Clear() {
   Resize(MaxVertices);
   nvtx = -9999;
 
+  FillWith(vtxId       , -9999  );
   FillWith(vtxx        , -9999  );
   FillWith(vtxy        , -9999  );
   FillWith(vtxz        , -9999  );
@@ -1976,6 +1975,9 @@ void microboone::AnalysisTreeDataStruct::VertexDataStruct::SetAddresses(
   BranchName = "nvtx_" + VertexLabel;
   CreateBranch(BranchName, &nvtx, BranchName + "/S");
   std::string NVertexIndexStr = "[" + BranchName + "]";
+
+  BranchName = "vtxId_" + VertexLabel;
+  CreateBranch(BranchName, vtxId, BranchName + NVertexIndexStr + "/S");
 
   BranchName = "vtxx_" + VertexLabel;
   CreateBranch(BranchName, vtxx, BranchName + NVertexIndexStr + "/F");
@@ -4386,6 +4388,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
 
       for (size_t i = 0; i < NVertices && i < kMaxVertices ; ++i){//loop over hits
+	VertexData.vtxId[i] = vertexlist[iVertexAlg][i]->ID();
 	Double_t xyz[3] = {};
 	vertexlist[iVertexAlg][i] -> XYZ(xyz);
 	VertexData.vtxx[i] = xyz[0];
