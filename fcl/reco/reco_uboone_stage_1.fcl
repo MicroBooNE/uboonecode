@@ -51,15 +51,15 @@ physics:
   rns:                 { module_type: RandomNumberSaver }
 
   ### OpHit finders
-  ophitT   : @local::ub_ophitfinder_t
-  ophitFW  : @local::ub_ophitfinder_fw
-  ophitSW  : @local::ub_ophitfinder_sw
-  ophitCFD : @local::ub_ophitfinder_cfd
+  #ophitT   : @local::ub_ophitfinder_t
+  #ophitFW  : @local::ub_ophitfinder_fw
+  #ophitSW  : @local::ub_ophitfinder_sw
+  #ophitCFD : @local::ub_ophitfinder_cfd
 
-  ophitSatT   : @local::ub_ophitfinder_satt
-  ophitSatFW  : @local::ub_ophitfinder_satfw
-  ophitSatSW  : @local::ub_ophitfinder_satsw
-  ophitSatCFD : @local::ub_ophitfinder_satcfd
+  #ophitSatT   : @local::ub_ophitfinder_satt
+  #ophitSatFW  : @local::ub_ophitfinder_satfw
+  #ophitSatSW  : @local::ub_ophitfinder_satsw
+  #ophitSatCFD : @local::ub_ophitfinder_satcfd
 
   ### Saturation correction module
   saturation : @local::correct_saturation
@@ -69,18 +69,10 @@ physics:
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  sflash           : @local::microboone_simple_flash
 
-  sflashT   : @local::ub_sflash_t
-  sflashFW  : @local::ub_sflash_fw
-  sflashSW  : @local::ub_sflash_sw
-  sflashCFD : @local::ub_sflash_cfd
-
-  opflashSat   : @local::microboone_opflash_saturation
-
-  sflashSatT   : @local::ub_sflash_satt
-  sflashSatFW  : @local::ub_sflash_satfw
-  sflashSatSW  : @local::ub_sflash_satsw
-  sflashSatCFD : @local::ub_sflash_satcfd
+  opflashSat : @local::microboone_opflash_saturation
+  sflashSat  : @local::microboone_simple_flash_sat
 
   ### calwire producers
   caldata:             @local::microboone_calroi
@@ -110,12 +102,10 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
          saturation,
-         ophitT, ophitFW, ophitSW, ophitCFD,
-         sflashT, sflashFW, sflashSW, sflashCFD,
-         ophitSatT, ophitSatFW, ophitSatSW, ophitSatCFD,
-         sflashSatT, sflashSatFW, sflashSatSW, sflashSatCFD,
          opflash,
+         sflash,
          opflashSat,
+         sflashSat,
          opflashLow,
          opflashCosmic,
          opflashCosmicLow,
