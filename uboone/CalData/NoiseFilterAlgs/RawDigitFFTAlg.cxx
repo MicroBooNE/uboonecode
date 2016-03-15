@@ -153,6 +153,7 @@ template <class T> void RawDigitFFTAlg::getFFTCorrection(std::vector<T>& corValV
     std::transform(fftOutputArray, fftOutputArray + fftDataSize, corValVec.begin(), [normFctr](const double& real){return real * normFctr;});
     
     delete fftc2r;
+    delete fftr2c;
     
     return;
 }
@@ -204,6 +205,7 @@ template<class T> void RawDigitFFTAlg::getFFTCorrection(std::vector<T>& corValVe
     std::transform(fftOutputArray, fftOutputArray + fftDataSize, corValVec.begin(), [normFctr](const double& real){return real * normFctr;});
     
     delete fftc2r;
+    delete fftr2c;
     
     return;
 }
@@ -318,9 +320,9 @@ void RawDigitFFTAlg::filterFFT(std::vector<short>& rawadc, size_t view, size_t w
         
         if (fFillHistograms && view == 0 && wire >= lowWire && wire < hiWire)
             for(int idx = 0; idx < fftDataSize; idx++) fFFTCorValHistVec[wire-lowWire]->Fill(idx, rawadc[idx] - pedestal, 1.);
-            
-        delete fftr2c;
+        
         delete fftc2r;
+        delete fftr2c;
     }
     
     return;
