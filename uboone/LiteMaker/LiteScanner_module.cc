@@ -237,8 +237,8 @@ void LiteScanner::analyze(art::Event const & e)
   _mgr.set_id(e.id().run(),
 	      e.id().subRun(),
 	      e.id().event());
-  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
-  ts->preProcessEvent(e);
+  //auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
+  //ts->preProcessEvent(e);
   /*
   std::cout<<" Run: " << _mgr.run_id() << " ... "
 	   <<" SubRun: " << _mgr.subrun_id() << " ... "
