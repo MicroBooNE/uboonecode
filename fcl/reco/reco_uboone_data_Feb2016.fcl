@@ -161,7 +161,7 @@ microboone_reco_data_optical: [ saturation,
                                 ophitSat,
                                 ophitLow,
                                 ophitCosmic,
-                                ophitCosmicLow
+                                ophitCosmicLow,
                                 opflash,
                                 sflash,
                                 opflashSat,

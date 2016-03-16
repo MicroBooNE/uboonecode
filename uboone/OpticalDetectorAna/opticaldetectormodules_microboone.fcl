@@ -16,7 +16,7 @@ microboone_simple_flash:
 }
 
 microboone_simple_flash_sat: @local::microboone_simple_flash
-microboone_simple_flash_sat.OpHitProducer: "opflashSat"
+microboone_simple_flash_sat.OpHitProducer: "ophitSat"
 
 #
 # OpHitFinder module
@@ -109,25 +109,25 @@ microboone_opflash_highgain:
 }
 
 microboone_opflash_beam_highgain: @local::microboone_opflash_highgain
-microboone_opflash_beam_highgain.InputModule: "microboone_ophit_beam_highgain"
+microboone_opflash_beam_highgain.InputModule: "ophit"
 
 microboone_opflash_beam_lowgain: @local::microboone_opflash_lowgain
-microboone_opflash_beam_lowgain.InputModule: "microboone_ophit_beam_lowgain"
+microboone_opflash_beam_lowgain.InputModule: "ophitLow"
 
 microboone_opflash_cosmic_highgain: @local::microboone_opflash_highgain
-microboone_opflash_cosmic_highgain.InputModule: "microboone_ophit_cosmic_highgain"
+microboone_opflash_cosmic_highgain.InputModule: "ophitCosmic"
 
 microboone_opflash_cosmic_lowgain: @local::microboone_opflash_lowgain
-microboone_opflash_cosmic_lowgain.InputModule: "microboone_ophit_cosmic_lowgain"
+microboone_opflash_cosmic_lowgain.InputModule: "ophitCosmicLow"
 
 microboone_opflash: @local::microboone_opflash_beam_highgain
-microboone_opflash.InputModule: "microboone_ophit"
+microboone_opflash.InputModule: "ophit"
 
 #
 # OpFlash on saturation output
 #
 microboone_opflash_saturation: @local::microboone_opflash
-microboone_opflash_saturation.InputModule: "microboone_ophit_saturation"
+microboone_opflash_saturation.InputModule: "ophitSat"
 
 microboone_opdigiana:        @local::standard_opdigiana
 microboone_opflashana:       @local::standard_opflashana

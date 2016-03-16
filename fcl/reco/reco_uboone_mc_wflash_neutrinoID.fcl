@@ -170,7 +170,7 @@ physics:
          #ophit,
          #ophitLow,
          #ophitCosmic,
-         #ophitCosmicLow
+         #ophitCosmicLow,
          #opflash,
          #opflashLow,
          #opflashCosmic,

@@ -112,7 +112,7 @@ physics:
          ophitSat,
          ophitLow,
          ophitCosmic,
-         ophitCosmicLow
+         ophitCosmicLow,
          opflash,
          sflash,
          opflashSat,

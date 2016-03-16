@@ -180,7 +180,7 @@ microboone_reco_mcc7_optical: [ saturation,
                                 ophitSat,
                                 ophitLow,
                                 ophitCosmic,
-                                ophitCosmicLow
+                                ophitCosmicLow,
                                 opflash,
                                 sflash,
                                 opflashSat,
