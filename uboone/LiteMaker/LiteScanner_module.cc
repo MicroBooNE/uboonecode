@@ -53,6 +53,7 @@
 #include "lardata/AnalysisBase/CosmicTag.h"
 #include "lardata/AnalysisBase/FlashMatch.h"
 #include "larsim/Simulation/SimChannel.h"
+#include "larsim/Simulation/AuxDetSimChannel.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/GTruth.h"
 #include "SimulationBase/MCTruth.h"
@@ -290,6 +291,8 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanSimPhotons(e,j); break;
       case ::larlite::data::kSimChannel:
 	ScanData<sim::SimChannel>(e,j); break;
+      case ::larlite::data::kAuxDetSimChannel:
+	ScanData<sim::AuxDetSimChannel>(e,j); break;
       case ::larlite::data::kMCShower:
 	ScanData<sim::MCShower>(e,j); break;
       case ::larlite::data::kMCTrack: 
@@ -392,6 +395,7 @@ void LiteScanner::analyze(art::Event const & e)
       case ::larlite::data::kMCTruth:
       case ::larlite::data::kOpHit: 
       case ::larlite::data::kSimChannel:
+      case ::larlite::data::kAuxDetSimChannel:
       case ::larlite::data::kSimPhotons:
       case ::larlite::data::kMCShower:
       case ::larlite::data::kMCTrack:
