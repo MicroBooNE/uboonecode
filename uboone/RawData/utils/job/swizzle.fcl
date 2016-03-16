@@ -77,6 +77,10 @@ physics:
 {
   producers: {
   ### flash finders
+  ophit            : @local::microboone_ophit_beam_highgain
+  #ophitLow         : @local::microboone_ophit_beam_lowgain
+  ophitCosmic      : @local::microboone_ophit_cosmic_highgain
+  #ophitCosmicLow   : @local::microboone_ophit_cosmic_lowgain
   opflash          : @local::microboone_opflash_beam_highgain
   #opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
@@ -85,7 +89,7 @@ physics:
  filters: {
   triggerEnforcement: @local::trigger_enforcement
  }
- reco: [ triggerEnforcement, opflash ]
+ reco: [ triggerEnforcement, ophit, opflash ]
  stream1:   [ out1 ]
  trigger_paths: [ reco ]
  end_paths: [ stream1 ]

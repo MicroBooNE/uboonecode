@@ -66,12 +66,17 @@ physics:
   saturation : @local::correct_saturation
 
   ### flash finders
+  ophit            : @local::microboone_ophit_beam_highgain
+  ophitLow         : @local::microboone_ophit_beam_lowgain
+  ophitCosmic      : @local::microboone_ophit_cosmic_highgain
+  ophitCosmicLow   : @local::microboone_ophit_cosmic_lowgain
   opflash          : @local::microboone_opflash_beam_highgain
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
   sflash           : @local::microboone_simple_flash
 
+  ophitSat     : @local::microboone_ophit_saturation
   opflashSat : @local::microboone_opflash_saturation
   sflashSat  : @local::microboone_simple_flash_sat
 
@@ -103,6 +108,11 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
          saturation,
+         ophit,
+         ophitSat,
+         ophitLow,
+         ophitCosmic,
+         ophitCosmicLow
          opflash,
          sflash,
          opflashSat,

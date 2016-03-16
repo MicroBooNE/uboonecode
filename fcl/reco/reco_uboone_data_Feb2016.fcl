@@ -50,12 +50,17 @@ microboone_reco_data_producers:
   saturation : @local::correct_saturation
 
   ### flash finders
+  ophit            : @local::microboone_ophit_beam_highgain
+  ophitLow         : @local::microboone_ophit_beam_lowgain
+  ophitCosmic      : @local::microboone_ophit_cosmic_highgain
+  ophitCosmicLow   : @local::microboone_ophit_cosmic_lowgain
   opflash          : @local::microboone_opflash_beam_highgain
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
   sflash : @local::microboone_simple_flash
 
+  ophitSat     : @local::microboone_ophit_saturation
   opflashSat   : @local::microboone_opflash_saturation
   sflashSat : @local::microboone_simple_flash_sat
 
@@ -152,6 +157,11 @@ microboone_reco_data_filters:
 ### Below are a list of convenient sequences that can be used for production/typical users. ###
 
 microboone_reco_data_optical: [ saturation,
+                                ophit,
+                                ophitSat,
+                                ophitLow,
+                                ophitCosmic,
+                                ophitCosmicLow
                                 opflash,
                                 sflash,
                                 opflashSat,

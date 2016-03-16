@@ -56,10 +56,17 @@ physics:
  {
 
   ### OpHit finders
+  ophit          : @local::microboone_ophit_beam_highgain
+  ophitLow       : @local::microboone_ophit_beam_lowgain
+  ophitCosmic    : @local::microboone_ophit_cosmic_highgain
+  ophitCosmicLow : @local::microboone_ophit_cosmic_lowgain
+
   ophitT   : @local::ub_ophitfinder_t
   ophitFW  : @local::ub_ophitfinder_fw
   ophitSW  : @local::ub_ophitfinder_sw
   ophitCFD : @local::ub_ophitfinder_cfd
+
+  ophitSat    : @local::microboone_ophit_saturation
 
   ophitSatT   : @local::ub_ophitfinder_satt
   ophitSatFW  : @local::ub_ophitfinder_satfw
@@ -106,6 +113,11 @@ physics:
          sflashT, sflashFW, sflashSW, sflashCFD,
          ophitSatT, ophitSatFW, ophitSatSW, ophitSatCFD,
          sflashSatT, sflashSatFW, sflashSatSW, sflashSatCFD,
+         ophit,
+         ophitSat,
+         ophitLow,
+         ophitCosmic,
+         ophitCosmicLow
          opflash,
          opflashSat,
          opflashLow,
