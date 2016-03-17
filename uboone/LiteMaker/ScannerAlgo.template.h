@@ -21,6 +21,7 @@
 #include "DataFormat/mcshower.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/simch.h"
+#include "DataFormat/auxsimch.h"
 #include "DataFormat/calorimetry.h"
 #include "DataFormat/vertex.h"
 #include "DataFormat/endpoint2d.h"
@@ -502,6 +503,48 @@ namespace larlite {
       //fPtrIndex_simch[sch_ptr] = std::make_pair(lite_data->size(),name_index);
 
       lite_data->push_back(lite_sch);
+    }
+
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::sim::AuxDetSimChannel> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    auto lite_data = (::larlite::event_auxsimch*)lite_dh;
+
+    for(size_t i=0; i<dh->size(); ++i ) {
+      
+      const art::Ptr<::sim::AuxDetSimChannel> auxsch_ptr(dh,i);
+
+      std::vector<larlite::auxide> lite_ide_v;
+
+      for(auto const& ide : auxsch_ptr->AuxDetIDEs()) {
+
+	::larlite::auxide lite_ide;
+	lite_ide.trackID         = ide.trackID;
+	lite_ide.energyDeposited = ide.energyDeposited;
+	lite_ide.entryX          = ide.entryX;
+	lite_ide.entryY          = ide.entryY;
+	lite_ide.entryZ          = ide.entryZ;
+	lite_ide.entryT          = ide.entryT;
+	lite_ide.exitX           = ide.exitX;
+	lite_ide.exitY           = ide.exitY;
+	lite_ide.exitZ           = ide.exitZ;
+	lite_ide.exitT           = ide.exitT;
+	lite_ide.exitMomentumX   = ide.exitMomentumX;
+	lite_ide.exitMomentumY   = ide.exitMomentumY;
+	lite_ide.exitMomentumZ   = ide.exitMomentumZ;
+
+	lite_ide_v.emplace_back(lite_ide);
+      }
+
+      ::larlite::auxsimch lite_auxsch(auxsch_ptr->AuxDetID(),
+				      std::move(lite_ide_v),
+				      auxsch_ptr->AuxDetSensitiveID());
+      lite_data->emplace_back(lite_auxsch);
     }
 
   }
@@ -1219,6 +1262,12 @@ namespace larlite {
     return fPtrIndex_simch[key1][key2]; 
   }
 
+  template <> std::map<art::Ptr< ::sim::AuxDetSimChannel>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_auxsimch.size()<=key1) fPtrIndex_auxsimch.resize(key1+1);
+    if(fPtrIndex_auxsimch[key1].size()<=key2) fPtrIndex_auxsimch[key1].resize(key2+1);
+    return fPtrIndex_auxsimch[key1][key2]; 
+  }
+
   template <> std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
   { if(fPtrIndex_mcshower.size()<=key1) fPtrIndex_mcshower.resize(key1+1);
     if(fPtrIndex_mcshower[key1].size()<=key2) fPtrIndex_mcshower[key1].resize(key2+1);
@@ -1376,6 +1425,8 @@ namespace larlite {
   { return ::larlite::data::kSimPhotons; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::SimChannel> () const
   { return ::larlite::data::kSimChannel; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::AuxDetSimChannel> () const
+  { return ::larlite::data::kAuxDetSimChannel; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCShower> () const
   { return ::larlite::data::kMCShower; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCTrack> () const

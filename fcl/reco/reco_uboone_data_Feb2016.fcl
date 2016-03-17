@@ -46,35 +46,18 @@ microboone_reco_data_producers:
   ### random number saver
   rns:                 { module_type: RandomNumberSaver }
 
-  ### OpHit finders
-  ophitT   : @local::ub_ophitfinder_t
-  ophitFW  : @local::ub_ophitfinder_fw
-  ophitSW  : @local::ub_ophitfinder_sw
-  ophitCFD : @local::ub_ophitfinder_cfd
-  ophitSatT   : @local::ub_ophitfinder_satt
-  ophitSatFW  : @local::ub_ophitfinder_satfw
-  ophitSatSW  : @local::ub_ophitfinder_satsw
-  ophitSatCFD : @local::ub_ophitfinder_satcfd
-
-
   ### Saturation correction module
   saturation : @local::correct_saturation
 
-### flash finders
+  ### flash finders
   opflash          : @local::microboone_opflash_beam_highgain
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  sflash : @local::microboone_simple_flash
 
-  sflashT   : @local::ub_sflash_t
-  sflashFW  : @local::ub_sflash_fw
-  sflashSW  : @local::ub_sflash_sw
-  sflashCFD : @local::ub_sflash_cfd
   opflashSat   : @local::microboone_opflash_saturation
-  sflashSatT   : @local::ub_sflash_satt
-  sflashSatFW  : @local::ub_sflash_satfw
-  sflashSatSW  : @local::ub_sflash_satsw
-  sflashSatCFD : @local::ub_sflash_satcfd
+  sflashSat : @local::microboone_simple_flash_sat
 
   ### noise filtering (if needed)
   digitfilter:                 @local::microboone_rawdigitfilter
@@ -169,15 +152,14 @@ microboone_reco_data_filters:
 ### Below are a list of convenient sequences that can be used for production/typical users. ###
 
 microboone_reco_data_optical: [ saturation,
-                                ophitT, ophitFW, ophitSW, ophitCFD,
-                                sflashT, sflashFW, sflashSW, sflashCFD,
-                                ophitSatT, ophitSatFW, ophitSatSW, ophitSatCFD,
-                                sflashSatT, sflashSatFW, sflashSatSW, sflashSatCFD,
                                 opflash,
+                                sflash,
                                 opflashSat,
+                                sflashSat,
                                 opflashLow,
                                 opflashCosmic,
-                                opflashCosmicLow ]
+                                opflashCosmicLow
+                                ]
 
 microboone_reco_data_signalprocessing: [ digitfilter,
                                          caldata,

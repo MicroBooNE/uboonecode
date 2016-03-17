@@ -1,41 +1,10 @@
 #include "opticaldetectormodules.fcl"
-#include "ophitfindermodule.fcl"
+#include "ophit_microboone.fcl"
 BEGIN_PROLOG
 
 microboone_simphotoncounter: @local::standard_simphotoncounter
 microboone_opdigi:           @local::standard_opdigi
 microboone_tracktimeassoc:   @local::standard_tracktimeassoc
-
-#
-# OpHitFinder module
-#
-ub_ophitfinder_fw: @local::microboone_ophitfinder
-ub_ophitfinder_fw.HitAlgoPset: @local::ubopt_algo_hit_fixedwindow
-
-ub_ophitfinder_t: @local::microboone_ophitfinder
-ub_ophitfinder_t.HitAlgoPset: @local::ubopt_algo_hit_threshold
-
-ub_ophitfinder_sw: @local::microboone_ophitfinder
-ub_ophitfinder_sw.HitAlgoPset: @local::ubopt_algo_hit_slidingwindow
-
-ub_ophitfinder_cfd: @local::microboone_ophitfinder
-ub_ophitfinder_cfd.HitAlgoPset: @local::ubopt_algo_hit_cfd
-
-ub_ophitfinder_satfw: @local::ub_ophitfinder_fw
-ub_ophitfinder_satfw.OpDetWaveformProducer: "saturation"
-ub_ophitfinder_satfw.OpDetWaveformLabel:    ""
-
-ub_ophitfinder_satt: @local::ub_ophitfinder_t
-ub_ophitfinder_satt.OpDetWaveformProducer: "saturation"
-ub_ophitfinder_satt.OpDetWaveformLabel:    ""
-
-ub_ophitfinder_satsw: @local::ub_ophitfinder_sw
-ub_ophitfinder_satsw.OpDetWaveformProducer: "saturation"
-ub_ophitfinder_satsw.OpDetWaveformLabel:    ""
-
-ub_ophitfinder_satcfd: @local::ub_ophitfinder_cfd
-ub_ophitfinder_satcfd.OpDetWaveformProducer: "saturation"
-ub_ophitfinder_satcfd.OpDetWaveformLabel:    ""
 
 #
 # SimpleFlashFinder module
@@ -46,29 +15,8 @@ microboone_simple_flash:
  OpHitProducer : "opflash"
 }
 
-ub_sflash_t: @local::microboone_simple_flash
-ub_sflash_t.OpHitProducer: "ophitT"
-
-ub_sflash_fw: @local::microboone_simple_flash
-ub_sflash_fw.OpHitProducer: "ophitFW"
-
-ub_sflash_sw: @local::microboone_simple_flash
-ub_sflash_sw.OpHitProducer: "ophitSW"
-
-ub_sflash_cfd: @local::microboone_simple_flash
-ub_sflash_cfd.OpHitProducer: "ophitCFD"
-
-ub_sflash_satt: @local::microboone_simple_flash
-ub_sflash_satt.OpHitProducer: "ophitSatT"
-
-ub_sflash_satfw: @local::microboone_simple_flash
-ub_sflash_satfw.OpHitProducer: "ophitSatFW"
-
-ub_sflash_satsw: @local::microboone_simple_flash
-ub_sflash_satsw.OpHitProducer: "ophitSatSW"
-
-ub_sflash_satcfd: @local::microboone_simple_flash
-ub_sflash_satcfd.OpHitProducer: "ophitSatCFD"
+microboone_simple_flash_sat: @local::microboone_simple_flash
+microboone_simple_flash_sat.OpHitProducer: "opflashSat"
 
 #
 # OpFlashFinder module
