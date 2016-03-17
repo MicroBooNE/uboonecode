@@ -7,7 +7,7 @@ litembass_opreco.DataLookUpMap:
 {
   mucsdata: ["merger"]
   mucsreco: ["mucsreco"]
-  ophit: ["opflash","opflashSat","ophitT","ophitFW","ophitSW","ophitCFD",
+  ophit: ["ophit","ophitSat","ophitT","ophitFW","ophitSW","ophitCFD",
           "ophitSatT","ophitSatFW","ophitSatSW","ophitSatCFD"]
   opflash: ["opflash","opflashSat",
             "sflashT","sflashFW","sflashSW","sflashCFD",
@@ -16,7 +16,7 @@ litembass_opreco.DataLookUpMap:
 
 litembass_opreco.AssociationLookUpMap:
 {
-  ophit: ["opflash","opflashSat","ophitT","ophitFW","ophitSW","ophitCFD",
+  ophit: ["ophit","ophitSat","ophitT","ophitFW","ophitSW","ophitCFD",
           "ophitSatT","ophitSatFW","ophitSatSW","ophitSatCFD"]
 
   opflash: ["opflash","opflashSat",

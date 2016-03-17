@@ -8,7 +8,7 @@ litemc_opreco.out_filename: "larlite_opreco.root"
 litemc_opreco.DataLookUpMap:
 {
 
-  ophit: ["opflash","opflashSat","ophitT","ophitFW","ophitSW","ophitCFD",
+  ophit: ["ophit","ophitSat","ophitT","ophitFW","ophitSW","ophitCFD",
           "ophitSatT","ophitSatFW","ophitSatSW","ophitSatCFD"]
 
   opflash: ["opflash","opflashSat",
@@ -18,7 +18,7 @@ litemc_opreco.DataLookUpMap:
 
 litemc_opreco.AssociationLookUpMap:
 {
-  ophit: ["opflash","opflashSat","ophitT","ophitFW","ophitSW","ophitCFD",
+  ophit: ["ophit","ophitSat","ophitT","ophitFW","ophitSW","ophitCFD",
           "ophitSatT","ophitSatFW","ophitSatSW","ophitSatCFD"]
 
   opflash: ["opflash","opflashSat",
