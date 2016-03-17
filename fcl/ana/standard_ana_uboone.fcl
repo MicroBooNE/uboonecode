@@ -59,14 +59,14 @@ outputs:
 ### Here, we overwrite ALL module labels with the ones defined above.
 physics.analyzers.analysistree:  @local::microboone_analysistree
 physics.analyzers.analysistree.HitsModuleLabel:                 "gaushit"
-physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit","stitchkalmanhit","trackkalmanhitcc","stitchkalmanhitcc","pandoraCosmic","pandoraCosmicKHit","pandoraNu","pandoraNuKHit","pandoraNuPMA","pmtrack","cctrack","trackkalmanhitc3d","stitchkalmanhitc3d"]
+physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit","stitchkalmanhit","pandoraCosmic","pandoraCosmicKHit","pandoraNu","pandoraNuKHit","pandoraNuPMA","pmtrack"]
 physics.analyzers.analysistree.VertexModuleLabel:               ["cccluster", "pandoraNu", "pandoraCosmic","pmtrack","linecluster"]
-physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo","stitchkalmanhitcalo","trackkalmanhitcalocc","stitchkalmanhitcalocc","pandoraCosmiccalo","pandoraCosmicKHitcalo","pandoraNucalo","pandoraNuKHitcalo","pandoraNuPMAcalo","pmtrackcalo","cctrackcaloDUMMY","trackkalmanhitcaloc3d","stitchkalmanhitcaloc3d"]
-physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","trackkalmanhitpidcc","stitchkalmanhitpidcc","pandoraCosmicpid","pandoraCosmicKHitpid","pandoraNupid","pandoraNuKHitpid","pandoraNuPMApid","pmtrackpid","cctrackpidDUMMY","trackkalmanhitpidc3d","stitchkalmanhitpidc3d"]
-physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag","stitchkalmanhittag","trackkalmanhittagcc","stitchkalmanhittagcc","pandoraCosmictag","pandoraCosmicKHitPFPart","pandoraNutag","pandoraNuKHittag","pandoraNuPMAtag","pmtracktag","cctracktagDUMMY","trackkalmanhittagc3d","stitchkalmanhittagc3d"]
-physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhitflashmatch","stitchkalmanhitflashmatch","trackkalmanhitflashmatchcc","stitchkalmanhitflashmatchcc","pandoraCosmicFlashMatch","pandoraCosmicKHitFlashMatch","pandoraNuFlashMatch","pandoraNuKHitFlashMatch","pandoraNuPMAFlashMath","pmtrackFlashMatch","cctrackflashmatchDUMMY","trackkalmanhitflashmatchc3d","stitchkalmanhitflashmatchc3d"]
-physics.analyzers.analysistree.FlashT0FinderLabel:              ["t0","t0","t0","t0","t0","t0","t0","t0","t0","t0","t0","t0","t0"]
-physics.analyzers.analysistree.MCT0FinderLabel:                 ["mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo","stitchkalmanhitcalo","pandoraCosmiccalo","pandoraCosmicKHitcalo","pandoraNucalo","pandoraNuKHitcalo","pandoraNuPMAcalo","pmtrackcalo"]
+physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","pandoraCosmicpid","pandoraCosmicKHitpid","pandoraNupid","pandoraNuKHitpid","pandoraNuPMApid","pmtrackpid"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag","stitchkalmanhittag","pandoraCosmictag","pandoraCosmicKHitPFPart","pandoraNutag","pandoraNuKHittag","pandoraNuPMAtag","pmtracktag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhitflashmatch","stitchkalmanhitflashmatch","pandoraCosmicFlashMatch","pandoraCosmicKHitFlashMatch","pandoraNuFlashMatch","pandoraNuKHitFlashMatch","pandoraNuPMAFlashMath","pmtrackFlashMatch"]
+physics.analyzers.analysistree.FlashT0FinderLabel:              ["t0","t0","t0","t0","t0","t0","t0","t0"]
+physics.analyzers.analysistree.MCT0FinderLabel:                 ["mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0"]
 physics.analyzers.analysistree.CosmicScoreThresholds:           [0.0]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
