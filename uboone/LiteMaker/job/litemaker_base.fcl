@@ -27,6 +27,7 @@ litemaker_base:
     mctruth:    []
     mcpart:     []
     simch:      []
+    auxsimch:   []
     mcshower:   []
     mctrack:    []
     rawdigit:   []

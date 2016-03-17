@@ -42,6 +42,7 @@
 #include "lardata/AnalysisBase/CosmicTag.h"
 #include "larsim/Simulation/SimChannel.h"
 #include "larsim/Simulation/SimPhotons.h"
+#include "larsim/Simulation/AuxDetSimChannel.h"
 #include "SimulationBase/MCFlux.h"
 #include "SimulationBase/GTruth.h"
 #include "SimulationBase/MCTruth.h"
@@ -179,6 +180,7 @@ namespace larlite {
     std::vector< std::vector< std::map< art::Ptr<::simb::MCFlux>,      std::pair<size_t,size_t> > > > fPtrIndex_mcflux;
     std::vector< std::vector< std::map< art::Ptr<::simb::MCParticle>,  std::pair<size_t,size_t> > > > fPtrIndex_mcpart;
     std::vector< std::vector< std::map< art::Ptr<::sim::SimChannel>,   std::pair<size_t,size_t> > > > fPtrIndex_simch;
+    std::vector< std::vector< std::map< art::Ptr<::sim::AuxDetSimChannel>,   std::pair<size_t,size_t> > > > fPtrIndex_auxsimch;
     std::vector< std::vector< std::map< art::Ptr<::sim::MCShower>,     std::pair<size_t,size_t> > > > fPtrIndex_mcshower;
     std::vector< std::vector< std::map< art::Ptr<::sim::MCTrack>,      std::pair<size_t,size_t> > > > fPtrIndex_mctrack;
     std::vector< std::vector< std::map< art::Ptr<::raw::RawDigit>,     std::pair<size_t,size_t> > > > fPtrIndex_rawdigit;

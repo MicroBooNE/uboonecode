@@ -27,6 +27,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -62,6 +63,7 @@ outputs:
    module_type: RootOutput
    dataTier: "reconstructed"
    compressionLevel: 1
+   saveMemoryObjectThreshold: 0
  }
 }
 

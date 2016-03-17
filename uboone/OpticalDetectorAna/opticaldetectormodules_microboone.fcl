@@ -1,5 +1,5 @@
 #include "opticaldetectormodules.fcl"
-#include "ophitfindermodule.fcl"
+#include "ophit_microboone.fcl"
 BEGIN_PROLOG
 
 microboone_simphotoncounter: @local::standard_simphotoncounter
@@ -7,139 +7,127 @@ microboone_opdigi:           @local::standard_opdigi
 microboone_tracktimeassoc:   @local::standard_tracktimeassoc
 
 #
-# OpHitFinder module
-#
-ub_ophitfinder_fw: @local::microboone_ophitfinder
-ub_ophitfinder_fw.HitAlgoPset: @local::ubopt_algo_hit_fixedwindow
-
-ub_ophitfinder_t: @local::microboone_ophitfinder
-ub_ophitfinder_t.HitAlgoPset: @local::ubopt_algo_hit_threshold
-
-ub_ophitfinder_sw: @local::microboone_ophitfinder
-ub_ophitfinder_sw.HitAlgoPset: @local::ubopt_algo_hit_slidingwindow
-
-ub_ophitfinder_cfd: @local::microboone_ophitfinder
-ub_ophitfinder_cfd.HitAlgoPset: @local::ubopt_algo_hit_cfd
-
-ub_ophitfinder_satfw: @local::ub_ophitfinder_fw
-ub_ophitfinder_satfw.OpDetWaveformProducer: "saturation"
-ub_ophitfinder_satfw.OpDetWaveformLabel:    ""
-
-ub_ophitfinder_satt: @local::ub_ophitfinder_t
-ub_ophitfinder_satt.OpDetWaveformProducer: "saturation"
-ub_ophitfinder_satt.OpDetWaveformLabel:    ""
-
-ub_ophitfinder_satsw: @local::ub_ophitfinder_sw
-ub_ophitfinder_satsw.OpDetWaveformProducer: "saturation"
-ub_ophitfinder_satsw.OpDetWaveformLabel:    ""
-
-ub_ophitfinder_satcfd: @local::ub_ophitfinder_cfd
-ub_ophitfinder_satcfd.OpDetWaveformProducer: "saturation"
-ub_ophitfinder_satcfd.OpDetWaveformLabel:    ""
-
-#
 # SimpleFlashFinder module
 #
 microboone_simple_flash:
 {
  module_type   : "SimpleFlashFinder"
- OpHitProducer : "opflash"
+ OpHitProducer : "ophit"
 }
 
-ub_sflash_t: @local::microboone_simple_flash
-ub_sflash_t.OpHitProducer: "ophitT"
+microboone_simple_flash_sat: @local::microboone_simple_flash
+microboone_simple_flash_sat.OpHitProducer: "ophitSat"
 
-ub_sflash_fw: @local::microboone_simple_flash
-ub_sflash_fw.OpHitProducer: "ophitFW"
+#
+# OpHitFinder module
+#
 
-ub_sflash_sw: @local::microboone_simple_flash
-ub_sflash_sw.OpHitProducer: "ophitSW"
+microboone_ophit_lowgain:
+{
+   module_type:    "OpHitFinder"
+   GenModule:      "generator"
+   InputModule:    "pmtreadout"
+   InputLabels:    [ "" ]
+   ChannelMasks:   []
+   HitThreshold:   0.2  # PE
+   AreaToPE:       true # Use area to calculate number of PEs
+   SPEArea:        12.0 # If AreaToPE is true, this number is 
+                        # used as single PE area (in ADC counts)
+   reco_man:       @local::standard_preco_manager
+   HitAlgoPset:    @local::ubopt_algo_hit_slidingwindow
+   PedAlgoPset:    @local::ubopt_algo_pedestal_ub
+}
 
-ub_sflash_cfd: @local::microboone_simple_flash
-ub_sflash_cfd.OpHitProducer: "ophitCFD"
+microboone_ophit_highgain:
+{
+   module_type:    "OpHitFinder"
+   GenModule:      "generator"
+   InputModule:    "pmtreadout"
+   InputLabels:    [ "" ]
+   ChannelMasks:   []
+   HitThreshold:   0.2  # PE
+   AreaToPE:       true # Use area to calculate number of PEs
+   SPEArea:        120  # If AreaToPE is true, this number is 
+                        # used as single PE area (in ADC counts)
+   reco_man:       @local::standard_preco_manager
+   HitAlgoPset:    @local::ubopt_algo_hit_slidingwindow
+   PedAlgoPset:    @local::ubopt_algo_pedestal_ub
+}
 
-ub_sflash_satt: @local::microboone_simple_flash
-ub_sflash_satt.OpHitProducer: "ophitSatT"
+microboone_ophit_beam_highgain: @local::microboone_ophit_highgain
+microboone_ophit_beam_highgain.InputLabels:  ["OpdetBeamHighGain"]
+microboone_ophit_beam_highgain.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47]
 
-ub_sflash_satfw: @local::microboone_simple_flash
-ub_sflash_satfw.OpHitProducer: "ophitSatFW"
+microboone_ophit_beam_lowgain: @local::microboone_ophit_lowgain
+microboone_ophit_beam_lowgain.InputLabels:   ["OpdetBeamLowGain"]
+microboone_ophit_beam_lowgain.ChannelMasks:  [ 132,  133,  134,  135,  136,  137,  138,  139,  140,  141,  142,  143,  144,  145,  146,  147]
 
-ub_sflash_satsw: @local::microboone_simple_flash
-ub_sflash_satsw.OpHitProducer: "ophitSatSW"
+microboone_ophit_cosmic_highgain: @local::microboone_ophit_highgain
+microboone_ophit_cosmic_highgain.InputLabels:  ["OpdetCosmicHighGain"]
+microboone_ophit_cosmic_highgain.ChannelMasks: [ 232,  233,  234,  235,  236,  237,  238,  239,  240,  242,  242,  243,  244,  245,  246,  247]
 
-ub_sflash_satcfd: @local::microboone_simple_flash
-ub_sflash_satcfd.OpHitProducer: "ophitSatCFD"
+microboone_ophit_cosmic_lowgain: @local::microboone_ophit_lowgain
+microboone_ophit_cosmic_lowgain.InputLabels:  ["OpdetCosmicLowGain"]
+microboone_ophit_cosmic_lowgain.ChannelMasks: [ 332,  333,  334,  335,  336,  337,  338,  339,  340,  342,  342,  343,  344,  345,  346,  347]
 
+microboone_ophit:   @local::microboone_ophit_beam_highgain
+
+#
+# OpHit on saturation output
+#
+microboone_ophit_saturation: @local::microboone_ophit
+microboone_ophit_saturation.InputModule: "saturation"
+microboone_ophit_saturation.InputLabels:  [""]
+microboone_ophit_saturation.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
+                                              100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+                                              110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                                              120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+                                              130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
+                                              140, 141, 142, 143, 144, 145, 146, 147 ]
 #
 # OpFlashFinder module
 #
 
 microboone_opflash_lowgain:
 {
-   module_type:     "OpFlashFinder"
-   GenModule:       "generator"
-   InputModule:     "pmtreadout"
-   InputLabels:     [ "" ]
-   BinWidth:         1   # us | Pulse finding parameters
-   FlashThreshold:   5   # PE
-   HitThreshold:     0.2 # PE
-   WidthTolerance:   0.5 # unitless
-   TrigCoinc:        2.5 # in microseconds!
-   AreaToPE:         true # Use area to calculate number of PEs
-   SPEArea:          12.0  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
-   reco_man:         @local::standard_preco_manager
-   HitAlgoPset:      @local::ubopt_algo_hit_slidingwindow
-   PedAlgoPset:      @local::ubopt_algo_pedestal_ub
+   module_type:    "OpFlashFinder"
+   InputModule:    "microboone_ophit_lowgain"
+   BinWidth:       1   # us | Pulse finding parameters
+   FlashThreshold: 5   # PE
+   WidthTolerance: 0.5 # unitless
+   TrigCoinc:      2.5 # in microseconds!
 }
 
 microboone_opflash_highgain:
 {
-   module_type:     "OpFlashFinder"
-   GenModule:       "generator"
-   InputModule:     "pmtreadout"
-   InputLabels:     [ "" ]
-   BinWidth:         1   # us | Pulse finding parameters
-   FlashThreshold:   2   # PE
-   HitThreshold:     0.2 # PE
-   WidthTolerance:   0.5 # unitless
-   TrigCoinc:        2.5 # in microseconds!
-   AreaToPE:         true # Use area to calculate number of PEs
-   SPEArea:          120  # If AreaToPE is true, this number is used as single PE area (in ADC counts)
-   reco_man:         @local::standard_preco_manager
-   HitAlgoPset:      @local::ubopt_algo_hit_slidingwindow
-   PedAlgoPset:      @local::ubopt_algo_pedestal_ub
+   module_type:    "OpFlashFinder"
+   InputModule:    "microboone_ophit_highgain"
+   BinWidth:       1   # us | Pulse finding parameters
+   FlashThreshold: 2   # PE
+   WidthTolerance: 0.5 # unitless
+   TrigCoinc:      2.5 # in microseconds!
 }
 
 microboone_opflash_beam_highgain: @local::microboone_opflash_highgain
-microboone_opflash_beam_highgain.InputLabels:  ["OpdetBeamHighGain"]
-microboone_opflash_beam_highgain.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47]
+microboone_opflash_beam_highgain.InputModule: "ophit"
 
 microboone_opflash_beam_lowgain: @local::microboone_opflash_lowgain
-microboone_opflash_beam_lowgain.InputLabels:   ["OpdetBeamLowGain"]
-microboone_opflash_beam_lowgain.ChannelMasks:  [ 132,  133,  134,  135,  136,  137,  138,  139,  140,  141,  142,  143,  144,  145,  146,  147]
+microboone_opflash_beam_lowgain.InputModule: "ophitLow"
 
 microboone_opflash_cosmic_highgain: @local::microboone_opflash_highgain
-microboone_opflash_cosmic_highgain.InputLabels:  ["OpdetCosmicHighGain"]
-microboone_opflash_cosmic_highgain.ChannelMasks: [ 232,  233,  234,  235,  236,  237,  238,  239,  240,  242,  242,  243,  244,  245,  246,  247]
+microboone_opflash_cosmic_highgain.InputModule: "ophitCosmic"
 
 microboone_opflash_cosmic_lowgain: @local::microboone_opflash_lowgain
-microboone_opflash_cosmic_lowgain.InputLabels:  ["OpdetCosmicLowGain"]
-microboone_opflash_cosmic_lowgain.ChannelMasks: [ 332,  333,  334,  335,  336,  337,  338,  339,  340,  342,  342,  343,  344,  345,  346,  347]
+microboone_opflash_cosmic_lowgain.InputModule: "ophitCosmicLow"
 
 microboone_opflash: @local::microboone_opflash_beam_highgain
+microboone_opflash.InputModule: "ophit"
 
 #
 # OpFlash on saturation output
 #
 microboone_opflash_saturation: @local::microboone_opflash
-microboone_opflash_saturation.InputModule: "saturation"
-microboone_opflash_saturation.InputLabels:  [""]
-microboone_opflash_saturation.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
-                                              100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
-                                              110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
-                                              120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
-                                              130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
-                                              140, 141, 142, 143, 144, 145, 146, 147 ]
+microboone_opflash_saturation.InputModule: "ophitSat"
 
 microboone_opdigiana:        @local::standard_opdigiana
 microboone_opflashana:       @local::standard_opflashana

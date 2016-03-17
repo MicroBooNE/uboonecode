@@ -20,7 +20,12 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   uboonecode_uboone_MuCS
 		   larcore_Geometry_Geometry_service
 	   	   larsim_Simulation
+		   lardata_RecoBase
 		   SimulationBase
+		   lardata_MCBase
+		   larcore_SummaryData
+		   lardata_RawData
+		   lardata_RecoObjects
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}
