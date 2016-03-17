@@ -46,6 +46,7 @@ physics:
 
   ### flash finders
   opreformat:          @local::microboone_opdetreformatter
+  ophit:               @local::microboone_ophit
   opflash:             @local::microboone_opflash
 
   ### calwire producers
@@ -68,6 +69,7 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
          opreformat,
+         ophit,
          opflash,
          caldata, 
          gaushit, #rffhit,
@@ -107,10 +109,11 @@ outputs:
 physics.producers.opreformat.InputModule:                       "pmtreadout"
 physics.producers.opreformat.GenModule:                         "generator"
 
-physics.producers.opflash.InputModule:                          "opreformat"
-physics.producers.opflash.GenModule:                            "generator"
-physics.producers.opflash.InputLabels:                        [ "FEMBeamHighGain",   "FEMBeamLowGain",
+physics.producers.ophit.InputModule:                            "opreformat"
+physics.producers.ophit.GenModule:                              "generator"
+physics.producers.ophit.InputLabels:                          [ "FEMBeamHighGain",   "FEMBeamLowGain",
                                                                 "FEMCosmicHighGain", "FEMCosmicLowGain"]
+physics.producers.opflash.InputModule:                          "ophit"
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 physcis.producers.caldata.uPlaneROIPad:                         [ 150,  50 ]

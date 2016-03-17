@@ -27,6 +27,10 @@ microboone_reco_notpc_services:
 microboone_reco_notpc_producers: {
 
   ### flash finders
+  ophit            : @local::microboone_ophit_beam_highgain
+  #ophitLow         : @local::microboone_ophit_beam_lowgain
+  ophitCosmic      : @local::microboone_ophit_cosmic_highgain
+  #ophitCosmicLow   : @local::microboone_ophit_cosmic_lowgain
   opflash          : @local::microboone_opflash_beam_highgain
   #opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
@@ -66,7 +70,7 @@ microboone_reco_notpc_filters: {
   }
 }
 
-microboone_reco_notpc: [ opflash, beamdata ]
+microboone_reco_notpc: [ ophit, opflash, beamdata ]
 
 microboone_reco_notpc_services.DetectorClocksService.TrigModuleName: "daq"
 
