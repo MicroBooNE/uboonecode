@@ -22,6 +22,7 @@ services:
           DatabaseUtil:           @local::microboone_database
           }
 }
+services.user.DetectorClocksService.InheritClockConfig: false
 
 microboone_tfile_metadata:
 {
