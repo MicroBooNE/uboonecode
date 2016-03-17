@@ -84,6 +84,7 @@ physics:
 {
 
   producers: {
+   ophit            : @local::microboone_ophit_beam_highgain
    opflash          : @local::microboone_opflash_beam_highgain
   }
 
@@ -97,7 +98,7 @@ physics:
         specalib: @local::microboone_SPEcalibration
   }
 
- common: [ triggerEnforcement, opflash  ] 
+ common: [ triggerEnforcement, ophit, opflash  ] 
  trigger_paths: [ common ]
  stream1: [ rawnotpc ]
  analyzeIt: [femsoft, specalib]

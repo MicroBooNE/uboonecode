@@ -76,6 +76,7 @@ physics:
 
    pmtreadout:     @local::microboone_optical_dram_readout_sim
 
+   opHit:   @local::microboone_ophit_beam_highgain
    opHitT:  @local::ophitfinder_microboone
    opHitSW: @local::ophitfinder_microboone
    opHitFW: @local::ophitfinder_microboone
@@ -88,6 +89,7 @@ physics:
 
    saturation:     @local::correct_saturation
 
+   satOpHit:   @local::microboone_ophit_beam_highgain
    satOpHitT:  @local::ophitfinder_microboone
    satOpHitSW: @local::ophitfinder_microboone
    satOpHitFW: @local::ophitfinder_microboone
@@ -121,10 +123,10 @@ physics:
 
  simulate: [ generator, largeant, 
              optdigitizer, optfem, triggersim, applyTrigger, pmtreadout, 
-             opHitT, opHitFW, opHitSW,
+             opHit, opHitT, opHitFW, opHitSW,
              opFlash, simpleFlash, simpleFlashT, simpleFlashFW, simpleFlashSW,
              saturation,
-             satOpHitT, satOpHitFW, satOpHitSW,
+             satOpHit, satOpHitT, satOpHitFW, satOpHitSW,
              satOpFlash, satSimpleFlash, satSimpleFlashT, satSimpleFlashFW, satSimpleFlashSW ]
  analyzeIt:  [ opdata ]
  #define the output stream, there could be more than one if using filters 
@@ -221,14 +223,15 @@ physics.producers.opHitT.Verbosity: false
 physics.producers.satOpHitSW.SPESize: 118
 physics.producers.satOpHitSW.HitAlgoPset: @local::standard_algo_slidingwindow
 
-physics.producers.satOpFlash.InputModule: "saturation"
-physics.producers.satOpFlash.InputLabels: [""]
-physics.producers.satOpFlash.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
-                                             100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
-                                             110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
-                                             120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
-                                             130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
-                                             140, 141, 142, 143, 144, 145, 146, 147 ]
+physics.producers.satOpHit.InputModule: "saturation"
+physics.producers.satOpHit.InputLabels: [""]
+physics.producers.satOpHit.ChannelMasks: [ 32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47,
+                                           100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+                                           110, 111, 112, 113, 114, 115, 116, 117, 118, 119,
+                                           120, 121, 122, 123, 124, 125, 126, 127, 128, 129,
+                                           130, 131, 132, 133, 134, 135, 136, 137, 138, 139,
+                                           140, 141, 142, 143, 144, 145, 146, 147 ]
+physics.producers.satOpFlash.InputModule: "satOpHit"
 
 physics.producers.satSimpleFlash.OpFlashProducer:   "satOpFlash"
 physics.producers.satSimpleFlashT.OpFlashProducer:  "satOpHitT"
@@ -242,6 +245,6 @@ physics.analyzers.opdata.DataLookUpMap: {
   opdigit:    ["pmtreadout","saturation"]
   opflash:    ["opFlash","simpleFlash","simpleFlashT","simpleFlashFW","simpleFlashSW",
                "satOpFlash","satSimpleFlash","satSimpleFlashT","satSimpleFlashFW","satSimpleFlashSW"]
-  ophit:      ["opFlash","opHitT","opHitFW","opHitSW","satOpFlash","satOpHitT","satOpHitFW","satOpHitSW"]
+  ophit:      ["opHit","opHitT","opHitFW","opHitSW","satOpHit","satOpHitT","satOpHitFW","satOpHitSW"]
 }
 

@@ -59,6 +59,7 @@ physics:
   # digitfilter:         @local::microboone_noisefilter
   
   ### flash finders
+  ophit:               @local::microboone_ophit
   opflash:             @local::microboone_opflash
 
   ### calwire producers
@@ -89,6 +90,7 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
          digitfilter,
+         ophit,
          opflash,
          caldata,
 	     calWireInvert,
@@ -138,10 +140,11 @@ outputs:
 physics.producers.digitfilter.TruncMeanFraction:                0.1
 physics.producers.digitfilter.NumWiresToGroup:                  [48, 48, 96]
 
-physics.producers.opflash.InputModule:                          "optreadout"
-physics.producers.opflash.GenModule:                            "generator"
-physics.producers.opflash.InputLabels:                        [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
+physics.producers.ophit.InputModule:                            "optreadout"
+physics.producers.ophit.GenModule:                              "generator"
+physics.producers.ophit.InputLabels:                          [ "OpdetBeamHighGain",   "OpdetBeamLowGain",
                                                                 "OpdetCosmicHighGain", "OpdetCosmicLowGain"]
+physics.producers.opflash.InputModule:                          "ophit"
 								
 physics.producers.caldata.DigitModuleLabel:                     "digitfilter"
 physics.producers.caldata.MaxAllowedChannelStatus:              1
