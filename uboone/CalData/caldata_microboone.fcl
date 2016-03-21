@@ -21,6 +21,8 @@ microboone_calroi:
  SaveWireWF:  0
  MinAllowedChannelStatus: 3 # All channels greater than or equal to this status level are considered
  DoBaselineSub_WaveformPropertiesAlg:   false # subtract baseline after deconvolution?
+ DodQdxCalib:           true  # apply wire-by-wire calibration?
+ dQdxCalibFileName:     "dQdxCalibrationPlanev1.txt"
  
  ROIPropertiesAlg:      { ROIAlgParams: @local::roiAlg_DigitAboveBaseline }
 }
