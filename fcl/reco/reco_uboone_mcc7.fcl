@@ -33,7 +33,6 @@ microboone_reco_mcc7_services.DetectorPropertiesService.NumberTimeSamples: 6400
 microboone_reco_mcc7_services.DetectorPropertiesService.ReadOutWindowSize: 6400
 microboone_reco_mcc7_services.DetectorClocksService.InheritClockConfig:       false
 microboone_reco_mcc7_services.DetectorClocksService.TriggerOffsetTPC:         -0.400e3
-microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.Drift3DCorrVec: [ 0.733, 0.733, 0.733 ]
 
 microboone_reco_mcc7_services_fullrawdigits:
 {
