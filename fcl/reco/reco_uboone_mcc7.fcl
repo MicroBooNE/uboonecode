@@ -404,7 +404,7 @@ microboone_reco_mcc7_producers.pandoraCosmic.ConfigFile:                        
 
 microboone_reco_mcc7_producers.pandoraCosmicKHit.UseClusterHits:                 false
 microboone_reco_mcc7_producers.pandoraCosmicKHit.UsePFParticleHits:              true
-microboone_reco_mcc7_producers.pandoraCosmicKHit.SelfSeed:                       true
+microboone_reco_mcc7_producers.pandoraCosmicKHit.Track3DKalmanHitAlg.SelfSeed:   true
 microboone_reco_mcc7_producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
 microboone_reco_mcc7_producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
 
@@ -439,7 +439,7 @@ microboone_reco_mcc7_producers.pandoraNu.ConfigFile:                            
 
 microboone_reco_mcc7_producers.pandoraNuKHit.UseClusterHits:                     false
 microboone_reco_mcc7_producers.pandoraNuKHit.UsePFParticleHits:                  true
-microboone_reco_mcc7_producers.pandoraNuKHit.SelfSeed:                           true
+microboone_reco_mcc7_producers.pandoraNuKHit.Track3DKalmanHitAlg.SelfSeed:       true
 microboone_reco_mcc7_producers.pandoraNuKHit.PFParticleModuleLabel:              "pandoraNu"
 microboone_reco_mcc7_producers.pandoraNuKHit.ClusterModuleLabel:                 "pandoraNu"
 microboone_reco_mcc7_producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
