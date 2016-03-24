@@ -461,6 +461,7 @@ namespace microboone {
       TrackData_t<Float_t> trkpurity;    // track purity based on hit information
       TrackData_t<Float_t> trkcompleteness; //track completeness based on hit information
       TrackData_t<int> trkg4id;        //true g4 track id for the reconstructed track
+      TrackData_t<int> trkorig;        //origin of the track 
       TrackData_t<Float_t> trktheta;      // theta.
       TrackData_t<Float_t> trkphi;        // phi.
       TrackData_t<Float_t> trkstartdcosx;
@@ -1553,6 +1554,10 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkpdgtruth.resize(MaxTracks);
   trkefftruth.resize(MaxTracks);
   trkpurtruth.resize(MaxTracks);
+  trkpurity.resize(MaxTracks);
+  trkcompleteness.resize(MaxTracks);
+  trkg4id.resize(MaxTracks);
+  trkorig.resize(MaxTracks);
   trkpitchc.resize(MaxTracks);
   ntrkhits.resize(MaxTracks);
   
@@ -1587,6 +1592,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkg4id      , -99999 );
   FillWith(trkpurity    , -99999.);
   FillWith(trkcompleteness, -99999.);
+  FillWith(trkorig      , -99999 );
   FillWith(trktheta     , -99999.);
   FillWith(trkphi       , -99999.);
   FillWith(trkstartdcosx, -99999.);
@@ -1750,6 +1756,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
 
   BranchName = "trkg4id_" + TrackLabel;
   CreateBranch(BranchName, trkg4id, BranchName + NTracksIndexStr + "/I");
+
+  BranchName = "trkorig_" + TrackLabel;
+  CreateBranch(BranchName, trkorig, BranchName + NTracksIndexStr + "/I");
   
   BranchName = "trkpurity_" + TrackLabel;
   CreateBranch(BranchName, trkpurity, BranchName + NTracksIndexStr + "/F");
@@ -3939,7 +3948,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	      hits[allHits[ah]->WireID().Plane].push_back(allHits[ah]);
 	    }
 	  }
-        
 	  for (size_t ipl = 0; ipl < 3; ++ipl){
 	    double maxe = 0;
 	    HitsPurity(hits[ipl],TrackerData.trkidtruth[iTrk][ipl],TrackerData.trkpurtruth[iTrk][ipl],maxe);
@@ -3957,6 +3965,34 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	      TrackerData.trkefftruth[iTrk][ipl] = maxe/(tote/kNplanes); //tote include both induction and collection energies
 	      //std::cout<<"\n"<<trkpdgtruth[iTracker][iTrk][ipl]<<"\t"<<trkefftruth[iTracker][iTrk][ipl];
 	    }
+	  }
+
+	  double maxe = 0;
+	  HitsPurity(allHits,TrackerData.trkg4id[iTrk],TrackerData.trkpurity[iTrk],maxe);
+	  if (TrackerData.trkg4id[iTrk]>0){
+	    const art::Ptr<simb::MCTruth> mc = bt->TrackIDToMCTruth(TrackerData.trkg4id[iTrk]);
+	    TrackerData.trkorig[iTrk] = mc->Origin();
+	  }
+	  if (allHits.size()){
+	    std::vector<art::Ptr<recob::Hit> > all_hits;
+	    art::Handle<std::vector<recob::Hit> > hithandle;
+	    float totenergy = 0;
+	    if (evt.get(allHits[0].id(), hithandle)){
+	      art::fill_ptr_vector(all_hits, hithandle);
+	      for(size_t h = 0; h < all_hits.size(); ++h){
+
+		art::Ptr<recob::Hit> hit = all_hits[h];
+		std::vector<sim::IDE> ides;
+		//bt->HitToSimIDEs(hit,ides);
+		std::vector<sim::TrackIDE> eveIDs = bt->HitToEveID(hit);
+		
+		for(size_t e = 0; e < eveIDs.size(); ++e){
+		  //std::cout<<h<<" "<<e<<" "<<eveIDs[e].trackID<<" "<<eveIDs[e].energy<<" "<<eveIDs[e].energyFrac<<std::endl;
+		  if (eveIDs[e].trackID==TrackerData.trkg4id[iTrk]) totenergy += eveIDs[e].energy;
+		}
+	      }	      
+	    }
+	    if (totenergy) TrackerData.trkcompleteness[iTrk] = maxe/totenergy;
 	  }
 	}//end if (isMC)
       }//end loop over track
