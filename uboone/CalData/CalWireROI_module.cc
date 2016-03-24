@@ -14,6 +14,7 @@
 #include <utility> // std::pair<>
 #include <memory> // std::unique_ptr<>
 #include <iomanip>
+#include <fstream>
 
 // ROOT libraries
 #include "TComplex.h"
@@ -85,7 +86,10 @@ class CalWireROI : public art::EDProducer
     int                         fSaveWireWF;           ///< Save recob::wire object waveforms
     size_t                      fEventCount;           ///< count of event processed
     int                         fMinAllowedChanStatus; ///< Don't consider channels with lower status
-    
+    bool                        fDodQdxCalib;          ///< Do we apply wire-by-wire calibration?
+    std::string                 fdQdxCalibFileName;    ///< Text file for constants to do wire-by-wire calibration
+    std::map<unsigned int, float> fdQdxCalib;          ///< Map to do wire-by-wire calibration, key is channel number, content is correction factor
+
     void doDecon(std::vector<float>&                                       holder,
                  raw::ChannelID_t                                          channel,
                  unsigned int                                              thePlane,
@@ -196,7 +200,35 @@ void CalWireROI::reconfigure(fhicl::ParameterSet const& p)
     // int fitbins = fFFT->FFTFitBins();
     // fFFT->ReinitializeFFT(fFFTSize, options, fitbins);
     //reconfFFT(fFFTSize);
-    
+
+    //wire-by-wire calibration
+    fDodQdxCalib        = p.get< bool >                          ("DodQdxCalib", false);
+    if (fDodQdxCalib){
+      fdQdxCalibFileName = p.get< std::string >                  ("dQdxCalibFileName");
+      std::string fullname;
+      cet::search_path sp("FW_SEARCH_PATH");
+      sp.find_file(fdQdxCalibFileName, fullname);
+
+      if (fullname.empty()) {
+	std::cout << "Input file " << fdQdxCalibFileName << " not found" << std::endl;
+	throw cet::exception("File not found");
+      }
+      else
+	std::cout << "Applying wire-by-wire calibration using file " << fdQdxCalibFileName << std::endl;
+
+      std::ifstream inFile(fullname, std::ios::in);
+      std::string line;
+      
+      while (std::getline(inFile,line)) {
+	unsigned int channel;
+	float        constant;
+	std::stringstream linestream(line);
+	linestream >> channel >> constant;
+	fdQdxCalib[channel] = constant;
+	if (channel%1000==0) std::cout<<"Channel "<<channel<<" correction factor "<<fdQdxCalib[channel]<<std::endl;
+      }
+    }
+	
 }
 
 
@@ -503,6 +535,17 @@ void CalWireROI::produce(art::Event& evt)
                 }
                 
                 if (baseSet) std::transform(holder.begin(),holder.end(),holder.begin(),[base](float& adcVal){return adcVal - base;});
+
+		// apply wire-by-wire calibration
+		if (fDodQdxCalib){
+		  if(fdQdxCalib.find(channel) != fdQdxCalib.end()){
+		    float constant = fdQdxCalib[channel];
+		    //std::cout<<channel<<" "<<constant<<std::endl;
+		    for (size_t iholder = 0; iholder < holder.size(); ++iholder){
+		      holder[iholder] *= constant;
+		    }
+		  }
+		}
 
                 // add the range into ROIVec
                 ROIVec.add_range(roi.first, std::move(holder));
