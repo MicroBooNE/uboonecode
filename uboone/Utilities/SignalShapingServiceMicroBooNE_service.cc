@@ -218,20 +218,22 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   fGetFilterFromHisto= pset.get<bool>("GetFilterFromHisto");
 
   // Construct parameterized collection filter function.
+  
+    fFilterWidthCorrectionFactor = pset.get<DoubleVec>("FilterWidthCorrectionFactor", DoubleVec() = {1.0, 1.0, 1.0});
   if(!fGetFilterFromHisto) {
 
     fFilterFuncVec.resize(fNViews);
     mf::LogInfo("SignalShapingServiceMicroBooNE") << "Getting Filters from .fcl file" ;
 
-    DoubleVec2 params = pset.get< DoubleVec2 >("FilterParamsVec");
+    fFilterParamsVec = pset.get< DoubleVec2 >("FilterParamsVec");
     fFilterFuncVec = pset.get<std::vector<std::string> > ("FilterFuncVec");
 
     fFilterTF1Vec.resize(fNViews);
     for(_vw=0;_vw<fNViews; ++_vw) {
       std::string name = Form("Filter_vw%02i_wr%02i", (int)_vw, (int)_wr);
       fFilterTF1Vec[_vw] = new TF1(name.c_str(), fFilterFuncVec[_vw].c_str() );
-      for(_ind=0; _ind<params[_vw].size(); ++_ind) {
-        fFilterTF1Vec[_vw]->SetParameter(_ind, params[_vw][_ind]);
+      for(_ind=0; _ind<fFilterParamsVec[_vw].size(); ++_ind) {
+        fFilterTF1Vec[_vw]->SetParameter(_ind, fFilterParamsVec[_vw][_ind]);
       }
     }
   } else {
@@ -840,8 +842,18 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
   {
     _vw = 0;
     for(auto& func : fFilterTF1Vec) {
+      //std::cout << "view/size " << _vw << " " << fFilterParamsVec[_vw].size() << std::endl;
       func->SetRange(0, double(nFFT2));
       size_t count = 0;
+      
+      // now to scale the filter function!
+      // only scale params 1,2 &3
+      
+      double timeFactor = fTimeScaleFactor*f3DCorrectionVec[_vw]*fFilterWidthCorrectionFactor[_vw];
+      for(size_t i=1;i<4;++i) {
+        func->SetParameter(i, fFilterParamsVec[_vw][i]/timeFactor);
+      }
+      
       for(_bn=0; _bn<=nFFT2; ++_bn) {
         //std::cout << "checking TF1 generation " << _bn << " " <<nFFT2 << std::endl;
         double freq = 500.*_bn/(ts*nFFT2);
@@ -858,7 +870,7 @@ void util::SignalShapingServiceMicroBooNE::SetFilters()
     for(auto hist : fFilterHistVec) {
       for(_bn=1; _bn<=nFFT2+1; ++_bn) {
         double f = hist->GetBinContent(_bn);
-        fFilterVec[_wr][_bn-1] = TComplex(f, 0.);
+        fFilterVec[_vw][_bn-1] = TComplex(f, 0.);
       }
       _vw++;
     }
@@ -913,7 +925,7 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype, siz
     for(size_t view=view0; view<view1; ++view) {
       //std::cout << "sampling view " << view  << " ktype/config/channel " << ktype << " " << config << " " << channel << std::endl;
 
-      double timeFactor = fTimeScaleFactor*f3DCorrectionVec[_wr];
+      double timeFactor = fTimeScaleFactor*f3DCorrectionVec[view];
       // time factor is already included in the calibrated response
       if(fUseCalibratedResponses) timeFactor = 1.0;
       double timeFactorInv = 1./timeFactor;

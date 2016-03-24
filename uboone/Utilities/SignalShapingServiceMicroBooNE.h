@@ -233,6 +233,8 @@ namespace util {
     std::vector<TF1*> fFilterTF1Vec;     ///< Vector of Parameterized filter functions
     std::vector<std::string> fFilterFuncVec;
     std::vector<std::vector<TComplex> > fFilterVec;
+    DoubleVec2 fFilterParamsVec;
+    DoubleVec fFilterWidthCorrectionFactor;  // a knob
 
     // Induced charge deconvolution additions (M. Mooney)
     std::vector<TF1*> fFilterTF1VecICTime;
