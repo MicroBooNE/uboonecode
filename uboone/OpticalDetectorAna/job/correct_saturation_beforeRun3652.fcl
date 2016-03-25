@@ -6,6 +6,8 @@ correct_saturation: {
  LGLabel     : "OpdetBeamLowGain"
  HGProducer  : "pmtreadout"
  HGLabel     : "OpdetBeamHighGain"
+ HGProducerCosmic  : "pmtreadout"
+ HGLabelCosmic     : "OpdetCosmicHighGain"
  verbose     : false 
  IncludeBeamgate : true
  CalibrationCorr : [1.014,1.024,1.013,1.003,1.014,0.993,1.004,0.957,0.939,0.981,0.918,0.960,0.953,0.937,1.005,0.964,
