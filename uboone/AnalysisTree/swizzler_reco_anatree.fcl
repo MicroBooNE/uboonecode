@@ -90,11 +90,11 @@ physics:
     #define the producer and filter modules for this path, order matters, 
     #filters reject all following items.  see lines starting physics.producers below
     reco: [ rns, 
-            ophit, 
+            ophitSat, 
             #ophitLow, 
             #ophitCosmic, 
             #ophitCosmicLow, 
-            opflash, 
+            opflashSat, 
             #opflashLow, 
             #opflashCosmic, 
             #opflashCosmicLow, 
@@ -157,7 +157,7 @@ outputs:
    fileName: "%ifb_%tc_reco.root"
    dataTier: "reconstructed"
    streamName: "all"      
-   compressionLevel: 3
+   compressionLevel: 1
   }
 }
 
@@ -175,7 +175,7 @@ services.user.DetectorPropertiesService.ReadOutWindowSize:           6400
 services.user.DetectorClocksService.InheritClockConfig:              false
 services.user.DetectorClocksService.TriggerOffsetTPC:                -0.400e3
 
-physics.producers.caldata.Threshold: [5, 5, 5]
+#physics.producers.gaushit.MinSig:    [8.0, 6.5, 8.0]
 #physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pandoraNucalo.CaloAlg.CalAreaConstants:                   [6.93e-3, 5.34e-3, 6.9e-3]
@@ -200,7 +200,7 @@ physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pa
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
 
 #physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
-
+physics.analyzers.analysistree.OpFlashModuleLabel: "opflashSat"
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
 physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
 physics.analyzers.analysistree.ClusterModuleLabel: "fuzzycluster"
