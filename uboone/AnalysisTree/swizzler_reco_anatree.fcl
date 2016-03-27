@@ -90,6 +90,7 @@ physics:
     #define the producer and filter modules for this path, order matters, 
     #filters reject all following items.  see lines starting physics.producers below
     reco: [ rns, 
+            saturation,
             ophitSat, 
             #ophitLow, 
             #ophitCosmic, 
@@ -169,6 +170,7 @@ services.user.DetectorClocksService.TrigModuleName:     "daq"
 ################
 
 ### Set the following if you want to run truncated RawDigits from the RawDigitFilter
+physics.producers.caldata.DodQdxCalib: true
 physics.producers.digitfilter.TruncateTicks:                    true
 services.user.DetectorPropertiesService.NumberTimeSamples:           6400
 services.user.DetectorPropertiesService.ReadOutWindowSize:           6400
