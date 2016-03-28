@@ -633,24 +633,24 @@ void BeamData::fillTreeData(std::string beam, const ub_BeamHeader& bh, const std
 
 void BeamData::createBranches(std::string beam) 
 {
-  //read 10 events and figure out which variables to output
+  //read events and figure out which variables to output
   //and if a var is an array
   std::map<std::string, unsigned int> vars;
   std::vector<std::streampos> rwbyt;
-  for (int iev=0;iev<10;iev++) {
+  bool ret=true;
+  while (ret) {
     ub_BeamHeader bh;
     std::vector<ub_BeamData> bd;
-    if (nextBeamEvent(beam, bh,bd)) {
-      for (int i=0;i<bh.getNumberOfDevices();i++) {
-	std::string varname=bd[i].getDeviceName();
-	varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
-	std::pair<std::string,unsigned int> p(varname, bd[i].getData().size());
-	vars.insert(p);
-      }    
-      rwbyt.push_back(bh.getNumberOfBytesInRecord());
-    }
+    ret=nextBeamEvent(beam, bh,bd); 
+    for (int i=0;i<bh.getNumberOfDevices();i++) {
+      std::string varname=bd[i].getDeviceName();
+      varname.erase(std::remove(varname.begin(), varname.end(), ':'), varname.end());
+      std::pair<std::string,unsigned int> p(varname, bd[i].getData().size());
+      vars.insert(p);
+    }    
+    rwbyt.push_back(bh.getNumberOfBytesInRecord());
   }
-
+  
   // This does not work ???
   //  for (unsigned int i=rwbyt.size()-1;i>=0;i--) {
   //  rewindBeamFile(beam,rwbyt[i]);
