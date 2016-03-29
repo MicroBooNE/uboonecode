@@ -96,6 +96,8 @@ using DoubleVec  = std::vector<double>;
 using DoubleVec2 = std::vector< DoubleVec >;
 using DoubleVec3 = std::vector< DoubleVec2 >;
 using DoubleVec4 = std::vector< DoubleVec3 >;
+using TH1FVec4    =     std::vector<std::vector<std::vector<std::vector<TH1F*> > > >;
+
 
 namespace util {
   class SignalShapingServiceMicroBooNE {
@@ -226,6 +228,7 @@ namespace util {
     DoubleVec f3DCorrectionVec;  ///< correction factor to account for 3D path of electrons, 1 for each plane (default = 1.0)
 
     double fTimeScaleFactor;
+    bool   fStretchFullResponse;
     
     DoubleVec fFieldRespAmpVec;
     DoubleVec2 fShapeTimeConst; ///< time constants for exponential shaping
