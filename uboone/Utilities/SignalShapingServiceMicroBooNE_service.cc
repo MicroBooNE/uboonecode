@@ -324,28 +324,28 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   fDefaultTemperature            = pset.get<double>("DefaultTemperature");
 
   fTimeScaleParams               = pset.get<DoubleVec>("TimeScaleParams");
+  fStretchFullResponse           = pset.get<bool>("StretchFullResponse");
 
   std::string histNameBase = pset.get<std::string>("FieldResponseHNameBase");
   cet::search_path sp("FW_SEARCH_PATH");
 
   DoubleVec tOffset(fNViews, 0.0);
-  //tOffset2;
+  
+  // calculate the time scale factor for this job
+  if(!fUseCalibratedResponses) SetTimeScaleFactor();
 
   fFieldResponseHistVec.resize(fNConfigs);
   for(size_t config=0;config<fNConfigs; ++config) {
     fFieldResponseHistVec[config].resize(2);
     for(size_t ktype=0;ktype<2;++ktype) {
       fFieldResponseHistVec[config][ktype].resize(fNViews);
-      
-      // calculate the time scale factor for this event
-      if(config==0 && ktype==0 && !fUseCalibratedResponses) SetTimeScaleFactor();
-
       _vw = 0;
       //std::cout << "config " << config << " in " << fNConfigs << std::endl;
       for(auto& plane : fFieldResponseHistVec[config][ktype]) {
         std::string fname0 = Form("%s_vw%02i_%s.root", fileNameBase.c_str(), (int)_vw, version[ktype].c_str());
         std::string fname;
         sp.find_file(fname0, fname);
+        
         plane.resize(fNResponses[ktype][_vw]);
         std::unique_ptr<TFile> fin(new TFile(fname.c_str(), "READ"));
         _wr = 0;
@@ -458,7 +458,8 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponseTOffsets(const TH1F* 
   }
 
   //std::cout << "view " << _vw << ", wire " << _wr << ", toffset " << tOffset << std::endl;
-  tOffset *= f3DCorrectionVec[_vw]*fTimeScaleFactor;
+  tOffset *= f3DCorrectionVec[_vw];
+  if(fStretchFullResponse) tOffset *= fTimeScaleFactor;
   fFieldResponseTOffset[ktype].at(_vw) = (-tOffset+ fCalibResponseTOffset[_vw])*1000.;
 
 }
@@ -697,16 +698,32 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse(size_t ktype)
 
     integral = fFieldResponseHistVec[config][ktype][fViewForNormalization][0]->Integral();
     weight = 1./integral;
+    
+    // we adjust the size of the fieldresponse vector to account for the stretch
+    // and interpolate the histogram to fill the vector with the stretched response
+    
 
     for(_vw=0; _vw<fNViews; ++_vw) {
+      
+      double timeFactor = 1.0;
+      if(!fUseCalibratedResponses && !fStretchFullResponse) timeFactor = fTimeScaleFactor*f3DCorrectionVec[_vw];
+
       for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
-        size_t nBins = fFieldResponseHistVec[config][ktype][_vw][_wr]->GetNbinsX();
-        (fFieldResponseVec[config][ktype][_vw][_wr]).resize(nBins);
-        for(_bn=1; _bn<=nBins; ++_bn) {
-          fFieldResponseVec[config][ktype][_vw][_wr][_bn-1] =
-            fFieldResponseHistVec[config][ktype][_vw][_wr]->GetBinContent(_bn);
-          fFieldResponseVec[config][ktype][_vw][_wr][_bn-1]
-            *= fFieldRespAmpVec[_vw]*weight;
+        // simplify the code
+        DoubleVec* responsePtr = &fFieldResponseVec[config][ktype][_vw][_wr];
+        TH1F*      histPtr     = fFieldResponseHistVec[config][ktype][_vw][_wr];
+        
+        size_t nBins = histPtr->GetNbinsX();
+        size_t nResponseBins = nBins*timeFactor + 1;
+        responsePtr->resize(nResponseBins);
+        double x0 = histPtr->GetBinCenter(1);
+        double xf = histPtr->GetBinCenter(nBins);
+        double deltaX = (xf - x0)/(nBins-1);
+        
+        for(_bn=1; _bn<=nResponseBins; ++_bn) {
+          double xVal = (x0 + deltaX*(_bn-1))/timeFactor;
+          responsePtr->at(_bn-1) = histPtr->Interpolate(xVal);
+          responsePtr->at(_bn-1) *= fFieldRespAmpVec[_vw]*weight;
         }
       }
     }
@@ -925,9 +942,12 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype, siz
     for(size_t view=view0; view<view1; ++view) {
       //std::cout << "sampling view " << view  << " ktype/config/channel " << ktype << " " << config << " " << channel << std::endl;
 
-      double timeFactor = fTimeScaleFactor*f3DCorrectionVec[view];
+      // we want to implement new scheme (fStretchFullResponse==false) while retaining the old
       // time factor is already included in the calibrated response
-      if(fUseCalibratedResponses) timeFactor = 1.0;
+      double timeFactor = 1.0;
+      if(fStretchFullResponse && !fUseCalibratedResponses) timeFactor *= fTimeScaleFactor*f3DCorrectionVec[view];      
+      //if(fUseCalibratedResponses) timeFactor = 1.0;
+      
       double timeFactorInv = 1./timeFactor;
       for(_wr=0; _wr<fNResponses[ktype][view]; ++_wr) {
         const DoubleVec* pResp = &((fSignalShapingVec[config][ktype][view][_wr]).Response_save());
