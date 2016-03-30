@@ -113,6 +113,9 @@ physics:
             pandoraCosmicKHit, 
             pandoraCosmicKHittag,
             pandoraCosmicKHitcalo,
+            pandoraCosmictag,
+            pandoraCosmiccalo,
+            pandoraCosmicpid,
             pandoraCosmicKHitpid,
             pandoraCosmicKHitPFPart,
             pandoraCosmicKHitRemoval,
@@ -187,19 +190,19 @@ services.user.DetectorClocksService.TriggerOffsetTPC:                -0.400e3
 
 #ANALYSIS TREE STUFF
 physics.analyzers.analysistree:  @local::microboone_analysistree
-physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "pandoraCosmicKHit", "pandoraNuKHit", "pmtrack", "pandoraNu", "pandoraNuPMA"]
-physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo", "pmtrackcalo", "pandoraNucalo", "pandoraNuPMAcalo"]
-physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "pandoraCosmicKHitpid", "pandoraNuKHitpid", "pmtrackpid", "pandoraNupid", "pandoraNuPMApid"]
-physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0", "t0","t0","t0"]
-physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0", "mct0", "mct0", "mct0"]
+physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "pandoraCosmic", "pandoraCosmicKHit", "pandoraNuKHit", "pmtrack", "pandoraNu", "pandoraNuPMA"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "pandoraCosmiccalo", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo", "pmtrackcalo", "pandoraNucalo", "pandoraNuPMAcalo"]
+physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "pandoraCosmicpid", "pandoraCosmicKHitpid", "pandoraNuKHitpid", "pmtrackpid", "pandoraNupid", "pandoraNuPMApid"]
+physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0", "t0","t0","t0", "t0"]
+physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0", "mct0", "mct0", "mct0", "mct0"]
 
 physics.analyzers.analysistree.VertexModuleLabel:               ["linecluster", "pandoraCosmic", "pandoraNu", "pmtrack"]
 
 physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
 
-physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmicKHittag", "pandoraNuKHittag", "pmtracktag", "pandoraNutag", "pandoraNuPMAtag"]
-physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmictag", "pandoraCosmicKHittag", "pandoraNuKHittag", "pmtracktag", "pandoraNutag", "pandoraNuPMAtag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
 
 #physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
 physics.analyzers.analysistree.OpFlashModuleLabel: "opflashSat"
