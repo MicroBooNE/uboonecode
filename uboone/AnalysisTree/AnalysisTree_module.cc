@@ -495,7 +495,10 @@ namespace microboone {
       PlaneData_t<Float_t> trkpidchipi;   // particle PID chisq for pion
       PlaneData_t<Float_t> trkpidchimu;   // particle PID chisq for muon
       PlaneData_t<Float_t> trkpidpida;    // particle PIDA
-      TrackData_t<Short_t> trkpidbestplane; // this is defined as the plane with most hits     
+      TrackData_t<Short_t> trkpidbestplane; // this is defined as the plane with most hits   
+	
+	  TrackData_t<Short_t> trkhasPFParticle; // whether this belongs to a PFParticle 
+	  TrackData_t<Short_t> trkPFParticleID;  // if hasPFParticle, its ID
        
       /// Creates an empty tracker data structure
       TrackDataStruct(): MaxTracks(0) { Clear(); }
@@ -514,8 +517,6 @@ namespace microboone {
       { return (size_t) kMaxTrackHits; }
       
     }; // class TrackDataStruct
-    
-
 
     //Vertex data struct
     class VertexDataStruct {
@@ -530,6 +531,9 @@ namespace microboone {
       VertexData_t<Float_t> vtxx;     // x position.
       VertexData_t<Float_t> vtxy;     // y position.
       VertexData_t<Float_t> vtxz;     // z position.
+	  
+	  VertexData_t<Short_t> vtxhasPFParticle; // whether this belongs to a PFParticle 
+	  VertexData_t<Short_t> vtxPFParticleID;  // if hasPFParticle, its ID
 
       VertexDataStruct(): MaxVertices(0) { Clear(); }
       VertexDataStruct(size_t maxVertices): MaxVertices(maxVertices) { Clear(); }
@@ -584,6 +588,9 @@ namespace microboone {
       PlaneData_t<Float_t>   shwr_totEng;     ///< Total energy of the shower per plane
       PlaneData_t<Float_t>   shwr_dedx;       ///< dE/dx of the shower per plane
       PlaneData_t<Float_t>   shwr_mipEng;     ///< Total MIP energy of the shower per plane
+	  
+	  ShowerData_t<Short_t>  shwr_hasPFParticle; // whether this belongs to a PFParticle 
+	  ShowerData_t<Short_t>  shwr_PFParticleID;  // if hasPFParticle, its ID
       /// @}
       
       /// Creates a shower data structure allowing up to maxShowers showers
@@ -1549,17 +1556,18 @@ namespace microboone {
 	<< "AnalysisTree::" << caller << ": no tree";
     } // CheckData()
     
-    
     /// Stores the information of shower in slot iShower of showerData
     void FillShower(
 		    AnalysisTreeDataStruct::ShowerDataStruct& showerData,
-		    size_t iShower, recob::Shower const& showers
+		    size_t iShower, recob::Shower const& showers, const bool fSavePFParticleInfo, 
+            const std::map<Short_t, Short_t> &showerIDtoPFParticleIDMap
 		    ) const;
     
     /// Stores the information of all showers into showerData
     void FillShowers(
 		     AnalysisTreeDataStruct::ShowerDataStruct& showerData,
-		     std::vector<recob::Shower> const& showers
+		     std::vector<recob::Shower> const& showers, const bool fSavePFParticleInfo, 
+             const std::map<Short_t, Short_t> &showerIDtoPFParticleIDMap
 		     ) const;
     
   }; // class microboone::AnalysisTree
@@ -1662,6 +1670,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkresrg.resize(MaxTracks);
   trkxyz.resize(MaxTracks);
   
+  trkhasPFParticle.resize(MaxTracks);
+  trkPFParticleID.resize(MaxTracks);
+  
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize()
 
 void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
@@ -1707,6 +1718,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trksvtxid    , -1);
   FillWith(trkevtxid    , -1);
   FillWith(trkpidbestplane, -1); 
+  
+  FillWith(trkhasPFParticle, -1);
+  FillWith(trkPFParticleID , -1);
  
   for (size_t iTrk = 0; iTrk < MaxTracks; ++iTrk){
     
@@ -1936,6 +1950,12 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
 
   BranchName = "trkpidbestplane_" + TrackLabel;
   CreateBranch(BranchName, trkpidbestplane, BranchName + NTracksIndexStr + "/S");
+  
+  BranchName = "trkhasPFParticle_" + TrackLabel;
+  CreateBranch(BranchName, trkhasPFParticle, BranchName + NTracksIndexStr + "/S");
+  
+  BranchName = "trkPFParticleID_" + TrackLabel;
+  CreateBranch(BranchName, trkPFParticleID, BranchName + NTracksIndexStr + "/S");
 
 } // microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses()
 
@@ -1948,6 +1968,9 @@ void microboone::AnalysisTreeDataStruct::VertexDataStruct::Resize(size_t nVertic
   vtxx.resize(MaxVertices);
   vtxy.resize(MaxVertices);
   vtxz.resize(MaxVertices);
+  
+  vtxhasPFParticle.resize(MaxVertices);
+  vtxPFParticleID.resize(MaxVertices);
 }
 
 void microboone::AnalysisTreeDataStruct::VertexDataStruct::Clear() {
@@ -1958,6 +1981,8 @@ void microboone::AnalysisTreeDataStruct::VertexDataStruct::Clear() {
   FillWith(vtxx        , -9999  );
   FillWith(vtxy        , -9999  );
   FillWith(vtxz        , -9999  );
+  FillWith(vtxhasPFParticle, -1  );
+  FillWith(vtxPFParticleID , -1  );
 }
 
 void microboone::AnalysisTreeDataStruct::VertexDataStruct::SetAddresses(
@@ -1987,6 +2012,12 @@ void microboone::AnalysisTreeDataStruct::VertexDataStruct::SetAddresses(
 
   BranchName = "vtxz_" + VertexLabel;
   CreateBranch(BranchName, vtxz, BranchName + NVertexIndexStr + "/F");
+  
+  BranchName = "vtxhasPFParticle_" + VertexLabel;
+  CreateBranch(BranchName, vtxhasPFParticle, BranchName + NVertexIndexStr + "/S");
+  
+  BranchName = "vtxPFParticleID_" + VertexLabel;
+  CreateBranch(BranchName, vtxPFParticleID, BranchName + NVertexIndexStr + "/S");
 }
 
 //------------------------------------------------------------------------------
@@ -2136,6 +2167,9 @@ void microboone::AnalysisTreeDataStruct::ShowerDataStruct::Resize
   shwr_dedx.resize(MaxShowers);
   shwr_mipEng.resize(MaxShowers);
   
+  shwr_hasPFParticle.resize(MaxShowers);
+  shwr_PFParticleID.resize(MaxShowers);
+  
 } // microboone::AnalysisTreeDataStruct::ShowerDataStruct::Resize()
 
 void microboone::AnalysisTreeDataStruct::ShowerDataStruct::Clear() {
@@ -2151,6 +2185,9 @@ void microboone::AnalysisTreeDataStruct::ShowerDataStruct::Clear() {
   FillWith(shwr_startx,     -99999.);
   FillWith(shwr_starty,     -99999.);
   FillWith(shwr_startz,     -99999.);
+  
+  FillWith(shwr_hasPFParticle, -1);
+  FillWith(shwr_PFParticleID,  -1);
  
   for (size_t iShw = 0; iShw < MaxShowers; ++iShw){
     // the following are BoxedArray's;
@@ -2243,6 +2280,12 @@ void microboone::AnalysisTreeDataStruct::ShowerDataStruct::SetAddresses
   
   BranchName = "shwr_mipEng_" + ShowerLabel;
   CreateBranch(BranchName, shwr_mipEng, BranchName + NShowerIndexStr + "[3]/F");
+  
+  BranchName = "shwr_hasPFParticle_" + ShowerLabel;
+  CreateBranch(BranchName, shwr_hasPFParticle, BranchName + NShowerIndexStr + "/S");
+  
+  BranchName = "shwr_PFParticleID_" + ShowerLabel;
+  CreateBranch(BranchName, shwr_PFParticleID, BranchName + NShowerIndexStr + "/S");
   
 } // microboone::AnalysisTreeDataStruct::ShowerDataStruct::SetAddresses()
 
@@ -3549,6 +3592,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   // the data structure itself is owned by art::Event and we should not try
   // to manage its memory
   std::vector<std::vector<recob::Shower> const*> showerList;
+  std::vector< art::Handle< std::vector<recob::Shower> > > showerListHandle(fShowerModuleLabel.size());
   showerList.reserve(fShowerModuleLabel.size());
   for (art::InputTag ShowerInputTag: fShowerModuleLabel) {
     art::Handle<std::vector<recob::Shower>> ShowerHandle;
@@ -3572,6 +3616,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
     }
     else showerList.push_back(ShowerHandle.product());
+    
+    showerListHandle.push_back(ShowerHandle); // either way, put it into the handle list
   } // for shower input tag
   
   art::Handle< std::vector<simb::MCFlux> > mcfluxListHandle;
@@ -3878,18 +3924,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     }
   }
   
-  if (fSaveShowerInfo){
-    
-    // fill data from all the shower algorithms
-    for (size_t iShowerAlgo = 0; iShowerAlgo < NShowerAlgos; ++iShowerAlgo) {
-      AnalysisTreeDataStruct::ShowerDataStruct& ShowerData
-        = fData->GetShowerData(iShowerAlgo);
-      std::vector<recob::Shower> const* pShowers = showerList[iShowerAlgo];
-      if (pShowers) FillShowers(ShowerData, *pShowers);
-      else ShowerData.MarkMissing(fTree); // tree should reflect lack of data
-    } // for iShowerAlgo
-    
-  } // if fSaveShowerInfo
+  
+  // Declare object-ID-to-PFParticleID maps so we can assign hasPFParticle and PFParticleID to the tracks, showers, vertices.
+  std::map<Short_t, Short_t> trackIDtoPFParticleIDMap, vertexIDtoPFParticleIDMap, showerIDtoPFParticleIDMap;
   
   //Save PFParticle information
   if (fSavePFParticleInfo){
@@ -3956,10 +3993,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       if (vertexMapIter != pfParticleToVertexMap.end()) {
           lar_pandora::VertexVector pfParticleVertices = vertexMapIter->second;
           
-          if (pfParticleVertices.size() == 1)
+          if (pfParticleVertices.size() > 1)
+            std::cerr << "Warning: there was more than one vertex found for PFParticle with ID " << pfparticlelist[i]->Self() << ", storing only one" << std::endl;
+          
+          if (pfParticleVertices.size() > 0) {
             PFParticleData.pfp_vertexID[i] = pfParticleVertices.at(0)->ID();
-          else
-            std::cerr << "Warning: there was more than one vertex found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
+            vertexIDtoPFParticleIDMap.insert(std::make_pair(pfParticleVertices.at(0)->ID(), pfparticlelist[i]->Self()));
+          }
       }
       else
         std::cerr << "Warning: there was no vertex found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
@@ -3972,10 +4012,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         if (trackMapIter != pfParticleToTrackMap.end()) {
             lar_pandora::TrackVector pfParticleTracks = trackMapIter->second;
             
-            if (pfParticleTracks.size() == 1)
-              PFParticleData.pfp_trackID[i] = pfParticleTracks.at(0)->ID();
-            else
+            if (pfParticleTracks.size() > 1)
               std::cerr << "Warning: there was more than one track found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
+            
+            if (pfParticleTracks.size() > 0) {
+              PFParticleData.pfp_trackID[i] = pfParticleTracks.at(0)->ID();
+              trackIDtoPFParticleIDMap.insert(std::make_pair(pfParticleTracks.at(0)->ID(), pfparticlelist[i]->Self()));
+            }
         }
         else
           std::cerr << "Warning: there was no track found for track-like PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
@@ -3990,10 +4033,13 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         if (showerMapIter != pfParticleToShowerMap.end()) {
           lar_pandora::ShowerVector pfParticleShowers = showerMapIter->second;
           
-          if (pfParticleShowers.size() == 1)
-            PFParticleData.pfp_showerID[i] = pfParticleShowers.at(0)->ID();
-          else
+          if (pfParticleShowers.size() > 1)
             std::cerr << "Warning: there was more than one shower found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
+          
+          if (pfParticleShowers.size() > 0) {
+            PFParticleData.pfp_showerID[i] = pfParticleShowers.at(0)->ID();
+            showerIDtoPFParticleIDMap.insert(std::make_pair(pfParticleShowers.at(0)->ID(), pfparticlelist[i]->Self()));
+          }
         }
         else
           std::cerr << "Warning: there was no shower found for shower-like PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
@@ -4014,6 +4060,21 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       //  std::cerr << "Warning: there were no clusters found for PFParticle with ID " << pfparticlelist[i]->Self() << std::endl;
     }
   } // if fSavePFParticleInfo
+  
+  if (fSaveShowerInfo){
+    
+    // fill data from all the shower algorithms
+    for (size_t iShowerAlgo = 0; iShowerAlgo < NShowerAlgos; ++iShowerAlgo) {
+      AnalysisTreeDataStruct::ShowerDataStruct& ShowerData
+        = fData->GetShowerData(iShowerAlgo);
+      std::vector<recob::Shower> const* pShowers = showerList[iShowerAlgo];
+      art::Handle< std::vector<recob::Shower> > showerHandle = showerListHandle[iShowerAlgo];
+      
+      if (pShowers) FillShowers(ShowerData, *pShowers, fSavePFParticleInfo, showerIDtoPFParticleIDMap);
+      else ShowerData.MarkMissing(fTree); // tree should reflect lack of data
+    } // for iShowerAlgo
+    
+  } // if fSaveShowerInfo
 
   //track information for multiple trackers
   if (fSaveTrackInfo) {
@@ -4167,6 +4228,18 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
           TrackerData.trkmomrange[iTrk] 	  = trkm.GetTrackMomentum(tlen,13);
           TrackerData.trkmommschi2[iTrk]	  = trkm.GetMomentumMultiScatterChi2(ptrack);
           TrackerData.trkmommsllhd[iTrk]	  = trkm.GetMomentumMultiScatterLLHD(ptrack);
+          
+          if (fSavePFParticleInfo) {
+            auto mapIter = trackIDtoPFParticleIDMap.find(TrackID);
+            if (mapIter != trackIDtoPFParticleIDMap.end()) {
+                // This track has a corresponding PFParticle.
+                TrackerData.trkhasPFParticle[iTrk] = 1;
+                TrackerData.trkPFParticleID[iTrk] = mapIter->second;
+            }
+            else 
+                TrackerData.trkhasPFParticle[iTrk] = 0;
+          }
+          
         } // if we have trajectory
 
 	// find vertices associated with this track
@@ -4241,9 +4314,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	    TrackerData.trkpidpida[iTrk][planenum] = pids[ipid]->PIDA();
 	  }
 	} // fmpid.isValid()
-      
-      
-
+	
 	art::FindMany<anab::Calorimetry> fmcal(trackListHandle[iTracker], evt, fCalorimetryModuleLabel[iTracker]);
 	if (fmcal.isValid()){
 	  std::vector<const anab::Calorimetry*> calos = fmcal.at(iTrk);
@@ -4388,16 +4459,40 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
 
       for (size_t i = 0; i < NVertices && i < kMaxVertices ; ++i){//loop over hits
-	VertexData.vtxId[i] = vertexlist[iVertexAlg][i]->ID();
-	Double_t xyz[3] = {};
-	vertexlist[iVertexAlg][i] -> XYZ(xyz);
-	VertexData.vtxx[i] = xyz[0];
-	VertexData.vtxy[i] = xyz[1];
-	VertexData.vtxz[i] = xyz[2];
+	    VertexData.vtxId[i] = vertexlist[iVertexAlg][i]->ID();
+	    Double_t xyz[3] = {};
+	    vertexlist[iVertexAlg][i] -> XYZ(xyz);
+        VertexData.vtxx[i] = xyz[0];
+        VertexData.vtxy[i] = xyz[1];
+        VertexData.vtxz[i] = xyz[2];
+        
+        if (fSavePFParticleInfo) {
+          auto mapIter = vertexIDtoPFParticleIDMap.find(vertexlist[iVertexAlg][i]->ID());
+          if (mapIter != vertexIDtoPFParticleIDMap.end()) {
+            // This vertex has a corresponding PFParticle.
+            VertexData.vtxhasPFParticle[i] = 1;
+            VertexData.vtxPFParticleID[i] = mapIter->second;
+          }
+          else 
+            VertexData.vtxhasPFParticle[i] = 0;
+        }
+        
+        // find PFParticle ID info
+        art::FindMany<recob::PFParticle> fmPFParticle(vertexListHandle[iVertexAlg], evt, fPFParticleModuleLabel);
+        if(fmPFParticle.isValid()) {
+          std::vector<const recob::PFParticle*> pfparticles = fmPFParticle.at(i);
+          if(pfparticles.size() > 1)
+          std::cerr << "Warning: more than one associated PFParticle found for a vertex. Only one stored in tree." << std::endl;
+          if (pfparticles.size() == 0)
+          VertexData.vtxhasPFParticle[i] = 0;
+          else {
+            VertexData.vtxhasPFParticle[i] = 1;
+            VertexData.vtxPFParticleID[i] = pfparticles.at(0)->Self();
+          }
+        } // fmPFParticle.isValid()
       }
     }
   }
-
 
   //mc truth information
   if (isMC){
@@ -4927,7 +5022,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
 void microboone::AnalysisTree::FillShower(
 					  AnalysisTreeDataStruct::ShowerDataStruct& showerData, size_t iShower,
-					  recob::Shower const& shower
+					  recob::Shower const& shower, const bool fSavePFParticleInfo, 
+                      const std::map<Short_t, Short_t> &showerIDtoPFParticleIDMap
 					  ) const {
   
   showerData.showerID[iShower]        = shower.ID();
@@ -4944,6 +5040,17 @@ void microboone::AnalysisTree::FillShower(
   showerData.shwr_starty[iShower]     = pos_start.Y();
   showerData.shwr_startz[iShower]     = pos_start.Z();
   
+  if (fSavePFParticleInfo) {
+    auto mapIter = showerIDtoPFParticleIDMap.find(shower.ID());
+    if (mapIter != showerIDtoPFParticleIDMap.end()) {
+      // This vertex has a corresponding PFParticle.
+      showerData.shwr_hasPFParticle[iShower] = 1;
+      showerData.shwr_PFParticleID[iShower] = mapIter->second;
+    }
+    else 
+      showerData.shwr_hasPFParticle[iShower] = 0;
+  }
+  
   if (shower.Energy().size() == kNplanes)
     std::copy_n
       (shower.Energy().begin(),    kNplanes, &showerData.shwr_totEng[iShower][0]);
@@ -4959,7 +5066,8 @@ void microboone::AnalysisTree::FillShower(
 
 void microboone::AnalysisTree::FillShowers(
 					   AnalysisTreeDataStruct::ShowerDataStruct& showerData,
-					   std::vector<recob::Shower> const& showers
+					   std::vector<recob::Shower> const& showers, const bool fSavePFParticleInfo, 
+                      const std::map<Short_t, Short_t> &showerIDtoPFParticleIDMap
 					   ) const {
   
   const size_t NShowers = showers.size();
@@ -4992,7 +5100,7 @@ void microboone::AnalysisTree::FillShowers(
   showerData.nshowers = (Short_t) NShowers;
   
   // set all the showers one by one
-  for (size_t i = 0; i < NShowers; ++i) FillShower(showerData, i, showers[i]);
+  for (size_t i = 0; i < NShowers; ++i) FillShower(showerData, i, showers[i], fSavePFParticleInfo, showerIDtoPFParticleIDMap);
   
 } // microboone::AnalysisTree::FillShowers()
 
