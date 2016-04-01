@@ -204,6 +204,8 @@ physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
 physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmictag", "pandoraCosmicKHittag", "pandoraNuKHittag", "pmtracktag", "pandoraNutag", "pandoraNuPMAtag"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
 
+#physics.analyzers.analysistree.PFParticleModuleLabel: "pandoraNu"
+
 #physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
 physics.analyzers.analysistree.OpFlashModuleLabel: "opflashSat"
 physics.analyzers.analysistree.CryGenModuleLabel: "generator"
@@ -226,6 +228,7 @@ physics.analyzers.analysistree.SaveFlashInfo: true
 physics.analyzers.analysistree.SaveCaloCosmics: true
 physics.analyzers.analysistree.SaveRawDigitInfo: false
 physics.analyzers.analysistree.SavePandoraNuVertexInfo:       true
+physics.analyzers.analysistree.SavePFParticleInfo: false
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :

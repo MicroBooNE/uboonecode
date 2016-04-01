@@ -3282,7 +3282,6 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
   fMCTrackModuleLabel      (pset.get< std::string >("MCTrackModuleLabel")     ),  
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
-  fPFParticleModuleLabel   (pset.get<std::string>("PFParticleModuleLabel")),
   fVertexModuleLabel        (pset.get< std::vector<std::string> >("VertexModuleLabel")),
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
@@ -3314,6 +3313,9 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveCaloCosmics          (pset.get< bool >("SaveCaloCosmics",false)),
   fG4minE                   (pset.get< float>("G4minE",0.01))
 {
+
+  if (fSavePFParticleInfo) fPFParticleModuleLabel = pset.get<std::string>("PFParticleModuleLabel");
+
   if (fSaveAuxDetInfo == true) fSaveGeantInfo = true;
   if (fSaveRawDigitInfo == true) fSaveHitInfo = true;
   mf::LogInfo("AnalysisTree") << "Configuration:"
