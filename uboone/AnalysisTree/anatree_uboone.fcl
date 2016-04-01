@@ -104,7 +104,7 @@ physics.producers.beziertrackerpid.CalorimetryModuleLabel:           "beziercalo
 #physics.analyzers.analysistree.VertexModuleLabel:       []
 
 physics.analyzers.analysistree.PFParticleModuleLabel: "pandoraNu"
-physics.analyzers.analysistree.SavePFParticleInfo:     true
+physics.analyzers.analysistree.SavePFParticleInfo:     false
 
 physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit"]
 physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo"]
