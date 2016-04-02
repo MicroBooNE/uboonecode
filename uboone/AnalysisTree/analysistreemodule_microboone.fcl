@@ -41,7 +41,7 @@ microboone_analysistree:
  SaveClusterInfo:          true
  SaveFlashInfo:            true
  SaveShowerInfo:           true
- SaveCaloCosmics:          false
+ SaveCaloCosmics:          true
  G4minE:                   0.01
 }
 
