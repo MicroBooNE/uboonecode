@@ -110,9 +110,9 @@ namespace MuCSDT
     
     //fetch MuCS data file using ifdh
     if ( ! fIFDH ) fIFDH = new ifdh_ns::ifdh;
-    mf::LogInfo("CorsikaGen") << "Fetching: "<<fMuCSFile<<"\n";
+    mf::LogInfo("MuCSDT") << "Fetching: "<<fMuCSFile<<"\n";
     std::string fetchedfile(fIFDH->fetchInput(fMuCSFile));
-    mf::LogInfo("CorsikaGen") << "Fetched; local path: "<<fetchedfile<<"\n";    
+    mf::LogInfo("MuCSDT") << "Fetched; local path: "<<fetchedfile<<"\n";    
     
     fTFMuCSData = new TFile( Form( fetchedfile.c_str() ), "read" );  
     

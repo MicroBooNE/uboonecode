@@ -4,9 +4,8 @@ BEGIN_PROLOG
 standard_mucsmerger:
 {
   module_type: "MuCSMerger"
-  group: 0
-  run: 0
   SwizzlerProducerLabel: "daq"
+  MuCSFile:          "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_144_0.333_0.root" 
 }
 
 standard_mucsreco:

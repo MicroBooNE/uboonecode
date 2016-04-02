@@ -29,16 +29,20 @@
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "lardata/RawData/TriggerData.h"
+
 
 #include <memory>
 #include <iostream>
-#include "MuCSData.h"
 #include "vector"
-#include "lardata/RawData/TriggerData.h"
 #include "TH1F.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TMath.h"
+
+#include "MuCSData.h"
+#include "MuCSDTOffset.h"
+#include "ifdh.h"  //to handle flux files
 
 using namespace std;
 
@@ -51,20 +55,18 @@ public:
   
   void reconfigure( fhicl::ParameterSet const &pset ); // override;
   void produce( art::Event &evt ) override;
-      
+  void beginRun(art::Run& run);
+  
 private:
   
   std::string fSwizzlerProducerLabel; 
-  
-  Int_t group = 0;
-  Int_t run = 0;
+  std::string fMuCSFile;
   
   Int_t trigID = 0;
   TH1F *hDT;
   Int_t run0;
   Int_t srun0;
-  TFile *f1;
-  TFile *f2;
+  TFile *fTFMuCSData;
   
   Int_t seq;
   Float_t time_sec_low;
@@ -93,94 +95,98 @@ private:
   Double_t offset = -666.0;
   Double_t TOLER2 = 2.5*0.001;
 
+  ifdh_ns::ifdh* fIFDH=0; ///< For MuCS data file retrieval
 };
 
 void MuCSMerger::reconfigure( fhicl::ParameterSet const &p ){
-    fSwizzlerProducerLabel = p.get< std::string >( "SwizzlerProducerLabel" );
-    group = p.get< int >( "group" );
-    run = p.get< int >( "run" );
-    return;
-  }
+  fSwizzlerProducerLabel = p.get< std::string >( "SwizzlerProducerLabel" );
+  fMuCSFile = p.get< std::string >( "MuCSFile" );
+  return;
+}
 
 MuCSMerger::MuCSMerger( fhicl::ParameterSet const &pset ){
   this->reconfigure( pset );
   produces< std::vector<MuCS::MuCSData> >();  
 }
 
-MuCSMerger::~MuCSMerger(){}
+MuCSMerger::~MuCSMerger() {
+  //close MuCS data root file
+  fTFMuCSData->Close();
+  //cleanup temp files
+  fIFDH->cleanup();  
+}
+
+void MuCSMerger::beginRun(art::Run& run){
+  //get offset from MuCSDTOffset stored in run
+  std::vector< art::Handle< std::vector<MuCS::MuCSDTOffset> > > dtcol;
+  run.getManyByType( dtcol );
+  art::Handle< std::vector<MuCS::MuCSDTOffset> > tMuCSDTOffset = dtcol[0];   
+  
+  offset = tMuCSDTOffset->at(0).getoffset();
+  cout << " - DT : " << Form( "%.6f", offset ) << endl;
+  cout << "" << endl;
+  
+  //fetch MuCS data file using ifdh
+  if ( ! fIFDH ) fIFDH = new ifdh_ns::ifdh;
+  mf::LogInfo("MuCSMerger") << "Fetching: "<<fMuCSFile<<"\n";
+  std::string fetchedfile(fIFDH->fetchInput(fMuCSFile));
+  mf::LogInfo("MuCSMerger") << "Fetched; local path: "<<fetchedfile<<"\n";    
+
+  fTFMuCSData = new TFile( Form( fetchedfile.c_str() ), "read" );  
+  
+  if ( fTFMuCSData->IsZombie() ) {
+    cout << " - mucs file not existing ! " << endl;
+    return;
+  }else{
+    my_tree = (TTree*)fTFMuCSData->Get( "preselected" );
+    
+    my_tree->SetBranchStatus( "*", 0 ); 
+    my_tree->SetBranchStatus( "seq", 1 );
+    my_tree->SetBranchStatus( "time_sec_low", 1 );
+    my_tree->SetBranchStatus( "time_sec_high", 1 );
+    my_tree->SetBranchStatus( "time_16ns_low", 1 );
+    my_tree->SetBranchStatus( "time_16ns_high", 1 );
+    my_tree->SetBranchStatus( "t0", 1 );
+    
+    my_tree->SetBranchStatus( "ADC1", 1 );
+    my_tree->SetBranchStatus( "ADC2", 1 );
+    my_tree->SetBranchStatus( "ADC3", 1 );
+    my_tree->SetBranchStatus( "ADC7", 1 );
+    
+    my_tree->SetBranchStatus( "hits1", 1 );
+    my_tree->SetBranchStatus( "hits2", 1 );
+    my_tree->SetBranchStatus( "hits3", 1 );
+    my_tree->SetBranchStatus( "hits7", 1 );
+    
+    my_tree->SetBranchAddress( "seq", &seq );
+    my_tree->SetBranchAddress( "time_sec_low", &time_sec_low );
+    my_tree->SetBranchAddress( "time_sec_high", &time_sec_high );
+    my_tree->SetBranchAddress( "time_16ns_low", &time_16ns_low );
+    my_tree->SetBranchAddress( "time_16ns_high", &time_16ns_high );
+    my_tree->SetBranchAddress( "t0", &t0 );
+    
+    my_tree->SetBranchAddress( "ADC1", &fadc1 );
+    my_tree->SetBranchAddress( "ADC2", &fadc2 );
+    my_tree->SetBranchAddress( "ADC3", &fadc3 );
+    my_tree->SetBranchAddress( "ADC7", &fadc7 );
+    
+    my_tree->SetBranchAddress( "hits1", &fhits1 );
+    my_tree->SetBranchAddress( "hits2", &fhits2 );
+    my_tree->SetBranchAddress( "hits3", &fhits3 );
+    my_tree->SetBranchAddress( "hits7", &fhits7 );
+    
+    my_entries = my_tree->GetEntries();
+    cout << " - events in mucs : " << my_entries << endl;
+    cout << "" << endl;
+    cout << "" << endl;
+  }
+}
 
 void MuCSMerger::produce( art::Event &evt ){
   if ( trigID==0 ){
-    cout << "" << endl;
-    cout << " starting ... " << endl;
-    cout << "" << endl;
-
-    cout << " - group : " << group << endl;
-    cout << "" << endl;
-
-    f1 = new TFile( Form( "/uboone/data/users/kalousis/MuCS/offsets/MuCSDT_%d_%d.root", run, group ), "read" ); 
-    TDirectory *dir = f1->GetDirectory( "MuCSDT" );
-    hDT = (TH1F*)dir->Get( "hDT" );
-
-    offset = hDT->GetXaxis()->GetBinCenter( hDT->GetMaximumBin() );
-    // offset = hDT->GetXaxis()->GetBinUpEdge( hDT->GetMaximumBin() );
-    cout << " - DT : " << Form( "%.6f", offset ) << endl;
-    cout << "" << endl;
-          
-    f2 = new TFile( Form( "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_%d_0.333_0.root", group ), "read" );  
-
-    if ( f2->IsZombie() ) {
-      cout << " - mucs file not existing ! " << endl;
-      return;
-    }else{
-      my_tree = (TTree*)f2->Get( "preselected" );
-      
-      my_tree->SetBranchStatus( "*", 0 ); 
-      my_tree->SetBranchStatus( "seq", 1 );
-      my_tree->SetBranchStatus( "time_sec_low", 1 );
-      my_tree->SetBranchStatus( "time_sec_high", 1 );
-      my_tree->SetBranchStatus( "time_16ns_low", 1 );
-      my_tree->SetBranchStatus( "time_16ns_high", 1 );
-      my_tree->SetBranchStatus( "t0", 1 );
-      
-      my_tree->SetBranchStatus( "ADC1", 1 );
-      my_tree->SetBranchStatus( "ADC2", 1 );
-      my_tree->SetBranchStatus( "ADC3", 1 );
-      my_tree->SetBranchStatus( "ADC7", 1 );
-      
-      my_tree->SetBranchStatus( "hits1", 1 );
-      my_tree->SetBranchStatus( "hits2", 1 );
-      my_tree->SetBranchStatus( "hits3", 1 );
-      my_tree->SetBranchStatus( "hits7", 1 );
-      
-      my_tree->SetBranchAddress( "seq", &seq );
-      my_tree->SetBranchAddress( "time_sec_low", &time_sec_low );
-      my_tree->SetBranchAddress( "time_sec_high", &time_sec_high );
-      my_tree->SetBranchAddress( "time_16ns_low", &time_16ns_low );
-      my_tree->SetBranchAddress( "time_16ns_high", &time_16ns_high );
-      my_tree->SetBranchAddress( "t0", &t0 );
-      
-      my_tree->SetBranchAddress( "ADC1", &fadc1 );
-      my_tree->SetBranchAddress( "ADC2", &fadc2 );
-      my_tree->SetBranchAddress( "ADC3", &fadc3 );
-      my_tree->SetBranchAddress( "ADC7", &fadc7 );
-      
-      my_tree->SetBranchAddress( "hits1", &fhits1 );
-      my_tree->SetBranchAddress( "hits2", &fhits2 );
-      my_tree->SetBranchAddress( "hits3", &fhits3 );
-      my_tree->SetBranchAddress( "hits7", &fhits7 );
-      
-      my_entries = my_tree->GetEntries();
-      cout << " - events in mucs : " << my_entries << endl;
-      cout << "" << endl;
-      cout << "" << endl;
-    }
-      
     run0 = evt.run();
     srun0 = evt.subRun();
-    
     previous_trigtime = 0.0;
-            
   }
   
   Int_t event = evt.id().event();
