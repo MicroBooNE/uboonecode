@@ -17,7 +17,7 @@
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/RawData/TriggerData.h"
-#include "art/Framework/Core/EDAnalyzer.h"
+#include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
@@ -45,25 +45,27 @@
 #include <string>
 #include <cmath>
 
+#include "MuCSDTOffset.h"
 
 using namespace std;
 namespace MuCSDT 
 {
-  class MuCSDT : public art::EDAnalyzer 
+  class MuCSDT : public art::EDProducer
   {
   public:
     explicit MuCSDT( fhicl::ParameterSet const& pset );
     virtual ~MuCSDT();
     void beginJob();
-    void beginRun( const art::Run& run );
+    void beginRun( art::Run& run );
+    void endRun( art::Run& run );
     void reconfigure( fhicl::ParameterSet const& pset );
-    void analyze ( const art::Event& evt ); 
+    void produce ( art::Event& evt ); 
     void endJob();
     
   private:
     std::string fSwizzlerProducerLabel; 
+    std::string fMuCSFile;
     
-    Int_t group = 0;
     Int_t trigID = 0;
     TH1F *hDT;
     Int_t run0;
@@ -86,9 +88,9 @@ namespace MuCSDT
     Double_t offset = -666.0;
   }; 
   
-  MuCSDT::MuCSDT( fhicl::ParameterSet const& parameterSet )
-    : EDAnalyzer(parameterSet){
-    this->reconfigure(parameterSet);
+  MuCSDT::MuCSDT( fhicl::ParameterSet const& pset ){
+    this->reconfigure(pset);
+    produces< std::vector<MuCS::MuCSDTOffset>, art::InRun >();
   }
   
   MuCSDT::~MuCSDT() {}
@@ -98,7 +100,7 @@ namespace MuCSDT
     // hDT = tfs->make<TH1F>( "hDT", "", 10800, 0, 10800 );
     hDT = tfs->make<TH1F>( "hDT", "", 1000*10800, 0, 10800 );
     
-    f1 = new TFile( Form( "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_%d_0.333_0.root", group ), "read" );  
+    f1 = new TFile( Form( fMuCSFile.c_str() ), "read" );  
     
     if ( f1->IsZombie() ) {
       cout << " - mucs file not existing ! " << endl;
@@ -128,21 +130,32 @@ namespace MuCSDT
     }
   }
   
-  void MuCSDT::beginRun( const art::Run& run ){}
-  
+  void MuCSDT::beginRun( art::Run& run ){}
+  void MuCSDT::endRun( art::Run& run ){
+    std::unique_ptr< std::vector<MuCS::MuCSDTOffset> > dtcol(new std::vector<MuCS::MuCSDTOffset>);
+    MuCS::MuCSDTOffset dt( hDT->GetXaxis()->GetBinCenter( hDT->GetMaximumBin()  ));
+    dtcol->push_back(dt);
+    run.put( std::move( dtcol ) );
+    //store found offset onto run
+    //std::unique_ptr<std::vector<double>> MuCSDTOffsets(new std::vector<double>);
+    //MuCSDTOffsets->push_back(hDT->GetXaxis()->GetBinCenter( hDT->GetMaximumBin() ));
+    //*MuCSDTOffset=hDT->GetXaxis()->GetBinCenter( hDT->GetMaximumBin() );
+    //run.put(std::move(MuCSDTOffsets),"MuCSDTOffsets");
+  }
+   
   void MuCSDT::reconfigure( fhicl::ParameterSet const& p ){
     fSwizzlerProducerLabel = p.get< std::string >( "SwizzlerProducerLabel" );
-    group = p.get< int >( "group" );
+    fMuCSFile = p.get< std::string >( "MuCSFile" );
     return;
   }
     
-  void MuCSDT::analyze( const art::Event& evt ){
+  void MuCSDT::produce( art::Event& evt ){
     if ( trigID==0 ){
       cout << "" << endl;
       cout << " starting ... " << endl;
       cout << "" << endl;
 
-      cout << " - group : " << group << endl;
+      cout << " - MuCSFile : " << fMuCSFile << endl;
       cout << "" << endl;
       cout << "" << endl;
 
