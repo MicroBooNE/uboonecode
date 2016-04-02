@@ -150,11 +150,6 @@ namespace MuCSDT
     MuCS::MuCSDTOffset dt( hDT->GetXaxis()->GetBinCenter( hDT->GetMaximumBin()  ));
     dtcol->push_back(dt);
     run.put( std::move( dtcol ) );
-    //store found offset onto run
-    //std::unique_ptr<std::vector<double>> MuCSDTOffsets(new std::vector<double>);
-    //MuCSDTOffsets->push_back(hDT->GetXaxis()->GetBinCenter( hDT->GetMaximumBin() ));
-    //*MuCSDTOffset=hDT->GetXaxis()->GetBinCenter( hDT->GetMaximumBin() );
-    //run.put(std::move(MuCSDTOffsets),"MuCSDTOffsets");
   }
    
   void MuCSDT::reconfigure( fhicl::ParameterSet const& p ){
