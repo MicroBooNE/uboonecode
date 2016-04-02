@@ -46,6 +46,7 @@
 #include <cmath>
 
 #include "MuCSDTOffset.h"
+#include "ifdh.h"  //to handle flux files
 
 using namespace std;
 namespace MuCSDT 
@@ -70,7 +71,7 @@ namespace MuCSDT
     TH1F *hDT;
     Int_t run0;
     Int_t srun0;
-    TFile *f1;
+    TFile *fTFMuCSData;
     Int_t seq;
     Float_t time_sec_low;
     Float_t time_sec_high;
@@ -86,6 +87,8 @@ namespace MuCSDT
     
     Double_t TOLER = 20.0;
     Double_t offset = -666.0;
+    
+    ifdh_ns::ifdh* fIFDH=0; ///< For MuCS data file retrieval
   }; 
   
   MuCSDT::MuCSDT( fhicl::ParameterSet const& pset ){
@@ -93,20 +96,31 @@ namespace MuCSDT
     produces< std::vector<MuCS::MuCSDTOffset>, art::InRun >();
   }
   
-  MuCSDT::~MuCSDT() {}
+  MuCSDT::~MuCSDT() {
+    //close MuCS data root file
+    fTFMuCSData->Close();
+    //cleanup temp files
+    fIFDH->cleanup();  
+  }
     
   void MuCSDT::beginJob(){
     art::ServiceHandle<art::TFileService> tfs;
     // hDT = tfs->make<TH1F>( "hDT", "", 10800, 0, 10800 );
     hDT = tfs->make<TH1F>( "hDT", "", 1000*10800, 0, 10800 );
     
-    f1 = new TFile( Form( fMuCSFile.c_str() ), "read" );  
+    //fetch MuCS data file using ifdh
+    if ( ! fIFDH ) fIFDH = new ifdh_ns::ifdh;
+    mf::LogInfo("CorsikaGen") << "Fetching: "<<fMuCSFile<<"\n";
+    std::string fetchedfile(fIFDH->fetchInput(fMuCSFile));
+    mf::LogInfo("CorsikaGen") << "Fetched; local path: "<<fetchedfile<<"\n";    
     
-    if ( f1->IsZombie() ) {
+    fTFMuCSData = new TFile( Form( fetchedfile.c_str() ), "read" );  
+    
+    if ( fTFMuCSData->IsZombie() ) {
       cout << " - mucs file not existing ! " << endl;
       return;
     }else{
-      my_tree = (TTree*)f1->Get( "preselected" );
+      my_tree = (TTree*)fTFMuCSData->Get( "preselected" );
 
       my_tree->SetBranchStatus( "*", 0 ); 
       my_tree->SetBranchStatus( "seq", 1 );
