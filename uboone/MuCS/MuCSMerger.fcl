@@ -1,6 +1,6 @@
 
 #include "reco_uboone_mcc7.fcl"
-#include "merger_microboone.fcl"
+#include "MuCSMerger_uboone.fcl"
 
 process_name: MuCSMerger
 
@@ -38,7 +38,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName: "%ifb_%tc_merged.root"
+   fileName: "%ifb_merged.root"
    dataTier: "mucs_merged"
    compressionLevel: 1
  }

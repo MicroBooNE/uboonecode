@@ -1,6 +1,13 @@
 
 BEGIN_PROLOG
 
+standard_mucsdt:
+{
+  module_type: "MuCSDT"
+  SwizzlerProducerLabel: "daq"
+  MuCSFile:          "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_144_0.333_0.root" 
+}
+
 standard_mucsmerger:
 {
   module_type: "MuCSMerger"
