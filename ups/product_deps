@@ -36,7 +36,7 @@ ubutil          v01_37_13
 uboone_data     v01_05_00
 uboonedaq_datatypes v6_19_00_e9
 
-cetbuildtools	v4_18_04	-	only_for_build
+cetbuildtools	v4_19_04	-	only_for_build
 end_product_list
 
 
