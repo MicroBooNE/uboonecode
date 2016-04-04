@@ -3,7 +3,7 @@
 #     The main fhcl file to execute MuCSReco 
 
 #include "services_microboone.fcl"
-#include "merger_microboone.fcl"
+#include "MuCSMerger_uboone.fcl"
 
 process_name: MuCSReco
 

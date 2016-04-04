@@ -3,6 +3,13 @@
 
 #include "MuCSData.h"
 #include "MuCSRecoData.h"
+#include "MuCSDTOffset.h"
+
+template class std::vector<MuCS::MuCSDTOffset>;
+
+template class art::Wrapper<MuCS::MuCSDTOffset>;
+
+template class art::Wrapper<std::vector<MuCS::MuCSDTOffset> >;
 
 template class std::vector<MuCS::MuCSData>;
 
