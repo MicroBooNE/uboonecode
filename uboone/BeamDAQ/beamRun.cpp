@@ -57,7 +57,7 @@ void beamRun::StartRun(beamRunHeader& rh, boost::posix_time::ptime tstart)
   fRunHeader.fRunStart=tstart;
 
   mf::LogInfo("") <<"Starting new beam run "<<fRunHeader.fRun<<" subrun "<<fRunHeader.fSubRun<<" on "<<tstart;
-  fOut=new ofstream[fBeamLine.size()];
+  fOut=new std::ofstream[fBeamLine.size()];
   for (unsigned int i=0;i<fBeamLine.size();i++) {
     stringstream ss;
     ss<<fOutputDirData<<"/beam_"<<fBeamLine[i]<<"_"
@@ -176,7 +176,7 @@ void beamRun::EndRun(boost::posix_time::ptime tstop)
     fOut[i].close();
   }
 
-  ofstream infofile;
+  std::ofstream infofile;
   stringstream ss;
   ss<<fOutputDirInfo<<"/beam_"
       <<setfill('0')<<setw(7)<<fRunHeader.fRun<<"_"
