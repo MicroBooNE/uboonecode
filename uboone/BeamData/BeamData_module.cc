@@ -274,7 +274,7 @@ void BeamData::beginSubRun(art::SubRun & sr)
       <<std::setw(40)<<fname.str()
       <<std::setw(30)<<fBeamConf[fBeams[ibeam]].fOffsetT
       <<std::setw(30)<<fBeamConf[fBeams[ibeam]].fDt;
-    ifstream *fin=new ifstream(fBeamConf[fBeams[ibeam]].fFilePath+
+    std::ifstream *fin=new std::ifstream(fBeamConf[fBeams[ibeam]].fFilePath+
 			       fname.str(), 
 			       std::ios::binary);
     if ( !fin->is_open() ) {
