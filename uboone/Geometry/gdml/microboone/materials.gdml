@@ -1,4 +1,4 @@
-<?xml version='1.0'?>
+<?xml version'1.0'?>
 <materials>
   <element name="bromine" formula="Br" Z="35"> <atom value="79.904"/> </element>
   <element name="hydrogen" formula="H" Z="1">  <atom value="1.0079"/> </element>
@@ -39,7 +39,7 @@
    <composite n="6" ref="oxygen"/>
    <composite n="4" ref="bromine"/>
   </material>
-  
+
   <material name="PU_foam_dense" formula="C25H42N2O6">
    <D value=".224" unit="g/cm3"/>
    <composite n="25" ref="carbon"/>
@@ -47,7 +47,7 @@
    <composite n="2" ref="nitrogen"/>
    <composite n="6" ref="oxygen"/>
  </material>
- 
+
  <material name="PU_foam_light" formula="C25H42N2O6">
 	 <D value=".0384" unit="g/cm3"/>
 	 <composite n="25" ref="carbon"/>
@@ -55,7 +55,7 @@
 	 <composite n="2" ref="nitrogen"/>
 	 <composite n="6" ref="oxygen"/>
  </material>
-	     
+
   <material name="SiO2" formula="SiO2">
    <D value="2.2" unit="g/cm3"/>
    <composite n="1" ref="silicon"/>
@@ -154,7 +154,7 @@
   </material>
 
   <material formula=" " name="ShotRock">
-   <D value="2.7*0.6" unit="g/cm3"/>
+   <D value="1.62" unit="g/cm3"/>
    <fraction n="0.438" ref="oxygen"/>
    <fraction n="0.257" ref="silicon"/>
    <fraction n="0.222" ref="sodium"/>

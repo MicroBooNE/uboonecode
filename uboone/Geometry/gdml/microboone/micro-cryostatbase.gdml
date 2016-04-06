@@ -1,15 +1,15 @@
 <solids>
- <tube name="Cryostat" 
-  rmax="(240)"
-  z="1400+5"
-  deltaphi="2*(3.1415926535897)"
+ <tube name="Cryostat"
+  rmax="240"
+  z="1405"
+  deltaphi="6.28318530718"
   aunit="rad"
   lunit="cm"/>
 <tube name="SteelTube"
-  rmin="(200)"
-  rmax="(240)"
+  rmin="200"
+  rmax="240"
   z="1400"
-  deltaphi="2*(3.1415926535897)"
+  deltaphi="6.28318530718"
   aunit="rad"
   lunit="cm"/>
 </solids>

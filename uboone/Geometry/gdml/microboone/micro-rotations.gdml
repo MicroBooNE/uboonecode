@@ -1,10 +1,10 @@
-<?xml version='1.0'?>
+<?xml version'1.0'?>
 <define>
    <rotation name="rPlus30AboutX"  unit="deg" x="30"  y="0"   z="0"/>
    <rotation name="rPlus60AboutX"  unit="deg" x="60"  y="0"   z="0"/>
    <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
    <rotation name="rMinus90AboutX"  unit="deg" x="-90"  y="0"   z="0"/>
-   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="90+ 60" y="0"   z="0"/>
+   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="150" y="0"   z="0"/>
    <rotation name="rPlus150AboutX"      unit="deg" x="150" y="0"   z="0"/>
    <rotation name="rPlus180AboutX"      unit="deg" x="180" y="0"   z="0"/>
    <rotation name="rMinusUVAngleAboutX" unit="deg" x="-30" y="0"   z="0"/>
