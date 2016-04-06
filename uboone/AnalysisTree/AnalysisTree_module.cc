@@ -454,6 +454,9 @@ namespace microboone {
       TrackData_t<Short_t> trkncosmictags_tagger;
       TrackData_t<Float_t> trkcosmicscore_tagger;
       TrackData_t<Short_t> trkcosmictype_tagger;
+      TrackData_t<Short_t> trkncosmictags_containmenttagger;
+      TrackData_t<Float_t> trkcosmicscore_containmenttagger;
+      TrackData_t<Short_t> trkcosmictype_containmenttagger;
       TrackData_t<Short_t> trkncosmictags_flashmatch;
       TrackData_t<Float_t> trkcosmicscore_flashmatch;
       TrackData_t<Short_t> trkcosmictype_flashmatch;
@@ -1429,6 +1432,7 @@ namespace microboone {
     bool fSavePFParticleInfo; ///whether to extract and save PFParticle information
 
     std::vector<std::string> fCosmicTaggerAssocLabel;
+    std::vector<std::string> fContainmentTaggerAssocLabel;
     std::vector<std::string> fFlashMatchAssocLabel;
 
     bool bIgnoreMissingShowers; ///< whether to ignore missing shower information
@@ -1611,6 +1615,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkncosmictags_tagger.resize(MaxTracks);
   trkcosmicscore_tagger.resize(MaxTracks);
   trkcosmictype_tagger.resize(MaxTracks);
+  trkncosmictags_containmenttagger.resize(MaxTracks);
+  trkcosmicscore_containmenttagger.resize(MaxTracks);
+  trkcosmictype_containmenttagger.resize(MaxTracks);
   trkncosmictags_flashmatch.resize(MaxTracks);
   trkcosmicscore_flashmatch.resize(MaxTracks);
   trkcosmictype_flashmatch.resize(MaxTracks);
@@ -1683,6 +1690,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkncosmictags_tagger, -9999  );
   FillWith(trkcosmicscore_tagger, -99999.);
   FillWith(trkcosmictype_tagger, -9999  );
+  FillWith(trkncosmictags_containmenttagger, -9999  );
+  FillWith(trkcosmicscore_containmenttagger, -99999.);
+  FillWith(trkcosmictype_containmenttagger, -9999  );
   FillWith(trkncosmictags_flashmatch, -9999  );
   FillWith(trkcosmicscore_flashmatch, -99999.);
   FillWith(trkcosmictype_flashmatch, -9999  );
@@ -1783,6 +1793,15 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkcosmictype_tagger_" + TrackLabel;
   CreateBranch(BranchName, trkcosmictype_tagger, BranchName + NTracksIndexStr + "/S");
+
+  BranchName = "trkncosmictags_containmenttagger_" + TrackLabel;
+  CreateBranch(BranchName, trkncosmictags_containmenttagger, BranchName + NTracksIndexStr + "/S");
+
+  BranchName = "trkcosmicscore_containmenttagger_" + TrackLabel;
+  CreateBranch(BranchName, trkcosmicscore_containmenttagger, BranchName + NTracksIndexStr + "/F");
+
+  BranchName = "trkcosmictype_containmenttagger_" + TrackLabel;
+  CreateBranch(BranchName, trkcosmictype_containmenttagger, BranchName + NTracksIndexStr + "/S");
 
   BranchName = "trkncosmictags_flashmatch_" + TrackLabel;
   CreateBranch(BranchName, trkncosmictags_flashmatch, BranchName + NTracksIndexStr + "/S");
@@ -3307,6 +3326,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveShowerInfo            (pset.get< bool >("SaveShowerInfo", false)),
   fSavePFParticleInfo	    (pset.get< bool >("SavePFParticleInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
+  fContainmentTaggerAssocLabel  (pset.get<std::vector< std::string > >("ContainmentTaggerAssocLabel") ),
   fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
   bIgnoreMissingShowers     (pset.get< bool >("IgnoreMissingShowers", false)),
   isCosmics(false),
@@ -4136,6 +4156,18 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fCosmicTaggerAssocLabel[iTracker];
             TrackerData.trkcosmicscore_tagger[iTrk] = fmct.at(iTrk).at(0)->CosmicScore();
             TrackerData.trkcosmictype_tagger[iTrk] = fmct.at(iTrk).at(0)->CosmicType();
+          }
+        }
+
+        //Containment Tagger information
+        art::FindManyP<anab::CosmicTag> fmct(trackListHandle[iTracker],evt,fContainmentTaggerAssocLabel[iTracker]);
+        if (fmct.isValid()){
+          TrackerData.trkncosmictags_containmenttagger[iTrk]     = fmct.at(iTrk).size();
+          if (fmct.at(iTrk).size()>0){
+            if(fmct.at(iTrk).size()>1)
+              std::cerr << "\n Warning : more than one containment tag per track in module! assigning the first tag to the track" << fContainmentTaggerAssocLabel[iTracker];
+            TrackerData.trkcosmicscore_containmenttagger[iTrk] = fmct.at(iTrk).at(0)->CosmicScore();
+            TrackerData.trkcosmictype_containmenttagger[iTrk] = fmct.at(iTrk).at(0)->CosmicType();
           }
         }
 
