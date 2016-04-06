@@ -1,6 +1,6 @@
 
 #include "reco_uboone_mcc7.fcl"
-#include "merger_microboone.fcl"
+#include "MuCSMerger_uboone.fcl"
 
 @table::microboone_reco_mcc7_services
 process_name: MuCSExtrapolate
