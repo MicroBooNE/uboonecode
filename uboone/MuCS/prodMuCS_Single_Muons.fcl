@@ -27,10 +27,10 @@ physics:
 
  producers:
  {
-   generator: @local::microboone_MuCSMCGen
+   MuCSMCGen: @local::microboone_MuCSMCGen
    rns:       { module_type: "RandomNumberSaver" }
  }
- simulate: [ rns, generator ] 
+ simulate: [ rns, MuCSMCGen ] 
  stream1:  [ out1 ]
  trigger_paths: [simulate] 
  end_paths:     [stream1]  

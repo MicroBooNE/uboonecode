@@ -4,4 +4,55 @@
  <class name="std::pair<std::string, bool>"/>
  <class name="std::vector<bool>"/>
  <class name="std::vector<std::pair<std::string, bool> >"/>
+
+ <ioread 
+   checksum="[2334756667]"
+   sourceClass="raw::ubdaqSoftwareTriggerData"
+   source="unsigned int PHMAX"
+   targetClass="raw::ubdaqSoftwareTriggerData"
+   target="PHMAX"
+   include="vector;uboone/RawData/utils/ubdaqSoftwareTriggerData.h">
+   <![CDATA[
+     PHMAX.push_back(onfile.PHMAX);
+   ]]>
+ </ioread> 
+
+ <ioread 
+   checksum="[2334756667]"
+   sourceClass="raw::ubdaqSoftwareTriggerData"
+   source="unsigned int multiplicity"
+   targetClass="raw::ubdaqSoftwareTriggerData"
+   target="multiplicity"
+   include="vector;uboone/RawData/utils/ubdaqSoftwareTriggerData.h">
+   <![CDATA[
+     multiplicity.push_back(onfile.multiplicity);
+   ]]>
+ </ioread> 
+
+ <ioread 
+   checksum="[2334756667]"
+   sourceClass="raw::ubdaqSoftwareTriggerData"
+   source="unsigned int triggerTick"
+   targetClass="raw::ubdaqSoftwareTriggerData"
+   target="triggerTick"
+   include="vector;uboone/RawData/utils/ubdaqSoftwareTriggerData.h">
+   <![CDATA[
+     triggerTick.push_back(onfile.triggerTick);
+   ]]>
+ </ioread> 
+
+ <ioread 
+   checksum="[2334756667]"
+   sourceClass="raw::ubdaqSoftwareTriggerData"
+   source="double triggerTime"
+   targetClass="raw::ubdaqSoftwareTriggerData"
+   target="triggerTime"
+   include="vector;uboone/RawData/utils/ubdaqSoftwareTriggerData.h">
+   <![CDATA[
+     triggerTime.push_back(onfile.triggerTime);
+   ]]>
+ </ioread> 
+
+
 </lcgdict>
+

@@ -9,140 +9,69 @@
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef MuCSDT_Module
-
 #define MuCSDT_Module
 
-
-#include "larsim/Simulation/SimChannel.h"
-
-#include "larsim/Simulation/LArG4Parameters.h"
-
-
+//larsoft includes
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
-
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-
-
 #include "larcore/Geometry/Geometry.h"
-
-#include "larcore/Geometry/OpDetGeo.h"
-
-#include "SimulationBase/MCParticle.h"
-
-#include "SimulationBase/MCTruth.h"
-
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
-
-
-#include "lardata/RecoBase/Hit.h"
-
-#include "larreco/RecoAlg/SpacePointAlg.h"
-
-#include "lardata/RecoBase/Cluster.h"
-
-#include "lardata/RecoBase/Track.h"
-
-#include "lardata/RecoBase/PFParticle.h"  
-
-#include "lardata/RecoBase/SpacePoint.h"  
-
-#include "lardata/RecoBase/OpHit.h"  
-
-#include "lardata/RecoBase/OpFlash.h"  
-
-#include "lardata/RecoObjects/BezierTrack.h"
-
-#include "larreco/RecoAlg/TrackMomentumCalculator.h"
-
 #include "lardata/RawData/TriggerData.h"
-
-
-#include "art/Framework/Core/EDAnalyzer.h"
-
+#include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
-
 #include "art/Framework/Principal/Handle.h"
-
 #include "art/Framework/Services/Registry/ServiceHandle.h"
- 
 #include "art/Framework/Services/Optional/TFileService.h"
-
 #include "art/Framework/Core/ModuleMacros.h"
-
 #include "art/Framework/Core/FindManyP.h"
-
 #include "messagefacility/MessageLogger/MessageLogger.h"
-
 #include "fhiclcpp/ParameterSet.h"
 
-// #include "EventDisplay/HeaderDrawer.h"
-
-
+//ROOT includes
 #include "TMath.h"
-
 #include "TH1.h"
-
 #include "TAxis.h"
-
 #include "TH2.h"
-
 #include "TTree.h"
-
 #include "TLorentzVector.h"
-
 #include "TVector3.h"
-
 #include "TFile.h"
 
-
+//C includes
 #include <map>
-
 #include <vector>
-
 #include <algorithm>
-
 #include <iostream>
-
 #include <string>
-
 #include <cmath>
 
+#include "MuCSDTOffset.h"
+#include "ifdh.h"  //to handle flux files
 
 using namespace std;
-
-
 namespace MuCSDT 
 {
-  class MuCSDT : public art::EDAnalyzer 
+  class MuCSDT : public art::EDProducer
   {
   public:
-    
     explicit MuCSDT( fhicl::ParameterSet const& pset );
-    
     virtual ~MuCSDT();
-    
     void beginJob();
-        
-    void beginRun( const art::Run& run );
-        
+    void beginRun( art::Run& run );
+    void endRun( art::Run& run );
     void reconfigure( fhicl::ParameterSet const& pset );
-        
-    void analyze ( const art::Event& evt ); 
-    
+    void produce ( art::Event& evt ); 
     void endJob();
     
   private:
-    
     std::string fSwizzlerProducerLabel; 
+    std::string fMuCSFile;
     
-    Int_t group = 0;
-        
     Int_t trigID = 0;
     TH1F *hDT;
     Int_t run0;
     Int_t srun0;
-    TFile *f1;
-        
+    TFile *fTFMuCSData;
     Int_t seq;
     Float_t time_sec_low;
     Float_t time_sec_high;
@@ -158,93 +87,92 @@ namespace MuCSDT
     
     Double_t TOLER = 20.0;
     Double_t offset = -666.0;
-        
+    
+    ifdh_ns::ifdh* fIFDH=0; ///< For MuCS data file retrieval
   }; 
   
-  MuCSDT::MuCSDT( fhicl::ParameterSet const& parameterSet )
-    : EDAnalyzer(parameterSet)
-  {
-    this->reconfigure(parameterSet);
-  
+  MuCSDT::MuCSDT( fhicl::ParameterSet const& pset ){
+    this->reconfigure(pset);
+    produces< std::vector<MuCS::MuCSDTOffset>, art::InRun >();
   }
   
-  MuCSDT::~MuCSDT() 
-  {}
+  MuCSDT::~MuCSDT() {
+    //close MuCS data root file
+    fTFMuCSData->Close();
+    //cleanup temp files
+    fIFDH->cleanup();  
+  }
     
-  void MuCSDT::beginJob()
-  {
+  void MuCSDT::beginJob(){
     art::ServiceHandle<art::TFileService> tfs;
     // hDT = tfs->make<TH1F>( "hDT", "", 10800, 0, 10800 );
     hDT = tfs->make<TH1F>( "hDT", "", 1000*10800, 0, 10800 );
     
-    f1 = new TFile( Form( "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_%d_0.333_0.root", group ), "read" );  
+    //fetch MuCS data file using ifdh
+    if ( ! fIFDH ) fIFDH = new ifdh_ns::ifdh;
+    mf::LogInfo("MuCSDT") << "Fetching: "<<fMuCSFile<<"\n";
+    std::string fetchedfile(fIFDH->fetchInput(fMuCSFile));
+    mf::LogInfo("MuCSDT") << "Fetched; local path: "<<fetchedfile<<"\n";    
     
-    if ( f1->IsZombie() ) 
-      {
-	cout << " - mucs file not existing ! " << endl;
-	return;
-	
-      }
+    fTFMuCSData = new TFile( Form( fetchedfile.c_str() ), "read" );  
     
-    else
-      {
-	my_tree = (TTree*)f1->Get( "preselected" );
-	
-	my_tree->SetBranchStatus( "*", 0 ); 
-	my_tree->SetBranchStatus( "seq", 1 );
-	my_tree->SetBranchStatus( "time_sec_low", 1 );
-	my_tree->SetBranchStatus( "time_sec_high", 1 );
-	my_tree->SetBranchStatus( "time_16ns_low", 1 );
-	my_tree->SetBranchStatus( "time_16ns_high", 1 );
-	my_tree->SetBranchStatus( "t0", 1 );
-	
-	my_tree->SetBranchAddress( "seq", &seq );
-	my_tree->SetBranchAddress( "time_sec_low", &time_sec_low );
-	my_tree->SetBranchAddress( "time_sec_high", &time_sec_high );
-	my_tree->SetBranchAddress( "time_16ns_low", &time_16ns_low );
-	my_tree->SetBranchAddress( "time_16ns_high", &time_16ns_high );
-	my_tree->SetBranchAddress( "t0", &t0 );
-	
-	my_entries = my_tree->GetEntries();
-	cout << " - events in mucs : " << my_entries << endl;
-	cout << "" << endl;
-	cout << "" << endl;
-		
-      }
-    
-  }
-  
-  void MuCSDT::beginRun( const art::Run& run )
-  {}
-  
-  void MuCSDT::reconfigure( fhicl::ParameterSet const& p )
-  {
-    fSwizzlerProducerLabel = p.get< std::string >( "SwizzlerProducerLabel" );
-    
-    group = p.get< int >( "group" );
-    
-    return;
-    
-  }
-    
-  void MuCSDT::analyze( const art::Event& evt ) 
-  {
-    if ( trigID==0 )
-      {
-	cout << "" << endl;
-	cout << " starting ... " << endl;
-	cout << "" << endl;
-	
-	cout << " - group : " << group << endl;
-	cout << "" << endl;
-	cout << "" << endl;
-	
-	run0 = evt.run();
-	srun0 = evt.subRun();
+    if ( fTFMuCSData->IsZombie() ) {
+      cout << " - mucs file not existing ! " << endl;
+      return;
+    }else{
+      my_tree = (TTree*)fTFMuCSData->Get( "preselected" );
 
-	previous_trigtime = 0.0;
-	
-      }
+      my_tree->SetBranchStatus( "*", 0 ); 
+      my_tree->SetBranchStatus( "seq", 1 );
+      my_tree->SetBranchStatus( "time_sec_low", 1 );
+      my_tree->SetBranchStatus( "time_sec_high", 1 );
+      my_tree->SetBranchStatus( "time_16ns_low", 1 );
+      my_tree->SetBranchStatus( "time_16ns_high", 1 );
+      my_tree->SetBranchStatus( "t0", 1 );
+
+      my_tree->SetBranchAddress( "seq", &seq );
+      my_tree->SetBranchAddress( "time_sec_low", &time_sec_low );
+      my_tree->SetBranchAddress( "time_sec_high", &time_sec_high );
+      my_tree->SetBranchAddress( "time_16ns_low", &time_16ns_low );
+      my_tree->SetBranchAddress( "time_16ns_high", &time_16ns_high );
+      my_tree->SetBranchAddress( "t0", &t0 );
+
+      my_entries = my_tree->GetEntries();
+      cout << " - events in mucs : " << my_entries << endl;
+      cout << "" << endl;
+      cout << "" << endl;
+    }
+  }
+  
+  void MuCSDT::beginRun( art::Run& run ){}
+  void MuCSDT::endRun( art::Run& run ){
+    std::unique_ptr< std::vector<MuCS::MuCSDTOffset> > dtcol(new std::vector<MuCS::MuCSDTOffset>);
+    MuCS::MuCSDTOffset dt( hDT->GetXaxis()->GetBinCenter( hDT->GetMaximumBin()  ));
+    dtcol->push_back(dt);
+    run.put( std::move( dtcol ) );
+  }
+   
+  void MuCSDT::reconfigure( fhicl::ParameterSet const& p ){
+    fSwizzlerProducerLabel = p.get< std::string >( "SwizzlerProducerLabel" );
+    fMuCSFile = p.get< std::string >( "MuCSFile" );
+    return;
+  }
+    
+  void MuCSDT::produce( art::Event& evt ){
+    if ( trigID==0 ){
+      cout << "" << endl;
+      cout << " starting ... " << endl;
+      cout << "" << endl;
+
+      cout << " - MuCSFile : " << fMuCSFile << endl;
+      cout << "" << endl;
+      cout << "" << endl;
+
+      run0 = evt.run();
+      srun0 = evt.subRun();
+
+      previous_trigtime = 0.0;
+    }
     
     Int_t event = evt.id().event();
     cout << "" << endl;
@@ -272,36 +200,30 @@ namespace MuCSDT
     cout << " - relative trig. time : " << t_rel << endl;
     cout << "" << endl; 
         
-    for ( Int_t i=0; i<my_entries; i++ )
-      {
-	my_tree->GetEntry( i );
-	
-	Float_t DTunix = TMath::Abs( time_sec_high*65536.0+time_sec_low-unix_time_stamp );
-		
-	if ( DTunix<=TOLER ) 
-	  {
-	    // cout << " Gotcha !!! " << endl;
-	    // cout << "" << endl;
-	    // cout << " i : " << i << ", mucs unix timestamp : " << Form( "%.1f", time_sec_high*65536.0+time_sec_low ) << ", diff : " << DTunix << endl; 
-	    // cout << "" << endl;
-	    // getchar();
-	    	    
-	    Double_t tmucs = t0*1.0e-9;
-	    hDT->Fill( tmucs-t_rel );
-	    
-	  }
-		
+    for ( Int_t i=0; i<my_entries; i++ ){
+      my_tree->GetEntry( i );
+  
+      Float_t DTunix = TMath::Abs( time_sec_high*65536.0+time_sec_low-unix_time_stamp );
+    
+      if ( DTunix<=TOLER ){
+        // cout << " Gotcha !!! " << endl;
+        // cout << "" << endl;
+        // cout << " i : " << i << ", mucs unix timestamp : " << Form( "%.1f", time_sec_high*65536.0+time_sec_low ) << ", diff : " << DTunix << endl; 
+        // cout << "" << endl;
+        // getchar();
+              
+        Double_t tmucs = t0*1.0e-9;
+        hDT->Fill( tmucs-t_rel );
       }
+    }
     
     previous_trigtime = trigtime;
     
     trigID++;
     return;
-    
   }
   
-  void MuCSDT::endJob()
-  {
+  void MuCSDT::endJob(){
     cout << "" << endl; 
     cout << " - events processed : " << trigID << endl;
     cout << "" << endl;
@@ -311,7 +233,6 @@ namespace MuCSDT
     cout << "" << endl;
     cout << " ... ending ! " << endl;
     cout << "" << endl;
-    
   }
   
   DEFINE_ART_MODULE( MuCSDT )
@@ -319,9 +240,3 @@ namespace MuCSDT
 } 
 
 #endif 
-
-////////////////////////////////////////////////////////////////////////
-//
-//    The end !
-//
-////////////////////////////////////////////////////////////////////////
