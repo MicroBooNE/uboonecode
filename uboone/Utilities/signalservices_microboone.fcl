@@ -51,7 +51,7 @@ CalibResponseTOffset: [0, 0, 0]   # in us time offset to align all three planes
   FieldResponseFVersion:  [ "v0.1", "v0.1" ]
   
   DefaultEField:       0.5
-  DefaultTemperature: 87.0
+  DefaultTemperature:  87.0
 
   TimeScaleParams:   [ 1.0, 0.806 ] # this does the scaling from full- to half-field
                                       # good to ~0.2% over the range of the velocity ratio for 1-0.4 in the field

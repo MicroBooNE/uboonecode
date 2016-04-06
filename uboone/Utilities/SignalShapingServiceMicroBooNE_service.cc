@@ -13,6 +13,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "art/Framework/Services/Optional/TFileService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/Utilities/LArFFT.h"
@@ -36,6 +37,14 @@ util::SignalShapingServiceMicroBooNE::SignalShapingServiceMicroBooNE(const fhicl
                                                                      art::ActivityRegistry& /* reg */)
 : fInit(false), fInitConfigMap(false)
 {
+  for(size_t i=0; i<3; ++i) {
+    fHRawResponse[i] = 0;
+    fHStretchedResponse[i] = 0;
+    fHFullResponse[i] = 0;
+    fHistDone[i] = false;
+    fHistDoneF[i] = false;
+  }
+    
   reconfigure(pset);
 }
 
@@ -356,9 +365,12 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 
           auto Xaxis = resp->GetXaxis();
           fNFieldBins[ktype] = Xaxis->GetNbins();
-
+          fFieldLowEdge[ktype] = resp->GetBinCenter(1) - 0.5*resp->GetBinWidth(1);
+          fFieldBin1Center[ktype] = resp->GetBinCenter(1);
           // internal time is in nsec
           fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
+      
+
           // get the offsets for each plane... use wire 0 and either peak or zero-crossing
 
           SetFieldResponseTOffsets(resp, ktype);
@@ -459,8 +471,9 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponseTOffsets(const TH1F* 
 
   //std::cout << "view " << _vw << ", wire " << _wr << ", toffset " << tOffset << std::endl;
   tOffset *= f3DCorrectionVec[_vw];
-  if(fStretchFullResponse) tOffset *= fTimeScaleFactor;
+  tOffset *= fTimeScaleFactor;
   fFieldResponseTOffset[ktype].at(_vw) = (-tOffset+ fCalibResponseTOffset[_vw])*1000.;
+  //std::cout << "view " << _vw << ": " << tOffset << std::endl;
 
 }
 
@@ -514,8 +527,8 @@ void util::SignalShapingServiceMicroBooNE::init()
     // re-initialize the FFT service for the request size
     art::ServiceHandle<util::LArFFT> fFFT;
     std::string options = fFFT->FFTOptions();
-    int fitbins = fFFT->FFTFitBins();
-    int fftsize = fFFT->FFTSize();
+    size_t fitbins = fFFT->FFTFitBins();
+    size_t fftsize = fFFT->FFTSize();
 
 
     // Calculate field and electronics response functions.
@@ -567,6 +580,8 @@ void util::SignalShapingServiceMicroBooNE::init()
             (fSignalShapingVec[config][ktype][_vw][_wr]).set_normflag(false);
           }
         }
+        // see if we get the same toffsets
+        
         SetResponseSampling(ktype, config);
 
         // Currently we only have fine binning "fFieldBinWidth"
@@ -574,7 +589,7 @@ void util::SignalShapingServiceMicroBooNE::init()
         // Now we are sampling the convoluted field-electronic response
         // with the nominal sampling.
         // We may consider to do the same for the filters as well.
-        if (fftsize!=fFFT->FFTSize()){
+        if ((int)fftsize!=fFFT->FFTSize()){
           std::string options = fFFT->FFTOptions();
           int fitbins = fFFT->FFTFitBins();
           fFFT->ReinitializeFFT( fftsize, options, fitbins);
@@ -683,12 +698,17 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse(size_t ktype)
   // Get services.
 
 //  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+//  }
 
-  //  }
-
+  
 
   ////////////////////////////////////////////////////
 
+  art::ServiceHandle<art::TFileService> tfs; 
+  
+  char buff0[80]; //buff1[80];
+
+  
   // Ticks in nanosecond
   // Calculate the normalization of the collection plane
   double integral;
@@ -701,29 +721,55 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse(size_t ktype)
     
     // we adjust the size of the fieldresponse vector to account for the stretch
     // and interpolate the histogram to fill the vector with the stretched response
-    
-
+        
     for(_vw=0; _vw<fNViews; ++_vw) {
       
       double timeFactor = 1.0;
-      if(!fUseCalibratedResponses && !fStretchFullResponse) timeFactor = fTimeScaleFactor*f3DCorrectionVec[_vw];
+      if(!fUseCalibratedResponses) timeFactor *= f3DCorrectionVec[_vw];
+      if(!fStretchFullResponse) timeFactor *= fTimeScaleFactor;
 
       for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
         // simplify the code
         DoubleVec* responsePtr = &fFieldResponseVec[config][ktype][_vw][_wr];
         TH1F*      histPtr     = fFieldResponseHistVec[config][ktype][_vw][_wr];
+
+        // see if we get the same toffsets... we do!
+        //if(_wr==0) SetFieldResponseTOffsets(histPtr, ktype);
         
         size_t nBins = histPtr->GetNbinsX();
-        size_t nResponseBins = nBins*timeFactor + 1;
+        size_t nResponseBins = nBins*timeFactor;
         responsePtr->resize(nResponseBins);
         double x0 = histPtr->GetBinCenter(1);
         double xf = histPtr->GetBinCenter(nBins);
         double deltaX = (xf - x0)/(nBins-1);
+        //std::cout << "lims " << x0 << " " << xf << " " << deltaX << std::endl;
         
         for(_bn=1; _bn<=nResponseBins; ++_bn) {
-          double xVal = (x0 + deltaX*(_bn-1))/timeFactor;
-          responsePtr->at(_bn-1) = histPtr->Interpolate(xVal);
+          double xVal = x0 + deltaX*(_bn-1)/timeFactor;
+          //if(_bn==1) std::cout << "1st bin " << x0 << " " << xVal << std::endl;
+          double yVal = histPtr->Interpolate(xVal);
+          responsePtr->at(_bn-1) = yVal; 
           responsePtr->at(_bn-1) *= fFieldRespAmpVec[_vw]*weight;
+        }
+        
+        // fill some histos
+        if(_wr==0 && config==0 && ktype==0 && !fHistDone[_vw]) {
+          sprintf(buff0, "hRawResp%i", (int)_vw);
+          fHRawResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nBins, x0-0.5*deltaX, xf+0.5*deltaX);
+          sprintf(buff0, "hStretchedResp%i", (int)_vw);
+          double x0S = timeFactor*x0 - 0.5*deltaX/timeFactor;
+          double xfS = timeFactor*xf + 0.5*deltaX/timeFactor;
+          //std::cout << "title " << buff0 << std::endl;
+          fHStretchedResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nResponseBins, x0S, xfS);
+          for(size_t i=0;i<nBins; ++i) {
+            fHRawResponse[_vw]->SetBinContent(i, histPtr->GetBinContent(i));
+            //std::cout << "bin " << i <<  " xVal " << fHRawResponse[_vw]->GetBinCenter(i) << " response " << fHRawResponse[_vw]->GetBinContent(i) << std::endl;
+          }
+          for(size_t i=0;i<nResponseBins; ++i) {
+            fHStretchedResponse[_vw]->SetBinContent(i+1, responsePtr->at(i));
+            //std::cout << "vbin " << i <<  " xVal " << fHStretchedResponse[_vw]->GetBinCenter(i) << " response " << fHStretchedResponse[_vw]->GetBinContent(i) << std::endl;
+          }
+          fHistDone[_vw] = true;
         }
       }
     }
@@ -904,6 +950,10 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype, siz
   auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
   auto const* geo = lar::providerFrom<geo::Geometry>();
   art::ServiceHandle<util::LArFFT> fft;
+  art::ServiceHandle<art::TFileService> tfs; 
+  
+  char buff0[80], buff1[80];
+
 
   /* This could be a warning, but in principle, there's no reason to restrict the binning
 
@@ -935,73 +985,120 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype, siz
   for ( size_t itime = 0; itime < nticks; itime++ ) {
     SamplingTime[itime] = (1.*itime) * detprop->SamplingRate();
   }
-
   // Sampling
 
-
-    for(size_t view=view0; view<view1; ++view) {
       //std::cout << "sampling view " << view  << " ktype/config/channel " << ktype << " " << config << " " << channel << std::endl;
 
       // we want to implement new scheme (fStretchFullResponse==false) while retaining the old
       // time factor is already included in the calibrated response
-      double timeFactor = 1.0;
-      if(fStretchFullResponse && !fUseCalibratedResponses) timeFactor *= fTimeScaleFactor*f3DCorrectionVec[view];      
-      //if(fUseCalibratedResponses) timeFactor = 1.0;
+  for(size_t view=view0; view<view1; ++view) {
+    double timeFactor = 1.0;
+    //if(fStretchFullResponse && !fUseCalibratedResponses) timeFactor *= fTimeScaleFactor*f3DCorrectionVec[view];      
+
+    if (!fUseCalibratedResponses) timeFactor *= f3DCorrectionVec[view];
+    if(fStretchFullResponse) timeFactor *= fTimeScaleFactor;
+    double plotTimeFactor = 1.0;
+    if(!fStretchFullResponse) plotTimeFactor = f3DCorrectionVec[view]*fTimeScaleFactor;
+    //std::cout << "Time factors " << timeFactor << " " << plotTimeFactor << std::endl;
+    
+    double timeFactorInv = 1./timeFactor;
+    for(_wr=0; _wr<fNResponses[ktype][view]; ++_wr) {
+      const DoubleVec* pResp = &((fSignalShapingVec[config][ktype][view][_wr]).Response_save());
+    
+      // more histos
+      //std::cout << "HistDone " << view << " " << fHistDoneF[view] << std::endl;
       
-      double timeFactorInv = 1./timeFactor;
-      for(_wr=0; _wr<fNResponses[ktype][view]; ++_wr) {
-        const DoubleVec* pResp = &((fSignalShapingVec[config][ktype][view][_wr]).Response_save());
-
-        size_t nticks_input = pResp->size();
-        DoubleVec InputTime(nticks_input, 0. );
-        for (size_t itime = 0; itime < nticks_input; itime++ ) {
-          InputTime[itime] = (1.*itime) * deltaInputTime*timeFactor;
-        }
-        //std::cout << "Input time vector done" << std::endl;
-
-        DoubleVec SamplingResp(nticks, 0. );
-
-        size_t SamplingCount = 0;
-
-        size_t startJ = 1;
-        SamplingResp[0] = (*pResp)[0];
-        for ( size_t itime = 1; itime < nticks; itime++ ) {
-          size_t low, high;
-          for ( size_t jtime = startJ; jtime < nticks_input; jtime++ ) {
-            if ( InputTime[jtime] >= SamplingTime[itime] ) {
-              low  = jtime - 1;
-              high = jtime;
-              //            if(jtime<2&&itime<2) std::cout << itime << " " << jtime << " " << low << " " << up << std::endl;
-              double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
-              SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor);
-              // note: timeFactor = timeFactorInv =  1.0 for calibrated responses
-              SamplingResp[itime] *= timeFactorInv;
-              SamplingCount++;
-              startJ = jtime;
-              break;
-            }
-          } // for (  jtime = 0; jtime < nticks; jtime++ )
-        } // for (  itime = 0; itime < nticks; itime++ )
-        //std::cout << "SamplingResponse done " << std::endl;
-
-        if(fPrintResponses) {
-          size_t printCount = 0;
-          int inc = 1;
-          //std::cout << "Sampled response (ticks) for view " << view << " wire " << _wr << " nticks " << nticks << std::endl;
-          for(size_t i = 0; i<nticks; i+=inc) {
-            std::cout << SamplingResp[i] << " " ;
-            if((printCount+1)%10==0) std::cout << std::endl;
-            printCount++;
-            if (printCount>=100) {inc = 100;}
-          }
-        }
-
-        (fSignalShapingVec[config][ktype][view][_wr]).AddResponseFunction( SamplingResp, true);
-        //std::cout << "Finished with wire " << _wr << ", view " << _vw << std::endl;
+      if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
         
-      }  //  loop over wires
-    } // loop over views
+//        size_t nBins = fNFieldBins[ktype];
+//        double xLowF = fFieldLowEdge[ktype];
+//        double xHighF = xLowF + 0.001*fNFieldBins[ktype]*fFieldBinWidth[ktype];
 
+        double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
+        double xHighF = xLowF + 0.001*(fNFieldBins[ktype]+1)*fFieldBinWidth[ktype]*plotTimeFactor;
+        double nBins = fNFieldBins[ktype]*plotTimeFactor;
+
+        
+//        std::cout << "set 1 " << fNFieldBins[0] << " " << fFieldLowEdge[0] << " " << fFieldBinWidth[0] << std::endl;
+//        std::cout << "      " << nBins << " " << xLowF << " " << xHighF << std::endl;
+        
+        sprintf(buff0, "FullResponse%i", (int)view);
+        fHFullResponse[view] = tfs->make<TH1D>(buff0, buff0, nBins, xLowF, xHighF);                
+        for (size_t i=0; i<nBins; ++i) {
+          fHFullResponse[view]->SetBinContent(i+1, pResp->at(i));
+        }
+      }
+      
+      size_t nticks_input = pResp->size();
+      DoubleVec InputTime(nticks_input, 0. );
+      for (size_t itime = 0; itime < nticks_input; itime++ ) {
+        InputTime[itime] = (1.*itime) * deltaInputTime*timeFactor;
+      }
+      //std::cout << "Input time vector done" << std::endl;
+      
+      DoubleVec SamplingResp(nticks, 0. );
+      
+      size_t SamplingCount = 0;
+      
+      size_t startJ = 1;
+      SamplingResp[0] = (*pResp)[0];
+      for ( size_t itime = 1; itime < nticks; itime++ ) {
+        size_t low, high;
+        for ( size_t jtime = startJ; jtime < nticks_input; jtime++ ) {
+          if ( InputTime[jtime] >= SamplingTime[itime] ) {
+            low  = jtime - 1;
+            high = jtime;
+            //            if(jtime<2&&itime<2) std::cout << itime << " " << jtime << " " << low << " " << up << std::endl;
+            double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
+            SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor);
+            // note: timeFactor = timeFactorInv =  1.0 for calibrated responses
+            SamplingResp[itime] *= timeFactorInv;
+            SamplingCount++;
+            startJ = jtime;
+            break;
+          }
+        } // for (  jtime = 0; jtime < nticks; jtime++ )
+      } // for (  itime = 0; itime < nticks; itime++ )
+      //std::cout << "SamplingResponse done " << std::endl;
+      
+      // more histos
+      //std::cout << "HistDone " << view << " " << fHistDoneF[view] << std::endl;
+      if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
+        double plotTimeFactor = f3DCorrectionVec[view]*fTimeScaleFactor;
+        double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
+        double xHighF = xLowF + 0.001*(fNFieldBins[ktype])*fFieldBinWidth[ktype]*plotTimeFactor;
+        double binWidth = 0.5;
+        size_t nBins = (xHighF-xLowF+1)/binWidth;
+//        std::cout << "set 2 " << fNFieldBins[0] << " " << fFieldLowEdge[0] << " " << fFieldBinWidth[0] << std::endl;
+//        std::cout << "      " << nBins << " " << xLowF << " " << xHighF << std::endl;
+        
+        sprintf(buff1, "SampledResponse%i", (int)view);
+        fHSampledResponse[view] = tfs->make<TH1D>(buff1, buff1, nBins, xLowF, xHighF);                
+        for (size_t i=0; i<nBins; ++i) {
+          //std::cout << "bin/SamplingResp " << i << " " << SamplingResp[i] << std::endl;
+          fHSampledResponse[view]->SetBinContent(i+1, SamplingResp[i]);
+        }
+        fHistDoneF[view] = true;
+      }
+            
+      if(fPrintResponses) {
+        size_t printCount = 0;
+        int inc = 1;
+        //std::cout << "Sampled response (ticks) for view " << view << " wire " << _wr << " nticks " << nticks << std::endl;
+        for(size_t i = 0; i<nticks; i+=inc) {
+          //std::cout << SamplingResp[i] << " " ;
+          if((printCount+1)%10==0) std::cout << std::endl;
+          printCount++;
+          if (printCount>=100) {inc = 100;}
+        }
+      }
+      
+      (fSignalShapingVec[config][ktype][view][_wr]).AddResponseFunction( SamplingResp, true);
+      //std::cout << "Finished with wire " << _wr << ", view " << _vw << std::endl;
+      
+    }  //  loop over wires
+  } // loop over views
+  
   //std::cout << "Done with field responses" << std::endl;
   return;
 }
