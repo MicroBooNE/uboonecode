@@ -1,11 +1,13 @@
 #include "reco_uboone_mcc7.fcl"
+#include "MuCSMerger_uboone.fcl"
+
 process_name: MuCSDT
 
 @table::microboone_reco_mcc7_services
 
 services:
 {
-  TFileService: { fileName: "/uboone/data/users/kalousis/MuCS/offsets/MuCSDT_myrun_mygroup.root" }
+  #TFileService: { fileName: "MuCSDT.root" }
   Timing:       {}
   message:      @local::standard_info
   user:         @local::microboone_simulation_services
@@ -22,7 +24,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName: "%ifb_%tc_DT.root"
+   fileName: "%ifb_MuCSDT.root"
    dataTier: "mucs_DT"
    compressionLevel: 1
  }
@@ -33,15 +35,10 @@ outputs:
 physics:
 {
   # Define the variables we'll need to run for this analysis program.
-  producers:
-  {
-    MuCSDT: 
-    {
-      module_type:     "MuCSDT"
-      SwizzlerProducerLabel: "daq"
-      MuCSFile:          "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_144_0.333_0.root" 
-      }
-  }
+ producers:
+ {
+   MuCSDT: @local::standard_mucsdt
+ }
 
   produce: [ MuCSDT ]
   trigger_paths: [produce]
@@ -49,3 +46,7 @@ physics:
   end_paths: [ stream1 ]  
 }
 
+
+physics.producers.MuCSDT.MuCSFile: "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_144_0.333_0.root"
+DetectorClocksService.InheritClockConfig: false
+services.user.DetectorClocksService.InheritClockConfig: false
