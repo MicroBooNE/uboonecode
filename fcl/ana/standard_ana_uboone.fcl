@@ -78,7 +78,7 @@ physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhit
 physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","pandoraCosmicpid","pandoraCosmicKHitpid","pandoraNupid","pandoraNuKHitpid","pandoraNuPMApid","pmtrackpid"]
 physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag","stitchkalmanhittag","pandoraCosmictag","pandoraCosmicKHitPFPart","pandoraNutag","pandoraNuKHittag","pandoraNuPMAtag","pmtracktag"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhitflashmatch","stitchkalmanhitflashmatch","pandoraCosmicFlashMatch","pandoraCosmicKHitFlashMatch","pandoraNuFlashMatch","pandoraNuKHitFlashMatch","pandoraNuPMAFlashMath","pmtrackFlashMatch"]
-#physics.analyzers.analysistree.PFParticleModuleLabel:          "pandoraNu"
+physics.analyzers.analysistree.PFParticleModuleLabel:           "pandoraNu"
 physics.analyzers.analysistree.FlashT0FinderLabel:              ["t0","t0","t0","t0","t0","t0","t0","t0"]
 physics.analyzers.analysistree.MCT0FinderLabel:                 ["mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0"]
 physics.analyzers.analysistree.CosmicScoreThresholds:           [0.0]
@@ -88,7 +88,7 @@ physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
 physics.analyzers.analysistree.ShowerModuleLabel:               ["showerrecofuzzy","showerrecopandora"]
 physics.analyzers.analysistree.IgnoreMissingShowers:            true
 physics.analyzers.analysistree.SavePandoraNuVertexInfo:         true
-physics.analyzers.analysistree.SavePFParticleInfo:              false
+physics.analyzers.analysistree.SavePFParticleInfo:              true
 physics.analyzers.analysistree.SaveCryInfo:                     false
 physics.analyzers.pandoraNueff.TrackModuleLabel:       "pandoraNu"
 physics.analyzers.pandoraCosmiceff.TrackModuleLabel:   "pandoraCosmic"
