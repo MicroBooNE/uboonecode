@@ -4160,14 +4160,14 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         }
 
         //Containment Tagger information
-        art::FindManyP<anab::CosmicTag> fmct(trackListHandle[iTracker],evt,fContainmentTaggerAssocLabel[iTracker]);
-        if (fmct.isValid()){
-          TrackerData.trkncosmictags_containmenttagger[iTrk]     = fmct.at(iTrk).size();
-          if (fmct.at(iTrk).size()>0){
-            if(fmct.at(iTrk).size()>1)
+        art::FindManyP<anab::CosmicTag> fmcnt(trackListHandle[iTracker],evt,fContainmentTaggerAssocLabel[iTracker]);
+        if (fmcnt.isValid()){
+          TrackerData.trkncosmictags_containmenttagger[iTrk]     = fmcnt.at(iTrk).size();
+          if (fmcnt.at(iTrk).size()>0){
+            if(fmcnt.at(iTrk).size()>1)
               std::cerr << "\n Warning : more than one containment tag per track in module! assigning the first tag to the track" << fContainmentTaggerAssocLabel[iTracker];
-            TrackerData.trkcosmicscore_containmenttagger[iTrk] = fmct.at(iTrk).at(0)->CosmicScore();
-            TrackerData.trkcosmictype_containmenttagger[iTrk] = fmct.at(iTrk).at(0)->CosmicType();
+            TrackerData.trkcosmicscore_containmenttagger[iTrk] = fmcnt.at(iTrk).at(0)->CosmicScore();
+            TrackerData.trkcosmictype_containmenttagger[iTrk] = fmcnt.at(iTrk).at(0)->CosmicType();
           }
         }
 

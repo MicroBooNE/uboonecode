@@ -77,6 +77,7 @@ physics.analyzers.analysistree.VertexModuleLabel:               ["cccluster", "p
 physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo","stitchkalmanhitcalo","pandoraCosmiccalo","pandoraCosmicKHitcalo","pandoraNucalo","pandoraNuKHitcalo","pandoraNuPMAcalo","pmtrackcalo"]
 physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","pandoraCosmicpid","pandoraCosmicKHitpid","pandoraNupid","pandoraNuKHitpid","pandoraNuPMApid","pmtrackpid"]
 physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag","stitchkalmanhittag","pandoraCosmictag","pandoraCosmicKHitPFPart","pandoraNutag","pandoraNuKHittag","pandoraNuPMAtag","pmtracktag"]
+physics.analyzers.analysistree.ContainmentTaggerAssocLabel:     ["trackkalmanhitContTag","stitchkalmanhitContTag","pandoraCosmicContTag","dummy","pandoraNuContTag","dummy","pandoraNuPMAContTag","pmtrackContTag"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhitflashmatch","stitchkalmanhitflashmatch","pandoraCosmicFlashMatch","pandoraCosmicKHitFlashMatch","pandoraNuFlashMatch","pandoraNuKHitFlashMatch","pandoraNuPMAFlashMath","pmtrackFlashMatch"]
 physics.analyzers.analysistree.PFParticleModuleLabel:           "pandoraNu"
 physics.analyzers.analysistree.FlashT0FinderLabel:              ["t0","t0","t0","t0","t0","t0","t0","t0"]

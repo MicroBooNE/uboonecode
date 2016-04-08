@@ -196,7 +196,7 @@ microboone_reco_mcc7_producers:
   stitchkalmanhitContTag:      @local::microboone_containment_tag
   trackkalmanhitccContTag:     @local::microboone_containment_tag
   stitchkalmanhitccContTag:    @local::microboone_containment_tag
-  pmatrackConttag:             @local::microboone_containment_tag
+  pmtrackContTag:              @local::microboone_containment_tag
 
 }
 
@@ -236,6 +236,8 @@ microboone_reco_mcc7_fuzzytracks: [      trackkalmanhit,
                                          stitchkalmanhitpid,
                                          trackkalmanhittag,
                                          stitchkalmanhittag,
+                                         trackkalmanhitContTag,
+                                         stitchkalmanhitContTag,
                                          showerrecofuzzy ]
 
 microboone_reco_mcc7_fuzzypath: [        @sequence::microboone_reco_mcc7_fuzzycluster,
@@ -253,6 +255,7 @@ microboone_reco_mcc7_cctracks: [         #trackkalmanhitcc,
                                          #stitchkalmanhittagcc 
                                          pmtrack,
                                          pmtracktag,
+                                         pmtrackContTag,
                                          pmtrackcalo,
                                          pmtrackpid]
 
@@ -269,6 +272,7 @@ microboone_reco_mcc7_pandoraCosmic: [    pandoraCosmic,
                                          pandoraCosmicKHitFlashMatch,
                                          pandoraCosmicKHitRemoval,
                                          pandoraCosmictag,
+                                         pandoraCosmicContTag,
                                          pandoraCosmiccalo,
                                          pandoraCosmicpid ]
 
@@ -276,12 +280,14 @@ microboone_reco_mcc7_pandoraNu: [        pandoraNu,
                                          pandoraNuKHit,
                                          pandoraNuPMA,
                                          pandoraNutag,
+                                         pandoraNuContTag,
                                          pandoraNucalo,
                                          pandoraNupid,
                                          pandoraNuKHittag,
                                          pandoraNuKHitcalo,
                                          pandoraNuKHitpid,
                                          pandoraNuPMAtag,
+                                         pandoraNuPMAContTag,
                                          pandoraNuPMAcalo,
                                          pandoraNuPMApid,
                                          pandoraNuKHitFlashMatch,
@@ -540,17 +546,17 @@ microboone_reco_mcc7_producers.trackkalmanhitContTag.TrackModuleLabels:         
 microboone_reco_mcc7_producers.trackkalmanhitContTag.ApplyTags:                  [true]
 microboone_reco_mcc7_producers.trackkalmanhitccContTag.TrackModuleLabels:        ["trackkalmanhitcc"]
 microboone_reco_mcc7_producers.trackkalmanhitccContTag.ApplyTags:                [true]
-microboone_reco_mcc7_producers.stitchtrackkalmanhitContTag.TrackModuleLabels:    ["stitchtrackkalmanhit"]
-microboone_reco_mcc7_producers.stitchtrackkalmanhitContTag.ApplyTags:            [true]
-microboone_reco_mcc7_producers.stitchtrackkalmanhitccContTag.TrackModuleLabels:  ["stitchtrackkalmanhitcc"]
-microboone_reco_mcc7_producers.stitchtrackkalmanhitccContTag.ApplyTags:          [true]
-microboone_reco_mcc7_producers.pandoraCosmicConttag.TrackModuleLabels:           ["pandoraCosmic"]
-microboone_reco_mcc7_producers.pandoraCosmicConttag.ApplyTags:                   [true]
-microboone_reco_mcc7_producers.pandoraNuConttag.TrackModuleLabels:               ["pandoraCosmic","trackkalmanhit","pandoraNu"]
-microboone_reco_mcc7_producers.pandoraNuConttag.ApplyTags:                       [false,false,true]
-microboone_reco_mcc7_producers.pandoraNuPMAConttag.TrackModuleLabels:            ["pandoraCosmic","trackkalmanhit","pandoraNuPMA"]
-microboone_reco_mcc7_producers.pandoraNuPMAConttag.ApplyTags:                    [false,false,true]
-microboone_reco_mcc7_producers.pmtrackConttag.TrackModuleLabels:                 ["pmtrack"]
-microboone_reco_mcc7_producers.pmtrackConttag.ApplyTags:                         [true]
+microboone_reco_mcc7_producers.stitchkalmanhitContTag.TrackModuleLabels:         ["stitchkalmanhit"]
+microboone_reco_mcc7_producers.stitchkalmanhitContTag.ApplyTags:                 [true]
+microboone_reco_mcc7_producers.stitchkalmanhitccContTag.TrackModuleLabels:       ["stitchkalmanhitcc"]
+microboone_reco_mcc7_producers.stitchkalmanhitccContTag.ApplyTags:               [true]
+microboone_reco_mcc7_producers.pandoraCosmicContTag.TrackModuleLabels:           ["pandoraCosmic"]
+microboone_reco_mcc7_producers.pandoraCosmicContTag.ApplyTags:                   [true]
+microboone_reco_mcc7_producers.pandoraNuContTag.TrackModuleLabels:               ["pandoraCosmic","trackkalmanhit","pandoraNu"]
+microboone_reco_mcc7_producers.pandoraNuContTag.ApplyTags:                       [false,false,true]
+microboone_reco_mcc7_producers.pandoraNuPMAContTag.TrackModuleLabels:            ["pandoraCosmic","trackkalmanhit","pandoraNuPMA"]
+microboone_reco_mcc7_producers.pandoraNuPMAContTag.ApplyTags:                    [false,false,true]
+microboone_reco_mcc7_producers.pmtrackContTag.TrackModuleLabels:                 ["pmtrack"]
+microboone_reco_mcc7_producers.pmtrackContTag.ApplyTags:                         [true]
 
 END_PROLOG
