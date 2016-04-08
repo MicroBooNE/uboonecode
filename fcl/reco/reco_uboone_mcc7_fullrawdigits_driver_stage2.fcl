@@ -1,6 +1,6 @@
 #include "reco_uboone_mcc7_fullrawdigits_driver_common.fcl"
 
-process_name: McRecoStage2
+process_name: McRecoAprStage2
 
 services.DetectorClocksService.InheritClockConfig:  false
 
