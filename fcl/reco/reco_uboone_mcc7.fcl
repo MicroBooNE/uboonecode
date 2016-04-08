@@ -48,17 +48,17 @@ microboone_reco_mcc7_services_fullrawdigits:
 
 ### track containment base stuff ... putting this here, cause why not? ###
 microboone_containment_tag:{ module_type: TrackContainmentTagger
-     			     TrackModuleLabels: []
-			     #ApplyTags: []  #you can use this option to decide to apply tags or not. By default, yes.
-			     TrackContainmentAlg:{
-	         	       ZBuffer:10
-		 	       YBuffer:20
-		 	       XBuffer:10
-		 	       Isolation:2.5
-		 	       Debug: false
-		 	       FillOutputTree: true
-	       		     }
-	     		   }
+     			             TrackModuleLabels: []
+			                 #ApplyTags: []  #you can use this option to decide to apply tags or not. By default, yes.
+			                 TrackContainmentAlg:{
+	         	                                  ZBuffer:10
+		 	                                      YBuffer:20
+                                                  XBuffer:10
+		 	                                      Isolation:2.5
+                                                  Debug: false
+		 	                                      FillOutputTree: true
+	       		                                 }
+	     		            }
 
 
 ### This is the complete list of all producers! ###

@@ -42,6 +42,20 @@ microboone_reco_data_services.DetectorClocksService.TriggerOffsetTPC:           
 
 microboone_reco_data_services.SignalShapingServiceMicroBooNE.StretchFullResponse: false
 
+### track containment base stuff ... putting this here, cause why not? ###
+microboone_containment_tag:{ module_type: TrackContainmentTagger
+                             TrackModuleLabels: []
+                             #ApplyTags: []  #you can use this option to decide to apply tags or not. By default, yes.
+                             TrackContainmentAlg:{
+                                                    ZBuffer:10
+                                                    YBuffer:20
+                                                    XBuffer:10
+                                                    Isolation:2.5
+                                                    Debug: false
+                                                    FillOutputTree: true
+                                                  }
+                            }
+
 microboone_reco_data_producers:
 {
 
