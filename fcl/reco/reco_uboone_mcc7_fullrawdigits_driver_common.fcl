@@ -18,7 +18,7 @@ services:
   @table::microboone_reco_mcc7_services_fullrawdigits
 }
 
-process_name: McRecoCommon
+process_name: McRecoAprCommon
 
 services.DatabaseUtil.ShouldConnect: false
 
