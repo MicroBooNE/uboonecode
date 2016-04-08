@@ -32,11 +32,12 @@ microboone_reco_mcc7_services:
                               @table::microboone_services_reco
 
 }
-microboone_reco_mcc7_services.DetectorPropertiesService.NumberTimeSamples: 6400
-microboone_reco_mcc7_services.DetectorPropertiesService.ReadOutWindowSize: 6400
-microboone_reco_mcc7_services.DetectorClocksService.InheritClockConfig:       false
-microboone_reco_mcc7_services.DetectorClocksService.TriggerOffsetTPC:         -0.400e3
+microboone_reco_mcc7_services.DetectorPropertiesService.NumberTimeSamples:        6400
+microboone_reco_mcc7_services.DetectorPropertiesService.ReadOutWindowSize:        6400
+microboone_reco_mcc7_services.DetectorClocksService.InheritClockConfig:           false
+microboone_reco_mcc7_services.DetectorClocksService.TriggerOffsetTPC:             -0.400e3
 
+microboone_reco_data_services.SignalShapingServiceMicroBooNE.StretchFullResponse: false
 
 
 microboone_reco_mcc7_services_fullrawdigits:
@@ -137,6 +138,7 @@ microboone_reco_mcc7_producers:
   pandoraCosmicKHitcalo:       @local::microboone_calomc
   pandoraCosmicKHitpid:        @local::microboone_chi2pid
   pandoraCosmicKHitFlashMatch: @local::microboone_beamflashtrackmatchtagger
+  pandoraTrackPFPartMatch:     @local::microboone_trackpfparticlematch
   pandoraCosmicKHitRemoval:    @local::microboone_crhitremoval
   pandoraCosmictag:            @local::microboone_cosmictracktagger
   pandoraCosmiccalo:           @local::microboone_calomc
@@ -270,6 +272,7 @@ microboone_reco_mcc7_pandoraCosmic: [    pandoraCosmic,
                                          pandoraCosmicKHitpid,
                                          pandoraCosmicKHitPFPart,
                                          pandoraCosmicKHitFlashMatch,
+                                         pandoraTrackPFPartMatch,
                                          pandoraCosmicKHitRemoval,
                                          pandoraCosmictag,
                                          pandoraCosmicContTag,

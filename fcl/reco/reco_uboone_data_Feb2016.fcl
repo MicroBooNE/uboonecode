@@ -35,10 +35,12 @@ microboone_reco_data_services_fullrawdigits:
 }
 
 ### This is the complete list of all producers! ###
-microboone_reco_data_services.DetectorPropertiesService.NumberTimeSamples: 6400
-microboone_reco_data_services.DetectorPropertiesService.ReadOutWindowSize: 6400
-microboone_reco_data_services.DetectorClocksService.InheritClockConfig:    false
-microboone_reco_data_services.DetectorClocksService.TriggerOffsetTPC:      -0.400e3
+microboone_reco_data_services.DetectorPropertiesService.NumberTimeSamples:        6400
+microboone_reco_data_services.DetectorPropertiesService.ReadOutWindowSize:        6400
+microboone_reco_data_services.DetectorClocksService.InheritClockConfig:           false
+microboone_reco_data_services.DetectorClocksService.TriggerOffsetTPC:             -0.400e3
+
+microboone_reco_data_services.SignalShapingServiceMicroBooNE.StretchFullResponse: false
 
 microboone_reco_data_producers:
 {
@@ -146,7 +148,17 @@ microboone_reco_data_producers:
   trackkalmanhittagcc:         @local::microboone_cosmictracktagger
   stitchkalmanhittagcc:        @local::microboone_cosmictracktagger
 
-  ### PMA 
+  ### Containment taggers
+  pandoraCosmicContTag:        @local::microboone_containment_tag
+  pandoraNuContTag:            @local::microboone_containment_tag
+  pandoraNuPMAContTag:         @local::microboone_containment_tag
+  trackkalmanhitContTag:       @local::microboone_containment_tag
+  stitchkalmanhitContTag:      @local::microboone_containment_tag
+  trackkalmanhitccContTag:     @local::microboone_containment_tag
+  stitchkalmanhitccContTag:    @local::microboone_containment_tag
+  pmtrackContTag:              @local::microboone_containment_tag
+
+  ### PMA
   pmtrack:                     @local::standard_pmalgtrackmaker
   pmtracktag:                  @local::microboone_cosmictracktagger
   pmtrackcalo:                 @local::microboone_calodata
@@ -190,6 +202,8 @@ microboone_reco_data_fuzzytracks: [      trackkalmanhit,
                                          stitchkalmanhitpid,
                                          trackkalmanhittag,
                                          stitchkalmanhittag,
+                                         trackkalmanhitContTag,
+                                         stitchkalmanhitContTag,
                                          showerrecofuzzy ]
 
 microboone_reco_data_fuzzypath: [        @sequence::microboone_reco_data_fuzzycluster,
@@ -207,6 +221,7 @@ microboone_reco_data_cctracks: [         #trackkalmanhitcc,
                                          #stitchkalmanhittagcc 
                                          pmtrack,
                                          pmtracktag,
+                                         pmtrackContTag,
                                          pmtrackcalo,
                                          pmtrackpid]
 
@@ -220,6 +235,7 @@ microboone_reco_data_pandoraCosmic: [    pandoraCosmic,
                                          pandoraCosmicKHitcalo,
                                          pandoraCosmicKHitpid,
                                          pandoraCosmictag,
+                                         pandoraCosmicContTag,
                                          pandoraCosmiccalo,
                                          pandoraCosmicpid,
                                          pandoraCosmicKHitPFPart,
@@ -231,12 +247,14 @@ microboone_reco_data_pandoraNu: [        pandoraNu,
                                          pandoraNuKHit,
                                          pandoraNuPMA,
                                          pandoraNutag,
+                                         pandoraNuContTag,
                                          pandoraNucalo,
                                          pandoraNupid,
                                          pandoraNuKHittag,
                                          pandoraNuKHitcalo,
                                          pandoraNuKHitpid,
                                          pandoraNuPMAtag,
+                                         pandoraNuPMAContTag,
                                          pandoraNuPMAcalo,
                                          pandoraNuPMApid,
                                          pandoraNuKHitFlashMatch,
@@ -484,6 +502,23 @@ microboone_reco_data_producers.pmtrackcalo.TrackModuleLabel:                    
 microboone_reco_data_producers.pmtrackcalo.SpacePointModuleLabel:                "pmtrack"
 microboone_reco_data_producers.pmtrackpid.CalorimetryModuleLabel:                "pmtrackcalo"
 microboone_reco_data_producers.pmtrackpid.TrackModuleLabel:                      "pmtrack"
+
+microboone_reco_data_producers.trackkalmanhitContTag.TrackModuleLabels:          ["trackkalmanhit"]
+microboone_reco_data_producers.trackkalmanhitContTag.ApplyTags:                  [true]
+microboone_reco_data_producers.trackkalmanhitccContTag.TrackModuleLabels:        ["trackkalmanhitcc"]
+microboone_reco_data_producers.trackkalmanhitccContTag.ApplyTags:                [true]
+microboone_reco_data_producers.stitchkalmanhitContTag.TrackModuleLabels:         ["stitchkalmanhit"]
+microboone_reco_data_producers.stitchkalmanhitContTag.ApplyTags:                 [true]
+microboone_reco_data_producers.stitchkalmanhitccContTag.TrackModuleLabels:       ["stitchkalmanhitcc"]
+microboone_reco_data_producers.stitchkalmanhitccContTag.ApplyTags:               [true]
+microboone_reco_data_producers.pandoraCosmicContTag.TrackModuleLabels:           ["pandoraCosmic"]
+microboone_reco_data_producers.pandoraCosmicContTag.ApplyTags:                   [true]
+microboone_reco_data_producers.pandoraNuContTag.TrackModuleLabels:               ["pandoraCosmic","trackkalmanhit","pandoraNu"]
+microboone_reco_data_producers.pandoraNuContTag.ApplyTags:                       [false,false,true]
+microboone_reco_data_producers.pandoraNuPMAContTag.TrackModuleLabels:            ["pandoraCosmic","trackkalmanhit","pandoraNuPMA"]
+microboone_reco_data_producers.pandoraNuPMAContTag.ApplyTags:                    [false,false,true]
+microboone_reco_data_producers.pmtrackContTag.TrackModuleLabels:                 ["pmtrack"]
+microboone_reco_data_producers.pmtrackContTag.ApplyTags:                         [true]
 
 
 END_PROLOG
