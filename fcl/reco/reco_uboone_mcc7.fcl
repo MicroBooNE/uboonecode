@@ -39,7 +39,6 @@ microboone_reco_mcc7_services.DetectorClocksService.TriggerOffsetTPC:           
 
 microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.StretchFullResponse: true
 
-
 microboone_reco_mcc7_services_fullrawdigits:
 {
   PhotonVisibilityService:    @local::microboone_photonvisibilityservice
@@ -346,7 +345,7 @@ microboone_reco_mcc7_producers.caldata.DigitModuleLabel:                        
 microboone_reco_mcc7_producers.caldata.DodQdxCalib:                              false
 
 microboone_reco_mcc7_producers.gaushit.CalDataModuleLabel:                       "caldata"
-microboone_reco_mcc7_producers.gaushit.MinSig:                                   [5.0, 5.0, 5.0]
+microboone_reco_mcc7_producers.gaushit.MinSig:                                   [4.0, 4.0, 4.0]
 microboone_reco_mcc7_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
 
 microboone_reco_mcc7_producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
