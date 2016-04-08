@@ -34,6 +34,19 @@ microboone_reco_data_services_fullrawdigits:
                               @table::microboone_services_reco
 }
 
+microboone_containment_tag:{ module_type: TrackContainmentTagger
+                             TrackModuleLabels: []
+                             TrackContainmentAlg:{
+                               ZBuffer:10
+                               YBuffer:20
+                               XBuffer:10
+                               Isolation:2.5
+                               Debug: false
+                               FillOutputTree: true
+                             }
+                           }
+
+
 ### This is the complete list of all producers! ###
 microboone_reco_data_services.DetectorPropertiesService.NumberTimeSamples:        6400
 microboone_reco_data_services.DetectorPropertiesService.ReadOutWindowSize:        6400
