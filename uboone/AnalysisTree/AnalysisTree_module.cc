@@ -712,8 +712,16 @@ namespace microboone {
     /// information from the subrun
     struct SubRunData_t {
       SubRunData_t() { Clear(); }
-      void Clear() { pot = -99999.; }
+      void Clear() { 
+        pot = -99999.; 
+        potbnbETOR860 = -99999.;
+        potbnbETOR875 = -99999.;
+        potnumiETORTGT = -99999.;
+      }
       Double_t pot; //protons on target
+      Double_t potbnbETOR860;
+      Double_t potbnbETOR875;
+      Double_t potnumiETORTGT;
     }; // struct SubRunData_t
 
     //    RunData_t    RunData; ///< run data collected at begin of run
@@ -3390,6 +3398,9 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
     art::ServiceHandle<art::TFileService> tfs;
     fPOT = tfs->make<TTree>("pottree","pot tree");
     fPOT->Branch("pot",&SubRunData.pot,"pot/D");
+    fPOT->Branch("potbnbETOR860",&SubRunData.potbnbETOR860,"potbnbETOR860/D");
+    fPOT->Branch("potbnbETOR875",&SubRunData.potbnbETOR875,"potbnbETOR875/D");
+    fPOT->Branch("potnumiETORTGT",&SubRunData.potnumiETORTGT,"potnumiETORTGT/D");
   }
   CreateData(bClearData);
   SetAddresses();
@@ -3399,13 +3410,13 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
 void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
 {
 
-  art::Handle< sumdata::POTSummary > potListHandle;
-  //sr.getByLabel(fPOTModuleLabel,potListHandle);
-
-  if(sr.getByLabel(fPOTModuleLabel,potListHandle))
-    SubRunData.pot=potListHandle->totpot;
-  else
-    SubRunData.pot=0.;
+//  art::Handle< sumdata::POTSummary > potListHandle;
+//  //sr.getByLabel(fPOTModuleLabel,potListHandle);
+//
+//  if(sr.getByLabel(fPOTModuleLabel,potListHandle))
+//    SubRunData.pot=potListHandle->totpot;
+//  else
+//    SubRunData.pot=0.;
 
 }
 
@@ -3413,12 +3424,32 @@ void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
 {
 
   art::Handle< sumdata::POTSummary > potListHandle;
-  //sr.getByLabel(fPOTModuleLabel,potListHandle);
-
   if(sr.getByLabel(fPOTModuleLabel,potListHandle))
     SubRunData.pot=potListHandle->totpot;
   else
     SubRunData.pot=0.;
+  
+  art::Handle<sumdata::POTSummary> potSummaryHandlebnbETOR860;
+  if (sr.getByLabel("beamdata","bnbETOR860",potSummaryHandlebnbETOR860)){
+    SubRunData.potbnbETOR860 = potSummaryHandlebnbETOR860->totpot;
+  }
+  else
+    SubRunData.potbnbETOR860 = 0;
+
+  art::Handle<sumdata::POTSummary> potSummaryHandlebnbETOR875;
+  if (sr.getByLabel("beamdata","bnbETOR875",potSummaryHandlebnbETOR875)){
+    SubRunData.potbnbETOR875 = potSummaryHandlebnbETOR875->totpot;
+  }
+  else
+    SubRunData.potbnbETOR875 = 0;
+
+  art::Handle<sumdata::POTSummary> potSummaryHandlenumiETORTGT;
+  if (sr.getByLabel("beamdata","numiETORTGT",potSummaryHandlenumiETORTGT)){
+    SubRunData.potnumiETORTGT = potSummaryHandlenumiETORTGT->totpot;
+  }
+  else
+    SubRunData.potnumiETORTGT = 0;
+
   if (fPOT) fPOT->Fill();
 
 }
