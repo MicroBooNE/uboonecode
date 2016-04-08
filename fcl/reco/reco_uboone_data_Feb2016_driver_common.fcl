@@ -5,7 +5,7 @@
 #include "time_memory_tracker_microboone.fcl"
 #include "reco_uboone_data_Feb2016.fcl"
 
-process_name: DataFeb2016RecoCommon
+process_name: DataApr2016RecoCommon
 
 services:
 {
@@ -24,10 +24,10 @@ services.DatabaseUtil.ShouldConnect: false
 
 # Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
 #THIS IS DONE IN reco_uboone_data_Feb2016.fcl
-#services.DetectorPropertiesService.NumberTimeSamples:                                   6400
-#services.DetectorPropertiesService.ReadOutWindowSize:                                   6400
-#services.DetectorClocksService.InheritClockConfig:                                         false
-#services.DetectorClocksService.TriggerOffsetTPC:                                           -0.475e3
+#services.DetectorPropertiesService.NumberTimeSamples:  6400
+#services.DetectorPropertiesService.ReadOutWindowSize:  6400
+#services.DetectorClocksService.InheritClockConfig:     false
+#services.DetectorClocksService.TriggerOffsetTPC:       -0.475e3
 
 #include "uboone_data_runSettings.fcl"
 

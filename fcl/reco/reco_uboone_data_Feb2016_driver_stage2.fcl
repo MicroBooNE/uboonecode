@@ -1,6 +1,6 @@
 #include "reco_uboone_data_Feb2016_driver_common.fcl"
 
-process_name: DataFeb2016RecoStage2
+process_name: DataApr2016RecoStage2
 
 services.TFileService.fileName: "reco_stage_2_hist.root"
 physics.reco: [ @sequence::microboone_reco_data_stage2 ]
