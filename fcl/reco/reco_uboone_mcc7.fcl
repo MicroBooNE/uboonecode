@@ -46,6 +46,21 @@ microboone_reco_mcc7_services_fullrawdigits:
                               @table::microboone_services_reco
 }
 
+### track containment base stuff ... putting this here, cause why not? ###
+microboone_containment_tag:{ module_type: TrackContainmentTagger
+     			     TrackModuleLabels: []
+			     #ApplyTags: []  #you can use this option to decide to apply tags or not. By default, yes.
+			     TrackContainmentAlg:{
+	         	       ZBuffer:10
+		 	       YBuffer:20
+		 	       XBuffer:10
+		 	       Isolation:2.5
+		 	       Debug: false
+		 	       FillOutputTree: true
+	       		     }
+	     		   }
+
+
 ### This is the complete list of all producers! ###
 
 microboone_reco_mcc7_producers:
@@ -173,6 +188,15 @@ microboone_reco_mcc7_producers:
   pmtrackcalo:                 @local::microboone_calomc
   pmtrackpid:                  @local::microboone_chi2pid
 
+  ### Containment taggers
+  pandoraCosmicContTag:        @local::microboone_containment_tag
+  pandoraNuContTag:            @local::microboone_containment_tag
+  pandoraNuPMAContTag:         @local::microboone_containment_tag
+  trackkalmanhitContTag:       @local::microboone_containment_tag
+  stitchkalmanhitContTag:      @local::microboone_containment_tag
+  trackkalmanhitccContTag:     @local::microboone_containment_tag
+  stitchkalmanhitccContTag:    @local::microboone_containment_tag
+  pmatrackConttag:             @local::microboone_containment_tag
 
 }
 
@@ -511,5 +535,22 @@ microboone_reco_mcc7_producers.pmtrackcalo.TrackModuleLabel:                    
 microboone_reco_mcc7_producers.pmtrackcalo.SpacePointModuleLabel:                   "pmtrack"
 microboone_reco_mcc7_producers.pmtrackpid.CalorimetryModuleLabel:                   "pmtrackcalo"
 microboone_reco_mcc7_producers.pmtrackpid.TrackModuleLabel:                         "pmtrack"
+
+microboone_reco_mcc7_producers.trackkalmanhitContTag.TrackModuleLabels:          ["trackkalmanhit"]
+microboone_reco_mcc7_producers.trackkalmanhitContTag.ApplyTags:                  [true]
+microboone_reco_mcc7_producers.trackkalmanhitccContTag.TrackModuleLabels:        ["trackkalmanhitcc"]
+microboone_reco_mcc7_producers.trackkalmanhitccContTag.ApplyTags:                [true]
+microboone_reco_mcc7_producers.stitchtrackkalmanhitContTag.TrackModuleLabels:    ["stitchtrackkalmanhit"]
+microboone_reco_mcc7_producers.stitchtrackkalmanhitContTag.ApplyTags:            [true]
+microboone_reco_mcc7_producers.stitchtrackkalmanhitccContTag.TrackModuleLabels:  ["stitchtrackkalmanhitcc"]
+microboone_reco_mcc7_producers.stitchtrackkalmanhitccContTag.ApplyTags:          [true]
+microboone_reco_mcc7_producers.pandoraCosmicConttag.TrackModuleLabels:           ["pandoraCosmic"]
+microboone_reco_mcc7_producers.pandoraCosmicConttag.ApplyTags:                   [true]
+microboone_reco_mcc7_producers.pandoraNuConttag.TrackModuleLabels:               ["pandoraCosmic","trackkalmanhit","pandoraNu"]
+microboone_reco_mcc7_producers.pandoraNuConttag.ApplyTags:                       [false,false,true]
+microboone_reco_mcc7_producers.pandoraNuPMAConttag.TrackModuleLabels:            ["pandoraCosmic","trackkalmanhit","pandoraNuPMA"]
+microboone_reco_mcc7_producers.pandoraNuPMAConttag.ApplyTags:                    [false,false,true]
+microboone_reco_mcc7_producers.pmtrackConttag.TrackModuleLabels:                 ["pmtrack"]
+microboone_reco_mcc7_producers.pmtrackConttag.ApplyTags:                         [true]
 
 END_PROLOG
