@@ -4154,7 +4154,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     
       //call the track momentum algorithm that gives you momentum based on track range
       trkf::TrackMomentumCalculator trkm;
-      trkm.SetMinLength(10); //change the minimal track length requirement to 10 cm
+      trkm.SetMinLength(50); //change the minimal track length requirement to 50 cm
 
       for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
       
