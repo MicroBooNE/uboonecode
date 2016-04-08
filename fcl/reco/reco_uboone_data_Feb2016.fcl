@@ -537,5 +537,13 @@ microboone_reco_data_producers.pandoraNuPMAContTag.ApplyTags:                   
 microboone_reco_data_producers.pmtrackContTag.TrackModuleLabels:                 ["pmtrack"]
 microboone_reco_data_producers.pmtrackContTag.ApplyTags:                         [true]
 
+microboone_reco_data_producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:      [4.746e-3, 3.091e-3, 4.688e-3]
+microboone_reco_data_producers.stitchkalmanhitcalo.CaloAlg.CalAreaConstants:     [4.746e-3, 3.091e-3, 4.688e-3]
+microboone_reco_data_producers.pandoraCosmiccalo.CaloAlg.CalAreaConstants:       [4.746e-3, 3.091e-3, 4.688e-3]
+microboone_reco_data_producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:   [4.746e-3, 3.091e-3, 4.688e-3]
+microboone_reco_data_producers.pandoraNucalo.CaloAlg.CalAreaConstants:           [4.746e-3, 3.091e-3, 4.688e-3]
+microboone_reco_data_producers.pandoraNuKHitcalo.CaloAlg.CalAreaConstants:       [4.746e-3, 3.091e-3, 4.688e-3]
+microboone_reco_data_producers.pandoraNuPMAcalo.CaloAlg.CalAreaConstants:        [4.746e-3, 3.091e-3, 4.688e-3]
+microboone_reco_data_producers.pmtrackcalo.CaloAlg.CalAreaConstants:             [4.746e-3, 3.091e-3, 4.688e-3]
 
 END_PROLOG
