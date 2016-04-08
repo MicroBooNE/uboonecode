@@ -1,0 +1,15 @@
+#include "standard_ana_uboone.fcl"
+
+process_name: Ana
+
+services.FileCatalogMetadata:  @local::art_file_catalog_data
+
+physics.ana: [analysistree]
+
+physics.analyzers.analysistree.SaveCryInfo:     false
+physics.analyzers.analysistree.SaveGenieInfo:   false
+physics.analyzers.analysistree.SaveGeantInfo:   false
+physics.analyzers.analysistree.SaveMCShowerInfo:false 
+physics.analyzers.analysistree.SaveMCTrackInfo: false 
+physics.analyzers.analysistree.SaveShowerInfo:  false 
+physics.analyzers.analysistree.SaveCaloCosmics: true
