@@ -333,6 +333,7 @@ microboone_reco_data_producers.trackkalmanhittag.TrackModuleLabel:              
 
 microboone_reco_data_producers.stitchkalmanhittag.ClusterModuleLabel:            "fuzzycluster"
 microboone_reco_data_producers.stitchkalmanhittag.TrackModuleLabel:              "stitchkalmanhit"
+microboone_reco_data_producers.stitchkalmanhittag.EndTickPadding:                75
 
 # ClusterCrawler / Track Maker related
 microboone_reco_data_producers.linecluster.HitFinderModuleLabel: "pandoraCosmicKHitRemoval"
@@ -433,15 +434,17 @@ microboone_reco_data_producers.pandoraCosmicpid.TrackModuleLabel:               
 
 microboone_reco_data_producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:    "pandoraCosmic"
 microboone_reco_data_producers.pandoraCosmicKHitPFPart.TrackModuleLabel:         "pandoraCosmicKHit"
+microboone_reco_data_producers.pandoraCosmicKHitPFPart.EndTickPadding:           75
 
 microboone_reco_data_producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosmicKHit"
 microboone_reco_data_producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "opflash"
 microboone_reco_data_producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
 microboone_reco_data_producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
-microboone_reco_data_producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKHitPFPart", "pandoraTrackPFPartMatch"]
+microboone_reco_data_producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKHitPFPart", "trackkalmanhittag"]
 microboone_reco_data_producers.pandoraCosmicKHitRemoval.TrackProducerLabels:     ["pandoraCosmicKHit", "trackkalmanhit"]
 microboone_reco_data_producers.pandoraCosmicKHitRemoval.AssnProducerLabels:      ["pandoraCosmicKHit","pandoraTrackPFPartMatch"]
+microboone_reco_data_producers.pandoraCosmicKHitRemoval.EndTickPadding:          75
 
 microboone_reco_data_producers.pandoraNu.GeantModuleLabel:                       "largeant"
 microboone_reco_data_producers.pandoraNu.HitFinderModuleLabel:                   "pandoraCosmicKHitRemoval"
