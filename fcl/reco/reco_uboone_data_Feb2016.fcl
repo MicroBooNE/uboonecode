@@ -281,7 +281,7 @@ physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.
 microboone_reco_data_producers.digitfilter.TruncateTicks:                        true
 
 microboone_reco_data_producers.caldata.DigitModuleLabel:                         "digitfilter"
-
+microboone_reco_data_producers.caldata.DodQdxCalib:                              true
 microboone_reco_data_producers.gaushit.CalDataModuleLabel:                       "caldata"
 microboone_reco_data_producers.gaushit.MinSig:                                   [8.0, 8.0, 8.0]
 microboone_reco_data_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
