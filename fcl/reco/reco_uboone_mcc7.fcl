@@ -340,6 +340,7 @@ physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.
 
 
 microboone_reco_mcc7_producers.caldata.DigitModuleLabel:                         "digitfilter"
+microboone_reco_mcc7_producers.caldata.DodQdxCalib:                              false
 
 microboone_reco_mcc7_producers.gaushit.CalDataModuleLabel:                       "caldata"
 microboone_reco_mcc7_producers.gaushit.MinSig:                                   [5.0, 5.0, 5.0]
