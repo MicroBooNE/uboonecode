@@ -316,9 +316,11 @@ microboone_reco_data_producers.digitfilter.TruncateTicks:                       
 
 microboone_reco_data_producers.caldata.DigitModuleLabel:                         "digitfilter"
 microboone_reco_data_producers.caldata.DodQdxCalib:                              true
+
 microboone_reco_data_producers.gaushit.CalDataModuleLabel:                       "caldata"
 microboone_reco_data_producers.gaushit.MinSig:                                   [4.0, 4.0, 5.0]
 microboone_reco_data_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
+#microboone_reco_data_producers.gaushit.FilterHits:                               true
 
 # Fuzzy Cluster related
 microboone_reco_data_producers.fuzzycluster.HitsModuleLabel:                     "gaushit"
