@@ -16,6 +16,7 @@
 #include "art/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "larcore/Geometry/Geometry.h"
 
 // data-products
 #include "lardata/RecoBase/OpHit.h"
@@ -107,10 +108,11 @@ void SimpleFlashFinder::produce(art::Event & e)
   // how many 100 ns wide bins do we need?
   int n_bins = int(beam_gate/_bin_width)+1;
   
+  auto const& geometry(*lar::providerFrom< geo::Geometry >());
   
   // collect the total optical charge collected in the hits
   // in the various 100 ns-wide time slices
-  std::vector< std::vector<double> > OpCharge(n_bins, std::vector<double>(32,0.) );
+  std::vector< std::vector<double> > OpCharge(n_bins, std::vector<double>(geometry.MaxOpChannel(),0.) );
   // find the peak-time for each 100-ns bin
   // this is the time at which the hit with the most PEs are found
   // vector of < time, PE of hit >

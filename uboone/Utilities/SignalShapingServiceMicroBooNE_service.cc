@@ -1177,11 +1177,11 @@ double util::SignalShapingServiceMicroBooNE::GetRawNoise(unsigned int const chan
   double shapingtime = fShapeTimeConst[config].at(plane);
   double gain = fASICGainInMVPerFC[config].at(plane);
   int temp;
-  if (shapingtime == 0.5){
+  if (std::abs(shapingtime - 0.5)<1e-6){
     temp = 0;
-  }else if (shapingtime == 1.0){
+  }else if (std::abs(shapingtime - 1.0)<1e-6){
     temp = 1;
-  }else if (shapingtime == 2.0){
+  }else if (std::abs(shapingtime - 2.0)<1e-6){
     temp = 2;
   }else{
     temp = 3;
@@ -1218,11 +1218,11 @@ double util::SignalShapingServiceMicroBooNE::GetDeconNoise(unsigned int const ch
 
   double shapingtime = fShapeTimeConst[config].at(plane);
   int temp;
-  if (shapingtime == 0.5){
+  if (std::abs(shapingtime - 0.5)<1e-6){
     temp = 0;
-  }else if (shapingtime == 1.0){
+  }else if (std::abs(shapingtime - 1.0)<1e-6){
     temp = 1;
-  }else if (shapingtime == 2.0){
+  }else if (std::abs(shapingtime - 2.0)<1e-6){
     temp = 2;
   }else{
     temp = 3;
