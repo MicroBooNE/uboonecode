@@ -117,6 +117,7 @@ physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
 physics.analyzers.analysistree.POTModuleLabel:          "generator"
 physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid"]
 
+physics.analyzers.analysistree.ContainmentTaggerAssocLabel: ["isotag"]
 physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["cosmictaggerKHit"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit"]
 

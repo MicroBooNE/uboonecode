@@ -454,6 +454,9 @@ namespace microboone {
       TrackData_t<Short_t> trkncosmictags_tagger;
       TrackData_t<Float_t> trkcosmicscore_tagger;
       TrackData_t<Short_t> trkcosmictype_tagger;
+      TrackData_t<Short_t> trkncosmictags_containmenttagger;
+      TrackData_t<Float_t> trkcosmicscore_containmenttagger;
+      TrackData_t<Short_t> trkcosmictype_containmenttagger;
       TrackData_t<Short_t> trkncosmictags_flashmatch;
       TrackData_t<Float_t> trkcosmicscore_flashmatch;
       TrackData_t<Short_t> trkcosmictype_flashmatch;
@@ -709,8 +712,16 @@ namespace microboone {
     /// information from the subrun
     struct SubRunData_t {
       SubRunData_t() { Clear(); }
-      void Clear() { pot = -99999.; }
+      void Clear() { 
+        pot = -99999.; 
+        potbnbETOR860 = -99999.;
+        potbnbETOR875 = -99999.;
+        potnumiETORTGT = -99999.;
+      }
       Double_t pot; //protons on target
+      Double_t potbnbETOR860;
+      Double_t potbnbETOR875;
+      Double_t potnumiETORTGT;
     }; // struct SubRunData_t
 
     //    RunData_t    RunData; ///< run data collected at begin of run
@@ -1429,6 +1440,7 @@ namespace microboone {
     bool fSavePFParticleInfo; ///whether to extract and save PFParticle information
 
     std::vector<std::string> fCosmicTaggerAssocLabel;
+    std::vector<std::string> fContainmentTaggerAssocLabel;
     std::vector<std::string> fFlashMatchAssocLabel;
 
     bool bIgnoreMissingShowers; ///< whether to ignore missing shower information
@@ -1611,6 +1623,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkncosmictags_tagger.resize(MaxTracks);
   trkcosmicscore_tagger.resize(MaxTracks);
   trkcosmictype_tagger.resize(MaxTracks);
+  trkncosmictags_containmenttagger.resize(MaxTracks);
+  trkcosmicscore_containmenttagger.resize(MaxTracks);
+  trkcosmictype_containmenttagger.resize(MaxTracks);
   trkncosmictags_flashmatch.resize(MaxTracks);
   trkcosmicscore_flashmatch.resize(MaxTracks);
   trkcosmictype_flashmatch.resize(MaxTracks);
@@ -1683,6 +1698,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkncosmictags_tagger, -9999  );
   FillWith(trkcosmicscore_tagger, -99999.);
   FillWith(trkcosmictype_tagger, -9999  );
+  FillWith(trkncosmictags_containmenttagger, -9999  );
+  FillWith(trkcosmicscore_containmenttagger, -99999.);
+  FillWith(trkcosmictype_containmenttagger, -9999  );
   FillWith(trkncosmictags_flashmatch, -9999  );
   FillWith(trkcosmicscore_flashmatch, -99999.);
   FillWith(trkcosmictype_flashmatch, -9999  );
@@ -1783,6 +1801,15 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkcosmictype_tagger_" + TrackLabel;
   CreateBranch(BranchName, trkcosmictype_tagger, BranchName + NTracksIndexStr + "/S");
+
+  BranchName = "trkncosmictags_containmenttagger_" + TrackLabel;
+  CreateBranch(BranchName, trkncosmictags_containmenttagger, BranchName + NTracksIndexStr + "/S");
+
+  BranchName = "trkcosmicscore_containmenttagger_" + TrackLabel;
+  CreateBranch(BranchName, trkcosmicscore_containmenttagger, BranchName + NTracksIndexStr + "/F");
+
+  BranchName = "trkcosmictype_containmenttagger_" + TrackLabel;
+  CreateBranch(BranchName, trkcosmictype_containmenttagger, BranchName + NTracksIndexStr + "/S");
 
   BranchName = "trkncosmictags_flashmatch_" + TrackLabel;
   CreateBranch(BranchName, trkncosmictags_flashmatch, BranchName + NTracksIndexStr + "/S");
@@ -3307,6 +3334,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveShowerInfo            (pset.get< bool >("SaveShowerInfo", false)),
   fSavePFParticleInfo	    (pset.get< bool >("SavePFParticleInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
+  fContainmentTaggerAssocLabel  (pset.get<std::vector< std::string > >("ContainmentTaggerAssocLabel") ),
   fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
   bIgnoreMissingShowers     (pset.get< bool >("IgnoreMissingShowers", false)),
   isCosmics(false),
@@ -3370,6 +3398,9 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
     art::ServiceHandle<art::TFileService> tfs;
     fPOT = tfs->make<TTree>("pottree","pot tree");
     fPOT->Branch("pot",&SubRunData.pot,"pot/D");
+    fPOT->Branch("potbnbETOR860",&SubRunData.potbnbETOR860,"potbnbETOR860/D");
+    fPOT->Branch("potbnbETOR875",&SubRunData.potbnbETOR875,"potbnbETOR875/D");
+    fPOT->Branch("potnumiETORTGT",&SubRunData.potnumiETORTGT,"potnumiETORTGT/D");
   }
   CreateData(bClearData);
   SetAddresses();
@@ -3379,13 +3410,13 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
 void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
 {
 
-  art::Handle< sumdata::POTSummary > potListHandle;
-  //sr.getByLabel(fPOTModuleLabel,potListHandle);
-
-  if(sr.getByLabel(fPOTModuleLabel,potListHandle))
-    SubRunData.pot=potListHandle->totpot;
-  else
-    SubRunData.pot=0.;
+//  art::Handle< sumdata::POTSummary > potListHandle;
+//  //sr.getByLabel(fPOTModuleLabel,potListHandle);
+//
+//  if(sr.getByLabel(fPOTModuleLabel,potListHandle))
+//    SubRunData.pot=potListHandle->totpot;
+//  else
+//    SubRunData.pot=0.;
 
 }
 
@@ -3393,12 +3424,32 @@ void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
 {
 
   art::Handle< sumdata::POTSummary > potListHandle;
-  //sr.getByLabel(fPOTModuleLabel,potListHandle);
-
   if(sr.getByLabel(fPOTModuleLabel,potListHandle))
     SubRunData.pot=potListHandle->totpot;
   else
     SubRunData.pot=0.;
+  
+  art::Handle<sumdata::POTSummary> potSummaryHandlebnbETOR860;
+  if (sr.getByLabel("beamdata","bnbETOR860",potSummaryHandlebnbETOR860)){
+    SubRunData.potbnbETOR860 = potSummaryHandlebnbETOR860->totpot;
+  }
+  else
+    SubRunData.potbnbETOR860 = 0;
+
+  art::Handle<sumdata::POTSummary> potSummaryHandlebnbETOR875;
+  if (sr.getByLabel("beamdata","bnbETOR875",potSummaryHandlebnbETOR875)){
+    SubRunData.potbnbETOR875 = potSummaryHandlebnbETOR875->totpot;
+  }
+  else
+    SubRunData.potbnbETOR875 = 0;
+
+  art::Handle<sumdata::POTSummary> potSummaryHandlenumiETORTGT;
+  if (sr.getByLabel("beamdata","numiETORTGT",potSummaryHandlenumiETORTGT)){
+    SubRunData.potnumiETORTGT = potSummaryHandlenumiETORTGT->totpot;
+  }
+  else
+    SubRunData.potnumiETORTGT = 0;
+
   if (fPOT) fPOT->Fill();
 
 }
@@ -4103,7 +4154,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     
       //call the track momentum algorithm that gives you momentum based on track range
       trkf::TrackMomentumCalculator trkm;
-      trkm.SetMinLength(10); //change the minimal track length requirement to 10 cm
+      trkm.SetMinLength(50); //change the minimal track length requirement to 50 cm
 
       for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
       
@@ -4136,6 +4187,18 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
               std::cerr << "\n Warning : more than one cosmic tag per track in module! assigning the first tag to the track" << fCosmicTaggerAssocLabel[iTracker];
             TrackerData.trkcosmicscore_tagger[iTrk] = fmct.at(iTrk).at(0)->CosmicScore();
             TrackerData.trkcosmictype_tagger[iTrk] = fmct.at(iTrk).at(0)->CosmicType();
+          }
+        }
+
+        //Containment Tagger information
+        art::FindManyP<anab::CosmicTag> fmcnt(trackListHandle[iTracker],evt,fContainmentTaggerAssocLabel[iTracker]);
+        if (fmcnt.isValid()){
+          TrackerData.trkncosmictags_containmenttagger[iTrk]     = fmcnt.at(iTrk).size();
+          if (fmcnt.at(iTrk).size()>0){
+            if(fmcnt.at(iTrk).size()>1)
+              std::cerr << "\n Warning : more than one containment tag per track in module! assigning the first tag to the track" << fContainmentTaggerAssocLabel[iTracker];
+            TrackerData.trkcosmicscore_containmenttagger[iTrk] = fmcnt.at(iTrk).at(0)->CosmicScore();
+            TrackerData.trkcosmictype_containmenttagger[iTrk] = fmcnt.at(iTrk).at(0)->CosmicType();
           }
         }
 

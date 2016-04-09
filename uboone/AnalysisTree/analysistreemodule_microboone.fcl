@@ -23,6 +23,7 @@ microboone_analysistree:
  ShowerModuleLabel:        ["showerrecofuzzy"]
  CosmicClusterTaggerAssocLabel: "ccclustertag"
  CosmicTaggerAssocLabel: ["trackkalmanhit"]
+ ContainmentTaggerAssocLabel: ["isotag"]
  FlashMatchAssocLabel:   ["flashTrackMatchkHit"]
  POTModuleLabel:           "generator"
  UseBuffers:               false
@@ -41,7 +42,7 @@ microboone_analysistree:
  SaveClusterInfo:          true
  SaveFlashInfo:            true
  SaveShowerInfo:           true
- SaveCaloCosmics:          false
+ SaveCaloCosmics:          true
  G4minE:                   0.01
 }
 

@@ -6,6 +6,10 @@
   <class name="MuCS::MuCSRecoData 	  " ClassVersion="11"           >
   <version ClassVersion="11" checksum="2789969266"/>
   </class>
+ <class name="MuCS::MuCSDTOffset"               />
+ <class name="std::vector< MuCS::MuCSDTOffset >"               />
+ <class name="art::Wrapper< MuCS::MuCSDTOffset >"               />
+ <class name="art::Wrapper<std::vector< MuCS::MuCSDTOffset > >"               />
  <class name="std::vector< MuCS::MuCSData>     "               />
  <class name="art::Wrapper< MuCS::MuCSData                   >"/>
  <class name="art::Wrapper< std::vector<MuCS::MuCSData>      >"/>

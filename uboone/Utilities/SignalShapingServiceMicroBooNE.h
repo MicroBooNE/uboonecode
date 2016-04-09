@@ -96,6 +96,8 @@ using DoubleVec  = std::vector<double>;
 using DoubleVec2 = std::vector< DoubleVec >;
 using DoubleVec3 = std::vector< DoubleVec2 >;
 using DoubleVec4 = std::vector< DoubleVec3 >;
+using TH1FVec4   = std::vector<std::vector<std::vector<std::vector<TH1F*> > > >;
+
 
 namespace util {
   class SignalShapingServiceMicroBooNE {
@@ -219,13 +221,15 @@ namespace util {
     // test
 
 
-    int fNFieldBins[2];         		///< number of bins for field response
-    int fFieldLowEdge[2];           ///< low edge of the field response histo (for test output)
+    size_t fNFieldBins[2];         		///< number of bins for field response
+    double fFieldLowEdge[2];           ///< low edge of the field response histo (for test output)
+    double fFieldBin1Center[2];
     double fFieldBinWidth[2];       ///<  Bin with of the input field response.
 
     DoubleVec f3DCorrectionVec;  ///< correction factor to account for 3D path of electrons, 1 for each plane (default = 1.0)
 
     double fTimeScaleFactor;
+    bool   fStretchFullResponse;
     
     DoubleVec fFieldRespAmpVec;
     DoubleVec2 fShapeTimeConst; ///< time constants for exponential shaping
@@ -233,6 +237,8 @@ namespace util {
     std::vector<TF1*> fFilterTF1Vec;     ///< Vector of Parameterized filter functions
     std::vector<std::string> fFilterFuncVec;
     std::vector<std::vector<TComplex> > fFilterVec;
+    DoubleVec2 fFilterParamsVec;
+    DoubleVec fFilterWidthCorrectionFactor;  // a knob
 
     // Induced charge deconvolution additions (M. Mooney)
     std::vector<TF1*> fFilterTF1VecICTime;
@@ -253,7 +259,7 @@ namespace util {
 
     bool fGetFilterFromHisto;   		///< Flag that allows to use a filter function from a histogram instead of the functional dependency
 
-    std::vector<std::vector<std::vector<std::vector<TH1F*> > > > fFieldResponseHistVec;
+    TH1FVec4 fFieldResponseHistVec;
 
     double fDefaultEField;
     double fDefaultTemperature;
@@ -279,6 +285,16 @@ namespace util {
 
     bool fPrintResponses;
     bool fManualInterpolation;
+    
+    // some diagnostic histograms
+    
+    TH1D* fHRawResponse[3];
+    TH1D* fHStretchedResponse[3];
+    TH1D* fHFullResponse[3];
+    TH1D* fHSampledResponse[3];
+    
+    bool fHistDone[3];
+    bool fHistDoneF[3];
   };
 }
 

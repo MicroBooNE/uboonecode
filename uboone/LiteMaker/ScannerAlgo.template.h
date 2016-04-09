@@ -123,17 +123,18 @@ namespace larlite {
       
       // Neutrino Information
       const ::simb::MCNeutrino lar_nu(mct_ptr->GetNeutrino());
-      
-      lite_mct.SetNeutrino( lar_nu.CCNC(),
-			    lar_nu.Mode(),
-			    lar_nu.InteractionType(),
-			    lar_nu.Target(),
-			    lar_nu.HitNuc(),
-			    lar_nu.HitQuark(),
-			    lar_nu.W(),
-			    lar_nu.X(),
-			    lar_nu.Y(),
-			    lar_nu.QSqr() );
+
+      if (lite_mct.GetParticles().size() )      
+        lite_mct.SetNeutrino( lar_nu.CCNC(),
+			      lar_nu.Mode(),
+			      lar_nu.InteractionType(),
+			      lar_nu.Target(),
+			      lar_nu.HitNuc(),
+			      lar_nu.HitQuark(),
+			      lar_nu.W(),
+			      lar_nu.X(),
+			      lar_nu.Y(),
+			      lar_nu.QSqr() );
 
       // Store address map for downstream association
       //fPtrIndex_mctruth[mct_ptr] = std::make_pair(lite_data->size(),name_index);
