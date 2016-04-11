@@ -3,7 +3,7 @@ BEGIN_PROLOG
 microboone_signalshapingservice:
 {
 
-  NConfigs:  2  # if set to 1, you get the same config for all channels
+  NConfigs:  1  # if set to 1, you get the same config for all channels
                 # otherwise, you need to supply the map of channel <-> config... see GetConfig()
 
   ADCPerPCAtLowestASICGain: 9390 #ADC/pC
@@ -51,12 +51,15 @@ CalibResponseTOffset: [0, 0, 0]   # in us time offset to align all three planes
   FieldResponseFVersion:  [ "v0.1", "v0.1" ]
   
   DefaultEField:       0.5
-  DefaultTemperature: 87.0
+  DefaultTemperature:  87.0
 
   TimeScaleParams:   [ 1.0, 0.806 ] # this does the scaling from full- to half-field
                                       # good to ~0.2% over the range of the velocity ratio for 1-0.4 in the field
                                       # and <2% between views (calibrated on the Y view)
                                       #  not used for calibrated responses
+
+  StretchFullResponse:  false         # to maintain the original stretching scheme
+                                      # false means only the field response is stretched, not the electronic response
 
   DeconNorm: 200.
 
@@ -83,11 +86,16 @@ CalibResponseTOffset: [0, 0, 0]   # in us time offset to align all three planes
   # cycles/microsecond.  The conversion to frequency bin depends on FFT size
   # samping rate.
 
-  FilterFuncVec:  [ "(x>0.0)*gaus(0)*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*gaus(0)*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])" ]   
-  FilterParamsVec:   [ [ 1.803396, 1.69, 1.55, 0.19, 3.75 ], [ 1.849030, 1.46, 1.33, 0.23, 4.89 ], [ 1.034516, 0.08, 0.15, 2.17 ] ]
+  FilterFuncVec:  [ "(x>0.0)*gaus(0)*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*gaus(0)*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[4])" ]   
+  FilterParamsVec:   [ [ 1.803396, 1.69, 1.55, 0.19, 3.75 ], [ 1.849030, 1.46, 1.33, 0.23, 4.89 ], [ 1.034516, 0.08, 0.15, 0.0, 2.17 ] ]
+  FilterWidthCorrectionFactor:  [ 1.0, 1.0, 1.0 ]
 
-  FilterFuncVecICTime:  [ "(x>0.0)*(gaus(0)+[5]*(x+0.005)+[6]*pow((x+0.005),[7]))*exp(-0.5*pow((x+0.005)/[3],[4]))", "(x>0.0)*(gaus(0)+[5]*(x+0.005)+[6]*pow((x+0.005),[7]))*exp(-0.5*pow((x+0.005)/[3],[4]))", "(x>0.0)*[0]*exp(-0.5*((((x+0.005)-[1])/[2])^2)^[3])" ]
-  FilterParamsVecICTime:  [ [ 33.8, 3.62, 9.66, 0.220, 4.17, 21.9, -0.401, -0.784 ], [ 99.6, -12.2, 16.1, 0.267, 5.63, -57.8, -15.1, -0.295 ], [ 39.8, 0.0837, 0.161, 1.72 ] ]
+  FilterFuncVecICTime:  [ "(x>0.0)*(gaus(0)+[5]*(x+0.005)+[6]*pow((x+0.005),[7]))*exp(-0.5*pow((x+0.005)/[3],[4]))",
+                          "(x>0.0)*(gaus(0)+[5]*(x+0.005)+[6]*pow((x+0.005),[7]))*exp(-0.5*pow((x+0.005)/[3],[4]))",
+                          "(x>0.0)*[0]*exp(-0.5*((((x+0.005)-[1])/[2])^2)^[4])" ]
+  FilterParamsVecICTime:  [ [ 33.8,  3.62, 9.66, 0.220, 4.17, 21.9, -0.401, -0.784 ],
+                            [ 99.6, -12.2, 16.1, 0.267, 5.63, -57.8, -15.1, -0.295 ], 
+                            [ 39.8, 0.0837, 0.161, 0.4, 1.72 ] ]
   FilterScaleVecICTime:  [ 1.0, 1.0, 1.0 ]
   FilterFuncVecICWire:  [ "(gaus(0)+[5]*x+[6]*pow(x,[7]))*exp(-0.5*pow(x/[3],[4]))", "(gaus(0)+[5]*x+[6]*pow(x,[7]))*exp(-0.5*pow(x/[3],[4]))", "(1.0-gaus(0))*[3]" ]
   FilterParamsVecICWire:  [ [ 104.5, -2.23, 5.75, 0.205, 1.80, 287.3, -0.411, 0.0641 ], [ 196.1, -0.939, 4.14, 0.269, 4.98, -79.2, 2.42, 1.25 ], [ 0.0897, 0.154, -0.0578, 105.6 ] ]
