@@ -28,7 +28,7 @@
 
 <!--  <physvol>
     <volumeref ref="volTPCCross"/>
-    <position name="posTPCCross" unit="cm" x="-128" y="-100" z="0"/>
+    <position name="posTPCCross" unit="cm" x="-128.0" y="-100" z="0"/>
     <rotation ref="rMinus41AboutX" unit="deg" x="-41.58" y="0" z="0"/>
   </physvol>  -->
 

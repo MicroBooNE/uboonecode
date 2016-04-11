@@ -9,7 +9,7 @@
   <box name="VacuumBox"
 	lunit="cm"
 	x="148326"
-    y="51200"
+    y="51200.0"
     z="148326"/>
   <tube name="LArTFVacuumSubtract"
     rmax="787.4"

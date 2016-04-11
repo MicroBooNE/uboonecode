@@ -154,19 +154,19 @@
 
  <union name="Frame1">
     <first ref="Frame0"/> <second ref="VertBar"/>
-    <position name="posVertBarUnion1" unit="cm" x="-6" y="0" z="-301.05"/>
+    <position name="posVertBarUnion1" unit="cm" x="-5.5" y="0" z="-301.05"/>
  </union>
  <union name="Frame2">
     <first ref="Frame1"/> <second ref="VertBar"/>
-    <position name="posVertBarUnion2" unit="cm" x="-6" y="0" z="-100.35"/>
+    <position name="posVertBarUnion2" unit="cm" x="-5.5" y="0" z="-100.35"/>
  </union>
  <union name="Frame3">
     <first ref="Frame2"/> <second ref="VertBar"/>
-    <position name="posVertBarUnion3" unit="cm" x="-6" y="0" z="100.35"/>
+    <position name="posVertBarUnion3" unit="cm" x="-5.5" y="0" z="100.35"/>
  </union>
  <union name="Frame4">
     <first ref="Frame3"/> <second ref="VertBar"/>
-    <position name="posVertBarUnion4" unit="cm" x="-6" y="0" z="301.05"/>
+    <position name="posVertBarUnion4" unit="cm" x="-5.5" y="0" z="301.05"/>
  </union>
 </solids>
 
@@ -216,7 +216,7 @@
   </physvol>
  <physvol>
     <volumeref ref="volFrame"/>
-    <position name="posFrame2" unit="cm" x="-136" y="0" z="0"/>
+    <position name="posFrame2" unit="cm" x="-136.0" y="0" z="0"/>
   </physvol>
   <physvol>
       <volumeref ref="volaSideCross"/>
@@ -230,27 +230,27 @@
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaTopCross0" unit="cm" x="0" y="134.35" z="-334.92"/>
+      <position name="posaTopCross0" unit="cm" x="0" y="134.35" z="-279.1"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaBottomCross0" unit="cm" x="0" y="-134.35" z="-334.92"/>
+      <position name="posaBottomCross0" unit="cm" x="0" y="-134.35" z="-279.1"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaTopCross1" unit="cm" x="0" y="134.35" z="-111.64"/>
+      <position name="posaTopCross1" unit="cm" x="0" y="134.35" z="-55.82"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaBottomCross1" unit="cm" x="0" y="-134.35" z="-111.64"/>
+      <position name="posaBottomCross1" unit="cm" x="0" y="-134.35" z="-55.82"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaTopCross2" unit="cm" x="0" y="134.35" z="111.64"/>
+      <position name="posaTopCross2" unit="cm" x="0" y="134.35" z="167.46"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaBottomCross2" unit="cm" x="0" y="-134.35" z="111.64"/>
+      <position name="posaBottomCross2" unit="cm" x="0" y="-134.35" z="167.46"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCrossOuter"/>
@@ -262,11 +262,11 @@
   </physvol>
   <physvol>
       <volumeref ref="volaTopCrossOuter"/>
-      <position name="posaTopCrossOuter1" unit="cm" x="0" y="134.35" z="334.92"/>
+      <position name="posaTopCrossOuter1" unit="cm" x="0" y="134.35" z="390.74"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCrossOuter"/>
-      <position name="posaBottomCrossOuter1" unit="cm" x="0" y="-134.35" z="334.92"/>
+      <position name="posaBottomCrossOuter1" unit="cm" x="0" y="-134.35" z="390.74"/>
   </physvol>
 
   <physvol>

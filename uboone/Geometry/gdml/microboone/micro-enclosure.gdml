@@ -1,9 +1,9 @@
 <?xml version'1.0'?>
 <gdml>
 <solids>
- <box name="DetEnclosureOLDbig" lunit="cm" x="1484.26" y="1061" z="1484.26" />
+ <box name="DetEnclosureOLDbig" lunit="cm" x="1484.26" y="1061.0" z="1484.26" />
  <box name="DetEnclosureOLDsmall" lunit="cm" x="1483.26" y="1060" z="1483.26" />
- <tube name="DetEnclosureNEW" lunit="cm" rmax="741.58" z="1070" aunit="deg" deltaphi="360" />
+ <tube name="DetEnclosureNEW" lunit="cm" rmax="741.58" z="1070.0" aunit="deg" deltaphi="360" />
 <tube name="DetEnclosureAboveGrade" rmax="741.18" z="730.62" deltaphi="360" lunit="cm" aunit="deg"/>
 
   <subtraction name="DetSub0">
@@ -76,7 +76,7 @@
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack1" unit="cm" x="-75" y="513.01" z="120"/>
+        <position name="posRack1" unit="cm" x="-75" y="513.01" z="120.0"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
@@ -127,7 +127,7 @@
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack14" unit="cm" x="-75" y="513.01" z="310"/>
+        <position name="posRack14" unit="cm" x="-75" y="513.01" z="310.0"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
@@ -161,7 +161,7 @@
       </physvol>
       <physvol>
          <volumeref ref="volFloorTankBox1"/>
-         <position name="posfloortankbox1_5" unit="cm" x="420" y="-429.999" z="-395.28"/>
+         <position name="posfloortankbox1_5" unit="cm" x="420.0" y="-429.999" z="-395.28"/>
       </physvol>
 <!--      <physvol>
         <volumeref ref="volWalkway"/>
@@ -177,7 +177,7 @@
       </physvol>
       <physvol>
          <volumeref ref="volFloorTankBox2"/>
-         <position name="posfloortankbox2_2" unit="cm" x="-136" y="-410" z="-500"/>
+         <position name="posfloortankbox2_2" unit="cm" x="-136" y="-410.0" z="-500"/>
       </physvol>
       <physvol>
          <volumeref ref="volPump"/>

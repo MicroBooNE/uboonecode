@@ -30,8 +30,8 @@
   <twoDimVertex x="-8" y="10" />
   <twoDimVertex x="-3.5" y="10" />
   <twoDimVertex x="-3.5" y="0" />
-  <section zOrder="0" zPosition="-4" xOffset="0" yOffset="0" scalingFactor="1" />
-  <section zOrder="1" zPosition="3" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="0" zPosition="-3.5" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="3.5" xOffset="0" yOffset="0" scalingFactor="1" />
  </xtru>
  <tube name="WheelPart1"
   rmin="1.5"
@@ -61,8 +61,8 @@
   <twoDimVertex x="-8" y="0" />
   <twoDimVertex x="-8" y="7.8" />
   <twoDimVertex x="8" y="7.8" />
-  <section zOrder="0" zPosition="-8" xOffset="0" yOffset="0" scalingFactor="1" />
-  <section zOrder="1" zPosition="7" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="0" zPosition="-7.5" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="7.5" xOffset="0" yOffset="0" scalingFactor="1" />
  </xtru>
  <xtru name="WheelSupportPiece7" lunit="cm" >
   <twoDimVertex x="3.9" y="0" />
@@ -73,8 +73,8 @@
   <twoDimVertex x="-3.9" y="0" />
   <twoDimVertex x="-3.9" y="32.32" />
   <twoDimVertex x="3.9" y="32.32" />
-  <section zOrder="0" zPosition="-8" xOffset="0" yOffset="0" scalingFactor="1" />
-  <section zOrder="1" zPosition="7" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="0" zPosition="-7.5" xOffset="0" yOffset="0" scalingFactor="1" />
+  <section zOrder="1" zPosition="7.5" xOffset="0" yOffset="0" scalingFactor="1" />
  </xtru>
  <tube name="AxlePart1"
   rmax="1.5"

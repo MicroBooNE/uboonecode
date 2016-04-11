@@ -7,7 +7,7 @@
    <rotation name="rPlus60AboutX"  unit="deg" x="60"  y="0"   z="0"/>
    <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
    <rotation name="rMinus90AboutX"  unit="deg" x="-90"  y="0"   z="0"/>
-   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="150" y="0"   z="0"/>
+   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="150.0" y="0"   z="0"/>
    <rotation name="rPlus150AboutX"      unit="deg" x="150" y="0"   z="0"/>
    <rotation name="rPlus180AboutX"      unit="deg" x="180" y="0"   z="0"/>
    <rotation name="rMinusUVAngleAboutX" unit="deg" x="-30" y="0"   z="0"/>
@@ -4399,7 +4399,7 @@
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
- <box name="PlatformOLDbig" lunit="cm" x="551" y="19" z="1501" />
+ <box name="PlatformOLDbig" lunit="cm" x="551.0" y="19.0" z="1501.0" />
  <box name="PlatformOLDsmall" lunit="cm" x="550" y="18" z="1500" />
  <tube name="PlatformNEW" lunit="cm" rmax="741.18" z="19.5" aunit="deg" deltaphi="360" />
 
@@ -4820,9 +4820,9 @@
     <box lunit="cm" name="AuxDet265"    x="19"    y="0.6"    z="151" />
     <box lunit="cm" name="AuxDet266"    x="19"    y="0.6"    z="151" />
 
- <box name="DetEnclosureOLDbig" lunit="cm" x="1484.26" y="1061" z="1484.26" />
+ <box name="DetEnclosureOLDbig" lunit="cm" x="1484.26" y="1061.0" z="1484.26" />
  <box name="DetEnclosureOLDsmall" lunit="cm" x="1483.26" y="1060" z="1483.26" />
- <tube name="DetEnclosureNEW" lunit="cm" rmax="741.58" z="1070" aunit="deg" deltaphi="360" />
+ <tube name="DetEnclosureNEW" lunit="cm" rmax="741.58" z="1070.0" aunit="deg" deltaphi="360" />
 
   <subtraction name="DetSub0">
 	<first ref="DetEnclosureOLDbig"/> <second ref="DetEnclosureNEW"/>
@@ -39683,7 +39683,7 @@
       </physvol>
       <physvol>
          <volumeref ref="volFloorTankBox1"/>
-         <position name="posfloortankbox1_5" unit="cm" x="420" y="-429.999" z="-395.28"/>
+         <position name="posfloortankbox1_5" unit="cm" x="420.0" y="-429.999" z="-395.28"/>
       </physvol>
       <physvol>
         <volumeref ref="volWalkway"/>
@@ -39699,7 +39699,7 @@
       </physvol>
       <physvol>
          <volumeref ref="volFloorTankBox2"/>
-         <position name="posfloortankbox2_2" unit="cm" x="-136" y="-410" z="-500"/>
+         <position name="posfloortankbox2_2" unit="cm" x="-136" y="-410.0" z="-500"/>
       </physvol>
       <physvol>
          <volumeref ref="volPump"/>

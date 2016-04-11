@@ -7,7 +7,7 @@
    <rotation name="rPlus60AboutX"  unit="deg" x="60"  y="0"   z="0"/>
    <rotation name="rPlus90AboutX"  unit="deg" x="90"  y="0"   z="0"/>
    <rotation name="rMinus90AboutX"  unit="deg" x="-90"  y="0"   z="0"/>
-   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="150" y="0"   z="0"/>
+   <rotation name="rPlusUVAngleAboutX"  unit="deg" x="150.0" y="0"   z="0"/>
    <rotation name="rPlus150AboutX"      unit="deg" x="150" y="0"   z="0"/>
    <rotation name="rPlus180AboutX"      unit="deg" x="180" y="0"   z="0"/>
    <rotation name="rMinusUVAngleAboutX" unit="deg" x="-30" y="0"   z="0"/>
@@ -363,9 +363,9 @@
   lunit="cm"/>
  <box name="Paddle_PMT"
   lunit="cm"
-  x="0.0"
+  x="0.3175"
   y="50.8"
-  z="17.78"/>
+  z="18.6266666667"/>
 
  <tube name="PMT_Lens"
   rmax="10.16"
@@ -381,11 +381,11 @@
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
- <box name="PlatformOLDbig" lunit="cm" x="559" y="229.7524" z="1501" />
+ <box name="PlatformOLDbig" lunit="cm" x="559.0" y="229.7524" z="1501.0" />
  <box name="PlatformOLDsmall" lunit="cm" x="558" y="228.7524" z="1500" />
  <tube name="PlatformNEW" lunit="cm" rmax="741.18" z="227.7124" aunit="deg" deltaphi="360" />
 
- <box name="PlatformRectbig" lunit="cm" x="551" y="3.54" z="1501" />
+ <box name="PlatformRectbig" lunit="cm" x="551.0" y="3.54" z="1501.0" />
  <box name="PlatformRectsmall" lunit="cm" x="550" y="2.54" z="1500" />
  <tube name="PlatformCircle" lunit="cm" rmax="741.18" z="4.04" aunit="deg" deltaphi="360" />
 
@@ -755,19 +755,19 @@
 
  <union name="Frame1">
     <first ref="Frame0"/> <second ref="VertBar"/>
-    <position name="posVertBarUnion1" unit="cm" x="-6" y="0" z="-301.05"/>
+    <position name="posVertBarUnion1" unit="cm" x="-5.5" y="0" z="-301.05"/>
  </union>
  <union name="Frame2">
     <first ref="Frame1"/> <second ref="VertBar"/>
-    <position name="posVertBarUnion2" unit="cm" x="-6" y="0" z="-100.35"/>
+    <position name="posVertBarUnion2" unit="cm" x="-5.5" y="0" z="-100.35"/>
  </union>
  <union name="Frame3">
     <first ref="Frame2"/> <second ref="VertBar"/>
-    <position name="posVertBarUnion3" unit="cm" x="-6" y="0" z="100.35"/>
+    <position name="posVertBarUnion3" unit="cm" x="-5.5" y="0" z="100.35"/>
  </union>
  <union name="Frame4">
     <first ref="Frame3"/> <second ref="VertBar"/>
-    <position name="posVertBarUnion4" unit="cm" x="-6" y="0" z="301.05"/>
+    <position name="posVertBarUnion4" unit="cm" x="-5.5" y="0" z="301.05"/>
  </union>
 
     <box lunit="cm" name="AuxDet0"    x="19"    y="0.6"    z="151" />
@@ -1038,9 +1038,9 @@
     <box lunit="cm" name="AuxDet265"    x="19"    y="0.6"    z="151" />
     <box lunit="cm" name="AuxDet266"    x="19"    y="0.6"    z="151" />
 
- <box name="DetEnclosureOLDbig" lunit="cm" x="1484.26" y="1061" z="1484.26" />
+ <box name="DetEnclosureOLDbig" lunit="cm" x="1484.26" y="1061.0" z="1484.26" />
  <box name="DetEnclosureOLDsmall" lunit="cm" x="1483.26" y="1060" z="1483.26" />
- <tube name="DetEnclosureNEW" lunit="cm" rmax="741.58" z="1070" aunit="deg" deltaphi="360" />
+ <tube name="DetEnclosureNEW" lunit="cm" rmax="741.58" z="1070.0" aunit="deg" deltaphi="360" />
 <tube name="DetEnclosureAboveGrade" rmax="741.18" z="730.62" deltaphi="360" lunit="cm" aunit="deg"/>
 
   <subtraction name="DetSub0">
@@ -1283,7 +1283,7 @@
 
 <!--  <physvol>
     <volumeref ref="volTPCCross"/>
-    <position name="posTPCCross" unit="cm" x="-128" y="-100" z="0"/>
+    <position name="posTPCCross" unit="cm" x="-128.0" y="-100" z="0"/>
     <rotation ref="rMinus41AboutX" unit="deg" x="-41.58" y="0" z="0"/>
   </physvol>  -->
 
@@ -3011,7 +3011,7 @@
   </physvol>
  <physvol>
     <volumeref ref="volFrame"/>
-    <position name="posFrame2" unit="cm" x="-136" y="0" z="0"/>
+    <position name="posFrame2" unit="cm" x="-136.0" y="0" z="0"/>
   </physvol>
   <physvol>
       <volumeref ref="volaSideCross"/>
@@ -3025,27 +3025,27 @@
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaTopCross0" unit="cm" x="0" y="134.35" z="-334.92"/>
+      <position name="posaTopCross0" unit="cm" x="0" y="134.35" z="-279.1"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaBottomCross0" unit="cm" x="0" y="-134.35" z="-334.92"/>
+      <position name="posaBottomCross0" unit="cm" x="0" y="-134.35" z="-279.1"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaTopCross1" unit="cm" x="0" y="134.35" z="-111.64"/>
+      <position name="posaTopCross1" unit="cm" x="0" y="134.35" z="-55.82"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaBottomCross1" unit="cm" x="0" y="-134.35" z="-111.64"/>
+      <position name="posaBottomCross1" unit="cm" x="0" y="-134.35" z="-55.82"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaTopCross2" unit="cm" x="0" y="134.35" z="111.64"/>
+      <position name="posaTopCross2" unit="cm" x="0" y="134.35" z="167.46"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCross"/>
-      <position name="posaBottomCross2" unit="cm" x="0" y="-134.35" z="111.64"/>
+      <position name="posaBottomCross2" unit="cm" x="0" y="-134.35" z="167.46"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCrossOuter"/>
@@ -3057,11 +3057,11 @@
   </physvol>
   <physvol>
       <volumeref ref="volaTopCrossOuter"/>
-      <position name="posaTopCrossOuter1" unit="cm" x="0" y="134.35" z="334.92"/>
+      <position name="posaTopCrossOuter1" unit="cm" x="0" y="134.35" z="390.74"/>
   </physvol>
   <physvol>
       <volumeref ref="volaTopCrossOuter"/>
-      <position name="posaBottomCrossOuter1" unit="cm" x="0" y="-134.35" z="334.92"/>
+      <position name="posaBottomCrossOuter1" unit="cm" x="0" y="-134.35" z="390.74"/>
   </physvol>
 
   <physvol>
@@ -4364,7 +4364,7 @@
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack1" unit="cm" x="-75" y="513.01" z="120"/>
+        <position name="posRack1" unit="cm" x="-75" y="513.01" z="120.0"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
@@ -4415,7 +4415,7 @@
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
-        <position name="posRack14" unit="cm" x="-75" y="513.01" z="310"/>
+        <position name="posRack14" unit="cm" x="-75" y="513.01" z="310.0"/>
       </physvol>
       <physvol>
         <volumeref ref="volRack"/>
@@ -4449,7 +4449,7 @@
       </physvol>
       <physvol>
          <volumeref ref="volFloorTankBox1"/>
-         <position name="posfloortankbox1_5" unit="cm" x="420" y="-429.999" z="-395.28"/>
+         <position name="posfloortankbox1_5" unit="cm" x="420.0" y="-429.999" z="-395.28"/>
       </physvol>
 <!--      <physvol>
         <volumeref ref="volWalkway"/>
@@ -4465,7 +4465,7 @@
       </physvol>
       <physvol>
          <volumeref ref="volFloorTankBox2"/>
-         <position name="posfloortankbox2_2" unit="cm" x="-136" y="-410" z="-500"/>
+         <position name="posfloortankbox2_2" unit="cm" x="-136" y="-410.0" z="-500"/>
       </physvol>
       <physvol>
          <volumeref ref="volPump"/>

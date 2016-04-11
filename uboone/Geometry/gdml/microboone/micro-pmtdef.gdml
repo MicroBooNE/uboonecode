@@ -32,9 +32,9 @@
   lunit="cm"/>
  <box name="Paddle_PMT"
   lunit="cm"
-  x="0.0"
+  x="0.3175"
   y="50.8"
-  z="17.78"/>
+  z="18.6266666667"/>
 
  <tube name="PMT_Lens"
   rmax="10.16"

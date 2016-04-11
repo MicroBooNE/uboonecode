@@ -8,11 +8,11 @@
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
- <box name="PlatformOLDbig" lunit="cm" x="559" y="229.7524" z="1501" />
+ <box name="PlatformOLDbig" lunit="cm" x="559.0" y="229.7524" z="1501.0" />
  <box name="PlatformOLDsmall" lunit="cm" x="558" y="228.7524" z="1500" />
  <tube name="PlatformNEW" lunit="cm" rmax="741.18" z="227.7124" aunit="deg" deltaphi="360" />
 
- <box name="PlatformRectbig" lunit="cm" x="551" y="3.54" z="1501" />
+ <box name="PlatformRectbig" lunit="cm" x="551.0" y="3.54" z="1501.0" />
  <box name="PlatformRectsmall" lunit="cm" x="550" y="2.54" z="1500" />
  <tube name="PlatformCircle" lunit="cm" rmax="741.18" z="4.04" aunit="deg" deltaphi="360" />
 
