@@ -23,6 +23,7 @@ microboone_analysistree:
  ShowerModuleLabel:        ["showerrecofuzzy"]
  CosmicClusterTaggerAssocLabel: "ccclustertag"
  CosmicTaggerAssocLabel: ["trackkalmanhit"]
+ ContainmentTaggerAssocLabel: ["isotag"]
  FlashMatchAssocLabel:   ["flashTrackMatchkHit"]
  POTModuleLabel:           "generator"
  UseBuffers:               false

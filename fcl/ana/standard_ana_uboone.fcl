@@ -43,7 +43,7 @@ physics:
         }
 
  #define the output stream, there could be more than one if using filters 
- stream1:  [ out1 ]
+# stream1:  [ out1 ]
 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
@@ -51,7 +51,8 @@ physics:
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
- end_paths:     [stream1,ana]  
+# end_paths:     [stream1,ana]  
+ end_paths:     [ana]  
 }
 
 #block to define where the output goes.  if you defined a filter in the physics
@@ -77,8 +78,9 @@ physics.analyzers.analysistree.VertexModuleLabel:               ["cccluster", "p
 physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo","stitchkalmanhitcalo","pandoraCosmiccalo","pandoraCosmicKHitcalo","pandoraNucalo","pandoraNuKHitcalo","pandoraNuPMAcalo","pmtrackcalo"]
 physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","pandoraCosmicpid","pandoraCosmicKHitpid","pandoraNupid","pandoraNuKHitpid","pandoraNuPMApid","pmtrackpid"]
 physics.analyzers.analysistree.CosmicTaggerAssocLabel:          ["trackkalmanhittag","stitchkalmanhittag","pandoraCosmictag","pandoraCosmicKHitPFPart","pandoraNutag","pandoraNuKHittag","pandoraNuPMAtag","pmtracktag"]
+physics.analyzers.analysistree.ContainmentTaggerAssocLabel:     ["trackkalmanhitContTag","stitchkalmanhitContTag","pandoraCosmicContTag","dummy","pandoraNuContTag","dummy","pandoraNuPMAContTag","pmtrackContTag"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhitflashmatch","stitchkalmanhitflashmatch","pandoraCosmicFlashMatch","pandoraCosmicKHitFlashMatch","pandoraNuFlashMatch","pandoraNuKHitFlashMatch","pandoraNuPMAFlashMath","pmtrackFlashMatch"]
-#physics.analyzers.analysistree.PFParticleModuleLabel:          "pandoraNu"
+physics.analyzers.analysistree.PFParticleModuleLabel:           "pandoraNu"
 physics.analyzers.analysistree.FlashT0FinderLabel:              ["t0","t0","t0","t0","t0","t0","t0","t0"]
 physics.analyzers.analysistree.MCT0FinderLabel:                 ["mct0","mct0","mct0","mct0","mct0","mct0","mct0","mct0"]
 physics.analyzers.analysistree.CosmicScoreThresholds:           [0.0]
@@ -88,7 +90,7 @@ physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
 physics.analyzers.analysistree.ShowerModuleLabel:               ["showerrecofuzzy","showerrecopandora"]
 physics.analyzers.analysistree.IgnoreMissingShowers:            true
 physics.analyzers.analysistree.SavePandoraNuVertexInfo:         true
-physics.analyzers.analysistree.SavePFParticleInfo:              false
+physics.analyzers.analysistree.SavePFParticleInfo:              true
 physics.analyzers.analysistree.SaveCryInfo:                     false
 physics.analyzers.pandoraNueff.TrackModuleLabel:       "pandoraNu"
 physics.analyzers.pandoraCosmiceff.TrackModuleLabel:   "pandoraCosmic"
