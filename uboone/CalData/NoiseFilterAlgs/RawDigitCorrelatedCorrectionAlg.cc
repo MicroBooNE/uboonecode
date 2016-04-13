@@ -56,7 +56,7 @@ void RawDigitCorrelatedCorrectionAlg::reconfigure(fhicl::ParameterSet const & ps
     fNumWiresToGroup       = pset.get<std::vector<size_t>>("NumWiresToGroup",          std::vector<size_t>() = {48, 48, 96});
     fFillHistograms        = pset.get<bool>               ("FillHistograms",                                          false);
     fRunFFTCorrected       = pset.get<bool>               ("RunFFTCorrectedWires",                                    false);
-    fNumRmsToSmoothVec     = pset.get<std::vector<float>> ("NumRmsToSmooth",          std::vector<float>() = {3.5, 3.5, 4.});
+    fNumRmsToSmoothVec     = pset.get<std::vector<float>> ("NumRmsToSmooth",          std::vector<float>() = {3.6, 3.6, 4.});
 }
 
 //----------------------------------------------------------------------------
