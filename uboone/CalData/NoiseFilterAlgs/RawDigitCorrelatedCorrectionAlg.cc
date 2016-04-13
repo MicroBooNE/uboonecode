@@ -56,6 +56,7 @@ void RawDigitCorrelatedCorrectionAlg::reconfigure(fhicl::ParameterSet const & ps
     fNumWiresToGroup       = pset.get<std::vector<size_t>>("NumWiresToGroup",          std::vector<size_t>() = {48, 48, 96});
     fFillHistograms        = pset.get<bool>               ("FillHistograms",                                          false);
     fRunFFTCorrected       = pset.get<bool>               ("RunFFTCorrectedWires",                                    false);
+    fNumRmsToSmoothVec     = pset.get<std::vector<float>> ("NumRmsToSmooth",          std::vector<float>() = {3.5, 3.5, 4.});
 }
 
 //----------------------------------------------------------------------------
@@ -70,9 +71,9 @@ void RawDigitCorrelatedCorrectionAlg::initializeHists(art::ServiceHandle<art::TF
     int    numSamples  = (readOutSize / 2 + 1) / 4;
     
     // quick aside
-    std::cout << "++> plane 0 offset: " << fDetectorProperties->GetXTicksOffset(0,0,0) << std::endl;
-    std::cout << "++> plane 1 offset: " << fDetectorProperties->GetXTicksOffset(1,0,0) << std::endl;
-    std::cout << "++> plane 2 offset: " << fDetectorProperties->GetXTicksOffset(2,0,0) << std::endl;
+//    std::cout << "++> plane 0 offset: " << fDetectorProperties->GetXTicksOffset(0,0,0) << std::endl;
+//    std::cout << "++> plane 1 offset: " << fDetectorProperties->GetXTicksOffset(1,0,0) << std::endl;
+//    std::cout << "++> plane 2 offset: " << fDetectorProperties->GetXTicksOffset(2,0,0) << std::endl;
     
     fFFTHist[0]       = tfs->make<TProfile>("FFTPlaneU",    "FFT;kHz",  numSamples, minFreq, maxFreq, 0., 10000.);
     fFFTHist[1]       = tfs->make<TProfile>("FFTPlaneV",    "FFT;kHz",  numSamples, minFreq, maxFreq, 0., 10000.);
@@ -148,7 +149,7 @@ void RawDigitCorrelatedCorrectionAlg::initializeHists(art::ServiceHandle<art::TF
     fFFTvsMBProf[2]   = tfs->make<TProfile2D>("FFTvsMBPlaneW", "FFT;MB;kHz", numSamples, minFreq, maxFreq, 3456/16, 0., 3456/16);
 }
 
-void RawDigitCorrelatedCorrectionAlg::smoothCorrectionVec(std::vector<float>& corValVec) const
+void RawDigitCorrelatedCorrectionAlg::smoothCorrectionVec(std::vector<float>& corValVec, unsigned int& viewIdx) const
 {
     // First get the truncated mean and rms for the input vector (noting that it is not in same format as raw data)
     // We need a local copy so we can sort it
@@ -173,7 +174,7 @@ void RawDigitCorrelatedCorrectionAlg::smoothCorrectionVec(std::vector<float>& co
     
     for(std::vector<float>::iterator corValItr = lastGoodItr+1; corValItr != corValVec.end(); corValItr++)
     {
-        if (fabs(*corValItr - meanCorVal) < 6.*rmsVal)
+        if (fabs(*corValItr - meanCorVal) < fNumRmsToSmoothVec.at(viewIdx)*rmsVal)
         {
             if (wasOutlier)
             {
@@ -275,7 +276,7 @@ void RawDigitCorrelatedCorrectionAlg::removeCorrelatedNoise(RawDigitAdcIdxPair& 
         }
         
         // Try to eliminate any real outliers
-        if (fApplyCorSmoothing) smoothCorrectionVec(corValVec);
+        if (fApplyCorSmoothing) smoothCorrectionVec(corValVec, viewIdx);
         
         // Diagnostics block
         if (doFFTCorrection)
