@@ -1,0 +1,118 @@
+#include "services_microboone.fcl"
+#include "analysistreemodule_microboone.fcl"
+#include "reco_uboone_mcc7.fcl"
+#include "trackfindermodules_microboone.fcl"
+#include "MuCSTrackTagger_module.fcl"
+
+process_name: AnaMuCSData
+
+services:
+{
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "MuCS_data_ana_hist.root" }
+  Timing:       {}
+  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  message:      @local::microboone_message_services_prod_debug
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  BackTracker: @local::microboone_backtracker
+  #user:         @local::microboone_services_ana
+  @table::microboone_reco_mcc7_services
+}
+
+#source is now a root file
+source:
+{
+  module_type: RootInput
+  maxEvents:  10        # Number of events to create
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+ producers:{ MuCSTrackTaggertrackkalmanhit: @local::microboone_MuCSTrackTagger
+             MuCSTrackTaggerstitchkalmanhit: @local::microboone_MuCSTrackTagger
+             MuCSTrackTaggerpandoraCosmic: @local::microboone_MuCSTrackTagger
+             MuCSTrackTaggerpandoraCosmicKHit: @local::microboone_MuCSTrackTagger
+             MuCSTrackTaggerpmtrack: @local::microboone_MuCSTrackTagger
+              }
+ tag: [MuCSTrackTaggertrackkalmanhit, MuCSTrackTaggerstitchkalmanhit, MuCSTrackTaggerpandoraCosmic, MuCSTrackTaggerpandoraCosmicKHit, MuCSTrackTaggerpmtrack ]
+ analyzers:{
+        analysistree:        @local::microboone_analysistree
+      }
+
+ #define the output stream, there could be more than one if using filters 
+ # stream1:  [ out1 ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [tag]  
+
+ #define the producer and filter modules for this path, order matters, 
+ #filters reject all following items.  see lines starting physics.producers below
+ ana:  [ analysistree ]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ana]  
+}
+
+#block to define where the output goes.  if you defined a filter in the physics
+#block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+#entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "%ifb_%tc_merged.root"
+   dataTier:    "reconstructed"
+   compressionLevel: 1
+ }
+}
+
+### Here, we overwrite ALL module labels with the ones defined above.
+#physics.analyzers.analysistree:  @local::microboone_analysistree
+physics.analyzers.analysistree.OpFlashModuleLabel: "opflashSat"
+physics.analyzers.analysistree.HitsModuleLabel:                 "gaushit"
+physics.analyzers.analysistree.TrackModuleLabel:                ["trackkalmanhit","stitchkalmanhit","pandoraCosmic","pandoraCosmicKHit","pmtrack"]
+physics.analyzers.analysistree.VertexModuleLabel:               ["cccluster", "pandoraNu", "pandoraCosmic","pmtrack","linecluster"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:          ["trackkalmanhitcalo","stitchkalmanhitcalo","pandoraCosmiccalo","pandoraCosmicKHitcalo","pmtrackcalo"]
+physics.analyzers.analysistree.ParticleIDModuleLabel:           ["trackkalmanhitpid","stitchkalmanhitpid","pandoraCosmicpid","pandoraCosmicKHitpid","pmtrackpid"]
+physics.analyzers.analysistree.CosmicTaggerAssocLabel:          [MuCSTrackTaggertrackkalmanhit, MuCSTrackTaggerstitchkalmanhit, MuCSTrackTaggerpandoraCosmic, MuCSTrackTaggerpandoraCosmicKHit, MuCSTrackTaggerpmtrack]
+physics.analyzers.analysistree.ContainmentTaggerAssocLabel:     ["trackkalmanhitContTag","stitchkalmanhitContTag","pandoraCosmicContTag","dummy","pmtrackContTag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhitflashmatch","stitchkalmanhitflashmatch","pandoraCosmicFlashMatch","pandoraCosmicKHitFlashMatch","pmtrackFlashMatch"]
+physics.analyzers.analysistree.PFParticleModuleLabel:           "pandoraNu"
+physics.analyzers.analysistree.FlashT0FinderLabel:              ["t0","t0","t0","t0","t0"]
+physics.analyzers.analysistree.MCT0FinderLabel:                 ["mct0","mct0","mct0","mct0","mct0"]
+physics.analyzers.analysistree.CosmicScoreThresholds:           [0.0]
+physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
+physics.analyzers.analysistree.POTModuleLabel:                  "generator"
+physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
+physics.analyzers.analysistree.ShowerModuleLabel:               ["showerrecofuzzy","showerrecopandora"]
+physics.analyzers.analysistree.IgnoreMissingShowers:            true
+physics.analyzers.analysistree.SavePandoraNuVertexInfo:         false
+physics.analyzers.analysistree.SavePFParticleInfo:              false
+physics.analyzers.analysistree.SaveCryInfo:                     false
+
+physics.analyzers.analysistree.SaveCryInfo:     false
+physics.analyzers.analysistree.SaveGenieInfo:   false
+physics.analyzers.analysistree.SaveGeantInfo:   false
+physics.analyzers.analysistree.SaveMCShowerInfo:false 
+physics.analyzers.analysistree.SaveMCTrackInfo: false 
+physics.analyzers.analysistree.SaveShowerInfo:  false 
+physics.analyzers.analysistree.SaveCaloCosmics: true
+
+#Setup MuCS track taggers with extra 20 cm buffer which increases acceptance and accounts for scattering
+physics.producers.MuCSTrackTaggertrackkalmanhit.BoxExtension: 20
+physics.producers.MuCSTrackTaggertrackkalmanhit.TrackModuleLabel: "trackkalmanhit"
+physics.producers.MuCSTrackTaggerstitchkalmanhit.BoxExtension: 20
+physics.producers.MuCSTrackTaggerstitchkalmanhit.TrackModuleLabel: "stitchkalmanhit"
+physics.producers.MuCSTrackTaggerpandoraCosmic.BoxExtension: 20
+physics.producers.MuCSTrackTaggerpandoraCosmic.TrackModuleLabel: "pandoraCosmic"
+physics.producers.MuCSTrackTaggerpandoraCosmicKHit.BoxExtension: 20
+physics.producers.MuCSTrackTaggerpandoraCosmicKHit.TrackModuleLabel: "pandoraCosmicKHit"
+physics.producers.MuCSTrackTaggerpmtrack.BoxExtension: 20
+physics.producers.MuCSTrackTaggerpmtrack.TrackModuleLabel: "pmtrack"
