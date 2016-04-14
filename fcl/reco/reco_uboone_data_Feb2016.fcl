@@ -321,10 +321,6 @@ microboone_reco_data_3D: [               rns,
 ### Below we include overrides for the modules above
 ### These are for MCC 7
 
-physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-
-
 microboone_reco_data_producers.digitfilter.TruncateTicks:                        true
 
 microboone_reco_data_producers.caldata.DigitModuleLabel:                         "digitfilter"
