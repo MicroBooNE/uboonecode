@@ -69,7 +69,7 @@ public:
 
 private:
     
-    void smoothCorrectionVec(std::vector<float>&) const;
+    void smoothCorrectionVec(std::vector<float>&, unsigned int&) const;
     
     template<class T> T getMedian(std::vector<T>&, T) const;
 
@@ -86,6 +86,7 @@ private:
     std::vector<size_t>  fNumWiresToGroup;       ///< If smoothing, the number of wires to look at
     bool                 fFillHistograms;        ///< if true then will fill diagnostic hists
     bool                 fRunFFTCorrected;       ///< Should we run FFT's on corrected wires?
+    std::vector<float>   fNumRmsToSmoothVec;     ///< # "sigma" to smooth correlated correction vec
     
     // Pointers to the histograms we'll create for monitoring what is happening
     TProfile*            fFFTHist[3];

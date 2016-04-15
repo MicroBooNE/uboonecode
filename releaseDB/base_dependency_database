@@ -125,6 +125,7 @@ larana : larsim : larsim/Simulation/SimChannel.h
 larana : larsim : larsim/Simulation/SimListUtils.h
 larana : larsim : larsim/Simulation/SimPhotons.h
 larana : larsim : larsim/Simulation/sim.h
+larcore : larcore : larcore/CoreUtils/DebugUtils.h
 larcore : larcore : larcore/CoreUtils/ServiceUtil.h
 larcore : larcore : larcore/Geometry/AuxDetChannelMapAlg.h
 larcore : larcore : larcore/Geometry/AuxDetExptGeoHelperInterface.h
@@ -530,8 +531,11 @@ larpandora : lardata : lardata/Utilities/GeometryUtilities.h
 larpandora : lardata : lardata/Utilities/PxUtils.h
 larpandora : lardata : lardata/Utilities/UtilException.h
 larpandora : lardata : lardata/Utilities/sparse_vector.h
+larpandora : larevt : larevt/CalibrationDBI/Interface/ChannelStatusProvider.h
+larpandora : larevt : larevt/CalibrationDBI/Interface/ChannelStatusService.h
 larpandora : larpandora : larpandora/LArPandoraInterface/ILArPandora.h
 larpandora : larpandora : larpandora/LArPandoraInterface/LArPandora.h
+larpandora : larpandora : larpandora/LArPandoraInterface/LArPandoraGeometry.h
 larpandora : larpandora : larpandora/LArPandoraInterface/LArPandoraHelper.h
 larpandora : larpandora : larpandora/LArPandoraInterface/LArPandoraInput.h
 larpandora : larpandora : larpandora/LArPandoraInterface/LArPandoraOutput.h
@@ -697,6 +701,7 @@ larreco : larreco : larreco/Genfit/SlTrackRep.h
 larreco : larreco : larreco/Genfit/TGeant3/TGeant3.h
 larreco : larreco : larreco/HitFinder/GaussianEliminationAlg.h
 larreco : larreco : larreco/HitFinder/HitAnaAlg.h
+larreco : larreco : larreco/HitFinder/HitFilterAlg.h
 larreco : larreco : larreco/HitFinder/RFFHitFinderAlg.h
 larreco : larreco : larreco/HitFinder/RFFHitFitter.h
 larreco : larreco : larreco/HitFinder/RegionAboveThresholdFinder.h
@@ -891,6 +896,7 @@ larsim : lardata : lardata/Utilities/sparse_vector.h
 larsim : larevt : larevt/CalibrationDBI/Interface/ChannelStatusProvider.h
 larsim : larevt : larevt/CalibrationDBI/Interface/ChannelStatusService.h
 larsim : larevt : larevt/SpaceCharge/SpaceCharge.h
+larsim : larsim : LArG4/ParticleFilters.h
 larsim : larsim : larsim/EventGenerator/NueAr40CCGenerator.h
 larsim : larsim : larsim/LArG4/AuxDetReadout.h
 larsim : larsim : larsim/LArG4/AuxDetReadoutGeometry.h
@@ -1130,6 +1136,7 @@ uboonecode : uboonecode : uboone/Geometry/ChannelMapUBooNEAlg.h
 uboonecode : uboonecode : uboone/Geometry/UBOpChannelTypes.h
 uboonecode : uboonecode : uboone/Geometry/UBOpReadoutMap.h
 uboonecode : uboonecode : uboone/Geometry/UBooNEGeometryHelper.h
+uboonecode : uboonecode : uboone/MuCS/MuCSDTOffset.h
 uboonecode : uboonecode : uboone/MuCS/MuCSData.h
 uboonecode : uboonecode : uboone/MuCS/MuCSRecoData.h
 uboonecode : uboonecode : uboone/MuCS/classes.h

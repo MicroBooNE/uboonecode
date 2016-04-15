@@ -22,6 +22,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 largeant: { 
@@ -76,7 +77,8 @@ outputs:
 		    "drop *_largeantc_*_G4c",
 		    "drop *_largeantd_*_G4d",
 		    "drop *_largeante_*_G4e"]
-  dropMetaDataForDroppedData: true
+   dropMetaDataForDroppedData: true
+   saveMemoryObjectThreshold: 0
  }
 }
 
