@@ -9,11 +9,11 @@ services:
 {
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "MuCS_data_ana_hist.root" }
+  TFileService: { fileName: "ana_hist.root" }
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   message:      @local::microboone_message_services_prod_debug
-  FileCatalogMetadata:  @local::art_file_catalog_mc
+  FileCatalogMetadata:  @local::art_file_catalog_data
   BackTracker: @local::microboone_backtracker
   #user:         @local::microboone_services_ana
   @table::microboone_reco_mcc7_services
