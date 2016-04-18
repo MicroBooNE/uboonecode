@@ -1,0 +1,11 @@
+BEGIN_PROLOG
+
+microboone_MuCSRecoToMC:
+{ 
+ module_type:              "MuCSRecoToMC"
+ SampleTime:  0.
+ MuonKE: 10.
+}
+
+END_PROLOG
+
