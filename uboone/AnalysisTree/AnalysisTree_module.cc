@@ -717,11 +717,19 @@ namespace microboone {
         potbnbETOR860 = -99999.;
         potbnbETOR875 = -99999.;
         potnumiETORTGT = -99999.;
+        run = -99999;
+        subrun = -99999;
+        begintime = -99999;
+        endtime = -99999;
       }
       Double_t pot; //protons on target
       Double_t potbnbETOR860;
       Double_t potbnbETOR875;
       Double_t potnumiETORTGT;
+      Int_t    run;
+      Int_t    subrun;
+      Double_t begintime;
+      Double_t endtime;
     }; // struct SubRunData_t
 
     //    RunData_t    RunData; ///< run data collected at begin of run
@@ -3401,6 +3409,10 @@ void microboone::AnalysisTree::CreateTree(bool bClearData /* = false */) {
     fPOT->Branch("potbnbETOR860",&SubRunData.potbnbETOR860,"potbnbETOR860/D");
     fPOT->Branch("potbnbETOR875",&SubRunData.potbnbETOR875,"potbnbETOR875/D");
     fPOT->Branch("potnumiETORTGT",&SubRunData.potnumiETORTGT,"potnumiETORTGT/D");
+    fPOT->Branch("run",&SubRunData.run,"run/I");
+    fPOT->Branch("subrun",&SubRunData.subrun,"subrun/I");
+    fPOT->Branch("begintime",&SubRunData.begintime,"begintime/D");
+    fPOT->Branch("endtime",&SubRunData.endtime,"endtime/D");
   }
   CreateData(bClearData);
   SetAddresses();
@@ -3422,6 +3434,11 @@ void microboone::AnalysisTree::beginSubRun(const art::SubRun& sr)
 
 void microboone::AnalysisTree::endSubRun(const art::SubRun& sr)
 {
+
+  SubRunData.run = sr.run();
+  SubRunData.subrun = sr.subRun();
+  SubRunData.begintime = sr.beginTime().value();
+  SubRunData.endtime = sr.endTime().value();
 
   art::Handle< sumdata::POTSummary > potListHandle;
   if(sr.getByLabel(fPOTModuleLabel,potListHandle))
