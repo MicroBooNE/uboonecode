@@ -66,9 +66,12 @@
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/Utilities/GeometryUtilities.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
 #include "DataFormat/simphotons.h"
-
+#include "DataFormat/chstatus.h"
+#include "DataFormat/DataFormatException.h"
 #include "ScannerAlgo.h"
 #include "LLMetaMaker.h"
 //#include "ScannerAlgo.template.h"
@@ -120,6 +123,8 @@ private:
   /// Templated association scanner
   template<class T> void ScanAssociation(const art::Event& evt, const size_t name_index);
 
+  void FillChStatus(const art::Event& e, const std::string& name);
+
   /// storage_manager from larlite
   ::larlite::storage_manager _mgr;
 
@@ -131,6 +136,8 @@ private:
   std::string fOutFileName;
   /// Stream name
   std::string fStreamName;
+  /// RawDigit producer name (if needed) for ChStatus 
+  std::string _chstatus_rawdigit_producer;
 };
 
 
@@ -143,6 +150,8 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
 
   //  fDataReadFlag.resize((size_t)(::larlite::data::kDATA_TYPE_MAX),std::map<std::string,
   fStoreAss = p.get<bool>("store_association");
+
+  _chstatus_rawdigit_producer = p.get<std::string>("RawDigit4ChStatus","");
 
   fOutFileName = p.get<std::string>("out_filename","annonymous.root");
   if(p.get<bool>("unique_filename")) {
@@ -345,6 +354,8 @@ void LiteScanner::analyze(art::Event const & e)
 	ScanData<MuCS::MuCSRecoData>(e,j); break;
 	//case ::larlite::data::kPOTSummary:
 	//break;
+      case::larlite::data::kChStatus:
+	FillChStatus(e,labels[j]); break;
       case ::larlite::data::kUndefined:
       case ::larlite::data::kEvent:
       default:
@@ -410,6 +421,69 @@ void LiteScanner::analyze(art::Event const & e)
   }
   fAlg.EventClear();
   _mgr.next_event();
+}
+
+//-------------------------------------------------------------------------------------------------
+// FillChStatus
+//-------------------------------------------------------------------------------------------------
+void LiteScanner::FillChStatus(const art::Event& e, const std::string& name)
+{ 
+  auto lite_chstatus = _mgr.get_data<larlite::event_chstatus>(name);
+  auto const* geom = ::lar::providerFrom<geo::Geometry>();
+
+  std::vector<bool> filled_ch( geom->Nchannels(), false );
+  std::map<geo::PlaneID,std::vector<short> > status_m;
+
+  // If specified check RawDigit pedestal value: if negative this channel is not used by wire (set status=>-2)
+  if(!_chstatus_rawdigit_producer.empty()) {
+    art::Handle<std::vector<raw::RawDigit> > digit_h;
+    e.getByLabel(_chstatus_rawdigit_producer,digit_h);
+    for(auto const& digit : *digit_h) {
+      auto const ch = digit.Channel();
+      if(ch >= filled_ch.size()) throw ::larlite::DataFormatException("Found RawDigit > possible channel number!");
+      if(digit.GetPedestal()<0.) {
+	auto const wid =  geom->ChannelToWire(ch).front();
+	auto iter = status_m.find(wid.planeID());
+	if(iter != status_m.end())
+	  (*iter).second[wid.Wire] = -2;
+	else{
+	  std::vector<short> status_v(geom->Nwires(wid.planeID()),5);
+	  status_v[wid.Wire] = -2;
+	  status_m.emplace(wid.planeID(),status_v);
+	}
+	filled_ch[ch] = true;
+      }
+    }
+  }
+
+  // Set database status                                                                                                                                
+  const lariov::ChannelStatusProvider& chanFilt = art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider();
+  for(size_t i=0; i < geom->Nchannels(); ++i) {
+    if ( filled_ch[i] ) continue;
+    auto const wid =  geom->ChannelToWire(i).front();
+    short status = 0;
+    if (!chanFilt.IsPresent(i)) status = -1;
+    else status = (short)(chanFilt.Status(i));
+
+    auto iter = status_m.find(wid.planeID());
+    if(iter != status_m.end())
+      (*iter).second[wid.Wire] = status;
+    else{
+      std::vector<short> status_v(geom->Nwires(wid.planeID()),5);
+      status_v[wid.Wire] = status;
+      status_m.emplace(wid.planeID(),status_v);
+    }    
+  }
+  
+  // store
+  for(auto& plane_status : status_m) {
+    auto const& pid = plane_status.first;
+    auto& status_v = plane_status.second;
+    ::larlite::geo::PlaneID lite_pid(pid.Cryostat, pid.TPC, pid.Plane);
+    ::larlite::chstatus status;
+    status.set_status(lite_pid,std::move(status_v));
+    lite_chstatus->emplace_back(status);
+  }
 }
 
 //-------------------------------------------------------------------------------------------------

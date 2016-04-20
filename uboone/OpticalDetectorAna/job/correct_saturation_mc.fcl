@@ -11,9 +11,9 @@ correct_saturation: {
  verbose     : false 
  IncludeBeamgate : true
  #
- # NOTE: the following corrections are the same as those in correct_saturation_afterRun3701.fcl 
+ # NOTE: the following corrections are appropriate only for MC data
  #
- CalibrationCorr : [1.013,1.020,1.013,1.005,0.996,0.995,1.004,0.958,0.942,0.981,0.925,0.961,0.956,0.935,0.999,0.966,
-                    1.026,0.982,1.032,1.008,0.977,0.964,1.014,0.974,0.976,1.010,1.048,0.981,0.999,0.979,0.993,1.001]  # for data
+ CalibrationCorr : [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,
+                    1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]  # for MC 
 }
 END_PROLOG

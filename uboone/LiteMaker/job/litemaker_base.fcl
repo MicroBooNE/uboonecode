@@ -1,5 +1,3 @@
-BEGIN_PROLOG
-
 litemaker_base:
 {
   # module name
@@ -50,5 +48,3 @@ litemaker_base:
 
   AssociationLookUpMap: {}
 }
-
-END_PROLOG
