@@ -50,6 +50,7 @@
 #include <algorithm>
 #include "uboone/Utilities/TFileMetadataMicroBooNE.h"
 #include "uboone/Utilities/FileCatalogMetadataMicroBooNE.h"
+#include "art/Framework/Principal/SubRun.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/System/FileCatalogMetadata.h"
 #include "art/Utilities/OutputFileInfo.h"
@@ -82,7 +83,7 @@ util::TFileMetadataMicroBooNE::TFileMetadataMicroBooNE(fhicl::ParameterSet const
   reg.sPostOpenFile.watch(this, &TFileMetadataMicroBooNE::postOpenFile);
   reg.sPostEndJob.watch(this, &TFileMetadataMicroBooNE::postEndJob);
   reg.sPostProcessEvent.watch(this, &TFileMetadataMicroBooNE::postEvent);
-  
+  reg.sPostBeginSubRun.watch(this, &TFileMetadataMicroBooNE::postBeginSubRun);
 }
 
 //--------------------------------------------------------------------
@@ -170,10 +171,11 @@ void util::TFileMetadataMicroBooNE::postEvent(art::Event const& evt)
   art::RunNumber_t run = evt.run();
   art::SubRunNumber_t subrun = evt.subRun();
   art::EventNumber_t event = evt.event();
+  art::SubRunID srid = evt.id().subRunID();
       
   // save run, subrun and runType information once every subrun    
-  if (fSubRunNumbers.count(subrun) == 0){
-    fSubRunNumbers.insert(subrun);
+  if (fSubRunNumbers.count(srid) == 0){
+    fSubRunNumbers.insert(srid);
     md.fruns.push_back(make_tuple(run, subrun, frunType));   
   }
   
@@ -183,6 +185,24 @@ void util::TFileMetadataMicroBooNE::postEvent(art::Event const& evt)
   // event counter
   ++md.fevent_count;
     
+}
+
+//--------------------------------------------------------------------  	
+// PostSubRun callback.
+void util::TFileMetadataMicroBooNE::postBeginSubRun(art::SubRun const& sr)
+{
+
+  if(!fGenerateTFileMetadata) return;
+
+  art::RunNumber_t run = sr.run();
+  art::SubRunNumber_t subrun = sr.subRun();
+  art::SubRunID srid = sr.id();
+
+  // save run, subrun and runType information once every subrun
+  if (fSubRunNumbers.count(srid) == 0){
+    fSubRunNumbers.insert(srid);
+    md.fruns.push_back(make_tuple(run, subrun, frunType));
+  }
 }
 
 //--------------------------------------------------------------------
