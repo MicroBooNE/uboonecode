@@ -346,9 +346,9 @@ constexpr int kMaxShowerHits = 10000;  //maximum number of hits on a shower
 constexpr int kMaxTruth      = 10;     //maximum number of neutrino truth interactions
 constexpr int kMaxClusters   = 1000;   //maximum number of clusters;
 
-constexpr int kMaxNDaughtersPerPFP = 10; //maximum number of daughters per PFParticle
-constexpr int kMaxNClustersPerPFP  = 10; //maximum number of clusters per PFParticle
-constexpr int kMaxNPFPNeutrinos    = 5;  //maximum number of reconstructed neutrino PFParticles
+constexpr int kMaxNDaughtersPerPFP = 100; //maximum number of daughters per PFParticle
+constexpr int kMaxNClustersPerPFP  = 100; //maximum number of clusters per PFParticle
+constexpr int kMaxNPFPNeutrinos    = 10;  //maximum number of reconstructed neutrino PFParticles
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -4037,8 +4037,11 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
          
       // Set the daughter IDs.
       std::vector<size_t> daughterIDs = pfparticlelist[i]->Daughters();
-      
-      for (size_t j = 0; j < daughterIDs.size(); ++j)
+
+      if (daughterIDs.size() > kMaxNDaughtersPerPFP)
+        std::cerr << "Warning: the number of PFParticle daughters exceeds the maximum number. Only the first " << kMaxNDaughtersPerPFP << " will be used" << std::endl;
+
+      for (size_t j = 0; j < daughterIDs.size() && j < kMaxNDaughtersPerPFP; ++j)
         PFParticleData.pfp_daughterIDs[i][j] = daughterIDs[j];
          
       // Set the vertex ID.
@@ -4099,14 +4102,17 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
       else
         PFParticleData.pfp_isShower[i] = 0;
-      
+
       // Set the cluster IDs.
       auto clusterMapIter = pfParticleToClusterMap.find(pfparticlelist[i]);
       if (clusterMapIter != pfParticleToClusterMap.end()) {
           lar_pandora::ClusterVector pfParticleClusters = clusterMapIter->second;
           PFParticleData.pfp_numClusters[i] = pfParticleClusters.size();
-          
-          for (size_t j = 0; j < pfParticleClusters.size(); ++j) 
+
+          if (pfParticleClusters.size() > kMaxNClustersPerPFP)
+            std::cerr << "Warning: the number of PFParticle clusters exceeds the maximum number. Only the first " << kMaxNClustersPerPFP << " will be used" << std::endl;           
+
+          for (size_t j = 0; j < pfParticleClusters.size() && j < kMaxNClustersPerPFP; ++j) 
             PFParticleData.pfp_clusterIDs[i][j] = pfParticleClusters[j]->ID();
       }
       //else
