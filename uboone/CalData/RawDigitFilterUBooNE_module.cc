@@ -80,33 +80,16 @@ private:
 
     // Fcl parameters.
     std::string          fDigitModuleLabel;      ///< The full collection of hits
-    float                fTruncMeanFraction;     ///< Fraction for truncated mean
-    std::vector<float>   fRmsRejectionCutHi;     ///< Maximum rms for input channels, reject if larger
-    std::vector<float>   fRmsRejectionCutLow;    ///< Minimum rms to consider channel "alive"
-    std::vector<float>   fRmsSelectionCut;       ///< Don't use/apply correction to wires below this
-    std::vector<short>   fMinMaxSelectionCut;    ///< Plane by plane cuts for spread cut
-    unsigned int         fTheChosenWire;         ///< For example hist
-    double               fMaxPedestalDiff;       ///< Max pedestal diff to db to warn
+    bool                 fProcessNoise;          ///< Process the noise
     bool                 fApplyBinAverage;       ///< Do bin averaging to get rid of high frequency noise
-    std::vector<size_t>  fBinsToAverage;         ///< # bins to average by view
     bool                 fApplyTopHatFilter;     ///< Apply the top hat filter
-    size_t               fStructuringElement;    ///< Structuring element to use with Top Hat filter
     bool                 fSmoothCorrelatedNoise; ///< Should we smooth the noise?
-    bool                 fApplyCorSmoothing;     ///< Attempt to smooth the correlated noise correction?
-    bool                 fApplyFFTCorrection;    ///< Use an FFT to get the correlated noise correction
-    bool                 fFillFFTHistograms;     ///< Fill associated FFT histograms
-    std::vector<size_t>  fFFTHistsWireGroup;     ///< Wire Group to pick on
-    std::vector<size_t>  fFFTNumHists;           ///< Number of hists total per view
-    std::vector<double>  fFFTHistsStartTick;     ///< Starting tick for histograms
-    std::vector<double>  fFFTMinPowerThreshold;  ///< Threshold for trimming FFT power spectrum
     std::vector<size_t>  fNumWiresToGroup;       ///< If smoothing, the number of wires to look at
-    bool                 fFillHistograms;        ///< if true then will fill diagnostic hists
-    bool                 fRunFFTInput;           ///< Should we run FFT's on input wires?
-    bool                 fRunFFTCorrected;       ///< Should we run FFT's on corrected wires?
     bool                 fTruncateTicks;         ///< If true then drop channels off ends of wires
     unsigned int         fWindowSize;            ///< # ticks to keep in window
     unsigned int         fNumTicksToDropFront;   ///< # ticks to drop from front of waveform
-    bool                 fProcessNoise;          ///< Process the noise
+    std::vector<float>   fRmsRejectionCutHi;     ///< Maximum rms for input channels, reject if larger
+    std::vector<float>   fRmsRejectionCutLow;    ///< Minimum rms to consider channel "alive"
 
     // Statistics.
     int fNumEvent;        ///< Number of events seen.
@@ -136,9 +119,9 @@ DEFINE_ART_MODULE(RawDigitFilterUBooNE)
 RawDigitFilterUBooNE::RawDigitFilterUBooNE(fhicl::ParameterSet const & pset) :
                       fNumEvent(0),
                       fBinAverageAlg(pset),
-                      fCharacterizationAlg(pset),
-                      fCorCorrectAlg(pset),
-                      fFilterAlg(pset),
+                      fCharacterizationAlg(pset.get<fhicl::ParameterSet>("CharacterizationAlg")),
+                      fCorCorrectAlg(pset.get<fhicl::ParameterSet>("CorrelatedCorrectionAlg")),
+                      fFilterAlg(pset.get<fhicl::ParameterSet>("FilterAlg")),
                       fFFTAlg(pset.get<fhicl::ParameterSet>("FFTAlg")),
                       fPedestalRetrievalAlg(*lar::providerFrom<lariov::DetPedestalService>())
 {
@@ -168,33 +151,16 @@ RawDigitFilterUBooNE::~RawDigitFilterUBooNE()
 void RawDigitFilterUBooNE::reconfigure(fhicl::ParameterSet const & pset)
 {
     fDigitModuleLabel      = pset.get<std::string>        ("DigitModuleLabel",                                        "daq");
-    fTruncMeanFraction     = pset.get<float>              ("TruncMeanFraction",                                        0.15);
-    fRmsRejectionCutHi     = pset.get<std::vector<float>> ("RMSRejectionCutHi",     std::vector<float>() = {25.0,25.0,25.0});
-    fRmsRejectionCutLow    = pset.get<std::vector<float>> ("RMSRejectionCutLow",    std::vector<float>() = {0.70,0.70,0.70});
-    fRmsSelectionCut       = pset.get<std::vector<float>> ("RMSSelectionCut",       std::vector<float>() = {1.40,1.40,1.00});
-    fMinMaxSelectionCut    = pset.get<std::vector<short>> ("MinMaxSelectionCut",        std::vector<short>() = {13, 13, 11});
-    fTheChosenWire         = pset.get<unsigned int>       ("TheChosenWire",                                            1200);
-    fMaxPedestalDiff       = pset.get<double>             ("MaxPedestalDiff",                                           10.);
+    fProcessNoise          = pset.get<bool>               ("ProcessNoise",                                             true);
     fApplyBinAverage       = pset.get<bool>               ("ApplyBinAverage",                                          true);
-    fBinsToAverage         = pset.get<std::vector<size_t>>("NumBinsToAverage",              std::vector<size_t>() = {2,2,2});
     fApplyTopHatFilter     = pset.get<bool>               ("ApplyTopHatFilter",                                        true);
-    fStructuringElement    = pset.get<size_t>             ("StructuringElement",                                         30);
     fSmoothCorrelatedNoise = pset.get<bool>               ("SmoothCorrelatedNoise",                                    true);
-    fApplyCorSmoothing     = pset.get<bool>               ("ApplyCorSmoothing",                                        true);
-    fApplyFFTCorrection    = pset.get<bool>               ("ApplyFFTCorrection",                                       true);
-    fFillFFTHistograms     = pset.get<bool>               ("FillFFTHistograms",                                        true);
-    fFFTHistsWireGroup     = pset.get<std::vector<size_t>>("FFTHistsWireGroup",         std::vector<size_t>() = {1, 33, 34});
-    fFFTNumHists           = pset.get<std::vector<size_t>>("FFTNumWaveHistograms",       std::vector<size_t>() = {10,48,48});
-    fFFTHistsStartTick     = pset.get<std::vector<double>>("FFTWaveHistsStartTick", std::vector<double>() = {96.,96.,7670.});
-    fFFTMinPowerThreshold  = pset.get<std::vector<double>>("FFTPowerThreshold",     std::vector<double>() = {100.,75.,500.});
     fNumWiresToGroup       = pset.get<std::vector<size_t>>("NumWiresToGroup",          std::vector<size_t>() = {48, 48, 96});
-    fFillHistograms        = pset.get<bool>               ("FillHistograms",                                          false);
-    fRunFFTInput           = pset.get<bool>               ("RunFFTInputWires",                                        false);
-    fRunFFTCorrected       = pset.get<bool>               ("RunFFTCorrectedWires",                                    false);
     fTruncateTicks         = pset.get<bool>               ("TruncateTicks",                                           false);
     fWindowSize            = pset.get<size_t>             ("WindowSize",                                               6400);
     fNumTicksToDropFront   = pset.get<size_t>             ("NumTicksToDropFront",                                      2400);
-    fProcessNoise          = pset.get<bool>               ("ProcessNoise",                                             true);
+    fRmsRejectionCutHi     = pset.get<std::vector<float>> ("RMSRejectionCutHi",     std::vector<float>() = {25.0,25.0,25.0});
+    fRmsRejectionCutLow    = pset.get<std::vector<float>> ("RMSRejectionCutLow",    std::vector<float>() = {0.70,0.70,0.70});
 }
 
 //----------------------------------------------------------------------------

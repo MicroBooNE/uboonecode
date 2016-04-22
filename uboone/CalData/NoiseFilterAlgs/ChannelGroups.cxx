@@ -104,6 +104,14 @@ ChannelGroups::ChannelGroups(fhicl::ParameterSet const & pset)
     fGroupByViewAndWireMap[1][1367] = 1;
     
     // Do the W plane
+    // First group running from 2336 to 2399
+    for(size_t wire = 2336; wire < 2400; wire++) fGroupByViewAndWireMap[2][wire] = 1;
+    
+    // Second group but excluding the two good wires
+    for(size_t wire = 2401; wire < 2464; wire++)
+    {
+        if (wire != 2415) fGroupByViewAndWireMap[2][wire] = 1;
+    }
 
     // Report.
     mf::LogInfo("ChannelGroups") << "ChannelGroups configured\n";
