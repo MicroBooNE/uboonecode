@@ -26,7 +26,7 @@
 #include "art/Framework/Services/Optional/RandomNumberGenerator.h"
 
 // art extensions
-#include "artextensions/SeedService/SeedService.hh"
+#include "larsim/RandomUtils/LArSeedService.h"
 
 // larsoft includes
 #include "SimulationBase/MCTruth.h"
