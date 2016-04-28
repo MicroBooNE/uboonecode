@@ -38,6 +38,7 @@
 #include "DataFormat/flashmatch.h"
 #include "DataFormat/mucsdata.h"
 #include "DataFormat/mucsreco.h"
+#include "DataFormat/chstatus.h"
 #include <TStopwatch.h>
 /*
   This file defines certain specilization of templated functions.

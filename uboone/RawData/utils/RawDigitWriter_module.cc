@@ -131,8 +131,8 @@ namespace zmqds {
     {
 
       art::ServiceHandle<art::TFileService> tfs;
-      art::TFileDirectory tfbeamdir = tfs->mkdir( "RawData" );
-      fTRawDigits = tfbeamdir.make<TTree>("RawDigits","TPC Waveform data");
+      //art::TFileDirectory tfbeamdir = tfs->mkdir( "RawData" );
+      fTRawDigits = tfs->make<TTree>("RawDigits","TPC Waveform data");
       fTRawDigits->Branch( "run", &fRun, "run/I" );
       fTRawDigits->Branch( "subrun", &fSubRun, "subrun/I" );
       fTRawDigits->Branch( "event", &fEvent, "event/I" );
@@ -142,7 +142,7 @@ namespace zmqds {
       fTRawDigits->Branch( "wireid", &fWireID, "wireid/I" );
       fTRawDigits->Branch( "adcs", &rawdigits );
 
-      fTOpDetWaveforms = tfbeamdir.make<TTree>("OpDetWaveforms","PMT Readout Waveforms");
+      fTOpDetWaveforms = tfs->make<TTree>("OpDetWaveforms","PMT Readout Waveforms");
       fTOpDetWaveforms->Branch( "run", &fRun, "run/I" );
       fTOpDetWaveforms->Branch( "subrun", &fSubRun, "subrun/I" );
       fTOpDetWaveforms->Branch( "event", &fEvent, "event/I" );
