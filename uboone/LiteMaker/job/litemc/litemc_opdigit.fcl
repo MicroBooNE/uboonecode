@@ -1,7 +1,5 @@
 #include "litemaker_base.fcl"
 
-BEGIN_PROLOG
-
 litemc_opdigit: @local::litemaker_base
 
 litemc_opdigit.out_filename: "larlite_opdigit.root"
@@ -16,5 +14,4 @@ litemc_opdigit.DataLookUpMap:
 litemc_opdigit.AssociationLookUpMap:
 {}
 
-END_PROLOG
 

@@ -65,6 +65,9 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   lardata_RawData
 		   lardata_RecoBase
 		   lardata_RecoObjects
+                   larevt_Filters
+                   larevt_CalibrationDBI_IOVData
+                   larevt_CalibrationDBI_Providers
 		   ${UBOONECODE_LIB}
 		   ${SIMULATIONBASE}
 		   ${LARRECO_LIB}
