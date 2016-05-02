@@ -60,8 +60,8 @@ namespace ana {
     /// Function to create utility TTrees
     void SaveUtilityData(fhicl::ParameterSet const& pset);
     void SaveGeometry(fhicl::ParameterSet const& pset);
-    void SaveLArProperties(fhicl::ParameterSet const& pset);
-    void SaveDetectorProperties(fhicl::ParameterSet const& pset);
+    void SaveLArProperties(fhicl::ParameterSet const& detp_pset, fhicl::ParameterSet const& larp_pset);
+    void SaveDetectorProperties(fhicl::ParameterSet const& detp_pset, fhicl::ParameterSet const& larp_pset);
 
   private:
     bool _util_saved;
@@ -116,8 +116,10 @@ namespace ana {
 
   void UtilScanner::SaveUtilityData(fhicl::ParameterSet const& pset)
   {
-    SaveDetectorProperties(pset.get< fhicl::ParameterSet >("DetectorProperties"));
-    SaveLArProperties(pset.get< fhicl::ParameterSet >("LArProperties"));
+    SaveDetectorProperties(pset.get< fhicl::ParameterSet >("DetectorPropertiesService"),
+			   pset.get< fhicl::ParameterSet >("LArPropertiesService"));
+    SaveLArProperties(pset.get< fhicl::ParameterSet >("DetectorPropertiesService"),
+		      pset.get< fhicl::ParameterSet >("LArPropertiesService"));
     SaveGeometry(pset.get< fhicl::ParameterSet >("Geometry"));
     _util_saved=true;
   }
@@ -265,7 +267,8 @@ namespace ana {
     _geom_tree->Fill();
   }
 
-  void UtilScanner::SaveDetectorProperties(fhicl::ParameterSet const& pset)
+  void UtilScanner::SaveDetectorProperties(fhicl::ParameterSet const& detp_pset,
+					   fhicl::ParameterSet const& larp_pset)
   {
     if(_detp_tree) return;
     art::ServiceHandle<art::TFileService>  fileService;    
@@ -303,7 +306,8 @@ namespace ana {
     return;
   }
 
-  void UtilScanner::SaveLArProperties(fhicl::ParameterSet const& pset)
+  void UtilScanner::SaveLArProperties(fhicl::ParameterSet const& detp_pset,
+				      fhicl::ParameterSet const& larp_pset)
   {
     if(_larp_tree) return;
     auto const* _larp = lar::providerFrom<detinfo::LArPropertiesService>();
@@ -318,57 +322,57 @@ namespace ana {
     Double_t                         fRadiationLength = _larp->RadiationLength();  ///< g/cm^2
 
     Double_t                         fArgon39DecayRate = _larp->Argon39DecayRate(); ///<  decays per cm^3 per second
-  
+
     // Following parameters are for use in Bethe-Bloch formula for dE/dx.
-    Double_t fZ = pset.get<double>("AtomicNumber");       ///< Ar atomic number
-    Double_t fA = pset.get<double>("AtomicMass");         ///< Ar atomic mass (g/mol)
-    Double_t fI = pset.get<double>("ExcitationEnergy");   ///< Ar mean excitation energy (eV)
-    Double_t fSa= pset.get<double>("SternheimerA");       ///< Sternheimer parameter a
-    Double_t fSk= pset.get<double>("SternheimerK");       ///< Sternheimer parameter k
-    Double_t fSx0 = pset.get<double>("SternheimerX0");    ///< Sternheimer parameter x0
-    Double_t fSx1 = pset.get<double>("SternheimerX1");    ///< Sternheimer parameter x1
-    Double_t fScbar = pset.get<double>("SternheimerCbar");///< Sternheimer parameter Cbar
-  
+    Double_t fZ = larp_pset.get<double>("AtomicNumber");       ///< Ar atomic number
+    Double_t fA = larp_pset.get<double>("AtomicMass");         ///< Ar atomic mass (g/mol)
+    Double_t fI = larp_pset.get<double>("ExcitationEnergy");   ///< Ar mean excitation energy (eV)
+    Double_t fSa= detp_pset.get<double>("SternheimerA");       ///< Sternheimer parameter a
+    Double_t fSk= detp_pset.get<double>("SternheimerK");       ///< Sternheimer parameter k
+    Double_t fSx0 = detp_pset.get<double>("SternheimerX0");    ///< Sternheimer parameter x0
+    Double_t fSx1 = detp_pset.get<double>("SternheimerX1");    ///< Sternheimer parameter x1
+    Double_t fScbar = detp_pset.get<double>("SternheimerCbar");///< Sternheimer parameter Cbar
+
     // Optical parameters for Dar 
-    std::vector<Double_t> fFastScintEnergies = pset.get< std::vector<double> >("FastScintEnergies");
-    std::vector<Double_t> fFastScintSpectrum = pset.get< std::vector<double> >("FastScintSpectrum");
-    std::vector<Double_t> fSlowScintEnergies = pset.get< std::vector<double> >("SlowScintEnergies");
-    std::vector<Double_t> fSlowScintSpectrum = pset.get< std::vector<double> >("SlowScintSpectrum");
-    std::vector<Double_t> fAbsLengthEnergies = pset.get< std::vector<double> >("AbsLengthEnergies");
-    std::vector<Double_t> fAbsLengthSpectrum = pset.get< std::vector<double> >("AbsLengthSpectrum");
-    std::vector<Double_t> fRIndexEnergies    = pset.get< std::vector<double> >("RIndexEnergies"   );
-    std::vector<Double_t> fRIndexSpectrum    = pset.get< std::vector<double> >("RIndexSpectrum"   );
-    std::vector<Double_t> fRayleighEnergies  = pset.get< std::vector<double> >("RayleighEnergies" );
-    std::vector<Double_t> fRayleighSpectrum  = pset.get< std::vector<double> >("RayleighSpectrum" );
+    std::vector<Double_t> fFastScintEnergies = larp_pset.get< std::vector<double> >("FastScintEnergies");
+    std::vector<Double_t> fFastScintSpectrum = larp_pset.get< std::vector<double> >("FastScintSpectrum");
+    std::vector<Double_t> fSlowScintEnergies = larp_pset.get< std::vector<double> >("SlowScintEnergies");
+    std::vector<Double_t> fSlowScintSpectrum = larp_pset.get< std::vector<double> >("SlowScintSpectrum");
+    std::vector<Double_t> fAbsLengthEnergies = larp_pset.get< std::vector<double> >("AbsLengthEnergies");
+    std::vector<Double_t> fAbsLengthSpectrum = larp_pset.get< std::vector<double> >("AbsLengthSpectrum");
+    std::vector<Double_t> fRIndexEnergies    = larp_pset.get< std::vector<double> >("RIndexEnergies"   );
+    std::vector<Double_t> fRIndexSpectrum    = larp_pset.get< std::vector<double> >("RIndexSpectrum"   );
+    std::vector<Double_t> fRayleighEnergies  = larp_pset.get< std::vector<double> >("RayleighEnergies" );
+    std::vector<Double_t> fRayleighSpectrum  = larp_pset.get< std::vector<double> >("RayleighSpectrum" );
+
+    bool fScintByParticleType = larp_pset.get<bool>("ScintByParticleType");
+
+    Double_t fProtonScintYield        = larp_pset.get<double>("ProtonScintYield"     );
+    Double_t fProtonScintYieldRatio   = larp_pset.get<double>("ProtonScintYieldRatio");
+    Double_t fMuonScintYield          = larp_pset.get<double>("MuonScintYield"       );
+    Double_t fMuonScintYieldRatio     = larp_pset.get<double>("MuonScintYieldRatio"  );
+    Double_t fPionScintYield          = larp_pset.get<double>("PionScintYield"       );
+    Double_t fPionScintYieldRatio     = larp_pset.get<double>("PionScintYieldRatio"  );
+    Double_t fKaonScintYield          = larp_pset.get<double>("KaonScintYield"       );
+    Double_t fKaonScintYieldRatio     = larp_pset.get<double>("KaonScintYieldRatio"  );
+    Double_t fElectronScintYield      = larp_pset.get<double>("ElectronScintYield"   );
+    Double_t fElectronScintYieldRatio = larp_pset.get<double>("ElectronScintYieldRatio");
+    Double_t fAlphaScintYield         = larp_pset.get<double>("AlphaScintYield"      );
+    Double_t fAlphaScintYieldRatio    = larp_pset.get<double>("AlphaScintYieldRatio" );  
+
+    Double_t fScintResolutionScale = larp_pset.get<double>("ScintResolutionScale");
+    Double_t fScintFastTimeConst   = larp_pset.get<double>("ScintFastTimeConst"  );
+    Double_t fScintSlowTimeConst   = larp_pset.get<double>("ScintSlowTimeConst"  );
+    Double_t fScintBirksConstant   = larp_pset.get<double>("ScintBirksConstant"  );
+    Double_t fScintYield           = larp_pset.get<double>("ScintYield"          );
+    Double_t fScintYieldRatio      = larp_pset.get<double>("ScintYieldRatio"     );
   
-    bool fScintByParticleType = pset.get<bool>("ScintByParticleType");
+    bool fEnableCerenkovLight = larp_pset.get<bool>("EnableCerenkovLight");
 
-    Double_t fProtonScintYield        = pset.get<double>("ProtonScintYield"     );
-    Double_t fProtonScintYieldRatio   = pset.get<double>("ProtonScintYieldRatio");
-    Double_t fMuonScintYield          = pset.get<double>("MuonScintYield"       );
-    Double_t fMuonScintYieldRatio     = pset.get<double>("MuonScintYieldRatio"  );
-    Double_t fPionScintYield          = pset.get<double>("PionScintYield"       );
-    Double_t fPionScintYieldRatio     = pset.get<double>("PionScintYieldRatio"  );
-    Double_t fKaonScintYield          = pset.get<double>("KaonScintYield"       );
-    Double_t fKaonScintYieldRatio     = pset.get<double>("KaonScintYieldRatio"  );
-    Double_t fElectronScintYield      = pset.get<double>("ElectronScintYield"   );
-    Double_t fElectronScintYieldRatio = pset.get<double>("ElectronScintYieldRatio");
-    Double_t fAlphaScintYield         = pset.get<double>("AlphaScintYield"      );
-    Double_t fAlphaScintYieldRatio    = pset.get<double>("AlphaScintYieldRatio" );  
-
-    Double_t fScintResolutionScale = pset.get<double>("ScintResolutionScale");
-    Double_t fScintFastTimeConst   = pset.get<double>("ScintFastTimeConst"  );
-    Double_t fScintSlowTimeConst   = pset.get<double>("ScintSlowTimeConst"  );
-    Double_t fScintBirksConstant   = pset.get<double>("ScintBirksConstant"  );
-    Double_t fScintYield           = pset.get<double>("ScintYield"          );
-    Double_t fScintYieldRatio      = pset.get<double>("ScintYieldRatio"     );
-  
-    bool fEnableCerenkovLight = pset.get<bool>("EnableCerenkovLight");
-
-    std::vector<std::string> fReflectiveSurfaceNames = pset.get<std::vector<std::string> >("ReflectiveSurfaceNames");
-    std::vector<Double_t> fReflectiveSurfaceEnergies = pset.get<std::vector<double> >("ReflectiveSurfaceEnergies");;
-    std::vector<std::vector<Double_t> > fReflectiveSurfaceReflectances = pset.get<std::vector<std::vector<double> > >("ReflectiveSurfaceReflectances");
-    std::vector<std::vector<Double_t> > fReflectiveSurfaceDiffuseFractions = pset.get<std::vector<std::vector<double> > >("ReflectiveSurfaceDiffuseFractions");
+    std::vector<std::string> fReflectiveSurfaceNames = larp_pset.get<std::vector<std::string> >("ReflectiveSurfaceNames");
+    std::vector<Double_t> fReflectiveSurfaceEnergies = larp_pset.get<std::vector<double> >("ReflectiveSurfaceEnergies");;
+    std::vector<std::vector<Double_t> > fReflectiveSurfaceReflectances = larp_pset.get<std::vector<std::vector<double> > >("ReflectiveSurfaceReflectances");
+    std::vector<std::vector<Double_t> > fReflectiveSurfaceDiffuseFractions = larp_pset.get<std::vector<std::vector<double> > >("ReflectiveSurfaceDiffuseFractions");
 
     //--- Set TTree Branches ---//
     art::ServiceHandle<art::TFileService>  fileService;    
