@@ -50,7 +50,7 @@ NuMuCCInclusiveAlg::NuMuCCInclusiveAlg(fhicl::ParameterSet const &pset) :
 NuMuCCInclusiveAlg::~NuMuCCInclusiveAlg()
 {
 }
-    
+
 void NuMuCCInclusiveAlg::reconfigure(fhicl::ParameterSet const &inputPset)
 {
     // Assume we could be called externally with the top level module's complete parameter set
@@ -222,7 +222,7 @@ bool NuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     art::Ptr<recob::Vertex> vertex(vertexVecHandle,VertexCandidate);
                     art::Ptr<recob::Track>  track(trackVecHandle,TrackCandidate);
                     
-                    util::CreateAssn(*this, event, track, vertex, *vertexTrackAssociations);
+                    util::CreateAssn(*fMyProducerModule, event, track, vertex, *vertexTrackAssociations);
                 }
             }
         }  //end of if flag
