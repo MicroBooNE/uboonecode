@@ -11,7 +11,7 @@
  */
 
 // The main include
-#include "uboone/TPCNeutrinoIDFilter/TrackPairPlusVertexAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/TrackPairPlusVertexAlg.h"
 
 // Framework Includes
 #include "art/Framework/Core/FindManyP.h"

@@ -1,5 +1,19 @@
 BEGIN_PROLOG
 
+microboone_NuMuCCInclusiveAlg:
+{
+    TrackModuleLabel:   "pandoraNu"
+    VertexModuleLabel:  "pandoraNu"
+    OpFlashModuleLabel: "opflashSat"
+    FlashWidth:         80.
+    BeamMin:            3.55
+    BeamMax:            5.15
+    PEThresh:           50.
+    MinTrk2VtxDist:     5.
+    MinTrackLen:        75.
+    FillHistograms:     false
+}
+
 microboone_tpcTracksPlusVtxAlg:
 {
     TrackModuleLabel:           "trackkalmanhit"
@@ -34,6 +48,7 @@ microboone_tpcNeutrinoID:
 {
     module_type:                "TPCNeutrinoID"
     NeutrinoIDAlgName:          "TrackPairPlusVertexAlg"
+    NuMuCCInclusiveAlg:         @local::microboone_NuMuCCInclusiveAlg
     TPCTracksPlusVertexAlg:     @local::microboone_tpcTracksPlusVtxAlg
     TPCCluster2DNuAlg:          @local::microboone_tpcCluster2DNuAlg
 }
