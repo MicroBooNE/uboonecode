@@ -125,8 +125,6 @@ bool NuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
         
         for(const auto& opFlash : flashlist)
         {
-            std::cout << "Flash time: " << opFlash->Time() << ", PE: " << opFlash->TotalPE() << std::endl;
-            
             if (opFlash->Time() > fBeamMin && opFlash->Time() < fBeamMax && opFlash->TotalPE() > fPEThresh)
             {
                 flashtag = true;
