@@ -7,9 +7,10 @@
  */
 
 // Includes for algorithms
-#include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgFactory.h"
-#include "uboone/TPCNeutrinoIDFilter/TrackPairPlusVertexAlg.h"
-#include "uboone/TPCNeutrinoIDFilter/Cluster2DNuAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/NeutrinoIDAlgFactory.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/NuMuCCInclusiveAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/TrackPairPlusVertexAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/Cluster2DNuAlg.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -22,7 +23,12 @@ std::unique_ptr< NeutrinoIDAlgBase > NeutrinoIDAlgFactory::MakeNeutrinoIDAlg(fhi
     
     std::unique_ptr< NeutrinoIDAlgBase > ptr;
     
-    if(algName.compare("TrackPairPlusVertexAlg")==0)
+    if     (algName.compare("NuMuCCInclusiveAlg")==0)
+    {
+        std::unique_ptr< NeutrinoIDAlgBase > new_ptr(new NuMuCCInclusiveAlg(p));
+        ptr.swap(new_ptr);
+    }
+    else if(algName.compare("TrackPairPlusVertexAlg")==0)
     {
         std::unique_ptr< NeutrinoIDAlgBase > new_ptr(new TrackPairPlusVertexAlg(p));
         ptr.swap(new_ptr);

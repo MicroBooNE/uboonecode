@@ -2,8 +2,8 @@
 
 
 art_make(BASENAME_ONLY
-	LIBRARY_NAME TPCNeutrinoIDFilter
-	LIB_LIBRARIES
+	LIBRARY_NAME TPCNeutrinoIDAlgs
+	LIB_LIBRARIES 
 		     lardata_RecoBase
 		     lardata_AnalysisBase
 		     larcore_Geometry
@@ -25,7 +25,6 @@ art_make(BASENAME_ONLY
 		     ${ROOT_BASIC_LIB_LIST}
 		     ${Boost_SYSTEM_LIBRARY}
 	MODULE_LIBRARIES
-             TPCNeutrinoIDAlgs
 		     lardata_RecoBase
 		     lardata_AnalysisBase
 		     larcore_Geometry
@@ -47,8 +46,6 @@ art_make(BASENAME_ONLY
 		     ${ROOT_BASIC_LIB_LIST}
 		     ${Boost_SYSTEM_LIBRARY}
          )
-
-add_subdirectory(Algorithms)
 
 install_headers()
 install_source()
