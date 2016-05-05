@@ -33,7 +33,7 @@ services:
     filename          : "mem.db" 
   }
   RandomNumberGenerator: {} 
-  SeedService:  @local::microboone_seedservice
+  LArSeedService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data
   DatabaseUtil:           @local::microboone_database
   @table::microboone_reco_notpc_services

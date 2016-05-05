@@ -73,5 +73,5 @@ physics.producers.largeantd.KeepParticlesInVolumes: ["volCryostat"] #only keep M
 physics.producers.largeantd.InputLabels: ["corsikad"]
 #physics.producers.corsikad.ShowerFluxConstants:  [ 1.72e4, 9.2e3, 6.2e3, 9.2e3, 6.2e3]
 physics.producers.corsikad.ShowerFluxConstants:  [ 3440., 1840., 1240., 1840., 1240.]
-services.user.SeedService.policy: "perEvent"
-services.user.SeedService.algorithm: "EventTimestamp_v1"
+services.user.LArSeedService.policy: "perEvent"
+services.user.LArSeedService.algorithm: "EventTimestamp_v1"

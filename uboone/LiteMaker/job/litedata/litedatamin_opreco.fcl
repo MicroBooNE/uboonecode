@@ -1,5 +1,4 @@
 #include "litemaker_base.fcl"
-BEGIN_PROLOG
 
 litedatamin_opreco: @local::litemaker_base
 litedatamin_opreco.out_filename: "larlite_datamin_opreco.root"
@@ -24,4 +23,3 @@ litedatamin_opreco.AssociationLookUpMap:
             "sflashSatT","sflashSatFW","sflashSatSW","sflashSatCFD"]
 }
 
-END_PROLOG
