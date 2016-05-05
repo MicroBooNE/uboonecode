@@ -27,7 +27,7 @@ services:
   TimeTracker:         {}
   MemoryTracker:       {}
   RandomNumberGenerator: {} 
-  #SeedService:  @local::microboone_seedservice
+  #LArSeedService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data
   #PhotonVisibilityService: @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties  
