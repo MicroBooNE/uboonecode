@@ -50,7 +50,7 @@ NuMuCCInclusiveAlg::NuMuCCInclusiveAlg(fhicl::ParameterSet const &pset) :
 NuMuCCInclusiveAlg::~NuMuCCInclusiveAlg()
 {
 }
-
+    
 void NuMuCCInclusiveAlg::reconfigure(fhicl::ParameterSet const &inputPset)
 {
     // Assume we could be called externally with the top level module's complete parameter set
@@ -235,7 +235,7 @@ bool NuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
 bool NuMuCCInclusiveAlg::inFV(double x, double y, double z) const
 {
     double distInX = x - fGeometry->DetHalfWidth();
-    double distInY = y - fGeometry->DetHalfHeight();
+    double distInY = y;
     double distInZ = z - 0.5 * fGeometry->DetLength();
     
     if (fabs(distInX) < fDistToEdgeX && fabs(distInY) < fDistToEdgeY && fabs(distInZ) < fDistToEdgeZ) return true;
