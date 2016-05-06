@@ -14,6 +14,20 @@ microboone_NuMuCCInclusiveAlg:
     FillHistograms:     false
 }
 
+microboone_AltNuMuCCInclusiveAlg:
+{
+    TrackModuleLabel:   "pandoraNu"
+    VertexModuleLabel:  "pandoraNu"
+    OpFlashModuleLabel: "opflashSat"
+    FlashWidth:         10.
+    BeamMin:            3.55
+    BeamMax:            5.15
+    PEThresh:           50.
+    MinTrk2VtxDist:     5.
+    MinTrackLen:        75.
+    FillHistograms:     false
+}
+
 microboone_tpcTracksPlusVtxAlg:
 {
     TrackModuleLabel:           "trackkalmanhit"
@@ -49,6 +63,7 @@ microboone_tpcNeutrinoID:
     module_type:                "TPCNeutrinoID"
     NeutrinoIDAlgName:          "TrackPairPlusVertexAlg"
     NuMuCCInclusiveAlg:         @local::microboone_NuMuCCInclusiveAlg
+    AltNuMuCCInclusiveAlg:      @local::microboone_AltNuMuCCInclusiveAlg
     TPCTracksPlusVertexAlg:     @local::microboone_tpcTracksPlusVtxAlg
     TPCCluster2DNuAlg:          @local::microboone_tpcCluster2DNuAlg
 }
@@ -60,6 +75,20 @@ microboone_tpcneutrinoidfilter:
     VtxTrackAssnModuleLabelVec:   ["vtxPlusTrkPanKal"]
     Cluster2DCosmicProducerLabel: "fuzzyclustertag"
     Cluster2DCosmicClusterAssns:  "cluster2D"
+}
+
+microboone_numuccinc:
+{
+    module_type:        "numuCCIncFilter"
+    TrackModuleLabel:   "pandoraNu"
+    VertexModuleLabel:  "pandoraNu"
+    OpFlashModuleLabel: "opflashSat"
+    FlashWidth:         80.
+    BeamMin:            3.55
+    BeamMax:            5.15
+    PEThresh:           50.
+    MinTrk2VtxDist:     5.
+    MinTrackLen:        75.
 }
 
 microboone_tpcneutrinoidana:
