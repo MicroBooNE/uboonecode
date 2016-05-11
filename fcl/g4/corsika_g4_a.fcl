@@ -75,4 +75,4 @@ physics.producers.largeanta.KeepParticlesInVolumes: ["volCryostat"] #only keep M
 physics.producers.largeanta.InputLabels: ["corsikaa"]
 #physics.producers.corsikaa.ShowerFluxConstants:  [ 1.72e4, 9.2e3, 6.2e3, 9.2e3, 6.2e3]
 physics.producers.corsikaa.ShowerFluxConstants:  [ 3440., 1840., 1240., 1840., 1240.]
-services.user.SeedService.policy: "perEvent"
+services.user.LArSeedService.policy: "perEvent"

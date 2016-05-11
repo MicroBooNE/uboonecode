@@ -14,7 +14,7 @@ art_make( BASENAME_ONLY
 			BeamDAQ
 			${UB_DATA_TYPES}
 			${Boost_SERIALIZATION_LIBRARY}
-                        ${SEEDSERVICE_SERVICE} # artextensions
+                        larsim_RandomUtils_LArSeedService_service
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}

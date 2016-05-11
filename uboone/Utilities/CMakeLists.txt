@@ -6,7 +6,7 @@ set( uboone_util_lib_list lardata_Utilities_LArFFT_service
 			lardata_RecoBase
 			larcore_Geometry_Geometry_service
 			lardata_Utilities
-			${SEEDSERVICE_SERVICE} # artextensions
+			larsim_RandomUtils_LArSeedService_service
   			${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}

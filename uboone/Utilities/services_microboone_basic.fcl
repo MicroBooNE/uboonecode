@@ -34,7 +34,7 @@ microboone_basic_services:
  DatabaseUtil:                   @local::microboone_database
  DetectorClocksService:                    @local::microboone_detectorclocks
  SpaceCharge:                    @local::microboone_spacecharge
- SeedService:                    @local::microboone_seedservice
+ LArSeedService:                    @local::microboone_seedservice
 }
 
 END_PROLOG
