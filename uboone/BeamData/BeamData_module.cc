@@ -33,6 +33,7 @@
 #include "../BeamDAQ/beamRun.h"
 #include "../BeamDAQ/beamRunHeader.h"
 #include "../BeamDAQ/beamDAQConfig.h"
+#include "getFOM.h"
 
 #include <iostream>
 #include <iomanip>
@@ -78,8 +79,6 @@ public:
   int compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offsetT);
   void createBranches(std::string beam);
   void fillTreeData(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd);
-
-  float getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd);
 
 private:
 
@@ -188,9 +187,7 @@ void BeamData::beginSubRun(art::SubRun & sr)
     art::ServiceHandle<ifdh_ns::IFDH> ifdh;
     boost::filesystem::path inputPath(fInputFileName);
     std::string md = ifdh->getMetadata(inputPath.filename().string());
-    std::cout << "BeamData: metadata" << std::endl;
-    std::cout << md << std::endl;
-    std::cout << "BeamData: end metadata" << std::endl;
+    mf::LogInfo(__FUNCTION__)<< "BeamData: metadata" << std::endl<< md;
 
     // Set timezone to Fermilab local time (seconds west of utc).
     const char* tz = getenv("TZ");
@@ -222,12 +219,12 @@ void BeamData::beginSubRun(art::SubRun & sr)
     n1 = md.find("online.start_time_usec:");
     n1 = md.find(":",n1)+1;
     n2 = md.find("\n", n1);
-    std::cout << "Usec start time = " << md.substr(n1, n2-n1) << std::endl;
+    //std::cout << "Usec start time = " << md.substr(n1, n2-n1) << std::endl;
     long tstart_us=stol(md.substr(n1, n2-n1));
     n1 = md.find("online.end_time_usec:");
     n1 = md.find(":",n1)+1;
     n2 = md.find("\n", n1);
-    std::cout << "Usec end time = " << md.substr(n1, n2-n1) << std::endl;
+    //std::cout << "Usec end time = " << md.substr(n1, n2-n1) << std::endl;
     long tend_us=stol(md.substr(n1, n2-n1));
  
     // Restore time zone.
@@ -394,14 +391,11 @@ void BeamData::endJob()
 
 void BeamData::respondToOpenInputFile(art::FileBlock const& fb)
 {
-  std::cout << "BeamData: " << fb.fileName() << " opened." << std::endl;
   fInputFileName = fb.fileName();
-
 }
 
 void BeamData::respondToCloseInputFile(art::FileBlock const& fb)
 {
-  std::cout << "BeamData: " << fb.fileName() << " closed." << std::endl;
   fInputFileName.clear();
 }
 
@@ -484,6 +478,9 @@ void BeamData::produce(art::Event & e)
       
 	  for (int i=0;i<bh.getNumberOfDevices();i++) 
 	    beam_info->Set(bd[i].getDeviceName(),bd[i].getData());
+
+	  //calculate FOM
+	  beam_info->Set("FOM",bmd::getFOM(beam_name,bh,bd));
 	}
 	ready_for_next_det_event=true;
 	if (fBeamConf[beam_name].fWriteBeamData) 
@@ -518,7 +515,7 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
       ia_beam>>bdata;
       bd.push_back(bdata);
     }
-    fFOM=getFOM(beamline,bh,bd);
+    fFOM=bmd::getFOM(beamline,bh,bd);
     for (auto& bdata : bd) {
       for (auto it=fBeamConf[beamline].fTotalSums.begin();
 	   it!=fBeamConf[beamline].fTotalSums.end();it++) {
@@ -548,7 +545,7 @@ bool BeamData::rewindBeamFile(std::string beam_name, const ub_BeamHeader& bh, co
     //rewind beam file
     std::streampos nbytes=bh.getNumberOfBytesInRecord();
     fBeamConf[beam_name].fBeamStream->seekg(fBeamConf[beam_name].fBeamStream->tellg()-nbytes);
-    fFOM=getFOM(beam_name,bh,bd);
+    fFOM=bmd::getFOM(beam_name,bh,bd);
     for (auto& bdata : bd) {
       for (auto it=fBeamConf[beam_name].fTotalSums.begin();
 	   it!=fBeamConf[beam_name].fTotalSums.end();it++) {
@@ -605,15 +602,10 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offs
   return comp;
 }
 
-float BeamData::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
-{
-  return 1.0;
-}
-
 void BeamData::fillTreeData(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
 {
   mf::LogDebug(__FUNCTION__)<<"Filling "<<beam<<" ntuple";
-  fFOM=getFOM(beam, bh,bd);
+  fFOM=bmd::getFOM(beam, bh,bd);
   fSeconds=bh.getSeconds();
   fMilliSeconds=bh.getMilliSeconds();
 
