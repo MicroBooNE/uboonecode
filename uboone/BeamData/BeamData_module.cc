@@ -692,7 +692,7 @@ void BeamData::createBranches(std::string beam)
 	double* x=new double[it.second];
 	fBeamConf[beam].fTreeArr[it.first]=x;
 	ss <<"Creating vector branch for device "<<it.first.c_str()<<std::endl;
-	fBeamConf[beam].fTree->Branch(it.first.c_str(),&fBeamConf[beam].fTreeArr[it.first],
+	fBeamConf[beam].fTree->Branch(it.first.c_str(),fBeamConf[beam].fTreeArr[it.first],
 				      (it.first+"["+std::to_string(it.second)+"]/D").c_str());
       }
 
