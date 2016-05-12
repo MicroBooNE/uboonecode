@@ -205,6 +205,7 @@ outputs:
    dataTier:    "reconstructed-3d"
    compressionLevel: 1
    saveMemoryObjectThreshold: 0
+   fastCloning: false
  }
 }
 
