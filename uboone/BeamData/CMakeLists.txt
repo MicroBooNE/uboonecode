@@ -4,7 +4,7 @@ find_ups_product( ifdh_art v1_12_06 )
 include_directories ( $ENV{IFDHC_FQ_DIR}/inc )
 
 find_library( UB_DATA_TYPES NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LIB} )
-cet_make(LIBRARY_NAME BeamUtil LIBRARIES ${UB_DATA_TYPES} EXCLUDE BeamData_module.cc BeamDataQualityFilter_module.cc)
+cet_make(LIBRARY_NAME BeamUtil LIBRARIES ${UB_DATA_TYPES} ${ROOT_SPECTRUM} ${ROOT_BASIC_LIB_LIST} EXCLUDE BeamData_module.cc BeamDataQualityFilter_module.cc)
 
 simple_plugin ( BeamDataQualityFilter "module"
                    lardata_RawData
@@ -50,6 +50,10 @@ art_make( EXCLUDE BeamDataQualityFilter_module.cc
                         ${FHICLCPP}
                         ${CETLIB}
                         ${CLHEP}
+                        ${ROOT_BASIC_LIB_LIST}
+		LIB_LIBRARIES
+			${UB_DATA_TYPES}
+			${ROOT_SPECTRUM}
                         ${ROOT_BASIC_LIB_LIST}
         )
 
