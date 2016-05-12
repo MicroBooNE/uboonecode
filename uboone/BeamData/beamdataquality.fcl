@@ -8,7 +8,10 @@ beam_data_quality: {
     recalculate_fom: true
     intensity_range: [0.5, 6]
     horn_current_range: [172, 176]
-    fom_range: [0, 1]
+    #fom gives fraction of beam on target (0-1)
+    #when data is missing fom=2
+    #when tgt multiwire data is corrupt fom=3
+    fom_range: [0.95, 100]
     }
   numi: {
     beam_name: "numi"
@@ -16,7 +19,7 @@ beam_data_quality: {
     recalculate_fom: true
     intensity_range: [0.5, 80]
     horn_current_range: [198, 202]
-    fom_range: [0, 1]
+    fom_range: [0.95, 100]
     }
 }
 END_PROLOG
