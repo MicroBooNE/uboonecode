@@ -691,23 +691,23 @@
 
 <union name="CrossBeam">
    <first ref="CrossBeamA"/> <second ref="CrossBeamA"/>
-   <rotation name="CrossBeam93rot" unit="deg" x="93" y="0" z="0"/>
    <position name="posCrossBeamUnion0" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="CrossBeam93rot" unit="deg" x="93" y="0" z="0"/>
  </union>
  <union name="aTopCross0">
    <first ref="aTopCrossBeamA"/> <second ref="aTopCrossBeamA"/>
-   <rotationref ref="rPlus60AboutY"/>
    <position name="posaTopCrossUnion" unit="cm" x="0" y="0" z="0"/>
+   <rotationref ref="rPlus60AboutY"/>
  </union>
  <union name="aTopCross1">
     <first ref="aTopBeam"/> <second ref="aTopCross0"/>
-    <rotation name="rMinus60AboutY0" unit="deg" x="0" y="-30" z="0"/>
     <position name="posaCrossBeamUnion0" unit="cm" x="64" y="0" z="55.82"/>
+    <rotation name="rMinus60AboutY0" unit="deg" x="0" y="-30" z="0"/>
 </union>
  <union name="aTopCross2">
     <first ref="aTopCross1"/> <second ref="aTopCross0"/>
-    <rotation name="rMinus60AboutY1" unit="deg" x="0" y="-30" z="0"/>
     <position name="posaCrossBeamUnion1" unit="cm" x="-64" y="0" z="55.82"/>
+    <rotation name="rMinus60AboutY1" unit="deg" x="0" y="-30" z="0"/>
 </union>
  <union name="aTopCross">
     <first ref="aTopCross2"/> <second ref="aTopBeam"/>
@@ -716,8 +716,8 @@
 
  <union name="aTopCrossOuter0">
    <first ref="aTopCrossBeamB"/> <second ref="aTopCrossBeamB"/>
-   <rotation name="rPlus76AboutY" unit="deg" x="0" y="76" z="0" />
    <position name="posaTopCrossOutUnion" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="rPlus76AboutY" unit="deg" x="0" y="76" z="0" />
  </union>
  <union name="aTopCrossOuter1">
     <first ref="aTopBeam"/> <second ref="aTopCrossOuter0"/>
@@ -736,18 +736,18 @@
 
  <union name="aSideCross1">
    <first ref="aSideCross0"/> <second ref="aSideCross0"/>
-   <rotation name="rotSideCross33AboutY" unit="deg" x="0" y="66" z="0"/>
    <position name="posaSideCrossUnion" unit="cm" x="0" y="0" z="0"/>
+   <rotation name="rotSideCross33AboutY" unit="deg" x="0" y="66" z="0"/>
  </union>
  <union name="aSideCross2">
     <first ref="aTopBeam"/> <second ref="aSideCross1"/>
-    <rotation name="rMinus17AboutY" unit="deg" x="0" y="-33" z="0"/>
     <position name="posaSideCrossBeamUnion0" unit="cm" x="64" y="0" z="45.63"/>
+    <rotation name="rMinus17AboutY" unit="deg" x="0" y="-33" z="0"/>
 </union>
  <union name="aSideCross3">
     <first ref="aSideCross2"/> <second ref="aSideCross1"/>
-    <rotation name="rMinus60AboutY" unit="deg" x="0" y="-33" z="0"/>
     <position name="posaSideCrossBeamUnion1" unit="cm" x="-64" y="0" z="45.63"/>
+    <rotation name="rMinus60AboutY" unit="deg" x="0" y="-33" z="0"/>
 </union>
  <union name="aSideCross">
     <first ref="aSideCross2"/> <second ref="aTopBeam"/>
@@ -933,8 +933,8 @@
 
   <subtraction name="VacuumSpace">
    <first ref="VacuumBox"/> <second ref="LArTFVacuumSubtract"/>
-   <rotation name="rotLArTFVac" unit="deg" x="90" y="0" z="0"/>
    <position name="posLArTFVac" unit="cm" x="128.175" y="-25150.42" z="518.5" />
+   <rotation name="rotLArTFVac" unit="deg" x="90" y="0" z="0"/>
   </subtraction>
 
   <subtraction name="ConcreteWallAboveGrade">
