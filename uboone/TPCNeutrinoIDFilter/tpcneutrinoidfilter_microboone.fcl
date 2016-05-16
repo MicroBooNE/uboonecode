@@ -23,8 +23,9 @@ microboone_AltNuMuCCInclusiveAlg:
     BeamMin:            3.55
     BeamMax:            5.15
     PEThresh:           50.
-    MinTrk2VtxDist:     5.
     MinTrackLen:        75.
+    MinTrackDoca:       4.
+    MinTrackArcLen:     4.
     FillHistograms:     false
 }
 
