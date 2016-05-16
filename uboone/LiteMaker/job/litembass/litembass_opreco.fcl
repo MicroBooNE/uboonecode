@@ -1,5 +1,4 @@
 #include "litemaker_base.fcl"
-BEGIN_PROLOG
 
 litembass_opreco: @local::litemaker_base
 litembass_opreco.out_filename: "larlite_mbass_opreco.root"
@@ -24,4 +23,4 @@ litembass_opreco.AssociationLookUpMap:
             "sflashSatT","sflashSatFW","sflashSatSW","sflashSatCFD"]
 }
 
-END_PROLOG
+

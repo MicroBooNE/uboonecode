@@ -1,6 +1,5 @@
 #include "litemaker_base.fcl"
 
-BEGIN_PROLOG
 
 litemc_mcpart: @local::litemaker_base
 
@@ -17,4 +16,4 @@ litemc_mcpart.DataLookUpMap:
   mcpart:     ["largeant"]
 }
 
-END_PROLOG
+
