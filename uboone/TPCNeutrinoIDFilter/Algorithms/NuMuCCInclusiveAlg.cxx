@@ -26,6 +26,7 @@
 
 #include "lardata/RecoBase/Hit.h"
 #include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/PFParticle.h"
 #include "lardata/RecoBase/Vertex.h"
 #include "lardata/RecoBase/OpFlash.h"
 #include "lardata/AnalysisBase/CosmicTag.h"
@@ -93,13 +94,15 @@ void NuMuCCInclusiveAlg::produces(art::EDProducer* owner)
 {
     fMyProducerModule = owner;
     fMyProducerModule->produces< art::Assns<recob::Vertex, recob::Track> >();
+    fMyProducerModule->produces< art::Assns<recob::Vertex, recob::PFParticle> >();
 }
 
     
 bool NuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
 {
     // Agreed convention is to ALWAYS output to the event store so get a pointer to our collection
-    std::unique_ptr<art::Assns<recob::Vertex, recob::Track> > vertexTrackAssociations(new art::Assns<recob::Vertex, recob::Track>);
+    std::unique_ptr<art::Assns<recob::Vertex, recob::Track>>      vertexTrackAssociations(new art::Assns<recob::Vertex, recob::Track>);
+    std::unique_ptr<art::Assns<recob::Vertex, recob::PFParticle>> vertexPFParticleAssociations(new art::Assns<recob::Vertex, recob::PFParticle>);
     
     // Recover the hanles to the vertex and track collections we want to analyze.
     art::Handle<std::vector<recob::Vertex>>  vertexVecHandle;
@@ -118,6 +121,9 @@ bool NuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
     // Require valid handles, otherwise nothing to do
     if (vertexVecHandle.isValid() && vertexVecHandle->size() > 0 && trackVecHandle.isValid() && trackVecHandle->size() > 0)
     {
+        // Recover associations to PFParticles...
+        art::FindManyP<recob::PFParticle> trackToPFPartAssns(trackVecHandle,  event, fTrackModuleLabel);
+        
         //----loop over all the flashes and check if there are flashes within the beam
         //window and above the PE threshold
         const recob::OpFlash* flashPtr(0);
@@ -230,6 +236,14 @@ bool NuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     art::Ptr<recob::Track>  track(trackVecHandle,TrackCandidate);
                     
                     util::CreateAssn(*fMyProducerModule, event, track, vertex, *vertexTrackAssociations);
+                    
+                    // Find the associated PFParticle
+                    std::vector<art::Ptr<recob::PFParticle>> pfParticleVec = trackToPFPartAssns.at(track.key());
+                    
+                    if (!pfParticleVec.empty())
+                    {
+                        util::CreateAssn(*fMyProducerModule, event, pfParticleVec[0], vertex, *vertexPFParticleAssociations);
+                    }
                 }
             }
         }  //end of if flag
@@ -237,6 +251,7 @@ bool NuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
     
     // Add associations to event.
     event.put(std::move(vertexTrackAssociations));
+    event.put(std::move(vertexPFParticleAssociations));
     
     return true;
 }

@@ -159,13 +159,15 @@ void AltNuMuCCInclusiveAlg::produces(art::EDProducer* owner)
 {
     fMyProducerModule = owner;
     fMyProducerModule->produces< art::Assns<recob::Vertex, recob::Track> >();
+    fMyProducerModule->produces< art::Assns<recob::Vertex, recob::PFParticle> >();
 }
 
     
 bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
 {
     // Agreed convention is to ALWAYS output to the event store so get a pointer to our collection
-    std::unique_ptr<art::Assns<recob::Vertex, recob::Track> > vertexTrackAssociations(new art::Assns<recob::Vertex, recob::Track>);
+    std::unique_ptr<art::Assns<recob::Vertex, recob::Track>>      vertexTrackAssociations(new art::Assns<recob::Vertex, recob::Track>);
+    std::unique_ptr<art::Assns<recob::Vertex, recob::PFParticle>> vertexPFParticleAssociations(new art::Assns<recob::Vertex, recob::PFParticle>);
     
     // Recover the hanles to the vertex and track collections we want to analyze.
     art::Handle<std::vector<recob::Vertex>>  vertexVecHandle;
@@ -434,7 +436,8 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     if (trackVtxDoca < fMaxTrackDoca && trackVtxArcLen < fMaxTrackArcLen && projLength > fMinTrackLen && inFidVolStart)
                     {
                         nTrackMatchGood++;
-                        util::CreateAssn(*fMyProducerModule, event, track, primaryVertexVec[0], *vertexTrackAssociations);
+                        util::CreateAssn(*fMyProducerModule, event, track,      primaryVertexVec[0], *vertexTrackAssociations);
+                        util::CreateAssn(*fMyProducerModule, event, pfParticle, primaryVertexVec[0], *vertexPFParticleAssociations);
                     }
                 }
             }
@@ -451,6 +454,7 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
     
     // Add associations to event.
     event.put(std::move(vertexTrackAssociations));
+    event.put(std::move(vertexPFParticleAssociations));
     
     return true;
 }
