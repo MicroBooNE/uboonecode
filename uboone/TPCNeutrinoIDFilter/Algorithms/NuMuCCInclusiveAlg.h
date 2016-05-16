@@ -85,8 +85,9 @@ private:
     double                     fMinTrackLen;             ///< Minimum track length
     bool                       fDoHists;                 ///< Fill histograms
     
-    TH1D*                      fMaxDistHists;            ///< maximum distance all triangles
-    TH1D*                      fBestMaxDistHists;        ///< best max dist
+    TH1D*                      fNFlashPerEvent;          ///< number of flashes per event
+    TH1D*                      fFlashPE;                 ///< flash photoelectrons
+    TH1D*                      fFlashTime;               ///< flash timing
     
     art::EDProducer*           fMyProducerModule;        ///< The producer module driving us
     
