@@ -13,7 +13,7 @@ microboone_simwire:
  CompressionType:     "none"      #could also be none	
  SimDeadChannels:     false	
  
- GenNoise:            1        # 0 = no noise, 1 = time domain, 2 = freq. domain, 3 = data driven post-filter noise spectrum by Jyoti
+ GenNoise:            3       # 0 = no noise, 1 = time domain, 2 = freq. domain, 3 = data driven post-filter noise spectrum by Jyoti
  GetNoiseFromHisto:   false     #generate noise from histogram of freq-distribution
  NoiseFileFname:      "uboone_noise_v0.1.root"
  NoiseHistoName:      "NoiseFreq"  
@@ -25,7 +25,7 @@ microboone_simwire:
  TestCharge:          [20000] 
  Sample:              -1           # no test: 0-3 generates test output
 
- MakeNoiseDists:      false
+ MakeNoiseDists:      true
 }
 #microboone_simwireana: @local::standard_simwireana
 microboone_simwireana:

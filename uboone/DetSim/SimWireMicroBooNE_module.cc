@@ -138,7 +138,7 @@ namespace detsim {
     };
 
     //
-    // Needed for post-filter noise (pfn) generator by Jyoti (imp. by Kazu)
+    // Needed for post-filter noise (pfn) generator by Jyoti 
     //
     std::vector<double> _pfn_shaping_time_v;
     TF1  *_pfn_f1;
@@ -506,6 +506,32 @@ namespace detsim {
 //      }
 //    }
 
+    DoubleVec             noiseFactVec(N_VIEWS,0.);
+    auto tempNoiseVec = sss->GetNoiseFactVec();	
+    for (size_t v = 0; v != N_VIEWS; ++v) {
+      	
+      //the current sss only allows retrieval by channel, even though these things only change by view
+      //If these ever do change by channel, then this code automatically becomes incorrect!
+      double shapingTime = sss->GetShapingTime(first_channel_in_view[v]);	
+      double asicGain    = sss->GetASICGain(first_channel_in_view[v]);
+      
+      if (fShapingTimeOrder.find( shapingTime ) != fShapingTimeOrder.end() ) {
+        if(_pfn_shaping_time_v.size()<=v) _pfn_shaping_time_v.resize(v+1,-1);
+        if(_pfn_shaping_time_v[v]<0) _pfn_shaping_time_v[v]=shapingTime;
+        noiseFactVec[v]  = tempNoiseVec[v].at( fShapingTimeOrder.find( shapingTime )->second );
+        noiseFactVec[v] *= asicGain/4.7;
+      }
+      else {//Throw exception...
+        throw cet::exception("SimWireMicroBooNE")
+        << "\033[93m"
+        << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
+        << std::endl
+        << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
+        << "\033[00m"
+        << std::endl;
+      }
+    }
+
     
     //--------------------------------------------------------------------
     //
@@ -844,14 +870,22 @@ namespace detsim {
     _pfn_MyPoisson->SetParameters(params);
     _pfn_f1->SetParameters(fitpar);
 
-    //To assign a random number to variable X
-    for(size_t i=0; i<waveform_size; i++)
-      _pfn_rho_v[i] = _pfn_MyPoisson->GetRandom() * _pfn_f1->Eval(i);
+    Int_t n = waveform_size;
 
     TVirtualFFT::SetTransform(0);
     //**Inverse FFT**//
     TRandom3 rand(0);
     for(size_t i=0; i<waveform_size; i++){
+
+      Double_t freq;
+      if (i < n/2.){
+        freq = (i)*2./n; //2 MHz digitization
+      }else{
+        freq = (n-i)*2./n;
+      }
+
+      _pfn_rho_v[i] = _pfn_f1->Eval(freq) * _pfn_MyPoisson->GetRandom();
+
       Double_t rho = _pfn_rho_v[i];
 
       Double_t phi = 2*TMath::Pi()*rand.Rndm(1) - TMath::Pi();
@@ -860,7 +894,6 @@ namespace detsim {
       _pfn_value_im[i] = phi*sin(phi)/((double)waveform_size);
     }
 
-    Int_t n = waveform_size;
 
     if(!_pfn_ifft) _pfn_ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     _pfn_ifft->SetPointsComplex(&_pfn_value_re[0],&_pfn_value_im[0]);
@@ -868,9 +901,9 @@ namespace detsim {
     TH1 *fb = 0;
     fb = TH1::TransformHisto(_pfn_ifft,fb,"Re");
 
-    for(size_t i=0; i<waveform_size; ++i)
+    for(size_t i=0; i<waveform_size; ++i) {
       noise[i] = fb->GetBinContent(i+1);
-
+    }
     /*
     double average=0;
     for(auto const& v : noise) average += v;
