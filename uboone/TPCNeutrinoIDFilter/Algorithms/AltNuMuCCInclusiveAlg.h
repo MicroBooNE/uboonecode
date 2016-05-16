@@ -14,10 +14,12 @@
 
 // LArSoft includes
 #include "larcore/Geometry/GeometryCore.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "lardata/DetectorInfo/DetectorClocks.h"
 
 // Root includes
 #include "TH1D.h"
+#include "TH2D.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -73,6 +75,7 @@ public:
 
 private:
     
+    double projectedLength(const recob::Track* track) const;
     bool inFV(const TVector3&) const;
     
     int traversePFParticleHierarchy(art::Handle<std::vector<recob::PFParticle>>& pfParticleHandle,
@@ -84,7 +87,8 @@ private:
                                     std::vector<art::Ptr<recob::Vertex>>&        vertexVec) const;
     
     void   getBestFlashTrackDist(const std::vector<art::Ptr<recob::OpFlash>>&, double, double, size_t&, double&) const;
-    double FlashTrackDist(double flash, double start, double end) const;
+    double FlashTrackDistInZ(double flash, double start, double end) const;
+    void   getTrackVertexDCA(const TVector3& vertex, const TVector3& trackStart, TVector3& trackDir, double& doca, double& arcLen) const;
     
     /**
      *  @ brief FHICL parameters.
@@ -102,12 +106,13 @@ private:
     double                     fBeamMin;                 ///< Cut on min beam time
     double                     fBeamMax;                 ///< Cut on max beam time
     double                     fPEThresh;                ///< Cut on PE threshold
-    double                     fMinTrk2VtxDist;          ///< Minimum track to vertex distance
     double                     fMinTrackLen;             ///< Minimum track length
+    double                     fMaxTrackDoca;            ///< Maximum track to vertex doca
+    double                     fMaxTrackArcLen;          ///< Maximum track arclen to trk/vtx doca
     bool                       fDoHists;                 ///< Fill histograms
     
-    TH1D*                      fMaxDistHists;            ///< maximum distance all triangles
-    TH1D*                      fBestMaxDistHists;        ///< best max dist
+    std::vector<TH1D*>         fTH1DVec;                 ///< histogram container
+    std::vector<TH2D*>         fTH2DVec;                 ///< 2D histogram container
     
     art::EDProducer*           fMyProducerModule;        ///< The producer module driving us
     
@@ -117,6 +122,7 @@ private:
      */
     geo::GeometryCore const*            fGeometry;           ///< pointer to the Geometry service
     detinfo::DetectorProperties const*  fDetector;           ///< Pointer to the detector properties
+    detinfo::DetectorClocks const*      fClocks;             ///< Pointer to the clock services
     /// @}
 };
 

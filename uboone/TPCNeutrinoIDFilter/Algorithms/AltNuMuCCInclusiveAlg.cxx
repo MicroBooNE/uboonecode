@@ -17,6 +17,7 @@
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "larcore/Geometry/PlaneGeo.h"
 #include "larcore/Geometry/WireGeo.h"
 #include "lardata/Utilities/AssociationUtil.h"
@@ -36,11 +37,46 @@
 // implementation follows
 
 namespace neutrinoid {
+    
+enum class TH1DLabels : size_t
+{
+    NFlashEvent,
+    NFlashBeam,
+    FlashPE,
+    FlashPEgt10,
+    FlashTime,
+    FlashTimegt10,
+    FlashPEBeam,
+    FlashTimeBeam,
+    FlashPEEmpty,
+    FlashTimeEmpty,
+    TrackFlash,
+    TrackMatches,
+    VertexContained,
+    TrackMatchGood,
+    DistToFlash,
+    ProjLength,
+    LengthInZ,
+    DistToFlashA,
+    ProjLengthA,
+    LengthInZA,
+    DistToVertex,
+    DocaToVertex,
+    ArcLenToVertex,
+    Count
+};
+    
+enum class TH2DLabels : size_t
+{
+    DocaVsArcLen,
+    Count
+};
 
 AltNuMuCCInclusiveAlg::AltNuMuCCInclusiveAlg(fhicl::ParameterSet const &pset) :
     fMyProducerModule(0),
     fGeometry(lar::providerFrom<geo::Geometry>()),
-    fDetector(lar::providerFrom<detinfo::DetectorPropertiesService>())
+    fDetector(lar::providerFrom<detinfo::DetectorPropertiesService>()),
+    fClocks(lar::providerFrom<detinfo::DetectorClocksService>())
 {
     this->reconfigure(pset);
 }
@@ -69,8 +105,9 @@ void AltNuMuCCInclusiveAlg::reconfigure(fhicl::ParameterSet const &inputPset)
     fBeamMin                 = pset.get<double>      ("BeamMin",                              3.55);
     fBeamMax                 = pset.get<double>      ("BeamMax",                              5.15);
     fPEThresh                = pset.get<double>      ("PEThresh",                              50.);
-    fMinTrk2VtxDist          = pset.get<double>      ("MinTrk2VtxDist",                         5.);
     fMinTrackLen             = pset.get<double>      ("MinTrackLen",                           75.);
+    fMaxTrackDoca            = pset.get<double>      ("MinTrackDoca",                           4.);
+    fMaxTrackArcLen          = pset.get<double>      ("MinTrackArcLen",                         4.);
     
     fDoHists                 = pset.get<bool>        ("FillHistograms",                      false);
 }
@@ -82,8 +119,37 @@ void AltNuMuCCInclusiveAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs)
         // Define the histograms. Putting semi-colons around the title
         // causes it to be displayed as the x-axis label if the histogram
         // is drawn.
-        fMaxDistHists     = tfs->make<TH1D>("TriangleMaxDist", "Max distance for each triangle found",            2000, 0, 1000);
-        fBestMaxDistHists = tfs->make<TH1D>("TriBestMaxDist",  "Max distance for the best triangle in the event", 2000, 0, 1000);
+        fTH1DVec.resize(size_t(TH1DLabels::Count));
+        
+        fTH1DVec[size_t(TH1DLabels::NFlashEvent)]     = tfs->make<TH1D>("NFlashEvent",     ";Flash/Event",     200,   0.,   200.);
+        fTH1DVec[size_t(TH1DLabels::NFlashBeam)]      = tfs->make<TH1D>("NFlashBeam",      ";Flash/Beam Win",   10,   0.,    10.);
+        fTH1DVec[size_t(TH1DLabels::FlashPE)]         = tfs->make<TH1D>("FlashPE",         ";PE",              100,   0.,   100.);
+        fTH1DVec[size_t(TH1DLabels::FlashPEgt10)]     = tfs->make<TH1D>("FlashPEgt10",     ";PE",              100,   0.,   100.);
+        fTH1DVec[size_t(TH1DLabels::FlashTime)]       = tfs->make<TH1D>("FlashTime",       ";Flash Time(us)",  100, -10.,    30.);
+        fTH1DVec[size_t(TH1DLabels::FlashTimegt10)]   = tfs->make<TH1D>("FlashTimegt10",   ";Flash Time(us)",  100, -10.,    30.);
+        
+        fTH1DVec[size_t(TH1DLabels::FlashPEBeam)]     = tfs->make<TH1D>("FlashPEBeam",     ";PE",              100,   0.,   100.);
+        fTH1DVec[size_t(TH1DLabels::FlashTimeBeam)]   = tfs->make<TH1D>("FlashTimeBeam",   ";Flash Time(us)",  100, -10.,    30.);
+        fTH1DVec[size_t(TH1DLabels::FlashPEEmpty)]    = tfs->make<TH1D>("FlashPEEmpty",    ";PE",              100,   0.,   100.);
+        fTH1DVec[size_t(TH1DLabels::FlashTimeEmpty)]  = tfs->make<TH1D>("FlashTimeEmpty",  ";Flash Time(us)",  100, -10.,    30.);
+        
+        fTH1DVec[size_t(TH1DLabels::TrackFlash)]      = tfs->make<TH1D>("TracksFlash",     ";# tracks",         25,   0.,    25.);
+        fTH1DVec[size_t(TH1DLabels::TrackMatches)]    = tfs->make<TH1D>("TracksMatched",   ";# tracks",         25,   0.,    25.);
+        fTH1DVec[size_t(TH1DLabels::VertexContained)] = tfs->make<TH1D>("VertexContained", ";# vertices",       25,   0.,    25.);
+        fTH1DVec[size_t(TH1DLabels::TrackMatchGood)]  = tfs->make<TH1D>("TracksMatGood",   ";# tracks",         25,   0.,    25.);
+        fTH1DVec[size_t(TH1DLabels::DistToFlash)]     = tfs->make<TH1D>("DistToFlash",     ";distance",        100,   0.,   100.);
+        fTH1DVec[size_t(TH1DLabels::ProjLength)]      = tfs->make<TH1D>("ProjLength",      ";Track Length",    250,   0.,  1000.);
+        fTH1DVec[size_t(TH1DLabels::LengthInZ)]       = tfs->make<TH1D>("LengthInZ",       ";Length in Z",     250,   0.,   500.);
+        fTH1DVec[size_t(TH1DLabels::DistToFlashA)]    = tfs->make<TH1D>("DistToFlashA",    ";distance",        100,   0.,   100.);
+        fTH1DVec[size_t(TH1DLabels::ProjLengthA)]     = tfs->make<TH1D>("ProjLengthA",     ";Track Length",    250,   0.,  1000.);
+        fTH1DVec[size_t(TH1DLabels::LengthInZA)]      = tfs->make<TH1D>("LengthInZA",      ";Length in Z",     250,   0.,   500.);
+        
+        fTH1DVec[size_t(TH1DLabels::DistToVertex)]    = tfs->make<TH1D>("DistToVertex",    ";Dist to Vtx",     100,   0.,    25.);
+        fTH1DVec[size_t(TH1DLabels::DocaToVertex)]    = tfs->make<TH1D>("DocaToVertex",    ";Doca to Vtx",     100,   0.,    25.);
+        fTH1DVec[size_t(TH1DLabels::ArcLenToVertex)]  = tfs->make<TH1D>("ArcLenToVertex",  ";ArcLen to Vtx",   100,   0.,    25.);
+        
+        fTH2DVec.resize(size_t(TH2DLabels::Count));
+        fTH2DVec[size_t(TH2DLabels::DocaVsArcLen)]    = tfs->make<TH2D>("DocaVsArcLen",    ";Doca;ArcLen",     100,   0.,    25., 100, 0., 25.);
     }
     
     return;
@@ -128,7 +194,45 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
         {
             if (opFlash->Time() > fBeamMin && opFlash->Time() < fBeamMax && opFlash->TotalPE() > fPEThresh)
                 flashVec.push_back(opFlash);
+            
+            if (fDoHists)
+            {
+                fTH1DVec[size_t(TH1DLabels::FlashPE)]->Fill(opFlash->TotalPE(), 1.);
+                fTH1DVec[size_t(TH1DLabels::FlashTime)]->Fill(opFlash->Time(), 1.);
+                
+                if (opFlash->TotalPE() > 10.)
+                {
+                    fTH1DVec[size_t(TH1DLabels::FlashPEgt10)]->Fill(opFlash->TotalPE(), 1.);
+                    fTH1DVec[size_t(TH1DLabels::FlashTimegt10)]->Fill(opFlash->Time(), 1.);
+                }
+            }
         }  //end of loop over all the flashes
+        
+        if (fDoHists)
+        {
+            fTH1DVec[size_t(TH1DLabels::NFlashEvent)]->Fill(flashlist.size(), 1.);
+            fTH1DVec[size_t(TH1DLabels::NFlashBeam)]->Fill(flashVec.size(), 1.);
+            
+            for(const auto& opFlash : flashlist)
+            {
+                if (!flashVec.empty())
+                {
+                    fTH1DVec[size_t(TH1DLabels::FlashPEBeam)]->Fill(opFlash->TotalPE(), 1.);
+                    fTH1DVec[size_t(TH1DLabels::FlashTimeBeam)]->Fill(opFlash->Time(), 1.);
+                }
+                else
+                {
+                    fTH1DVec[size_t(TH1DLabels::FlashPEEmpty)]->Fill(opFlash->TotalPE(), 1.);
+                    fTH1DVec[size_t(TH1DLabels::FlashTimeEmpty)]->Fill(opFlash->Time(), 1.);
+                }
+            }
+        }
+        
+        // install some counters to keep track of things...
+        int nTrackFlash(0);
+        int nTracksMatched(0);
+        int nVerticesContained(0);
+        int nTrackMatchGood(0);
         
         // Do we have any "in time" flashes?
         if(!flashVec.empty())
@@ -148,7 +252,12 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
             
             FlashMatchTuple flashMatchTuple;
             
-            // Loop through the entire PFParticle collection...
+            using PFParticleTrackMap = std::map<size_t,size_t>;
+            
+            PFParticleTrackMap pfParticleTrackMap;
+            
+            // Loop through the entire PFParticle collection and match any tracks associated to either the primary
+            // or its immediate daughters (if a neutrino like PFParticle) to flashes
             for(size_t pfPartIdx = 0; pfPartIdx < pfParticleHandle->size(); pfPartIdx++)
             {
                 art::Ptr<recob::PFParticle> pfParticle(pfParticleHandle,pfPartIdx);
@@ -158,11 +267,17 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                 
                 // Recover vertices associated to this PFParticle
                 std::vector<art::Ptr<recob::Vertex>> primaryVertexVec = pfPartToVertexAssns.at(pfParticle.key());
+                
+                if (primaryVertexVec.empty()) mf::LogDebug("AltNuMuCCInclusiveAlg") << "*****>> Primary PFParticle with no associated vertex! Key: " << pfParticle.key() << std::endl;
 
                 if (!primaryVertexVec.empty())
                 {
                     // Start by looking at tracks associated to the Primary PFParticle
                     std::vector<art::Ptr<recob::Track>>  pfPartTrackVec  = pfPartToTrackAssns.at(pfParticle.key());
+                    
+                    int nAssociatedTracks(0);
+                    
+                    pfParticleTrackMap[pfParticle.key()] = pfPartTrackVec.size();
                     
                     // Primary track, if there is one, gets special handling
                     if (!pfPartTrackVec.empty())
@@ -173,28 +288,43 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                         
                         getBestFlashTrackDist(flashVec, track->Vertex().Z(), track->End().Z(), bestFlashIdx, bestDist);
                         
-                        flashMatchTuple.emplace_back(FlashMatch(bestFlashIdx, bestDist, pfParticle.key(), track.key()));
-                    }
-                    
-                    // Now loop over the Primary's daughters
-                    for(auto& daughterIdx : pfParticle->Daughters())
-                    {
-                        art::Ptr<recob::PFParticle> daughter(pfParticleHandle, daughterIdx);
+                        nAssociatedTracks++;
                         
-                        // recover tracks associated to this daughter
-                        pfPartTrackVec = pfPartToTrackAssns.at(daughter.key());
-                    
-                        // In all likelihood there is but one track associated to each daughter but loop just in case
-                        for(const auto& track : pfPartTrackVec)
-                        {
-                            size_t bestFlashIdx(0);
-                            double bestDist(0.);
+                        mf::LogDebug("AltNuMuCCInclusiveAlg") << "*****>> PFParticle primary with track, key: " << pfParticle.key() << ", pdg: " << pfParticle->PdgCode() << std::endl;
                         
-                            getBestFlashTrackDist(flashVec, track->Vertex().Z(), track->End().Z(), bestFlashIdx, bestDist);
-                            
+                        if (bestDist > -1.)
                             flashMatchTuple.emplace_back(FlashMatch(bestFlashIdx, bestDist, pfParticle.key(), track.key()));
+                    }
+
+                    // Require particle to be "neutrino like"
+                    if (pfParticle->PdgCode() == 14 || pfParticle->PdgCode() == 12)
+                    {
+                        // Now loop over the Primary's daughters
+                        for(auto& daughterIdx : pfParticle->Daughters())
+                        {
+                            art::Ptr<recob::PFParticle> daughter(pfParticleHandle, daughterIdx);
+                        
+                            // recover tracks associated to this daughter
+                            pfPartTrackVec = pfPartToTrackAssns.at(daughter.key());
+                            
+                            pfParticleTrackMap[pfParticle.key()] += pfPartTrackVec.size();
+                    
+                            // In all likelihood there is but one track associated to each daughter but loop just in case
+                            for(const auto& track : pfPartTrackVec)
+                            {
+                                size_t bestFlashIdx(0);
+                                double bestDist(0.);
+                            
+                                nAssociatedTracks++;
+                        
+                                getBestFlashTrackDist(flashVec, track->Vertex().Z(), track->End().Z(), bestFlashIdx, bestDist);
+                            
+                                if (bestDist > -1.)
+                                    flashMatchTuple.emplace_back(FlashMatch(bestFlashIdx, bestDist, pfParticle.key(), track.key()));
+                            }
                         }
                     }
+                    else mf::LogDebug("AltNuMuCCInclusiveAlg") << "*****>> PFParticle not neutrino like: " << pfParticle.key() << ", pdg: " << pfParticle->PdgCode() << std::endl;
                 }
             }
             
@@ -203,10 +333,37 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
             {
                 std::sort(flashMatchTuple.begin(),flashMatchTuple.end(),[](const auto& left, const auto& right){return std::get<1>(left) < std::get<1>(right);});
                 
+                nTrackFlash = flashMatchTuple.size();
+                
+                if (fDoHists)
+                {
+                    for(const auto& tupleVal : flashMatchTuple)
+                    {
+                        double distToFlash(std::get<1>(tupleVal));
+                        
+                        art::Ptr<recob::Track> track(trackVecHandle,std::get<3>(tupleVal));
+                        
+                        double projLength = projectedLength(track.get());
+                        double lengthInZ  = fabs((track->Vertex() - track->End()).Z());
+                        
+                        fTH1DVec[size_t(TH1DLabels::DistToFlashA)]->Fill(std::min(fabs(distToFlash),99.5), 1.);
+                        fTH1DVec[size_t(TH1DLabels::ProjLengthA)]->Fill(projLength, 1.);
+                        fTH1DVec[size_t(TH1DLabels::LengthInZA)]->Fill(lengthInZ, 1.);
+                    }
+                }
+                
                 for(const auto& tupleVal : flashMatchTuple)
                 {
+                    double distToFlash(std::get<1>(tupleVal));
+                    
                     // If the match distance is large then we're done
-                    if (std::get<1>(tupleVal) > fFlashWidth) break;
+                    if (distToFlash > fFlashWidth)
+                    {
+                        mf::LogDebug("AltNuMuCCInclusiveAlg") << "*****>> distance to flash above cut: " << distToFlash << std::endl;
+                        break;
+                    }
+                    
+                    nTracksMatched++;
 
                     art::Ptr<recob::PFParticle> pfParticle(pfParticleHandle,std::get<2>(tupleVal));
                     art::Ptr<recob::Track>      track(trackVecHandle,std::get<3>(tupleVal));
@@ -221,9 +378,18 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     
                     TVector3 primaryVertex(primaryVertexXYZ[0],primaryVertexXYZ[1],primaryVertexXYZ[2]);
                     
+                    if (!inFV(primaryVertex))
+                    {
+                        mf::LogDebug("AltNuMuCCInclusiveAlg") << "*****>> Vertex outside fiducial volume" << std::endl;
+                        continue;
+                    }
+                    
+                    nVerticesContained++;
+                    
                     // so we need to get the track direction sorted out.
                     TVector3 trackPos = track->Vertex();
                     TVector3 trackEnd = track->End();
+                    TVector3 trackDir = track->VertexDirection();
                     
                     // Take the closer end---------------------------------
                     double trackToVertexDist = (trackPos - primaryVertex).Mag();
@@ -232,24 +398,85 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     {
                         trackPos          = track->End();
                         trackEnd          = track->Vertex();
+                        trackDir          = -track->EndDirection();
                         trackToVertexDist = (trackPos - primaryVertex).Mag();
                     }
                     
-                    bool inFidVol = inFV(trackPos) && inFV(trackEnd);
+                    bool   inFidVolStart = inFV(trackPos);
+                    bool   inFidVolEnd   = inFV(trackEnd);
+//                    bool   inFidVol      = inFidVolStart && inFidVolEnd;
+                    double projLength    = projectedLength(track.get());
+                    double trackVtxDoca(0.);
+                    double trackVtxArcLen(0.);
                     
-                    if (trackToVertexDist < fMinTrk2VtxDist && inFidVol)
+                    getTrackVertexDCA(primaryVertex, trackPos, trackDir, trackVtxDoca, trackVtxArcLen);
+                    
+                    mf::LogDebug("AltNuMuCCInclusiveAlg") << "**> PFParticle key: " << pfParticle.key() << ", track key: " << track.key() << ", len: " << projectedLength(track.get()) << ", start: " << inFidVolStart << ", end: " << inFidVolEnd << ", distToFlash: " << distToFlash << ", # dt: " << pfParticleTrackMap[pfParticle.key()] << std::endl;
+                    mf::LogDebug("AltNuMuCCInclusiveAlg") << "    Track/Vertex doca: " << trackVtxDoca << ", arcLen: " << trackVtxArcLen << ", trackToVtx: " << trackToVertexDist << std::endl;
+                    
+                    // Do some histogramming
+                    if (fDoHists)
                     {
+                        art::Ptr<recob::Track> track(trackVecHandle,std::get<3>(tupleVal));
+                        double                 distToFlash(std::get<1>(tupleVal));
+                        double                 lengthInZ  = fabs((track->Vertex() - track->End()).Z());
+                        
+                        fTH1DVec[size_t(TH1DLabels::DistToFlash)]->Fill(std::min(fabs(distToFlash),99.5), 1.);
+                        fTH1DVec[size_t(TH1DLabels::ProjLength)]->Fill(projLength, 1.);
+                        fTH1DVec[size_t(TH1DLabels::LengthInZ)]->Fill(lengthInZ, 1.);
+                        fTH1DVec[size_t(TH1DLabels::DistToVertex)]->Fill(std::min(trackToVertexDist,24.8), 1.);
+                        fTH1DVec[size_t(TH1DLabels::DocaToVertex)]->Fill(std::min(trackVtxDoca,24.8), 1.);
+                        fTH1DVec[size_t(TH1DLabels::ArcLenToVertex)]->Fill(std::min(trackVtxArcLen,24.8), 1.);
+                        fTH2DVec[size_t(TH2DLabels::DocaVsArcLen)]->Fill(std::min(trackVtxDoca,24.8), std::min(trackVtxArcLen,24.8), 1.);
+                    }
+                    
+                    // Require that the track starts and passes to close to the vertex, that it has a minimum length, starts in the fiducial volume
+                    if (trackVtxDoca < fMaxTrackDoca && trackVtxArcLen < fMaxTrackArcLen && projLength > fMinTrackLen && inFidVolStart)
+                    {
+                        nTrackMatchGood++;
                         util::CreateAssn(*fMyProducerModule, event, track, primaryVertexVec[0], *vertexTrackAssociations);
                     }
                 }
             }
-        }  //end of if flag
+        }  //end of if on flashes
+
+        if (fDoHists)
+        {
+            fTH1DVec[size_t(TH1DLabels::TrackFlash)]->Fill(nTrackFlash, 1.);
+            fTH1DVec[size_t(TH1DLabels::TrackMatches)]->Fill(nTracksMatched, 1.);
+            fTH1DVec[size_t(TH1DLabels::VertexContained)]->Fill(nVerticesContained, 1.);
+            fTH1DVec[size_t(TH1DLabels::TrackMatchGood)]->Fill(nTrackMatchGood, 1.);
+        }
     }
     
     // Add associations to event.
     event.put(std::move(vertexTrackAssociations));
     
     return true;
+}
+    
+// Length of reconstructed track.
+//----------------------------------------------------------------------------
+double AltNuMuCCInclusiveAlg::projectedLength(const recob::Track* track) const
+{
+    double   result(0.);
+    TVector3 lastPoint(track->LocationAtPoint(0));
+    TVector3 lastDir(track->DirectionAtPoint(0));
+    int      n(track->NumberTrajectoryPoints());
+    
+    for(int i = 1; i < n; ++i)
+    {
+        const TVector3& newPoint = track->LocationAtPoint(i);
+        
+        TVector3 lastToNewPoint = newPoint - lastPoint;
+        double   arcLenToDoca   = lastDir.Dot(lastToNewPoint);
+        
+        result    += arcLenToDoca;
+        lastPoint  = lastPoint + arcLenToDoca * lastDir;
+        lastDir    = track->DirectionAtPoint(i);
+    }
+    
+    return result;
 }
     
 bool AltNuMuCCInclusiveAlg::inFV(const TVector3& pos) const
@@ -303,27 +530,32 @@ void AltNuMuCCInclusiveAlg::getBestFlashTrackDist(const std::vector<art::Ptr<rec
                                                   size_t&                                      flashIdx,
                                                   double&                                      bestDist) const
 {
-    bestDist = 10000.;
+    static const double veryLarge(1000.);
+    
+    double localBestDist(veryLarge);
     
     for(size_t flashIdx = 0; flashIdx < flashVec.size(); flashIdx++)
     {
         const art::Ptr<recob::OpFlash>& flash = flashVec.at(flashIdx);
         
-        double dist = FlashTrackDist(flash->ZCenter(), trackStart, trackEnd);
+        double dist = FlashTrackDistInZ(flash->ZCenter(), trackStart, trackEnd);
         
-        if (dist < bestDist)
+        if (dist < localBestDist)
         {
-            bestDist = dist;
+            localBestDist = dist;
             flashIdx = flashIdx;
         }
     }
+    
+    if (localBestDist < veryLarge) bestDist = localBestDist;
+    else                           bestDist = -1.;
     
     return;
 }
 
 //This function returns the distance between a flash and
 //a track (in one dimension, here used only for z direction)
-double AltNuMuCCInclusiveAlg::FlashTrackDist(double flash, double start, double end) const
+double AltNuMuCCInclusiveAlg::FlashTrackDistInZ(double flash, double start, double end) const
 {
     double flashStartDist = flash - start;
     double flashEndDist   = flash - end;
@@ -336,6 +568,22 @@ double AltNuMuCCInclusiveAlg::FlashTrackDist(double flash, double start, double 
         bestDist = std::min(fabs(flashStartDist),fabs(flashEndDist));
     
     return bestDist;
+}
+    
+void AltNuMuCCInclusiveAlg::getTrackVertexDCA(const TVector3& vertex, const TVector3& trackStart, TVector3& trackDir, double& doca, double& arcLen) const
+{
+    TVector3 trackDirUnit  = trackDir;
+    TVector3 trackToVertex = vertex - trackStart;
+    
+    trackDirUnit.SetMag(1.);
+    
+    arcLen = trackToVertex.Dot(trackDirUnit);
+    
+    TVector3 trackDocaPos = trackStart + arcLen * trackDirUnit;
+    
+    doca = (vertex - trackDocaPos).Mag();
+    
+    return;
 }
 
 } // namespace
