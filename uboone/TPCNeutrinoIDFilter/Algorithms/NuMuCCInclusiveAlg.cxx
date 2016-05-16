@@ -81,8 +81,9 @@ void NuMuCCInclusiveAlg::beginJob(art::ServiceHandle<art::TFileService>& tfs)
         // Define the histograms. Putting semi-colons around the title
         // causes it to be displayed as the x-axis label if the histogram
         // is drawn.
-        fMaxDistHists     = tfs->make<TH1D>("TriangleMaxDist", "Max distance for each triangle found",            2000, 0, 1000);
-        fBestMaxDistHists = tfs->make<TH1D>("TriBestMaxDist",  "Max distance for the best triangle in the event", 2000, 0, 1000);
+        fNFlashPerEvent   = tfs->make<TH1D>("NFlashEvent", ";Flash/Event",     200,   0.,  200.);
+        fFlashPE          = tfs->make<TH1D>("FlashPE",     ";PE",              100,   0.,  100.);
+        fFlashTime        = tfs->make<TH1D>("FlashTime",   ";Flash Time(us)",  100, -10.,   30.);
     }
     
     return;
@@ -136,7 +137,15 @@ bool NuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     flashmax = opFlash->TotalPE();
                 }
             }
+            
+            if (fDoHists)
+            {
+                fFlashPE->Fill(opFlash->TotalPE(), 1.);
+                fFlashTime->Fill(opFlash->Time(), 1.);
+            }
         }  //end of loop over all the flashes
+        
+        if (fDoHists) fNFlashPerEvent->Fill(flashlist.size(), 1.);
         
         if(flashtag)
         {
