@@ -19,6 +19,9 @@ microboone_AltNuMuCCInclusiveAlg:
     TrackModuleLabel:   "pandoraNu"
     VertexModuleLabel:  "pandoraNu"
     OpFlashModuleLabel: "opflashSat"
+    DistToEdgeX:        2.
+    DistToEdgeY:        20.
+    DistToEdgeZ:        10.
     FlashWidth:         10.
     BeamMin:            3.55
     BeamMax:            5.15
