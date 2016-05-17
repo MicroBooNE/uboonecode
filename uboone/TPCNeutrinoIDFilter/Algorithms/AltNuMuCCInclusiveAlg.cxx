@@ -406,6 +406,7 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     
                     bool   inFidVolStart = inFV(trackPos);
                     bool   inFidVolEnd   = inFV(trackEnd);
+                    bool   endOkInY      = endPointOK(trackEnd);
 //                    bool   inFidVol      = inFidVolStart && inFidVolEnd;
                     double projLength    = projectedLength(track.get());
                     double trackVtxDoca(0.);
@@ -433,7 +434,7 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     }
                     
                     // Require that the track starts and passes to close to the vertex, that it has a minimum length, starts in the fiducial volume
-                    if (trackVtxDoca < fMaxTrackDoca && trackVtxArcLen < fMaxTrackArcLen && projLength > fMinTrackLen && inFidVolStart)
+                    if (trackVtxDoca < fMaxTrackDoca && trackVtxArcLen < fMaxTrackArcLen && projLength > fMinTrackLen && inFidVolStart && endOkInY)
                     {
                         nTrackMatchGood++;
                         util::CreateAssn(*fMyProducerModule, event, track,      primaryVertexVec[0], *vertexTrackAssociations);
@@ -490,6 +491,13 @@ bool AltNuMuCCInclusiveAlg::inFV(const TVector3& pos) const
     double distInZ = pos.Z() - 0.5 * fGeometry->DetLength();
     
     if (fabs(distInX) < fDistToEdgeX && fabs(distInY) < fDistToEdgeY && fabs(distInZ) < fDistToEdgeZ) return true;
+    
+    return false;
+}
+    
+bool AltNuMuCCInclusiveAlg::endPointOK(const TVector3& pos) const
+{
+    if (pos.Y() < fDistToEdgeY) return true;
     
     return false;
 }

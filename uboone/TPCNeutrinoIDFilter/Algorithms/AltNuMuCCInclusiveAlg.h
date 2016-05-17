@@ -77,6 +77,7 @@ private:
     
     double projectedLength(const recob::Track* track) const;
     bool inFV(const TVector3&) const;
+    bool endPointOK(const TVector3& pos) const;
     
     int traversePFParticleHierarchy(art::Handle<std::vector<recob::PFParticle>>& pfParticleHandle,
                                     size_t                                       pfParticleIdx,
