@@ -97,7 +97,7 @@ void AltNuMuCCInclusiveAlg::reconfigure(fhicl::ParameterSet const &inputPset)
     fVertexModuleLabel       = pset.get<std::string> ("VertexModuleLabel",             "pandoraNu");
     fOpFlashModuleLabel      = pset.get<std::string> ("OpFlashModuleLabel",           "opFlashSat");
     
-    fDistToEdgeX             = fGeometry->DetHalfWidth()   - pset.get<double>("DistToEdgeX",    0.);
+    fDistToEdgeX             = fGeometry->DetHalfWidth()   - pset.get<double>("DistToEdgeX",    2.);
     fDistToEdgeY             = fGeometry->DetHalfHeight()  - pset.get<double>("DistToEdgeY",   20.);
     fDistToEdgeZ             = fGeometry->DetLength() / 2. - pset.get<double>("DistToEdgeZ",   10.);
     
@@ -407,6 +407,7 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     bool   inFidVolStart = inFV(trackPos);
                     bool   inFidVolEnd   = inFV(trackEnd);
                     bool   endOkInY      = endPointOK(trackEnd);
+                    bool   trackEndCheck = (pfParticle->Daughters().size() > 1 && endOkInY) || (pfParticle->Daughters().size() == 1 && inFidVolEnd);
 //                    bool   inFidVol      = inFidVolStart && inFidVolEnd;
                     double projLength    = projectedLength(track.get());
                     double trackVtxDoca(0.);
@@ -434,7 +435,7 @@ bool AltNuMuCCInclusiveAlg::findNeutrinoCandidates(art::Event & event) const
                     }
                     
                     // Require that the track starts and passes to close to the vertex, that it has a minimum length, starts in the fiducial volume
-                    if (trackVtxDoca < fMaxTrackDoca && trackVtxArcLen < fMaxTrackArcLen && projLength > fMinTrackLen && inFidVolStart && endOkInY)
+                    if (trackVtxDoca < fMaxTrackDoca && trackVtxArcLen < fMaxTrackArcLen && projLength > fMinTrackLen && inFidVolStart && trackEndCheck)
                     {
                         nTrackMatchGood++;
                         util::CreateAssn(*fMyProducerModule, event, track,      primaryVertexVec[0], *vertexTrackAssociations);
@@ -497,7 +498,7 @@ bool AltNuMuCCInclusiveAlg::inFV(const TVector3& pos) const
     
 bool AltNuMuCCInclusiveAlg::endPointOK(const TVector3& pos) const
 {
-    if (pos.Y() < fDistToEdgeY) return true;
+    if (fabs(pos.Y()) < fDistToEdgeY) return true;
     
     return false;
 }
