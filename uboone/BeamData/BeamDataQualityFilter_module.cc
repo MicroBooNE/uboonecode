@@ -17,9 +17,9 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/TriggerData.h"
-
+#include "RawData/BeamInfo.h"
+#include "RawData/TriggerData.h"
+#include <bitset>
 #include <memory>
 #include "getFOM.h"
 

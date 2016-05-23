@@ -38,6 +38,8 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
+#include <bitset>
 #include <algorithm>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/binary_iarchive.hpp>
@@ -51,6 +53,41 @@
 #include <memory>
 
 #include "TTree.h"
+
+namespace {
+
+  // Local function to return the name of the raw ancestor of a file
+  // with the specified run and subrun.
+
+  std::string get_raw_ancestor(const std::string& filename, uint32_t run, uint32_t subrun)
+  {
+    art::ServiceHandle<ifdh_ns::IFDH> ifdh;
+
+    std::ostringstream dim;
+    dim << "isparentof: ( file_name " << filename << ")"
+	<< " and run_number " << run << "." << subrun
+	<< " and availability: anylocation";
+    std::vector<std::string> parents = ifdh->translateConstraints(dim.str());
+    if(parents.size() == 0)
+
+      // If there are no parents, return the original file.
+
+      return filename;
+
+    else if(parents.size() == 1)
+
+      // If there is a single parent, return its raw ancestor.
+
+      return get_raw_ancestor(parents.front(), run, subrun);
+
+    else
+
+      // Don't know what to do if there is more than one parent.
+
+      return std::string();
+  }
+}
+
 
 class BeamData;
 
@@ -186,7 +223,8 @@ void BeamData::beginSubRun(art::SubRun & sr)
     // Get sam metadata for input file.
     art::ServiceHandle<ifdh_ns::IFDH> ifdh;
     boost::filesystem::path inputPath(fInputFileName);
-    std::string md = ifdh->getMetadata(inputPath.filename().string());
+    std::string raw_ancestor = get_raw_ancestor(inputPath.filename().string(), fRun, fSubRun);
+    std::string md = ifdh->getMetadata(raw_ancestor);
     mf::LogInfo(__FUNCTION__)<< "BeamData: metadata" << std::endl<< md;
 
     // Set timezone to Fermilab local time (seconds west of utc).
