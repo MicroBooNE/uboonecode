@@ -23,6 +23,9 @@
 #include <memory>
 #include "getFOM.h"
 
+#include "datatypes/ub_BeamHeader.h"
+#include "datatypes/ub_BeamData.h"
+
 class BeamDataQualityFilter;
 
 class BeamDataQualityFilter : public art::EDFilter {
@@ -108,7 +111,18 @@ bool BeamDataQualityFilter::filter(art::Event & e)
     std::map<std::string, std::vector<double>> datamap = beam->GetDataMap();
     float fom=-99999;
     if (bc->fRecalculateFOM) {
-      fom=1;//getFOM();
+      gov::fnal::uboone::datatypes::ub_BeamHeader ubbh;
+      std::vector<gov::fnal::uboone::datatypes::ub_BeamData> ubbdvec;
+      //currently beamHeader, timestamp not required by getFOM function
+      //filling only data which is required 
+      for (auto& bdata : datamap) {
+	gov::fnal::uboone::datatypes::ub_BeamData ubbd;
+	ubbd.setDeviceName(bdata.first);
+	ubbd.setData(bdata.second);
+	ubbdvec.push_back(ubbd);
+      } 
+      fom=bmd::getFOM(bc->fBeamName,ubbh,ubbdvec);
+      mf::LogDebug(__FUNCTION__)<<"Recalculated fom="<<fom;
     } else {
       //get it from BeamInfo
       if (datamap["FOM"].size()>0)
@@ -149,7 +163,6 @@ void BeamDataQualityFilter::beginJob()
 {
   // Implementation of optional member function here.
   for (auto& bc: fBeamCutMap) {
-    bc.second.fRecalculateFOM=false;
     bc.second.fNHornCurrentCut=0;
     bc.second.fNIntensityCut=0;
     bc.second.fNFOMCut=0;
