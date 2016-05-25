@@ -29,11 +29,11 @@ event_type : { bnb : 18
 
 // merge data from devices with timestamp within timewindow 
 // into single event. time given in milliseconds
-time_window : { bnb : 2000
+time_window : { bnb : 20
 	        numi : 60 }
 
 //padding and offset modify the begin/end time that is fetched from IFDB, actual timestamps not changed
-time_padding : { bnb: 30
+time_padding : { bnb: 2000
 	         numi: 100 }
 
 time_offset  : { bnb: 35.9
