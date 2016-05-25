@@ -19,6 +19,14 @@ services:
   }
 }
 
+microboone_tfile_metadata:
+{
+  JSONFileName:          "beamdataquality_hist.root.json"
+  GenerateTFileMetadata: true
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
+}
+
 #source is now a root file
 source:
 {
