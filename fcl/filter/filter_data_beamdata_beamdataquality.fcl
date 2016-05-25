@@ -73,6 +73,7 @@ outputs:
    dataTier:    "reconstructed"
    saveMemoryObjectThreshold: 0
    compressionLevel: 1
+   SelectEvents: { SelectEvents: [ filter ] }
  }
 }
 
