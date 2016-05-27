@@ -6,7 +6,7 @@
 // Generated at Thu Sep  3 16:51:01 2015 by Zarko Pavlovic using artmod
 // from cetpkgsupport v1_08_06.
 ////////////////////////////////////////////////////////////////////////
-
+#include <stdlib.h>
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/FileBlock.h"
 #include "art/Framework/Core/ModuleMacros.h"
@@ -370,11 +370,6 @@ void BeamData::endSubRun(art::SubRun & sr)
     (it->second).fBeamStream->close();
     delete (it->second).fBeamStream;
   }
-  
-}
-
-void BeamData::endJob()
-{
   std::stringstream ss;
   ss<<"Non beam events: "<<fNonBeamCount<<std::endl;
   for (int i=0;i<120;i++) ss<<"=";
@@ -423,7 +418,13 @@ void BeamData::endJob()
   }
   for (int i=0;i<100;i++) ss<<"=";
   ss<<std::endl;
+
   mf::LogInfo(__FUNCTION__)<<ss.str();
+
+}
+
+void BeamData::endJob()
+{
   fBeamConf.clear();
 }
 
