@@ -7,7 +7,6 @@
 // from cetpkgsupport v1_08_06.
 ////////////////////////////////////////////////////////////////////////
 #include <stdlib.h>
-
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/FileBlock.h"
 #include "art/Framework/Core/ModuleMacros.h"
