@@ -35,8 +35,11 @@ microboone_analysistree:
  SaveMCShowerInfo:         true 
  SaveMCTrackInfo:          true 
  SaveHitInfo:              true
- SaveRawDigitInfo:         false  #set this to false by default since not everyone want rawdigits.
- SaveTrackInfo:            true
+ SaveRawDigitInfo:         false  #set this to false by default since not everyone want rawdigits. 
+ SaveCalWireInfo:          false #set this to false by default since not everyone want rawdigits.
+ SaveSimChannelInfo:       false #set this to false by default since not everyone want rawdigits.
+ SaveRawWaveFormInfo:      false #set this to false by default since not everyone wants this
+ SaveCalibWaveFormInfo:    false #set this to false by default since not everyone wants thisSaveTrackInfo:            true
  SaveVertexInfo:           true
  SavePandoraNuVertexInfo: true
  SaveClusterInfo:          true
