@@ -1573,6 +1573,10 @@ namespace microboone {
     bool isCosmics;      ///< if it contains cosmics
     bool fSaveCaloCosmics; ///< save calorimetry information for cosmics
     float fG4minE;         ///< Energy threshold to save g4 particle info
+    float fRawDigitROI;    ///< Define ROI +/-sigma for raw digit range
+    float fCalWireROI;     ///< Define ROI +/-sigma for calibrated signal range
+    float fRawDigitThresh; ///< Define Raw digit threshold in terms of % of pulse height for raw digit acceptance 
+    float fCalWireThresh;  ///< Define cal wire threshold in terms of % of pulse height for cal wire acceptance 
     /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
 
@@ -3624,7 +3628,11 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   bIgnoreMissingShowers     (pset.get< bool >("IgnoreMissingShowers", false)),
   isCosmics(false),
   fSaveCaloCosmics          (pset.get< bool >("SaveCaloCosmics",false)),
-  fG4minE                   (pset.get< float>("G4minE",0.01))
+  fG4minE                   (pset.get< float>("G4minE",0.01)),
+  fRawDigitROI              (pset.get< float>("RawDigitROI",3.0)), 
+  fCalWireROI               (pset.get< float>("CalWireROI",3.0)), 
+  fRawDigitThresh           (pset.get< float>("RawDigitThresh",10)), 
+  fCalWireThresh            (pset.get< float>("CalWireThresh",10))  
 {
 
   if (fSavePFParticleInfo) fPFParticleModuleLabel = pset.get<std::string>("PFParticleModuleLabel");
@@ -4070,9 +4078,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       
       if (hitlist[i]->WireID().Plane==2){
           int dataSize = fmwire.at(i)[0]->NSignal();
-	  int t0 = hitlist[i]->PeakTime() - 3*(hitlist[i]->RMS());
+	  int t0 = hitlist[i]->PeakTime() - fCalWireROI*(hitlist[i]->RMS());
 	  if (t0<0) t0 = 0;
-	  int t1 = hitlist[i]->PeakTime() + 3*(hitlist[i]->RMS());
+	  int t1 = hitlist[i]->PeakTime() + fCalWireROI*(hitlist[i]->RMS());
 	  if (t1>=dataSize) t1 = dataSize-1;
 	  	  
           std::vector<float> signal(fmwire.at(i)[0]->Signal());
@@ -4095,7 +4103,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	    if (signal[j]>=0.5*fData->calwire_ph[i]){
 		++fData->calwire_fwhh[i];
 	    } 
-            if (signal[j]>=0.1*fData->calwire_ph[i]){
+            if (signal[j]>=(fCalWireThresh/100)*fData->calwire_ph[i]){
               fData->calwire_charge[i] += signal[j];
               mean_t  += double(j)*(signal[j]);
               mean_t2 += double(j)*double(j)*(signal[j]);
@@ -4117,9 +4125,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
      
 	    std::vector<short> rawadc(dataSize);
 	    raw::Uncompress(fmrd.at(i)[0]->ADCs(), rawadc, fmrd.at(i)[0]->Compression());
-	    int t0 = hitlist[i]->PeakTime() - 3*(hitlist[i]->RMS());
+	    int t0 = hitlist[i]->PeakTime() - fRawDigitROI*(hitlist[i]->RMS());
 	    if (t0<0) t0 = 0;
-	    int t1 = hitlist[i]->PeakTime() + 3*(hitlist[i]->RMS());
+	    int t1 = hitlist[i]->PeakTime() + fRawDigitROI*(hitlist[i]->RMS());
 	    if (t1>=dataSize) t1 = dataSize-1;
 	    fData->rawD_ph[i] = -1;
 	    fData->rawD_peakT[i] = -1;
@@ -4137,7 +4145,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	      if (rawadc[j]-ped>=0.5*fData->rawD_ph[i]){
 		++fData->rawD_fwhh[i];
 	      }
-	      if (rawadc[j]-ped>=0.1*fData->rawD_ph[i]){
+	      if (rawadc[j]-ped>=(fRawDigitThresh/100)*fData->rawD_ph[i]){
 		fData->rawD_charge[i] += rawadc[j]-ped;
 		mean_t += (double)j*(rawadc[j]-ped);
 		mean_t2 += (double)j*(double)j*(rawadc[j]-ped);

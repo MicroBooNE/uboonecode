@@ -47,6 +47,10 @@ microboone_analysistree:
  SaveShowerInfo:           true
  SaveCaloCosmics:          true
  G4minE:                   0.01
+ RawDigitROI:              3.0 
+ CalWireROI:               3.0 
+ RawDigitThresh:           10 
+ CalWireThresh:            10 
 }
 
 END_PROLOG
