@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Core/FindManyP.h"
+#include "canvas/Persistency/Common/FindManyP.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
@@ -23,9 +23,9 @@
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/geo.h"
 
-#include "lardata/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Track.h"
 
-#include "lardata/AnalysisBase/CosmicTag.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardata/Utilities/AssociationUtil.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"

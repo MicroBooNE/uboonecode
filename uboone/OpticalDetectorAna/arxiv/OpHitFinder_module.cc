@@ -13,7 +13,7 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
@@ -27,10 +27,10 @@
 #include "larana/OpticalDetector/OpHitFinder/PedAlgoRollingMean.h"
 #include "larana/OpticalDetector/OpHitFinder/PedAlgoUB.h"
 #include "larana/OpticalDetector/OpHitFinder/PulseRecoManager.h"
-#include "lardata/RecoBase/OpHit.h"
+#include "lardataobj/RecoBase/OpHit.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 #include <string>
 
 class OpHitFinder;

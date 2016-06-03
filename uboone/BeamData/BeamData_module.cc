@@ -14,7 +14,7 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
@@ -24,10 +24,10 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "larcore/SummaryData/POTSummary.h"
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/DAQHeader.h"
-#include "lardata/RawData/TriggerData.h"
+#include "larcoreobj/SummaryData/POTSummary.h"
+#include "lardataobj/RawData/BeamInfo.h"
+#include "lardataobj/RawData/DAQHeader.h"
+#include "lardataobj/RawData/TriggerData.h"
 #include "datatypes/raw_data_access.h"
 
 #include "../BeamDAQ/beamRun.h"

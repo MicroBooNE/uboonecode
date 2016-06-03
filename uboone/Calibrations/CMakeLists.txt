@@ -6,7 +6,7 @@ art_make( BASENAME_ONLY
 	  LIB_LIBRARIES
                         lardata_Utilities_LArFFT_service
 			${ART_FRAMEWORK_CORE}
-			${ART_UTILITIES}
+			art_Utilities canvas_Utilities
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
@@ -14,20 +14,20 @@ art_make( BASENAME_ONLY
 			${ROOT_BASIC_LIB_LIST}
           MODULE_LIBRARIES 
 			uboonecode_uboone_Calibrations
-			lardata_RawData
+			lardataobj_RawData
 			CalData
 			larcore_Geometry
 			larcore_Geometry_Geometry_service
 			larsim_MCCheater_BackTracker_service
-			larsim_Simulation
-			lardata_RecoBase
+			larsim_Simulation larsimobj_Simulation
+			lardataobj_RecoBase
 			lardata_RecoObjects  
 			larreco_RecoAlg
 			lardata_Utilities
 			larevt_Filters
                         lardata_Utilities_LArFFT_service
 			SignalShapingServiceMicroBooNE_service
-			${SIMULATIONBASE}
+			nusimdata_SimulationBase
 			${LARRECO_LIB}
 			${LARDATA_LIB}
                         ${ART_FRAMEWORK_CORE}
@@ -36,9 +36,9 @@ art_make( BASENAME_ONLY
 			${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-			${ART_PERSISTENCY_COMMON}
-			${ART_PERSISTENCY_PROVENANCE}
-			${ART_UTILITIES}
+			art_Persistency_Common canvas_Persistency_Common
+			art_Persistency_Provenance canvas_Persistency_Provenance
+			art_Utilities canvas_Utilities
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 	                ${FHICLCPP}

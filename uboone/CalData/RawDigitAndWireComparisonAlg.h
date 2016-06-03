@@ -14,8 +14,8 @@
 #include <exception>
 
 #include "fhiclcpp/ParameterSet.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RecoBase/Wire.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RecoBase/Wire.h"
 #include "WaveformPropertiesAlg.h"
 
 #include "TTree.h"

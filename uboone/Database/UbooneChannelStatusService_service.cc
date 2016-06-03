@@ -10,8 +10,8 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "larcore/Geometry/Geometry.h"
 
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
 
 namespace lariov{
 

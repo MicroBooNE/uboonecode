@@ -1,4 +1,4 @@
-#include "art/Persistency/Common/Wrapper.h"
+#include "canvas/Persistency/Common/Wrapper.h"
 
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEvent.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/Flash.hh"

@@ -1,8 +1,8 @@
 art_make( BASENAME_ONLY
           LIBRARY_NAME NoiseFilterAlgs
           LIB_LIBRARIES 
-			lardata_RawData
-                        lardata_RecoBase
+			lardataobj_RawData
+                        lardataobj_RecoBase
 	                lardata_Utilities
 	                ${FHICLCPP}
 			${CETLIB}
@@ -11,10 +11,10 @@ art_make( BASENAME_ONLY
 	  		larcore_Geometry_Geometry_service
 	                lardata_Utilities
 			larevt_Filters
-			lardata_RawData
+			lardataobj_RawData
 			larevt_CalibrationDBI_IOVData
 			larevt_CalibrationDBI_Providers
-			lardata_RecoBase
+			lardataobj_RecoBase
 			lardata_RecoBaseArt
 			SignalShapingServiceMicroBooNE_service
                         ${ART_FRAMEWORK_CORE}
@@ -22,9 +22,9 @@ art_make( BASENAME_ONLY
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-			${ART_PERSISTENCY_COMMON}
-			${ART_PERSISTENCY_PROVENANCE}
-			${ART_UTILITIES}
+			art_Persistency_Common canvas_Persistency_Common
+			art_Persistency_Provenance canvas_Persistency_Provenance
+			art_Utilities canvas_Utilities
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 	                ${FHICLCPP}

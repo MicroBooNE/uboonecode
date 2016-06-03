@@ -15,7 +15,7 @@
 #include "art/Framework/Principal/RunPrincipal.h"
 #include "art/Framework/Principal/SubRunPrincipal.h"
 #include "art/Framework/Principal/EventPrincipal.h"
-#include "art/Persistency/Provenance/SubRunID.h"
+#include "canvas/Persistency/Provenance/SubRunID.h"
 
 #include "datatypes/uboone_data_utils.h"
 #include "datatypes/raw_data_access.h"

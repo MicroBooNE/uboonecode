@@ -30,13 +30,13 @@
 #include "larsim/RandomUtils/LArSeedService.h"
 
 // larsoft includes
-#include "SimulationBase/MCTruth.h"
-#include "SimulationBase/MCParticle.h"
-#include "EventGeneratorBase/evgenbase.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
+#include "nutools/EventGeneratorBase/evgenbase.h"
 #include "larcore/Geometry/geo.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/SummaryData/RunData.h"
+#include "larcoreobj/SummaryData/RunData.h"
 
 
 // CRY related include files
@@ -44,7 +44,7 @@
 #include "CRYParticle.h"
 #include "CRYGenerator.h"
 #include "CLHEP/Random/RandEngine.h"
-#include "EventGeneratorBase/CRY/CRYHelper.h"
+#include "nutools/EventGeneratorBase/CRY/CRYHelper.h"
 
 
 /// A module to check the results from the Monte Carlo generator
