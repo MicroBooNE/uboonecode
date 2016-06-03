@@ -2,8 +2,8 @@
 
 # The *parent* line must the first non-commented line and defines this product and version
 # The version must be of the form vxx_yy_zz (e.g. v01_02_03)
-parent uboonecode v06_00_00_rc3
-defaultqual e9
+parent uboonecode v06_00_00_rc4
+defaultqual e10
 
 # These optional lines define where headers, libraries, and executables go and should
 # be used only if your product does not conform to the defaults.
@@ -31,10 +31,10 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
-larsoft         v06_00_00_rc3
-ubutil          v06_00_00_rc3
+larsoft         v06_00_00_rc4
+ubutil          v06_00_00_rc4
 uboone_data     v01_05_00
-uboonedaq_datatypes v6_19_00a_e9
+uboonedaq_datatypes v6_19_00_e9
 
 cetbuildtools	v5_02_02	-	only_for_build
 end_product_list
@@ -42,11 +42,11 @@ end_product_list
 
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
-# e9  - with gcc 4.9.3 and -std=c++1y
+# e10  - with gcc 4.9.3 and -std=c++1y
 qualifier	larsoft		ubutil		uboone_data	uboonedaq_datatypes	notes
-e9:debug	e9:debug	e9:debug	-nq-		e9:debug
-e9:opt		e9:opt		e9:opt		-nq-        	e9:opt
-e9:prof		e9:prof		e9:prof		-nq-        	e9:prof
+e10:debug	e10:debug	e10:debug	-nq-		e10:debug
+e10:opt		e10:opt		e10:opt		-nq-        	e10:opt
+e10:prof	e10:prof	e10:prof	-nq-        	e10:prof
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
