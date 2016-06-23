@@ -65,7 +65,7 @@ class MicroBooNEGeometryIteratorTestFixture:
 
 BOOST_FIXTURE_TEST_SUITE
   (GeometryIteratorsMicroBooNE, MicroBooNEGeometryIteratorTestFixture)
-// BOOST_GLOBAL_FIXTURE(MicroBooNEGeometryIteratorTestFixture)
+// BOOST_GLOBAL_FIXTURE(MicroBooNEGeometryIteratorTestFixture);
 
 
 BOOST_AUTO_TEST_CASE( AllTests )
