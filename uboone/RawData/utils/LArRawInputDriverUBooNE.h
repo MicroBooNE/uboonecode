@@ -110,6 +110,9 @@ namespace lris {
     std::vector<std::streampos>    fEventLocation;
     uint32_t                       fEventCounter; 
     uint32_t                       fNumberEventsInFile;
+    uint32_t                       fFinalEventCutOff;
+    std::ios::streampos            fPreviousPosition;
+    bool                           fCompleteFile;
     bool                           fHuffmanDecode;
     bool                           fUseGPS;    // fhicl parameter force use GPS time.
     bool                           fUseNTP;    // fhicl parameter force use NTP time.

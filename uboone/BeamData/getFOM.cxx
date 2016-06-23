@@ -87,6 +87,9 @@ float bmd::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<u
 			{
 				mtgth[i] = -bdata.getData()[i];
 				mtgtv[i] = -bdata.getData()[i+48];
+				/* filter multiwires */
+				if( mtgth[i] < 0.0 ) mtgth[i]=0.0;
+				if( mtgtv[i] < 0.0 ) mtgtv[i]=0.0;
 			}
 			good_mtgth = true;
 			good_mtgtv = true;
@@ -94,16 +97,16 @@ float bmd::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<u
 		}
 	}
 
-	if( !(good_tor860 && good_tor875 && good_hp875 && good_vp875 && good_hptg1 && good_vptg1 && good_mtgth && good_mtgtv) )
+	if( !((good_tor860 || good_tor875) && good_hp875 && good_vp875 && good_hptg1 && good_vptg1 && good_mtgth && good_mtgtv) )
 	{
 		return 2.0;	// check that all data is here; if not, return bogus value
 	}
 
 	/* add offset.  this should be a database call */
-	hp875[0] -= -3.401;
-	vp875[0] -=  1.475;
-	hptg1[0] -=  0.457;
-	vptg1[0] -=  0.389;
+	hp875[0] -= -3.59;
+	vp875[0] -=  0.11;
+	hptg1[0] -=  0.10;
+	vptg1[0] -=  -0.72;
 
 	/* extrapolate position to target multiwire */
 	double mtgtx = hp875[0] + (hptg1[0]-hp875[0])/2.755*3.790;
@@ -150,21 +153,32 @@ float bmd::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<u
 	/* this next section calculates fraction of beam off target */
 	if( checktgt==0 )
 	{
-		int npeaks=0;
-		double par[11];
-		double sigmax;
-		double sigmay;
-
-		double fmt;	/* fraction missing target */
-
-		profilesigma( mtgth, &npeaks, par );	// fit beam to gauss + linear background
-		sigmax = par[4];
-
-		profilesigma( mtgtv, &npeaks, par );
-		sigmay = par[4];
-
-		edgex = findedge(mtgtx, NSIGMA*sigmax);
-		edgey = findedge(mtgty, NSIGMA*sigmay);
+	  static TF1* fitfunc=new TF1("fitfunc","gaus",-12.5,12.5);
+	  static TH1F* htgtx = new TH1F("htgtx","",48,-12.5,12.5);
+	  static TH1F* htgty = new TH1F("htgty","",48,-12.5,12.5);
+	  
+	  for( int i=0; i<48; ++i ) {		
+	    htgtx->SetBinContent(i+1,mtgth[i]);
+	    htgty->SetBinContent(i+1,mtgtv[i]);
+	  }
+	  double intx=htgtx->GetSumOfWeights();
+	  double inty=htgty->GetSumOfWeights();
+	  for( int i=0; i<48; ++i ) {		
+	    htgtx->SetBinError(i+1,0.005*intx);
+	    htgty->SetBinError(i+1,0.005*inty);
+	  }
+	  fitfunc->SetParameter(0,htgtx->GetMaximum());
+	  fitfunc->SetParameter(1,htgtx->GetMean());
+	  fitfunc->SetParameter(2,htgtx->GetRMS());
+	  htgtx->Fit(fitfunc,"NQ");
+	  double sigmax=fitfunc->GetParameter(2);
+	  fitfunc->SetParameter(0,htgty->GetMaximum());
+	  fitfunc->SetParameter(1,htgty->GetMean());
+	  fitfunc->SetParameter(2,htgty->GetRMS());
+	  htgty->Fit(fitfunc,"NQ");
+	  double sigmay=fitfunc->GetParameter(2);
+	  edgex = findedge(mtgtx, NSIGMA*sigmax);
+	  edgey = findedge(mtgty, NSIGMA*sigmay);
 
 		if( edgex<TGTR && edgey<TGTR )	// check if beam is contained within target
 		{
@@ -172,12 +186,11 @@ float bmd::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<u
 		}
 		else	// if not, calculate fraction missing the target
 		{
-			fmt = fractionmisstarget( mtgtx, mtgty, sigmax, sigmay);
-			fom = 1.0 - fmt;
+		  fom = 1.0 - fractionmisstarget( mtgtx, mtgty, sigmax, sigmay);
 		}
 	}
   } else if (beam=="numi") {
-    fom=100;
+    fom=10;
   }
 
   return fom;

@@ -1,5 +1,4 @@
 #include "litemaker_base.fcl"
-BEGIN_PROLOG
 
 litembass_reco2d_cc: @local::litemaker_base
 litembass_reco2d_cc.out_filename: "larlite_mbass_reco2d_cc.root"
@@ -25,4 +24,4 @@ litembass_reco2d_cc.AssociationLookUpMap:
   ]
 }
 
-END_PROLOG
+

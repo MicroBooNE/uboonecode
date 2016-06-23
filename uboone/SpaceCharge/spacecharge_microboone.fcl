@@ -2,6 +2,8 @@
 
 BEGIN_PROLOG
 
-microboone_spacecharge: @local::standard_spacecharge
+microboone_spacecharge:  @local::standard_spacecharge
+microboone_spacecharge.InputFilename:  "SCEoffsets_MicroBooNE_E273.root"
+microboone_spacecharge.service_provider:  SpaceChargeServiceMicroBooNE
 
 END_PROLOG

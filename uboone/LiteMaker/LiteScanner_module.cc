@@ -132,6 +132,10 @@ private:
   bool fStoreAss;
   /// POTSummary producer label
   std::vector<std::string> fPOTSummaryLabel_v;
+  /// Association producer label (for those associations not made by product producers)
+  std::vector<std::string> fAssProducer_v;
+  /// Boolean flat to automatically scan associations made by producers
+  bool fScanAssByProducers;
   /// Boolean to enable unique file name
   std::string fOutFileName;
   /// Stream name
@@ -177,9 +181,9 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
     default:
 
       labels = data_pset.get<std::vector<std::string> >(::larlite::data::kDATA_TREE_NAME[i].c_str(),labels);
-      std::cout<<::larlite::data::kDATA_TREE_NAME[i].c_str()<<" data product..."<<std::endl;
+      //std::cout<<::larlite::data::kDATA_TREE_NAME[i].c_str()<<" data product..."<<std::endl;
       for(auto const& label : labels) {
-	std::cout<<"  --"<<label.c_str()<<std::endl;
+	//std::cout<<"  --"<<label.c_str()<<std::endl;
 	fAlg.Register(label,(::larlite::data::DataType_t)i);
       }
       labels.clear();
@@ -190,6 +194,11 @@ LiteScanner::LiteScanner(fhicl::ParameterSet const & p)
     }
   }
   fPOTSummaryLabel_v = p.get<std::vector<std::string> >("pot_labels");
+
+  fAssProducer_v.clear();
+  fAssProducer_v = p.get<std::vector<std::string> >("AssociationProducers",fAssProducer_v);
+
+  fScanAssByProducers = p.get<bool>("ScanAssByProducers",true);
 }
 /*
 template<> void LiteScanner::ScanAssociation<recob::Cluster>(const art::Event& evt, const size_t name_index);
@@ -502,8 +511,8 @@ template<class T> void LiteScanner::ScanData(const art::Event& evt, const size_t
     fAlg.ScanData(dh,lite_data);
   }else{
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
-    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
-    std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
+    //auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
+    //std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;
 
     evt.getByLabel(lite_id.second, dh);
 
@@ -596,94 +605,188 @@ template<class T> void LiteScanner::SaveAssociationSource(const art::Event& evt)
 template<class T> void LiteScanner::ScanAssociation(const art::Event& evt, const size_t name_index)
 { 
   auto lite_id = fAlg.AssProductID<T>(name_index);
-  //auto lite_data = _mgr.get_data(lite_id.first,lite_id.second);
-  auto lite_ass = (::larlite::event_ass*)(_mgr.get_data(::larlite::data::kAssociation,lite_id.second));
   art::Handle<std::vector<T> > dh;
   evt.getByLabel(lite_id.second,dh);
   if(!dh.isValid()) return;
 
-  switch(lite_id.first){
-  case ::larlite::data::kUndefined:    break;
-  case ::larlite::data::kEvent:        break;
-  case ::larlite::data::kGTruth:       break;
-  case ::larlite::data::kMCTruth:      break;
-  case ::larlite::data::kMCParticle:
-    fAlg.ScanAssociation<T, simb::MCTruth     > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kMCFlux:        break;
-  case ::larlite::data::kMCTrajectory:  break;
-  case ::larlite::data::kMCNeutrino:    break;
-  case ::larlite::data::kRawDigit:      break;
-  case ::larlite::data::kOpDetWaveform: break;
-  case ::larlite::data::kSimPhotons:    break;
-  case ::larlite::data::kTrigger:       break;
-  case ::larlite::data::kWire:          break;
-  case ::larlite::data::kHit:           break;
-  case ::larlite::data::kMuCSData:      break;
-  case ::larlite::data::kMuCSReco:      break;
-  case ::larlite::data::kCosmicTag:
-    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kOpHit:        break;
-  case ::larlite::data::kOpFlash:
-    fAlg.ScanAssociation<T, recob::OpHit      > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kCluster:
-    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kSeed:         break;
-  case ::larlite::data::kSpacePoint:
-    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kTrack:
-    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, anab::ParticleID  > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, anab::Calorimetry > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kShower:
-    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kVertex:
-    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, recob::EndPoint2D > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kEndPoint2D:
-    //fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kCalorimetry:
-    fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kParticleID:
-    fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
-    //fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
-    break;
-  case ::larlite::data::kPFParticle:
-    //fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Seed       > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
-    fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
-    break;
-  default:
-    break;
+  //std::cout<<"Inspecting association for type " << lite_id.first << " by " << lite_id.second << std::endl;
+
+  for(auto const& ass_producer : fAssProducer_v) {
+
+    auto lite_ass = (::larlite::event_ass*)(_mgr.get_data(::larlite::data::kAssociation,ass_producer));
+    
+    switch(lite_id.first){
+    case ::larlite::data::kUndefined:    break;
+    case ::larlite::data::kEvent:        break;
+    case ::larlite::data::kGTruth:       break;
+    case ::larlite::data::kMCTruth:      break;
+    case ::larlite::data::kMCParticle:
+      fAlg.ScanAssociation<T, simb::MCTruth     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kMCFlux:        break;
+    case ::larlite::data::kMCTrajectory:  break;
+    case ::larlite::data::kMCNeutrino:    break;
+    case ::larlite::data::kRawDigit:      break;
+    case ::larlite::data::kOpDetWaveform: break;
+    case ::larlite::data::kSimPhotons:    break;
+    case ::larlite::data::kTrigger:       break;
+    case ::larlite::data::kWire:          break;
+    case ::larlite::data::kHit:           break;
+    case ::larlite::data::kMuCSData:      break;
+    case ::larlite::data::kMuCSReco:      break;
+    case ::larlite::data::kCosmicTag:
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kOpHit:        break;
+    case ::larlite::data::kOpFlash:
+      fAlg.ScanAssociation<T, recob::OpHit      > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kCluster:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kSeed:         break;
+    case ::larlite::data::kSpacePoint:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kTrack:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, anab::ParticleID  > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, anab::Calorimetry > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kShower:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kVertex:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      //fAlg.ScanAssociation<T, recob::EndPoint2D > (evt,dh,lite_ass);
+      //fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kEndPoint2D:
+      //fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kCalorimetry:
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      //fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kParticleID:
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      //fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kPFParticle:
+      //fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Seed       > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
+      break;
+    default:
+      break;
+    }
+  }
+
+  if(fScanAssByProducers) {
+
+    auto lite_ass = (::larlite::event_ass*)(_mgr.get_data(::larlite::data::kAssociation,lite_id.second));
+    
+    switch(lite_id.first){
+    case ::larlite::data::kUndefined:    break;
+    case ::larlite::data::kEvent:        break;
+    case ::larlite::data::kGTruth:       break;
+    case ::larlite::data::kMCTruth:      break;
+    case ::larlite::data::kMCParticle:
+      fAlg.ScanAssociation<T, simb::MCTruth     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kMCFlux:        break;
+    case ::larlite::data::kMCTrajectory:  break;
+    case ::larlite::data::kMCNeutrino:    break;
+    case ::larlite::data::kRawDigit:      break;
+    case ::larlite::data::kOpDetWaveform: break;
+    case ::larlite::data::kSimPhotons:    break;
+    case ::larlite::data::kTrigger:       break;
+    case ::larlite::data::kWire:          break;
+    case ::larlite::data::kHit:           break;
+    case ::larlite::data::kMuCSData:      break;
+    case ::larlite::data::kMuCSReco:      break;
+    case ::larlite::data::kCosmicTag:
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kOpHit:        break;
+    case ::larlite::data::kOpFlash:
+      fAlg.ScanAssociation<T, recob::OpHit      > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kCluster:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kSeed:         break;
+    case ::larlite::data::kSpacePoint:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kTrack:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, anab::ParticleID  > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, anab::Calorimetry > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kShower:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kVertex:
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      //fAlg.ScanAssociation<T, recob::EndPoint2D > (evt,dh,lite_ass);
+      //fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kEndPoint2D:
+      //fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kCalorimetry:
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      //fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kParticleID:
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      //fAlg.ScanAssociation<T, recob::Shower     > (evt,dh,lite_ass);
+      break;
+    case ::larlite::data::kPFParticle:
+      //fAlg.ScanAssociation<T, recob::Hit        > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Cluster    > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::SpacePoint > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Track      > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Seed       > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::PCAxis     > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, recob::Vertex     > (evt,dh,lite_ass);
+      fAlg.ScanAssociation<T, anab::CosmicTag   > (evt,dh,lite_ass);
+      break;
+    default:
+      break;
+    }
   }
   //lite_ass->list_association();
 }

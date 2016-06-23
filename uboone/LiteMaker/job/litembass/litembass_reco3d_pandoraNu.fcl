@@ -1,5 +1,4 @@
 #include "litemaker_base.fcl"
-BEGIN_PROLOG
 
 litembass_reco3d_pandoraNu: @local::litemaker_base
 litembass_reco3d_pandoraNu.out_filename: "larlite_mbass_reco3d_pandoraNu.root"
@@ -73,4 +72,4 @@ litembass_reco3d_pandoraNu.AssociationLookUpMap:
   ]
 }
 
-END_PROLOG
+
