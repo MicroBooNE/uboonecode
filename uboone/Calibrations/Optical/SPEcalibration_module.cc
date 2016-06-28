@@ -103,6 +103,16 @@ private:
   std::vector<int>* event_nchfires;
   std::vector<double>* event_lastcosmicwin;
   std::vector<double>* event_lastsatcosmicwin;
+
+  std::vector<float>*  event_mucs_pmtarea;
+  float event_mucs_totarea;
+  float fMuCS_tmin;
+  float fMuCS_tmax;
+  TH1D* hmucs_twin;
+
+  // MuCS prompt pe calcualtion
+  float calculate_mucs_pe( const art::Event& evt, std::vector<float>& mucs_pmtarea, float trig_timestamp );
+
   int nsamples = 0;
   double event_maxamp;
 
@@ -187,11 +197,14 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
   AVESPE_RMSLIMIT  = p.get<double>( "AveSPEBaselineRMScut", 2.0 );         // cut to use when selecting pulses to make average SPE waveforms
   fHandleOwnTFile  = p.get<bool>( "HandleOwnTFile", false );                // module manages its own rootfiles instead of using TFileService
   fAutoSlot        = p.get<bool>( "AutoFindWaveformSlot", true );          // if true, automatically determins slot to get waveform (to handle 2 or 3 FEM)
+  fMuCS_tmin       = p.get<float>( "MuCSMinTime", -1.200 );                   // time cut to select MuCS discriminator windows
+  fMuCS_tmax       = p.get<float>( "MuCSMaxTime", -0.800 );                   // time cut to select MuCS discriminator windows
 
   // Data for each Beam Window
   event_nchfires = new std::vector<int>;
   event_lastcosmicwin = new std::vector<double>;
   event_lastsatcosmicwin = new std::vector<double>;
+  event_mucs_pmtarea = new std::vector<float>;
 
   if ( !fHandleOwnTFile ) {
     // User TFileService
@@ -223,7 +236,9 @@ SPEcalibration::SPEcalibration(fhicl::ParameterSet const& p)
       for (int j=0;j<cfd_width;j++)
       hSPE_norm[i]->SetBinContent( j+1, 1.0 );
     }
-    
+
+    // MuCS timing
+    hmucs_twin = out_file->make<TH1D>("mucs_twin","Time with respect to trigger of cosmics windows for MuCS events;microseconds",200, -10.0, 10.0 );
   }    
   else {
     // We will open a tree at the beginning of each subrun file
@@ -261,22 +276,23 @@ void SPEcalibration::CloseoutTFile( TFile* file ) {
   if (!fOutputActive)
     return;
 
-  std::cout << "[SPEcalibration] Closeout TFile" << std::endl;
-  fOutDir->cd();
-  fOutDir->ls();
-  fTouttree->Write();
-  fTpulsetree->Write();
-  fTevent->Write();
-  for (int i=0; i<32; i++) {
-    hSPE_ave[i]->Write();
-    hSPE_norm[i]->Write();
-  }
-  file->Close();
+  // std::cout << "[SPEcalibration] Closeout TFile" << std::endl;
+  // fOutDir->cd();
+  // fOutDir->ls();
+  // fTouttree->Write();
+  // fTpulsetree->Write();
+  // fTevent->Write();
+  // for (int i=0; i<32; i++) {
+  //   hSPE_ave[i]->Write();
+  //   hSPE_norm[i]->Write();
+  // }
+  // file->Close();
   fOutputActive = false;
 }
 
 void SPEcalibration::endJob() {
-  CloseoutTFile( fOutfile );
+  // if ( fHandleOwnTFile )
+  //   CloseoutTFile( fOutfile );
 }
 
 void SPEcalibration::SetupBranches() {
@@ -327,6 +343,9 @@ void SPEcalibration::SetupBranches() {
   fTevent->Branch("nchfires", "vector<int>", &event_nchfires );
   fTevent->Branch("dt_lastcosmicwin_usec",    "vector<double>", &event_lastcosmicwin );
   fTevent->Branch("dt_lastsatcosmicwin_usec", "vector<double>", &event_lastsatcosmicwin );
+  fTevent->Branch("mucs_pmtarea", "vector<float>", &event_mucs_pmtarea );
+  fTevent->Branch("mucs_totarea", &event_mucs_totarea, "mucs_totarea/F" );
+
 
   // Tree for PMT slam events (planned)
   // fTslam = out_file->make<TTree>("slamtree", "Data about fully staurated PMT events" );
@@ -531,6 +550,9 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   event_lastsatcosmicwin->resize( 32, 1.0 );
   nsamples = 0;
 
+  event_mucs_pmtarea->resize( 32, 0.0 );
+  event_mucs_totarea = 0.0;
+
   // get trigger time
   double trig_timestamp = ts->TriggerTime(); // usec from beginning of run (or subrun?)
 
@@ -570,6 +592,9 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
   trigs[7] = triggerbit & ( 0x1 << ::trigger::kFakeGate );
   trigs[8] = triggerbit & ( 0x1 << ::trigger::kFakeBeam );
   trigs[9] = triggerbit & ( 0x1 << ::trigger::kSpare );
+
+  if ( trigs[9]!=0 )
+    event_mucs_totarea = calculate_mucs_pe( evt, (*event_mucs_pmtarea), trig_timestamp );
 
   // auto-slot
   unsigned int autoslot = 0;
@@ -715,6 +740,71 @@ void SPEcalibration::analyzePulseFindingMode(const art::Event& evt)
 
   fTevent->Fill();
 }
+
+float SPEcalibration::calculate_mucs_pe( const art::Event& evt, std::vector<float>& mucs_pmtarea, float trig_timestamp ) {
+
+  std::cout << "[SPE Calibration] Calculate MuCS area" << std::endl;
+  
+  mucs_pmtarea.resize(32,0.0);
+  art::Handle< std::vector< raw::OpDetWaveform > > hgHandle;
+  art::Handle< std::vector< raw::OpDetWaveform > > lgHandle;
+  evt.getByLabel( OpDataModule, "OpdetCosmicHighGain", hgHandle);
+  evt.getByLabel( OpDataModule, "OpdetBeamLowGain",  lgHandle);
+  
+  std::set<int> use_these_lowgain_channels;
+  std::vector<raw::OpDetWaveform> const& hgwfms(*hgHandle);
+  for (auto &wfm : hgwfms)  {
+    int readout_ch = (int)wfm.ChannelNumber();
+    if ( readout_ch%100>=32 )
+      continue;
+    float dt_usec = wfm.TimeStamp()-trig_timestamp;
+    hmucs_twin->Fill( (double)dt_usec );
+    std::cout << " ch=" << readout_ch << " dt=" << dt_usec;
+    if ( dt_usec>=fMuCS_tmin  && dt_usec<=fMuCS_tmax ) {
+      // Candidate MuCS window
+      int femch = readout_ch%100;
+      auto maxelem = std::max_element( wfm.begin(), wfm.end() );
+      std::cout << " accepted";
+      if ( (int)(*maxelem)>4090 ) {
+	use_these_lowgain_channels.insert( femch );
+      }
+      else {
+	float area = 0;
+	for ( auto &adc : wfm ) {
+	  area += (adc-2047);
+	}
+	mucs_pmtarea.at(femch) = area;
+      }
+    }
+    std::cout <<  std::endl;
+  }
+
+  // if we saturated any high gain MuCS cosmics disc. windows, we fill it here
+  if ( use_these_lowgain_channels.size()>0 ) {
+    std::vector<raw::OpDetWaveform> const& lgwfms(*lgHandle);
+    for (auto &wfm : lgwfms)  {
+      int readout_ch = (int)wfm.ChannelNumber();
+      int femch = readout_ch%100;
+      if ( femch>=32 )
+	continue;
+      if ( use_these_lowgain_channels.find( femch )==use_these_lowgain_channels.end() ) continue;
+      float dt_usec = wfm.TimeStamp()-trig_timestamp;
+      if ( dt_usec>=fMuCS_tmin  && dt_usec<=fMuCS_tmax ) {
+	float area = 0;
+        for ( auto &adc : wfm ) {
+          area += (adc-2047);
+        }
+	mucs_pmtarea.at(femch) = area*10.0;
+      }
+    }
+  }
+  
+  float tot = 0.0;
+  for ( auto &pmtarea : mucs_pmtarea ) 
+    tot += pmtarea;
+  return tot;
+}
+
 
 
 DEFINE_ART_MODULE(SPEcalibration)

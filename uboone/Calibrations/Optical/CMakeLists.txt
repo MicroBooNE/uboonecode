@@ -1,7 +1,13 @@
+# Either set these here or set environment variables
+
+include_directories ( $ENV{SWTRIGGER_INCDIR} )
+find_library( SWTRIG_LIBBASE NAMES SWTriggerBase PATHS $ENV{SWTRIGGER_LIBDIR} )
+find_library( SWTRIG_LIBFEMU NAMES FEMBeamTrigger PATHS $ENV{SWTRIGGER_LIBDIR} )	 
+
 add_subdirectory(fcl)
 
 art_make( LIBRARY_NAME SPEcalibrationCode
-	  EXCLUDE SPEcalibration_module.cc FEMemulator_module.cc CalibrationFit.C
+	  EXCLUDE SPEcalibration_module.cc DumpPMTPos_module.cc CalibrationFit.C
 	  lardata_RawData
 	  UBOpReadoutMap_service
 	  LIB_LIBRARIES ${ART_FRAMEWORK_CORE} 
@@ -15,6 +21,23 @@ art_make( LIBRARY_NAME SPEcalibrationCode
                ${ART_UTILITIES}
 	       ${ROOT_BASIC_LIB_LIST}	     
 	       BASENAME_ONLY  
+	 MODULE_LIBRARIES
+	       UBOpReadoutMap_service
+	       uboone_RawData
+	       lardata_RawData
+	       lardata_RecoBase
+	       ${ART_FRAMEWORK_CORE}
+	       ${ART_FRAMEWORK_IO_SOURCES}
+               ${ART_FRAMEWORK_PRINCIPAL}
+               ${ART_FRAMEWORK_SERVICES_REGISTRY}
+               ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+               ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
+               ${ART_PERSISTENCY_COMMON}
+               ${ART_PERSISTENCY_PROVENANCE}
+               ${ART_UTILITIES}
+	       ${SWTRIG_LIBFEMU}
+	       ${SWTRIG_LIBBASE}
+	       ${ROOT_BASIC_LIB_LIST}	       
 	)
 		
 
@@ -35,25 +58,6 @@ simple_plugin( SPEcalibration "module"
 	       ${ROOT_BASIC_LIB_LIST}	       
                BASENAME_ONLY
              )
-
-simple_plugin( FEMemulator "module"
-	       SPEcalibrationCode
-	       OpticalSubEvents
-	       UBOpReadoutMap_service
-	       lardata_RawData
-	       ${ART_FRAMEWORK_CORE}
-	       ${ART_FRAMEWORK_IO_SOURCES}
-               ${ART_FRAMEWORK_PRINCIPAL}
-               ${ART_FRAMEWORK_SERVICES_REGISTRY}
-               ${ART_FRAMEWORK_SERVICES_OPTIONAL}
-               ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-               ${ART_PERSISTENCY_COMMON}
-               ${ART_PERSISTENCY_PROVENANCE}
-               ${ART_UTILITIES}
-	       ${ROOT_BASIC_LIB_LIST}	       
-               BASENAME_ONLY
-             )
-
 
 install_fhicl()
 install_headers()
