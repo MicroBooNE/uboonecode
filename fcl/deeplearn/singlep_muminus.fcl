@@ -1,0 +1,7 @@
+#include "singlep_common.fcl"
+
+process_name: MuMinus
+services.TFileService.fileName: "muminus_%tc.root"
+physics.producers.generator.PDG: [ 13 ]
+physics.producers.generator.P0: [ 0.525 ]
+physics.producers.generator.SigmaP: [ 0.475 ]

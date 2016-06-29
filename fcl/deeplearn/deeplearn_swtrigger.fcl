@@ -1,0 +1,77 @@
+BEGIN_PROLOG
+
+swtrigger_bnb:
+{
+    module_type: "SWTrigger"
+
+    DAQHeaderModule:  "daq"
+    OpDataModule:     "pmtreadout"
+    OpFlashModule:    "opflashsat"
+    NumberOfChannels: 32
+    FEMslot:          4
+    MinReadoutTicks:  1499
+
+    drop_event : true
+    swtrg_algonames : ["BNB"]
+    swtrg_algotype : ["FEMBeamTriggerAlgo"]
+    swtrg_beam_window_size : 1100
+    swtrg_bits : [0x800]
+    BNB_FEMBeamTriggerAlgo:{
+      Discr0deadtime : 6
+      Discr0delay : 4
+      Discr0precount : 1
+      Discr0threshold : 5
+      Discr3WindowSize : 124
+      Discr3WindowStart : 186
+      Discr3deadtime : 6
+      Discr3delay : 4
+      Discr3threshold : 10
+      Discr3width : 6
+      MinReadoutTicks : 500
+      PrescaleFactor : 1.0
+      TriggerThresMult : 1
+      TriggerThresPHMAX : 130
+      TriggerWindowSize : 120
+      TriggerWindowStart : 190
+      Verbosity : 0
+    }
+}
+
+swtrigger_extbnb:
+{
+    module_type: "SWTrigger"
+
+    DAQHeaderModule:  "daq"
+    OpDataModule:     "pmtreadout"
+    OpFlashModule:    "opflashsat"
+    NumberOfChannels: 32
+    FEMslot:          4
+    MinReadoutTicks:  1499
+
+    drop_event : true
+    swtrg_algonames : ["EXT_BNBwin"]
+    swtrg_algotype : ["FEMBeamTriggerAlgo"]
+    swtrg_beam_window_size : 1100
+    swtrg_bits : [0x200]
+    EXT_BNBwin_FEMBeamTriggerAlgo:{
+      Discr0deadtime : 6
+      Discr0delay : 4
+      Discr0precount : 1
+      Discr0threshold : 5
+      Discr3WindowSize : 124
+      Discr3WindowStart : 186
+      Discr3deadtime : 6
+      Discr3delay : 4
+      Discr3threshold : 10
+      Discr3width : 6
+      MinReadoutTicks : 500
+      PrescaleFactor : 1.0
+      TriggerThresMult : 1
+      TriggerThresPHMAX : 130
+      TriggerWindowSize : 120
+      TriggerWindowStart : 190
+      Verbosity : 0
+    }
+}
+
+END_PROLOG

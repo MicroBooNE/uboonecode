@@ -118,7 +118,7 @@ microboone_swtrigger_mc:
     swtrg_algonames : ["BNB"]
     swtrg_algotype : ["FEMBeamTriggerAlgo"]
     swtrg_beam_window_size : 1100
-    swtrg_bits : [0x200,0x200,0x200,0x800,0x800,0x1000,0x1000]
+    swtrg_bits : [0x800]
     BNB_FEMBeamTriggerAlgo:{
       Discr0deadtime : 6
       Discr0delay : 4

@@ -1,0 +1,7 @@
+#include "singlep_common.fcl"
+
+process_name: PiMinus
+services.TFileService.fileName: "piminus_%tc.root"
+physics.producers.generator.PDG: [ -211 ]
+physics.producers.generator.P0: [ 0.525 ]
+physics.producers.generator.SigmaP: [ 0.475 ]

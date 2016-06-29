@@ -1,0 +1,7 @@
+#include "singlep_common.fcl"
+
+process_name: Proton
+services.TFileService.fileName: "proton_%tc.root"
+physics.producers.generator.PDG: [ 2212 ]
+physics.producers.generator.P0: [ 0.950 ]
+physics.producers.generator.SigmaP: [ 0.500 ]
