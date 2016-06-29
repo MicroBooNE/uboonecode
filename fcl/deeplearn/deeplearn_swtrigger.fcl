@@ -4,11 +4,11 @@ swtrigger_bnb:
 {
     module_type: "SWTrigger"
 
-    DAQHeaderModule:  "daq"
+    DAQHeaderModule:  "triggersim"
     OpDataModule:     "pmtreadout"
     OpFlashModule:    "opflashsat"
     NumberOfChannels: 32
-    FEMslot:          4
+    FEMslot:          5
     MinReadoutTicks:  1499
 
     drop_event : true
@@ -33,7 +33,7 @@ swtrigger_bnb:
       TriggerThresPHMAX : 130
       TriggerWindowSize : 120
       TriggerWindowStart : 190
-      Verbosity : 0
+      Verbosity : 3
     }
 }
 
@@ -41,11 +41,11 @@ swtrigger_extbnb:
 {
     module_type: "SWTrigger"
 
-    DAQHeaderModule:  "daq"
+    DAQHeaderModule:  "triggersim"
     OpDataModule:     "pmtreadout"
     OpFlashModule:    "opflashsat"
     NumberOfChannels: 32
-    FEMslot:          4
+    FEMslot:          5
     MinReadoutTicks:  1499
 
     drop_event : true
@@ -70,7 +70,7 @@ swtrigger_extbnb:
       TriggerThresPHMAX : 130
       TriggerWindowSize : 120
       TriggerWindowStart : 190
-      Verbosity : 0
+      Verbosity : 3
     }
 }
 

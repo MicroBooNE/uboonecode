@@ -340,7 +340,6 @@ bool SWTrigger::filter(art::Event & evt)
     ub_PMT_channel_map->GetCrateSlotFEMChFromReadoutChannel(readout_ch, c, s, f);
     size_t slot = s;
     size_t ch = f%100;
-
     if ( slot!=fFEMslot )
       continue;
     if ( ch>=fNChannels )
@@ -350,7 +349,6 @@ bool SWTrigger::filter(art::Event & evt)
 
     int trig_dt = (int)(trigger_time - wfm.TimeStamp());
     uint64_t unsigned_trig_dt = (trig_dt < 0 ? trig_dt*(-1) : trig_dt);
-
     if(min_trig_dt > unsigned_trig_dt) {
       min_trig_dt = unsigned_trig_dt;
       target_time = wfm.TimeStamp() * 1.e3;
