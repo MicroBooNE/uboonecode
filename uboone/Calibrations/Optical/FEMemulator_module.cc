@@ -51,9 +51,6 @@
 #include "uboonecode/uboone/TriggerSim/UBTriggerTypes.h"
 #include "uboonecode/uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 
-// Pulse finding
-//#include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"
-
 // Trigger Emulator Code
 #include "SWTriggerBase/SWTriggerTypes.h"
 #include "SWTriggerBase/MultiAlgo.h"
@@ -437,6 +434,9 @@ void FEMemulator::analyze(art::Event const & evt)
   offline_runtime = _stopwatch.RealTime();
   std::cout << "[FEMemulator Module: Running offline algo on event=" << event << " hwtrigbit=" << trig.TriggerBits()  << "]" << std::endl;
   for ( std::vector< trigger::Result >::iterator it=m_results.begin(); it!=m_results.end(); it++ ) {
+
+    
+
     std::cout << "  [" << (*it).pass << "] "
 	      << (*it).algo_instance_name 
 	      << " algo=" << (*it).pass_algo << " ps=" << (*it).pass_prescale 
