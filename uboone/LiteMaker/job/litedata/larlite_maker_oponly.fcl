@@ -1,8 +1,8 @@
 #include "services_microboone.fcl"
-#include "litemaker_mcpart.fcl"
-#include "litemaker_simch.fcl"
+#include "litedatamin_opdigit.fcl"
+#include "litedatamin_opreco.fcl"
 
-process_name: MCHeavyLiteMaker
+process_name: LiteMaker
 
 services:
 {
@@ -43,20 +43,25 @@ physics:
 
  analyzers:
  {
-   mcpart: @local::litemaker_mcpart
-   simch:  @local::litemaker_simch
+   opdigit:       @local::litedatamin_opdigit
+   opreco:        @local::litedatamin_opreco
  }
 
- analyzeIt: [ mcpart,
-              simch,
+ analyzeIt: [ 
+              opdigit,
+              opreco
             ]
 
  end_paths:     [ analyzeIt ]
 }
 
-physics.analyzers.mcpart.stream:      "mcpart"
-physics.analyzers.simch.stream:       "simch"
+services.DetectorClocksService.TrigModuleName: "daq"
+services.DetectorClocksService.InheritClockConfig: false
 
-physics.analyzers.mcpart.out_filename:      "larlite_mcpart.root"
-physics.analyzers.simch.out_filename:       "larlite_simch.root"
+physics.analyzers.opdigit.stream:     "opdigit"
+physics.analyzers.opreco.stream:      "opreco"
+
+physics.analyzers.opdigit.out_filename:       "larlite_opdigit.root"
+physics.analyzers.opreco.out_filename:        "larlite_opreco.root"
+
 

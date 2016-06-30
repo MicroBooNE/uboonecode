@@ -1,5 +1,4 @@
 #include "litemaker_base.fcl"
-BEGIN_PROLOG
 
 litembass_reco3d_kalmanhitcc: @local::litemaker_base
 litembass_reco3d_kalmanhitcc.out_filename: "larlite_mbass_reco3d_kalmanhitcc.root"
@@ -40,4 +39,4 @@ litembass_reco3d_kalmanhitcc.AssociationLookUpMap:
 }
 
 
-END_PROLOG
+

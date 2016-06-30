@@ -1,5 +1,3 @@
-BEGIN_PROLOG
-
 litemaker_base:
 {
   # module name
@@ -48,7 +46,19 @@ litemaker_base:
     pfpart:     []
   }
 
+  # Here list data products by type-producer name in the same style as DataLookUpMap.
+  # This map is used to search for product arrays that are candidate to look up associations for.
+  # If boolean ScanAssByProducers is set to true, associations made by registered product
+  # producers (i.e. the case where association and associated products are made by the same module)
+  # will be stored as well
   AssociationLookUpMap: {}
-}
 
-END_PROLOG
+  # If set to true, associations created by associated data product producers are stored automatically
+  ScanAssByProducers: true
+
+  # Register a list of association producers for which associations among products in AssociationLookUpMap
+  # will be stored
+  AssociationProducers: []
+
+
+}

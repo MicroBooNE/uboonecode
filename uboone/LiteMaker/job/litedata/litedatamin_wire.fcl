@@ -1,5 +1,4 @@
 #include "litemaker_base.fcl"
-BEGIN_PROLOG
 
 litedatamin_wire: @local::litemaker_base
 litedatamin_wire.out_filename: "larlite_datamin_wire.root"
@@ -11,4 +10,4 @@ litedatamin_wire.DataLookUpMap:
 litedatamin_wire.AssociationLookUpMap:
 {}
 
-END_PROLOG
+

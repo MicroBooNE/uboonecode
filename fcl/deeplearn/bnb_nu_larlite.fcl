@@ -10,12 +10,12 @@
 #include "correct_saturation.fcl"
 #include "caldata_microboone.fcl" 
 #include "time_memory_tracker_microboone.fcl"
+#include "deeplearn_swtrigger.fcl"
 #include "litemc_mcinfo.fcl"
 #include "litemc_simch.fcl"
 #include "litemc_wire.fcl"
 #include "litemc_opreco.fcl"
 #include "litemc_opdigit.fcl"
-#include "deeplearn_swtrigger.fcl"
 
 process_name: BNBNuLArLite
 

@@ -1,5 +1,4 @@
 #include "litemaker_base.fcl"
-BEGIN_PROLOG
 
 litedatamin_reco3d_kalmanhit: @local::litemaker_base
 litedatamin_reco3d_kalmanhit.out_filename: "larlite_datamin_reco3d_kalmanhit.root"
@@ -52,4 +51,4 @@ litedatamin_reco3d_kalmanhit.AssociationLookUpMap:
     "trackkalmanhitcalo"
   ]
 }
-END_PROLOG
+

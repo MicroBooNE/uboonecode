@@ -38,6 +38,7 @@
 #include "DataFormat/flashmatch.h"
 #include "DataFormat/mucsdata.h"
 #include "DataFormat/mucsreco.h"
+#include "DataFormat/chstatus.h"
 #include <TStopwatch.h>
 /*
   This file defines certain specilization of templated functions.
@@ -1511,12 +1512,28 @@ namespace larlite {
     auto ass_type_a = LiteDataType<T>();
     auto ass_type_b = LiteDataType<U>();
 
-    larlite::product_id ass_id_a(ass_type_a,lite_dh->name());
+    //std::cout << "    <<ScanAssociation>> looking up " << ass_type_a << " by " << lite_dh->name() << " => " << ass_type_b << " ... " << std::flush;
+
+    larlite::product_id ass_id_a(ass_type_a,dh.provenance()->moduleLabel());
 
     try{
-      if(!ptr_coll_v.size()) return;
+      if(!ptr_coll_v.size()) {
+	std::cout << "Empty!" << std::endl;
+	return;
+      }
       const std::vector<art::Ptr<U> > ptr_coll = ptr_coll_v.at(0);
+      /*
+      std::cout << "Got " << ptr_coll_v.size() << " associations!" << std::flush;
+      if(!ptr_coll.empty()) {
+	auto const& aptr = ptr_coll.front();
+	auto const& pid  = aptr.id();
+	art::Handle< std::vector<U> > u_handle;
+	e.get(pid,u_handle);
+	std::cout << " first product by " << u_handle.provenance()->moduleLabel() << std::endl;
+      }
+      */
     }catch( art::Exception const& e){
+      //std::cout << "Something went wrong!" << std::endl;
       return;
     }
     // Instantiate association container. length = # of producers for associated data type

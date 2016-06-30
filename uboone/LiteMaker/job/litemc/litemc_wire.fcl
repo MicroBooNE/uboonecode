@@ -1,18 +1,19 @@
 #include "litemaker_base.fcl"
 
-BEGIN_PROLOG
-
 litemc_wire: @local::litemaker_base
 
 litemc_wire.out_filename: "larlite_wire.root"
 
+litemc_wire.RawDigit4ChStatus: "digitfilter"
+
 litemc_wire.DataLookUpMap:
 {
   wire:       ["caldata"]
+  chstatus:   ["chstatus"]
 }
 
 litemc_wire.AssociationLookUpMap:
 {}
 
-END_PROLOG
+
 

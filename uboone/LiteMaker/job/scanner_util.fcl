@@ -1,15 +1,28 @@
-#include "services_microboone_simulation.fcl"
+#include "services_microboone.fcl"
+
+microboone_reco_mcc7_services:
+{
+  ExptGeoHelperInterface:     @local::microboone_geometry_helper
+  Geometry:                   @local::microboone_geo
+  PhotonVisibilityService:    @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties
+                              @table::microboone_services_reco
+
+}
+microboone_reco_mcc7_services.DetectorPropertiesService.NumberTimeSamples:        6400
+microboone_reco_mcc7_services.DetectorPropertiesService.ReadOutWindowSize:        6400
+microboone_reco_mcc7_services.DetectorClocksService.InheritClockConfig:           false
+microboone_reco_mcc7_services.DetectorClocksService.TriggerOffsetTPC:             -0.400e3
+
+microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.StretchFullResponse: true
+microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.NConfigs:            2
+
 
 process_name: ScanUtil
 
 # DataScanner default parameter settings
 standard_utilscanner:
-{
-    module_type:              "UtilScanner"
-    DetectorPropertiesService:       @local::microboone_detproperties
-    LArPropertiesService:            @local::microboone_properties
-    Geometry:                 @local::microboone_geo
-}
+{ module_type: "UtilScanner" }
 
 services:
 {
@@ -18,13 +31,15 @@ services:
     Timing:       {}
     RandomNumberGenerator: {} #ART native random number generator
     message:      @local::standard_warning
-    user:         @local::microboone_simulation_services
+    UBOpReadoutMap: @local::microboone_opreadoutmap
+    @table::microboone_reco_mcc7_services
 }
 
 source:
 {
     module_type: EmptyEvent
     maxEvents:   1        # Number of events to create
+    timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
 }
 
 # Define and configure some modules to do work on each event.
@@ -42,3 +57,7 @@ physics:
     
     end_paths:     [ analyzeIt ]
 }
+
+physics.analyzers.scanner.DetectorPropertiesService: @local::services.DetectorPropertiesService
+physics.analyzers.scanner.LArPropertiesService:      @local::services.LArPropertiesService
+physics.analyzers.scanner.Geometry:                  @local::services.Geometry
