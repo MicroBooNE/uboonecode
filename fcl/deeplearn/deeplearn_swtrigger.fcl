@@ -67,9 +67,7 @@ swtrigger_extbnb:
       MinReadoutTicks : 500
       PrescaleFactor : 1.0
       TriggerThresMult : 1
-      #TriggerThresMult : 50
       TriggerThresPHMAX : 130
-      #TriggerThresPHMAX : 5000
       TriggerWindowSize : 120
       TriggerWindowStart : 190
       Verbosity : 3
