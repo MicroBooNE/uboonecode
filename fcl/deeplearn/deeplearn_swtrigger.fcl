@@ -22,7 +22,7 @@ swtrigger_bnb:
       Discr0precount : 1
       Discr0threshold : 5
       Discr3WindowSize : 124
-      Discr3WindowStart : 186
+      Discr3WindowStart : 211
       Discr3deadtime : 6
       Discr3delay : 4
       Discr3threshold : 10
@@ -32,7 +32,7 @@ swtrigger_bnb:
       TriggerThresMult : 1
       TriggerThresPHMAX : 130
       TriggerWindowSize : 120
-      TriggerWindowStart : 190
+      TriggerWindowStart : 215
       Verbosity : 3
     }
 }
