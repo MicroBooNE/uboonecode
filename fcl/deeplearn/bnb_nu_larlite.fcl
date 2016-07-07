@@ -164,10 +164,10 @@ physics.analyzers.wire.out_filename:        "larlite_wire.root"
 physics.analyzers.opdigit.out_filename:     "larlite_opdigit.root"
 physics.analyzers.opreco.out_filename:      "larlite_opreco.root"
 
-physics.analyzers.opreco.DataLookUpMap.ophit: ["opflash","opflashSat"]
+physics.analyzers.opreco.DataLookUpMap.ophit: ["ophit","ophitSat"]
 physics.analyzers.opreco.DataLookUpMap.opflash: ["opflash","opflashSat"]
 
-physics.analyzers.opreco.AssociationLookUpMap.ophit: ["opflash","opflashSat"]
+physics.analyzers.opreco.AssociationLookUpMap.ophit: ["ophit","ophitSat"]
 physics.analyzers.opreco.AssociationLookUpMap.opflash: ["opflash","opflashSat"]
 
 outputs:
