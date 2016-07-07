@@ -1,3 +1,0 @@
-#include "mcc7_bnb_detsim_to_larlite.fcl"
-
-physics.filters.swtrigger: @local::swtrigger_extbnb
