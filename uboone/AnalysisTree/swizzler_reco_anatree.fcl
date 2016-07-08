@@ -27,7 +27,7 @@ services:
   TimeTracker:         {}
   MemoryTracker:       {}
   RandomNumberGenerator: {} 
-  #LArSeedService:  @local::microboone_seedservice
+  #SeedService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data
   #PhotonVisibilityService: @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties  
@@ -73,6 +73,7 @@ source:
                      "E:TORTGT, 100, 0, 50",
                      "E:TOR860, 100, 0, 5",
                      "E:TOR875, 100, 0, 5" ]
+  saveMemoryObjectThreshold: 0
 }
 
 physics:
@@ -118,6 +119,7 @@ physics:
             pandoraCosmicpid,
             pandoraCosmicKHitpid,
             pandoraCosmicKHitPFPart,
+            pandoraTrackPFPartMatch,
             pandoraCosmicKHitRemoval,
             pandoraNu,
             pandoraNutag,
@@ -162,10 +164,12 @@ outputs:
    dataTier: "reconstructed"
    streamName: "all"      
    compressionLevel: 1
+   saveMemoryObjectThreshold: 0
   }
 }
 
 services.user.DetectorClocksService.TrigModuleName: "daq"
+services.user.SignalShapingServiceMicroBooNE.StretchFullResponse: false
 
 ### Here we include the file giving us run/data dependent overrides
 
@@ -174,19 +178,42 @@ services.user.DetectorClocksService.TrigModuleName:     "daq"
 
 ### Set the following if you want to run truncated RawDigits from the RawDigitFilter
 physics.producers.caldata.DodQdxCalib: true
+#physics.producers.caldata.dQdxCalibFileName: "ChannelGainAndShapingTimeCalibFactors_MicroBooNE_TPC_14mVperfC_2us_May3rd2016.txt"
 physics.producers.digitfilter.TruncateTicks:                    true
 services.user.DetectorPropertiesService.NumberTimeSamples:           6400
 services.user.DetectorPropertiesService.ReadOutWindowSize:           6400
 services.user.DetectorClocksService.InheritClockConfig:              false
 services.user.DetectorClocksService.TriggerOffsetTPC:                -0.400e3
+services.user.DetectorPropertiesService.Electronlifetime:  1e10
 
 #physics.producers.gaushit.MinSig:    [8.0, 6.5, 8.0]
+#physics.producers.gaushit.MinSig:    [4.0, 4.0, 5.0]
 #physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pandoraNucalo.CaloAlg.CalAreaConstants:                   [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pandoraNuKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pandoraNuPMAcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pmtrackcalo.CaloAlg.CalAreaConstants:                [6.93e-3, 5.34e-3, 6.9e-3]
+
+#physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraCosmiccalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraNucalo.CaloAlg.CalAreaConstants:                   [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraNuKHitcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraNuPMAcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pmtrackcalo.CaloAlg.CalAreaConstants:                [4.803e-3, 3.616e-3, 5.418e-3]
+
+#physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:                 "gaushit"
+#physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:             ["pandoraCosmicKHitPFPart","trackkalmanhittag"]
+#physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel:          "pandoraCosmic"
+#physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabels:              ["pandoraCosmicKHit","trackkalmanhit"]
+#physics.producers.pandoraCosmicKHitRemoval.AssnProducerLabels:               ["pandoraCosmicKHit","trackPFParticleMatch"]
+#
+#physics.producers.trackkalmanhittag.EndTickPadding:                          75
+#physics.producers.pandoraCosmicKHitPFPart.EndTickPadding:           75
+#physics.producers.pandoraCosmicKHitRemoval.EndTickPadding:        75
+
+#physics.producers.pmtrack.PMAlgVertexing.FindKinks: true
 
 #ANALYSIS TREE STUFF
 physics.analyzers.analysistree:  @local::microboone_analysistree
@@ -203,6 +230,7 @@ physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
 
 physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmictag", "pandoraCosmicKHittag", "pandoraNuKHittag", "pmtracktag", "pandoraNutag", "pandoraNuPMAtag"]
 physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
+physics.analyzers.analysistree.ContainmentTaggerAssocLabel:     ["dummy","dummy","dummy","dummy","dummy","dummy","dummy"]
 
 physics.analyzers.analysistree.PFParticleModuleLabel: "pandoraNu"
 
