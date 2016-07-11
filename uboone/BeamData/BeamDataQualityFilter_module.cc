@@ -20,7 +20,7 @@
 
 #include "lardata/RawData/BeamInfo.h"
 #include "lardata/RawData/TriggerData.h"
-
+#include <bitset>
 #include <memory>
 #include "getFOM.h"
 
@@ -214,6 +214,7 @@ void BeamDataQualityFilter::beginJob()
 {
   // Implementation of optional member function here.
   for (auto& bc: fBeamCutMap) {
+    bc.second.fRecalculateFOM=false;
     bc.second.fNHornCurrentCut=0;
     bc.second.fNIntensityCut=0;
     bc.second.fNFOMCut=0;
