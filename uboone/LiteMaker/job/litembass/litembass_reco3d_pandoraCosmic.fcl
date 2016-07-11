@@ -1,0 +1,67 @@
+#include "litemaker_base.fcl"
+
+litembass_reco3d_pandoraCosmic: @local::litemaker_base
+litembass_reco3d_pandoraCosmic.out_filename: "larlite_mbass_reco3d_pandoraCosmic.root"
+litembass_reco3d_pandoraCosmic.DataLookUpMap:
+{
+  sps : [ 
+    "pandoraCosmic",
+    "pandoraCosmicKHit"
+  ]
+  track : [ 
+    "pandoraCosmic",
+    "pandoraCosmicKHit"
+  ]
+  pfpart : [ 
+    "pandoraCosmic"
+  ]
+  vertex : [ 
+    "pandoraCosmic"
+  ]
+  cosmictag : [ 
+    "pandoraCosmicKHitPFPart",
+    "pandoraCosmicKHittag"
+  ]
+  seed : [ 
+    "pandoraCosmic"
+  ]
+}
+
+litembass_reco3d_pandoraCosmic.AssociationLookUpMap:
+{
+  hit : [ 
+    "gaushit",
+    "pandoraCosmicKHitRemoval"
+  ]
+  cluster : [ 
+    "pandoraCosmic"
+  ]
+  pfpart : [ 
+    "pandoraCosmicKHitPFPart",
+    "pandoraCosmic",
+    "pandoraCosmicKHit"
+  ]
+  track : [ 
+    "pandoraCosmicKHitPFPart",
+    "pandoraCosmicKHittag",
+    "pandoraNuKHittag",
+    "pandoraCosmic",
+    "pandoraCosmicKHit"
+  ]
+  sps : [ 
+    "pandoraCosmic",
+    "pandoraCosmicKHit"
+  ]
+  vertex : [ 
+    "pandoraCosmic"
+  ]
+  cosmictag : [ 
+    "pandoraCosmicKHitPFPart",
+    "pandoraCosmicKHittag"
+  ]
+  seed : [ 
+    "pandoraCosmic"
+  ]
+}
+
+

@@ -1,0 +1,31 @@
+#include "litemaker_base.fcl"
+
+litemc_reco3d_fuzzyshower: @local::litemaker_base
+
+litemc_reco3d_fuzzyshower.out_filename: "larlite_reco3d_fuzzyshower.root"
+
+litemc_reco3d_fuzzyshower.DataLookUpMap:
+{
+  sps:        []
+  pcaxis:     []
+  vertex:     []
+  track:      []
+  seed:       []
+  shower:     ["showerrecofuzzy"]
+  pfpart:     []
+}
+
+litemc_reco3d_fuzzyshower.AssociationLookUpMap:
+{
+  hit:        ["gaushit"]
+  cluster:    ["fuzzyclustermerger"]
+  endpoint2d: []
+  sps:        []
+  pcaxis:     []
+  vertex:     []
+  track:      []
+  seed:       []
+  shower:     ["showerrecofuzzy"]
+  pfpart:     []
+}
+

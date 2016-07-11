@@ -21,6 +21,7 @@
 #include "DataFormat/mcshower.h"
 #include "DataFormat/mctrack.h"
 #include "DataFormat/simch.h"
+#include "DataFormat/auxsimch.h"
 #include "DataFormat/calorimetry.h"
 #include "DataFormat/vertex.h"
 #include "DataFormat/endpoint2d.h"
@@ -35,6 +36,10 @@
 #include "DataFormat/minos.h"
 #include "DataFormat/pcaxis.h"
 #include "DataFormat/flashmatch.h"
+#include "DataFormat/mucsdata.h"
+#include "DataFormat/mucsreco.h"
+#include "DataFormat/chstatus.h"
+#include <TStopwatch.h>
 /*
   This file defines certain specilization of templated functions.
   In particular it implements:
@@ -119,17 +124,18 @@ namespace larlite {
       
       // Neutrino Information
       const ::simb::MCNeutrino lar_nu(mct_ptr->GetNeutrino());
-      
-      lite_mct.SetNeutrino( lar_nu.CCNC(),
-			    lar_nu.Mode(),
-			    lar_nu.InteractionType(),
-			    lar_nu.Target(),
-			    lar_nu.HitNuc(),
-			    lar_nu.HitQuark(),
-			    lar_nu.W(),
-			    lar_nu.X(),
-			    lar_nu.Y(),
-			    lar_nu.QSqr() );
+
+      if (lite_mct.GetParticles().size() )      
+        lite_mct.SetNeutrino( lar_nu.CCNC(),
+			      lar_nu.Mode(),
+			      lar_nu.InteractionType(),
+			      lar_nu.Target(),
+			      lar_nu.HitNuc(),
+			      lar_nu.HitQuark(),
+			      lar_nu.W(),
+			      lar_nu.X(),
+			      lar_nu.Y(),
+			      lar_nu.QSqr() );
 
       // Store address map for downstream association
       //fPtrIndex_mctruth[mct_ptr] = std::make_pair(lite_data->size(),name_index);
@@ -432,6 +438,8 @@ namespace larlite {
       lite_mct.Process ( mct_ptr->Process() );
       lite_mct.Start   ( ::larlite::mcstep( mct_ptr->Start().Position(), mct_ptr->Start().Momentum() )  );
       lite_mct.End     ( ::larlite::mcstep( mct_ptr->End().Position(),   mct_ptr->End().Momentum()   )  );
+      lite_mct.dEdx( mct_ptr->dEdx() );
+      lite_mct.dQdx( mct_ptr->dQdx() );
 
       lite_mct.MotherPdgCode ( mct_ptr->MotherPdgCode() );
       lite_mct.MotherTrackID ( mct_ptr->MotherTrackID() );
@@ -497,6 +505,105 @@ namespace larlite {
       //fPtrIndex_simch[sch_ptr] = std::make_pair(lite_data->size(),name_index);
 
       lite_data->push_back(lite_sch);
+    }
+
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::sim::AuxDetSimChannel> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    //auto name_index = NameIndex(lite_dh->data_type(),lite_dh->name());
+    auto lite_data = (::larlite::event_auxsimch*)lite_dh;
+
+    for(size_t i=0; i<dh->size(); ++i ) {
+      
+      const art::Ptr<::sim::AuxDetSimChannel> auxsch_ptr(dh,i);
+
+      std::vector<larlite::auxide> lite_ide_v;
+
+      for(auto const& ide : auxsch_ptr->AuxDetIDEs()) {
+
+	::larlite::auxide lite_ide;
+	lite_ide.trackID         = ide.trackID;
+	lite_ide.energyDeposited = ide.energyDeposited;
+	lite_ide.entryX          = ide.entryX;
+	lite_ide.entryY          = ide.entryY;
+	lite_ide.entryZ          = ide.entryZ;
+	lite_ide.entryT          = ide.entryT;
+	lite_ide.exitX           = ide.exitX;
+	lite_ide.exitY           = ide.exitY;
+	lite_ide.exitZ           = ide.exitZ;
+	lite_ide.exitT           = ide.exitT;
+	lite_ide.exitMomentumX   = ide.exitMomentumX;
+	lite_ide.exitMomentumY   = ide.exitMomentumY;
+	lite_ide.exitMomentumZ   = ide.exitMomentumZ;
+
+	lite_ide_v.emplace_back(lite_ide);
+      }
+
+      ::larlite::auxsimch lite_auxsch(auxsch_ptr->AuxDetID(),
+				      std::move(lite_ide_v),
+				      auxsch_ptr->AuxDetSensitiveID());
+      lite_data->emplace_back(lite_auxsch);
+    }
+
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::MuCS::MuCSData> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    auto lite_data = (::larlite::event_mucsdata*)lite_dh;
+
+    for(size_t i=0; i<dh->size(); ++i ) {
+      
+      const art::Ptr<::MuCS::MuCSData> mucs_ptr(dh,i);
+      
+      auto adc1 = mucs_ptr->ADC1();
+      auto adc2 = mucs_ptr->ADC2();
+      auto adc3 = mucs_ptr->ADC3();
+      auto adc7 = mucs_ptr->ADC7();
+      auto hits1 = mucs_ptr->Hits1();
+      auto hits2 = mucs_ptr->Hits2();
+      auto hits3 = mucs_ptr->Hits3();
+      auto hits7 = mucs_ptr->Hits7();
+      
+      larlite::mucsdata lite_mucs( mucs_ptr->T0(), 
+				   &(adc1[0]), &(adc2[0]), &(adc3[0]), &(adc7[0]),
+				   hits1, hits2, hits3, hits7);
+
+      lite_data->push_back(lite_mucs);
+    }
+
+  }
+
+  template <>
+  void ScannerAlgo::ScanData(art::Handle<std::vector< ::MuCS::MuCSRecoData> > const &dh,
+			     ::larlite::event_base* lite_dh)
+  { 
+    fDataReadFlag_v[lite_dh->data_type()][lite_dh->name()] = true;  
+    auto lite_data = (::larlite::event_mucsreco*)lite_dh;
+
+    for(size_t i=0; i<dh->size(); ++i ) {
+      
+      const art::Ptr<::MuCS::MuCSRecoData> mucs_ptr(dh,i);
+
+      larlite::mucsreco lite_mucs(mucs_ptr->theta_xy(),
+				  mucs_ptr->theta_xy_rms(),
+				  mucs_ptr->x(),
+				  mucs_ptr->x_rms(),
+				  mucs_ptr->theta_yz(),
+				  mucs_ptr->theta_yz_rms(),
+				  mucs_ptr->z(),
+				  mucs_ptr->z_rms(),
+				  mucs_ptr->y(),
+				  mucs_ptr->xmatches(),
+				  mucs_ptr->zmatches());
+
+      lite_data->push_back(lite_mucs);
     }
 
   }
@@ -608,7 +715,9 @@ namespace larlite {
     for(size_t i=0; i<dh->size(); i++){
       
       art::Ptr<::recob::Hit> hit_ptr(dh,i);
-      
+
+      //std::cout<<i<<" "<<hit_ptr.id().productIndex()<<std::endl;
+
       larlite::hit lite_hit;
       lite_hit.set_rms(hit_ptr->RMS());
       lite_hit.set_time_range(hit_ptr->StartTick(),hit_ptr->EndTick());
@@ -1090,92 +1199,211 @@ namespace larlite {
 		::larlite::event_base* lite_dh)
   { throw cet::exception(__PRETTY_FUNCTION__)<<"Not implemented!"; }
 
+
+  //
+  // PtrMap key generator
+  //
+  template <> void ScannerAlgo::ProducePtrMapKey(const art::Ptr< ::recob::Hit>& ptr, size_t& key1, size_t& key2)
+  {
+    key1 = (size_t)(ptr->WireID().Plane);
+    key2 = (size_t)(ptr->WireID().Wire) / 200;
+  }
+
+  template <> void ScannerAlgo::ProducePtrMapKey(const art::Ptr< ::recob::OpHit>& ptr, size_t& key1, size_t& key2)
+  {
+    key1 = ptr->OpChannel();
+    key2 = 0;
+    //key2 = (size_t)(ptr->PeakTime() / 1000.);
+  }
+
+  template <> void ScannerAlgo::ProducePtrMapKey(const art::Ptr< ::recob::Cluster>& ptr, size_t& key1, size_t& key2)
+  {
+    key1 = 0;
+    key2 = (size_t)(ptr->Plane().Plane);
+  }
+
+  template <class T>
+  void ScannerAlgo::ProducePtrMapKey(const art::Ptr<T>& ptr,size_t& key1, size_t&key2)
+  {
+    if(ptr)
+      key1 = key2 = 0;
+    else
+      throw std::exception();
+  }
+
   //
   // Getter for associated data product pointer 
   //
-  template <> std::map<art::Ptr< ::simb::MCTruth>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_mctruth; }
+  template <> std::map<art::Ptr< ::simb::MCTruth>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_mctruth.size()<=key1) fPtrIndex_mctruth.resize(key1+1);
+    if(fPtrIndex_mctruth[key1].size()<=key2) fPtrIndex_mctruth[key1].resize(key2+1);
+    return fPtrIndex_mctruth[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::simb::GTruth>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_gtruth; }
+  template <> std::map<art::Ptr< ::simb::GTruth>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_gtruth.size()<=key1) fPtrIndex_gtruth.resize(key1+1);
+    if(fPtrIndex_gtruth[key1].size()<=key2) fPtrIndex_gtruth[key1].resize(key2+1);
+    return fPtrIndex_gtruth[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::simb::MCFlux>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_mcflux; }
+  template <> std::map<art::Ptr< ::simb::MCFlux>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_mcflux.size()<=key1) fPtrIndex_mcflux.resize(key1+1);
+    if(fPtrIndex_mcflux[key1].size()<=key2) fPtrIndex_mcflux[key1].resize(key2+1);
+    return fPtrIndex_mcflux[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::simb::MCParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_mcpart; }
+  template <> std::map<art::Ptr< ::simb::MCParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_mcpart.size()<=key1) fPtrIndex_mcpart.resize(key1+1);
+    if(fPtrIndex_mcpart[key1].size()<=key2) fPtrIndex_mcpart[key1].resize(key2+1);
+    return fPtrIndex_mcpart[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::sim::SimChannel>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_simch; }
+  template <> std::map<art::Ptr< ::sim::SimChannel>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_simch.size()<=key1) fPtrIndex_simch.resize(key1+1);
+    if(fPtrIndex_simch[key1].size()<=key2) fPtrIndex_simch[key1].resize(key2+1);
+    return fPtrIndex_simch[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_mcshower; }
+  template <> std::map<art::Ptr< ::sim::AuxDetSimChannel>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_auxsimch.size()<=key1) fPtrIndex_auxsimch.resize(key1+1);
+    if(fPtrIndex_auxsimch[key1].size()<=key2) fPtrIndex_auxsimch[key1].resize(key2+1);
+    return fPtrIndex_auxsimch[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::sim::MCTrack>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_mctrack; }
+  template <> std::map<art::Ptr< ::sim::MCShower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_mcshower.size()<=key1) fPtrIndex_mcshower.resize(key1+1);
+    if(fPtrIndex_mcshower[key1].size()<=key2) fPtrIndex_mcshower[key1].resize(key2+1);
+    return fPtrIndex_mcshower[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::OpHit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_ophit; }
+  template <> std::map<art::Ptr< ::sim::MCTrack>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_mctrack.size()<=key1) fPtrIndex_mctrack.resize(key1+1);
+    if(fPtrIndex_mctrack[key1].size()<=key2) fPtrIndex_mctrack[key1].resize(key2+1);
+    return fPtrIndex_mctrack[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::OpFlash>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_opflash; }
+  template <> std::map<art::Ptr< ::recob::OpHit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2) 
+  { if(fPtrIndex_ophit.size()<=key1) fPtrIndex_ophit.resize(key1+1);
+    if(fPtrIndex_ophit[key1].size()<=key2) fPtrIndex_ophit[key1].resize(key2+1);
+    return fPtrIndex_ophit[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::Hit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_hit; }
+  template <> std::map<art::Ptr< ::recob::OpFlash>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_opflash.size()<=key1) fPtrIndex_opflash.resize(key1+1);
+    if(fPtrIndex_opflash[key1].size()<=key2) fPtrIndex_opflash[key1].resize(key2+1);
+    return fPtrIndex_opflash[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::raw::RawDigit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_rawdigit; }
+  template <> std::map<art::Ptr< ::recob::Hit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_hit.size()<=key1) fPtrIndex_hit.resize(key1+1);
+    if(fPtrIndex_hit[key1].size()<=key2) fPtrIndex_hit[key1].resize(key2+1);
+    return fPtrIndex_hit[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::raw::OpDetWaveform>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_opdigit; }
+  template <> std::map<art::Ptr< ::raw::RawDigit>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_rawdigit.size()<=key1) fPtrIndex_rawdigit.resize(key1+1);
+    if(fPtrIndex_rawdigit[key1].size()<=key2) fPtrIndex_rawdigit[key1].resize(key2+1);
+    return fPtrIndex_rawdigit[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::raw::Trigger>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_trigger; }
+  template <> std::map<art::Ptr< ::raw::OpDetWaveform>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_opdigit.size()<=key1) fPtrIndex_opdigit.resize(key1+1);
+    if(fPtrIndex_opdigit[key1].size()<=key2) fPtrIndex_opdigit[key1].resize(key2+1);
+    return fPtrIndex_opdigit[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::Wire>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_wire; }
+  template <> std::map<art::Ptr< ::raw::Trigger>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_trigger.size()<=key1) fPtrIndex_trigger.resize(key1+1);
+    if(fPtrIndex_trigger[key1].size()<=key2) fPtrIndex_trigger[key1].resize(key2+1);
+    return fPtrIndex_trigger[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::Cluster>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_cluster; }
+  template <> std::map<art::Ptr< ::recob::Wire>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_wire.size()<=key1) fPtrIndex_wire.resize(key1+1);
+    if(fPtrIndex_wire[key1].size()<=key2) fPtrIndex_wire[key1].resize(key2+1);
+    return fPtrIndex_wire[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::Seed>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_seed; }
+  template <> std::map<art::Ptr< ::recob::Cluster>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_cluster.size()<=key1) fPtrIndex_cluster.resize(key1+1);
+    if(fPtrIndex_cluster[key1].size()<=key2) fPtrIndex_cluster[key1].resize(key2+1);
+    return fPtrIndex_cluster[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::Track>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_track; }
+  template <> std::map<art::Ptr< ::recob::Seed>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_seed.size()<=key1) fPtrIndex_seed.resize(key1+1);
+    if(fPtrIndex_seed[key1].size()<=key2) fPtrIndex_seed[key1].resize(key2+1);
+    return fPtrIndex_seed[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::Shower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_shower; }
+  template <> std::map<art::Ptr< ::recob::Track>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_track.size()<=key1) fPtrIndex_track.resize(key1+1);
+    if(fPtrIndex_track[key1].size()<=key2) fPtrIndex_track[key1].resize(key2+1);
+    return fPtrIndex_track[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::Vertex>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_vertex; }
+  template <> std::map<art::Ptr< ::recob::Shower>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_shower.size()<=key1) fPtrIndex_shower.resize(key1+1);
+    if(fPtrIndex_shower[key1].size()<=key2) fPtrIndex_shower[key1].resize(key2+1);
+    return fPtrIndex_shower[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::SpacePoint>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_sps; }
+  template <> std::map<art::Ptr< ::recob::Vertex>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_vertex.size()<=key1) fPtrIndex_vertex.resize(key1+1);
+    if(fPtrIndex_vertex[key1].size()<=key2) fPtrIndex_vertex[key1].resize(key2+1);
+    return fPtrIndex_vertex[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::EndPoint2D>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_end2d; }
+  template <> std::map<art::Ptr< ::recob::SpacePoint>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_sps.size()<=key1) fPtrIndex_sps.resize(key1+1);
+    if(fPtrIndex_sps[key1].size()<=key2) fPtrIndex_sps[key1].resize(key2+1);
+    return fPtrIndex_sps[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::anab::CosmicTag>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_cosmictag; }
+  template <> std::map<art::Ptr< ::recob::EndPoint2D>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_end2d.size()<=key1) fPtrIndex_end2d.resize(key1+1);
+    if(fPtrIndex_end2d[key1].size()<=key2) fPtrIndex_end2d[key1].resize(key2+1);
+    return fPtrIndex_end2d[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::anab::Calorimetry>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_calo; }
+  template <> std::map<art::Ptr< ::anab::CosmicTag>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_cosmictag.size()<=key1) fPtrIndex_cosmictag.resize(key1+1);
+    if(fPtrIndex_cosmictag[key1].size()<=key2) fPtrIndex_cosmictag[key1].resize(key2+1);
+    return fPtrIndex_cosmictag[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::anab::ParticleID>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_partid; }
+  template <> std::map<art::Ptr< ::anab::Calorimetry>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_calo.size()<=key1) fPtrIndex_calo.resize(key1+1);
+    if(fPtrIndex_calo[key1].size()<=key2) fPtrIndex_calo[key1].resize(key2+1);
+    return fPtrIndex_calo[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::PFParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_pfpart; }
+  template <> std::map<art::Ptr< ::anab::ParticleID>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_partid.size()<=key1) fPtrIndex_partid.resize(key1+1);
+    if(fPtrIndex_partid[key1].size()<=key2) fPtrIndex_partid[key1].resize(key2+1);
+    return fPtrIndex_partid[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::recob::PCAxis>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_pcaxis; }
+  template <> std::map<art::Ptr< ::recob::PFParticle>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_pfpart.size()<=key1) fPtrIndex_pfpart.resize(key1+1);
+    if(fPtrIndex_pfpart[key1].size()<=key2) fPtrIndex_pfpart[key1].resize(key2+1);
+    return fPtrIndex_pfpart[key1][key2]; 
+  }
 
-  template <> std::map<art::Ptr< ::anab::FlashMatch>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
-  { return fPtrIndex_fmatch; }
+  template <> std::map<art::Ptr< ::recob::PCAxis>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_pcaxis.size()<=key1) fPtrIndex_pcaxis.resize(key1+1);
+    if(fPtrIndex_pcaxis[key1].size()<=key2) fPtrIndex_pcaxis[key1].resize(key2+1);
+    return fPtrIndex_pcaxis[key1][key2]; 
+  }
+
+  template <> std::map<art::Ptr< ::anab::FlashMatch>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
+  { if(fPtrIndex_fmatch.size()<=key1) fPtrIndex_fmatch.resize(key1+1);
+    if(fPtrIndex_fmatch[key1].size()<=key2) fPtrIndex_fmatch[key1].resize(key2+1);
+    return fPtrIndex_fmatch[key1][key2]; 
+  }
 
   template <class T>
-  std::map<art::Ptr<T>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap()
+  std::map<art::Ptr<T>,std::pair<size_t,size_t> >& ScannerAlgo::GetPtrMap(size_t key1, size_t key2)
   { throw cet::exception(__PRETTY_FUNCTION__)<<"Not implemented for a specified data product type..."; }
 
   //
@@ -1199,6 +1427,8 @@ namespace larlite {
   { return ::larlite::data::kSimPhotons; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::SimChannel> () const
   { return ::larlite::data::kSimChannel; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::AuxDetSimChannel> () const
+  { return ::larlite::data::kAuxDetSimChannel; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCShower> () const
   { return ::larlite::data::kMCShower; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::sim::MCTrack> () const
@@ -1247,7 +1477,11 @@ namespace larlite {
   { return ::larlite::data::kParticleID; }
   template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::anab::FlashMatch> () const
   { return ::larlite::data::kFlashMatch; }
-
+  // MuCS
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSData> () const
+  { return ::larlite::data::kMuCSData; }
+  template <> const ::larlite::data::DataType_t ScannerAlgo::LiteDataType<::MuCS::MuCSRecoData> () const
+  { return ::larlite::data::kMuCSReco; }
   //
   // LocateLiteProduct implementation
   //
@@ -1255,7 +1489,9 @@ namespace larlite {
   bool ScannerAlgo::LocateLiteProduct(art::Ptr<T> const ptr,
 				      std::pair<size_t,size_t> &loc)
   { 
-    auto ptr_map = GetPtrMap<T>();
+    size_t key1, key2;
+    ProducePtrMapKey(ptr,key1,key2);
+    auto const& ptr_map = GetPtrMap<T>(key1,key2);
     auto id_iter = ptr_map.find(ptr);
     if(id_iter == ptr_map.end()) return false; 
     
@@ -1276,43 +1512,83 @@ namespace larlite {
     auto ass_type_a = LiteDataType<T>();
     auto ass_type_b = LiteDataType<U>();
 
-    larlite::product_id ass_id_a(ass_type_a,lite_dh->name());
+    //std::cout << "    <<ScanAssociation>> looking up " << ass_type_a << " by " << lite_dh->name() << " => " << ass_type_b << " ... " << std::flush;
+
+    larlite::product_id ass_id_a(ass_type_a,dh.provenance()->moduleLabel());
 
     try{
-      if(!ptr_coll_v.size()) return;
+      if(!ptr_coll_v.size()) {
+	std::cout << "Empty!" << std::endl;
+	return;
+      }
       const std::vector<art::Ptr<U> > ptr_coll = ptr_coll_v.at(0);
+      /*
+      std::cout << "Got " << ptr_coll_v.size() << " associations!" << std::flush;
+      if(!ptr_coll.empty()) {
+	auto const& aptr = ptr_coll.front();
+	auto const& pid  = aptr.id();
+	art::Handle< std::vector<U> > u_handle;
+	e.get(pid,u_handle);
+	std::cout << " first product by " << u_handle.provenance()->moduleLabel() << std::endl;
+      }
+      */
     }catch( art::Exception const& e){
+      //std::cout << "Something went wrong!" << std::endl;
       return;
     }
     // Instantiate association container. length = # of producers for associated data type
     std::vector< ::larlite::AssSet_t> ass_set_v(fAssModuleLabel_v[ass_type_b].size(),
 						::larlite::AssSet_t());
-
+    
     // Return if there's no data products stored for associated data type
     if(!(ass_set_v.size())) return;
 
+    auto watch = TStopwatch();
+    //std::cout<<"Scanning association start... " << GetPtrMap<U>().size() << " = pool size... " << std::endl;
     std::pair<size_t,size_t> lite_location;
 
     // Loop over origin data product vector, find associated objects and store association info
     for(size_t i=0; i<dh->size(); ++i) {
-
-      const std::vector<art::Ptr<U> > ptr_coll = ptr_coll_v.at(i);
-
+      watch.Start();
+      //std::cout<<"Association for " << i << std::endl;
+      const std::vector<art::Ptr<U> >& ptr_coll = ptr_coll_v.at(i);
+      //std::cout<<"Retrieved pointer vector "<< watch.RealTime() << std::endl;
+      watch.Start();
       // Association vector: one per associated data product producers
       std::vector< ::larlite::AssUnit_t> ass_unit_v(ass_set_v.size(),::larlite::AssUnit_t());
 
+      for(auto& au : ass_unit_v) au.reserve(ptr_coll.size());
+      //std::cout<<"Start loop for location... " << watch.RealTime() << std::endl;
+      watch.Start();
       for(auto& art_ptr : ptr_coll) {
 
 	if(!LocateLiteProduct(art_ptr,lite_location)) continue;
 
 	ass_unit_v[lite_location.second].push_back(lite_location.first);
       }
+      //std::cout<<"Located "<<ptr_coll.size()<<" "<<watch.RealTime()<<std::endl;
+
+      // Alternative
+      /*
+      watch.Start();
+      if(ptr_coll.size()) {
+	
+	auto const& first_ptr = ptr_coll.front();
+	auto const& pid = first_ptr.id().productID();
+
+	art::Handle< std::vector<U> > u_handle;
+	e.get(pid,u_handle);
+
+	std::vector<deque> 
+      }
+      */
       for(size_t i=0; i<ass_set_v.size(); ++i)
 
-	ass_set_v[i].push_back(ass_unit_v[i]);
+	ass_set_v[i].emplace_back(ass_unit_v[i]);
       
     } // end looping over origin data products
-	
+    //std::cout<<"Located a=>b "<<watch.RealTime()<<std::endl;
+    
     // Store associations in larlite data products
     for(size_t i=0; i<ass_set_v.size(); ++i) {
 
@@ -1424,6 +1700,20 @@ namespace larlite {
 	<< " is " << fModuleLabel_v[(size_t)data_type].size()
 	<< " while you requested " << name_index;
     return ::larlite::product_id(data_type,fModuleLabel_v[(size_t)(data_type)][name_index]);
+  }
+
+  //
+  // Associated ProductID
+  //
+  template <class T>
+  const ::larlite::product_id ScannerAlgo::AssProductID(size_t name_index) const
+  { auto data_type = LiteDataType<T>();
+    if(fAssModuleLabel_v[(size_t)data_type].size() <= name_index)
+      throw cet::exception(__PRETTY_FUNCTION__)
+	<< "Length of registered products for data type " << ::larlite::data::kDATA_TREE_NAME[data_type].c_str()
+	<< " is " << fAssModuleLabel_v[(size_t)data_type].size()
+	<< " while you requested " << name_index;
+    return ::larlite::product_id(data_type,fAssModuleLabel_v[(size_t)(data_type)][name_index]);
   }
 }
 #endif

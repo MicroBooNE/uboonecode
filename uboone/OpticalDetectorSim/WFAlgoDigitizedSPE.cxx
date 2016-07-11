@@ -3,6 +3,8 @@
 
 #include "WFAlgoDigitizedSPE.h"
 
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+
 namespace opdet {
   
   //--------------------------------------------------------
@@ -11,8 +13,8 @@ namespace opdet {
   {
     Reset();
     fSPE.clear();
-    //fSPETime = util::TimeService::GetME().OpticalClock();
-    art::ServiceHandle<util::TimeService> ts;
+    //fSPETime = detinfo::DetectorClocksService::GetME().OpticalClock();
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     fSPETime = ts->OpticalClock();
   }
 
@@ -25,16 +27,17 @@ namespace opdet {
 
   //--------------------------------------------------------------
   void WFAlgoDigitizedSPE::Process(std::vector<float> &wf,
-			  const ::util::ElecClock &start_time)
+			  const ::detinfo::ElecClock &start_time)
   //--------------------------------------------------------------
   {
     // Predefine variables to save time later
-    ::util::ElecClock rel_spe_start = start_time;
+    ::detinfo::ElecClock rel_spe_start = start_time;
 
     rel_spe_start.SetTime(0);
 
     double unit_time = fSPETime.TickPeriod();
 
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     for(auto const &t : fPhotonTime) {
 
       //
@@ -42,8 +45,7 @@ namespace opdet {
       //
 
       // Time in electronics clock frame (with T0)
-      //double time = ::util::TimeService::GetME().G4ToElecTime(t);
-      art::ServiceHandle<util::TimeService> ts;
+      //double time = ::detinfo::DetectorClocksService::GetME().G4ToElecTime(t);
       double time = ts->G4ToElecTime(t);
 
       if(fEnableSpread)  time +=  RandomServer::GetME().Gaus(fT0,fT0Sigma) * 1.e-3 ;
@@ -88,7 +90,7 @@ namespace opdet {
   
   //----------------------------------------------------------------
   void WFAlgoDigitizedSPE::SetSPE( const std::vector<float> &wf,
-				   const util::ElecClock &time_info)
+				   const detinfo::ElecClock &time_info)
   //----------------------------------------------------------------
   {
     if(time_info.Time() < 0 || time_info.Ticks() >= (int)(wf.size()))

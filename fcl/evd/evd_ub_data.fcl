@@ -8,9 +8,9 @@ process_name: EVD
 services:
 {
   TFileService:            { fileName: "reco2D_hist_evd.root" }
-#  message:                 @local::evd_message
   message:                 @local::microboone_message_services_prod_debug
-  			   @table::microboone_disp
+  channelstatusservice:    @local::microboone_channelstatus_service
+  			               @table::microboone_disp
 }
 
 
@@ -33,11 +33,6 @@ physics:
 {
 
  producers: {
-		### raw digit filter
-  		digitfilter:            @local::microboone_rawdigitfilter
-		
-		### calwire producers
- 		 caldata:               @local::microboone_calroi
             }
 
  filters:{}
@@ -47,10 +42,7 @@ physics:
   evdisp:{module_type: EVD}
  }
 
- reco: [
-         digitfilter,
-	 caldata
-       ]
+ reco: [ ]
  
  #list the modules for this path, order matters, filters reject all following items
  evd: [ evdisp ] 
@@ -64,21 +56,8 @@ physics:
 
 ### Here, we overwrite ALL module labels with the ones defined above.
 
-physics.producers.digitfilter.TruncMeanFraction:                 0.1
-physics.producers.digitfilter.NumWiresToGroup:                   [48, 48, 96]
-physics.producers.digitfilter.RMSRejectionCutHi:                 [25,25,25]
-physics.producers.digitfilter.RMSSelectionCut:                   [1.5,1.5,1.0]
-physics.producers.digitfilter.TheChosenWire:                     638
-
-physics.producers.caldata.DigitModuleLabel:                      "digitfilter"
-physics.producers.caldata.MaxAllowedChannelStatus:               1
-
 services.RawDrawingOptions.RawDataLabel: "digitfilter"
 services.RawDrawingOptions.TotalTicks: 9600
 services.RawDrawingOptions.MinimumSignal: 20
 services.RawDrawingOptions.DrawRawDataOrCalibWires: 2
 
-
-# This last include will be overrides for the above
-# must come after definitions are set!
-#include "uboone_data_runSettings.fcl"

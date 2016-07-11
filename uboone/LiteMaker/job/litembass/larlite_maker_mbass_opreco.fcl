@@ -1,0 +1,140 @@
+#include "services_microboone.fcl"
+#include "litembass_wire.fcl"
+#include "litembass_opdigit.fcl"
+#include "litembass_opreco.fcl"
+#include "litembass_reco2d.fcl"
+#include "litembass_reco2d_cc.fcl"
+#include "litembass_reco3d_kalmanhit.fcl"
+#include "litembass_reco3d_kalmanhitcc.fcl"
+#include "litembass_reco3d_pandoraCosmic.fcl"
+#include "litembass_reco3d_pandoraNu.fcl"
+
+#include "opticaldetectormodules_microboone.fcl"
+##include "correct_saturation.fcl"
+#include "correct_saturation_afterRun3701.fcl"
+process_name: LiteMaker
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "ana_hist.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} #ART native random number generator
+  message:      @local::standard_warning
+  #message:      @local::standard_debug # If you turn this on, uncomment the debug lines below
+  user:         @local::microboone_simulation_services 	     
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  -1        # Number of events to create
+  inputCommands: ["keep *_*_*_*","drop recob::OpFlashs_*_*_*","drop recob::OpHits_*_*_*"]
+}
+
+physics:
+{
+
+ producers:
+ {
+
+  ### OpHit finders
+  ophit          : @local::microboone_ophit_beam_highgain
+  ophitLow       : @local::microboone_ophit_beam_lowgain
+  ophitCosmic    : @local::microboone_ophit_cosmic_highgain
+  ophitCosmicLow : @local::microboone_ophit_cosmic_lowgain
+
+  ophitT   : @local::ub_ophitfinder_t
+  ophitFW  : @local::ub_ophitfinder_fw
+  ophitSW  : @local::ub_ophitfinder_sw
+  ophitCFD : @local::ub_ophitfinder_cfd
+
+  ophitSat    : @local::microboone_ophit_saturation
+
+  ophitSatT   : @local::ub_ophitfinder_satt
+  ophitSatFW  : @local::ub_ophitfinder_satfw
+  ophitSatSW  : @local::ub_ophitfinder_satsw
+  ophitSatCFD : @local::ub_ophitfinder_satcfd
+
+  ### Saturation correction module
+  saturation : @local::correct_saturation
+
+  ### flash finders
+  opflash          : @local::microboone_opflash_beam_highgain
+  opflashLow       : @local::microboone_opflash_beam_lowgain
+  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+
+  sflashT   : @local::ub_sflash_t
+  sflashFW  : @local::ub_sflash_fw
+  sflashSW  : @local::ub_sflash_sw
+  sflashCFD : @local::ub_sflash_cfd
+
+  opflashSat   : @local::microboone_opflash_saturation
+
+  sflashSatT   : @local::ub_sflash_satt
+  sflashSatFW  : @local::ub_sflash_satfw
+  sflashSatSW  : @local::ub_sflash_satsw
+  sflashSatCFD : @local::ub_sflash_satcfd
+ }
+
+ analyzers:
+ {
+   #wire:          @local::litembass_wire
+   opdigit:       @local::litembass_opdigit
+   opreco:        @local::litembass_opreco
+   reco2d:        @local::litembass_reco2d
+   reco2dcc:      @local::litembass_reco2d_cc
+   kalmanhit:     @local::litembass_reco3d_kalmanhit
+   kalmanhitcc:   @local::litembass_reco3d_kalmanhitcc
+   pandoraCosmic: @local::litembass_reco3d_pandoraCosmic
+   pandoraNu:     @local::litembass_reco3d_pandoraNu
+ }
+
+ reco: [ saturation,
+         ophitT, ophitFW, ophitSW, ophitCFD,
+         sflashT, sflashFW, sflashSW, sflashCFD,
+         ophitSatT, ophitSatFW, ophitSatSW, ophitSatCFD,
+         sflashSatT, sflashSatFW, sflashSatSW, sflashSatCFD,
+         ophit,
+         ophitSat,
+         ophitLow,
+         ophitCosmic,
+         ophitCosmicLow,
+         opflash,
+         opflashSat,
+         opflashLow,
+         opflashCosmic,
+         opflashCosmicLow
+       ]
+
+ analyzeIt: [ #wire,
+              opdigit,
+              opreco,
+              reco2d,
+              reco2dcc,
+              kalmanhit,
+              kalmanhitcc,
+              pandoraCosmic,
+              pandoraNu
+            ]
+
+ stream1:  [ out1 ]
+ trigger_paths: [reco]
+ end_paths:     [stream1,analyzeIt]
+}
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "empty.root"
+   dataTier:    "useless"
+   compressionLevel: 1
+   outputCommands: ["drop *_*_*_*"]
+ }
+}
+
+services.user.DetectorClocksService.TrigModuleName: "daq"
+services.user.DetectorClocksService.InheritClockConfig: false
+

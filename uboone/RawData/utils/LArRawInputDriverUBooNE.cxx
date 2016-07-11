@@ -9,16 +9,16 @@
 
 //LArSoft 
 #include "uboone/RawData/utils/LArRawInputDriverUBooNE.h"
-#include "RawData/RawDigit.h"
-#include "RawData/TriggerData.h"
-#include "RawData/DAQHeader.h"
-#include "RawData/BeamInfo.h"
-#include "RawData/OpDetWaveform.h"
-#include "Geometry/Geometry.h"
-#include "SummaryData/RunData.h"
-#include "Utilities/TimeService.h"
-#include "Utilities/ElecClock.h" // lardata
-#include "OpticalDetectorData/OpticalTypes.h" // lardata -- I want to move the enums we use back to UBooNE as they are UBooNE-specific
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/RawData/DAQHeader.h"
+#include "lardata/RawData/BeamInfo.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "larcore/SummaryData/RunData.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfo/ElecClock.h"
+#include "lardata/OpticalDetectorData/OpticalTypes.h" // I want to move the enums we use back to UBooNE as they are UBooNE-specific
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //ART, ...
@@ -123,17 +123,25 @@ namespace lris {
     fSourceHelper(pm),
     fCurrentSubRunID(),
     fEventCounter(0),
-    fHuffmanDecode(ps.get<bool>("huffmanDecode",false))
+    fFinalEventCutOff(30000000), //this value of 30 000 000 is the approximate size of an event.
+    fPreviousPosition(0),
+    fCompleteFile(true),
+    fHuffmanDecode(ps.get<bool>("huffmanDecode",false)),
+    fUseGPS(ps.get<bool>("UseGPS",false)),
+    fUseNTP(ps.get<bool>("UseNTP",false)),
+    fMaxEvents(-1),
+    fSkipEvents(0)
   {
     ::peek_at_next_event<ub_TPC_CardData_v6>(false);
     ::peek_at_next_event<ub_PMT_CardData_v6>(false);
     ::handle_missing_words<ub_TPC_CardData_v6>(true);
     ::handle_missing_words<ub_PMT_CardData_v6>(true);
 
-    helper.reconstitutes<raw::DAQHeader,              art::InEvent>("daq");
-    helper.reconstitutes<std::vector<raw::RawDigit>,  art::InEvent>("daq");
-    helper.reconstitutes<raw::BeamInfo,               art::InEvent>("daq");
-    helper.reconstitutes<std::vector<raw::Trigger>,   art::InEvent>("daq");
+    helper.reconstitutes<raw::DAQHeader,                 art::InEvent>("daq");
+    helper.reconstitutes<std::vector<raw::RawDigit>,     art::InEvent>("daq");
+    helper.reconstitutes<raw::BeamInfo,                  art::InEvent>("daq");
+    helper.reconstitutes<std::vector<raw::Trigger>,      art::InEvent>("daq");
+    helper.reconstitutes<raw::ubdaqSoftwareTriggerData, art::InEvent>("daq");
     registerOpticalData( helper ); //helper.reconstitutes<std::vector<raw::OpDetWaveform>,art::InEvent>("daq");
     fDataTakingTime                    = ps.get< int  >("DataTakingTime", -1);
     fSwizzlingTime                     = ps.get< int  >("SwizzlingTime", -1);
@@ -142,6 +150,8 @@ namespace lris {
     fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
     fSwizzleTrigger = ps.get<bool>("swizzleTrigger",true);
     fSwizzleTriggerType = ps.get<std::string>("swizzleTriggerType"); // Only use ALL for this option, other options will not work
+    fMaxEvents = ps.get<int>("maxEvents", -1);
+    fSkipEvents = ps.get<int>("skipEvents", 0);
 
     //temporary kazuTestSwizzleTrigger
     kazuTestSwizzleTrigger = ps.get<bool>("kazuTestSwizzleTrigger",true);
@@ -287,23 +297,31 @@ namespace lris {
     if (fEventCounter==0) {
       uint16_t end_of_file_marker;
       uint32_t nevents;
+      fPreviousPosition = fInputStream.tellg();
       fInputStream.seekg( -1*sizeof(uint16_t) , std::ios::end); //eof marker is 16 bits long so go 16 bits from the end.
       fInputStream.read( (char*)&end_of_file_marker , sizeof(uint16_t));
       if(end_of_file_marker != 0xe0f0){ //make sure that it is the correct marker
-	throw art::Exception( art::errors::FileReadError ) 
-	  << "File "<<name<<" has incorrect end of file marker. "<< end_of_file_marker<<std::endl;
-      }
-      
-      fInputStream.seekg( -3*sizeof(uint16_t) , std::ios::end); //need to go 48 bits from the end of the file (16 for eof marker and 32 for nevents
-      fInputStream.read( (char*)&nevents, sizeof(uint32_t)); //read in the 32 bits that should be the event count
-      if (nevents>0 && nevents <1E9) { //make sure that nevents is reasonable
-	mf::LogInfo("")<<"Opened file "<<name<<" with "<< nevents <<" event(s)";
-	fNumberEventsInFile = nevents;
+          fCompleteFile=false;
+          fNumberEventsInFile = -1;
+          mf::LogWarning("")<< "File "<<name<<" has incorrect end of file marker. Expected 0xe0f0 and instead got 0x"<< std::hex << end_of_file_marker<<std::endl;
+          mf::LogWarning("")<< "The number of events in this file will be determined on the fly, and we will stop when there is less than " << fFinalEventCutOff << " bytes in the file." <<std::endl;
       } else {
-	throw art::Exception( art::errors::FileReadError )
-	  << "File "<<name<<" has incorrect number of events in trailer. "<< nevents<<std::endl;
+          fCompleteFile=true;
+          mf::LogInfo("")<<"Opened file "<<name<<" and found that is has a good end of file marker."<<std::endl;
       }
       
+      if(fCompleteFile) {
+          fInputStream.seekg( -3*sizeof(uint16_t) , std::ios::end); //need to go 48 bits from the end of the file (16 for eof marker and 32 for nevents
+          fInputStream.read( (char*)&nevents, sizeof(uint32_t)); //read in the 32 bits that should be the event count
+          if (nevents>0 && nevents <1E9) { //make sure that nevents is reasonable
+              mf::LogInfo("")<<"Opened file "<<name<<" with "<< nevents <<" event(s)";
+              fNumberEventsInFile = nevents;
+          } else {
+              throw art::Exception( art::errors::FileReadError )
+              << "File "<<name<<" has incorrect number of events in trailer. "<< nevents<<std::endl;
+          }
+      }
+    
       fInputStream.seekg(std::ios::beg);
     }
     
@@ -342,21 +360,47 @@ namespace lris {
                                          art::SubRunPrincipal* &outSR,
                                          art::EventPrincipal* &outE)
   {
-    if (fEventCounter==fNumberEventsInFile) {
-      mf::LogInfo(__FUNCTION__)<<"Already read " << fNumberEventsInFile << " events, so checking end of file..." << std::endl;
-      std::ios::streampos current_position = fInputStream.tellg(); //find out where in the file we're located
-      fInputStream.seekg(0,std::ios::end); //go to the end of the file
-      std::ios::streampos file_length = fInputStream.tellg(); //get the location which will tell the size.
-      fInputStream.seekg(current_position); //put the ifstream back to where it was before
-      if ( ((uint8_t)file_length - (uint8_t)current_position) > (uint8_t)1000 ) {
-	throw art::Exception( art::errors::FileReadError ) << "We processed " << fEventCounter << "events from the file " << 
-	  std::endl << "But there are still " << (file_length - current_position) << " bytes in the file" << std::endl;
+      if (fCompleteFile) {
+          if (fEventCounter==fNumberEventsInFile) {
+              mf::LogInfo(__FUNCTION__)<<"Already read " << fEventCounter << " events, so checking end of file..." << std::endl;
+              std::ios::streampos current_position = fInputStream.tellg(); //find out where in the file we're located
+              std::ios::streampos data_offset = current_position - fPreviousPosition;
+              mf::LogInfo(__FUNCTION__)<< "For event " << fEventCounter << ", the number of bytes read since the last event is " << data_offset << std::endl;
+              fPreviousPosition = current_position;
+              fInputStream.seekg(0,std::ios::end); //go to the end of the file
+              std::ios::streampos file_length = fInputStream.tellg(); //get the location which will tell the size.
+              fInputStream.seekg(current_position); //put the ifstream back to where it was before
+              if ( ((uint8_t)file_length - (uint8_t)current_position) > (uint8_t)1000 ) {
+                  throw art::Exception( art::errors::FileReadError ) << "We processed " << fEventCounter << " events from the file " <<  std::endl << "But there are still " << (file_length - current_position) << " bytes in the file" << std::endl;
+              }
+              mf::LogInfo(__FUNCTION__)<<"Completed reading file and closing output file." << std::endl;
+              return false; //tells readNext that you're done reading all of the events in this file.
+          } else {
+              std::ios::streampos current_position = fInputStream.tellg(); //find out where in the file we're located
+              std::ios::streampos data_offset = current_position - fPreviousPosition;
+              mf::LogInfo(__FUNCTION__)<< "For event " << fEventCounter << ", the number of bytes read since the last event is " << data_offset << std::endl;
+              fPreviousPosition = current_position;
+	  }
+      } else {
+          mf::LogInfo(__FUNCTION__)<<"Read " << fEventCounter << " events from an incomplete file, and checking end of file..." << std::endl;
+          std::ios::streampos current_position = fInputStream.tellg(); //find out where in the file we're located
+          std::ios::streampos data_offset = current_position - fPreviousPosition;
+          mf::LogInfo(__FUNCTION__)<< "For event " << fEventCounter << ", the number of bytes read since the last event is " << data_offset << std::endl;
+          fPreviousPosition = current_position;
+          fInputStream.seekg(0,std::ios::end); //go to the end of the file
+          std::ios::streampos file_length = fInputStream.tellg(); //get the location which will tell the size.
+          fInputStream.seekg(current_position); //put the ifstream back to where it was before
+          if ( (file_length - current_position) < fFinalEventCutOff ) { //this value of 30000000 is the approximate size of an event.
+              mf::LogInfo(__FUNCTION__) << "We processed " << fEventCounter << " events from the incomplete file " << std::endl << "But there are only " << (file_length - current_position) << " bytes in the file, so we're calling that the end of the road." << std::endl;
+              return false; //tells readNext that you're done reading all of the events in this file.
+          } else {
+              mf::LogInfo(__FUNCTION__)<<"We processed " << fEventCounter << " events from the incomplete file. " << std::endl << "There are " << (file_length - current_position) << " bytes remaining to be read in the file, so we're gonna keep processing..." << std::endl;
+          }
       }
-      mf::LogInfo(__FUNCTION__)<<"Completed reading file and closing output file." << std::endl;
 
-      return false; //tells readNext that you're done reading all of the events in this file.
-    }
-    
+    if (fMaxEvents > 0 && fEventCounter == unsigned(fMaxEvents))
+      return false;
+
     mf::LogInfo(__FUNCTION__)<<"Attempting to read event: "<<fEventCounter<<std::endl;
     // Create empty result, then fill it from current file:
     std::unique_ptr<raw::DAQHeader> daq_header(new raw::DAQHeader);
@@ -364,6 +408,9 @@ namespace lris {
     std::unique_ptr<raw::BeamInfo> beam_info(new raw::BeamInfo);
     std::unique_ptr<std::vector<raw::Trigger>> trig_info( new std::vector<raw::Trigger> );
     std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > pmt_raw_digits;
+    std::unique_ptr<raw::ubdaqSoftwareTriggerData> sw_trig_info( new raw::ubdaqSoftwareTriggerData );
+    //raw::ubdaqSoftwareTriggerData * sw_trig_info(new raw::ubdaqSoftwareTriggerData);
+
     for ( unsigned int opdetcat=0; opdetcat<(unsigned int)opdet::NumUBOpticalChannelCategories; opdetcat++ ) {
       pmt_raw_digits.insert( std::make_pair( (opdet::UBOpticalChannelCategory_t)opdetcat, std::unique_ptr< std::vector<raw::OpDetWaveform> >(  new std::vector<raw::OpDetWaveform> ) ) );
     }
@@ -388,9 +435,18 @@ namespace lris {
     ADCwords_crate8 = 0;
     ADCwords_crate9 = 0;
 
-    bool res=false;
+    uint32_t event_number = 0;
 
-    res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info );
+    bool res = false;
+    bool done = false;
+
+    while(!done) {
+      res=processNextEvent(*tpc_raw_digits, pmt_raw_digits, *daq_header, *beam_info, *trig_info, *sw_trig_info, event_number, fSkipEvents > 0);
+      if(fSkipEvents > 0)
+	--fSkipEvents;
+      else
+	done = true;
+    }
 
     if (res) {
       fEventCounter++;
@@ -409,12 +465,12 @@ namespace lris {
       /*
 	std::cout<<"\033[93mAbout to make a principal for run: " << fCurrentSubRunID.run()
 	<<" subrun: " << fCurrentSubRunID.subRun()
-	<<" event: " << daq_header->GetEvent()
+	<<" event: " << event_number
 	<<"\033[00m"<< std::endl;
       */
       outE = fSourceHelper.makeEventPrincipal(fCurrentSubRunID.run(),
 					      fCurrentSubRunID.subRun(),
-					      daq_header->GetEvent(),
+					      event_number,
 					      tstamp);
       //std::cout<<"\033[93mDone\033[00m"<<std::endl;
 
@@ -431,6 +487,9 @@ namespace lris {
       art::put_product_in_principal(std::move(trig_info),
 				    *outE,
 				    "daq"); // Module label
+      art::put_product_in_principal(std::move(sw_trig_info),
+				    *outE,
+				    "daq"); // Module label
       putPMTDigitsIntoEvent( pmt_raw_digits, outE );
      
     }
@@ -445,7 +504,10 @@ namespace lris {
                                                  std::unique_ptr<std::vector<raw::OpDetWaveform>> >& pmtDigitList,
                                                  raw::DAQHeader& daqHeader,
                                                  raw::BeamInfo& beamInfo,
-						 std::vector<raw::Trigger>& trigInfo)
+						 std::vector<raw::Trigger>& trigInfo,
+						 raw::ubdaqSoftwareTriggerData& sw_trigInfo,
+						 uint32_t& event_number,
+						 bool skip)
   {  
      triggerFrame = -999;
      TPCframe = -999;
@@ -474,16 +536,21 @@ namespace lris {
     boost::archive::binary_iarchive ia(fInputStream); 
     ubdaq::ub_EventRecord event_record;  
     ia >> event_record;
+    if(skip)
+      return false;
     //std::cout<<event_record.debugInfo()<<std::endl;
     //set granularity 
     //      event_record.updateIOMode(ubdaq::IO_GRANULARITY_CHANNEL);
-      
+    _trigger_beam_window_time = std::numeric_limits<double>::max();
     fillTriggerData(event_record, trigInfo);
     //if (skipEvent){return false;} // check that trigger data doesn't suggest we should skip event. // commented out because this doesn't work at the moment
     fillDAQHeaderData(event_record, daqHeader);
     fillTPCData(event_record, tpcDigitList);
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
+    fillSWTriggerData(event_record, sw_trigInfo);
+
+    event_number = event_record.getGlobalHeader().getEventNumber()+1;
 
     checkTimeStampConsistency();
 
@@ -504,7 +571,11 @@ namespace lris {
                                                   raw::DAQHeader& daqHeader)
   {
     ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
-      
+    if(fUseGPS)
+      global_header.useGPSTime();
+    else if(fUseNTP)
+      global_header.useLocalHostTime();
+
     // art::Timestamp is an unsigned long long. The conventional 
     // use is for the upper 32 bits to have the seconds since 1970 epoch 
     // and the lower 32 bits to be the number of nanoseconds within the 
@@ -855,15 +926,19 @@ namespace lris {
     
     //crate -> card -> channel -> window
 
-    ::art::ServiceHandle<geo::Geometry> geom;
-    ::art::ServiceHandle< util::TimeService > timeService;
+    auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
     ::art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     
-    // pmt channel map is assumed to be time dependent. therefore we need eventn time to set correct map.
+    // pmt channel map is assumed to be time dependent. therefore we need event time to set correct map.
     ubdaq::ub_GlobalHeader global_header = event_record.getGlobalHeader();
+    if(fUseGPS)
+      global_header.useGPSTime();
+    else if(fUseNTP)
+      global_header.useLocalHostTime();
     uint32_t seconds=global_header.getSeconds();
     time_t mytime = (time_t)seconds;
     if ( mytime==0 ) {
+      // some events seem o be missing time stamp. use run number in this case.
       std::cout << "[LArRawInputDriverUBooNE::fillPMTData] event epoch time 0 (!?). using run to set channel map" << std::endl;
       ub_pmt_channel_map->SetOpMapRun( global_header.getRunNumber() );
     }
@@ -1082,7 +1157,7 @@ namespace lris {
 						std::vector<raw::Trigger>& trigInfo)
   {
 
-    ::art::ServiceHandle< util::TimeService > timeService;
+    auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
 
     for(auto const& it_trig_map : event_record.getTRIGSEBMap()){
 
@@ -1118,7 +1193,7 @@ namespace lris {
       unsigned int sample_64MHz = (trig_header.get2MHzSampleNumber() * 32) + (trig_header.get16MHzRemainderNumber() * 4) + trig_data.getPhase();
       unsigned int frame = trig_header.getFrame();
       //std::cout << "Trigger frame: " << frame << " ... sample : " << sample_64MHz << std::endl;
-      util::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
+      detinfo::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
 
       double trigger_time = trig_clock.Time();
       double beam_time = -1;
@@ -1154,15 +1229,96 @@ namespace lris {
       triggerBitPMTBeam = trig_bits & 0x1;
       triggerBitPMTCosmic = trig_bits & 0x2;
       triggerTime = trigger_time;
-      
-//      if (triggerBitBNB){std::cout << "BNB Trigger issued" << std::endl;}
-//      if (triggerBitNuMI){std::cout << "NuMI Trigger issued" << std::endl;}
-//      if (triggerBitEXT){std::cout << "EXT Trigger issued" << std::endl;}
-//      std::cout << "trigger frame, sample = " << frame << "," << sample_64MHz << std::endl;
 
-      
     }
   }
+
+  // =====================================================================  
+  void LArRawInputDriverUBooNE::fillSWTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
+						raw::ubdaqSoftwareTriggerData& trigInfo)
+  {
+    auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
+    
+    std::vector<ub_FEMBeamTriggerOutput> swTrig_vect;
+    try {
+
+      // Software trigger data pulled from DAQ software trigger
+      swTrig_vect = event_record.getSWTriggerOutputVector();
+    }
+    catch(...){ // softwrare trigger data product not present in binary file (because it's too old probably).  Just set values to a default
+      std::cout << "failed to obtain software trigger object from binary file - setting all values to default" << std::endl;
+      return;
+    }
+
+    //
+    // Figure out time w.r.t. Trigger - dirty but works.
+    //
+    auto const& opt_clock = timeService->OpticalClock();
+    //auto const& trg_clock = timeService->TriggerClock();
+    //auto const& tpc_clock = timeService->TPCClock();
+    auto const& trig_map  = event_record.getTRIGSEBMap();
+    auto const& trig_header = trig_map.begin()->second.getTriggerHeader();
+    auto const& trig_data = trig_map.begin()->second.getTriggerCardData().getTriggerData();
+
+    uint64_t trig_sample_number = trig_header.get2MHzSampleNumber() * 32;
+    trig_sample_number += trig_header.get16MHzRemainderNumber() * 4;
+    trig_sample_number += trig_data.getPhase();
+
+    double trigger_time = (double)(trig_header.getFrame() * opt_clock.FramePeriod());
+    trigger_time += ((double)trig_sample_number) * opt_clock.TickPeriod();
+
+    uint64_t trig_tick = trig_sample_number + trig_header.getFrame() * opt_clock.FrameTicks();
+
+    auto const& crate_data = event_record.getPMTSEBMap().begin()->second;
+    //auto const& pmt_card    = crate_data.getCards().at(0);
+    
+    uint64_t beam_ro_tick = 0;
+    auto const& card_data = crate_data.getCards().front();
+    uint64_t min_dt = 1e12; //FIXME this should be set to max integer value from compiler
+    // First search the target timing
+    for(auto const& ch_data : card_data.getChannels()){
+  
+      for(auto const& window : ch_data.getWindows()) {
+     
+        if(window.header().getDiscriminantor()!=ub_PMT_DiscriminatorTypes_v6::BEAM && 
+           window.header().getDiscriminantor()!=ub_PMT_DiscriminatorTypes_v6::BEAM_GATE){
+          continue; //ignore non-BEAM signals
+        }
+      
+        uint64_t window_time = RollOver(card_data.getFrame(), window.header().getFrame(), 3) * 102400;
+        window_time += window.header().getSample();
+        uint64_t window_trigger_dt = 
+          ( window_time < trig_tick ? trig_tick - window_time : window_time - trig_tick );
+        
+        if( min_dt > window_trigger_dt ) {
+          min_dt       = window_trigger_dt;
+          beam_ro_tick = window_time;
+        }
+      }
+    }
+
+    if(beam_ro_tick > trig_tick){
+      _trigger_beam_window_time = beam_ro_tick - trig_tick;
+    }
+    else{
+      _trigger_beam_window_time = trig_tick - beam_ro_tick;
+      _trigger_beam_window_time *= -1.;
+    }
+    
+    for (unsigned int i(0); i < swTrig_vect.size(); ++i){ // loop through swtrigger algos filling info
+      ub_FEMBeamTriggerOutput swTrig = swTrig_vect.at(i); // fetch algorithm
+      
+      trigInfo.addAlgorithm(swTrig.algo_instance_name, // add algorithm to art data product
+                            swTrig.pass_algo, 
+                            swTrig.pass_prescale, 
+                            swTrig.amplitude, 
+                            swTrig.multiplicity, 
+                            swTrig.time, 
+                            _trigger_beam_window_time + swTrig.time * opt_clock.TickPeriod(), 
+                            swTrig.prescale_weight);
+    } // end loop over swtrigger algos
+  }
+    
 
   // =====================================================================  
   std::vector<short> LArRawInputDriverUBooNE::decodeChannelTrailer(unsigned short last_adc, unsigned short data)
@@ -1266,4 +1422,3 @@ namespace lris {
   // =====================================================================  
 
 }//<---Endlris
-

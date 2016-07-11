@@ -1,0 +1,13 @@
+#include "litemaker_base.fcl"
+
+litedatamin_wire: @local::litemaker_base
+litedatamin_wire.out_filename: "larlite_datamin_wire.root"
+litedatamin_wire.DataLookUpMap:
+{
+  wire:       ["caldata"]
+}
+
+litedatamin_wire.AssociationLookUpMap:
+{}
+
+

@@ -94,11 +94,11 @@ physics:
  end_paths:     [ analyzeIt ]
 }
 
-services.user.DetectorProperties.NumberTimeSamples: 3200
-services.user.DetectorProperties.ReadOutWindowSize: 3200
+services.user.DetectorPropertiesService.NumberTimeSamples: 3200
+services.user.DetectorPropertiesService.ReadOutWindowSize: 3200
 
-services.user.TimeService.G4RefTime: 0
-services.user.TimeService.TriggerOffsetTPC: 0
-services.user.TimeService.DefaultTrigTime: 0
-services.user.TimeService.DefaultBeamTime: 0
+services.user.DetectorClocksService.G4RefTime: 0
+services.user.DetectorClocksService.TriggerOffsetTPC: 0
+services.user.DetectorClocksService.DefaultTrigTime: 0
+services.user.DetectorClocksService.DefaultBeamTime: 0
 

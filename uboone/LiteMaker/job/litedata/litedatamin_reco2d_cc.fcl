@@ -1,0 +1,27 @@
+#include "litemaker_base.fcl"
+
+litedatamin_reco2d_cc: @local::litemaker_base
+litedatamin_reco2d_cc.out_filename: "larlite_datamin_reco2d_cc.root"
+litedatamin_reco2d_cc.DataLookUpMap:
+{
+  hit : [ 
+#    "cchit",
+    "linecluster"
+  ]
+  cluster : [ 
+    "linecluster"
+  ]
+}
+
+litedatamin_reco2d_cc.AssociationLookUpMap:
+{
+  hit : [ 
+#    "cchit",
+    "linecluster"
+  ]
+  cluster : [ 
+    "linecluster"
+  ]
+}
+
+

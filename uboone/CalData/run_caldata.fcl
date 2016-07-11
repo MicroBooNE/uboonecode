@@ -12,8 +12,8 @@ services:
   user:         @local::microboone_simulation_services
 }
 
-#services.user.DetectorProperties.NumberTimeSamples: 1200
-#services.user.DetectorProperties.ReadOutWindowSize: 1200
+#services.user.DetectorPropertiesService.NumberTimeSamples: 1200
+#services.user.DetectorPropertiesService.ReadOutWindowSize: 1200
 
 #Start each new event with an empty event.
 source:

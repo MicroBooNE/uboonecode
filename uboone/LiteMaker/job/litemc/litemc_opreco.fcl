@@ -1,0 +1,23 @@
+#include "litemaker_base.fcl"
+
+litemc_opreco: @local::litemaker_base
+
+litemc_opreco.out_filename: "larlite_opreco.root"
+
+litemc_opreco.DataLookUpMap:
+{
+
+  ophit: ["ophit","ophitSat"]
+
+  opflash: ["opflash","opflashSat"]
+
+}
+
+litemc_opreco.AssociationLookUpMap:
+{
+  ophit: ["ophit","ophitSat"]
+
+  opflash: ["opflash","opflashSat"]
+}
+
+

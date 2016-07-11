@@ -2,7 +2,11 @@ BEGIN_PROLOG
 trigger_enforcement: {
   module_type: "TriggerEnforcement"
   Verbose: false
-  TriggerProducer: ""
+  HardwareTriggerProducer: ""
+  SoftwareTriggerProducer: ""
   ExcludeBits: []
+  IncludeBits: []
+  includeSoftwareTriggers: []
+  excludeSoftwareTriggers: []
 }
 END_PROLOG

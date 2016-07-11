@@ -1,6 +1,7 @@
 #include "services_microboone.fcl"
 #include "largeantmodules_microboone.fcl"
 #include "mcreco.fcl"
+#include "time_memory_tracker_microboone.fcl"
 process_name: G4
 
 services:
@@ -8,8 +9,8 @@ services:
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "g4_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  TimeTracker:             @local::microboone_time_tracker
+  MemoryTracker:           @local::microboone_memory_tracker
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:  @local::art_file_catalog_mc
   user:         @local::microboone_g4_services
@@ -20,6 +21,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -61,6 +63,11 @@ outputs:
    module_type: RootOutput
    fileName:    "%ifb_%tc_g4.root"
    dataTier:    "simulated"
+   saveMemoryObjectThreshold: 0
    compressionLevel: 1
  }
 }
+
+physics.producers.largeant.KeepParticlesInVolumes: ["volCryostat"] #only keep MCParticles that cross the cryostat
+physics.producers.mcreco.MCRecoPart.SavePathPDGList: [13,-13,211,-211,111,311,310,130,321,-321,2212,2112,2224,2214,2114,1114,3122,
+                                                      1000010020,1000010030,1000020030,1000020040]

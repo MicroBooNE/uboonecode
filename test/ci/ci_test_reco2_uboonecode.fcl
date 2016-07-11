@@ -1,0 +1,7 @@
+#include "reco_uboone_stage_2.fcl"
+
+services.LArSeedService.policy: "preDefinedSeed"
+services.LArSeedService.baseSeed: 1234
+
+#services.RandomNumberGenerator.restoreFrom: "Reco2RandomSeeds_Ref.dat"
+#services.RandomNumberGenerator.saveTo: "Reco2RandomSeeds.dat"

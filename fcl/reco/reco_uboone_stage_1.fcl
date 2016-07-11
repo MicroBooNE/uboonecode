@@ -7,6 +7,7 @@
 #include "cluster_microboone.fcl"
 #include "trackfindermodules_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "correct_saturation.fcl"
 #include "pandoramodules_microboone.fcl"
 #include "triggeralgo_service.fcl"
 #include "cosmicremovalmodules.fcl"
@@ -35,6 +36,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -49,11 +51,34 @@ physics:
   ### random number saver
   rns:                 { module_type: RandomNumberSaver }
 
+  ### OpHit finders
+  #ophitT   : @local::ub_ophitfinder_t
+  #ophitFW  : @local::ub_ophitfinder_fw
+  #ophitSW  : @local::ub_ophitfinder_sw
+  #ophitCFD : @local::ub_ophitfinder_cfd
+
+  #ophitSatT   : @local::ub_ophitfinder_satt
+  #ophitSatFW  : @local::ub_ophitfinder_satfw
+  #ophitSatSW  : @local::ub_ophitfinder_satsw
+  #ophitSatCFD : @local::ub_ophitfinder_satcfd
+
+  ### Saturation correction module
+  saturation : @local::correct_saturation
+
   ### flash finders
+  ophit            : @local::microboone_ophit_beam_highgain
+  ophitLow         : @local::microboone_ophit_beam_lowgain
+  ophitCosmic      : @local::microboone_ophit_cosmic_highgain
+  ophitCosmicLow   : @local::microboone_ophit_cosmic_lowgain
   opflash          : @local::microboone_opflash_beam_highgain
   opflashLow       : @local::microboone_opflash_beam_lowgain
   opflashCosmic    : @local::microboone_opflash_cosmic_highgain
   opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  sflash           : @local::microboone_simple_flash
+
+  ophitSat     : @local::microboone_ophit_saturation
+  opflashSat : @local::microboone_opflash_saturation
+  sflashSat  : @local::microboone_simple_flash_sat
 
   ### calwire producers
   caldata:             @local::microboone_calroi
@@ -82,7 +107,16 @@ physics:
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
+         saturation,
+         ophit,
+         ophitSat,
+         ophitLow,
+         ophitCosmic,
+         ophitCosmicLow,
          opflash,
+         sflash,
+         opflashSat,
+         sflashSat,
          opflashLow,
          opflashCosmic,
          opflashCosmicLow,
@@ -118,11 +152,15 @@ outputs:
    fileName:    "%ifb_%tc_reco1.root"
    dataTier:    "reconstructed-2d"
    compressionLevel: 1
+   saveMemoryObjectThreshold: 0
  }
 }
 
 
 ### Here, we overwrite ALL module labels with the ones defined above.
+
+physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 physics.producers.caldata.DigitModuleLabel:                     "daq"
 

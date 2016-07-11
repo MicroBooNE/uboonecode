@@ -14,7 +14,7 @@ namespace opdet {
 
   //------------------------------------------------------------
   void WFAlgoArray::Process(std::vector<float> &wf,
-			    const ::util::ElecClock &start_time)
+			    const ::detinfo::ElecClock &start_time)
   //------------------------------------------------------------
   {
     fTimeArray.clear();

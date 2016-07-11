@@ -1,0 +1,52 @@
+
+#
+#     The main fhcl file to execute MuCSReco 
+
+#include "services_microboone.fcl"
+#include "MuCSMerger_uboone.fcl"
+
+process_name: MuCSReco
+
+services:
+{
+  TFileService:               { fileName: "MuCSReco.root" }
+  Timing:                     {}
+  RandomNumberGenerator:      {} 
+  message:                    @local::standard_info
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents: 10     
+}
+
+physics:
+{
+ producers:
+ {
+   rns: { module_type: RandomNumberSaver }
+   mucsreco: @local::standard_mucsreco
+ }
+ 
+ reco: [ rns,mucsreco ]
+ stream1:  [ out1 ]
+ trigger_paths: [ reco ] 
+ end_paths: [ stream1 ]  
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   # fileName: "%ifb_%tc_merged.root"
+   fileName: "%ifb_myrun_mygroup_recod.root"
+   dataTier: "mucs_reco"
+   compressionLevel: 1
+ }
+}
+
+
+physics.producers.mucsreco.InputDB : "/uboone/app/users/mibass/cosmics/MuCS/sqMaker/MClib_bs30.sqlite"
+physics.producers.mucsreco.TopBoxy : "398.451"

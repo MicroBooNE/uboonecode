@@ -1,0 +1,69 @@
+#include "evdservices_microboone.fcl"
+#include "caldata_microboone.fcl"
+
+
+
+process_name: EVD
+
+services:
+{
+  TFileService:            { fileName: "reco2D_hist_evd.root" }
+  message:                 @local::microboone_message_services_prod_debug
+  channelstatusservice:    @local::microboone_channelstatus_service
+  			               @table::microboone_disp
+}
+
+
+# Define the services
+
+#Look at the input files
+source:
+{
+  module_type: RootInput
+  fileNames:  [ "data.root" ]
+  maxEvents:   -1       # Number of events to create
+}
+
+outputs:{}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+
+ producers: {
+            }
+
+ filters:{}
+
+ analyzers:
+ {
+  evdisp:{module_type: EVD}
+ }
+
+ reco: [ ]
+ 
+ #list the modules for this path, order matters, filters reject all following items
+ evd: [ evdisp ] 
+
+ #end_path are things that do not modify art::Event, includes analyzers 
+ #and output modules. all items here can be run simultaneously
+ end_paths: [evd]  
+}
+
+
+
+### Here, we overwrite ALL module labels with the ones defined above.
+
+### Use this to set the frame size for truncated readout
+services.DetectorPropertiesService.NumberTimeSamples:            6400
+services.DetectorPropertiesService.ReadOutWindowSize:            6400
+services.DetectorClocksService.InheritClockConfig:                  false
+services.DetectorClocksService.TriggerOffsetTPC:                    -0.400e3
+services.RawDrawingOptions.TotalTicks:                    6400
+
+services.RawDrawingOptions.RawDataLabel:                  "digitfilter"
+services.RawDrawingOptions.MinimumSignal:                 10
+services.RawDrawingOptions.DrawRawDataOrCalibWires:       2
+

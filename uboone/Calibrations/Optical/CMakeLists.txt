@@ -1,6 +1,8 @@
+add_subdirectory(fcl)
+
 art_make( LIBRARY_NAME SPEcalibrationCode
 	  EXCLUDE SPEcalibration_module.cc FEMemulator_module.cc CalibrationFit.C
-	  RawData
+	  lardata_RawData
 	  UBOpReadoutMap_service
 	  LIB_LIBRARIES ${ART_FRAMEWORK_CORE} 
 	       ${ART_FRAMEWORK_IO_SOURCES}
@@ -20,7 +22,7 @@ simple_plugin( SPEcalibration "module"
 	       SPEcalibrationCode
 	       OpticalSubEvents
 	       UBOpReadoutMap_service
-	       RawData
+	       lardata_RawData
 	       ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
                ${ART_FRAMEWORK_PRINCIPAL}
@@ -35,9 +37,10 @@ simple_plugin( SPEcalibration "module"
              )
 
 simple_plugin( FEMemulator "module"
+	       SPEcalibrationCode
 	       OpticalSubEvents
 	       UBOpReadoutMap_service
-	       RawData
+	       lardata_RawData
 	       ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
                ${ART_FRAMEWORK_PRINCIPAL}

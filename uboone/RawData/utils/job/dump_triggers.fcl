@@ -1,0 +1,35 @@
+#include "services_microboone.fcl"
+
+process_name: DumpTriggers
+
+services:
+{
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  message:      @local::standard_info
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:  10        # Number of events to create
+}
+
+physics:
+{
+
+ analyzers: {
+  dump: {
+    module_type: "TriggerDumper"
+    HardwareTriggerProducer: "daq"
+    SoftwareTriggerProducer: "daq"
+    NumDump: 1000
+  }
+ }
+
+ ana:  [ dump ]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ ana ]
+}
+

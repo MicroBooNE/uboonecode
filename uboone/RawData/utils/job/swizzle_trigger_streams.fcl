@@ -1,0 +1,209 @@
+#include "geometry_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
+#include "seedservice_microboone.fcl"
+#include "beamdata_microboone.fcl"
+#include "triggerenforcement.fcl"
+
+
+#include "reco_uboone_data_notpc.fcl"
+
+process_name: Swizzler
+services:
+{
+  scheduler: { fileMode: NOMERGE }
+  TFileService: { fileName: "daq_hist.root" }
+  TimeTracker: { 
+    printSummary : true
+    dbOutput     : {
+      filename   :  "time.db"
+      overwrite  :  true
+    }
+  }
+  MemoryTracker: {
+    ignoreTotal       : 1 # no. of events to exclude - '1' by default
+    printSummaries    : ["*"] # or any combination of ["general","event","module"]
+    includeMallocInfo : true
+    filename          : "mem.db" 
+  }
+  RandomNumberGenerator: {} 
+  LArSeedService:  @local::microboone_seedservice
+  FileCatalogMetadata:    @local::art_file_catalog_data
+  DatabaseUtil:           @local::microboone_database
+  @table::microboone_reco_notpc_services
+}
+services.DetectorClocksService.InheritClockConfig: false
+
+microboone_tfile_metadata:
+{
+  JSONFileName:          "daq_hist.root.json"
+  GenerateTFileMetadata: true
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
+}
+
+# Database settings
+services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: false
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
+
+source:
+{
+  fileNames:       []
+  module_type:	   LArRawInputSourceUBooNE
+  maxEvents:       -1
+  huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTriggerType: ALL
+  beam_histograms: [ "E:TOR101, 100, 0, 50",
+                     "E:TORTGT, 100, 0, 50",
+                     "E:TOR860, 100, 0, 5",
+                     "E:TOR875, 100, 0, 5" ]
+}
+
+outputs:
+{
+ outbnb:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_bnb.root"
+   dataTier: "raw"
+   streamName: "outbnb"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_bnb ] }
+  }
+ outnumi:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_numi.root"
+   dataTier: "raw"
+   streamName: "outnumi"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_numi ] }
+  }
+ outext:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_ext.root"
+   dataTier: "raw"
+   streamName: "outext"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_ext ] }
+  }
+ outmucs:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_mucs.root"
+   dataTier: "raw"
+   streamName: "outmucs"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_mucs ] }
+  }
+ outprescale:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_prescale.root"
+   dataTier: "raw"
+   streamName: "outprescale"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_prescale ] }
+  }
+ outnotpc:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_notpc.root"
+   dataTier: "raw"
+   streamName: "outnotpc"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_*_*_*"]
+   SelectEvents: { SelectEvents: [ path_notpc ] }
+  }
+}
+
+physics:
+{
+ producers: {
+  @table::microboone_reco_notpc_producers
+ }
+ filters: {
+  @table::microboone_reco_notpc_filters
+ }
+
+ path_notpc:    [ @sequence::microboone_reco_notpc ]
+ path_bnb:      [ trigbnb,  @sequence::microboone_reco_notpc, opflashfilter ]
+ path_numi:     [ trignumi, @sequence::microboone_reco_notpc, opflashfilternumi ]
+ path_ext:      [ trigext ]
+ path_mucs:     [ trigmucs ]
+ path_prescale: [ randomfilter ]
+ stream_notpc:    [ outnotpc ]
+ stream_bnb:      [ outbnb ]
+ stream_numi:     [ outnumi ]
+ stream_ext:      [ outext ]
+ stream_mucs:     [ outmucs ]
+ stream_prescale: [ outprescale ]
+
+ trigger_paths: [ path_notpc, path_bnb, path_numi, path_ext, path_mucs, path_prescale ] 
+ end_paths:     [ stream_notpc, stream_bnb, stream_numi, stream_ext, stream_mucs, stream_prescale ]
+}
+
+services.DetectorClocksService.TrigModuleName: "daq"
+
+physics.filters.opflashfilter.OpFlashModule : "opflash"
+physics.filters.opflashfilter.DisableFilter: false
+
+physics.filters.opflashfilternumi.OpFlashModule : "opflash"
+physics.filters.opflashfilternumi.DisableFilter: false
+
+
+
+### Here we try to suppress known and pointless messages
+services.message.destinations :
+{
+  STDCOUT: 
+  {
+     type:      "cout"      #tells the message service to output this destination to cout
+     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
+     append:     true       #says to append all messages to the output
+     categories:
+     {
+       ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       default:
+       {
+         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
+         reportEvery: 1
+       }
+     }
+  }
+}

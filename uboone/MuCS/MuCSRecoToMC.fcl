@@ -1,0 +1,57 @@
+
+#
+#     The main fhcl file to execute MuCSReco 
+
+#include "reco_uboone_mcc7.fcl"
+#include "MuCSRecoToMC_module.fcl"
+
+
+
+
+process_name: MuCSRecoToMC
+
+services:
+{
+  #TFileService:               { fileName: "MuCSReco.root" }
+  Timing:                     {}
+  RandomNumberGenerator:      {} 
+  message:                    @local::standard_info
+  @table::microboone_reco_mcc7_services
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents: -1     
+}
+
+physics:
+{
+ producers:
+ {
+   generator: @local::microboone_MuCSRecoToMC
+ }
+ 
+ sim: [ generator ]
+ stream1:  [ out1 ]
+ trigger_paths: [ sim ] 
+ end_paths: [ stream1 ]  
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName: "%ifb_MuCSRecoToMC.root"
+   dataTier: "mucs_recotomc"
+   compressionLevel: 1
+   outputCommands: ["keep *_*_*_MuCSRecoToMC"]
+   dropMetaDataForDroppedData: true
+ }
+}
+
+
+
+
+

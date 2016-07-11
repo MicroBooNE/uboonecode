@@ -1,0 +1,47 @@
+
+#include "reco_uboone_mcc7.fcl"
+#include "MuCSMerger_uboone.fcl"
+
+process_name: MuCSMerger
+
+services:
+{
+  #TFileService:               { fileName: "/uboone/data/users/kalousis/MuCS/merged/mucs_merger_hist_myrun_mygroup.root" }
+  #Timing:                     {}
+  # SimpleMemoryCheck:          { ignoreTotal: 1 }
+  #RandomNumberGenerator:      {} 
+  message:                    @local::standard_info
+  # FileCatalogMetadata:        @local::art_file_catalog_mc
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents: 200000     
+}
+
+physics:
+{
+ producers:
+ {
+   merger: @local::standard_mucsmerger
+ }
+ 
+ merge: [ merger ]
+ stream1:  [ out1 ]
+ trigger_paths: [ merge ] 
+ end_paths: [ stream1 ]  
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName: "%ifb_merged.root"
+   dataTier: "mucs_merged"
+   compressionLevel: 1
+ }
+}
+
+physics.producers.merger.MuCSFile: "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_144_0.333_0.root" 

@@ -1,7 +1,7 @@
 cet_enable_asserts()
 
 art_make( BASENAME_ONLY
-	  MODULE_LIBRARIES Utilities
+	  MODULE_LIBRARIES lardata_Utilities
                         SignalShapingServiceMicroBooNE_service
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}

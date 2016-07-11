@@ -21,9 +21,10 @@
 #include "datatypes/raw_data_access.h"
 #include <boost/archive/binary_iarchive.hpp>
 #include "datatypes/ub_EventRecord.h"
+#include "uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 
 #include "uboone/Geometry/UBOpChannelTypes.h"
-#include "Utilities/DatabaseUtil.h" // lardata
+#include "lardata/Utilities/DatabaseUtil.h" // lardata
 
 #include <fstream>
 #include <vector>
@@ -78,10 +79,14 @@ namespace lris {
     //Other functions
 
     bool processNextEvent(std::vector<raw::RawDigit>& digitList,
-			  std::map< opdet::UBOpticalChannelCategory_t, std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
+			  std::map< opdet::UBOpticalChannelCategory_t,
+			  std::unique_ptr< std::vector<raw::OpDetWaveform> > > & pmtDigitList,
 			  raw::DAQHeader& daqHeader,
 			  raw::BeamInfo& beamInfo,
-			  std::vector<raw::Trigger>& trigInfo);
+			  std::vector<raw::Trigger>& trigInfo,
+			  raw::ubdaqSoftwareTriggerData& sw_trigInfo,
+			  uint32_t& event_number,
+			  bool skip);
     void fillDAQHeaderData(gov::fnal::uboone::datatypes::ub_EventRecord& event_record,
 			   raw::DAQHeader& daqHeader);
     void fillTPCData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record, 
@@ -92,7 +97,12 @@ namespace lris {
 		      raw::BeamInfo& beamInfo);
     void fillTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
 			 std::vector<raw::Trigger>& trigInfo);
+    void fillSWTriggerData(gov::fnal::uboone::datatypes::ub_EventRecord &event_record,
+                        raw::ubdaqSoftwareTriggerData& trigInfo);
+
     void checkTimeStampConsistency(void);
+
+    double _trigger_beam_window_time;
 
     art::SourceHelper            fSourceHelper;
     art::SubRunID                  fCurrentSubRunID;
@@ -100,8 +110,15 @@ namespace lris {
     std::vector<std::streampos>    fEventLocation;
     uint32_t                       fEventCounter; 
     uint32_t                       fNumberEventsInFile;
+    uint32_t                       fFinalEventCutOff;
+    std::ios::streampos            fPreviousPosition;
+    bool                           fCompleteFile;
     bool                           fHuffmanDecode;
-    util::UBChannelMap_t           fChannelMap;   
+    bool                           fUseGPS;    // fhicl parameter force use GPS time.
+    bool                           fUseNTP;    // fhicl parameter force use NTP time.
+    util::UBChannelMap_t           fChannelMap;
+    int                            fMaxEvents; //fhicl parameter.  Maximum number of events.
+    int                            fSkipEvents; // fhicl parameter.  Number of events to skip.
     int                            fDataTakingTime; //fhicl parameter. Optional to override raw data's internal time stamp.
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
     bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data

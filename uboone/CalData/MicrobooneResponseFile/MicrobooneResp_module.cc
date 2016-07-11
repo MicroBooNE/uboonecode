@@ -28,11 +28,11 @@ extern "C" {
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 
 // LArSoft includes
-#include "Utilities/LArFFT.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/PlaneGeo.h"
+#include "lardata/Utilities/LArFFT.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/PlaneGeo.h"
 
 // ROOT includes
 #include <TFile.h>

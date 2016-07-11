@@ -1,15 +1,16 @@
 
-art_make( BASENAME_ONLY
-          MODULE_LIBRARIES Geometry
-			Geometry_service
-			Simulation
-			BackTracker_service
-	                Utilities
-			Filters
-			RawData
-			RecoBase
-			RecoObjects  
-			RecoAlg
+art_make( 
+          MODULE_LIBRARIES larcore_Geometry
+			larcore_Geometry_Geometry_service
+			larsim_Simulation
+			larsim_MCCheater_BackTracker_service
+	                lardata_Utilities
+			larevt_Filters
+			lardata_RawData
+			lardata_RecoBase
+			lardata_RecoObjects  
+			larreco_RecoAlg
+			larpandora_LArPandoraInterface
 			SignalShapingServiceMicroBooNE_service
                         ${SIMULATIONBASE}
                         ${LARRECO_LIB}
@@ -35,4 +36,3 @@ art_make( BASENAME_ONLY
 # install_headers()
 install_fhicl()
 install_source()
-

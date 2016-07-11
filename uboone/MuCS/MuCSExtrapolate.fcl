@@ -1,0 +1,46 @@
+
+#include "reco_uboone_mcc7.fcl"
+#include "MuCSMerger_uboone.fcl"
+
+@table::microboone_reco_mcc7_services
+process_name: MuCSExtrapolate
+
+services:
+{
+  TFileService:               { fileName: "MuCSExtrapolate.root" }
+  Timing:                     {}
+  message:                    @local::standard_info
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents: 10     
+}
+
+physics:
+{
+ producers:
+ {
+   mucsreco: @local::standard_mucsextrapolate
+ }
+ 
+ reco: [ mucsreco ]
+ stream1:  [ out1 ]
+ trigger_paths: [ reco ] 
+ end_paths: [ stream1 ]  
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   # fileName: "%ifb_%tc_merged.root"
+   fileName: "%ifb_myrun_mygroup_recod.root"
+   dataTier: "mucs_reco"
+   compressionLevel: 1
+ }
+}
+
+

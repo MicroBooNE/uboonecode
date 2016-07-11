@@ -1,0 +1,293 @@
+#include "reco_uboone_data_Feb2016.fcl"
+
+#include "geometry_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
+#include "seedservice_microboone.fcl"
+#include "calibration_microboone.fcl"
+
+#include "analysistreemodule_microboone.fcl"
+#include "filters.fcl"
+#include "signalservices_microboone.fcl"
+#include "showerfindermodules.fcl"
+#include "vertexfindermodules.fcl"
+#include "photpropservices_microboone.fcl"
+#include "photoncountert0matching.fcl"
+#include "beamdata_microboone.fcl"
+
+process_name: SwizzlerRecoAnatree
+services:
+{
+  scheduler: { fileMode: NOMERGE }
+  TFileService: { fileName: "SwizRecoAna_hist.root" }
+  TimeTracker:         {}
+  MemoryTracker:       {}
+  RandomNumberGenerator: {} 
+  #SeedService:  @local::microboone_seedservice
+  FileCatalogMetadata:    @local::art_file_catalog_data
+  #PhotonVisibilityService: @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties  
+  user:                       @local::microboone_full_services
+#  IFDH: {}
+}
+services.user.IFDH: {}
+
+microboone_tfile_metadata:
+{
+  JSONFileName:          "SwizRecoAna_hist.root.json"
+  GenerateTFileMetadata: false
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
+}
+
+services.user.ExptGeoHelperInterface: @local::microboone_geometry_helper
+services.user.Geometry:               @local::microboone_geo
+services.user.UBOpReadoutMap:           @local::microboone_opreadoutmap
+services.user.DetectorClocksService:            @local::microboone_detectorclocks
+services.user.DatabaseUtil:           @local::microboone_database
+# Database settings
+services.user.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.user.DatabaseUtil.DBName:        "hootgibson_prod"
+services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.user.DatabaseUtil.Port:          5444
+services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.user.DatabaseUtil.ToughErrorTreatment: false
+services.user.DatabaseUtil.ShouldConnect: true
+services.user.DatabaseUtil.TableName: "main_run"
+services.user.DetectorPropertiesService.InheritNumberTimeSamples: false
+
+source:
+{
+  fileNames:       []
+  module_type:	   LArRawInputSourceUBooNE
+  maxEvents:       -1
+  huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTriggerType: ALL
+  beam_histograms: [ "E:TOR101, 100, 0, 50",
+                     "E:TORTGT, 100, 0, 50",
+                     "E:TOR860, 100, 0, 5",
+                     "E:TOR875, 100, 0, 5" ]
+  saveMemoryObjectThreshold: 0
+}
+
+physics:
+{
+    producers: 
+    {
+        beamdata: @local::microboone_beamdata
+        @table::microboone_reco_data_producers
+        }
+    
+    analyzers:
+        {
+        }
+    
+    #define the producer and filter modules for this path, order matters, 
+    #filters reject all following items.  see lines starting physics.producers below
+    reco: [ rns, 
+            saturation,
+            ophitSat, 
+            #ophitLow, 
+            #ophitCosmic, 
+            #ophitCosmicLow, 
+            opflashSat, 
+            #opflashLow, 
+            #opflashCosmic, 
+            #opflashCosmicLow, 
+            beamdata, 
+            digitfilter, 
+            caldata, 
+            #	cchit, 
+            gaushit,
+            fuzzycluster,
+            pandoraCosmic, 
+            trackkalmanhit, 
+            trackkalmanhittag,
+            trackkalmanhitcalo,
+            trackkalmanhitpid,
+            pandoraCosmicKHit, 
+            pandoraCosmicKHittag,
+            pandoraCosmicKHitcalo,
+            pandoraCosmictag,
+            pandoraCosmiccalo,
+            pandoraCosmicpid,
+            pandoraCosmicKHitpid,
+            pandoraCosmicKHitPFPart,
+            pandoraTrackPFPartMatch,
+            pandoraCosmicKHitRemoval,
+            pandoraNu,
+            pandoraNutag,
+            pandoraNucalo,
+            pandoraNupid,
+            pandoraNuKHit,
+            pandoraNuKHittag,
+            pandoraNuKHitcalo,
+            pandoraNuKHitpid,
+            pandoraNuPMA,
+            pandoraNuPMAtag,
+            pandoraNuPMAcalo,
+            pandoraNuPMApid,
+            linecluster,
+            pmtrack,
+            pmtracktag,
+            pmtrackcalo,
+            pmtrackpid]
+    
+    ana: [analysistree]      
+    
+    #define the output stream, there could be more than one if using filters 
+    stream1:  [ out1 ]
+    
+    #trigger_paths is a keyword and contains the paths that modify the art::event, 
+    #ie filters and producers
+    trigger_paths: [reco] 
+    # end_paths: [ stream1,ana ]
+    end_paths: [ ana ]
+    
+    }
+
+#block to define where the output goes.  if you defined a filter in the physics
+#block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+#entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+ out1:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_reco.root"
+   dataTier: "reconstructed"
+   streamName: "all"      
+   compressionLevel: 1
+   saveMemoryObjectThreshold: 0
+  }
+}
+
+services.user.DetectorClocksService.TrigModuleName: "daq"
+services.user.SignalShapingServiceMicroBooNE.StretchFullResponse: false
+
+### Here we include the file giving us run/data dependent overrides
+
+services.user.DetectorClocksService.TrigModuleName:     "daq"
+################
+
+### Set the following if you want to run truncated RawDigits from the RawDigitFilter
+physics.producers.caldata.DodQdxCalib: true
+#physics.producers.caldata.dQdxCalibFileName: "ChannelGainAndShapingTimeCalibFactors_MicroBooNE_TPC_14mVperfC_2us_May3rd2016.txt"
+physics.producers.digitfilter.TruncateTicks:                    true
+services.user.DetectorPropertiesService.NumberTimeSamples:           6400
+services.user.DetectorPropertiesService.ReadOutWindowSize:           6400
+services.user.DetectorClocksService.InheritClockConfig:              false
+services.user.DetectorClocksService.TriggerOffsetTPC:                -0.400e3
+services.user.DetectorPropertiesService.Electronlifetime:  1e10
+
+#physics.producers.gaushit.MinSig:    [8.0, 6.5, 8.0]
+#physics.producers.gaushit.MinSig:    [4.0, 4.0, 5.0]
+#physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
+#physics.producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
+#physics.producers.pandoraNucalo.CaloAlg.CalAreaConstants:                   [6.93e-3, 5.34e-3, 6.9e-3]
+#physics.producers.pandoraNuKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
+#physics.producers.pandoraNuPMAcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
+#physics.producers.pmtrackcalo.CaloAlg.CalAreaConstants:                [6.93e-3, 5.34e-3, 6.9e-3]
+
+#physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraCosmiccalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraNucalo.CaloAlg.CalAreaConstants:                   [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraNuKHitcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pandoraNuPMAcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.pmtrackcalo.CaloAlg.CalAreaConstants:                [4.803e-3, 3.616e-3, 5.418e-3]
+
+#physics.producers.pandoraCosmicKHitRemoval.HitProducerLabel:                 "gaushit"
+#physics.producers.pandoraCosmicKHitRemoval.CosmicProducerLabels:             ["pandoraCosmicKHitPFPart","trackkalmanhittag"]
+#physics.producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel:          "pandoraCosmic"
+#physics.producers.pandoraCosmicKHitRemoval.TrackProducerLabels:              ["pandoraCosmicKHit","trackkalmanhit"]
+#physics.producers.pandoraCosmicKHitRemoval.AssnProducerLabels:               ["pandoraCosmicKHit","trackPFParticleMatch"]
+#
+#physics.producers.trackkalmanhittag.EndTickPadding:                          75
+#physics.producers.pandoraCosmicKHitPFPart.EndTickPadding:           75
+#physics.producers.pandoraCosmicKHitRemoval.EndTickPadding:        75
+
+#physics.producers.pmtrack.PMAlgVertexing.FindKinks: true
+
+#ANALYSIS TREE STUFF
+physics.analyzers.analysistree:  @local::microboone_analysistree
+physics.analyzers.analysistree.TrackModuleLabel:        ["trackkalmanhit", "pandoraCosmic", "pandoraCosmicKHit", "pandoraNuKHit", "pmtrack", "pandoraNu", "pandoraNuPMA"]
+physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "pandoraCosmiccalo", "pandoraCosmicKHitcalo", "pandoraNuKHitcalo", "pmtrackcalo", "pandoraNucalo", "pandoraNuPMAcalo"]
+physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "pandoraCosmicpid", "pandoraCosmicKHitpid", "pandoraNuKHitpid", "pmtrackpid", "pandoraNupid", "pandoraNuPMApid"]
+physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0", "t0","t0","t0", "t0"]
+physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0", "mct0", "mct0", "mct0", "mct0"]
+
+physics.analyzers.analysistree.VertexModuleLabel:               ["linecluster", "pandoraCosmic", "pandoraNu", "pmtrack"]
+
+physics.analyzers.analysistree.GenieGenModuleLabel:     "generator"
+physics.analyzers.analysistree.POTModuleLabel:          "beamdata"
+
+physics.analyzers.analysistree.CosmicTaggerAssocLabel: ["trackkalmanhittag", "pandoraCosmictag", "pandoraCosmicKHittag", "pandoraNuKHittag", "pmtracktag", "pandoraNutag", "pandoraNuPMAtag"]
+physics.analyzers.analysistree.FlashMatchAssocLabel:     ["flashTrackMatchkHit", "flashTrackMatchHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit", "flashTrackMatchkHit"]
+physics.analyzers.analysistree.ContainmentTaggerAssocLabel:     ["dummy","dummy","dummy","dummy","dummy","dummy","dummy"]
+
+physics.analyzers.analysistree.PFParticleModuleLabel: "pandoraNu"
+
+#physics.analyzers.analysistree.CosmicClusterTaggerAssocLabel: "ccclustertag"
+physics.analyzers.analysistree.OpFlashModuleLabel: "opflashSat"
+physics.analyzers.analysistree.CryGenModuleLabel: "generator"
+physics.analyzers.analysistree.HitsModuleLabel: "gaushit"
+physics.analyzers.analysistree.ClusterModuleLabel: "fuzzycluster"
+#physics.analyzers.analysistree.ShowerModuleLabel: ["showerrecofuzzy", "showerrecopandora"]
+#physics.analyzers.analysistree.MCShowerModuleLabel: "mcreco"
+#physics.analyzers.analysistree.MCTrackModuleLabel: "mcreco"
+physics.analyzers.analysistree.IgnoreMissingShowers: true
+physics.analyzers.analysistree.POTModuleLabel: "beamdata"
+
+physics.analyzers.analysistree.SaveCryInfo: false
+physics.analyzers.analysistree.SaveGenieInfo: false
+physics.analyzers.analysistree.SaveMCShowerInfo: false
+physics.analyzers.analysistree.SaveMCTrackInfo:  false
+physics.analyzers.analysistree.SaveShowerInfo: false
+physics.analyzers.analysistree.SaveGeantInfo: false
+physics.analyzers.analysistree.SaveAuxDetInfo: false
+physics.analyzers.analysistree.SaveFlashInfo: true
+physics.analyzers.analysistree.SaveCaloCosmics: true
+physics.analyzers.analysistree.SaveRawDigitInfo: false
+physics.analyzers.analysistree.SavePandoraNuVertexInfo:       true
+physics.analyzers.analysistree.SavePFParticleInfo: true
+
+### Here we try to suppress known and pointless messages
+services.message.destinations :
+{
+  STDCOUT: 
+  {
+     type:      "cout"      #tells the message service to output this destination to cout
+     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
+     append:     true       #says to append all messages to the output
+     categories:
+     {
+       ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       default:
+       {
+         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
+         reportEvery: 1
+       }
+     }
+  }
+}

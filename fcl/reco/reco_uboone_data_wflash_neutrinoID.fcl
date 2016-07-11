@@ -42,6 +42,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -64,6 +65,10 @@ physics:
   # digitfilter:                @local::microboone_noisefilter
   
   ### flash finders
+  ophit            :            @local::microboone_ophit_beam_highgain
+  ophitLow         :            @local::microboone_ophit_beam_lowgain
+  ophitCosmic      :            @local::microboone_ophit_cosmic_highgain
+  ophitCosmicLow   :            @local::microboone_ophit_cosmic_lowgain
   opflash          :            @local::microboone_opflash_beam_highgain
   opflashLow       :            @local::microboone_opflash_beam_lowgain
   opflashCosmic    :            @local::microboone_opflash_cosmic_highgain
@@ -162,6 +167,10 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  reco: [ rns,
          digitfilter,
+         #ophit,
+         #ophitLow,
+         #ophitCosmic,
+         #ophitCosmicLow,
          #opflash,
          #opflashLow,
          #opflashCosmic,
@@ -247,6 +256,7 @@ outputs:
    dataTier:    "reconstructed-2d"
    SelectEvents: { SelectEvents: [ reco ] }
    compressionLevel: 1
+   saveMemoryObjectThreshold: 0
  }
 }
 

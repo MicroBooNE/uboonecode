@@ -14,7 +14,8 @@ beamlines : [ "bnb", "numi" ]
 //beamlines : [ "bnb" ]
  
 // list bundles for each beam; should be array even if listing only one bundle
-bnb : [ "BoosterNeutrinoBeam_read", "BNBShortTerm_read", "BNBMultiWire" ]
+//bnb : [ "BoosterNeutrinoBeam_read", "BNBShortTerm_read", "BNBMultiWire" ]
+bnb : [ "BoosterNeutrinoBeam_read", "BNBMultiWire" ]
 numi : [ "NuMI_Physics_A9" ]
 
 mwr_time_offset : -35
@@ -32,7 +33,7 @@ time_window : { bnb : 20
 	        numi : 60 }
 
 //padding and offset modify the begin/end time that is fetched from IFDB, actual timestamps not changed
-time_padding : { bnb: 30
+time_padding : { bnb: 2000
 	         numi: 100 }
 
 time_offset  : { bnb: 35.9
@@ -40,7 +41,7 @@ time_offset  : { bnb: 35.9
 
 
 //IF beam database
-ifdb_url : "http://dbweb0.fnal.gov:8088/ifbeam/data"
+ifdb_url : "http://ifb-data.fnal.gov:8100/ifbeam/data"
 
 //log file setings:
 message_facility : {

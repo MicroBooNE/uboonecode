@@ -28,7 +28,7 @@ source:
   maxEvents:   -1          # Number of events to create
 }
 
-services.user.TimeService:             @local::microboone_timeservice
+services.user.DetectorClocksService:             @local::microboone_detectorclocks
 services.user.UBChConfig:              @local::microboone_optical_ch_config
 # Define and configure some modules to do work on each event.
 # First modules are defined; they are scheduled later.

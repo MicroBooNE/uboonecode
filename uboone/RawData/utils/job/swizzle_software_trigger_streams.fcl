@@ -1,0 +1,263 @@
+#include "geometry_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
+#include "seedservice_microboone.fcl"
+#include "beamdata_microboone.fcl"
+#include "triggerenforcement.fcl"
+
+
+#include "reco_uboone_data_notpc.fcl"
+
+process_name: Swizzler
+services:
+{
+  scheduler: { fileMode: NOMERGE }
+  TFileService: { fileName: "daq_hist.root" }
+  TimeTracker: { 
+    printSummary : true
+    dbOutput     : {
+      filename   :  "time.db"
+      overwrite  :  true
+    }
+  }
+  MemoryTracker: {
+    ignoreTotal       : 1 # no. of events to exclude - '1' by default
+    printSummaries    : ["*"] # or any combination of ["general","event","module"]
+    includeMallocInfo : true
+    filename          : "mem.db" 
+  }
+  RandomNumberGenerator: {} 
+  LArSeedService:  @local::microboone_seedservice
+  FileCatalogMetadata:    @local::art_file_catalog_data
+  DatabaseUtil:           @local::microboone_database
+  @table::microboone_reco_notpc_services
+}
+services.DetectorClocksService.InheritClockConfig: false
+
+microboone_tfile_metadata:
+{
+  JSONFileName:          "daq_hist.root.json"
+  GenerateTFileMetadata: true
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
+}
+
+# Database settings
+services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: false
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
+
+source:
+{
+  fileNames:       []
+  module_type:	   LArRawInputSourceUBooNE
+  maxEvents:       -1
+  huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTriggerType: ALL
+  beam_histograms: [ "E:TOR101, 100, 0, 50",
+                     "E:TORTGT, 100, 0, 50",
+                     "E:TOR860, 100, 0, 5",
+                     "E:TOR875, 100, 0, 5" ]
+}
+
+outputs:
+{
+ outbnb:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_bnb.root"
+   dataTier: "raw"
+   streamName: "outbnb"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_bnb ] }
+  }
+ outbnbunbiased:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_bnb_unbiased.root"
+   dataTier: "raw"
+   streamName: "outbnbunbiased"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_bnb_unbiased ] }
+  }
+ outnumi:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_numi.root"
+   dataTier: "raw"
+   streamName: "outnumi"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_numi ] }
+  }
+ outnumiunbiased:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_numi_unbiased.root"
+   dataTier: "raw"
+   streamName: "outnumiunbiased"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_numi_unbiased ] }
+  }
+ outextbnb:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_ext_bnb.root"
+   dataTier: "raw"
+   streamName: "outextbnb"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_ext_bnb ] }
+  }
+ outextnumi:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_ext_numi.root"
+   dataTier: "raw"
+   streamName: "outextnumi"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_ext_numi ] }
+  }
+ outextunbiased:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_ext_unbiased.root"
+   dataTier: "raw"
+   streamName: "outextunbiased"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_ext_unbiased ] }
+  }
+ outmucs:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_mucs.root"
+   dataTier: "raw"
+   streamName: "outmucs"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_mucs ] }
+  }
+ outnotpc:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_notpc.root"
+   dataTier: "raw"
+   streamName: "outnotpc"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_*_*_*"]
+   SelectEvents: { SelectEvents: [ path_notpc ] }
+  }
+}
+
+physics:
+{
+ producers: {
+  @table::microboone_reco_notpc_producers
+ }
+ filters: {
+  @table::microboone_reco_notpc_filters
+ }
+
+ path_notpc:         [ @sequence::microboone_reco_notpc ]
+ path_bnb:           [ swtrigbnb ]
+ path_bnb_unbiased:  [ swtrigbnbunbiased ]
+ path_numi:          [ swtrignumi ]
+ path_numi_unbiased: [ swtrignumiunbiased ]
+ path_ext_bnb:       [ swtrigextbnb ]
+ path_ext_numi:      [ swtrigextnumi ]
+ path_mucs:          [ trigmucs ]
+ path_ext_unbiased:  [ swtrigextunbiased ]
+
+ stream_notpc:         [ outnotpc ]
+ stream_bnb:           [ outbnb ]
+ stream_bnb_unbiased:  [ outbnbunbiased ]
+ stream_numi:          [ outnumi ]
+ stream_numi_unbiased: [ outnumiunbiased ]
+ stream_ext_bnb:       [ outextbnb ]
+ stream_ext_numi:      [ outextnumi ]
+ stream_ext_unbiased:  [ outextunbiased ]
+ stream_mucs:          [ outmucs ]
+
+ trigger_paths: [ path_notpc,
+                  path_bnb,
+                  path_bnb_unbiased,
+                  path_numi,
+                  path_numi_unbiased,
+                  path_ext_bnb,
+                  path_ext_numi,
+                  path_ext_unbiased,
+		  path_mucs ]
+
+ end_paths:     [ stream_notpc,
+                  stream_bnb,
+                  stream_bnb_unbiased,
+                  stream_numi,
+                  stream_numi_unbiased,
+                  stream_ext_bnb,
+                  stream_ext_numi,
+                  stream_ext_unbiased,
+		  stream_mucs ]
+}
+
+services.DetectorClocksService.TrigModuleName: "daq"
+
+#physics.filters.opflashfilter.OpFlashModule : "opflash"
+#physics.filters.opflashfilter.DisableFilter: false
+
+#physics.filters.opflashfilternumi.OpFlashModule : "opflash"
+#physics.filters.opflashfilternumi.DisableFilter: false
+
+
+
+### Here we try to suppress known and pointless messages
+services.message.destinations :
+{
+  STDCOUT: 
+  {
+     type:      "cout"      #tells the message service to output this destination to cout
+     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
+     append:     true       #says to append all messages to the output
+     categories:
+     {
+       ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       default:
+       {
+         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
+         reportEvery: 1
+       }
+     }
+  }
+}

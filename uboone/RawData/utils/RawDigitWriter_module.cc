@@ -27,19 +27,20 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // LArSoft includes
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "Filters/ChannelFilter.h"
-#include "Utilities/TimeService.h" // lardata
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "larevt/Filters/ChannelFilter.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 // RawDigits
-#include "RawData/raw.h" // raw::Uncompress()
-#include "RawData/RawDigit.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/RawData/raw.h" // raw::Uncompress()
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/OpDetWaveform.h"
 // Optical Channel Maps
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
 // TPC Channel Map
-#include "Utilities/DatabaseUtil.h" // lardata
+#include "lardata/Utilities/DatabaseUtil.h"
 
 // ROOT
 #include "TTree.h"
@@ -130,8 +131,8 @@ namespace zmqds {
     {
 
       art::ServiceHandle<art::TFileService> tfs;
-      art::TFileDirectory tfbeamdir = tfs->mkdir( "RawData" );
-      fTRawDigits = tfbeamdir.make<TTree>("RawDigits","TPC Waveform data");
+      //art::TFileDirectory tfbeamdir = tfs->mkdir( "RawData" );
+      fTRawDigits = tfs->make<TTree>("RawDigits","TPC Waveform data");
       fTRawDigits->Branch( "run", &fRun, "run/I" );
       fTRawDigits->Branch( "subrun", &fSubRun, "subrun/I" );
       fTRawDigits->Branch( "event", &fEvent, "event/I" );
@@ -141,7 +142,7 @@ namespace zmqds {
       fTRawDigits->Branch( "wireid", &fWireID, "wireid/I" );
       fTRawDigits->Branch( "adcs", &rawdigits );
 
-      fTOpDetWaveforms = tfbeamdir.make<TTree>("OpDetWaveforms","PMT Readout Waveforms");
+      fTOpDetWaveforms = tfs->make<TTree>("OpDetWaveforms","PMT Readout Waveforms");
       fTOpDetWaveforms->Branch( "run", &fRun, "run/I" );
       fTOpDetWaveforms->Branch( "subrun", &fSubRun, "subrun/I" );
       fTOpDetWaveforms->Branch( "event", &fEvent, "event/I" );
@@ -247,7 +248,7 @@ namespace zmqds {
 
     art::ServiceHandle<geo::UBOpReadoutMap> ub_pmt_channel_map;
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     fTrigTimeStamp = ts->TriggerTime();
     fBeamTimeStamp = ts->BeamGateTime();
     std::cout << "OpticalDRAM: Trigger time=" << ts->TriggerTime() << " Beam gate time=" << ts->BeamGateTime() << std::endl;

@@ -1,5 +1,5 @@
 #include "geometry_microboone.fcl"
-#include "timeservice_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "databaseutil_microboone.fcl"
 #include "sam_microboone.fcl"
@@ -22,7 +22,7 @@ services:
           ExptGeoHelperInterface: @local::microboone_geometry_helper
           Geometry:               @local::microboone_geo
 	  UBOpReadoutMap:         @local::microboone_opreadoutmap
-          TimeService:            @local::microboone_timeservice
+          DetectorClocksService:            @local::microboone_detectorclocks
           DatabaseUtil:           @local::microboone_database
 	  IFDH:                   {}
          }
@@ -38,7 +38,7 @@ microboone_tfile_metadata:
 
 
 # Database settings
-services.user.DatabaseUtil.DBHostName:    "ifdb02.fnal.gov"
+services.user.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
 services.user.DatabaseUtil.DBName:        "hootgibson_prod"
 services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
 services.user.DatabaseUtil.Port:          5444
@@ -47,7 +47,7 @@ services.user.DatabaseUtil.ToughErrorTreatment: true
 services.user.DatabaseUtil.ShouldConnect: true
 services.user.DatabaseUtil.TableName: "main_run"
 
-services.user.TimeService.TrigModuleName: "daq"
+services.user.DetectorClocksService.TrigModuleName: "daq"
 
 
 source:
@@ -84,6 +84,7 @@ physics:
 {
 
   producers: {
+   ophit            : @local::microboone_ophit_beam_highgain
    opflash          : @local::microboone_opflash_beam_highgain
   }
 
@@ -97,7 +98,7 @@ physics:
         specalib: @local::microboone_SPEcalibration
   }
 
- common: [ triggerEnforcement, opflash  ] 
+ common: [ triggerEnforcement, ophit, opflash  ] 
  trigger_paths: [ common ]
  stream1: [ rawnotpc ]
  analyzeIt: [femsoft, specalib]

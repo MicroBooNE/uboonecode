@@ -18,8 +18,8 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // data-products
-#include "RecoBase/OpHit.h"
-#include "RecoBase/OpFlash.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "lardata/RecoBase/OpFlash.h"
 
 #include <memory>
 #include <iostream>
@@ -57,6 +57,9 @@ private:
   // Declare member data here.
   std::string fOpHitProducer;
 
+  // Get list of channel numbers for LG PMTs
+  std::vector<int> fHGPMTChannels;
+
   // minimum PE to make a flash
   double _PE_min_flash;
   // minimum PE to use an OpHit
@@ -72,7 +75,8 @@ SimpleFlashFinder::SimpleFlashFinder(fhicl::ParameterSet const & p)
 // Initialize member data here.
 {
   produces< std::vector<recob::OpFlash>   >();
-  fOpHitProducer = p.get<std::string>("OpFlashProducer");
+  fOpHitProducer = p.get<std::string>("OpHitProducer");
+  fHGPMTChannels = p.get<std::vector<int> >("HGPMTChannels");
   
   _PE_min_flash = 10;//50;
   _PE_min_hit   = 1;
@@ -110,7 +114,7 @@ void SimpleFlashFinder::produce(art::Event & e)
   
   // collect the total optical charge collected in the hits
   // in the various 100 ns-wide time slices
-  std::vector< std::vector<double> > OpCharge(n_bins, std::vector<double>(32,0.) );
+  std::vector< std::vector<double> > OpCharge(n_bins, std::vector<double>(fHGPMTChannels.size(),0.) );
   // find the peak-time for each 100-ns bin
   // this is the time at which the hit with the most PEs are found
   // vector of < time, PE of hit >
@@ -120,17 +124,37 @@ void SimpleFlashFinder::produce(art::Event & e)
   int nhits = 0;
 
   for(auto const& hit : *ophit_h) {
+
+
+    // ignore hits with a channel number not in the list of HG PMT Channels
+    // do modulo 100 to account for FEM board location
+    std::vector<int>::iterator it;
+    it = std::find( fHGPMTChannels.begin(), fHGPMTChannels.end(), hit.OpChannel() );
+    // this PMT channels is not a HG PMT -> exit
+    if (it == fHGPMTChannels.end() )
+      continue;
+
     // ignore hits with < 5 PE
     if (hit.PE() < _PE_min_hit)
       continue;
     // figure out which 100-ns time bin this should go to
     double time = hit.PeakTime();
+    
     int bin = int(time/_bin_width);
+
+
     if ( (bin >= n_bins) || (bin < 0) ){
       //std::cout << "we should not have a hit at this time! something is wrong" << std::endl;
       continue;
     }
-    //std::cout << "adding hit " << hit.PE() << " for pmt " << hit.OpChannel() << " in time bin " << bin << std::endl;
+
+    // get the channel number, modulo 100 [to remove FEM board dependency]
+    int chmod = hit.OpChannel()%100;
+
+    // if the entry number is out of range:
+    if (chmod >= (int)OpCharge[bin].size())
+      continue;
+
     // add the charge to the right bin and the right PMT
     OpCharge[bin][hit.OpChannel()] += hit.PE();
     nhits += 1;
@@ -143,8 +167,6 @@ void SimpleFlashFinder::produce(art::Event & e)
     e.put(std::move(opflashes));
     return;
   }
-  //std::cout << "take care of late-light " << std::endl;
-
   // try and take care of late-light:
   // if OpFlash charge in bin n+1 is
   // less then what is in bin n

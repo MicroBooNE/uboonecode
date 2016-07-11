@@ -40,6 +40,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  saveMemoryObjectThreshold: 0
 }
 
 # Define and configure some modules to do work on each event.
@@ -170,6 +171,7 @@ outputs:
    fileName:    "%ifb_%tc_reco2.root"
    dataTier:    "reconstructed-3d"
    compressionLevel: 1
+   saveMemoryObjectThreshold: 0
  }
 }
 
@@ -206,7 +208,7 @@ physics.producers.trackkalmanhitcc.ClusterModuleLabel:              "cccluster"
 physics.producers.trackkalmanhitcc.PFParticleModuleLabel:           "cctrack"
 physics.producers.trackkalmanhitcc.UseClusterHits:                  false
 physics.producers.trackkalmanhitcc.UsePFParticleHits:               true
-physics.producers.trackkalmanhitcc.SelfSeed:                        true
+physics.producers.trackkalmanhitcc.Track3DKalmanHitAlg.SelfSeed:    true
 
 physics.producers.stitchkalmanhitcc.TrackModuleLabel:               "trackkalmanhitcc"
 physics.producers.stitchkalmanhitcc.SpptModuleLabel:                "trackkalmanhitcc"
@@ -232,7 +234,7 @@ physics.producers.stitchkalmanhittagcc.TrackModuleLabel:            "stitchkalma
 # Pandora related
 physics.producers.pandoraCosmicKHit.UseClusterHits:                 false
 physics.producers.pandoraCosmicKHit.UsePFParticleHits:              true
-physics.producers.pandoraCosmicKHit.SelfSeed:                       true
+physics.producers.pandoraCosmicKHit.Track3DKalmanHitAlg.SelfSeed:   true
 physics.producers.pandoraCosmicKHit.ClusterModuleLabel:             "pandoraCosmic"
 physics.producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
 
@@ -262,7 +264,7 @@ physics.producers.pandoraNu.ConfigFile:                             "PandoraSett
 
 physics.producers.pandoraNuKHit.UseClusterHits:                     false
 physics.producers.pandoraNuKHit.UsePFParticleHits:                  true
-physics.producers.pandoraNuKHit.SelfSeed:                           true
+physics.producers.pandoraNuKHit.Track3DKalmanHitAlg.SelfSeed:       true
 physics.producers.pandoraNuKHit.PFParticleModuleLabel:              "pandoraNu"
 physics.producers.pandoraNuKHit.ClusterModuleLabel:                 "pandoraNu"
 physics.producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"

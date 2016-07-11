@@ -11,7 +11,7 @@
 #include "photpropservices_microboone.fcl"
 #include "opticaldetectorservices_microboone.fcl"
 #include "sam_microboone.fcl"
-#include "timeservice_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
 #include "pmtconfig_microboone.fcl"
 #include "spacecharge_microboone.fcl"
 #include "seedservice_microboone.fcl"
@@ -29,12 +29,12 @@ microboone_basic_services:
 {
  ExptGeoHelperInterface:         @local::microboone_geometry_helper
  Geometry:                       @local::microboone_geo
- DetectorProperties:             @local::microboone_detproperties
- LArProperties:                  @local::microboone_properties
+ DetectorPropertiesService:             @local::microboone_detproperties
+ LArPropertiesService:                  @local::microboone_properties
  DatabaseUtil:                   @local::microboone_database
- TimeService:                    @local::microboone_timeservice
+ DetectorClocksService:                    @local::microboone_detectorclocks
  SpaceCharge:                    @local::microboone_spacecharge
- SeedService:                    @local::microboone_seedservice
+ LArSeedService:                    @local::microboone_seedservice
 }
 
 END_PROLOG

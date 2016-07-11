@@ -1,0 +1,134 @@
+#include "geometry_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
+#include "seedservice_microboone.fcl"
+#include "beamdata_microboone.fcl"
+#include "triggerenforcement.fcl"
+
+BEGIN_PROLOG
+
+microboone_reco_notpc_services:
+{
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  Geometry:               @local::microboone_geo
+  UBOpReadoutMap:           @local::microboone_opreadoutmap
+  DetectorClocksService:            @local::microboone_detectorclocks
+  user:
+  {
+    IFDH:                   {}
+  }
+}
+
+microboone_reco_notpc_producers: {
+
+  ### flash finders
+  ophit            : @local::microboone_ophit_beam_highgain
+  #ophitLow         : @local::microboone_ophit_beam_lowgain
+  ophitCosmic      : @local::microboone_ophit_cosmic_highgain
+  #ophitCosmicLow   : @local::microboone_ophit_cosmic_lowgain
+  opflash          : @local::microboone_opflash_beam_highgain
+  #opflashLow       : @local::microboone_opflash_beam_lowgain
+  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+  #opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+  beamdata         : @local::microboone_beamdata
+
+  #hwflash : @local::microboone_subeventbuilder
+}
+
+microboone_reco_notpc_filters: {
+
+  # Hardware triggers.
+
+  trigbnb:  @local::trigger_enforcement
+  trignumi: @local::trigger_enforcement
+  trigext:  @local::trigger_enforcement
+  trigmucs: @local::trigger_enforcement
+
+  # Software triggers.
+
+  swtrigbnb:          @local::trigger_enforcement
+  swtrigbnbunbiased:  @local::trigger_enforcement
+  swtrignumi:         @local::trigger_enforcement
+  swtrignumiunbiased: @local::trigger_enforcement
+  swtrigextbnb:       @local::trigger_enforcement
+  swtrigextnumi:      @local::trigger_enforcement
+  swtrigextunbiased:  @local::trigger_enforcement
+
+
+  opflashfilter:      @local::microboone_flashtrigger
+  opflashfilternumi:  @local::microboone_flashtrigger_numi
+  #hwflashfilter: @local::microboone_flashtrigger
+
+  randomfilter: {
+   module_type : "RandomPrescale"
+   Probability : 0.01
+  }
+}
+
+microboone_reco_notpc: [ ophit, opflash, beamdata ]
+
+microboone_reco_notpc_services.DetectorClocksService.TrigModuleName: "daq"
+
+microboone_reco_notpc_filters.trigbnb.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.trigbnb.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.trigbnb.IncludeBits: [ "TriggerBNB" ]
+
+microboone_reco_notpc_filters.trignumi.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.trignumi.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.trignumi.IncludeBits: [ "TriggerNuMI" ]
+
+microboone_reco_notpc_filters.trigext.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.trigext.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.trigext.IncludeBits: [ "TriggerEXT" ]
+
+microboone_reco_notpc_filters.trigmucs.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.trigmucs.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.trigmucs.IncludeBits: [ "Spare" ]
+
+microboone_reco_notpc_filters.opflashfilter.OpFlashModule : "opflash"
+microboone_reco_notpc_filters.opflashfilter.DisableFilter: false
+
+microboone_reco_notpc_filters.opflashfilternumi.OpFlashModule : "opflash"
+microboone_reco_notpc_filters.opflashfilternumi.DisableFilter: false
+
+microboone_reco_notpc_filters.swtrigbnb.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigbnb.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigbnb.IncludeBits: [ "TriggerBNB" ]
+microboone_reco_notpc_filters.swtrigbnb.includeSoftwareTriggers: [ "BNB_FEMBeamTriggerAlgo" ]
+
+microboone_reco_notpc_filters.swtrigbnbunbiased.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigbnbunbiased.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigbnbunbiased.IncludeBits: [ "TriggerBNB" ]
+microboone_reco_notpc_filters.swtrigbnbunbiased.includeSoftwareTriggers: [ "BNB_unbiased_PrescaleAlgo" ]
+
+microboone_reco_notpc_filters.swtrignumi.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrignumi.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrignumi.IncludeBits: [ "TriggerNuMI" ]
+microboone_reco_notpc_filters.swtrignumi.includeSoftwareTriggers: [ "NUMI_FEMBeamTriggerAlgo" ]
+
+microboone_reco_notpc_filters.swtrignumiunbiased.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrignumiunbiased.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrignumiunbiased.IncludeBits: [ "TriggerNuMI" ]
+microboone_reco_notpc_filters.swtrignumiunbiased.includeSoftwareTriggers: [ "NUMI_unbiased_PrescaleAlgo" ]
+
+microboone_reco_notpc_filters.swtrigextbnb.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigextbnb.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigextbnb.IncludeBits: [ "TriggerEXT" ]
+microboone_reco_notpc_filters.swtrigextbnb.includeSoftwareTriggers: [ "EXT_BNBwin_FEMBeamTriggerAlgo" ]
+
+microboone_reco_notpc_filters.swtrigextnumi.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigextnumi.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigextnumi.IncludeBits: [ "TriggerEXT" ]
+microboone_reco_notpc_filters.swtrigextnumi.includeSoftwareTriggers: [ "EXT_NUMIwin_FEMBeamTriggerAlgo" ]
+
+microboone_reco_notpc_filters.swtrigextunbiased.HardwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigextunbiased.SoftwareTriggerProducer: "daq"
+microboone_reco_notpc_filters.swtrigextunbiased.IncludeBits: [ "TriggerEXT" ]
+microboone_reco_notpc_filters.swtrigextunbiased.includeSoftwareTriggers: [ "EXT_unbiased_PrescaleAlgo" ]
+
+END_PROLOG

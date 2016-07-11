@@ -5,10 +5,11 @@ process_name: GenieGen
 outputs.out1.fileName: "prodgenie_bnb_dirt_nu_uboone_%tc_gen.root"
 
 physics.producers.generator: @local::microboone_genie_simple_dirt
-physics.producers.generator.GlobalTimeOffset: 0.
+physics.producers.generator.GlobalTimeOffset: 3125.
 physics.producers.generator.RandomTimeOffset: 1600.
 physics.producers.generator.TopVolume: "volWorld"
+physics.producers.generator.BeamName: "booster"
 
-services.user.Geometry.Name: "microboonev9_auxdet"
-services.user.Geometry.GDML: "microboonev9_auxdet.gdml"
-services.user.Geometry.ROOT: "microboonev9_auxdet.gdml"
+services.user.Geometry.Name: "microboonev10"
+services.user.Geometry.GDML: "microboonev10.gdml"
+services.user.Geometry.ROOT: "microboonev10.gdml"

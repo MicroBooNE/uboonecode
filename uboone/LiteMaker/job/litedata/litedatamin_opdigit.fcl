@@ -1,0 +1,13 @@
+#include "litemaker_base.fcl"
+litedatamin_opdigit: @local::litemaker_base
+litedatamin_opdigit.out_filename: "larlite_datamin_opdigit.root"
+litedatamin_opdigit.DataLookUpMap:
+{
+  opdigit: ["pmtreadout","saturation"]
+  trigger: ["daq"]
+}
+
+litedatamin_opdigit.AssociationLookUpMap:
+{}
+
+

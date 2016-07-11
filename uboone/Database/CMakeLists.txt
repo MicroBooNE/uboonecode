@@ -1,9 +1,19 @@
 art_make( BASENAME_ONLY
-	  SERVICE_LIBRARIES CalibrationDBI_Providers
-	                    CalibrationDBI_IOVData
-			    RawData
-			    Geometry
-			    Geometry_service
+	  SERVICE_LIBRARIES larevt_CalibrationDBI_Providers
+                      ${ART_FRAMEWORK_PRINCIPAL}
+                      ${ART_FRAMEWORK_SERVICES_REGISTRY}
+                      ${ART_PERSISTENCY_COMMON}
+                      ${ART_PERSISTENCY_PROVENANCE}
+                      ${ART_FRAMEWORK_SERVICES_BASIC}
+                      ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+                      ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
+                      ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
+                      ${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}
+                      ${ART_UTILITIES}
+	                    larevt_CalibrationDBI_IOVData
+			    lardata_RawData
+			    larcore_Geometry
+			    larcore_Geometry_Geometry_service
 			    ${ART_FRAMEWORK_SERVICES_REGISTRY}
 			    ${ART_FRAMEWORK_CORE}
                             ${ART_FRAMEWORK_PRINCIPAL}
@@ -19,4 +29,3 @@ art_make( BASENAME_ONLY
 install_headers()
 install_fhicl()
 install_source()
-

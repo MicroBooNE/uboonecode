@@ -44,7 +44,7 @@ physics:
  {
  }
 
- #reco: [ rns, opflash, simpleFlash, opflashfilter ]
+ #reco: [ rns, ophit, opflash, simpleFlash, opflashfilter ]
  reco: [ rns, saturation ]
  ana: []
 
@@ -84,7 +84,7 @@ outputs:
 ### Here we include the file giving us run/data dependent overrides
 
 services.DatabaseUtil.ShouldConnect: false
-services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB: false
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: false
 
 ### Here we try to suppress known and pointless messages
 services.message.destinations :

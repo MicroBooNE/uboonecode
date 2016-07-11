@@ -1,13 +1,12 @@
 cet_enable_asserts()
 
-set( uboone_util_lib_list LArFFT_service
-                        LArProperties_service
-			Geometry
-			HitFinder
-			RecoBase
-			Geometry_service
-			Utilities
-			${SEEDSERVICE_SERVICE} # artextensions
+set( uboone_util_lib_list lardata_Utilities_LArFFT_service
+			larcore_Geometry
+			larreco_HitFinder
+			lardata_RecoBase
+			larcore_Geometry_Geometry_service
+			lardata_Utilities
+			larsim_RandomUtils_LArSeedService_service
   			${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -23,6 +22,7 @@ set( uboone_util_lib_list LArFFT_service
 			${MF_UTILITIES}
 			${FHICLCPP}
 			${CETLIB}
+			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}
                         ${CLHEP}
 			${ROOT_BASIC_LIB_LIST}
@@ -58,7 +58,9 @@ simple_plugin( FileCatalogMetadataRawDigit "plugin"
 install_headers()
 # do not install duplicate standard_reco_uboone.fcl file
 # hack until install_fhicl( EXCLUDES standard_reco_uboone.fcl ) does the right thing
+# (issue #11708)
 install_fhicl( LIST databaseutil_microboone.fcl
+		    detectorclocks_microboone.fcl
 		    detectorproperties_microboone.fcl
 		    evdservices_microboone.fcl
 		    tinyhitfinderana_microboone.fcl
@@ -74,8 +76,8 @@ install_fhicl( LIST databaseutil_microboone.fcl
 		    services_microboone_simulation.fcl
 		    signalservices_microboone.fcl
 		    seedservice_microboone.fcl
-		    timeservice_microboone.fcl )
+		    timeservice_microboone.fcl 
+		    time_memory_tracker_microboone.fcl )
 install_source()
 
 add_subdirectory(test)
-

@@ -10,8 +10,8 @@
 #include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
 // Root includes
 #include "TH1D.h"
@@ -77,11 +77,13 @@ private:
     
     art::EDProducer*           fMyProducerModule;        ///< The producer module driving us
     
+    /// @{
     /**
      *  @brief Standard useful properties
      */
-    geo::Geometry*             m_geometry;            //< pointer to the Geometry service
-    util::DetectorProperties*  m_detector;            //< Pointer to the detector properties
+    geo::GeometryCore const*             m_geometry;           ///< pointer to the Geometry service
+    detinfo::DetectorProperties const* m_detector;           ///< Pointer to the detector properties
+    /// @}
 };
 
 } // namespace lar_cluster3d

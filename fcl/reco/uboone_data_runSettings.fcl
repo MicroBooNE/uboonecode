@@ -2,15 +2,13 @@
 #
 # Shaping time and gain settings
 #
-services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 2.0, 2.0, 2.0 ]
-#services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ 1.0, 1.0, 1.0 ]
-services.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: [ 14.0, 14.0, 14.0 ]
+services.SignalShapingServiceMicroBooNE.ShapeTimeConst:    [ [ 2.0, 2.0, 2.0 ], [ 1.0, 2.0, 2.0] ]
+services.SignalShapingServiceMicroBooNE.ASICGainInMVPerFC: [ [ 14.0, 14.0, 14.0 ], [ 4.7, 14.0, 14.0 ] ]
 #
 # Database access for pedestals
 #
-services.IDetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
-services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
-services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:        "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB:                             true
+services.DetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data"
 
 # Notes on August 25, 2015
 # According to Leon the three parameters below are:
@@ -21,7 +19,7 @@ services.IDetPedestalService.DetPedestalRetrievalAlg.DatabaseRetrievalAlg.DBUrl:
 # Note that run 1591 forward, bias is -158 and +23
 # Plane space is 0.3cm
 # These settings for the change in wire bias 8/13/15
-services.LArProperties.Efield:                             [0.273,0.367,0.767] # 0.273 corresponds to 70 kV, wirebias taken from ECL#9266
-services.LArProperties.Electronlifetime:                   8.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
+services.DetectorPropertiesService.Efield:                             [0.273,0.367,0.767] # 0.273 corresponds to 70 kV, wirebias taken from ECL#9266
+services.DetectorPropertiesService.Electronlifetime:                   8.0e03   # Current statement is that electron lifetime is 8 ms, per Ben Carls
 
-services.TimeService.TrigModuleName:     "daq"
+services.DetectorClocksService.TrigModuleName:     "daq"

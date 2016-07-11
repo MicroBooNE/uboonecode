@@ -71,15 +71,11 @@ namespace uboone {
           // overwrite the configuration that happened in the base class:
           base_t::SetApplicationName("MicroBooNEGeometryTest");
           base_t::SetDefaultGeometryConfiguration(R"(
-              services: {
-                Geometry: {
-                  SurfaceY: 6.9e2 # in cm, vertical distance to the surface
-                  Name:     "microboonevX"
-                  GDML:     "microboonevX.gdml"
-                  ROOT:     "microboonevX.gdml"
-                  SortingParameters: {}
-                } # Geometry
-              } # services
+            SurfaceY: 6.9e2 # in cm, vertical distance to the surface
+            Name:     "microboonevX"
+            GDML:     "microboonevX.gdml"
+            ROOT:     "microboonevX.gdml"
+            SortingParameters: {}
             )");
         }
     }; // class MicroBooNEGeometryEnvironmentConfiguration<>

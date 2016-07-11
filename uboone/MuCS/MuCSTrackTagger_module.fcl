@@ -1,0 +1,15 @@
+BEGIN_PROLOG
+
+microboone_MuCSTrackTagger:
+{ 
+ module_type:              "MuCSTrackTagger"
+ TrackModuleLabel:         "trackkalmanhit"
+ MuCSTopBox:                [-71.795,-23.795,398.451,397.451,579.45,627.45] # top box edges [cm]
+ MuCSBottomBox:             [-19.6948,28.3052,320.551,319.551,581.25,629.25] # bottom box edges [cm]
+ BoxExtension:              0. #extend box dimensions by this much to allow for scattering
+ DirFromNPoints:           0 #number of traj. points to use to determine direction; 0=use start direction
+ MinTrackLength:           0. #tracks must be at least this long to be tagged
+}
+
+END_PROLOG
+

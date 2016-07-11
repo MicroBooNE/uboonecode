@@ -1,0 +1,16 @@
+BEGIN_PROLOG
+
+microboone_MuCSMCGen:
+{ 
+ module_type:              "MuCSMCGen"
+ TopLayerDims:                [-71.795,-23.795,398.451,397.451,579.45,627.45] # top box edges [cm]
+ BottomLayerDims:             [-19.6948,28.3052,320.551,319.551,581.25,629.25] # bottom box edges [cm]
+ SampleTime:  0.
+ EnergyThreshold: 0.05
+ #subboxLength should be full width of top box (in m)
+ CRYConfigStr: "date 1-1-2016 returnGammas 0 returnElectrons 0 returnMuons 1 returnPions 0 returnNeutrons 0 returnProtons 0 latitude 41.8 subboxLength 0.48 altitude 0"
+ ParticlesPerEvent: 1
+}
+
+END_PROLOG
+

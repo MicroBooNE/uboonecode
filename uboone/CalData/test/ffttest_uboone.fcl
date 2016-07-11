@@ -17,7 +17,7 @@ services:
 #services.user.Geometry: @local::detector_geo
 services.user.LArFFT: @local::microboone_larfft
 services.user.LArFFT.FFTOption: ""
-services.user.DetectorProperties: @local::microboone_detproperties
+services.user.DetectorPropertiesService: @local::microboone_detproperties
 
 source:
 {

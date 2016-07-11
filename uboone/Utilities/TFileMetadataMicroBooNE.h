@@ -56,8 +56,8 @@ namespace util{
       std::string fproject_version;
     };
     
-    metadata md;           
-    std::set<art::SubRunNumber_t> fSubRunNumbers;  
+    metadata md;
+    std::set<art::SubRunID> fSubRunNumbers;
     std::map<std::string,std::string> mdmap;    
 
   private:
@@ -66,6 +66,7 @@ namespace util{
     void postBeginJob();
     void postOpenFile(std::string const& fn);
     void postEvent(art::Event const& ev);
+    void postBeginSubRun(art::SubRun const& subrun);
     void postEndJob();
 
     // Private member functions.
@@ -84,4 +85,3 @@ namespace util{
 DECLARE_ART_SERVICE(util::TFileMetadataMicroBooNE, LEGACY)
 	
 #endif
-

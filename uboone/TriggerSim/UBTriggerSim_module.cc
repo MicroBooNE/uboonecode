@@ -31,16 +31,17 @@
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "UBTrigException.h"
 #include "UBTriggerAlgo.h"
-#include "RawData/TriggerData.h"
-#include "OpticalDetectorData/PMTTrigger.h"
-#include "Utilities/AssociationUtil.h"
-#include "Utilities/ElecClock.h"
-#include "Utilities/TimeService.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/OpticalDetectorData/PMTTrigger.h"
+#include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/DetectorInfo/ElecClock.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 /// nutools
-#include "Simulation/BeamGateInfo.h"
+#include "larsim/Simulation/BeamGateInfo.h"
 
 namespace trigger {
   /**
@@ -70,6 +71,11 @@ namespace trigger {
     /// Algorithm
     UBTriggerAlgo fAlg;
 
+    /// BNB delay
+    double fBNBFireTime;
+    /// NuMI delay
+    double fNuMIFireTime;
+
     /// Module labels for event generator(s) that produced sim::BeamGateInfo data product
     std::vector<std::string> fBeamModName;
 
@@ -77,11 +83,11 @@ namespace trigger {
     std::string fOpticalFEMMod;
 
     //-- ElecClock for user-defined trigger times --//
-    std::vector<util::ElecClock> fTriggerCalib; ///< user-defined calibration trigger (per-event)
-    std::vector<util::ElecClock> fTriggerPC;    ///< user-defined PC trigger (per-event)
-    std::vector<util::ElecClock> fTriggerExt;   ///< user-defined Ext trigger (per-event)
-    std::vector<util::ElecClock> fTriggerBNB;   ///< user-defined BNB trigger (per-event)
-    std::vector<util::ElecClock> fTriggerNuMI;  ///< user-defined NuMI trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerCalib; ///< user-defined calibration trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerPC;    ///< user-defined PC trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerExt;   ///< user-defined Ext trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerBNB;   ///< user-defined BNB trigger (per-event)
+    std::vector<detinfo::ElecClock> fTriggerNuMI;  ///< user-defined NuMI trigger (per-event)
 
   };
 
@@ -142,9 +148,13 @@ namespace trigger {
 								      std::vector<double>()) 
 				     );
 
+    fBNBFireTime  = pset.get<double>("BNBFireTime");
+    fNuMIFireTime = pset.get<double>("NuMIFireTime");
+
     // Store user-defined trigger timings to the attributes
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     auto clock = ts->OpticalClock();
+
     fTriggerCalib.clear();
     fTriggerExt.clear();
     fTriggerPC.clear();
@@ -200,7 +210,7 @@ namespace trigger {
   //#########################################
   {
     // Initialize
-    art::ServiceHandle<util::TimeService> ts;
+    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
     std::unique_ptr< std::vector<raw::Trigger>   >  triggers(new std::vector<raw::Trigger>);
     fAlg.ClearInputTriggers();
     auto clock = ts->OpticalClock();
@@ -219,12 +229,18 @@ namespace trigger {
       if(!(beamArray.isValid())) continue;
       for(size_t i=0; i<beamArray->size(); ++i) {
 	art::Ptr<sim::BeamGateInfo> beam_ptr (beamArray,i);
-	auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
-	clock.SetTime(clock.Sample(elec_time),clock.Frame(elec_time));
-	if(beam_ptr->BeamType() == sim::kBNB) 
+	if(beam_ptr->BeamType() == sim::kBNB) {
+	  //auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
+	  auto const elec_time = ts->G4ToElecTime(fBNBFireTime);
+	  clock.SetTime(clock.Sample(elec_time),clock.Frame(elec_time));
 	  fAlg.AddTriggerBNB(clock);
-	else if(beam_ptr->BeamType() == sim::kNuMI)
+	}
+	else if(beam_ptr->BeamType() == sim::kNuMI) {
+	  //auto const elec_time = ts->G4ToElecTime(beam_ptr->Start());
+	  auto const elec_time = ts->G4ToElecTime(fNuMIFireTime);
+	  clock.SetTime(clock.Sample(elec_time),clock.Frame(elec_time));
 	  fAlg.AddTriggerBNB(clock);
+	}
 	else
 	  throw UBTrigException(Form("Beam type %d not supported!",beam_ptr->BeamType()));
       }
@@ -265,4 +281,3 @@ namespace trigger {
   }
 } 
 /** @} */ // end of doxygen group 
-

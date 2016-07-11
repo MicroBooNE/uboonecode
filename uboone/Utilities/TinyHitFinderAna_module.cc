@@ -41,13 +41,13 @@ extern "C" {
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // LArSoft includes
-#include "Geometry/Geometry.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/TPCGeo.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/TPCGeo.h"
 
-#include "RecoBase/Hit.h"
-#include "Utilities/LArFFT.h"
-#include "RecoBase/Hit.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/Utilities/LArFFT.h"
+#include "lardata/RecoBase/Hit.h"
 
 #include "TComplex.h"
 #include "TString.h"

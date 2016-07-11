@@ -1,0 +1,17 @@
+#include "ophit_microboone.fcl"
+#include "opticaldetectormodules.fcl"
+BEGIN_PROLOG
+
+microboone_ophitfinder:
+{
+  module_type: "OpHitFinder"
+  OpDetWaveformProducer: "pmtreadout"
+  OpDetWaveformLabel:    "OpdetBeamHighGain"
+  UseArea: true
+  SPESize: 120
+  Verbosity: false
+  HitAlgoPset: @local::ubopt_algo_hit_slidingwindow
+  PedAlgoPset: @local::ubopt_algo_pedestal_ub
+}
+
+END_PROLOG

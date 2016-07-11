@@ -15,8 +15,8 @@ simple_plugin( LArRawInputSourceUBooNE
 
 simple_plugin( RawDigitWriter "module"
 	       UBOpReadoutMap_service
-	       DatabaseUtil_service
-	       RawData
+	       lardata_Utilities_DatabaseUtil_service
+	       lardata_RawData
                ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
                ${ART_FRAMEWORK_PRINCIPAL}
@@ -30,19 +30,39 @@ simple_plugin( RawDigitWriter "module"
                BASENAME_ONLY
              )
 
-art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
+# need a special link list because of the explicit link to a specific service inplementation
+simple_plugin( TriggerEnforcement "module"
+                   lardata_DetectorInfoServices_DetectorClocksServiceStandard_service # BUG note that we link to a specific service implementation
+                   lardata_RawData
+                   uboone_RawData
+                   ${ART_FRAMEWORK_CORE}
+                   ${ART_FRAMEWORK_PRINCIPAL}
+                   ${ART_FRAMEWORK_SERVICES_REGISTRY}
+                   ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+                   ${ART_PERSISTENCY_COMMON}
+                   ${ART_PERSISTENCY_PROVENANCE}
+                   ${ART_UTILITIES}
+                   ${MF_MESSAGELOGGER}
+                   ${MF_UTILITIES}
+                   ${FHICLCPP}
+                   ${CETLIB}
+                   ${ROOT_BASIC_LIB_LIST}
+                   BASENAME_ONLY
+             )
+
+
+art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc TriggerEnforcement_module.cc
 	  BASENAME_ONLY
 	  LIBRARY_NAME uboone_RawData
-	  LIB_LIBRARIES DatabaseUtil_service
-                        Geometry
-	  	        Geometry_service
-		        Utilities
-	       	        TimeService_service
+	  LIB_LIBRARIES lardata_Utilities_DatabaseUtil_service
+                        larcore_Geometry
+	  	        larcore_Geometry_Geometry_service
+		        lardata_Utilities
 	                uboone_Geometry
 			UBOpReadoutMap_service
-                        OpticalDetectorData
-                        RawData
-                        SummaryData
+                        lardata_OpticalDetectorData
+                        lardata_RawData
+                        larcore_SummaryData
 			${UBDut}
                         ${PQ}
 			${Boost_SERIALIZATION_LIBRARY}
@@ -65,16 +85,16 @@ art_make( EXCLUDE LArRawInputSourceUBooNE_source.cc RawDigitWriter_module.cc
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
 
-	  MODULE_LIBRARIES DatabaseUtil_service
-                        Geometry
-	  	        Geometry_service
-		        Utilities
-	       	        TimeService_service
+	  MODULE_LIBRARIES lardata_Utilities_DatabaseUtil_service
+                        larcore_Geometry
+	  	        larcore_Geometry_Geometry_service
+		        lardata_Utilities
 	                uboone_Geometry
 			UBOpReadoutMap_service
-                        OpticalDetectorData
-                        RawData
-                        SummaryData
+                        lardata_OpticalDetectorData
+                        lardata_RawData
+                        larcore_SummaryData
+			uboone_RawData
 			${UBDut}
                         ${PQ}
 			${Boost_SERIALIZATION_LIBRARY}

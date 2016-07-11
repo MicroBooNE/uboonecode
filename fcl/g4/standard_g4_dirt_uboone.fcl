@@ -1,5 +1,5 @@
 #include "standard_g4_uboone.fcl"
 outputs.out1.fileName: "%ifb_%tc_g4_dirt.root"
-services.user.Geometry.Name: "microboonev9_auxdet"
-services.user.Geometry.GDML: "microboonev9_auxdet.gdml"
-services.user.Geometry.ROOT: "microboonev9_auxdet.gdml"
+services.user.Geometry.Name: "microboonev10"
+services.user.Geometry.GDML: "microboonev10.gdml"
+services.user.Geometry.ROOT: "microboonev10.gdml"

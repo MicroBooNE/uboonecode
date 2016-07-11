@@ -1,8 +1,8 @@
 
 art_make( BASENAME_ONLY
 	  LIBRARY_NAME  uboonecode_uboone_TriggerSim
-	  LIB_LIBRARIES RawData
-			Utilities
+	  LIB_LIBRARIES lardata_RawData
+			lardata_Utilities
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -15,10 +15,10 @@ art_make( BASENAME_ONLY
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
 	  MODULE_LIBRARIES
-			Simulation
-			RawData
-			OpticalDetectorData
-			Utilities
+			larsim_Simulation
+			lardata_RawData
+			lardata_OpticalDetectorData
+			lardata_Utilities
 			uboonecode_uboone_TriggerSim
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}

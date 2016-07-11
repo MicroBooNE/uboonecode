@@ -3,7 +3,8 @@
 BEGIN_PROLOG
 
 microboone_cry:            @local::standard_cry
-microboone_cry.TimeOffset: -3.65e-3 # 2.05ms (drift time in LArSoft, 2.56m/1251m/s) + 1.6ms (readout window, front porch)     
-microboone_cry.SampleTime: 6.85e-3  # 2.05ms + 1.6ms + 1.6ms + 1.6ms
+microboone_cry.SampleTime: 7.25e-3 #0.2 ms (g4 rise time) + 2.25 ms (1 full drift window) + 4.8 ms (readout) @ -70 kv, 114 cm/ms
+microboone_cry.TimeOffset: -4.05e-3 #4.8 ms readout should start at -1.6 ms to match data
+microboone_cry.BufferBox:  [ -250.0,250.0,-250.0,250.0,-250.0,250.0 ]
 
 END_PROLOG

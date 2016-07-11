@@ -50,6 +50,7 @@ physics:
    optfem:       @local::microboone_optical_fem_sim
    triggersim:   @local::ubtrigger_singlep
    optreadout:   @local::microboone_optical_dram_readout_sim
+   ophit:        @local::microboone_ophit
    opflash:      @local::microboone_opflash
 #   daq:          @local::microboone_simwire
  }
@@ -64,7 +65,7 @@ physics:
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
  #simulate: [ generator, largeant, backtrack, optdigitizer, optfem, triggersim, optreadout, daq ]
- simulate: [ generator, largeant, optdigitizer, optfem, triggersim, optreadout, opflash ]
+ simulate: [ generator, largeant, optdigitizer, optfem, triggersim, optreadout, ophit, opflash ]
 # analyzeIt:  [ largana ]
 # analyzeIt:  [ pmtresponse, opflashana ]
  analyzeIt:  [ opflashana ]

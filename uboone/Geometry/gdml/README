@@ -18,6 +18,10 @@ v8 replaces the air above ground with vacuum
 
 v9 rotates the roof of LARTF by 39 degrees -- it is no longer aligned with Cryostat
 
+v10 moves the PMTs out of the wires planes. 
+
+v10_opticalSim Removes the platform for the sake of optical sim generation-- it is currently uncertain why platform volume caused these jobs to fail. 
+
 vX
 microboonevX.gdml (microboonevX_nowires.gdml): Working gdml.  This file (may) contain working changes which are not tagged with a version. Don't use this gdml.  
 

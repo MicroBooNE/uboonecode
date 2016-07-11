@@ -1,6 +1,6 @@
 simple_plugin(KalmanFilterTest "module"
-              RecoObjects
-	      Geometry
+              lardata_RecoObjects
+	      larcore_Geometry
 	      ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -20,8 +20,8 @@ simple_plugin(KalmanFilterTest "module"
              )
 
 simple_plugin(PropTest "module"
-              RecoObjects
-	      Geometry
+              lardata_RecoObjects
+	      larcore_Geometry
 	      ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -41,8 +41,8 @@ simple_plugin(PropTest "module"
              )
 
 simple_plugin(InteractTest "module"
-              RecoObjects
-	      Geometry
+              lardata_RecoObjects
+	      larcore_Geometry
 	      ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}

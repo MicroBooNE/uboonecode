@@ -1,0 +1,52 @@
+#include "reco_uboone_mcc7.fcl"
+#include "MuCSMerger_uboone.fcl"
+
+process_name: MuCSDT
+
+@table::microboone_reco_mcc7_services
+
+services:
+{
+  #TFileService: { fileName: "MuCSDT.root" }
+  Timing:       {}
+  message:      @local::standard_info
+  user:         @local::microboone_simulation_services
+}
+
+source:
+{
+  module_type: RootInput 
+  maxEvents: -1 
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName: "%ifb_MuCSDT.root"
+   dataTier: "mucs_DT"
+   compressionLevel: 1
+ }
+}
+
+# The 'physics' section defines and configures some modules to do work on each event.
+# First modules are defined; they are scheduled later. Modules are grouped by type.
+physics:
+{
+  # Define the variables we'll need to run for this analysis program.
+ producers:
+ {
+   MuCSDT: @local::standard_mucsdt
+ }
+
+  produce: [ MuCSDT ]
+  trigger_paths: [produce]
+  stream1: [out1]
+  end_paths: [ stream1 ]  
+}
+
+
+physics.producers.MuCSDT.MuCSFile: "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_144_0.333_0.root"
+DetectorClocksService.InheritClockConfig: false
+services.user.DetectorClocksService.InheritClockConfig: false

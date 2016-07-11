@@ -38,7 +38,7 @@
 ///                    which the input field responses are obtained
 ///                 4. Convolute the field and electronic responses,
 ///                    and then sample the convoluted function with
-///                    the nominal sampling rate (util::DetectorProperties).
+///                    the nominal sampling rate (detinfo::DetectorPropertiesService).
 ///                    NOTE: Currently this doesn't include the filter 
 ///                    function and the deconvolution kernel.
 ///                    We may want to include them later?
@@ -79,20 +79,25 @@
 #define SIGNALSHAPINGSERVICEMICROBOONE_H
 
 #include <vector>
+#include <map>
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "Utilities/SignalShaping.h"
+#include "lardata/Utilities/SignalShaping.h"
 #include "TF1.h"
 #include "TH1D.h"
 
 // LArSoft include
-#include "Geometry/Geometry.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Utilities/TimeService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
 
-using DoubleVec = std::vector<double>;
+using DoubleVec  = std::vector<double>;
+using DoubleVec2 = std::vector< DoubleVec >;
+using DoubleVec3 = std::vector< DoubleVec2 >;
+using DoubleVec4 = std::vector< DoubleVec3 >;
+using TH1FVec4   = std::vector<std::vector<std::vector<std::vector<TH1F*> > > >;
+
 
 namespace util {
   class SignalShapingServiceMicroBooNE {
@@ -110,16 +115,11 @@ namespace util {
 
     // Accessors.
 
-    //  double GetASICGain()                                  { return fASICGainInMVPerFC; }
-    std::vector<DoubleVec> GetNoiseFactVec()                { return fNoiseFactVec; }
-    //double GetShapingTime()                                 { return fShapeTimeConst.at(1); }; 
+    DoubleVec2 GetNoiseFactVec()                { return fNoiseFactVec; }
     std::vector<std::vector<size_t> > GetNResponses()       { return fNResponses; }
     std::vector<std::vector<size_t> > GetNActiveResponses() { return fNActiveResponses; }
 
     std::vector<size_t> GetViewIndex()       { return fViewIndex; }
-    //double GetASICGain() { return fASICGainInMVPerFC; }
-
-    //double GetShapingTime() { return fShapeTimeConst.at(1); }
 
     double GetASICGain(unsigned int const channel) const;
     double GetShapingTime(unsigned int const channel) const; 
@@ -131,7 +131,7 @@ namespace util {
     double Get2DFilterVal(size_t planeNum, size_t freqDimension, double binFrac) const;  // M. Mooney
     double Get2DFilterNorm(size_t planeNum) const;  // M. Mooney
 
-    const util::SignalShaping& SignalShaping(unsigned int channel, unsigned wire = 0, size_t ktype = 0) const;
+    const util::SignalShaping& SignalShaping(size_t channel, size_t wire = 0, size_t ktype = 0) const;
 
     int FieldResponseTOffset(unsigned int const channel, size_t ktype) const;
 
@@ -145,8 +145,9 @@ namespace util {
     template <class T> void Deconvolute(size_t channel, std::vector<T>& func) const;
     template <class T> void Deconvolute(size_t channel, size_t wire, std::vector<T>& func) const;
     
-    void SetDecon(int fftsize);
+    void SetDecon(size_t fftsize, size_t channel);
     double GetDeconNorm(){return fDeconNorm;};
+
 
   private:
 
@@ -171,17 +172,28 @@ namespace util {
 
     void SetFilters();
 
+    // Pick the electronics configuration
+    size_t GetConfig(size_t channel) const;
+
     // Attributes.
 
-    bool fInit;               ///< Initialization flag.
+    bool fInit;               ///< Initialization flag
+    bool fInitConfigMap;
+
+    mutable std::map<size_t, size_t> fConfigMap;
+    mutable size_t fConfigMapFirstChannel;
+    mutable size_t fConfigMapLastChannel;
 
     // Sample the response function, including a configurable
     // drift velocity of electrons
 
-    void SetResponseSampling(size_t ktype);
+    void SetResponseSampling(size_t ktype, size_t config, int mode=0, size_t channel=0);
 
     void SetFieldResponseTOffsets( const TH1F* resp, const size_t ktype);
 
+    DoubleVec3 fTestParams;
+
+    size_t fNConfigs;
     size_t fNPlanes;
     size_t fNViews;
 
@@ -189,59 +201,65 @@ namespace util {
     std::vector<size_t>      fViewIndex;
     std::map<size_t, size_t> fViewMap;
     size_t                   fViewForNormalization;
+
     double fDeconNorm;
     double fADCPerPCAtLowestASICGain; ///< Pulse amplitude gain for a 1 pc charge impulse after convoluting it the with field and electronics response with the lowest ASIC gain setting of 4.7 mV/fC
 
-	  //double fASICGainInMVPerFC;                ///< Cold electronics ASIC gain setting in mV/fC
-    std::vector<DoubleVec> fNoiseFactVec;       ///< RMS noise in ADCs for lowest gain setting
+    DoubleVec2 fNoiseFactVec;       ///< RMS noise in ADCs for lowest gain setting
 
     std::vector<std::vector<size_t> > fNResponses;
     std::vector<std::vector<size_t> > fNActiveResponses;
-    //double fASICGainInMVPerFC;                  ///< Cold electronics ASIC gain setting in mV/fC
-    std::vector<double> fASICGainInMVPerFC;       ///< Cold electronics ASIC gain setting in mV/fC
-    //std::vector<double> fNoiseFactColl;         ///< RMS Noise in ADCs for lowest Gain Setting
-    //std::vector<double> fNoiseFactInd;          ///< RMS Noise in ADCs for lowest Gain Setting
+    DoubleVec2 fASICGainInMVPerFC;       ///< Cold electronics ASIC gain setting in mV/fC
 
     DoubleVec fDefaultDriftVelocity;  ///< Default drift velocity of electrons in cm/usec
-    std::vector<DoubleVec>  fFieldResponseTOffset;  ///< Time offset for field response in ns
+    DoubleVec2  fFieldResponseTOffset;  ///< Time offset for field response in ns
 
-    std::vector<double> fCalibResponseTOffset; // calibrated time offset to align U/V/Y Signals 
+    bool fUseCalibratedResponses;         //Flag to use Calibrated Responses for 70kV  
+  
+    DoubleVec fCalibResponseTOffset; // calibrated time offset to align U/V/Y Signals 
 
-    int fNFieldBins[2];         		///< number of bins for field response
-    int fFieldLowEdge[2];           ///< low edge of the field response histo (for test output)
+    // test
+
+
+    size_t fNFieldBins[2];         		///< number of bins for field response
+    double fFieldLowEdge[2];           ///< low edge of the field response histo (for test output)
+    double fFieldBin1Center[2];
     double fFieldBinWidth[2];       ///<  Bin with of the input field response.
 
     DoubleVec f3DCorrectionVec;  ///< correction factor to account for 3D path of electrons, 1 for each plane (default = 1.0)
 
     double fTimeScaleFactor;
+    bool   fStretchFullResponse;
     
     DoubleVec fFieldRespAmpVec;
-    std::vector<double> fShapeTimeConst; ///< time constants for exponential shaping
+    DoubleVec2 fShapeTimeConst; ///< time constants for exponential shaping
     std::vector<int> fDeconvPol;         ///< switch for DeconvKernel normalization sign (+ -> max pos ADC, - -> max neg ADC). Entry 0,1,2 = U,V,Y plane settings
     std::vector<TF1*> fFilterTF1Vec;     ///< Vector of Parameterized filter functions
     std::vector<std::string> fFilterFuncVec;
     std::vector<std::vector<TComplex> > fFilterVec;
+    DoubleVec2 fFilterParamsVec;
+    DoubleVec fFilterWidthCorrectionFactor;  // a knob
 
     // Induced charge deconvolution additions (M. Mooney)
     std::vector<TF1*> fFilterTF1VecICTime;
     std::vector<std::string> fFilterFuncVecICTime;
     std::vector<TF1*> fFilterTF1VecICWire;
     std::vector<std::string> fFilterFuncVecICWire;
-    std::vector<double> fFilterScaleVecICTime;
-    std::vector<double> fFilterScaleVecICWire;
-    std::vector<double> fFilterNormVecIC;
+    DoubleVec fFilterScaleVecICTime;
+    DoubleVec fFilterScaleVecICWire;
+    DoubleVec fFilterNormVecIC;
 
     std::vector<double> fFilterICTimeMaxFreq;
-    std::vector<double> fFilterICTimeMaxVal;
+    DoubleVec fFilterICTimeMaxVal;
 
-    std::vector<double> fFilterICWireMaxFreq;
-    std::vector<double> fFilterICWireMaxVal;
+    DoubleVec fFilterICWireMaxFreq;
+    DoubleVec fFilterICWireMaxVal;
 
     
 
     bool fGetFilterFromHisto;   		///< Flag that allows to use a filter function from a histogram instead of the functional dependency
 
-    std::vector<std::vector<std::vector<TH1F*> > > fFieldResponseHistVec;
+    TH1FVec4 fFieldResponseHistVec;
 
     double fDefaultEField;
     double fDefaultTemperature;
@@ -252,10 +270,10 @@ namespace util {
     
     // Following attributes hold the convolution and deconvolution kernels
 
-    std::vector<std::vector<std::vector<util::SignalShaping> > >fSignalShapingVec;
+    std::vector<std::vector<std::vector<std::vector<util::SignalShaping> > > > fSignalShapingVec;
     // Field response.
 
-    std::vector<std::vector<std::vector<DoubleVec> > >fFieldResponseVec;
+    std::vector<DoubleVec4 >fFieldResponseVec;
 
     // Electronics response.
 
@@ -267,6 +285,16 @@ namespace util {
 
     bool fPrintResponses;
     bool fManualInterpolation;
+    
+    // some diagnostic histograms
+    
+    TH1D* fHRawResponse[3];
+    TH1D* fHStretchedResponse[3];
+    TH1D* fHFullResponse[3];
+    TH1D* fHSampledResponse[3];
+    
+    bool fHistDone[3];
+    bool fHistDoneF[3];
   };
 }
 
@@ -367,4 +395,3 @@ template <class T> inline void util::SignalShapingServiceMicroBooNE::Deconvolute
 
 DECLARE_ART_SERVICE(util::SignalShapingServiceMicroBooNE, LEGACY)
 #endif
-

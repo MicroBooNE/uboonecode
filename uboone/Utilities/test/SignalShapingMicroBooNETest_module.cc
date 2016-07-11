@@ -14,7 +14,7 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "Utilities/LArFFT.h"
+#include "lardata/Utilities/LArFFT.h"
 
 #include "TComplex.h"
 #include "TFile.h"

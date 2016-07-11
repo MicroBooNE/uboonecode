@@ -24,13 +24,13 @@
 #include <iostream>
 
 // LArSoft
-#include "RawData/OpDetWaveform.h"
-#include "RecoBase/OpFlash.h"
-#include "RecoBase/OpHit.h"
-#include "Utilities/AssociationUtil.h"
-#include "Utilities/TimeService.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/OpDetGeo.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "lardata/RecoBase/OpFlash.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "lardata/Utilities/AssociationUtil.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/OpDetGeo.h"
 
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/FlashList.hh"
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/subevent_algo/SubEvent.hh"
@@ -79,7 +79,7 @@ private:
   void prepCosmicDiscWaveforms(  subevent::CosmicWindowHolder& cosmics ); 
   void prepBeamWaveforms( art::Event& event, subevent::WaveformData& hgwfms, subevent::WaveformData& lgwfms, subevent::SubEventList& cosmic_subevents );
   void GetHitGeometryInfo(subevent::Flash const& flash,
-  			  geo::Geometry const& geom,
+  			  geo::GeometryCore const& geom,
   			  std::vector<double> & sumw,
   			  std::vector<double> & sumw2,
   			  double & sumy, double & sumy2,
@@ -253,7 +253,7 @@ void SubEventBuilder::produce(art::Event & e)
 
 bool SubEventBuilder::sortWaveforms( art::Event& event, subevent::WaveformData& hgbeam, subevent::WaveformData& lgbeam, subevent::CosmicWindowHolder& cosmics, int beamwin_len_threshold ) {
   // Load Services and Event Handles
-  art::ServiceHandle<util::TimeService> ts;
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
   
   art::Handle< std::vector< raw::OpDetWaveform > > hgwfmHandle;
   bool loadedhg = event.getByLabel( fOpDetInputModule, "OpdetBeamHighGain", hgwfmHandle );
@@ -394,7 +394,7 @@ void SubEventBuilder::prepCosmicDiscWaveforms( subevent::CosmicWindowHolder& cos
 
 void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformData& hgwfms, subevent::WaveformData& lgwfms, subevent::SubEventList& cosmicsubevents ) {
   // get services
-  art::ServiceHandle<util::TimeService> ts;
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
   // first replace hgwfms that saturate and remove pedestal. also calculate mean beam timestapm while we are at it
   double mean_hg_beamtimestamp = 0.;
@@ -568,7 +568,7 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
 // bool SubEventBuilder::gatherWaveforms( art::Event& event, subevent::WaveformData& wfms, subevent::CosmicWindowHolder& cosmics ) {
 
 //   // Load Services and Event Handles
-//   art::ServiceHandle<util::TimeService> ts;
+//    auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
 
 //   art::Handle< std::vector< raw::OpDetWaveform > > hgwfmHandle;
 //   bool loadedhg = event.getByLabel( fOpDetInputModule, "OpdetBeamHighGain", hgwfmHandle );
@@ -691,7 +691,7 @@ void SubEventBuilder::prepBeamWaveforms( art::Event& event, subevent::WaveformDa
 // }
 
 void SubEventBuilder::GetHitGeometryInfo(subevent::Flash const& flash,
-					 geo::Geometry const& geom,
+					 geo::GeometryCore const& geom,
 					 std::vector<double> & sumw,
 					 std::vector<double> & sumw2,
 					 double & sumy, double & sumy2,
@@ -717,9 +717,8 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
  				     art::Assns<recob::OpFlash, recob::OpHit>& AssnPtr )
 {
   
-  art::ServiceHandle<util::TimeService> ts;
-  art::ServiceHandle<geo::Geometry> geom;
-  geo::Geometry const& Geometry(*geom);
+  auto const* ts = lar::providerFrom<detinfo::DetectorClocksService>();
+  geo::GeometryCore const* geom = lar::providerFrom<geo::Geometry>();
   double dt_beam = ts->BeamGateTime() - ts->TriggerTime();
 
   for ( subevent::SubEventListIter isubevent=subevents.begin(); isubevent!=subevents.end(); isubevent++ ) {
@@ -770,7 +769,7 @@ void SubEventBuilder::makeOpFlashes( art::Event& e, subevent::SubEventList& sube
       // if ( iopdet >=32 )
       // 	std::cout << "weird opdet: " << iopdet << " " << (*iflash).ch << std::endl;
       PEperOpDet.at( iopdet ) += (*iflash).area; // need calibration constants here
-      GetHitGeometryInfo( (*iflash), Geometry, sumw, sumw2, sumy, sumy2, sumz, sumz2 );
+      GetHitGeometryInfo( (*iflash), *geom, sumw, sumw2, sumy, sumy2, sumz, sumz2 );
     }
     double meany = sumy/asubevent.totpe;
     double meanz = sumz/asubevent.totpe;
