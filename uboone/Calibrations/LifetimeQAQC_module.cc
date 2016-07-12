@@ -1,3 +1,12 @@
+////////////////////////////////////////////////
+// Lifetime module to be used for end-to-end purity analysis
+// Author: Sowjanya Gollapinni, first commit: July 11, 2016
+// 
+// The module does the full lifetime analysis and produces
+// a final QAQC plot. Current implement only takes crossing tracks.
+// The associated fcl file is lifetime_qaqc.fcl
+///////////////////////////////////////////////
+
 #ifndef LifetimeQAQC_Module
 #define LifetimeQAQC_Module
 

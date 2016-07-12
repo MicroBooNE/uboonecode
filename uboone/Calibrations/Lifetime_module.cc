@@ -1,3 +1,14 @@
+////////////////////////////////////////////////
+// Lifetime module to be used for nearline monitoring
+// Author: Sowjanya Gollapinni, first commit: July 11, 2016
+// 
+// The module selects tracks that cross anode and cathode
+// and applies some angular cuts and produces dQ/ds vs drifttime
+// scatter plot. The actual lifetime analysis is done in a 
+// post processing script to extract QA/QC value.
+// Associated fcl file is lifetime.fcl
+///////////////////////////////////////////////
+
 #ifndef Lifetime_Module
 #define Lifetime_Module
 
