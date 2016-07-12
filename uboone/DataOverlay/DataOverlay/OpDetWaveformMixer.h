@@ -18,7 +18,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "RawData/OpDetWaveform.h"
+#include "lardata/RawData/OpDetWaveform.h"
 #include "RawDigitAdder_HardSaturate.h"
 
 

@@ -24,25 +24,25 @@
 #include <exception>
 #include <sstream>
 
-#include "CalibrationDBI/Interface/IChannelStatusService.h"
-#include "CalibrationDBI/Interface/IChannelStatusProvider.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
 #include "SimulationBase/MCTruth.h"
 #include "SimulationBase/MCParticle.h"
 
-#include "Simulation/SimChannel.h"
-#include "Simulation/SimPhotons.h"
-#include "Simulation/AuxDetSimChannel.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "larsim/Simulation/SimPhotons.h"
+#include "larsim/Simulation/AuxDetSimChannel.h"
 
-#include "MCBase/MCTrack.h"
-#include "MCBase/MCShower.h"
+#include "lardata/MCBase/MCTrack.h"
+#include "lardata/MCBase/MCShower.h"
 
 #include "DataOverlay/RawDigitMixer.h"
-#include "RawData/RawDigit.h"
-#include "SimpleTypesAndConstants/RawTypes.h"
+#include "lardata/RawData/RawDigit.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
 
 #include "DataOverlay/OpDetWaveformMixer.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/RawData/OpDetWaveform.h"
 
 #include "DataOverlayProducts/EventMixingSummary.h"
 
@@ -289,7 +289,7 @@ void mix::OverlayRawDataDetailMicroBooNE::GenerateMCRawDigitScaleMap(std::vector
   //note: we will put here access to the channel database to determine dead channels
   fMCRawDigitScaleMap.clear();
 
-  const lariov::IChannelStatusProvider& chanStatus = art::ServiceHandle<lariov::IChannelStatusService>()->GetProvider();
+  const lariov::ChannelStatusProvider& chanStatus = art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider();
   
   for(auto const& d : dataDigitVector){
     if(chanStatus.IsBad(d.Channel()))

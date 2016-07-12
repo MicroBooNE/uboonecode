@@ -18,8 +18,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "RawData/RawDigit.h"
-#include "SimpleTypesAndConstants/RawTypes.h"
+#include "lardata/RawData/RawDigit.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
 #include "RawDigitAdder_HardSaturate.h"
 
 

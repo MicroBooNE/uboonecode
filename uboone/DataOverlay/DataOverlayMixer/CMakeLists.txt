@@ -6,11 +6,11 @@ art_make(
 	MODULE_LIBRARIES
 			ub_RawDigitMixer
 			ub_OpDetWaveformMixer
-                        RawData
+                        lardata_RawData
 			SimulationBase
-			MCBase
-			CalibrationDBI_IOVData
-			CalibrationDBI_Providers
+			lardata_MCBase
+			larevt_CalibrationDBI_IOVData
+			larevt_CalibrationDBI_Providers
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_PRODUCTMIX}
 			${ART_FRAMEWORK_IO_ROOT}
@@ -29,7 +29,7 @@ art_make(
 	EXCLUDE OverlayRawDataMicroBooNE_module.cc
 	MODULE_LIBRARIES
 			ub_RawDigitAdderAna
-                        RawData
+                        lardata_RawData
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_ROOT}
 			${ART_FRAMEWORK_MODULES}

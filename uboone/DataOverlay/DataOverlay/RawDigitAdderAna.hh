@@ -13,8 +13,8 @@
 #include<vector>
 #include<string>
 
-#include "RawData/RawDigit.h"
-#include "SimpleTypesAndConstants/RawTypes.h"
+#include "lardata/RawData/RawDigit.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h"
 
 #include "TH1S.h"
 
