@@ -29,6 +29,8 @@ add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(LiteMaker)
 add_subdirectory(MuCS)
 
+add_subdirectory(DataOverlay)
+
 # Respect the order specified in lar_build, which is:
 #
 #     "SimpleTypesAndConstants",
