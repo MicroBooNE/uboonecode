@@ -27,14 +27,12 @@ services:
   #PhotonVisibilityService: @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties  
   user:                       @local::microboone_full_services
-#  IFDH: {}
 }
-services.user.IFDH: {}
 
 microboone_tfile_metadata:
 {
   JSONFileName:          "SwizRecoLifetime_hist.root.json"
-  GenerateTFileMetadata: false
+  GenerateTFileMetadata: true
   dataTier:              "root-tuple"
   fileFormat:            "root"
 }
