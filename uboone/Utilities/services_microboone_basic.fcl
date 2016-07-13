@@ -5,7 +5,7 @@
 #include "messageservice.fcl"
 #include "simulationservices_microboone.fcl"
 #include "signalservices_microboone.fcl"
-#include "magfield.fcl"
+#include "magfield_larsoft.fcl"
 #include "databaseutil_microboone.fcl"
 #include "backtracker.fcl"
 #include "photpropservices_microboone.fcl"
