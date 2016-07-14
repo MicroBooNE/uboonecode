@@ -111,7 +111,7 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 
   // load tracks previously created for which T0 reconstruction should occur
   art::Handle<std::vector<recob::Track> > track_h;
-  e.getByLabel("pandoraCosmic",track_h);
+  e.getByLabel(fTrackProducer,track_h);
 
   // make sure hits look good
   if(!track_h.isValid()) {
@@ -225,7 +225,7 @@ bool   T0RecoAnodeCathodePiercing::Anode(const std::vector<TVector3>& sorted_trk
 }
 
 void   T0RecoAnodeCathodePiercing::SortTrackPoints(const recob::Track& track,
-							std::vector<TVector3>& sorted_trk)
+						   std::vector<TVector3>& sorted_trk)
 {
   // vector to store 3D coordinates of
   // ordered track
