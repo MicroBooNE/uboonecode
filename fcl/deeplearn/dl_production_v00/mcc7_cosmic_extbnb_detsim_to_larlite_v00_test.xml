@@ -36,7 +36,7 @@
     <inputdef>dl_mcc7_detsim_inTime_cosmic_v00_test</inputdef>
     <outdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_out/&release;</outdir>
     <logdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_log/&release;</logdir>
-    <workdir>/uboone/data/users/kterao/&name;_&dl_version;_&dl_part;_work</workdir>
+    <workdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_work/&release;</workdir>
     <numjobs>6</numjobs>
     <memory>4000</memory>
     <datatier>larlite</datatier>
