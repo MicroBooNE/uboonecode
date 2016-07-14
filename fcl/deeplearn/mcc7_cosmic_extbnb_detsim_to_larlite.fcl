@@ -132,6 +132,9 @@ physics.producers.caldata.MinAllowedChannelStatus: 0
 physics.producers.caldata.DigitModuleLabel: "digitfilter"
 physics.producers.caldata.DodQdxCalib: false
 
+physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+
 physics.analyzers.mcinfo.SelectEvents: { SelectEvents: [ simulate ] }
 physics.analyzers.simch.SelectEvents: { SelectEvents: [ simulate ] }
 physics.analyzers.wire.SelectEvents: { SelectEvents: [ simulate ] }

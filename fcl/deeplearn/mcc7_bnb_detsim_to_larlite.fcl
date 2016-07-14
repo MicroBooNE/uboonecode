@@ -6,6 +6,7 @@
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "correct_saturation.fcl"
 #include "photpropservices_microboone.fcl"
 #include "correct_saturation.fcl"
 #include "caldata_microboone.fcl" 
@@ -69,6 +70,13 @@ physics:
    digitfilter:  @local::microboone_rawdigitfilter
    caldata:      @local::microboone_calroi
 
+   saturation: @local::correct_saturation
+
+   ophit:      @local::microboone_ophit_beam_highgain
+   opflash:    @local::microboone_opflash_beam_highgain
+   ophitSat:   @local::microboone_ophit_saturation
+   opflashSat: @local::microboone_opflash_saturation
+
    rns:       { module_type: "RandomNumberSaver" }
  }
 
@@ -83,7 +91,7 @@ physics:
 
  filters: { swtrigger: @local::swtrigger_bnb }
 
- simulate: [ rns,
+ simulate: [ rns, saturation, ophit, opflash, ophitSat, opflashSat,
              swtrigger, digitfilter, caldata ]
 
  ana: [ mcinfo, simch, wire, opdigit, opreco ]
@@ -101,6 +109,9 @@ physics.producers.digitfilter.TruncateTicks: true
 physics.producers.caldata.MinAllowedChannelStatus: 0
 physics.producers.caldata.DigitModuleLabel: "digitfilter"
 physics.producers.caldata.DodQdxCalib: false
+
+physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+                                                1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 physics.analyzers.mcinfo.SelectEvents: { SelectEvents: [ simulate ] }
 physics.analyzers.simch.SelectEvents: { SelectEvents: [ simulate ] }
