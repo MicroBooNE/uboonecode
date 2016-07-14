@@ -5,5 +5,6 @@ add_subdirectory(reco)
 add_subdirectory(ana)
 add_subdirectory(utility)
 add_subdirectory(evd)
+add_subdirectory(deeplearn)
 
 install_fhicl()
