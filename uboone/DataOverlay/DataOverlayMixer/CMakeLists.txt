@@ -6,9 +6,9 @@ art_make(
 	MODULE_LIBRARIES
 			ub_RawDigitMixer
 			ub_OpDetWaveformMixer
-                        lardata_RawData
-			SimulationBase
-			lardata_MCBase
+                        lardataobj_RawData
+			nusimdata_SimulationBase
+			lardataobj_MCBase
 			larevt_CalibrationDBI_IOVData
 			larevt_CalibrationDBI_Providers
                         ${ART_FRAMEWORK_CORE}
@@ -17,8 +17,8 @@ art_make(
 			${ART_FRAMEWORK_MODULES}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
-                        ${ART_PERSISTENCY_COMMON}
-                        ${ART_UTILITIES}
+                        art_Persistency_Common canvas_Persistency_Common
+                        art_Utilities canvas_Utilities
                         ${BOOST_LIB}
                         ${FHICLCPP}
                         ${CETLIB}
@@ -29,7 +29,7 @@ art_make(
 	EXCLUDE OverlayRawDataMicroBooNE_module.cc
 	MODULE_LIBRARIES
 			ub_RawDigitAdderAna
-                        lardata_RawData
+                        lardataobj_RawData
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_ROOT}
 			${ART_FRAMEWORK_MODULES}
@@ -49,7 +49,7 @@ install_fhicl()
 #			ub_RawDigitAdderAna
 #
 #			${ART_FRAMEWORK_IO_SOURCES}
-#                        ${ART_PERSISTENCY_PROVENANCE}
+#                        art_Persistency_Provenance canvas_Persistency_Provenance
 #                        ${MF_MESSAGELOGGER}
 #                        ${MF_UTILITIES}
 #                        ${ROOT_BASIC_LIB_LIST}
