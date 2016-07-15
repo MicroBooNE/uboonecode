@@ -3671,6 +3671,23 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
       << "fMCT0FinderLabel.size() = "<<fMCT0FinderLabel.size();
   }
+  if (fTrackModuleLabel.size() != fCosmicTaggerAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fCosmicTaggerAssocLabel.size() = "<<fCosmicTaggerAssocLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fFlashMatchAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fFlashMatchAssocLabel.size() = "<<fFlashMatchAssocLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fContainmentTaggerAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fContainmentTaggerAssocLabel.size() = "<<fContainmentTaggerAssocLabel.size();
+  }
+
+
   if (GetNVertexAlgos() > kMaxVertexAlgos) {
     throw art::Exception(art::errors::Configuration)
       << "AnalysisTree currently supports only up to " << kMaxVertexAlgos
