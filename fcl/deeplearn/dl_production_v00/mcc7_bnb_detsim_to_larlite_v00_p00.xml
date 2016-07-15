@@ -34,9 +34,9 @@
   <stage name="larlite">
     <fcl>mcc7_bnb_detsim_to_larlite.fcl</fcl>
     <inputdef>dl_mcc7_detsim_bnb_nu_v00_&dl_part;</inputdef>
-    <outdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_out/&release;</outdir>
-    <logdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_log/&release;</logdir>
-    <workdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_work/&release;</workdir>
+    <outdir>/pnfs/uboone/scratch/users/vgenty/&name;_&dl_version;_&dl_part;_out/&release;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/vgenty/&name;_&dl_version;_&dl_part;_log/&release;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/vgenty/&name;_&dl_version;_&dl_part;_work/&release;</workdir>
     <numjobs>730</numjobs>
     <memory>4000</memory>
     <datatier>larlite</datatier>
