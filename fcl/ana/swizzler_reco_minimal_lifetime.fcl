@@ -154,6 +154,7 @@ physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [4.803
 
 physics.analyzers.Lifetime.TrackModuleLabel:        "trackkalmanhit"
 physics.analyzers.Lifetime.CalorimetryModuleLabel:  "trackkalmanhitcalo"
+physics.analyzers.Lifetime.SaveTrackInfo: true
 
 # Here we try to suppress known and pointless messages
 services.message.destinations :

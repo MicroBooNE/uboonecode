@@ -75,6 +75,5 @@ physics:
 
 physics.analyzers.LifetimeQAQC.TrackModuleLabel:        "trackkalmanhit"
 physics.analyzers.LifetimeQAQC.CalorimetryModuleLabel:  "trackkalmanhitcalo"
-
-
+physics.analyzers.LifetimeQAQC.SaveTrackInfo: true
 
