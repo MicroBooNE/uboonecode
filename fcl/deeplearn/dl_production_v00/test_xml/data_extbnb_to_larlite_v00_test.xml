@@ -8,7 +8,7 @@
 <!ENTITY run_type     "physics"   >
 <!ENTITY name         "data_extbnb_to_larlite">
 <!ENTITY dl_version   "v00"       >
-<!ENTITY dl_part      "p00"       >
+<!ENTITY dl_part      "test"       >
 <!ENTITY tardir       "/pnfs/uboone/scratch/users/kterao/tars">
 ]>
 
@@ -33,7 +33,7 @@
 
   <stage name="larlite">
     <fcl>data_to_larlite.fcl</fcl>
-    <inputdef>prod_good_run_extbnb_swizzle_v5_inc_dl_v00_test</inputdef>
+    <inputdef>prod_good_run_extbnb_swizzle_v5_inc_dl_&dl_version;_&dl_part;</inputdef>
     <outdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_out/&release;</outdir>
     <logdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_log/&release;</logdir>
     <workdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_work/&release;</workdir>
