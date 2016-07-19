@@ -8,7 +8,7 @@
 <!ENTITY run_type     "physics"   >
 <!ENTITY name         "data_bnb_to_larlite">
 <!ENTITY dl_version   "v00"       >
-<!ENTITY dl_part      "p00"       >
+<!ENTITY dl_part      "test"       >
 <!ENTITY tardir       "/pnfs/uboone/scratch/users/kterao/tars">
 ]>
 
