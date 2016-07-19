@@ -1909,7 +1909,7 @@ def dojobsub(project, stage, makeup):
     workname = '%s-%s-%s' % (stage.name, project.name, project.release_tag)
     workname = workname + os.path.splitext(project.script)[1]
     #workscript = os.path.join(stage.workdir, workname)
-    workscript = os.path.join('/tmp/kterao', workname)
+    workscript = os.path.join('/tmp/%s' % os.environ['USER'], workname)
     if project.script != workscript:
         larbatch_posix.copy(project.script, workscript)
 
@@ -1920,7 +1920,7 @@ def dojobsub(project, stage, makeup):
     if project.start_script != '':
         workstartname = 'start-%s' % workname
         #workstartscript = os.path.join(stage.workdir, workstartname)
-        workstartscript = os.path.join('/tmp/kterao', workstartname)
+        workstartscript = os.path.join('/tmp/%s' % os.environ['USER'], workstartname)
         if project.start_script != workstartscript:
             larbatch_posix.copy(project.start_script, workstartscript)
 
@@ -1931,7 +1931,7 @@ def dojobsub(project, stage, makeup):
     if project.stop_script != '':
         workstopname = 'stop-%s' % workname
         #workstopscript = os.path.join(stage.workdir, workstopname)
-        workstopscript = os.path.join('/tmp/kterao', workstopname)
+        workstopscript = os.path.join('/tmp/%s' % os.environ['USER'], workstopname)
         if project.stop_script != workstopscript:
             larbatch_posix.copy(project.stop_script, workstopscript)
 
@@ -2330,7 +2330,7 @@ def dojobsub(project, stage, makeup):
         # Create dagNabbit.py configuration script in the work directory.
 
         #dagfilepath = os.path.join(stage.workdir, 'submit.dag')
-        dagfilepath = os.path.join('/tmp/kterao', 'submit.dag')
+        dagfilepath = os.path.join('/tmp/%s' % os.environ['USER'], 'submit.dag')
         dag = safeopen(dagfilepath)
 
         # Write start section.
