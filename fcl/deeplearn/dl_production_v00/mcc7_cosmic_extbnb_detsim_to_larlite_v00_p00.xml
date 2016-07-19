@@ -42,7 +42,7 @@
     <datatier>larlite</datatier>
     <resource>DEDICATED,OPPORTUNISTIC</resource>
     <defname>&name;_&dl_version;_&dl_part;</defname>
-    <jobsub>--expected-lifetime=medium</jobsub>
+    <jobsub>--expected-lifetime=long</jobsub>
   </stage>
 
   <!-- file type -->
