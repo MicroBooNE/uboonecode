@@ -69,7 +69,7 @@ source:
 {
   module_type: RootInput
   maxEvents:   10          # Number of events to create
-#  inputCommands: ["drop recob::Wires_*_*_* "]
+  inputCommands: ["keep *_*_*_*","drop recob::OpHits_*_*_*","drop recob::OpFlashs_*_*_*"]
 }
 
 physics:
@@ -97,7 +97,7 @@ physics:
    opreco:  @local::litemc_opreco
  }
 
- reco: [ rns, digitfilter, caldata ]
+ reco: [ rns, digitfilter, caldata, saturation, ophit, opflash, ophitSat, opflashSat ]
 
  ana: [ wire, opdigit, opreco ]
  

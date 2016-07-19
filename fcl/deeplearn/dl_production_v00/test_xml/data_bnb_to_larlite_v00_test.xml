@@ -37,7 +37,7 @@
     <outdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_out/&release;</outdir>
     <logdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_log/&release;</logdir>
     <workdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_work/&release;</workdir>
-    <numjobs>35</numjobs>
+    <numjobs>36</numjobs>
     <memory>4000</memory>
     <datatier>larlite</datatier>
     <resource>DEDICATED,OPPORTUNISTIC</resource>
