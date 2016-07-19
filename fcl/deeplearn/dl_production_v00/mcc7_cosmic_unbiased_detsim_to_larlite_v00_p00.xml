@@ -34,15 +34,15 @@
   <stage name="larlite">
     <fcl>mcc7_cosmic_unbiased_detsim_to_larlite.fcl</fcl>
     <inputdef>dl_mcc7_detsim_cosmic_v00_&dl_part;</inputdef>
-    <outdir>/pnfs/uboone/scratch/users/vgenty/&name;_&dl_version;_&dl_part;_out/&release;</outdir>
-    <logdir>/pnfs/uboone/scratch/users/vgenty/&name;_&dl_version;_&dl_part;_log/&release;</logdir>
-    <workdir>/pnfs/uboone/scratch/users/vgenty/&name;_&dl_version;_&dl_part;_work/&release;</workdir>
-    <numjobs>730</numjobs>
+    <outdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_out/&release;</outdir>
+    <logdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_log/&release;</logdir>
+    <workdir>/pnfs/uboone/scratch/users/kterao/&name;_&dl_version;_&dl_part;_work/&release;</workdir>
+    <numjobs>499</numjobs>
     <memory>4000</memory>
     <datatier>larlite</datatier>
     <resource>DEDICATED,OPPORTUNISTIC</resource>
     <defname>&name;_&dl_version;_&dl_part;</defname>
-    <jobsub>--expected-lifetime=medium</jobsub>
+    <jobsub>--expected-lifetime=long</jobsub>
   </stage>
 
   <!-- file type -->
