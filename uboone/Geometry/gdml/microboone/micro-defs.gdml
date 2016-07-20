@@ -1,4 +1,4 @@
-<?xml version='1.0'?>
+<?xml version'1.0'?>
 <define>
 <constant name="kInch"	value="2.54" />
 <constant name="kPi"	value="3.14159265358979" />

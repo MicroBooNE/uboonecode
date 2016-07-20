@@ -29,9 +29,9 @@
 #include "larsim/RandomUtils/LArSeedService.h"
 
 // larsoft includes
-#include "SimulationBase/MCTruth.h"
-#include "SimulationBase/MCParticle.h"
-#include "EventGeneratorBase/evgenbase.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
+#include "nutools/EventGeneratorBase/evgenbase.h"
 
 #include "MuCSRecoData.h"
 

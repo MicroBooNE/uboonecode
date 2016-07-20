@@ -16,10 +16,10 @@
 #define OPTICALDRAMREADOUT_MODULE_CC
 
 // LArSoft includes
-#include "lardata/OpticalDetectorData/FIFOChannel.h"
-#include "lardata/OpticalDetectorData/OpticalRawDigit.h"
-#include "lardata/RawData/TriggerData.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/OpticalDetectorData/FIFOChannel.h"
+#include "lardataobj/OpticalDetectorData/OpticalRawDigit.h"
+#include "lardataobj/RawData/TriggerData.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this code is non-portable
 #include "uboone/OpticalDetectorSim/UBOpticalException.h"
 #include "larcore/Geometry/Geometry.h" // larcore
@@ -32,12 +32,12 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 
 // C++ language includes
 #include <iostream>

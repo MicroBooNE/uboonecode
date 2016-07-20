@@ -13,7 +13,7 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 // #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 // #include "lardata/DetectorInfoServices/DetectorClocksService.h"
@@ -21,7 +21,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <memory>
-#include "lardata/RawData/TriggerData.h"
+#include "lardataobj/RawData/TriggerData.h"
 #include "uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 #include <string>

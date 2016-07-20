@@ -12,19 +12,19 @@ art_make( BASENAME_ONLY
 	    LIBRARY_NAME  uboonecode_uboone_MuCS
       MODULE_LIBRARIES larcore_Geometry
 			larcore_Geometry_Geometry_service
-			larcore_SummaryData
-			larsim_Simulation
+			larcoreobj_SummaryData
+			larsim_Simulation larsimobj_Simulation
 			larsim_MCCheater_BackTracker_service
       lardata_Utilities
 			larevt_Filters
-			lardata_RawData
-			lardata_RecoBase
+			lardataobj_RawData
+			lardataobj_RecoBase
 			lardata_RecoObjects  
 			larreco_RecoAlg
 			uboonecode_uboone_MuCS
 			SignalShapingServiceMicroBooNE_service
-			lardata_AnalysisBase
-      ${SIMULATIONBASE}
+			lardataobj_AnalysisBase
+      nusimdata_SimulationBase
       ${LARRECO_LIB}
       ${LARDATA_LIB}
       ${ART_FRAMEWORK_CORE}
@@ -32,9 +32,9 @@ art_make( BASENAME_ONLY
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-			${ART_PERSISTENCY_COMMON}
-			${ART_PERSISTENCY_PROVENANCE}
-			${ART_UTILITIES}
+			art_Persistency_Common canvas_Persistency_Common
+			art_Persistency_Provenance canvas_Persistency_Provenance
+			art_Utilities canvas_Utilities
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
       ${FHICLCPP}

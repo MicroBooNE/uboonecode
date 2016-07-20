@@ -1,4 +1,4 @@
-<?xml version='1.0'?>
+<?xml version'1.0'?>
 <gdml>
   <solids>
     <box lunit="cm" name="AuxDet0"    x="19"    y="0.6"    z="151" />

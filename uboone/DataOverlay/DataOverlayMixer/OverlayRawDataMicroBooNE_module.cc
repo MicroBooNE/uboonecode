@@ -12,7 +12,7 @@
 #include "art/Framework/IO/ProductMix/MixHelper.h"
 #include "art/Framework/Core/PtrRemapper.h"
 #include "art/Persistency/Common/CollectionUtilities.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "fhiclcpp/ParameterSet.h"
@@ -27,22 +27,22 @@
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
 
-#include "SimulationBase/MCTruth.h"
-#include "SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
 
-#include "larsim/Simulation/SimChannel.h"
-#include "larsim/Simulation/SimPhotons.h"
-#include "larsim/Simulation/AuxDetSimChannel.h"
+#include "larsimobj/Simulation/SimChannel.h"
+#include "larsimobj/Simulation/SimPhotons.h"
+#include "larsimobj/Simulation/AuxDetSimChannel.h"
 
-#include "lardata/MCBase/MCTrack.h"
-#include "lardata/MCBase/MCShower.h"
+#include "lardataobj/MCBase/MCTrack.h"
+#include "lardataobj/MCBase/MCShower.h"
 
 #include "DataOverlay/RawDigitMixer.h"
-#include "lardata/RawData/RawDigit.h"
-#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
 
 #include "DataOverlay/OpDetWaveformMixer.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 
 #include "DataOverlayProducts/EventMixingSummary.h"
 

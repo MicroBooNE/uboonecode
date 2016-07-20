@@ -90,7 +90,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   if(fNConfigs>1 && !fInitConfigMap) {
 
     fConfigMap.clear();
-    ifstream configList;
+    std::ifstream configList;
 
     std::string fname;
     cet::search_path sp("FW_SEARCH_PATH");

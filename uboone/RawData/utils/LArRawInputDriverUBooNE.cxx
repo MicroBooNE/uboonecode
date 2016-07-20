@@ -9,22 +9,22 @@
 
 //LArSoft 
 #include "uboone/RawData/utils/LArRawInputDriverUBooNE.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/TriggerData.h"
-#include "lardata/RawData/DAQHeader.h"
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/OpDetWaveform.h"
-#include "larcore/SummaryData/RunData.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/TriggerData.h"
+#include "lardataobj/RawData/DAQHeader.h"
+#include "lardataobj/RawData/BeamInfo.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
+#include "larcoreobj/SummaryData/RunData.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfo/ElecClock.h"
-#include "lardata/OpticalDetectorData/OpticalTypes.h" // I want to move the enums we use back to UBooNE as they are UBooNE-specific
+#include "lardataobj/OpticalDetectorData/OpticalTypes.h" // I want to move the enums we use back to UBooNE as they are UBooNE-specific
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //ART, ...
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
 #include "art/Framework/Core/EDProducer.h"
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
