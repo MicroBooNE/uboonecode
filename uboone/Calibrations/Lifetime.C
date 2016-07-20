@@ -345,13 +345,87 @@ void Lifetime(int itime = 0) {
   dqdsvsdt->Write();
   hsigma->Write();
   
+  
+  //the code below is for single exponential fit
+  //Fit an exponential function to the TGraph
+  TCanvas *dqdsvsdt_fit = new TCanvas("dqdsvsdt_fit","dqdsvsdt_fit");
+  dqdsvsdt_fit->cd();
+  TF1 *fit = new TF1("fit","expo",50,2150);
+  
+  gr->Fit("fit","R"); 
+  gr->Draw("AP");
+  fit->Draw("same");
+  dqdsvsdt_fit->Write();    
+  gr->Write();
+  
+  //Now do expoenential (or expo+constant) fits to the gr TGraphs plot
+  Double_t par[2];
+  Double_t par_error[2];
+  Double_t QA,QC;
+  Double_t lifetime;
+  Double_t QA_err, QC_err, lifetime_err,QAQC_err;
+  fit->GetParameters(&par[0]); 
+  
+  for (int i =0; i <2; i++ )
+       par_error[i] = fit->GetParError(i);
+  
+  QC = TMath::Exp(par[0]);
+  QA = TMath::Exp(par[0] + par[1]*2200);
+  //lifetime = -1/par[1];
+  
+  QC_err = TMath::Abs((TMath::Exp(par[0]))*par_error[0]);
+  QA_err = TMath::Sqrt(TMath::Power( TMath::Exp(par[0] + par[1]*2200),2)*(TMath::Power(par_error[0],2) + 2200*2200*(TMath::Power(par_error[1],2))));
+  lifetime_err = TMath::Abs((1/(TMath::Power(par[1],2)))*par_error[1]);
+  QA_QC_err = (QA + QA_err)/(QC - QC_err) - QA/QC;
+  
+  std::cout << "***************Purity Information *******************" << endl;
+
+  std::cout << "QC    : " << QC << " +/- " << QC_err << endl;
+  std::cout << "QA    : " << QA << " +/- " << QA_err << endl;
+  std::cout << "QA/QC : " << QA/QC << " +/- " << QAQC_err << endl;
+  //std::cout << "Electron Life : " << lifetime*1000<<" ms"<< " +/- " << lifetime_err*1000<<" ms"<< endl;
+  
+  const int n=1;
+  Double_t x[n] = {0.5}, ex[n]={0};
+  Double_t QaQc[n], QaQc_err[n];
+  QaQc[0]=QA/QC;
+  QaQc_err[0]=QAQC_err;
+  
+  TCanvas *qAqC = new TCanvas("qAqC","");
+   qAqC->SetGridy(1);
+   qAqC->SetTicky(1);
+
+  TGraphErrors *qaqc = new TGraphErrors(1,x,QaQc,ex,QaQc_err);
+  qaqc->SetMarkerStyle(20);
+  qaqc->SetMarkerColor(kRed);
+  qaqc->GetXaxis()->SetNdivisions(0,2,0);
+  qaqc->GetYaxis()->SetRangeUser(0,1.2);
+  qaqc->GetXaxis()->SetRangeUser(0.4,0.604);
+  qaqc->SetTitle(" ");  
+  qaqc->GetYaxis()->SetTitle("QA/QC");
+  qaqc->Draw("AP");
+  
+  //TLine *line = new TLine(0.4,1,0.6,1);
+  //line->SetLineColor(kBlack);
+  //line->SetLineWidth(2);
+  //line->Draw("same");
+
+  qaqc->Write();
+  qAqC->Write();
+
+}  
+  
+  
+  
+  /********************************************
+  //the code below is for EXPO+Constant fit
   //Fit an exponential + constant function to the TGraph
   TCanvas *dqdsvsdt_fit = new TCanvas("dqdsvsdt_fit","dqdsvsdt_fit");
   dqdsvsdt_fit->cd();
   TF1 *fit = new TF1("fit","[0] + exp([1] + [2]*x)",50,2150);
-  fit->SetParameter(0,0);
-  fit->SetParameter(1,5.46113);
-  fit->SetParameter(2,-0.000127173);
+  //fit->SetParameter(0,0);
+  //fit->SetParameter(1,5.46113);
+  //fit->SetParameter(2,-0.000127173);
   
   gr->Fit("fit","R"); 
   gr->Draw("AP");
@@ -406,14 +480,15 @@ void Lifetime(int itime = 0) {
   qaqc->GetYaxis()->SetTitle("QA/QC");
   qaqc->Draw("AP");
   
-  /*TLine *line = new TLine(0.4,1,0.6,1);
-  line->SetLineColor(kBlack);
-  line->SetLineWidth(2);
-  line->Draw("same");*/
+  //TLine *line = new TLine(0.4,1,0.6,1);
+  //line->SetLineColor(kBlack);
+  //line->SetLineWidth(2);
+  //line->Draw("same");
 
 
   qaqc->Write();
   qAqC->Write();
+  *************************************************/
   
-}
+
 
