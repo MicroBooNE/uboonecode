@@ -12,7 +12,7 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
@@ -20,8 +20,8 @@
 #include "larcore/Geometry/Geometry.h"
 
 // data-products
-#include "lardata/RecoBase/Track.h"
-#include "lardata/AnalysisBase/T0.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/AnalysisBase/T0.h"
 #include "lardata/Utilities/AssociationUtil.h"
 
 // ROOT

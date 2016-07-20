@@ -14,8 +14,8 @@ art_make(
 			larcore_Geometry_Geometry_service
 			larsim_MCCheater_BackTracker_service
 			larsim_Simulation
-			lardata_RecoBase
-			lardata_AnalysisBase	
+			lardataobj_RecoBase
+			lardataobj_AnalysisBase	
 			lardata_RecoObjects  
 			larreco_RecoAlg
 			lardata_Utilities
