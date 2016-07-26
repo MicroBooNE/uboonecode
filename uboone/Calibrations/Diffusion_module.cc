@@ -652,7 +652,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     	   chan = fSimChannels[sc];
       }     
       if (chan){
-        const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = chan->TDCIDEMap();
+        auto const& tdcidemap = chan->TDCIDEMap();
         int k=-1;
         double elec[tdcidemap.size()];
         int tdc[tdcidemap.size()];

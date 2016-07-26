@@ -4197,7 +4197,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
    	      chan = fSimChannels[sc];
    	 }     
    	 if (chan){
-   	   const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = chan->TDCIDEMap();
+   	   auto const& tdcidemap = chan->TDCIDEMap();
    	   int k=-1;
    	   double elec[tdcidemap.size()];
    	   int tdc[tdcidemap.size()];
@@ -4247,7 +4247,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	  if(fSimChannels[sc]->Channel() == hitlist[i]->Channel()) chan = fSimChannels[sc];
 	}
 	if (chan){
-	  const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = chan->TDCIDEMap();
+	  auto const& tdcidemap = chan->TDCIDEMap();
 	  for(auto mapitr = tdcidemap.begin(); mapitr != tdcidemap.end(); mapitr++){
 	    // loop over the vector of IDE objects.
 	    const std::vector<sim::IDE> idevec = (*mapitr).second;
