@@ -1098,7 +1098,7 @@ namespace microboone {
     std::vector<Int_t>    process_primary;
     std::vector<std::string> processname;
     std::vector<Int_t>    MergedId; //geant track segments, which belong to the same particle, get the same
-    std::vector<Int_t>    origin;   ////0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles 
+    std::vector<Int_t>    origin;   ////0: unknown, 1: neutrino, 2: cosmic, 3: supernova, 4: singles 
     std::vector<Int_t>    MCTruthIndex; //this geant particle comes from the neutrino interaction of the _truth variables with this index
 
     //MC Shower information
