@@ -86,9 +86,16 @@ CalibResponseTOffset: [0, 0, 0]   # in us time offset to align all three planes
   # cycles/microsecond.  The conversion to frequency bin depends on FFT size
   # samping rate.
 
-  FilterFuncVec:  [ "(x>0.0)? (gaus(0)*exp(-0.5*pow(x/[3],[4]))): 0.0", "(x>0.0)? (gaus(0)*exp(-0.5*pow(x/[3],[4]))): 0.0", "(x>0.0)? ([0]*exp(-0.5*(((x-[1])/[2])^2)^[4])) + 0*[3]: 0.0" ]   
-  FilterParamsVec:   [ [ 1.803396, 1.69, 1.55, 0.19, 3.75 ], [ 1.849030, 1.46, 1.33, 0.23, 4.89 ], [ 1.034516, 0.08, 0.15, 0.0, 2.17 ] ]
-  FilterWidthCorrectionFactor:  [ 1.0, 1.0, 1.0 ]
+  # This is the original Wiener filter
+  #FilterFuncVec:  [ "(x>0.0)? (gaus(0)*exp(-0.5*pow(x/[3],[4]))): 0.0", "(x>0.0)? (gaus(0)*exp(-0.5*pow(x/[3],[4]))): 0.0", "(x>0.0)? ([0]*exp(-0.5*(((x-[1])/[2])^2)^[4])) + 0*[3]: 0.0" ]
+  #FilterParamsVec:   [ [ 1.803396, 1.69, 1.55, 0.19, 3.75 ], [ 1.849030, 1.46, 1.33, 0.23, 4.89 ], [ 1.034516, 0.08, 0.15, 0.0, 2.17 ] ]
+  #FilterWidthCorrectionFactor:  [ 1.0, 1.0, 1.0 ]
+
+  # This is Mike Mooney's new gaussian filter
+  # Introduced on July 29, 2016
+  FilterFuncVec:                [ "(x>0.0)*gaus", "(x>0.0)*gaus", "(x>0.0)*gaus" ]
+  FilterParamsVec:              [ [ 1.0, 0.0, 0.1 ], [ 1.0, 0.0, 0.1 ], [ 1.0, 0.0, 0.1 ] ]
+  FilterWidthCorrectionFactor:  [ 0.738, 0.738, 0.738 ]
 
   # never omit mentioning a parameter in a formula; in collection plane, 4th parameter is unused but it must still appear in the expression
   FilterFuncVecICTime:  [ "(x<=0.0)? 0.0: (gaus(0)+[5]*(x+0.005)+[6]*pow((x+0.005),[7]))*exp(-0.5*pow((x+0.005)/[3],[4]))",
