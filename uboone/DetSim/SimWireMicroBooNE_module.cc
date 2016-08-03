@@ -44,16 +44,16 @@
 #include "larsim/RandomUtils/LArSeedService.h"
 
 // LArSoft libraries
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
-#include "lardata/RawData/TriggerData.h"
-#include "larsim/Simulation/SimChannel.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
+#include "lardataobj/RawData/TriggerData.h"
+#include "larsimobj/Simulation/SimChannel.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "larsim/Simulation/sim.h"
+#include "larsimobj/Simulation/sim.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"

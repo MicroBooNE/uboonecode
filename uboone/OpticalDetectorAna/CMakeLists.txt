@@ -10,12 +10,12 @@ art_make( BASENAME_ONLY
 	  	        larcore_Geometry_Geometry_service
 		        lardata_Utilities
 	                uboone_Geometry
-                        lardata_OpticalDetectorData
+                        lardataobj_OpticalDetectorData
 			larana_OpticalDetector
-                        lardata_RawData
-			lardata_RecoBase
-			larsim_Simulation
-			SimulationBase
+                        lardataobj_RawData
+			lardataobj_RecoBase
+			larsim_Simulation larsimobj_Simulation
+			nusimdata_SimulationBase
 			larsim_PhotonPropagation
 			uboone_OpticalDetectorAna
                         ${ART_FRAMEWORK_CORE}
@@ -24,9 +24,9 @@ art_make( BASENAME_ONLY
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-                        ${ART_PERSISTENCY_COMMON}
-                        ${ART_PERSISTENCY_PROVENANCE}
-                        ${ART_UTILITIES}
+                        art_Persistency_Common canvas_Persistency_Common
+                        art_Persistency_Provenance canvas_Persistency_Provenance
+                        art_Utilities canvas_Utilities
                         ${MF_MESSAGELOGGER}
                         ${MF_UTILITIES}
                         ${FHICLCPP}
@@ -35,7 +35,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
                         ${ROOT_BASIC_LIB_LIST}
-			${SIMULATIONBASE}
+			nusimdata_SimulationBase
         )							   
 
 install_headers()

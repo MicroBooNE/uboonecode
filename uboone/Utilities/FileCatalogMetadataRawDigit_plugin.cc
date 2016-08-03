@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <sstream>
-#include "lardata/RawData/RawDigit.h"
+#include "lardataobj/RawData/RawDigit.h"
 #include "art/Framework/Core/FileCatalogMetadataPlugin.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"

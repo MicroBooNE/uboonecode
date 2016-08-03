@@ -34,7 +34,7 @@ BEGIN_PROLOG
 
 # Define microboone_gen_services ... (0)
 microboone_gen_services:               @local::microboone_basic_services
-microboone_gen_services.MagneticField: @local::no_mag
+microboone_gen_services.MagneticField: @local::no_mag_larsoft
 
 # Define microboone_g4_dark_services ... (1)
 microboone_g4_dark_services:                    @local::microboone_gen_services

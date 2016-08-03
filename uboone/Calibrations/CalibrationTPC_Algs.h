@@ -11,7 +11,7 @@
  */
 
 #include <vector>
-#include "lardata/RawData/RawDigit.h"
+#include "lardataobj/RawData/RawDigit.h"
 #include "lardata/Utilities/UniqueRangeSet.h"
 #include <map>
 

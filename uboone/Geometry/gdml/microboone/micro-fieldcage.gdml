@@ -1,34 +1,34 @@
 <solids>
  <tube name="FieldCageTubeZ"
-  rmin="1.27-0.635"
-  rmax="1.27"  
-  z="1042.08-2*(6.35+1.27)" 
-  deltaphi="360" 
-  aunit="deg" 
-  lunit="cm"/> 
- <tube name="FieldCageTubeY" 
-  rmin="1.27-0.635"
-  rmax="1.27"  
-  z="238.08-2*(6.35+1.27)"  
-  deltaphi="360" 
-  aunit="deg" 
-  lunit="cm"/> 
-</solids> 
-<structure> 
- <volume name="volFieldCageTubeTop"> 
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
-  <solidref ref="FieldCageTubeZ"/> 
- </volume> 
- <volume name="volFieldCageTubeBot"> 
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
-  <solidref ref="FieldCageTubeZ"/> 
- </volume> 
- <volume name="volFieldCageTubeFront"> 
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
-  <solidref ref="FieldCageTubeY"/> 
- </volume> 
- <volume name="volFieldCageTubeBack"> 
-  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/> 
-  <solidref ref="FieldCageTubeY"/> 
- </volume> 
+  rmin="0.635"
+  rmax="1.27"
+  z="1026.84"
+  deltaphi="360"
+  aunit="deg"
+  lunit="cm"/>
+ <tube name="FieldCageTubeY"
+  rmin="0.635"
+  rmax="1.27"
+  z="222.84"
+  deltaphi="360"
+  aunit="deg"
+  lunit="cm"/>
+</solids>
+<structure>
+ <volume name="volFieldCageTubeTop">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="FieldCageTubeZ"/>
+ </volume>
+ <volume name="volFieldCageTubeBot">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="FieldCageTubeZ"/>
+ </volume>
+ <volume name="volFieldCageTubeFront">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="FieldCageTubeY"/>
+ </volume>
+ <volume name="volFieldCageTubeBack">
+  <materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
+  <solidref ref="FieldCageTubeY"/>
+ </volume>
 </structure>

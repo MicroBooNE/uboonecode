@@ -12,7 +12,7 @@
 #define MuCSReader_Module
 
 
-#include "larsim/Simulation/SimChannel.h"
+#include "larsimobj/Simulation/SimChannel.h"
 
 #include "larsim/Simulation/LArG4Parameters.h"
 
@@ -26,34 +26,34 @@
 
 #include "larcore/Geometry/OpDetGeo.h"
 
-#include "SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
 
-#include "SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
 
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 #include "larreco/RecoAlg/SpacePointAlg.h"
 
-#include "lardata/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Cluster.h"
 
-#include "lardata/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Track.h"
 
-#include "lardata/RecoBase/PFParticle.h"  
+#include "lardataobj/RecoBase/PFParticle.h"  
 
-#include "lardata/RecoBase/SpacePoint.h"  
+#include "lardataobj/RecoBase/SpacePoint.h"  
 
-#include "lardata/RecoBase/OpHit.h"  
+#include "lardataobj/RecoBase/OpHit.h"  
 
-#include "lardata/RecoBase/OpFlash.h"  
+#include "lardataobj/RecoBase/OpFlash.h"  
 
 #include "lardata/RecoObjects/BezierTrack.h"
 
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
 
-#include "lardata/RawData/TriggerData.h"
+#include "lardataobj/RawData/TriggerData.h"
 
 
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -68,7 +68,7 @@
 
 #include "art/Framework/Core/ModuleMacros.h"
 
-#include "art/Framework/Core/FindManyP.h"
+#include "canvas/Persistency/Common/FindManyP.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 

@@ -2,7 +2,7 @@
 
 <physvol>
 <volumeref ref="volAl_Layer_Under"/>
-<position name="posUnder0" unit="cm" x="0" y="-236.0" z="-116.45"/> 
+<position name="posUnder0" unit="cm" x="0" y="-236.0" z="-116.45"/>
 </physvol>
 
 <physvol>
