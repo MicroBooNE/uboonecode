@@ -14,7 +14,7 @@
 #include "uboone/TPCNeutrinoIDFilter/Algorithms/NuMuCCInclusiveAlg.h"
 
 // Framework Includes
-#include "art/Framework/Core/FindManyP.h"
+#include "canvas/Persistency/Common/FindManyP.h"
 
 // LArSoft includes
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
@@ -24,12 +24,12 @@
 #include "larcore/Geometry/WireGeo.h"
 #include "lardata/Utilities/AssociationUtil.h"
 
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/PFParticle.h"
-#include "lardata/RecoBase/Vertex.h"
-#include "lardata/RecoBase/OpFlash.h"
-#include "lardata/AnalysisBase/CosmicTag.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/OpFlash.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
