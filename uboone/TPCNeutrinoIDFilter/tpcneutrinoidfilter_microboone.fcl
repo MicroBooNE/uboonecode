@@ -62,6 +62,25 @@ microboone_tpcCluster2DNuAlg:
     MaximumTime:                30.
 }
 
+microboone_NuMuCCSelectionIIAlg:
+{
+    TrackModuleLabel:   "pandoraNu"
+    VertexModuleLabel:  "pandoraNu"
+    OpFlashModuleLabel: "opflashSat"
+    CalorimetryModuleLabel: "pandoraNucalo"
+    DistToEdgeX:        20.
+    DistToEdgeY:        20.
+    DistToEdgeZ:        10.
+    FlashWidth:         80.
+    BeamMin:            3.3
+    BeamMax:            4.9
+    PEThresh:           50.
+    MinTrk2VtxDist:     3.
+    MinTrackLen:        75.
+    FillHistograms:     false
+    Debug:              1
+}
+
 microboone_tpcNeutrinoID:
 {
     module_type:                "TPCNeutrinoID"
@@ -70,6 +89,7 @@ microboone_tpcNeutrinoID:
     AltNuMuCCInclusiveAlg:      @local::microboone_AltNuMuCCInclusiveAlg
     TPCTracksPlusVertexAlg:     @local::microboone_tpcTracksPlusVtxAlg
     TPCCluster2DNuAlg:          @local::microboone_tpcCluster2DNuAlg
+    NuMuCCSelectionIIAlg:       @local::microboone_NuMuCCSelectionIIAlg
 }
 
 microboone_tpcneutrinoidfilter:

@@ -12,6 +12,7 @@
 #include "uboone/TPCNeutrinoIDFilter/Algorithms/AltNuMuCCInclusiveAlg.h"
 #include "uboone/TPCNeutrinoIDFilter/Algorithms/TrackPairPlusVertexAlg.h"
 #include "uboone/TPCNeutrinoIDFilter/Algorithms/Cluster2DNuAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/NuMuCCSelectionIIAlg.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -44,6 +45,10 @@ std::unique_ptr< NeutrinoIDAlgBase > NeutrinoIDAlgFactory::MakeNeutrinoIDAlg(fhi
         std::unique_ptr< NeutrinoIDAlgBase > new_ptr(new Cluster2DNuAlg(p));
         ptr.swap(new_ptr);
     }
+    else if(algName.compare("NuMuCCSelectionIIAlg")==0){
+        std::unique_ptr< NeutrinoIDAlgBase > new_ptr(new NuMuCCSelectionIIAlg(p));
+        ptr.swap(new_ptr);
+    }      
     else{
         std::cout << "Algname is ... " << algName << std::endl;
         throw std::runtime_error("ERROR in NeutrinoIDAlgFactory: No registered Neutrino ID with that name.");
