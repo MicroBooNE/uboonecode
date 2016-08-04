@@ -66,13 +66,21 @@ void NuMuCCSelectionIIAlg::reconfigure(fhicl::ParameterSet const &inputPset)
     fDistToEdgeY             = fGeometry->DetHalfHeight()  - pset.get<double>("DistToEdgeY",   20.);
     fDistToEdgeZ             = fGeometry->DetLength() / 2. - pset.get<double>("DistToEdgeZ",   10.);
     
-    fFlashWidth              = pset.get<double>      ("FlashWidth",                            80.);
     fBeamMin                 = pset.get<double>      ("BeamMin",                              3.3);
     fBeamMax                 = pset.get<double>      ("BeamMax",                              4.9);
     fPEThresh                = pset.get<double>      ("PEThresh",                              50.);
+    fTrk2FlashDist           = pset.get<double>      ("Trk2FlashDist",                         70.);
     fMinTrk2VtxDist          = pset.get<double>      ("MinTrk2VtxDist",                         3.);
-    fMinTrackLen             = pset.get<double>      ("MinTrackLen",                           75.);
-    
+    fMinTrackLen             = pset.get<double>      ("MinTrackLen",                           15.);
+    fMaxCosineAngle          = pset.get<double>      ("MaxCosineAngle",                        0.9);
+    fMaxCosy1stTrk           = pset.get<double>      ("MaxCosy1stTrk",                         0.6);
+    fMinTrackLen2ndTrk       = pset.get<double>      ("MinTrackLen2ndTrk",                     30.);
+    fMaxCosySingle           = pset.get<double>      ("MaxCosySingle",                         0.7);
+    fMinTrackLenSingle       = pset.get<double>      ("MinTrackLenSingle",                     40.);
+    fMindEdxRatioSingle      = pset.get<double>      ("MindEdxRatioSingle",                    1.5);
+    fMaxTrkLengthySingle     = pset.get<double>      ("MaxTrkLengthySingle",                   25.);
+    fMinStartdEdx1stTrk      = pset.get<double>      ("MinStartdEdx1stTrk",                    2.5);
+    fMaxEnddEdx1stTrk        = pset.get<double>      ("MaxEnddEdx1stTrk",                      4.0);
     fDoHists                 = pset.get<bool>        ("FillHistograms",                      false);
     fDebug                   = pset.get<int>         ("Debug",                                   0);
 }
@@ -123,7 +131,7 @@ bool NuMuCCSelectionIIAlg::findNeutrinoCandidates(art::Event & evt) const
     int NuFlashID=-1;
    
     for (size_t i = 0; i<flashlist.size(); ++i){
-      if (flashlist[i]->TotalPE()>50 && flashlist[i]->Time()>fBeamMin && flashlist[i]->Time()<fBeamMax){
+      if (flashlist[i]->TotalPE()>fPEThresh && flashlist[i]->Time()>fBeamMin && flashlist[i]->Time()<fBeamMax){
         if (flashlist[i]->TotalPE()>FlashPEmax){
           FlashPEmax = flashlist[i]->TotalPE();
           NuFlashID = i;
@@ -194,7 +202,7 @@ bool NuMuCCSelectionIIAlg::findNeutrinoCandidates(art::Event & evt) const
         FlashTrackDis = std::min(std::abs(trkstartz[i] - TaggedFlashZCenter),
                                  std::abs(trkendz[i] - TaggedFlashZCenter));
       }
-      if (FlashTrackDis<70){
+      if (FlashTrackDis<fTrk2FlashDist){
         trackflashmatch[i] = true;
         foundtrackflashmatch = true;
       }
@@ -373,18 +381,19 @@ bool NuMuCCSelectionIIAlg::findNeutrinoCandidates(art::Event & evt) const
           dcosy1 = trkenddcosy[trkindex[i][j1]];
           dcosz1 = trkenddcosz[trkindex[i][j1]];
         }
+        //cosine angle between two longest tracks, 1 indicates broken track
         cosangle[i] = std::abs(dcosx0*dcosx1+dcosy0*dcosy1+dcosz0*dcosz1);
         if (j0 == jhigh){
           dcosylong[i] = fliptrack[i][j0]?std::abs(trkstartdcosy[trkindex[i][j0]]):std::abs(trkenddcosy[trkindex[i][j0]]);
           trklen2nd[i] = trklen[trkindex[i][j1]];
         }
         if (fDebug) std::cout<<i<<" "<<trkindex[i].size()<<" "<<j0<<" "<<jhigh<<" "<<cosangle[i]<<" "<<dcosylong[i]<<" "<<trklen2nd[i]<<std::endl;
-        if (cosangle[i]>0.9) {
+        if (cosangle[i]>fMaxCosineAngle) {
           nuvtx[i] = false;
           continue;
         }
         if (j0 == jhigh){
-          if (dcosylong[i]>0.6&&trklen2nd[i]<20){
+          if (dcosylong[i]>fMaxCosy1stTrk&&trklen2nd[i]<fMinTrackLen2ndTrk){
             nuvtx[i] = false;
             continue;
           }
@@ -410,12 +419,12 @@ bool NuMuCCSelectionIIAlg::findNeutrinoCandidates(art::Event & evt) const
             inFV(trkendx[itrk],
                  trkendy[itrk],
                  trkendz[itrk])){
-          if (std::abs(trkstartdcosy[itrk])>0.7) {
+          if (std::abs(trkstartdcosy[itrk])>fMaxCosySingle) {
             nuvtx[i] = false;
             continue;
           }
           //At least 40 cm
-          if (trklen[itrk]>40){
+          if (trklen[itrk]>fMinTrackLenSingle){
             double TrackLengthYNu = trklen[itrk]*std::abs(trkstartdcosy[itrk]);
             double LongSingleTrackdEdxRatio = -999;              
             if (trkstarty[itrk]>trkendy[itrk]){
@@ -425,7 +434,7 @@ bool NuMuCCSelectionIIAlg::findNeutrinoCandidates(art::Event & evt) const
               LongSingleTrackdEdxRatio = trkEnddEdx[itrk]/trkStartdEdx[itrk];
             }
             if (fDebug) std::cout<<"LongSingleTrackdEdxRatio = "<<LongSingleTrackdEdxRatio<<" TrackLengthYNu "<<TrackLengthYNu<<" trkStartdEdx "<<trkStartdEdx[itrk]<<" trkEnddEdx "<<trkEnddEdx[itrk]<<std::endl;
-            if(LongSingleTrackdEdxRatio>1.5 || (TrackLengthYNu<=25 && LongSingleTrackdEdxRatio<=1.5)){
+            if(LongSingleTrackdEdxRatio>fMindEdxRatioSingle || (TrackLengthYNu<=fMaxTrkLengthySingle && LongSingleTrackdEdxRatio<=fMindEdxRatioSingle)){
               nuvtx[i] = true;
             }
           }//At least 40 cm
@@ -471,11 +480,10 @@ bool NuMuCCSelectionIIAlg::findNeutrinoCandidates(art::Event & evt) const
           }
         }//second track is longer
         if (((trkstartdedx0>trkenddedx0&&
-              trkstartdedx0>2.5&&trkenddedx0<4)||
-               trkendy0>96.5)&&trklen1<30)
+              trkstartdedx0>fMinStartdEdx1stTrk&&trkenddedx0<fMaxEnddEdx1stTrk)||
+               trkendy0>fDistToEdgeY)&&trklen1<fMinTrackLen2ndTrk)
           isMichel = true;
         
-        if (std::abs(cosangle[i])>0.9) isMichel = true;
         if (isMichel){
           nuvtx[i] = false;
         }
@@ -498,7 +506,7 @@ bool NuMuCCSelectionIIAlg::findNeutrinoCandidates(art::Event & evt) const
         if (fDebug) std::cout<<"ivtx = "<<i<<" trkid = "<<trkindex[i][j]<<" tracklen "<<trklen[trkindex[i][j]]<<" trackflashmatch "<<trackflashmatch[trkindex[i][j]]<<std::endl;
         if (trklen[trkindex[i][j]]>longesttracklength&&
             trackflashmatch[trkindex[i][j]]&&
-            trklen[trkindex[i][j]]>15){
+            trklen[trkindex[i][j]]>fMinTrackLen){
           longesttracklength = trklen[trkindex[i][j]];
           ivtx = i;
           itrk = j;

@@ -79,12 +79,21 @@ private:
     double                     fDistToEdgeY;             ///< fiducial volume - y
     double                     fDistToEdgeZ;             ///< fiducial volume - z
     
-    double                     fFlashWidth;              ///< Cut on flash width
     double                     fBeamMin;                 ///< Cut on min beam time
     double                     fBeamMax;                 ///< Cut on max beam time
     double                     fPEThresh;                ///< Cut on PE threshold
+    double                     fTrk2FlashDist;           ///< Cut on track to flash distance
     double                     fMinTrk2VtxDist;          ///< Minimum track to vertex distance
     double                     fMinTrackLen;             ///< Minimum track length
+    double                     fMaxCosineAngle;          ///< Cut on cosine angle of two longest track
+    double                     fMaxCosy1stTrk;           ///< Maximum cosy of longtest track when mult>1
+    double                     fMinTrackLen2ndTrk;       ///< Minimum track length of the second longest track when mult>1
+    double                     fMaxCosySingle;           ///< Maximum cosy of the single track
+    double                     fMinTrackLenSingle;       ///< Minimum track length of single track
+    double                     fMindEdxRatioSingle;      ///< Minimum dEdx ratio of single track
+    double                     fMaxTrkLengthySingle;     ///< Maximum track length in y projection
+    double                     fMinStartdEdx1stTrk;      ///< Minimum dEdx of track start
+    double                     fMaxEnddEdx1stTrk;        ///< Maximum dEdx of track end
     bool                       fDoHists;                 ///< Fill histograms
     int                        fDebug;                   ///< Print out debug information
     TH1D*                      fNFlashPerEvent;          ///< number of flashes per event

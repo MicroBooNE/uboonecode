@@ -68,17 +68,26 @@ microboone_NuMuCCSelectionIIAlg:
     VertexModuleLabel:  "pandoraNu"
     OpFlashModuleLabel: "opflashSat"
     CalorimetryModuleLabel: "pandoraNucalo"
-    DistToEdgeX:        20.
-    DistToEdgeY:        20.
-    DistToEdgeZ:        10.
-    FlashWidth:         80.
-    BeamMin:            3.3
-    BeamMax:            4.9
-    PEThresh:           50.
-    MinTrk2VtxDist:     3.
-    MinTrackLen:        75.
-    FillHistograms:     false
-    Debug:              1
+    DistToEdgeX:          20.
+    DistToEdgeY:          20.
+    DistToEdgeZ:          10.
+    BeamMin:              3.3
+    BeamMax:              4.9
+    PEThresh:             50.
+    Trk2FlashDist:        70.
+    MinTrk2VtxDist:       3.
+    MinTrackLen:          15.
+    MaxCosineAngle:       0.9
+    MaxCosy1stTrk:        0.6
+    MinTrackLen2ndTrk:    30.
+    MaxCosySingle:        0.7
+    MinTrackLenSingle:    40.
+    MindEdxRatioSingle:   1.5
+    MaxTrkLengthySingle:  25.
+    MinStartdEdx1stTrk:   2.5
+    MaxEnddEdx1stTrk:     4.0
+    FillHistograms:       false
+    Debug:                0
 }
 
 microboone_tpcNeutrinoID:
