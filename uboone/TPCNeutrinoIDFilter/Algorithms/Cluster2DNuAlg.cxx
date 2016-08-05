@@ -15,7 +15,7 @@
  */
 
 // The main include
-#include "uboone/TPCNeutrinoIDFilter/Cluster2DNuAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/Cluster2DNuAlg.h"
 
 // ROOT Includes
 #include "TMath.h"
