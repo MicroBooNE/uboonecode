@@ -948,7 +948,7 @@ namespace datascanner {
 
       const art::Ptr<sim::SimChannel> sch_ptr(schArray,i);
 
-      std::map<unsigned short,std::vector<sim::IDE> > sch_map(sch_ptr->TDCIDEMap());
+      const auto & sch_map(sch_ptr->TDCIDEMap());
 
       larlight::simch light_sch;
       light_sch.set_channel(sch_ptr->Channel());

@@ -1,5 +1,5 @@
 # define ROOTLIB
-set( ROOTLIB -L$ENV{ROOTSYS}/lib -lCore -lCint -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl)
+#set( ROOTLIB -L$ENV{ROOTSYS}/lib -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -lMultiProc -pthread -lm -ldl)
 
 set( LARLITE_LIB -L$ENV{LARLITE_LIBDIR} -lLArLite_Base -lLArLite_DataFormat -lLArLite_LArUtil)
 

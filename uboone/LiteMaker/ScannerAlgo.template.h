@@ -479,7 +479,7 @@ namespace larlite {
       
       const art::Ptr<::sim::SimChannel> sch_ptr(dh,i);
       
-      std::map<unsigned short,std::vector<sim::IDE> > sch_map(sch_ptr->TDCIDEMap());
+      const auto & sch_map(sch_ptr->TDCIDEMap());
       
       larlite::simch lite_sch;
       lite_sch.set_channel(sch_ptr->Channel());
