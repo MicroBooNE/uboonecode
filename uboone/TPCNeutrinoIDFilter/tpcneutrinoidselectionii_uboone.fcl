@@ -30,13 +30,13 @@ source:
 
 physics:
 {
- producers:     { NuMuCCInclusive:      @local::microboone_tpcNeutrinoID }
+ producers:     { NuMuCCSelectionII:      @local::microboone_tpcNeutrinoID }
 
  filters:       { tpcneutrinoidfilter : @local::microboone_tpcneutrinoidfilter} 
 
  analyzers:     { }
 
- reco:          [ NuMuCCInclusive, tpcneutrinoidfilter ]
+ reco:          [ NuMuCCSelectionII, tpcneutrinoidfilter ]
  
  stream1:       [ out1 ]
 
@@ -66,9 +66,9 @@ services.DetectorClocksService.TriggerOffsetTPC:                       -0.400e3
 
 # define the list of LArSoft modules to run through the simulate path
 
-physics.producers.NuMuCCInclusive.NeutrinoIDAlgName:                         "NuMuCCInclusiveAlg"
+physics.producers.NuMuCCSelectionII.NeutrinoIDAlgName:                         "NuMuCCSelectionIIAlg"
 
 physics.filters.tpcneutrinoidfilter.VertexModuleLabelVec:                    ["pandoraNu"]
-physics.filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:              ["NuMuCCInclusive"]
+physics.filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:              ["NuMuCCSelectionII"]
 physics.filters.tpcneutrinoidfilter.Cluster2DCosmicProducerLabel:            ""
 physics.filters.tpcneutrinoidfilter.Cluster2DCosmicClusterAssns:             ""

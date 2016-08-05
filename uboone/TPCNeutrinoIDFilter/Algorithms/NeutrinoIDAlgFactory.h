@@ -13,7 +13,7 @@
 #include "fhiclcpp/ParameterSet.h"
 
 // Abstract class include
-#include "uboone/TPCNeutrinoIDFilter/NeutrinoIDAlgBase.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/NeutrinoIDAlgBase.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
