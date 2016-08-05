@@ -1,0 +1,108 @@
+<?xml version'1.0'?>
+<gdml>
+
+  <define>
+
+    <position name="pxzUnder" unit="cm" x="-164" y="0" z="245.45"/> 
+    <position name="pyPipe" unit="cm" x="0" y="248.055" z="0"/> 
+      
+  </define>
+
+  <solids>
+   
+    <!-- bottom -->
+    
+    <box name="unionSci1_Under" lunit="cm" x="500.38" y="1.0" z="345.44" />
+    <box name="unionSci2_Under" lunit="cm" x="172.72" y="1.0" z="149.86" />
+
+    <union name="UnionSci_Under_Side">
+      <first ref="unionSci1_Under"/>
+      <second ref="unionSci2_Under"/>
+      <positionref ref="pxzUnder"/>
+    </union>
+
+
+    <box name="unionAl1_Under" lunit="cm" x="500.38" y="0.2" z="345.44" />    
+    <box name="unionAl2_Under" lunit="cm" x="172.72" y="0.2" z="149.86" />
+
+    <union name="UnionAl_Under_Side">
+      <first ref="unionAl1_Under"/>
+      <second ref="unionAl2_Under"/>
+      <positionref ref="pxzUnder"/>
+    </union>
+
+
+    <!-- bottom -->
+   
+
+    <!-- FT -->
+
+    <box name="Sci_Layer_FT_Side" lunit="cm" x="1.0" y="346.1" z="1211.3" />
+    <box name="Al_Layer_FT_Side" lunit="cm" x="0.2" y="346.1" z="1211.3" />
+  
+    <!-- FT -->
+
+    <!-- Pipe -->
+
+    <box name="unionSci1_Pipe" lunit="cm" x="1.0" y="345.44" z="1153.16" />
+    <box name="unionSci2_Pipe" lunit="cm" x="1.0" y="154.94" z="1211.58" />
+
+    <union name="UnionSci_Pipe_Side">
+      <first ref="unionSci1_Pipe"/>
+      <second ref="unionSci2_Pipe"/>
+      <positionref ref="pyPipe"/>
+    </union>
+
+
+    <box name="unionAl1_Pipe" lunit="cm" x="1.0" y="345.44" z="1153.16" />
+    <box name="unionAl2_Pipe" lunit="cm" x="1.0" y="154.94" z="1211.58" />
+
+    <union name="UnionAl_Pipe_Side">
+      <first ref="unionAl1_Pipe"/>
+      <second ref="unionAl2_Pipe"/>
+      <positionref ref="pyPipe"/>
+    </union>
+
+    <!-- Pipe -->
+
+   
+  </solids>
+
+
+  <structure>
+
+    <volume name="volAuxDet_Sci_Layer_Under_Side">
+      <materialref ref="Polystyrene"/>
+      <solidref ref="UnionSci_Under_Side"/>
+    </volume>
+
+    <volume name="volAl_Layer_Under_Side">
+      <materialref ref="ALUMINUM_Al"/>
+      <solidref ref="UnionAl_Under_Side"/>
+    </volume>
+
+
+    <volume name="volAuxDet_Sci_Layer_FT_Side">
+      <materialref ref="Polystyrene"/>
+      <solidref ref="Sci_Layer_FT_Side"/>
+    </volume>
+
+    <volume name="volAl_Layer_FT_Side">
+      <materialref ref="ALUMINUM_Al"/>
+      <solidref ref="Al_Layer_FT_Side"/>
+    </volume>
+
+    <volume name="volAuxDet_Sci_Layer_Pipe_Side">
+      <materialref ref="Polystyrene"/>
+      <solidref ref="UnionSci_Pipe_Side"/>
+    </volume>
+
+    <volume name="volAl_Layer_Pipe_Side">
+      <materialref ref="ALUMINUM_Al"/>
+      <solidref ref="UnionAl_Pipe_Side"/>
+    </volume>
+
+  </structure>
+
+
+</gdml>
