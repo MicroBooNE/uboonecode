@@ -13,24 +13,6 @@
 // The main include
 #include "uboone/TPCNeutrinoIDFilter/Algorithms/ModNuMuCCInclusiveAlg.h"
 
-// Framework Includes
-#include "art/Framework/Core/FindManyP.h"
-
-// LArSoft includes
-#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
-#include "larcore/Geometry/Geometry.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcore/Geometry/PlaneGeo.h"
-#include "larcore/Geometry/WireGeo.h"
-#include "lardata/Utilities/AssociationUtil.h"
-
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/PFParticle.h"
-#include "lardata/RecoBase/Vertex.h"
-#include "lardata/RecoBase/OpFlash.h"
-#include "lardata/AnalysisBase/CosmicTag.h"
-
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -243,11 +225,14 @@ for (const auto& opFlash : flashlist)
 		for (auto const& TrackID : VtxTrack.second)
                 {
                     art::Ptr<recob::Track> track(trackVecHandle,TrackID);
+		    
+		    // Calculate track range (trackstart - trackend)
+		    double TrackRange = GetTrackRange(track);
 
-                    // Add all track lengths of tracks close to vertex (Normalization factor of the weighted average)
-                    NormFactor += track->Length();
-                    // Add cos(theta) weighted by track length
-                    WeightedCosTheta += track->Length()*cos(track->Theta());
+                    // Add all track range of tracks close to vertex (Normalization factor of the weighted average)
+                    NormFactor += TrackRange;
+                    // Add cos(theta) weighted by track range
+                    WeightedCosTheta += TrackRange*cos(track->Theta());
                 }// track ID loop
 
                 // Make average
@@ -268,19 +253,22 @@ for (const auto& opFlash : flashlist)
 	    vertex->XYZ(vertexXYZ);
 	    
             // Check if the wertex candidate is contained and pick the longest track
-            if (inFV(vertexXYZ[0],vertexXYZ[1],vertexXYZ[2]))
+            if (IsInFV(vertexXYZ[0],vertexXYZ[1],vertexXYZ[2]))
             {
                 // Looping over track IDs of tracks associated with the vertex candidate
 		for (auto const& TrackID : VertexTrackCollection.find(VertexCandidate)->second)
                 {
                     art::Ptr<recob::Track> track(trackVecHandle,TrackID);
 		    
+		    // Calculate track range (trackstart - trackend)
+		    double TrackRange = GetTrackRange(track);
+		    
                     // Check for if track is longer
-                    if (track->Length() > TrackCandLength)
+                    if (TrackRange > TrackCandLength)
                     {
 			// Pick the numbers of the longest track
                         TrackCandidate = TrackID;
-                        TrackCandLength = track->Length();
+                        TrackCandLength = TrackRange;
                     }
                 }
             }  //end of if the vertex is contained
@@ -291,11 +279,11 @@ for (const auto& opFlash : flashlist)
                 art::Ptr<recob::Track>  track(trackVecHandle,TrackCandidate);
 		
 		// Check if track and flash are matched
-                bool trackFlashFlag = FlashTrackDist(flashPtr->ZCenter(), track->Vertex().z(), track->End().z()) < fFlashWidth;
+                bool trackFlashFlag = GetFlashTrackDist(flashPtr->ZCenter(), track->Vertex().z(), track->End().z()) < fFlashWidth;
 		
 		// Check if track is contained in FV
-		bool trackContainedFlag = inFV(track->Vertex().x(), track->Vertex().y(), track->Vertex().z());
-		trackContainedFlag &= inFV(track->End().x(), track->End().y(), track->End().z());
+		bool trackContainedFlag = IsInFV(track->Vertex().x(), track->Vertex().y(), track->Vertex().z());
+		trackContainedFlag &= IsInFV(track->End().x(), track->End().y(), track->End().z());
 
                 // Check to see if we think we have a candidate
                 if (TrackCandLength>fMinTrackLen && trackFlashFlag && trackContainedFlag)
@@ -322,7 +310,7 @@ for (const auto& opFlash : flashlist)
     return true;
 }
 
-bool ModNuMuCCInclusiveAlg::inFV(double x, double y, double z) const
+bool ModNuMuCCInclusiveAlg::IsInFV(double x, double y, double z) const
 {
     double distInX = x - fGeometry->DetHalfWidth();
     double distInY = y;
@@ -335,7 +323,7 @@ bool ModNuMuCCInclusiveAlg::inFV(double x, double y, double z) const
 
 //This function returns the distance between a flash and
 //a track (in one dimension, here used only for z direction)
-double ModNuMuCCInclusiveAlg::FlashTrackDist(double flash, double start, double end) const
+double ModNuMuCCInclusiveAlg::GetFlashTrackDist(double flash, double start, double end) const
 {
     if (end >= start) {
         if (flash < end && flash > start) return 0;
@@ -346,5 +334,13 @@ double ModNuMuCCInclusiveAlg::FlashTrackDist(double flash, double start, double 
         else return std::min(fabs(flash-start), fabs(flash-end));
     }
 }
+
+double ModNuMuCCInclusiveAlg::GetTrackRange(art::Ptr<recob::Track> InputTrackPtr) const
+{
+    return std::sqrt( std::pow(InputTrackPtr->Vertex().x()-InputTrackPtr->End().x(),2) + 
+                      std::pow(InputTrackPtr->Vertex().y()-InputTrackPtr->End().y(),2) +
+                      std::pow(InputTrackPtr->Vertex().z()-InputTrackPtr->End().z(),2) );    
+}
+
 
 } // namespace
