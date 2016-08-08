@@ -497,8 +497,6 @@ microboone_reco_data_producers.pandoraNuKHit.HitFinderModuleLabel:              
 
 microboone_reco_data_producers.pandoraNuPMA.HitModuleLabel:                      "pandoraCosmicKHitRemoval"
 microboone_reco_data_producers.pandoraNuPMA.PfpModuleLabel:                  "pandoraNu"
-microboone_reco_data_producers.pandoraNuPMA.PMAlgTracking.FlipDownward:                        false
-microboone_reco_data_producers.pandoraNuPMA.PMAlgTracking.FlipToBeam:                          true
 
 microboone_reco_data_producers.pandoraNutag.TrackModuleLabel:                    "pandoraNu"
 
