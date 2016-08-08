@@ -222,6 +222,7 @@ physics.analyzers.analysistree.CalorimetryModuleLabel:  ["trackkalmanhitcalo", "
 physics.analyzers.analysistree.ParticleIDModuleLabel:   ["trackkalmanhitpid", "pandoraCosmicpid", "pandoraCosmicKHitpid", "pandoraNuKHitpid", "pmtrackpid", "pandoraNupid", "pandoraNuPMApid"]
 physics.analyzers.analysistree.FlashT0FinderLabel: ["t0", "t0", "t0", "t0","t0","t0", "t0"]
 physics.analyzers.analysistree.MCT0FinderLabel: ["mct0", "mct0", "mct0", "mct0", "mct0", "mct0", "mct0"]
+physics.analyzers.analysistree.T0RecoAnodeCathodePiercingLabel: ["t0reco","t0reco","t0reco","t0reco","t0reco","t0reco","t0reco"]
 
 physics.analyzers.analysistree.VertexModuleLabel:               ["linecluster", "pandoraCosmic", "pandoraNu", "pmtrack"]
 
