@@ -60,3 +60,4 @@ physics:
 
 services.user.DetectorClocksService.TrigModuleName: "daq"
 services.user.DetectorClocksService.InheritClockConfig: false
+

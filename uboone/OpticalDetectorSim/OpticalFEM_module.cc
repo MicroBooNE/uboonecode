@@ -10,12 +10,12 @@
 
 // LArSoft includes
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/OpticalDetectorData/OpticalTypes.h"
-#include "lardata/OpticalDetectorData/ChannelData.h"
-#include "lardata/OpticalDetectorData/ChannelDataGroup.h"
-#include "lardata/OpticalDetectorData/FIFOChannel.h"
-#include "lardata/OpticalDetectorData/PMTTrigger.h"
-#include "larsim/Simulation/BeamGateInfo.h"
+#include "lardataobj/OpticalDetectorData/OpticalTypes.h"
+#include "lardataobj/OpticalDetectorData/ChannelData.h"
+#include "lardataobj/OpticalDetectorData/ChannelDataGroup.h"
+#include "lardataobj/OpticalDetectorData/FIFOChannel.h"
+#include "lardataobj/OpticalDetectorData/PMTTrigger.h"
+#include "larsimobj/Simulation/BeamGateInfo.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "UBOpticalChConfig.h"
 #include "UBOpticalConstants.h"
@@ -28,12 +28,12 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 
 // ROOT includes (for diagnostic histograms)
 #include <TH1S.h>

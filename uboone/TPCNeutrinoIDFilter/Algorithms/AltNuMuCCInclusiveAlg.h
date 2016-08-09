@@ -10,7 +10,7 @@
 #include "uboone/TPCNeutrinoIDFilter/Algorithms/NeutrinoIDAlgBase.h"
 
 // Framework Includes
-#include "art/Framework/Core/FindManyP.h"
+#include "canvas/Persistency/Common/FindManyP.h"
 
 // LArSoft includes
 #include "larcore/Geometry/GeometryCore.h"

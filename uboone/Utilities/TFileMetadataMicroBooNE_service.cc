@@ -239,7 +239,7 @@ void util::TFileMetadataMicroBooNE::postEndJob()
   // If you submitted a grid job invoking this service, the information from 
   // this file is appended to a final json file and this file will be removed
   
-  ofstream jsonfile;
+  std::ofstream jsonfile;
   jsonfile.open(fJSONFileName);
   jsonfile<<"{\n  \"application\": {\n    \"family\": "<<std::get<0>(md.fapplication)<<",\n    \"name\": ";
   jsonfile<<std::get<1>(md.fapplication)<<",\n    \"version\": "<<std::get<2>(md.fapplication)<<"\n  },\n  ";

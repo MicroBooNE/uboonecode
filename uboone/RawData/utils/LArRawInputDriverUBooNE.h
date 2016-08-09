@@ -15,7 +15,7 @@
 #include "art/Framework/Principal/RunPrincipal.h"
 #include "art/Framework/Principal/SubRunPrincipal.h"
 #include "art/Framework/Principal/EventPrincipal.h"
-#include "art/Persistency/Provenance/SubRunID.h"
+#include "canvas/Persistency/Provenance/SubRunID.h"
 
 #include "datatypes/uboone_data_utils.h"
 #include "datatypes/raw_data_access.h"
@@ -110,6 +110,9 @@ namespace lris {
     std::vector<std::streampos>    fEventLocation;
     uint32_t                       fEventCounter; 
     uint32_t                       fNumberEventsInFile;
+    uint32_t                       fFinalEventCutOff;
+    std::ios::streampos            fPreviousPosition;
+    bool                           fCompleteFile;
     bool                           fHuffmanDecode;
     bool                           fUseGPS;    // fhicl parameter force use GPS time.
     bool                           fUseNTP;    // fhicl parameter force use NTP time.
@@ -120,6 +123,10 @@ namespace lris {
     int                            fSwizzlingTime; //fhicl parameter.  Defaults as time of Hoot database query execution.
     bool                           fSwizzleTPC; //fhicl parameter.  Tells us whether to swizzle the TPC data
     bool                           fSwizzlePMT; //fhicl parameter.  Tells us whether to swizzle the PMT data
+    bool                           fSwizzlePMT_init; //stored initial fhicl parameter telling whether to swizzle PMT data
+                                                    // using this to reset fSwizzlePMT for events without PMT data but
+                                                    // with the fSwizzlePMT fhicl parameter set to true
+                                                    // (fix crash in checkTimeStampConsistency)
     bool                           fSwizzleTrigger; //fhicl parameter.  Tells us whether to swizzle the trigger data. (desired if we don't care about frame slippage)
     std::string                    fSwizzleTriggerType; //fhicl parameter.  Tells us whether to swizzle a specific trigger type only. Options are ALL, BNB, NuMI, CALIB
     bool skipEvent; // tag to skip event if trigger is not the type we want.

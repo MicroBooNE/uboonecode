@@ -23,22 +23,26 @@ add_subdirectory(Calibrations)
 add_subdirectory(OpticalDetectorSim)
 add_subdirectory(OpticalDetectorAna)
 add_subdirectory(SpaceCharge)
+add_subdirectory(SpaceChargeServices)
 add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(DataScanner)
 #add_subdirectory(LiteMaker)
 add_subdirectory(MuCS)
+add_subdirectory(T0Reco)
+
+add_subdirectory(DataOverlay)
 
 # Respect the order specified in lar_build, which is:
 #
 #     "SimpleTypesAndConstants",
 #     "larcore_Geometry",
-#     "larcore_SummaryData",
-#     "lardata_RawData",
-#     "lardata_RecoBase",
-#     "lardata_OpticalDetectorData",
-#     "lardata_AnalysisBase",
+#     "larcoreobj_SummaryData",
+#     "lardataobj_RawData",
+#     "lardataobj_RecoBase",
+#     "lardataobj_OpticalDetectorData",
+#     "lardataobj_AnalysisBase",
 #     "lardata_Utilities",
-#     "larsim_Simulation",
+#     "larsim_Simulation larsimobj_Simulation",
 #     "larsim_MCCheater",
 #     "lardata_AnalysisAlg",
 #     "lardata_RecoObjects",

@@ -6,7 +6,7 @@
 // Generated at Thu Sep  3 16:51:01 2015 by Zarko Pavlovic using artmod
 // from cetpkgsupport v1_08_06.
 ////////////////////////////////////////////////////////////////////////
-
+#include <stdlib.h>
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/FileBlock.h"
 #include "art/Framework/Core/ModuleMacros.h"
@@ -14,7 +14,7 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
@@ -24,19 +24,21 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "larcore/SummaryData/POTSummary.h"
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/DAQHeader.h"
-#include "lardata/RawData/TriggerData.h"
+#include "larcoreobj/SummaryData/POTSummary.h"
+#include "lardataobj/RawData/BeamInfo.h"
+#include "lardataobj/RawData/DAQHeader.h"
+#include "lardataobj/RawData/TriggerData.h"
 #include "datatypes/raw_data_access.h"
 
 #include "../BeamDAQ/beamRun.h"
 #include "../BeamDAQ/beamRunHeader.h"
 #include "../BeamDAQ/beamDAQConfig.h"
+#include "getFOM.h"
 
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <bitset>
 #include <algorithm>
 #include <boost/archive/binary_oarchive.hpp>
@@ -51,6 +53,41 @@
 #include <memory>
 
 #include "TTree.h"
+
+namespace {
+
+  // Local function to return the name of the raw ancestor of a file
+  // with the specified run and subrun.
+
+  std::string get_raw_ancestor(const std::string& filename, uint32_t run, uint32_t subrun)
+  {
+    art::ServiceHandle<ifdh_ns::IFDH> ifdh;
+
+    std::ostringstream dim;
+    dim << "isparentof: ( file_name " << filename << ")"
+	<< " and run_number " << run << "." << subrun
+	<< " and availability: anylocation";
+    std::vector<std::string> parents = ifdh->translateConstraints(dim.str());
+    if(parents.size() == 0)
+
+      // If there are no parents, return the original file.
+
+      return filename;
+
+    else if(parents.size() == 1)
+
+      // If there is a single parent, return its raw ancestor.
+
+      return get_raw_ancestor(parents.front(), run, subrun);
+
+    else
+
+      // Don't know what to do if there is more than one parent.
+
+      return std::string();
+  }
+}
+
 
 class BeamData;
 
@@ -79,8 +116,6 @@ public:
   int compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offsetT);
   void createBranches(std::string beam);
   void fillTreeData(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd);
-
-  float getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd);
 
 private:
 
@@ -124,6 +159,10 @@ BeamData::BeamData(fhicl::ParameterSet const & p)
 // :
 // Initialize member data here.
 {
+  // Set timezone to Fermilab.
+  setenv("TZ", "CST+6CDT", 1);
+  tzset();
+
   // Call appropriate produces<>() functions here.
   fBeams=p.get<std::vector<std::string> >("beams");
   for (unsigned int i=0;i<fBeams.size();i++) {
@@ -177,9 +216,7 @@ void BeamData::beginSubRun(art::SubRun & sr)
     mf::LogInfo(__FUNCTION__)<<"Fetching beam files for run "<<sr.run()
 			     <<" subrun "<<sr.subRun();
 
-    std::string fhiclFile("BEAMDAQ_CONFIG_FILE=");
-    fhiclFile.append(fBDAQfhicl);
-    ::putenv(const_cast<char *>(fhiclFile.c_str()));
+    setenv("BEAMDAQ_CONFIG_FILE", fBDAQfhicl.c_str(), 1);
     
     gov::fnal::uboone::beam::beamDAQConfig* bdconfig=gov::fnal::uboone::beam::beamDAQConfig::GetInstance();
     if (!bdconfig) 
@@ -188,16 +225,36 @@ void BeamData::beginSubRun(art::SubRun & sr)
     // Get sam metadata for input file.
     art::ServiceHandle<ifdh_ns::IFDH> ifdh;
     boost::filesystem::path inputPath(fInputFileName);
-    std::string md = ifdh->getMetadata(inputPath.filename().string());
-    std::cout << "BeamData: metadata" << std::endl;
-    std::cout << md << std::endl;
-    std::cout << "BeamData: end metadata" << std::endl;
+    std::string raw_ancestor = get_raw_ancestor(inputPath.filename().string(), fRun, fSubRun);
+    std::string md = ifdh->getMetadata(raw_ancestor);
+    mf::LogInfo(__FUNCTION__)<< "BeamData: metadata" << std::endl<< md;
 
-    // Set timezone to Fermilab local time (seconds west of utc).
+    // Check the timezone, which we set in the constructor.
+    // Throw an exception if the timezone is not Fermilab's.
+    // If the timezone is wrong, then someone else is trying to hijack the 
+    // timezone (not good).
+
     const char* tz = getenv("TZ");
-    setenv("TZ", "CST+6CDT", 1);
-    tzset();
-    
+    if(tz != 0 && *tz != 0) {
+
+      // Timezone has been set.
+      // Make sure it is correct.
+
+      std::string tzs(tz);
+      if(tzs != std::string("CST+6CDT")) {
+
+	// Timezone is wrong, throw exception.
+
+	throw cet::exception("BeamData") << "Wrong timezone: " << tzs;
+      }
+    }
+    else {
+
+      // Timezone is not set.  Throw exception.
+
+      throw cet::exception("BeamData") << "Timezone not set.";
+    }
+
     size_t n1 = md.find("Start Time:");
     n1 += 11;
     size_t n2 = md.find("\n", n1);
@@ -223,22 +280,14 @@ void BeamData::beginSubRun(art::SubRun & sr)
     n1 = md.find("online.start_time_usec:");
     n1 = md.find(":",n1)+1;
     n2 = md.find("\n", n1);
-    std::cout << "Usec start time = " << md.substr(n1, n2-n1) << std::endl;
+    //std::cout << "Usec start time = " << md.substr(n1, n2-n1) << std::endl;
     long tstart_us=stol(md.substr(n1, n2-n1));
     n1 = md.find("online.end_time_usec:");
     n1 = md.find(":",n1)+1;
     n2 = md.find("\n", n1);
-    std::cout << "Usec end time = " << md.substr(n1, n2-n1) << std::endl;
+    //std::cout << "Usec end time = " << md.substr(n1, n2-n1) << std::endl;
     long tend_us=stol(md.substr(n1, n2-n1));
  
-    // Restore time zone.
-    if(tz)
-      setenv("TZ", tz, 1);
-    else
-      unsetenv("TZ");
-    
-    tzset();
-
     boost::posix_time::time_duration zoneOffset = boost::posix_time::second_clock::local_time()-boost::posix_time::second_clock::universal_time();
 
     boost::posix_time::ptime pt0= boost::posix_time::from_time_t(tstart)+ boost::posix_time::hours(zoneOffset.hours())+ boost::posix_time::microseconds(tstart_us);
@@ -274,7 +323,7 @@ void BeamData::beginSubRun(art::SubRun & sr)
       <<std::setw(40)<<fname.str()
       <<std::setw(30)<<fBeamConf[fBeams[ibeam]].fOffsetT
       <<std::setw(30)<<fBeamConf[fBeams[ibeam]].fDt;
-    ifstream *fin=new ifstream(fBeamConf[fBeams[ibeam]].fFilePath+
+    std::ifstream *fin=new std::ifstream(fBeamConf[fBeams[ibeam]].fFilePath+
 			       fname.str(), 
 			       std::ios::binary);
     if ( !fin->is_open() ) {
@@ -336,11 +385,6 @@ void BeamData::endSubRun(art::SubRun & sr)
     (it->second).fBeamStream->close();
     delete (it->second).fBeamStream;
   }
-  
-}
-
-void BeamData::endJob()
-{
   std::stringstream ss;
   ss<<"Non beam events: "<<fNonBeamCount<<std::endl;
   for (int i=0;i<120;i++) ss<<"=";
@@ -389,20 +433,23 @@ void BeamData::endJob()
   }
   for (int i=0;i<100;i++) ss<<"=";
   ss<<std::endl;
+
   mf::LogInfo(__FUNCTION__)<<ss.str();
+
+}
+
+void BeamData::endJob()
+{
   fBeamConf.clear();
 }
 
 void BeamData::respondToOpenInputFile(art::FileBlock const& fb)
 {
-  std::cout << "BeamData: " << fb.fileName() << " opened." << std::endl;
   fInputFileName = fb.fileName();
-
 }
 
 void BeamData::respondToCloseInputFile(art::FileBlock const& fb)
 {
-  std::cout << "BeamData: " << fb.fileName() << " closed." << std::endl;
   fInputFileName.clear();
 }
 
@@ -495,6 +542,9 @@ void BeamData::produce(art::Event & e)
       
 	  for (int i=0;i<bh.getNumberOfDevices();i++) 
 	    beam_info->Set(bd[i].getDeviceName(),bd[i].getData());
+
+	  //calculate FOM
+	  beam_info->Set("FOM",bmd::getFOM(beam_name,bh,bd));
 	}
 	ready_for_next_det_event=true;
 	if (fBeamConf[beam_name].fWriteBeamData) 
@@ -530,7 +580,7 @@ bool BeamData::nextBeamEvent(std::string beamline, ub_BeamHeader &bh, std::vecto
       ia_beam>>bdata;
       bd.push_back(bdata);
     }
-    fFOM=getFOM(beamline,bh,bd);
+    fFOM=bmd::getFOM(beamline,bh,bd);
     for (auto& bdata : bd) {
       for (auto it=fBeamConf[beamline].fTotalSums.begin();
 	   it!=fBeamConf[beamline].fTotalSums.end();it++) {
@@ -561,7 +611,7 @@ bool BeamData::rewindBeamFile(std::string beam_name, const ub_BeamHeader& bh, co
     //rewind beam file
     std::streampos nbytes=bh.getNumberOfBytesInRecord();
     fBeamConf[beam_name].fBeamStream->seekg(fBeamConf[beam_name].fBeamStream->tellg()-nbytes);
-    fFOM=getFOM(beam_name,bh,bd);
+    fFOM=bmd::getFOM(beam_name,bh,bd);
     for (auto& bdata : bd) {
       for (auto it=fBeamConf[beam_name].fTotalSums.begin();
 	   it!=fBeamConf[beam_name].fTotalSums.end();it++) {
@@ -618,15 +668,10 @@ int BeamData::compareTime(ub_BeamHeader& bh, art::Event& e, float dt, float offs
   return comp;
 }
 
-float BeamData::getFOM(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
-{
-  return 1.0;
-}
-
 void BeamData::fillTreeData(std::string beam, const ub_BeamHeader& bh, const std::vector<ub_BeamData>& bd)
 {
   mf::LogDebug(__FUNCTION__)<<"Filling "<<beam<<" ntuple";
-  fFOM=getFOM(beam, bh,bd);
+  fFOM=bmd::getFOM(beam, bh,bd);
   fSeconds=bh.getSeconds();
   fMilliSeconds=bh.getMilliSeconds();
 
@@ -700,7 +745,7 @@ void BeamData::createBranches(std::string beam)
 	double* x=new double[it.second];
 	fBeamConf[beam].fTreeArr[it.first]=x;
 	ss <<"Creating vector branch for device "<<it.first.c_str()<<std::endl;
-	fBeamConf[beam].fTree->Branch(it.first.c_str(),&fBeamConf[beam].fTreeArr[it.first],
+	fBeamConf[beam].fTree->Branch(it.first.c_str(),fBeamConf[beam].fTreeArr[it.first],
 				      (it.first+"["+std::to_string(it.second)+"]/D").c_str());
       }
 
