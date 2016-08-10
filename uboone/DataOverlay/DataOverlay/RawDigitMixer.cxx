@@ -11,6 +11,7 @@
 void mix::RawDigitMixer::DeclareData(std::vector<raw::RawDigit> const& dataVector){
 
   fChannelIndexMap.clear();
+  fOutputWaveforms.clear();
   fOutputWaveforms.resize(dataVector.size());
 
   for(size_t i_rd=0; i_rd<dataVector.size(); i_rd++){
@@ -21,7 +22,7 @@ void mix::RawDigitMixer::DeclareData(std::vector<raw::RawDigit> const& dataVecto
     fChannelIndexMap[dataVector[i_rd].Channel()] = i_rd;
 
     //initialize adc vector for output
-    fOutputWaveforms[i_rd].waveform.resize(dataVector[i_rd].Samples());
+    fOutputWaveforms[i_rd].waveform.resize(dataVector[i_rd].Samples(),0);
     fOutputWaveforms[i_rd].channel = dataVector[i_rd].Channel();
     fOutputWaveforms[i_rd].ped     = dataVector[i_rd].GetPedestal();
     fOutputWaveforms[i_rd].sigma   = dataVector[i_rd].GetSigma();
