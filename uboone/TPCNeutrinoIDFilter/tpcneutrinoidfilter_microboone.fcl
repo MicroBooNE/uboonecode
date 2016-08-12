@@ -14,6 +14,20 @@ microboone_NuMuCCInclusiveAlg:
     FillHistograms:     false
 }
 
+microboone_ModNuMuCCInclusiveAlg:
+{
+    TrackModuleLabel:   "pandoraNu"
+    VertexModuleLabel:  "pandoraNu"
+    OpFlashModuleLabel: "opflashSat"
+    FlashWidth:         80.
+    BeamMin:            3.55
+    BeamMax:            5.15
+    PEThresh:           50.
+    MinTrk2VtxDist:     5.
+    MinTrackLen:        75.
+    FillHistograms:     false
+}
+
 microboone_AltNuMuCCInclusiveAlg:
 {
     TrackModuleLabel:   "pandoraNu"

@@ -509,11 +509,12 @@ bool NuMuCCSelectionIIAlg::findNeutrinoCandidates(art::Event & evt) const
             trklen[trkindex[i][j]]>fMinTrackLen){
           longesttracklength = trklen[trkindex[i][j]];
           ivtx = i;
-          itrk = j;
+          itrk = trkindex[i][j];
         }
       }
     }//Loop over all vertices
     if (ivtx!=-1 && itrk!=-1){
+      if (fDebug) std::cout<<ivtx<<" "<<itrk<<std::endl;
       //outputfile[isample]<<run<<" "<<subrun<<" "<<event<<" "<<ivtx<<" "<<trkindex[ivtx][itrk]<<" "<<trkindex[ivtx].size()<<std::endl;
       util::CreateAssn(*fMyProducerModule, evt, tracklist[itrk], vtxlist[ivtx], *vertexTrackAssociations);
     }
