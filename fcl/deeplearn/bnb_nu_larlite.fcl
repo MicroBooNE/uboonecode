@@ -33,6 +33,8 @@ services:
   @table::microboone_simulation_services
 }
 
+services.Geometry.ForceUseFCLOnly: true
+
 services.FileCatalogMetadata.applicationVersion: "develop"
 services.FileCatalogMetadata.fileType: "mc"
 services.FileCatalogMetadata.runType: "physics"

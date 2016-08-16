@@ -33,6 +33,8 @@ services:
   @table::microboone_reco_data_services
 }
 
+services.Geometry.ForceUseFCLOnly: true
+
 ### This is the complete list of all producers! ###
 services.UBOpReadoutMap: @local::microboone_opreadoutmap
 services.DetectorPropertiesService.NumberTimeSamples:   6400

@@ -64,7 +64,7 @@ for d in jobdirs:
     lite_files = [x for x in os.listdir(jobdir) if ( ( (x.startswith('larlite') and x.endswith('.root')) or
                                                        (x.startswith('ana_hist'))
                                                        ) and
-                                                     os.path.getsize('%s/%s' % (jobdir,x)) > 1000 )
+                                                     os.path.getsize('%s/%s' % (jobdir,x)) > 1000000 )
                   ]
     for f in lite_files:
 
