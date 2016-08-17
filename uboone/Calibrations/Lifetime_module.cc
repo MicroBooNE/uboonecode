@@ -127,7 +127,7 @@ private:
     Int_t    run;                  //run number
     Int_t    subrun;               //subrun number
     Int_t    event;                //event number
-
+    Double_t evttime; 		   //event time in sec
     
     //Track information
     //Track plane data
@@ -209,6 +209,7 @@ void Lifetime::beginJob(){
     fEventTree->Branch("event", &event);
     fEventTree->Branch("run", &run);
     fEventTree->Branch("subrun", &subrun); 
+    fEventTree->Branch("evttime", &evttime);
     if (fSaveTrackInfo){
       fEventTree->Branch("ntracks",&ntracks,"ntracks/S");
       fEventTree->Branch("ntracks_cross",&ntracks_cross,"ntracks_cross/S");
@@ -261,7 +262,11 @@ void Lifetime::analyze( const art::Event& evt ){
     event  = evt.id().event(); 
     run    = evt.run();
     subrun = evt.subRun();
-        
+    
+    art::Timestamp ts = evt.time();   
+    TTimeStamp tts(ts.timeHigh(), ts.timeLow());
+    evttime = tts.AsDouble();        
+
     art::Handle< std::vector<recob::Track> > trackListHandle;
     std::vector<art::Ptr<recob::Track> > tracklist;
     if (evt.getByLabel(fTrackModuleLabel,trackListHandle))
@@ -385,6 +390,7 @@ void Lifetime::reset(){
   run = -99999;
   subrun = -99999;
   event = -99999;
+  evttime = -99999;
   
 if (fSaveTrackInfo){
   ntracks = 0;
