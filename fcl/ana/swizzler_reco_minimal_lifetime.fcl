@@ -93,8 +93,10 @@ physics:
             caldata, 
             gaushit,
             fuzzycluster,
-            trackkalmanhit, 
-            trackkalmanhitcalo
+	    pandoraCosmic,
+	    pandoraCosmiccalo
+            #trackkalmanhit, 
+            #trackkalmanhitcalo
 	    ]
     
     ana: [Lifetime]      
@@ -150,10 +152,11 @@ services.user.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 0.73
 
 physics.producers.gaushit.MinSig:    [4.0, 4.0, 5.0]
 
-physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [4.803e-3, 3.616e-3, 5.418e-3]
+#physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants: [4.803e-3, 3.616e-3, 5.418e-3]
+physics.producers.pandoraCosmiccalo.CaloAlg.CalAreaConstants: [4.803e-3, 3.616e-3, 5.418e-3]
 
-physics.analyzers.Lifetime.TrackModuleLabel:        "trackkalmanhit"
-physics.analyzers.Lifetime.CalorimetryModuleLabel:  "trackkalmanhitcalo"
+physics.analyzers.Lifetime.TrackModuleLabel:        "pandoraCosmic"
+physics.analyzers.Lifetime.CalorimetryModuleLabel:  "pandoraCosmiccalo"
 physics.analyzers.Lifetime.SaveTrackInfo: true
 
 # Here we try to suppress known and pointless messages

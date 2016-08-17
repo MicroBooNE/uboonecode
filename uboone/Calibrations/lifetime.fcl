@@ -77,6 +77,8 @@ physics:
 
 physics.analyzers.Lifetime.TrackModuleLabel:        "trackkalmanhit"
 physics.analyzers.Lifetime.CalorimetryModuleLabel:  "trackkalmanhitcalo"
+#physics.analyzers.Lifetime.TrackModuleLabel:        "pandoraCosmic"
+#physics.analyzers.Lifetime.CalorimetryModuleLabel:  "pandoraCosmiccalo"
 physics.analyzers.Lifetime.SaveTrackInfo: true
 
 
