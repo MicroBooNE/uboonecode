@@ -1,0 +1,50 @@
+#include "geometry_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "swtrigger_microboone.fcl"
+
+process_name: FEMemulator
+services:
+{
+  TFileService: { fileName: "FEMemulator.root" }
+  Timing:       {}
+  user: {
+          ExptGeoHelperInterface: @local::microboone_geometry_helper
+          Geometry:               @local::microboone_geo
+          DetectorClocksService:            @local::microboone_detectorclocks
+	  UBOpReadoutMap:         @local::microboone_opreadoutmap
+         }
+}
+
+services.user.DetectorClocksService.TrigModuleName: "daq"
+
+outputs:
+{
+ output:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_swtrigger.root"
+   dataTier: "raw"
+   streamName: "out_swtrigger"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ swtrg_path ] }
+  }
+}
+
+physics:
+{
+  producers: {}
+  analyzers: {}
+  filters:   { swtrigger: @local::microboone_swtrigger_data }
+
+  swtrg_path: [ swtrigger ]
+  out_stream: [ output    ]
+
+  trigger_paths: [ swtrg_path ]
+  end_paths:     [ out_stream ]
+
+}
+
+
+
