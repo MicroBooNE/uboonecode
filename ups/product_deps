@@ -45,8 +45,8 @@ end_product_list
 # Make a table by adding columns before "notes". 
 # e9  - with gcc 4.9.3 and -std=c++1y
 qualifier	swtrigger	larsoft		ubutil		uboone_data	uboonedaq_datatypes	notes
-e9:debug	e9:prof		e9:debug	e9:debug	-nq-		e9:debug
-e9:opt		e9:prof		e9:opt		e9:opt		-nq-        	e9:opt
+e9:debug	e9:debug	e9:debug	e9:debug	-nq-		e9:debug
+e9:opt		e9:opt		e9:opt		e9:opt		-nq-        	e9:opt
 e9:prof		e9:prof		e9:prof		e9:prof		-nq-        	e9:prof
 end_qualifier_list
 
