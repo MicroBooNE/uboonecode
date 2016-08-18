@@ -1,7 +1,0 @@
-#include "singlep_common.fcl"
-
-process_name: Gamma
-services.TFileService.fileName: "gamma_%tc.root"
-physics.producers.generator.PDG: [ 22 ]
-physics.producers.generator.P0: [ 0.525 ]
-physics.producers.generator.SigmaP: [ 0.475 ]
