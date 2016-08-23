@@ -34,7 +34,7 @@ product          version
 larsoft         v06_04_00
 ubutil          v06_04_00
 uboone_data     v01_06_00
-uboonedaq_datatypes v6_19_00a_e10
+uboonedaq_datatypes v6_19_01_e10
 
 cetbuildtools	v5_04_03	-	only_for_build
 end_product_list
