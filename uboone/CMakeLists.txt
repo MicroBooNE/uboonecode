@@ -29,6 +29,7 @@ add_subdirectory(MuCS)
 add_subdirectory(T0Reco)
 
 add_subdirectory(DataOverlay)
+add_subdirectory(PatternFilter)
 
 # Respect the order specified in lar_build, which is:
 #
