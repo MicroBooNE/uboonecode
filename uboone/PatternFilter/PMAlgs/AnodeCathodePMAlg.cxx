@@ -123,30 +123,19 @@ void pm::AnodeCathodePMAlg::MakePatterns(){
 
     wire_a = (float)(fStartWire.Wire + (i_p/fNbinsWires)*fWiresPerBin + fWiresPerBin/2);
     wire_c = (float)(fStartWire.Wire + (i_p%fNbinsWires)*fWiresPerBin + fWiresPerBin/2);
-    //slope = (wire_c - wire_a)/(float)(fNtimeTicksPattern*fTimeTicksPerBin);
 
     for(time_start=fStartTimeTick, time_end=fStartTimeTick+fNtimeTicksPattern;
 	time_end<=fEndTimeTick;
 	time_start+=fTimeTicksPerBin, time_end+= fTimeTicksPerBin){
       slope = (wire_c - wire_a)/(float)(time_end-time_start);
       intercept = (time_start)*slope;
-          
-      std::cout << "\t" << i_p << " " << time_start << " " << time_end << " "
-		<< wire_a << " " << wire_c << " "
-		<< slope << " " << intercept << std::endl;
 
-      //for(time=fStartTimeTick+i_s_t*fTimeTicksPerBin, end_time = fStartTimeTick+(i_s_t+fNtimeTicksPattern-1)*fTimeTicksPerBin;
       fPatterns.push_back(Pattern_t());
       for(time=time_start; time<=time_end; time += 0.1*fTimeTicksPerBin){
 	
 	fPatterns.back().emplace(GetBinWire(wire_a+time*slope-intercept),GetBinTime(time));
-	/*
-	std::cout << (wire_a+time*slope-intercept) << " -->" << GetBinWire(wire_a+time*slope-intercept)
-		  << "   " << time << " -->" << GetBinTime(time) << std::endl;
-	*/
       }
     }
-      //std::cout << "\tfPatterns size is " << i_p << " " << fPatterns[i_p].size() << std::endl;
   }
 
 }
@@ -159,14 +148,6 @@ void pm::AnodeCathodePMAlg::FillHitmap( std::vector<recob::Hit> const& hits)
     if(hit.PeakTime() > fEndTimeTick || hit.PeakTime() < fStartTimeTick) continue;
     if(hit.WireID().Wire < fStartWire.Wire || hit.WireID().Wire > fEndWire.Wire) continue;
     fHitmap[GetBinWire(hit.WireID())][GetBinTime(hit.PeakTime())] += hit.Integral();
-    /*
-    if(fHitmap[GetBinWire(hit.WireID())][GetBinTime(hit.PeakTime())] > 10 )
-      
-      std::cout << " integral=" << fHitmap[GetBinWire(hit.WireID())][GetBinTime(hit.PeakTime())]
-		<< " (" << hit.WireID().Wire << "," << hit.PeakTime() << ") = "
-		<< " (" << GetBinWire(hit.WireID()) << "," << GetBinTime(hit.PeakTime()) << ") "
-		<< std::endl;
-      */
   }
 }
 

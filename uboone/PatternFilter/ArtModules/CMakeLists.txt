@@ -5,17 +5,21 @@ art_make(
 			uboone_PatternFilter_PMAlgs
 			larcore_Geometry
 			lardata_DetectorInfo
+			lardataobj_RecoBase
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_IO_ROOT}
 			${ART_FRAMEWORK_MODULES}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
+                        ${ART_FRAMEWORK_SERVICES_OPTIONAL}
+                        ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
                         art_Persistency_Common canvas_Persistency_Common
                         art_Utilities canvas_Utilities
 			${MF_MESSAGELOGGER}
                         ${BOOST_LIB}
                         ${FHICLCPP}
                         ${CETLIB}
+			${ROOT_BASIC_LIB_LIST}
 )							   
 
 install_headers()
