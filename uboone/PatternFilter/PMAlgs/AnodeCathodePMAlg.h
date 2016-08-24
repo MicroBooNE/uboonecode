@@ -11,39 +11,34 @@
 
 #include <vector>
 #include <unordered_set>
-//#include <boost/functional/hash.hpp>
+#include <boost/functional/hash.hpp>
 #include <tuple>
 #include <chrono>
 
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
-//#include "fhiclcpp/ParameterSet.h"
-//#include "larcore/Geometry/GeometryCore.h"
-//#include "lardata/DetectorInfo/DetectorProperties.h"
-
 namespace pm      { class AnodeCathodePMAlg; }
 namespace geo     { class GeometryCore; }
 namespace detinfo { class DetectorProperties; }
-//namespace fhicl   { class ParameterSet; }
+namespace fhicl   { class ParameterSet; }
 namespace recob   { class Hit; }
 
 class pm::AnodeCathodePMAlg{
-
+  
   typedef std::pair<int,int> Indices_t;
-  //typedef std::unordered_set< Indices_t, boost::hash<Indices_t> > Pattern_t;
-  typedef std::vector< Indices_t > Pattern_t;
+  typedef std::unordered_set< Indices_t, boost::hash<Indices_t> > Pattern_t;
   
  public:
   AnodeCathodePMAlg();
-
-  void Configure(//fhicl::ParameterSet         const&,
+  
+  void Configure(fhicl::ParameterSet         const&,
 		 geo::GeometryCore           const&,
 		 detinfo::DetectorProperties const&);
-
+  
   void RunPatternMatching(std::vector<recob::Hit> const&,float &);
   
  private:
-
+  
   void          ClearHitmap();
   unsigned int  GetBinTime(float);
   unsigned int  GetBinWire(float);
@@ -68,9 +63,11 @@ class pm::AnodeCathodePMAlg{
   float        fTimeTicksPerBin;
   float        fStartTimeTick;
   float        fEndTimeTick;
+  float        fNtimeTicksPattern;
   unsigned int fNbinsTimeTicks;
-  unsigned int fNtimeTicksPattern;
+  unsigned int fNbinsPattern;
   
   float  fIntegralThreshold;
   float  fMatchFractionThreshold;
+  
 };

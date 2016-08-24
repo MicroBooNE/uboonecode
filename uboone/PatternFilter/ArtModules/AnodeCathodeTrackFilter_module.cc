@@ -26,7 +26,15 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+//#include "art/Framework/Services/Optional/TFileService.h"
+
 #include <memory>
+#include <iostream>
+
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "uboone/PatternFilter/PMAlgs/AnodeCathodePMAlg.h"
 
 namespace pm {
   class AnodeCathodeTrackFilter;
@@ -53,7 +61,10 @@ public:
 
 private:
 
-  // Declare member data here.
+  art::InputTag     fHitLabel;
+  float             fFractionMatchingThreshold;
+  AnodeCathodePMAlg fAlg;
+  bool              fVerbose;
 
 };
 
@@ -63,16 +74,47 @@ pm::AnodeCathodeTrackFilter::AnodeCathodeTrackFilter(fhicl::ParameterSet const &
 // Initialize member data here.
 {
   // Call appropriate produces<>() functions here.
+  this->reconfigure(p);
 }
 
 bool pm::AnodeCathodeTrackFilter::filter(art::Event & e)
 {
-  return true;
+
+  auto const& hitVector = *e.getValidHandle< std::vector<recob::Hit> >(fHitLabel);
+  float result;
+  fAlg.RunPatternMatching(hitVector,result);
+
+  if(fVerbose) std::cout << "\tDone matching. Result = " << result << std::endl;
+  
+  if(result > fFractionMatchingThreshold) return true;
+
+  return false;
 }
 
 void pm::AnodeCathodeTrackFilter::reconfigure(fhicl::ParameterSet const & p)
 {
-  // Implementation of optional member function here.
+
+  auto const* geo     = lar::providerFrom<geo::Geometry>();  
+  auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();  
+  fHitLabel = art::InputTag( p.get<std::string>("HitLabel") );
+  fFractionMatchingThreshold = p.get<float>("FractionMatchingThreshold");
+
+  float frac = p.get<fhicl::ParameterSet>("AnodeCathodPMAlg").get<float>("MatchFractionThreshold",10.0);
+  if(fFractionMatchingThreshold > frac)
+    {
+      mf::LogWarning("AnodeCathodeTrackFilter")
+	<< "FractionMatchingThreshold misconfigured:"
+	<< "  it's greater than MatchFractionThreshold in AnodeCathodePMAlg."
+	<< "\nSetting them equal or FractionMatchingThreshold to 0.0, so all events may pass.";
+      if(frac>0.0 && frac<1.0)
+	fFractionMatchingThreshold = frac;
+      else
+	fFractionMatchingThreshold = 0.0;
+    }
+  
+  fAlg.Configure(p.get<fhicl::ParameterSet>("AnodeCathodPMAlg"),*geo,*detprop);
+
+  fVerbose = p.get<bool>("Verbose",false);
 }
 
 void pm::AnodeCathodeTrackFilter::beginJob()
