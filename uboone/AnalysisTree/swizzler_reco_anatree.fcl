@@ -22,7 +22,6 @@
 process_name: SwizzlerRecoAnatree
 services:
 {
-  scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "SwizRecoAna_hist.root" }
   TimeTracker:         {}
   MemoryTracker:       {}
@@ -31,10 +30,10 @@ services:
   FileCatalogMetadata:    @local::art_file_catalog_data
   #PhotonVisibilityService: @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties  
-  user:                       @local::microboone_full_services
+  @table::microboone_full_services
 #  IFDH: {}
 }
-services.user.IFDH: {}
+services.IFDH: {}
 
 microboone_tfile_metadata:
 {
@@ -44,21 +43,21 @@ microboone_tfile_metadata:
   fileFormat:            "root"
 }
 
-services.user.ExptGeoHelperInterface: @local::microboone_geometry_helper
-services.user.Geometry:               @local::microboone_geo
-services.user.UBOpReadoutMap:           @local::microboone_opreadoutmap
-services.user.DetectorClocksService:            @local::microboone_detectorclocks
-services.user.DatabaseUtil:           @local::microboone_database
+services.ExptGeoHelperInterface: @local::microboone_geometry_helper
+services.Geometry:               @local::microboone_geo
+services.UBOpReadoutMap:           @local::microboone_opreadoutmap
+services.DetectorClocksService:            @local::microboone_detectorclocks
+services.DatabaseUtil:           @local::microboone_database
 # Database settings
-services.user.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
-services.user.DatabaseUtil.DBName:        "hootgibson_prod"
-services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
-services.user.DatabaseUtil.Port:          5444
-services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
-services.user.DatabaseUtil.ToughErrorTreatment: false
-services.user.DatabaseUtil.ShouldConnect: true
-services.user.DatabaseUtil.TableName: "main_run"
-services.user.DetectorPropertiesService.InheritNumberTimeSamples: false
+services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: false
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
+services.DetectorPropertiesService.InheritNumberTimeSamples: false
 
 source:
 {
@@ -165,26 +164,30 @@ outputs:
    streamName: "all"      
    compressionLevel: 1
    saveMemoryObjectThreshold: 0
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
 }
 
-services.user.DetectorClocksService.TrigModuleName: "daq"
-services.user.SignalShapingServiceMicroBooNE.StretchFullResponse: false
+services.DetectorClocksService.TrigModuleName: "daq"
+services.SignalShapingServiceMicroBooNE.StretchFullResponse: false
 
 ### Here we include the file giving us run/data dependent overrides
 
-services.user.DetectorClocksService.TrigModuleName:     "daq"
+services.DetectorClocksService.TrigModuleName:     "daq"
 ################
 
 ### Set the following if you want to run truncated RawDigits from the RawDigitFilter
 physics.producers.caldata.DodQdxCalib: true
 #physics.producers.caldata.dQdxCalibFileName: "ChannelGainAndShapingTimeCalibFactors_MicroBooNE_TPC_14mVperfC_2us_May3rd2016.txt"
 physics.producers.digitfilter.TruncateTicks:                    true
-services.user.DetectorPropertiesService.NumberTimeSamples:           6400
-services.user.DetectorPropertiesService.ReadOutWindowSize:           6400
-services.user.DetectorClocksService.InheritClockConfig:              false
-services.user.DetectorClocksService.TriggerOffsetTPC:                -0.400e3
-services.user.DetectorPropertiesService.Electronlifetime:  1e10
+services.DetectorPropertiesService.NumberTimeSamples:           6400
+services.DetectorPropertiesService.ReadOutWindowSize:           6400
+services.DetectorClocksService.InheritClockConfig:              false
+services.DetectorClocksService.TriggerOffsetTPC:                -0.400e3
+services.DetectorPropertiesService.Electronlifetime:  1e10
 
 #physics.producers.gaushit.MinSig:    [8.0, 6.5, 8.0]
 #physics.producers.gaushit.MinSig:    [4.0, 4.0, 5.0]

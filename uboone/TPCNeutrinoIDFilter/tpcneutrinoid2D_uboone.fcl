@@ -17,7 +17,7 @@ services:
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 }     #default is one
   RandomNumberGenerator: {}                     #ART native random number generator
-  user:         @local::microboone_services
+  @table::microboone_services
   message:      @local::standard_info
 }
 
@@ -35,7 +35,7 @@ outputs:
    module_type: RootOutput
    fileName:    "%ifb_%tc_nuid2D.root"
    fastCloning: false
-   SelectEvents: { SelectEvents: [ reco ] }
+   SelectEvents: [ reco ]
  } 
 }
 

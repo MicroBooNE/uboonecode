@@ -46,7 +46,7 @@ services:
   # ${LARDATA_DIR}/job/services.fcl (which will lead you to other
   # files in the various products' job directories).
 
-  user:         @local::microboone_simulation_services
+  @table::microboone_simulation_services
 }
 
 # The 'source' section tells the script to expect an input file with art::Event records.

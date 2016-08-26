@@ -6,17 +6,16 @@ services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "ss_test_uboone.root" }
-  user: {}
 }
 
-services.user.ExptGeoHelperInterface: @local::microboone_geometry_helper
-services.user.Geometry:           @local::microboone_geo
-services.user.DetectorPropertiesService: @local::microboone_detproperties
-services.user.LArPropertiesService:      @local::microboone_properties
-services.user.LArFFT:             @local::microboone_larfft
-services.user.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
-services.user.DatabaseUtil:       @local::microboone_database
-services.user.DatabaseUtil.ShouldConnect: false
+services.ExptGeoHelperInterface: @local::microboone_geometry_helper
+services.Geometry:           @local::microboone_geo
+services.DetectorPropertiesService: @local::microboone_detproperties
+services.LArPropertiesService:      @local::microboone_properties
+services.LArFFT:             @local::microboone_larfft
+services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+services.DatabaseUtil:       @local::microboone_database
+services.DatabaseUtil.ShouldConnect: false
 
 source:
 {
