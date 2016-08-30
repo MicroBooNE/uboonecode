@@ -1,5 +1,22 @@
+cet_find_library( LIBWDA NAMES wda PATHS ENV LIBWDA_LIB NO_DEFAULT_PATH )
+
+include_directories( $ENV{LIBWDA_FQ_DIR}/include )
+
 art_make( BASENAME_ONLY
-	  SERVICE_LIBRARIES larevt_CalibrationDBI_Providers
+          LIB_LIBRARIES 
+			larevt_CalibrationDBI_IOVData
+			larevt_CalibrationDBI_Providers
+			${LIBWDA}
+	                ${FHICLCPP}
+			${CETLIB}
+                        ${Boost_SYSTEM_LIBRARY}
+			${ART_FRAMEWORK_SERVICES_REGISTRY}
+			${ROOT_BASIC_LIB_LIST}
+			art_Utilities canvas_Utilities
+
+	  SERVICE_LIBRARIES 
+	              larevt_CalibrationDBI_Providers
+		      uboone_Database
                       ${ART_FRAMEWORK_PRINCIPAL}
                       ${ART_FRAMEWORK_SERVICES_REGISTRY}
                       art_Persistency_Common canvas_Persistency_Common
