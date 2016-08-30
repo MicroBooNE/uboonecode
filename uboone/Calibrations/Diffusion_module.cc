@@ -15,41 +15,41 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/View.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
-#include "art/Framework/Core/FindMany.h"
+#include "canvas/Persistency/Common/FindMany.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "larcore/Geometry/Geometry.h"
-#include "SimulationBase/MCTruth.h"
-#include "SimulationBase/MCFlux.h"
-#include "larsim/Simulation/SimChannel.h"
-#include "larsim/Simulation/AuxDetSimChannel.h"
-#include "lardata/AnalysisBase/Calorimetry.h"
-#include "lardata/AnalysisBase/ParticleID.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
-#include "lardata/RawData/BeamInfo.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCFlux.h"
+#include "larsimobj/Simulation/SimChannel.h"
+#include "larsimobj/Simulation/AuxDetSimChannel.h"
+#include "lardataobj/AnalysisBase/Calorimetry.h"
+#include "lardataobj/AnalysisBase/ParticleID.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
+#include "lardataobj/RawData/BeamInfo.h"
 #include "lardata/Utilities/AssociationUtil.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcore/SummaryData/POTSummary.h"
+#include "larcoreobj/SummaryData/POTSummary.h"
 #include "larsim/MCCheater/BackTracker.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RecoBase/EndPoint2D.h"
-#include "lardata/RecoBase/Vertex.h"
-#include "lardata/RecoBase/OpFlash.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/EndPoint2D.h"
+#include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/OpFlash.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/RecoObjects/BezierTrack.h"
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
-#include "lardata/AnalysisBase/CosmicTag.h"
-#include "lardata/AnalysisBase/FlashMatch.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
+#include "lardataobj/AnalysisBase/FlashMatch.h"
 	
 #include <cstring> // std::memcpy()
 #include <vector>
@@ -652,7 +652,7 @@ void microboone::Diffusion::analyze(const art::Event& evt)
     	   chan = fSimChannels[sc];
       }     
       if (chan){
-        const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = chan->TDCIDEMap();
+        auto const& tdcidemap = chan->TDCIDEMap();
         int k=-1;
         double elec[tdcidemap.size()];
         int tdc[tdcidemap.size()];

@@ -15,14 +15,14 @@
  */
 
 // The main include
-#include "uboone/TPCNeutrinoIDFilter/Cluster2DNuAlg.h"
+#include "uboone/TPCNeutrinoIDFilter/Algorithms/Cluster2DNuAlg.h"
 
 // ROOT Includes
 #include "TMath.h"
 
 // Framework Includes
 #include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Core/FindManyP.h"
+#include "canvas/Persistency/Common/FindManyP.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // LArSoft includes
@@ -33,9 +33,9 @@
 #include "larcore/Geometry/WireGeo.h"
 #include "lardata/Utilities/AssociationUtil.h"
 
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/AnalysisBase/CosmicTag.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 

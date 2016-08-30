@@ -4,10 +4,8 @@ set( IFDH_ART_DIR $ENV{IFDH_ART_DIR} )
 
 add_subdirectory(Geometry)
 add_subdirectory(RawData)
-if( UBOONEDAQ_DATATYPES_DIR )
-	add_subdirectory(BeamData)
-	add_subdirectory(BeamDAQ)
-endif()
+add_subdirectory(BeamData)
+add_subdirectory(BeamDAQ)
 add_subdirectory(BeamAna)
 add_subdirectory(Utilities)
 add_subdirectory(Database)
@@ -28,18 +26,22 @@ add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(DataScanner)
 #add_subdirectory(LiteMaker)
 add_subdirectory(MuCS)
+add_subdirectory(T0Reco)
+
+add_subdirectory(DataOverlay)
+add_subdirectory(PatternFilter)
 
 # Respect the order specified in lar_build, which is:
 #
 #     "SimpleTypesAndConstants",
 #     "larcore_Geometry",
-#     "larcore_SummaryData",
-#     "lardata_RawData",
-#     "lardata_RecoBase",
-#     "lardata_OpticalDetectorData",
-#     "lardata_AnalysisBase",
+#     "larcoreobj_SummaryData",
+#     "lardataobj_RawData",
+#     "lardataobj_RecoBase",
+#     "lardataobj_OpticalDetectorData",
+#     "lardataobj_AnalysisBase",
 #     "lardata_Utilities",
-#     "larsim_Simulation",
+#     "larsim_Simulation larsimobj_Simulation",
 #     "larsim_MCCheater",
 #     "lardata_AnalysisAlg",
 #     "lardata_RecoObjects",

@@ -16,7 +16,7 @@
 
 // LArSoft
 #include "UBADCBase.h" // uboonecode
-#include "lardata/OpticalDetectorData/ChannelData.h" // lardata
+#include "lardataobj/OpticalDetectorData/ChannelData.h" // lardata
 
 namespace opdet {
   /**

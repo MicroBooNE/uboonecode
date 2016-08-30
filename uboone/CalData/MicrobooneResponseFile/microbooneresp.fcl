@@ -18,7 +18,7 @@ microboone_makeresp:
   RawIndFilterParams:  [ 0.0456, 100.0, 2.0 ]
   RawColFilter:        "(x>0)*[0]*exp(-0.5*((x-[1])/[2])^2)"
   RawColFilterParams: [ .675, 0.0, 110.0 ]
-  SimIndFilter:        "gaus*exp(-0.5*pow(x/[3],[4]))"
+  SimIndFilter:        "gaus(0)*exp(-0.5*pow(x/[3],[4]))"
   SimIndFilterParams:  [ .454, 0.0, 150.0, 200.0, 8.0 ]
   SimColFilter:        "(x>0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])"
   SimColFilterParams: [ 79258.0, 0.0, 150.0, 1.5 ]

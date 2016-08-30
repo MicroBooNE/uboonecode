@@ -5,19 +5,20 @@
 #include "trackfindermodules_microboone.fcl"
 #include "vertexfindermodules.fcl"
 #include "pandoramodules.fcl"
-#include "tpcneutrinoidfiltermodule_microboone.fcl"
+#include "tpcneutrinoidfilter_microboone.fcl"
 
 process_name: TPCNeutrinoIDFilter
 
 services:
 {
   #Load the service that manages root files for histograms.
-  TFileService: { fileName: "tpcneutrinoid.root" }
-  Timing:       {}
+  TFileService:          { fileName: "tpcneutrinoid.root" }
+  Timing:                {}
   SimpleMemoryCheck:     { ignoreTotal: 1 }     #default is one
   RandomNumberGenerator: {}                     #ART native random number generator
-  user:         @local::microboone_services
-  message:      @local::standard_info
+  FileCatalogMetadata:   @local::art_file_catalog_data
+  message:               @local::standard_info
+                         @table::microboone_services_reco
 }
 
 #source is now a root file
@@ -27,25 +28,15 @@ source:
   maxEvents:  -1            # Number of events to create
 }
 
-outputs:
-{
- out1:
- {
-   module_type: RootOutput
-   fileName:    "standard_reco.root"    #default file name, can override from command line with -o or --output
-   fastCloning: false
- } 
-}
-
 physics:
 {
- producers:     { }
+ producers:     { NuMuCCInclusive:      @local::microboone_tpcNeutrinoID }
 
  filters:       { tpcneutrinoidfilter : @local::microboone_tpcneutrinoidfilter} 
 
  analyzers:     { }
 
- reco:          [ tpcneutrinoidfilter ]
+ reco:          [ NuMuCCInclusive, tpcneutrinoidfilter ]
  
  stream1:       [ out1 ]
 
@@ -54,13 +45,30 @@ physics:
  end_paths:     [ stream1 ] 
 }
 
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "%ifb_%tc_wflash.root"
+#   sam_ignore:  true
+   dataTier:    "reconstructed-2d"
+   SelectEvents: { SelectEvents: [ reco ] }
+   compressionLevel: 1
+ } 
+}
+
+# Adjust the window/offset for the reduced total frame size (9600 -> 6400 ticks)
+services.DetectorPropertiesService.NumberTimeSamples:                  6400
+services.DetectorPropertiesService.ReadOutWindowSize:                  6400
+services.DetectorClocksService.InheritClockConfig:                     false
+services.DetectorClocksService.TriggerOffsetTPC:                       -0.400e3
+
 # define the list of LArSoft modules to run through the simulate path
 
-#physics.analyzers.tpcneutrinoidfilter.TrackModuleLabel:        "trackkalmanhit"
-#physics.analyzers.tpcneutrinoidfilter.CosmicTaggerAssocLabel:  "trackkalmanhittag"
-#physics.analyzers.tpcneutrinoidfilter.VertexModuleLabel:       "pandoraNu"
+physics.producers.NuMuCCInclusive.NeutrinoIDAlgName:                         "NuMuCCInclusiveAlg"
 
-physics.filters.tpcneutrinoidfilter.module_type:             "TPCNeutrinoIDFilter"
-physics.filters.tpcneutrinoidfilter.TrackModuleLabel:        "trackkalmanhit"
-physics.filters.tpcneutrinoidfilter.CosmicTaggerAssocLabel:  "ccclustertag"
-physics.filters.tpcneutrinoidfilter.VertexModuleLabel:       "pandoraNu"
+physics.filters.tpcneutrinoidfilter.VertexModuleLabelVec:                    ["pandoraNu"]
+physics.filters.tpcneutrinoidfilter.VtxTrackAssnModuleLabelVec:              ["NuMuCCInclusive"]
+physics.filters.tpcneutrinoidfilter.Cluster2DCosmicProducerLabel:            ""
+physics.filters.tpcneutrinoidfilter.Cluster2DCosmicClusterAssns:             ""

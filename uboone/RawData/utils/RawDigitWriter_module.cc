@@ -27,15 +27,15 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // LArSoft includes
-#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 #include "larevt/Filters/ChannelFilter.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 // RawDigits
-#include "lardata/RawData/raw.h" // raw::Uncompress()
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/RawData/raw.h" // raw::Uncompress()
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 // Optical Channel Maps
 #include "uboone/Geometry/UBOpChannelTypes.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"

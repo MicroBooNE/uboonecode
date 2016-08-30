@@ -42,7 +42,7 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/Ptr.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "larcore/Geometry/Geometry.h"
@@ -56,8 +56,8 @@
 #include "NoiseFilterAlgs/RawDigitCorrelatedCorrectionAlg.h"
 #include "NoiseFilterAlgs/RawDigitFilterAlg.h"
 
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
 
 
 class RawDigitFilterUBooNE : public art::EDProducer

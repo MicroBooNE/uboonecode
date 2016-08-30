@@ -70,6 +70,7 @@ outputs:
    dataTier:    "detector-simulated"
    saveMemoryObjectThreshold: 0
    compressionLevel: 1
+   fastCloning: false
  }
 }
 

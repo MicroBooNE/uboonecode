@@ -1,0 +1,143 @@
+<!-- Bottom Plane -->
+
+<physvol>
+<volumeref ref="volAl_Layer_Under_Side"/>
+<position name="posUnder0" unit="cm" x="0" y="-236.0" z="-116.45"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAuxDet_Sci_Layer_Under_Side"/>
+<position name="posUnder1" unit="cm" x="0" y="-236.3" z="-116.45"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Under_Side"/>
+<position name="posUnder2" unit="cm" x="0" y="-237.4" z="-116.45"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Under_Side"/>
+<position name="posUnder3" unit="cm" x="0" y="-237.6" z="-116.45"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAuxDet_Sci_Layer_Under_Side"/>
+<position name="posUnder4" unit="cm" x="0" y="-237.9" z="-116.45"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Under_Side"/>
+<position name="posUnder5" unit="cm" x="0" y="-239.0" z="-116.45"/>
+</physvol> 
+
+
+<!-- Bottom Plane -->
+
+
+
+<!-- FT Side -->
+
+<physvol>
+<volumeref ref="volAl_Layer_FT_Side"/>
+<position name="posFT_Side0" unit="cm" x="-265.0" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAuxDet_Sci_Layer_FT_Side"/>
+<position name="posFT_Side1" unit="cm" x="-265.3" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_FT_Side"/>
+<position name="posFT_Side2" unit="cm" x="-266.4" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_FT_Side"/>
+<position name="posFT_Side3" unit="cm" x="-266.6" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAuxDet_Sci_Layer_FT_Side"/>
+<position name="posFT_Side4" unit="cm" x="-266.9" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_FT_Side"/>
+<position name="posFT_Side5" unit="cm" x="-268.0" y="0" z="0"/>
+</physvol>
+
+<!-- FT Side -->
+
+
+<!-- Pipe Side -->
+
+<physvol>
+<volumeref ref="volAl_Layer_Pipe_Side"/>
+<position name="posPipe_Side0" unit="cm" x="250.0" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAuxDet_Sci_Layer_Pipe_Side"/>
+<position name="posPipe_Side1" unit="cm" x="250.3" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Pipe_Side"/>
+<position name="posPipe_Side2" unit="cm" x="251.4" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Pipe_Side"/>
+<position name="posPipe_Side3" unit="cm" x="251.6" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAuxDet_Sci_Layer_Pipe_Side"/>
+<position name="posPipe_Side4" unit="cm" x="251.9" y="0" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Pipe_Side"/>
+<position name="posPipe_Side5" unit="cm" x="253.0" y="0" z="0"/>
+</physvol>
+
+
+<!-- Pipe Side -->
+
+
+<!-- Top -->
+
+<physvol>
+<volumeref ref="volAl_Layer_Top"/>
+<position name="posTop0" unit="cm" x="-90.17" y="657.20" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAuxDet_Sci_Layer_Top"/>
+<position name="posTop1" unit="cm" x="-90.17" y="657.50" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Top"/>
+<position name="posTop2" unit="cm" x="-90.17" y="658.6" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Top"/>
+<position name="posTop3" unit="cm" x="-90.17" y="658.8" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAuxDet_Sci_Layer_Top"/>
+<position name="posTop4" unit="cm" x="-90.17" y="659.1" z="0"/>
+</physvol>
+
+<physvol>
+<volumeref ref="volAl_Layer_Top"/>
+<position name="posTop5" unit="cm" x="-90.17" y="660.2" z="0"/>
+</physvol>
+
+
+<!-- Top -->
+

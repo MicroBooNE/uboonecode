@@ -1,0 +1,49 @@
+
+art_make(	
+	  LIB_LIBRARIES
+                        lardata_Utilities_LArFFT_service
+			${ART_FRAMEWORK_CORE}
+			${ART_UTILITIES}
+			${MF_MESSAGELOGGER}
+			${MF_UTILITIES}
+			${CETLIB}
+                        ${Boost_SYSTEM_LIBRARY}
+			${ROOT_BASIC_LIB_LIST}
+          MODULE_LIBRARIES 
+			larcore_Geometry
+			larcore_Geometry_Geometry_service
+			larsim_MCCheater_BackTracker_service
+			larsim_Simulation
+			lardataobj_RecoBase
+			lardataobj_AnalysisBase	
+			lardata_RecoObjects  
+			larreco_RecoAlg
+			lardata_Utilities
+			larevt_Filters
+			${SIMULATIONBASE}
+			${LARRECO_LIB}
+			${LARDATA_LIB}
+                        ${ART_FRAMEWORK_CORE}
+			${ART_FRAMEWORK_PRINCIPAL}
+			${ART_FRAMEWORK_SERVICES_REGISTRY}
+			${ART_FRAMEWORK_SERVICES_OPTIONAL}
+			${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
+			${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
+			${ART_PERSISTENCY_COMMON}
+			${ART_PERSISTENCY_PROVENANCE}
+			${ART_UTILITIES}
+			${MF_MESSAGELOGGER}
+			${MF_UTILITIES}
+	                ${FHICLCPP}
+			${CETLIB}
+			${CLHEP}
+                        ${ROOT_GEOM}
+                        ${ROOT_XMLIO}
+                        ${ROOT_GDML}
+			${ROOT_BASIC_LIB_LIST}
+        )
+
+install_headers()
+install_fhicl()
+install_source()
+

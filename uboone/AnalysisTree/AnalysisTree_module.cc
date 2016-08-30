@@ -273,49 +273,49 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/View.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
-#include "art/Framework/Core/FindMany.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Persistency/Common/FindMany.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "larcore/Geometry/Geometry.h"
-#include "SimulationBase/MCTruth.h"
-#include "lardata/MCBase/MCShower.h"
-#include "lardata/MCBase/MCTrack.h"
-#include "lardata/MCBase/MCStep.h"
-#include "SimulationBase/MCFlux.h"
-#include "larsim/Simulation/SimChannel.h"
-#include "larsim/Simulation/AuxDetSimChannel.h"
-#include "lardata/AnalysisBase/Calorimetry.h"
-#include "lardata/AnalysisBase/ParticleID.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/TriggerData.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "lardataobj/MCBase/MCShower.h"
+#include "lardataobj/MCBase/MCTrack.h"
+#include "lardataobj/MCBase/MCStep.h"
+#include "nusimdata/SimulationBase/MCFlux.h"
+#include "larsimobj/Simulation/SimChannel.h"
+#include "larsimobj/Simulation/AuxDetSimChannel.h"
+#include "lardataobj/AnalysisBase/Calorimetry.h"
+#include "lardataobj/AnalysisBase/ParticleID.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
+#include "lardataobj/RawData/BeamInfo.h"
+#include "lardataobj/RawData/TriggerData.h"
 #include "lardata/Utilities/AssociationUtil.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcore/SummaryData/POTSummary.h"
+#include "larcoreobj/SummaryData/POTSummary.h"
 #include "larsim/MCCheater/BackTracker.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/Shower.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/EndPoint2D.h"
-#include "lardata/RecoBase/Vertex.h"
-#include "lardata/RecoBase/OpFlash.h"
-#include "lardata/RecoBase/PFParticle.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/EndPoint2D.h"
+#include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/OpFlash.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/RecoObjects/BezierTrack.h"
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
-#include "lardata/AnalysisBase/CosmicTag.h"
-#include "lardata/AnalysisBase/FlashMatch.h"
-#include "lardata/AnalysisBase/T0.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
+#include "lardataobj/AnalysisBase/FlashMatch.h"
+#include "lardataobj/AnalysisBase/T0.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
@@ -533,6 +533,7 @@ namespace microboone {
       TrackData_t<Float_t> trkendy;       // ending y position.
       TrackData_t<Float_t> trkendz;       // ending z position.
       TrackData_t<Float_t> trkendd;       // ending distance to boundary.
+      TrackData_t<Float_t> trkACpierceT0;   // t0 per track from anode or cathode piercing tracks (in ns)     
       TrackData_t<Float_t> trkflashT0;   // t0 per track from matching tracks to flashes (in ns)
       TrackData_t<Float_t> trktrueT0;    // t0 per track from truth information (in ns)
       TrackData_t<Float_t> trkpurity;    // track purity based on hit information
@@ -1097,7 +1098,7 @@ namespace microboone {
     std::vector<Int_t>    process_primary;
     std::vector<std::string> processname;
     std::vector<Int_t>    MergedId; //geant track segments, which belong to the same particle, get the same
-    std::vector<Int_t>    origin;   ////0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles 
+    std::vector<Int_t>    origin;   ////0: unknown, 1: neutrino, 2: cosmic, 3: supernova, 4: singles 
     std::vector<Int_t>    MCTruthIndex; //this geant particle comes from the neutrino interaction of the _truth variables with this index
 
     //MC Shower information
@@ -1539,6 +1540,8 @@ namespace microboone {
     std::vector<std::string> fShowerModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
     std::vector<std::string> fParticleIDModuleLabel;
+    std::vector<std::string> fT0FinderLabel;   
+    std::vector<std::string> fT0RecoAnodeCathodePiercingLabel; 
     std::vector<std::string> fFlashT0FinderLabel;
     std::vector<std::string> fMCT0FinderLabel;
     std::string fPOTModuleLabel;
@@ -1888,6 +1891,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkendy.resize(MaxTracks);
   trkendz.resize(MaxTracks);
   trkendd.resize(MaxTracks);
+  trkACpierceT0.resize(MaxTracks);    
   trkflashT0.resize(MaxTracks);  
   trktrueT0.resize(MaxTracks);  
   trktheta.resize(MaxTracks);
@@ -1963,6 +1967,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkendy      , -99999.);
   FillWith(trkendz      , -99999.);
   FillWith(trkendd      , -99999.);
+  FillWith(trkACpierceT0, -99999.);    
   FillWith(trkflashT0   , -99999.);  
   FillWith(trktrueT0    , -99999.);  
   FillWith(trkg4id      , -99999 );
@@ -2135,6 +2140,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkendd_" + TrackLabel;
   CreateBranch(BranchName, trkendd, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkACpierceT0_" + TrackLabel;
+  CreateBranch(BranchName, trkACpierceT0, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkflashT0_" + TrackLabel;
   CreateBranch(BranchName, trkflashT0, BranchName + NTracksIndexStr + "/F");
@@ -3598,6 +3606,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
+  fT0RecoAnodeCathodePiercingLabel (pset.get< std::vector<std::string> >("T0RecoAnodeCathodePiercingLabel") ),
   fFlashT0FinderLabel       (pset.get< std::vector<std::string> >("FlashT0FinderLabel")   ),
   fMCT0FinderLabel          (pset.get< std::vector<std::string> >("MCT0FinderLabel")   ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")),   
@@ -3661,6 +3670,13 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
       << "fParticleIDModuleLabel.size() = "<<fParticleIDModuleLabel.size();
   }
+  
+  if (fTrackModuleLabel.size() != fT0RecoAnodeCathodePiercingLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fT0RecoAnodeCathodePiercingLabel.size() = "<<fT0RecoAnodeCathodePiercingLabel.size();
+  }
+  
   if (fTrackModuleLabel.size() != fFlashT0FinderLabel.size()){
     throw art::Exception(art::errors::Configuration)
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
@@ -3671,6 +3687,23 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
       << "fMCT0FinderLabel.size() = "<<fMCT0FinderLabel.size();
   }
+  if (fTrackModuleLabel.size() != fCosmicTaggerAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fCosmicTaggerAssocLabel.size() = "<<fCosmicTaggerAssocLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fFlashMatchAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fFlashMatchAssocLabel.size() = "<<fFlashMatchAssocLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fContainmentTaggerAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fContainmentTaggerAssocLabel.size() = "<<fContainmentTaggerAssocLabel.size();
+  }
+
+
   if (GetNVertexAlgos() > kMaxVertexAlgos) {
     throw art::Exception(art::errors::Configuration)
       << "AnalysisTree currently supports only up to " << kMaxVertexAlgos
@@ -4164,7 +4197,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
    	      chan = fSimChannels[sc];
    	 }     
    	 if (chan){
-   	   const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = chan->TDCIDEMap();
+   	   auto const& tdcidemap = chan->TDCIDEMap();
    	   int k=-1;
    	   double elec[tdcidemap.size()];
    	   int tdc[tdcidemap.size()];
@@ -4214,7 +4247,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	  if(fSimChannels[sc]->Channel() == hitlist[i]->Channel()) chan = fSimChannels[sc];
 	}
 	if (chan){
-	  const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = chan->TDCIDEMap();
+	  auto const& tdcidemap = chan->TDCIDEMap();
 	  for(auto mapitr = tdcidemap.begin(); mapitr != tdcidemap.end(); mapitr++){
 	    // loop over the vector of IDE objects.
 	    const std::vector<sim::IDE> idevec = (*mapitr).second;
@@ -4658,7 +4691,17 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
       for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
       
-        //save t0 from reconstructed flash track matching for every track
+        //save t0 from anode/cathode piercing tracks
+	art::FindManyP<anab::T0> fmacpt0(trackListHandle[iTracker],evt,fT0RecoAnodeCathodePiercingLabel[iTracker]);
+	if (fmacpt0.isValid()){          
+	  if(fmacpt0.at(iTrk).size()>0){
+	    if(fmacpt0.at(iTrk).size()>1)
+	      std::cerr << "\n Warning : more than one t0 tag per track in module! assigning the first tag to the track" << fT0RecoAnodeCathodePiercingLabel[iTracker];
+	    TrackerData.trkACpierceT0[iTrk] = fmacpt0.at(iTrk).at(0)->Time();
+	  }   
+        }
+	
+	//save t0 from reconstructed flash track matching for every track
         art::FindManyP<anab::T0> fmt0(trackListHandle[iTracker],evt,fFlashT0FinderLabel[iTracker]);
         if (fmt0.isValid()){          
 	  if(fmt0.at(iTrk).size()>0){

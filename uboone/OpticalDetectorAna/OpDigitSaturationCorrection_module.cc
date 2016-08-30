@@ -13,14 +13,14 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // data-products
-#include "lardata/RecoBase/OpHit.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/RecoBase/OpHit.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 //#include "RawData/TriggerData.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 

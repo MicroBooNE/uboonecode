@@ -9,22 +9,22 @@
 
 //LArSoft 
 #include "uboone/RawData/utils/LArRawInputDriverUBooNE.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/TriggerData.h"
-#include "lardata/RawData/DAQHeader.h"
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/OpDetWaveform.h"
-#include "larcore/SummaryData/RunData.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/TriggerData.h"
+#include "lardataobj/RawData/DAQHeader.h"
+#include "lardataobj/RawData/BeamInfo.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
+#include "larcoreobj/SummaryData/RunData.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfo/ElecClock.h"
-#include "lardata/OpticalDetectorData/OpticalTypes.h" // I want to move the enums we use back to UBooNE as they are UBooNE-specific
+#include "lardataobj/OpticalDetectorData/OpticalTypes.h" // I want to move the enums we use back to UBooNE as they are UBooNE-specific
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 
 //ART, ...
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
 #include "art/Framework/Core/EDProducer.h"
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
@@ -148,6 +148,7 @@ namespace lris {
 
     fSwizzleTPC = ps.get<bool>("swizzleTPC",true);
     fSwizzlePMT = ps.get<bool>("swizzlePMT",true);
+    fSwizzlePMT_init = ps.get<bool>("swizzlePMT",true);
     fSwizzleTrigger = ps.get<bool>("swizzleTrigger",true);
     fSwizzleTriggerType = ps.get<std::string>("swizzleTriggerType"); // Only use ALL for this option, other options will not work
     fMaxEvents = ps.get<int>("maxEvents", -1);
@@ -546,16 +547,23 @@ namespace lris {
     //if (skipEvent){return false;} // check that trigger data doesn't suggest we should skip event. // commented out because this doesn't work at the moment
     fillDAQHeaderData(event_record, daqHeader);
     fillTPCData(event_record, tpcDigitList);
+    //please keep fillPMTData ahead of fillSWTriggerData in cases of events without any PMT data
     fillPMTData(event_record, pmtDigitList);
     fillBeamData(event_record, beamInfo);
+    //please keep fillPMTData ahead of fillSWTriggerData in cases of events without any PMT data
     fillSWTriggerData(event_record, sw_trigInfo);
-
+      
     event_number = event_record.getGlobalHeader().getEventNumber()+1;
 
     checkTimeStampConsistency();
-
+      
     tMyTree->Fill();
+      
+    //Note that the fSwizzlePMT value needs to be reset every event, since it can be set to false if there is no PMT data
+    //Setting it to false makes sure that the checkTimeStampConsistency() doesn't try to compare nonexistent data
 
+    fSwizzlePMT = fSwizzlePMT_init;
+      
     /*
       } catch (...) {
       //throw art::Exception( art::errors::FileReadError )
@@ -913,7 +921,6 @@ namespace lris {
       //throw std::runtime_error( warn );
     }
 
-    mf::LogInfo("")<< "Got to end of fillTPCData().";
   }
 
   // =====================================================================
@@ -922,6 +929,12 @@ namespace lris {
   {
     //fill PMT data
 
+    if (!fSwizzlePMT){
+        std::cout << "Swizzling turned off for PMT Data so skipping that.." << std::endl;
+        return;
+    }
+
+      
     // MODIFIED by Nathaniel Sat May 16, to use my new version of datatypes (v6_08, on branch master)
     
     //crate -> card -> channel -> window
@@ -949,6 +962,13 @@ namespace lris {
     
     auto const seb_pmt_map = event_record.getPMTSEBMap();
     
+    if (seb_pmt_map.empty()) {
+        std::cerr << "Warning swizzler didn't find any PMT data in the event." << std::endl;
+        std::cerr << "If this is a calibration or laser run, that's ok." << std::endl;
+        fSwizzlePMT=false;
+        return;
+    }
+
     N_PMT_waveforms = 0;
     for(auto const& it:  seb_pmt_map) {
       pmt_crate_data_t const& crate_data = it.second;
@@ -1250,6 +1270,10 @@ namespace lris {
       return;
     }
 
+    if (swTrig_vect.empty()){
+        std::cout << "The SWTriggerOutputVector was empty, so setting all values to the default." << std::endl;
+        return;
+    }
     //
     // Figure out time w.r.t. Trigger - dirty but works.
     //
@@ -1259,17 +1283,25 @@ namespace lris {
     auto const& trig_map  = event_record.getTRIGSEBMap();
     auto const& trig_header = trig_map.begin()->second.getTriggerHeader();
     auto const& trig_data = trig_map.begin()->second.getTriggerCardData().getTriggerData();
-
     uint64_t trig_sample_number = trig_header.get2MHzSampleNumber() * 32;
     trig_sample_number += trig_header.get16MHzRemainderNumber() * 4;
     trig_sample_number += trig_data.getPhase();
-
     double trigger_time = (double)(trig_header.getFrame() * opt_clock.FramePeriod());
     trigger_time += ((double)trig_sample_number) * opt_clock.TickPeriod();
 
     uint64_t trig_tick = trig_sample_number + trig_header.getFrame() * opt_clock.FrameTicks();
+     
+    //NOTE that if there's no PMT Data, there isn't gonna be any SW Trigger information.
+    //need to make this more complicated if there are ever triggers based on things other than PMTS
+
+    auto const seb_pmt_map = event_record.getPMTSEBMap();
+    if (seb_pmt_map.empty()) {
+        std::cout << "The PMTSEBMap was empty and there was no PMT data, so setting all SWTrigger values to the default." << std::endl;
+        return;
+    }
 
     auto const& crate_data = event_record.getPMTSEBMap().begin()->second;
+     
     //auto const& pmt_card    = crate_data.getCards().at(0);
     
     uint64_t beam_ro_tick = 0;
@@ -1393,6 +1425,9 @@ namespace lris {
   // =====================================================================  
   void LArRawInputDriverUBooNE::checkTimeStampConsistency(){
 
+    //Note that fSwizzlePMT will be set to false if there is no PMT data in the event.
+    //at the end of the event, it is reset to the initial value from the fhicl parameters.
+    //but this means that the trig-TPC comparison will continue, but not the TPC-PMT or Trig-PMT
     if (fSwizzleTrigger && fSwizzlePMT ){ // trig-PMT comparison
       if (abs(PMTframe - triggerFrame)>1){
         std::cout << "ERROR!" << std::endl;
