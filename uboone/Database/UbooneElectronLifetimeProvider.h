@@ -20,7 +20,7 @@
 #include "larevt/CalibrationDBI/IOVData/IOVDataConstants.h"
 #include "larevt/CalibrationDBI/Providers/DatabaseRetrievalAlg.h"
 
-#include "uboonecode/uboone/Database/ElectronLifetime.h"
+#include "uboonecode/uboone/Database/ElectronLifetimeContainer.h"
 
 namespace lariov {
 
@@ -58,22 +58,26 @@ namespace lariov {
       bool Update(DBTimeStamp_t ts);
       
       /// Retrieve lifetime information
-      const ElectronLifetime& Lifetime() const;
-      float ExpPar() const;
-      float ConstPar() const;
+      const ElectronLifetimeContainer& LifetimeContainer() const;
+      float ExpOffset() const;
+      float TimeConstant() const;
+      float ExpOffsetErr() const;
+      float TimeConstantErr() const;
            
       //hardcoded information about database folder - useful for debugging cross checks
-      static constexpr unsigned int NCOLUMNS = 3;
+      static constexpr unsigned int NCOLUMNS = 5;
       static constexpr const char* FIELD_NAMES[NCOLUMNS]
-        = {"channel", "exponential", "constant"};
+        = {"channel", "exponential_offset", "err_exponential_offset", "time_constant", "err_time_constant"};
       static constexpr const char* FIELD_TYPES[NCOLUMNS]
-        = {"unsigned int", "float", "float"};
+        = {"bigint", "real", "real", "real", "real"};
       
     private:
     
       DataSource::ds fDataSource;
           
-      Snapshot<ElectronLifetime> fData;
+      Snapshot<ElectronLifetimeContainer> fData;
+      
+      const unsigned int fLifetimeChannel = 0;
   };
 }//end namespace lariov
 

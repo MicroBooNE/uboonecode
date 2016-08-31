@@ -2,8 +2,7 @@
 #define UBOONEELECTRONLIFETIMEPROVIDER_CXX
 
 #include "UbooneElectronLifetimeProvider.h"
-#include "larevt/CalibrationDBI/Providers/WebError.h"
-#include "larevt/CalibrationDBI/IOVData/IOVDataConstants.h"
+//#include "larevt/CalibrationDBI/Providers/WebError.h"
 
 // art/LArSoft libraries
 #include "cetlib/exception.h"
@@ -52,14 +51,18 @@ namespace lariov {
     else              fDataSource = DataSource::Default;
 
     if (fDataSource == DataSource::Default) {
-      std::cout << "Using default pedestal values\n";
-      float default_exppar     = p.get<float>("DefaultExpPar");
-      float default_constpar   = p.get<float>("DefaultConstPar");
+      std::cout << "Using default lifetime fit values\n";
+      float default_expoffset      = p.get<float>("DefaultExpOffset");
+      float default_timeconstant   = p.get<float>("DefaultTimeConstant");
+      float default_expoffseterr      = p.get<float>("DefaultExpOffsetErr");
+      float default_timeconstanterr   = p.get<float>("DefaultTimeConstantErr");
       
-      ElectronLifetime default_pars(0);
+      ElectronLifetimeContainer default_pars(fLifetimeChannel);
       
-      default_pars.SetExpPar(default_exppar);
-      default_pars.SetConstPar(default_constpar);
+      default_pars.SetExpOffset(default_expoffset);
+      default_pars.SetTimeConstant(default_timeconstant);
+      default_pars.SetExpOffsetErr(default_expoffseterr);
+      default_pars.SetTimeConstantErr(default_timeconstanterr);
       fData.AddOrReplaceRow(default_pars);
  
     }
@@ -72,18 +75,25 @@ namespace lariov {
       }
       
       std::string line;
-      ElectronLifetime dp(0);
+      ElectronLifetimeContainer dp(fLifetimeChannel);
       while (std::getline(file, line)) {
-        size_t current_comma = line.find(',');
-        DBChannelID_t ch = 0;	
-	float exp_par = std::stof(line.substr(current_comma+1, line.find(',',current_comma+1)));
+        size_t current_comma = line.find(',');	
+	float exp_offset = std::stof(line.substr(current_comma+1, line.find(',',current_comma+1)));
 	
 	current_comma = line.find(',',current_comma+1);
-	float const_par = std::stof(line.substr(current_comma+1, line.find(',',current_comma+1)));
+	float exp_offset_err = std::stof(line.substr(current_comma+1, line.find(',',current_comma+1)));
+	
+	current_comma = line.find(',',current_comma+1);
+	float time_constant = std::stof(line.substr(current_comma+1, line.find(',',current_comma+1)));
+	
+	current_comma = line.find(',',current_comma+1);
+	float time_constant_err = std::stof(line.substr(current_comma+1, line.find(',',current_comma+1)));
 
-	dp.SetChannel(ch);
-	dp.SetExpPar(exp_par);
-        dp.SetConstPar(const_par);
+	dp.SetChannel(fLifetimeChannel);
+	dp.SetExpOffset(exp_offset);
+        dp.SetTimeConstant(time_constant);
+	dp.SetExpOffsetErr(exp_offset_err);
+        dp.SetTimeConstantErr(time_constant_err);
 	fData.AddOrReplaceRow(dp);
 	
 	break; //only should have one line
@@ -105,13 +115,17 @@ namespace lariov {
     fData.Clear();
     fData.SetIoV(this->Begin(), this->End());
 
-    double exp_par, const_par;
-    fFolder->GetNamedChannelData(0, "exponential",     exp_par);
-    fFolder->GetNamedChannelData(0, "constant", const_par);
+    double exp_offset, exp_offset_err, time_constant, time_constant_err;
+    fFolder->GetNamedChannelData(fLifetimeChannel, "exponential_offset",     exp_offset);
+    fFolder->GetNamedChannelData(fLifetimeChannel, "time_constant",          time_constant);
+    fFolder->GetNamedChannelData(fLifetimeChannel, "err_exponential_offset", exp_offset_err);
+    fFolder->GetNamedChannelData(fLifetimeChannel, "err_time_constant",      time_constant_err);
 
-    ElectronLifetime pd(0);
-    pd.SetExpPar( (float)exp_par );
-    pd.SetConstPar( (float)const_par );
+    ElectronLifetimeContainer pd(fLifetimeChannel);
+    pd.SetExpOffset( (float)exp_offset );
+    pd.SetTimeConstant( (float)time_constant );
+    pd.SetExpOffsetErr( (float)exp_offset_err );
+    pd.SetTimeConstantErr( (float)time_constant_err );
 
     fData.AddOrReplaceRow(pd);
 
@@ -119,19 +133,25 @@ namespace lariov {
 
   }
   
-  const ElectronLifetime& UbooneElectronLifetimeProvider::Lifetime() const {     
-    return fData.GetRow(0);
+  const ElectronLifetimeContainer& UbooneElectronLifetimeProvider::LifetimeContainer() const {     
+    return fData.GetRow(fLifetimeChannel);
   }
       
-  float UbooneElectronLifetimeProvider::ExpPar() const {
-    return this->Lifetime().ExpPar();
+  float UbooneElectronLifetimeProvider::ExpOffset() const {
+    return this->LifetimeContainer().ExpOffset();
   }
   
-  float UbooneElectronLifetimeProvider::ConstPar() const {
-    return this->Lifetime().ConstPar();
+  float UbooneElectronLifetimeProvider::TimeConstant() const {
+    return this->LifetimeContainer().TimeConstant();
   }
 
-
+  float UbooneElectronLifetimeProvider::ExpOffsetErr() const {
+    return this->LifetimeContainer().ExpOffsetErr();
+  }
+  
+  float UbooneElectronLifetimeProvider::TimeConstantErr() const {
+    return this->LifetimeContainer().TimeConstantErr();
+  }
 
 }//end namespace lariov
 	
