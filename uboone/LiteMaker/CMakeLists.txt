@@ -19,7 +19,7 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   uboone_Geometry
 		   uboonecode_uboone_MuCS
 		   larcore_Geometry_Geometry_service
-	   	   larsim_Simulation larsimobj_Simulation
+	   	   larsim_Simulation lardataobj_Simulation
 		   lardataobj_RecoBase
 		   nusimdata_SimulationBase
 		   lardataobj_MCBase
@@ -57,7 +57,7 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   larcore_Geometry
 		   uboone_Geometry
 		   larcore_Geometry_Geometry_service
-		   larsim_Simulation larsimobj_Simulation
+		   larsim_Simulation lardataobj_Simulation
 		   nusimdata_SimulationBase
 		   lardata_Utilities
 		   lardataobj_MCBase
