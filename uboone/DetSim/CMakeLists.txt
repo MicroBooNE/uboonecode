@@ -2,7 +2,7 @@ art_make( BASENAME_ONLY
           EXCLUDE SimWireMicroBooNE_module.cc
           MODULE_LIBRARIES larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        larsim_Simulation larsimobj_Simulation
+                        larsim_Simulation lardataobj_Simulation
                         lardata_Utilities
                         larevt_Filters
                         lardataobj_RawData
@@ -33,7 +33,7 @@ simple_plugin(SimWireMicroBooNE "module"
           BASENAME_ONLY
               larcore_Geometry
               larcore_Geometry_Geometry_service
-              larsim_Simulation larsimobj_Simulation
+              larsim_Simulation lardataobj_Simulation
               lardata_Utilities
               larevt_Filters
               lardataobj_RawData

@@ -14,7 +14,7 @@ art_make( BASENAME_ONLY
 			larana_OpticalDetector
                         lardataobj_RawData
 			lardataobj_RecoBase
-			larsim_Simulation larsimobj_Simulation
+			larsim_Simulation lardataobj_Simulation
 			nusimdata_SimulationBase
 			larsim_PhotonPropagation
 			uboone_OpticalDetectorAna

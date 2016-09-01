@@ -40,7 +40,7 @@
 #include "lardataobj/RecoBase/Vertex.h"
 #include "lardataobj/RecoBase/EndPoint2D.h"
 #include "lardataobj/AnalysisBase/Calorimetry.h"
-#include "larsimobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimChannel.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 #include "lardataobj/OpticalDetectorData/FIFOChannel.h"

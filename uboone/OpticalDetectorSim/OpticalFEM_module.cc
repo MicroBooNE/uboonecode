@@ -15,7 +15,7 @@
 #include "lardataobj/OpticalDetectorData/ChannelDataGroup.h"
 #include "lardataobj/OpticalDetectorData/FIFOChannel.h"
 #include "lardataobj/OpticalDetectorData/PMTTrigger.h"
-#include "larsimobj/Simulation/BeamGateInfo.h"
+#include "lardataobj/Simulation/BeamGateInfo.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "UBOpticalChConfig.h"
 #include "UBOpticalConstants.h"
