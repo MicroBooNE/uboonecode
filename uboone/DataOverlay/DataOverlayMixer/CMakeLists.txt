@@ -1,5 +1,7 @@
 # basic source code CMakeLists.txt
 
+include_directories( $ENV{IFDHC_FQ_DIR}/inc )
+
 art_make(
 	LIBRARY_NAME OverlayRawDataMicroBooNE_module
 	EXCLUDE RawDigitOverlayMicroBooNEAna_module.cc
@@ -19,6 +21,7 @@ art_make(
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
                         art_Persistency_Common canvas_Persistency_Common
                         art_Utilities canvas_Utilities
+			ifdh
                         ${BOOST_LIB}
                         ${FHICLCPP}
                         ${CETLIB}
