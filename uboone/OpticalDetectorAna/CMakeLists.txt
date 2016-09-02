@@ -10,6 +10,7 @@ art_make( BASENAME_ONLY
 	  	        larcore_Geometry_Geometry_service
 		        lardata_Utilities
 	                uboone_Geometry
+			UBOpReadoutMap_service
                         lardataobj_OpticalDetectorData
 			larana_OpticalDetector
                         lardataobj_RawData
