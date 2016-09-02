@@ -12,10 +12,12 @@
 #include "art/Framework/IO/ProductMix/MixHelper.h"
 #include "art/Framework/Core/PtrRemapper.h"
 #include "art/Persistency/Common/CollectionUtilities.h"
+#include "art/Framework/Services/System/FileCatalogMetadata.h"
 #include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 #include "IFDH_service.h"
 
 #include <memory>
@@ -191,7 +193,7 @@ mix::OverlayRawDataDetailMicroBooNE::OverlayRawDataDetailMicroBooNE(fhicl::Param
   fSamAppVersion(fpset.get<std::string>("SamAppVersion", "1")),
   fSamUser(fpset.get<std::string>("SamUser", "")),
   fSamDescription(fpset.get<std::string>("SamDescription", "")),
-  fSamFileLimit(fpset.get<int>("SamFileLimit", 1)),
+  fSamFileLimit(fpset.get<int>("SamFileLimit", 100)),
   fSamSchema(fpset.get<std::string>("SamSchema", "root")),    // xrootd by default.
 
   fEventMixingSummary(nullptr)
@@ -333,6 +335,9 @@ mix::OverlayRawDataDetailMicroBooNE::OverlayRawDataDetailMicroBooNE(fhicl::Param
 					   fSamDescription,
 					   fSamFileLimit,
 					   fSamSchema);
+    mf::LogInfo("OverlayRawDigitMicroBooNE") << "Overlay sam definition: " << fSamDefname << "\n"
+					     << "Overlay sam project: " << fSamProject;
+
     //std::cout << "Mix SAM: process id = " << fSamProcessID << std::endl;
     if(fSamProcessID.empty())
       throw cet::exception("OverlayRawDataMicroBooNE") << "Failed to start sam process.";
@@ -561,18 +566,27 @@ std::string mix::OverlayRawDataDetailMicroBooNE::getMixFile()
     fSamCurrentFileName = fSamCurrentFileURI.substr(n);
     //std::cout << "Mix SAM: Next file uri = " << fSamCurrentFileURI << std::endl;
     //std::cout << "Mix SAM: Next file name = " << fSamCurrentFileName << std::endl;
+    mf::LogInfo("OverlayRawDigitMicroBooNE") << "Next mix file uri: " << fSamCurrentFileURI << "\n"
+					     << "Next mix file name: " << fSamCurrentFileName;
+
+    // Throw an exception if we didn't get a next file.
+
+    if(fSamCurrentFileURI.empty() || fSamCurrentFileName.empty())
+      throw cet::exception("OverlayRawDataMicroBooNE") << "Failed to get next mix file.";
 
     // Here is where we would copy the file to the local node, if that were necessary.
-    // Since we are using schema "root" (i.e. xrootd), copying the file is not necessary,
-    // as root can stream the file.
+    // Since we are using schema "root" (i.e. xrootd) to stream files, copying the 
+    // file is not necessary.
+    // Note further that we should not update the file status to "transferred" for
+    // streaming files, since that can in principle allow the file to be deleted from
+    // disk cache.
 
-    // Update status of new file to "transferred."
+    // Update metadata.
 
-    ifdh->updateFileStatus(fSamProjectURI,
-			   fSamProcessID,
-			   fSamCurrentFileName,
-			   "transferred");
-    //std::cout << "Mix SAM: File " << fSamCurrentFileName << " status changed to transferred." << std::endl;
+    art::ServiceHandle<art::FileCatalogMetadata> md;
+    md->addMetadataString("mixparent", fSamCurrentFileName);
+
+    // Done.
 
     result = fSamCurrentFileURI;
   }
