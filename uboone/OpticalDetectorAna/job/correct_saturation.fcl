@@ -8,8 +8,8 @@ correct_saturation: {
  HGLabel     : "OpdetBeamHighGain"
  HGProducerCosmic  : "pmtreadout"
  HGLabelCosmic     : "OpdetCosmicHighGain"
- HGProducerCosmic  : "pmtreadout"
- HGLabelCosmic     : "OpdetCosmicLowGain"
+ LGProducerCosmic  : "pmtreadout"
+ LGLabelCosmic     : "OpdetCosmicLowGain"
  verbose     : false 
  IncludeBeamgate : true
  #

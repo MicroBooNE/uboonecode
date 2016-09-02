@@ -6,6 +6,8 @@ correct_saturation: {
  LGLabel     : "OpdetBeamLowGain"
  HGProducer  : "pmtreadout"
  HGLabel     : "OpdetBeamHighGain"
+ LGProducerCosmic  : "pmtreadout"
+ LGLabelCosmic     : "OpdetCosmicLowGain"
  HGProducerCosmic  : "pmtreadout"
  HGLabelCosmic     : "OpdetCosmicHighGain"
  verbose     : false 
