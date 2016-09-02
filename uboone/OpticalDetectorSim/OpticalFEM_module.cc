@@ -92,7 +92,7 @@ namespace opdet {
     timeVector_t         fm_triggerDeadtime;    // minimum number of time slices between successive PMT triggers
     std::vector<short>   fm_triggerFEMSlot;     // slot number for FEM modules to be used for generating PMT triggers
     bool                 fm_hist;               // if true, generate megatons of diagnostic histograms
-
+    bool                 _debug; // if true print out some words0
     void FillBeamTimingVectors(const std::vector<sim::BeamGateInfo> &beamGates,
 			       const optdata::TimeSlice_t readout_first_tdc,
 			       const optdata::TimeSlice_t readout_size);
@@ -157,7 +157,7 @@ namespace opdet {
     fm_disc3width         = p.get< timeVector_t >        ("Discriminator3Width");
     fm_triggerDeadtime    = p.get< timeVector_t >        ("PMTTriggerDeadtime");
     fm_triggerFEMSlot     = p.get< std::vector<short> >  ("TriggerFEMSlot");
-
+    _debug                = p.get< bool > ("DebugMode",false);
     return;
   }
 
@@ -179,7 +179,8 @@ namespace opdet {
     _gateFrame.clear();
     _gateWindowTime.clear();
 
-    //std::cout << "FillBeamTimingVectors: " << "beam_bnb_delay=" << fm_beamDelayBNB.size() << " ngates=" << numberOfGates << std::endl;
+    if(_debug)
+      std::cout << "FillBeamTimingVectors: " << "beam_bnb_delay=" << fm_beamDelayBNB.size() << " ngates=" << numberOfGates << std::endl;
 
     for(size_t gain_index=0; gain_index < fm_beamDelayBNB.size(); ++gain_index){
 
@@ -348,7 +349,7 @@ namespace opdet {
       }
     }
   
-    //std::cout << "Number of Gates: " << numberOfGates << std::endl;
+    std::cout << "Number of Gates: " << numberOfGates << std::endl;
 
     // Do the same for the vectors that will accumulate the sums of
     // the ADC and multiplicity counts for the PMT trigger processing.
@@ -392,22 +393,27 @@ namespace opdet {
       for ( auto const& channelData : (*channelDataHandle) ) {
 
 	optdata::Channel_t channel = channelData.ChannelNumber();
-
-	::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channelData.ChannelNumber());
+	if(_debug) std::cout << "Line " << __LINE__ << ": Processing channel " << channel << std::endl;
+	::opdet::UBOpticalChannelCategory_t category_type = ch_map->GetChannelCategory(channelData.ChannelNumber());
 	size_t gain_index = 0;
 	// Determine the gain category.
-	switch(gain_type) {
-	case ::opdet::LowGain:
+	switch(category_type) {
+	case ::opdet::OpdetBeamHighGain:
 	  gain_index=0; break;
-	case ::opdet::HighGain:
-	case ::opdet::LogicChannel:
+	case ::opdet::OpdetBeamLowGain:
 	  gain_index=1; break;
-	  //gain_index=2; break;
+	case ::opdet::OpdetCosmicHighGain:
+	  gain_index=2; break;
+	case ::opdet::OpdetCosmicLowGain:
+	  gain_index=3; break;
 	default:
+	  /*
 	  mf::LogError("OpticalFEM") 
 	    << "Unknown channel data category = " <<  gain_type
 	    << "; skipping channel data group";
 	  continue; // skip to the next ChannelDataGroup
+	  */
+	  gain_index = 2;
 	}
 
 	auto const& gateFrame      = _gateFrame.at      (gain_index);
@@ -437,8 +443,9 @@ namespace opdet {
 			     channel,
 			     beamEndBin[gateIndex] - beamBeginBin[gateIndex]);
 
-	  mf::LogDebug("OpticalFEM")
-	  //std::cout
+	  //mf::LogDebug("OpticalFEM")
+	  if(_debug)
+	    std::cout
 	    << "Writing beam gate FIFO entry: chanel=" << channel
 	    << " at frame=" << gateFrame[gateIndex]
 	    << " slice="    << gateWindowTime[gateIndex]
@@ -531,6 +538,7 @@ namespace opdet {
       ch_map->GetCrateSlotFEMChFromReadoutChannel(channel,crate,slot,femch);
       // Get gain type
       ::opdet::UBOpticalChannelType_t gain_type = ch_map->GetChannelType(channel);
+      ::opdet::UBOpticalChannelCategory_t category_type = ch_map->GetChannelCategory(channel);
       bool is_logic_channel = false;
       if(gain_type == ::opdet::LogicChannel) {
 	// Logic channel also belong to a specific FEM w/ gain setting.
@@ -544,22 +552,33 @@ namespace opdet {
       }
       size_t gain_index = 0;
       // Determine the gain category.
-      switch( ::opdet::UBOpticalChannelType_t(gain_type) ) {
-      case ::opdet::LowGain:
+      switch(category_type) {
+      case ::opdet::OpdetBeamHighGain:
 	gain_index=0; break;
-      case ::opdet::HighGain:
+      case ::opdet::OpdetBeamLowGain:
 	gain_index=1; break;
-      case ::opdet::LogicChannel:
+      case ::opdet::OpdetCosmicHighGain:
+	gain_index=2; break;
+      case ::opdet::OpdetCosmicLowGain:
+	gain_index=3; break;
       default:
-	// If reaching this point, we do not understand the cause and it is an error.
+	/*
+	  mf::LogError("OpticalFEM") 
+	  << "Unknown channel data category = " <<  gain_type
+	  << "; skipping channel data group";
+	  continue; // skip to the next ChannelDataGroup
+	*/
+	gain_index = 2;
+	/*
 	mf::LogError("OpticalFEM") 
 	  << "Could not find gain setting for a channel: " << channel
 	  << std::endl
 	  << "Corresponding hardware address: Crate = " << crate << " Slot = " << slot << " FEMCh = " << femch
 	  << std::endl;
-	throw cet::exception("OpticalFEM");	
+	  throw cet::exception("OpticalFEM");	
+	*/
       }
-    
+
       // Fill information for PMT Trigger generation here if relevant
       bool slot_for_trigger = false;
       for(auto const& trigger_slot : fm_triggerFEMSlot) {
