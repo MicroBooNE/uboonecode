@@ -12,7 +12,7 @@
 #define MuCSReader_Module
 
 
-#include "larsimobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimChannel.h"
 
 #include "larsim/Simulation/LArG4Parameters.h"
 

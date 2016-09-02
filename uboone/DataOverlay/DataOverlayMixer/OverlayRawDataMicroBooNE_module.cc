@@ -34,9 +34,9 @@
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 
-#include "larsimobj/Simulation/SimChannel.h"
-#include "larsimobj/Simulation/SimPhotons.h"
-#include "larsimobj/Simulation/AuxDetSimChannel.h"
+#include "lardataobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimPhotons.h"
+#include "lardataobj/Simulation/AuxDetSimChannel.h"
 
 #include "lardataobj/MCBase/MCTrack.h"
 #include "lardataobj/MCBase/MCShower.h"
