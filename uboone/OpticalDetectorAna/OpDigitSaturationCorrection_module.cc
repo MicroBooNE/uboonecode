@@ -125,6 +125,22 @@ private:
   // Note these are opdet::Undefined, opdet::HighGain, opdet::LowGain, and opdet::LogicChannel
   std::vector<opdet::UBOpticalChannelType_t> _opch_to_chtype_m; 
 
+  // OpChannel => UBOpChannelCategory mapping
+  // Note categories are:
+  /*
+    opdet::Uncategorized = 0
+    opdet::UnspecifiedLogic
+    opdet::OpdetCosmicHighGain
+    opdet::OpdetCosmicLowGain
+    opdet::OpdetBeamHighGain
+    opdet::OpdetBeamLowGain
+    opdet::BNBLogicPulse
+    opdet::NUMILogicPulse
+    opdet::FlasherLogicPulse
+    opdet::StrobeLogicPulse
+  */
+  std::vector<opdet::UBOpticalChannelCategory_t> _opch_to_chcategory_m;
+
   // OpChannel => OpDet mapping
   std::vector<int> _opch_to_opdet_m;
 
@@ -239,6 +255,7 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
     // Make sure mapping has enough entries
     if(ch >= _opch_to_opdet_m.size()) {
       _opch_to_chtype_m.resize(ch+1,opdet::Undefined);
+      _opch_to_chcategory_m.resize(ch+1,opdet::Uncategorized);
       _opch_to_opdet_m.resize(ch+1,-1);
     }
     
@@ -253,10 +270,12 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
     }
     if(skip) continue;
 
+    _opch_to_chcategory_m[ch] = ub_geom->GetChannelCategory(ch);
+
     _opch_to_chtype_m[ch] = ub_geom->GetChannelType(ch);
     
     _opch_to_opdet_m[ch] = geom->OpDetFromOpChannel(ch);
-    
+
   }
 
   // Reverse-engineer OpDet => set of OpChannel mapping (probably not really useful)
@@ -269,17 +288,33 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
 
   // Report
   if(_verbose) {
-    std::cout << "Loaded OpChannel => OpDet ... Channel Type mapping" << std::endl;
+    std::cout << "Loaded OpChannel => OpDet ... Channel Type ... Channel Category mapping" << std::endl;
     for(size_t opch=0; opch<_opch_to_opdet_m.size(); ++opch) {
       if(_opch_to_opdet_m[opch] < 0) continue;
       std::cout << opch << " => " << _opch_to_opdet_m[opch];
       switch(_opch_to_chtype_m[opch]) {
-      case opdet::Undefined:    std::cout << " UNDEFINED!" << std::endl; break;
-      case opdet::HighGain:     std::cout << " HG"    << std::endl; break;
-      case opdet::LowGain:      std::cout << " LG"    << std::endl; break;
-      case opdet::LogicChannel: std::cout << " LOGIC" << std::endl; break;
+      case opdet::Undefined:    std::cout << " UNDEFINED!"; break;
+      case opdet::HighGain:     std::cout << " HG";         break;
+      case opdet::LowGain:      std::cout << " LG";         break;
+      case opdet::LogicChannel: std::cout << " LOGIC";      break;
       default:
 	std::cerr << "Cannot decode the type: " << _opch_to_chtype_m[opch] << std::endl;
+	throw std::exception();
+      }
+      std::cout << " ...";
+      switch(_opch_to_chcategory_m[opch]) {
+      case opdet::Uncategorized:       std::cout << " UNDEFINED!"        << std::endl; break;
+      case opdet::UnspecifiedLogic:    std::cout << " Unspecified Logic" << std::endl; break;
+      case opdet::OpdetCosmicHighGain: std::cout << " Cosmic High Gain " << std::endl; break;
+      case opdet::OpdetCosmicLowGain:  std::cout << " Cosmic Low Gain " << std::endl; break;
+      case opdet::OpdetBeamHighGain:   std::cout << " Beam High Gain " << std::endl; break;
+      case opdet::OpdetBeamLowGain:    std::cout << " Beam Low Gain " << std::endl; break;
+      case opdet::BNBLogicPulse:       std::cout << " BNB Logic Pulse " << std::endl; break;
+      case opdet::NUMILogicPulse:      std::cout << " NuMI Logic Pulse " << std::endl; break;
+      case opdet::FlasherLogicPulse:   std::cout << " Flasher Logic Pulse " << std::endl; break;
+      case opdet::StrobeLogicPulse:    std::cout << " Strobe Logic Pulse " << std::endl; break;
+      default:
+	std::cerr << "Cannot decode the category: " << _opch_to_chcategory_m[opch] << std::endl;
 	throw std::exception();
       }
     }
