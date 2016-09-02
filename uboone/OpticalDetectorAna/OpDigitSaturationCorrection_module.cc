@@ -474,7 +474,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   }
 
   if (_verbose)
-    std::cout << "Fill LG_BEAM_ChanMap" << std::endl;
+    std::cout << "Fill LG_BEAM_ChanMap : there are " << opwf_LG_v->size() << " waveforms." << std::endl;
 
   // fill a vector (for LG BEAM):
   // [ pmt channel ] -> [ idx(wf1), idx(wf2), ...]
@@ -493,7 +493,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   }
 
   if (_verbose)
-    std::cout << "Fill LG_COSMIC_ChanMap" << std::endl;
+    std::cout << "Fill LG_COSMIC_ChanMap : there are " << opwf_LG_cosmic_v->size() << " waveforms." << std::endl;
 
   // fill a vector (for LG COSMIC):
   // [ pmt channel ] -> [ idx(wf1), idx(wf2), ...]
@@ -527,7 +527,8 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     auto const& wf_HG = opwf_HG_v->at(idx);
 
     if (_verbose)
-      std::cout << "Starting a new HG BEAM wf w/ chan num " << wf_HG.ChannelNumber() << std::endl;
+      std::cout << "Starting a new HG BEAM wf w/ chan num " << wf_HG.ChannelNumber() 
+		<< " and " << wf_HG.size() << " ticks" << std::endl;
     
     // retrieve OpDet channel number
     auto const& opdet = _opch_to_opdet_m[ wf_HG.ChannelNumber() ];
@@ -627,19 +628,113 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     
   }// for all WFs
 
-  /*
-  // loop through LG waveforms
-  for(auto const& wf : *opwf_LG_v){
-  
-    auto const& max_idx = getMaxADC(wf);
+
+  // loop through HG COSMICS waveforms
+  for (size_t idx = 0; idx < opwf_HG_cosmic_v->size(); idx++){
+    auto const& wf_HG = opwf_HG_cosmic_v->at(idx);
+
+    if (_verbose)
+      std::cout << "Starting a new HG COSMIC wf w/ chan num " << wf_HG.ChannelNumber()
+		<< " and " << wf_HG.size() << " ticks" << std::endl;
+    
+    // retrieve OpDet channel number
+    auto const& opdet = _opch_to_opdet_m[ wf_HG.ChannelNumber() ];
+
+    if (_verbose)
+      std::cout << "corresponding to PMT OpDet number " << opdet << std::endl;
+    
+    // ignore PMTs with size != cosmic discriminator size
+    if (!_include_beamgate && wf_HG.size() > 800)
+      continue;
+    
+    _time_LG = -1;
+    _max_adc_LG = _max_tdc_LG = -1;
+    _max_adc_corr = -1;
+    
+    auto const& max_idx = getMaxADC(wf_HG);
+    double wf_time = wf_HG.TimeStamp() - _TrigTime;
+    
+    _time_HG    = wf_time;
+    _max_adc_HG = wf_HG.at(max_idx) - _baseline;
+    _max_tdc_HG = max_idx;
+    _chan       = wf_HG.ChannelNumber();
+    _pmt        = opdet;
+
+    if (_verbose)
+      std::cout << "This HG channel has Ch Num : " << wf_HG.ChannelNumber()
+		<< " w/ TimeStamp : " << wf_time
+		<< " w/ size : " << wf_HG.size() << std::endl
+		<< "\t max ADC @ " << max_idx << " is " << wf_HG.at(max_idx) << std::endl;
+    
+    // find matching LG channel
+    if (_verbose)
+      std::cout << "Try and find a matching LG pulse" << std::endl;
+    auto const& LG_idx = FindMatchingLGPulse(_pmt, wf_time, LG_COSMIC_ChanMap);
+    
+    // if we did not find a match:
+    // add the old HG waveform
+    if (LG_idx == IDX_max){
+      if (_verbose)
+	std::cout << "no match found -> add saturated HG wf" << std::endl;
+      corrected_wfs->push_back(wf_HG);
+    }
+    
+    else{
+      // if we made it this far -> we found a match in LG information!
+      if (_verbose)
+	std::cout << "getting corresponding LG pulse w/ idx " << LG_idx << std::endl;
+      auto const& wf_LG = opwf_LG_cosmic_v->at(LG_idx);
+      auto const& max_idx_LG = getMaxADC(wf_LG);
+      _time_LG      = wf_LG.TimeStamp() - _TrigTime;
+      _max_adc_LG   = wf_LG.at(max_idx_LG) - _baseline;
+      _max_tdc_LG   = max_idx_LG;
+      _max_adc_corr = _max_adc_LG * ( _gain_fact * _calibration_corr[ _opch_to_opdet_m [ wf_LG.ChannelNumber() ] ] );
+      if (_verbose)
+	std::cout << "finished getting corresponding LG pulse w/ idx " << LG_idx << std::endl;
+      
+      // if the max ADC value for the HG was below saturation -> add the HG wf
+      if (_max_adc_HG < (4095-_baseline) ){
+	if (_verbose)
+	  std::cout << "HG pulse not saturated -> add HG pulse" << std::endl;
+	corrected_wfs->push_back(wf_HG);
+      }
+      else{
+	  if (_verbose)
+	    std::cout << "found a match and HG saturates! -> add LG wf w/ correction" << std::endl;
+	  // create a new waveform by editing the LG one
+	  if (_verbose)
+	    std::cout << "corr factor for chan " << wf_LG.ChannelNumber()
+		      << " : " << _calibration_corr[ _opch_to_opdet_m[ wf_LG.ChannelNumber() ] ] << std::endl;
+	  std::vector<short unsigned int> adcs;
+	  for (size_t n=0; n < wf_LG.size(); n++){
+	    int this_ADC_above_baseline = wf_LG.at(n) - _baseline;
+	    // make sure we don't overflow the data-product (not the firmware waveform...)
+	    if (this_ADC_above_baseline > (int)( ADC_max / (_gain_fact * _calibration_corr[ _opch_to_opdet_m[ wf_LG.ChannelNumber() ] ] ) ) ){
+	      if (_verbose) std::cout << "new ADC (saturated) : " << ADC_max << std::endl;
+	      adcs.push_back(ADC_max);
+	    }
+	    else{
+	      short unsigned int new_ADC = (short unsigned int)( this_ADC_above_baseline * (_gain_fact * _calibration_corr[ _opch_to_opdet_m[ wf_LG.ChannelNumber() ] ] ) + _baseline );
+	      if (_verbose) std::cout << "new ADC (not saturated) : " << new_ADC << std::endl;
+	      adcs.push_back( new_ADC );
+	    }
+	  }// for all ADCs
+	  raw::OpDetWaveform new_wf(wf_LG.TimeStamp(),
+				    _opchLG_to_opchHG_m [ wf_LG.ChannelNumber() ],
+				    adcs);
+	  corrected_wfs->push_back(new_wf);
+      }// if this waveform saturates
+    }// if LG wf was found
     
     if (_verbose)
-      std::cout << "This LG channel has Ch Num : " << wf.ChannelNumber()
-		<< " w/ TimeStamp : " << wf.TimeStamp() - _TrigTime 
-		<< " w/ size : " << wf.size() << std::endl
-		<< "\t max ADC @ " << max_idx << " is " << wf.at(max_idx) << std::endl;
-  }
-  */
+      std::cout << "fill tree!" << std::endl;
+    if (_tree) _tree->Fill();
+    
+    if (_verbose)
+      std::cout << "move to next wf..." << std::endl;
+    
+  }// for all COSMICS WFs
+
   if (_verbose)
     std::cout << "done merging HG/LG. Save waveforms" << std::endl;
   
