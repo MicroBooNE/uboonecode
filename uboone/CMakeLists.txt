@@ -24,7 +24,7 @@ add_subdirectory(SpaceCharge)
 add_subdirectory(SpaceChargeServices)
 add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(DataScanner)
-#add_subdirectory(LiteMaker)
+add_subdirectory(LiteMaker)
 add_subdirectory(MuCS)
 add_subdirectory(T0Reco)
 

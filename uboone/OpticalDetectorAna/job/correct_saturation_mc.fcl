@@ -6,12 +6,15 @@ correct_saturation: {
  LGLabel     : "OpdetBeamLowGain"
  HGProducer  : "pmtreadout"
  HGLabel     : "OpdetBeamHighGain"
- LGProducerCosmic  : "pmtreadout"
- LGLabelCosmic     : "OpdetCosmicLowGain"
+ #LGProducerCosmic  : "pmtreadout"
+ #LGLabelCosmic     : "OpdetCosmicLowGain"
+ LGProducerCosmic  : ""
+ LGLabelCosmic     : ""
  HGProducerCosmic  : "pmtreadout"
  HGLabelCosmic     : "OpdetCosmicHighGain"
  verbose     : false 
  IncludeBeamgate : true
+ UseLGBeamForHGCosmic : true
  #
  # NOTE: the following corrections are appropriate only for MC data
  #

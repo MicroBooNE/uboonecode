@@ -6,12 +6,15 @@ correct_saturation: {
  LGLabel     : "OpdetBeamLowGain"
  HGProducer  : "pmtreadout"
  HGLabel     : "OpdetBeamHighGain"
+ #LGProducerCosmic  : "pmtreadout"
+ #LGLabelCosmic     : "OpdetCosmicLowGain"
+ LGProducerCosmic  : ""
+ LGLabelCosmic     : ""
  HGProducerCosmic  : "pmtreadout"
  HGLabelCosmic     : "OpdetCosmicHighGain"
- LGProducerCosmic  : "pmtreadout"
- LGLabelCosmic     : "OpdetCosmicLowGain"
  verbose     : false 
  IncludeBeamgate : true
+ UseLGBeamForHGCosmic : true
  #
  # NOTE: the following corrections are the same as those in correct_saturation_afterRun3701.fcl 
  #

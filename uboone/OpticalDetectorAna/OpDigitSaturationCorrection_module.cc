@@ -33,7 +33,7 @@
 #include <memory>
 #include <iostream>
 #include <cmath>
-#include <limits>	  
+#include <limits>
 
 // ROOT includes
 #include <TTree.h>
@@ -73,13 +73,28 @@ public:
   // Verbosity setter
   void SetVerbose(bool on) { _verbose = on; }
 
+public:
+  
+  struct LGPulseInfo_t {
+    size_t _index;
+    double _start;
+    double _duration;
+    bool IsUseful(double start, double start_diff, double duration=-1, double duration_diff=-1) const {
+      if(std::abs(start - _start) > start_diff) return false; // Restrict start time difference
+      if(duration>0 && std::abs(duration - _duration) > duration_diff) return false; // restrict duration diff (optional)
+      return true;
+    }
+  };
+
+  typedef std::vector<std::vector<LGPulseInfo_t> > LGChanMap_t;
+
 private:
 
   // Declare member data here.
 
   // functions:
-  size_t FindMatchingLGPulse(const unsigned int& chan, const double& time,
-			     const std::vector<std::vector< std::pair<size_t,double> > >& LG_ChanMap);
+  size_t FindMatchingLGPulse(const unsigned int chan, const double time,
+			     const LGChanMap_t& LG_ChanMap);
 
   void MakeTree();
   
@@ -91,6 +106,9 @@ private:
 
   // time-tick duration in usec
   double _TDC;
+
+  // time-tick count minimum to define "beamgate"
+  double _BEAMGATE_MIN;
   
   // by how much to scale LG so that it matches the HG?
   double _gain_fact;
@@ -112,6 +130,11 @@ private:
 
   // vector holding the calibration correction factors per PMT
   std::vector<double> _calibration_corr;
+
+  // flat to allow use LG Beam FEM for HG Cosmic correction 
+  // If enabled, _LG_cosmic_* must be empty (else exception)
+  // This handle is to coop with UB situation where only 3FEM employeed (09/03/2016)
+  bool _use_LG_beam_for_HG_cosmic;
 
   // Waveform producer name
   std::string _LG_producer;
@@ -168,8 +191,9 @@ private:
   int    _max_adc_corr; // the maximum ADC assigned to the LG corrected WF that replaced the HG saturated WF
 };
 
-size_t OpDigitSaturationCorrection::FindMatchingLGPulse(const unsigned int& chan, const double& time,
-							const std::vector<std::vector< std::pair<size_t,double> > >& LG_ChanMap)
+size_t OpDigitSaturationCorrection::FindMatchingLGPulse(const unsigned int chan, 
+							const double start,
+							const LGChanMap_t& LG_ChanMap)
 {
 
   // search the _LG_ChanMap for a pulse on this channel at approx. the same time
@@ -180,17 +204,16 @@ size_t OpDigitSaturationCorrection::FindMatchingLGPulse(const unsigned int& chan
   auto const& LG_pulses = LG_ChanMap.at(chan);
   
   // go through them and find one with a matching time
-  for (auto const& pulse : LG_pulses){
-    if ( fabs(pulse.second - time) < 2*_TDC){
+  for (auto const& pulse : LG_pulses) {
+    if(pulse.IsUseful(start,(2*_TDC))) {
       // we have found a matching pulse!
       if (_verbose)
-	std::cout << "found a matching pulse for chan " << chan << " @ time " << time << std::endl;
-      return pulse.first;
+	std::cout << "found a matching pulse for chan " << chan << " @ time " << start << std::endl;
+      return pulse._index;
     }
   }// for all HG pulses
   return IDX_max;
 }
-
 
 OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet const & p)
   : _tree(nullptr)
@@ -198,6 +221,8 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
 {
   // Call appropriate produces<>() functions here.
   produces< std::vector<raw::OpDetWaveform>   >();
+  //produces< std::vector<raw::OpDetWaveform> >( opdet::UBOpChannelEnumName( opdet::OpdetBeamHighGain ) );
+  //produces< std::vector<raw::OpDetWaveform> >( opdet::UBOpChannelEnumName( opdet::OpdetCosmicHighGain ) );
 
   // load per-PMT calibration correction factors
   _calibration_corr = p.get< std::vector<double> > ( "CalibrationCorr" );
@@ -212,6 +237,9 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
 
   // time tick is 15.6 ns (in usec)
   _TDC = 0.0156;
+
+  // beam gate tick count min
+  _BEAMGATE_MIN = 800;
 
   // scale LG to HG
   _gain_fact = 10.;
@@ -241,6 +269,11 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
   _HG_cosmic_producer = p.get<std::string>( "HGProducerCosmic"  );
   _HG_cosmic_label    = p.get<std::string>( "HGLabelCosmic","*" );
 
+  _use_LG_beam_for_HG_cosmic = p.get<bool>("UseLGBeamForHGCosmic");
+  if(_use_LG_beam_for_HG_cosmic && (!_LG_cosmic_producer.empty() || !_LG_cosmic_label.empty())) {
+    std::cerr << "UseLGBeamForHGCosmic enabled but LGProducerCosmic and/or LGLabelCosmic also provided!" << std::endl;
+    throw std::exception();
+  }
 }
 
 void OpDigitSaturationCorrection::SetUpChannelMap()
@@ -387,7 +420,15 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   // output for this OpDet's cosmic-discriminated data will go to OpChan 01.
   // similary for the beam-gate readout for the same OpDet PMT. If it is read-out by OpChan 201 (HG) and 301 (LG) the data for this
   // stream will be stored in channel number 201.
-  
+
+  // load OpDetWaveform from High Gain raw data: Cosmic Disc. FEM
+  art::Handle<std::vector<raw::OpDetWaveform> > opwf_HG_cosmic_v;
+  e.getByLabel(_HG_cosmic_producer, _HG_cosmic_label, opwf_HG_cosmic_v);
+  // make sure hits look good
+  if(!opwf_HG_cosmic_v.isValid()) {
+    std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate HG Cosmic Disc. OpDetWf!"<<std::endl;
+    throw std::exception();
+  }  
 
   // load OpDetWaveform from High Gain raw data: Beam Window FEM
   art::Handle<std::vector<raw::OpDetWaveform> > opwf_HG_v;
@@ -398,30 +439,23 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     throw std::exception();
   }
 
-  // load OpDetWaveform from High Gain raw data: Cosmic Disc. FEM
-  art::Handle<std::vector<raw::OpDetWaveform> > opwf_HG_cosmic_v;
-  e.getByLabel(_HG_cosmic_producer, _HG_cosmic_label, opwf_HG_cosmic_v);
+  // load OpDetWaveform from Low Gain raw data: Cosmic Disc. FEM 
+  art::Handle<std::vector<raw::OpDetWaveform> > opwf_LG_cosmic_v;
+  e.getByLabel( (_use_LG_beam_for_HG_cosmic ? _LG_producer : _LG_cosmic_producer),
+		(_use_LG_beam_for_HG_cosmic ? _LG_label    : _LG_cosmic_label   ),
+		opwf_LG_cosmic_v);
   // make sure hits look good
-  if(!opwf_HG_cosmic_v.isValid()) {
-    std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate HG Cosmic Disc. OpDetWf!"<<std::endl;
+  if(!opwf_LG_cosmic_v.isValid()) {
+    std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate LG Cosmic Disc. OpDetWf!"<<std::endl;
     throw std::exception();
   }
   
-  // load OpDetWaveform from Low Gain raw data
+  // load OpDetWaveform from Low Gain raw data: Beam Window FEM
   art::Handle<std::vector<raw::OpDetWaveform> > opwf_LG_v;
   e.getByLabel(_LG_producer, _LG_label, opwf_LG_v);
   // make sure hits look good
   if(!opwf_LG_v.isValid()) {
     std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate LG OpDetWf!"<<std::endl;
-    throw std::exception();
-  }
-
-  // load OpDetWaveform from Low Gain raw data: Cosmic Disc. FEM 
-  art::Handle<std::vector<raw::OpDetWaveform> > opwf_LG_cosmic_v;
-  e.getByLabel(_LG_cosmic_producer, _LG_cosmic_label, opwf_LG_cosmic_v);
-  // make sure hits look good
-  if(!opwf_LG_cosmic_v.isValid()) {
-    std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate LG Cosmic Disc. OpDetWf!"<<std::endl;
     throw std::exception();
   }
 
@@ -457,6 +491,19 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   for (size_t idx = 0; idx < opwf_LG_cosmic_v->size(); idx++){
     auto const& wf   = opwf_LG_cosmic_v->at(idx);
     auto const& opch = wf.ChannelNumber();
+    static bool onetime_warning = false;
+    if (_use_LG_beam_for_HG_cosmic) {
+      if(_opch_to_chcategory_m[opch] != opdet::OpdetBeamLowGain){
+	std::cerr<<"\033[93m[ERROR]\033[00m ... channel " << opch << " from LG stream associated with producer "
+		 << _LG_producer << " is not marked as Beam LG in map produced by SetUpChannelMap function." <<std::endl;
+	throw std::exception();
+      }
+      if(!onetime_warning) {
+	std::cout<<"\033[95m[WARNING]\033[00m ... Using Beam LG to correct Cosmic HG!" << std::endl;
+	onetime_warning = true;
+      }
+      continue;
+    }
     if (_opch_to_chcategory_m[opch] != opdet::OpdetCosmicLowGain){
       std::cerr<<"\033[93m[ERROR]\033[00m ... channel " << opch << " from LG stream associated with producer "
 	       << _LG_cosmic_producer << " is not marked as Cosmic LG in map produced by SetUpChannelMap function." <<std::endl;
@@ -479,17 +526,22 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   // fill a vector (for LG BEAM):
   // [ pmt channel ] -> [ idx(wf1), idx(wf2), ...]
   // to quickly find the position of wach LG wf
-  std::vector<std::vector< std::pair<size_t,double> > > LG_BEAM_ChanMap;
+  //std::vector<std::vector< std::pair<size_t,double> > > LG_BEAM_ChanMap;
+  LGChanMap_t LG_BEAM_ChanMap;
   LG_BEAM_ChanMap.clear();
   for (size_t pmt=0; pmt < 32; pmt++)
-    LG_BEAM_ChanMap.push_back( std::vector<std::pair<size_t,double> >() );
+    LG_BEAM_ChanMap.push_back( std::vector<LGPulseInfo_t>() );
   for (size_t idx = 0; idx < opwf_LG_v->size(); idx++){
     auto const& wf = opwf_LG_v->at(idx);
     // retrieve PMT OpDet number
     auto const& opdet = _opch_to_opdet_m[ wf.ChannelNumber() ];
     // LG indx = ChannelNumber() - 100 (to match HG channel number)
     double wf_time = wf.TimeStamp() - _TrigTime;
-    LG_BEAM_ChanMap.at( opdet ).push_back( std::make_pair(idx,wf_time) );
+    LGPulseInfo_t p;
+    p._index = idx;
+    p._start = wf_time;
+    p._duration = wf.size() * _TDC;
+    LG_BEAM_ChanMap.at( opdet ).emplace_back( std::move(p) );
   }
 
   if (_verbose)
@@ -498,17 +550,23 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
   // fill a vector (for LG COSMIC):
   // [ pmt channel ] -> [ idx(wf1), idx(wf2), ...]
   // to quickly find the position of wach LG wf
-  std::vector<std::vector< std::pair<size_t,double> > > LG_COSMIC_ChanMap;
+  LGChanMap_t LG_COSMIC_ChanMap;
   LG_COSMIC_ChanMap.clear();
   for (size_t pmt=0; pmt < 32; pmt++)
-    LG_COSMIC_ChanMap.push_back( std::vector<std::pair<size_t,double> >() );
+    LG_COSMIC_ChanMap.push_back( std::vector<LGPulseInfo_t>() );
   for (size_t idx = 0; idx < opwf_LG_cosmic_v->size(); idx++){
     auto const& wf = opwf_LG_cosmic_v->at(idx);
     // retrieve PMT OpDet number
     auto const& opdet = _opch_to_opdet_m[ wf.ChannelNumber() ];
+    // If this "cosmic" is actually "beam", ignore beam window waveforms
+    if(_use_LG_beam_for_HG_cosmic && wf.size() > _BEAMGATE_MIN) continue;
     // LG indx = ChannelNumber() - 100 (to match HG channel number)
     double wf_time = wf.TimeStamp() - _TrigTime;
-    LG_COSMIC_ChanMap.at( opdet ).push_back( std::make_pair(idx,wf_time) );
+    LGPulseInfo_t p;
+    p._index = idx;
+    p._start = wf_time;
+    p._duration = wf.size() * _TDC;
+    LG_COSMIC_ChanMap.at( opdet ).emplace_back( std::move(p) );
   }
 
   // now loop through HG waveforms
@@ -537,7 +595,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
       std::cout << "corresponding to PMT OpDet number " << opdet << std::endl;
     
     // ignore PMTs with size != cosmic discriminator size
-    if (!_include_beamgate && wf_HG.size() > 800)
+    if (!_include_beamgate && wf_HG.size() > _BEAMGATE_MIN)
       continue;
     
     _time_LG = -1;
@@ -644,7 +702,7 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
       std::cout << "corresponding to PMT OpDet number " << opdet << std::endl;
     
     // ignore PMTs with size != cosmic discriminator size
-    if (!_include_beamgate && wf_HG.size() > 800)
+    if (!_include_beamgate && wf_HG.size() > _BEAMGATE_MIN)
       continue;
     
     _time_LG = -1;
