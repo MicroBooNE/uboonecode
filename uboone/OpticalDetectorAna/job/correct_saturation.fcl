@@ -14,7 +14,16 @@ correct_saturation: {
  HGLabelCosmic     : "OpdetCosmicHighGain"
  verbose     : false 
  IncludeBeamgate : true
+ # Unfortunately UB runs w/ only 3FEMs where 3rd FEM is a low gain cosmic + beam combined
+ # Implemented a handling of using 1 LG FEM for correcting both HG cosmic and beam.
  UseLGBeamForHGCosmic : true
+ # Ignore Paddle PMTs as they do not have a corresponding OpDet in geometry now.
+ # Note, actually, that (i.e. PMT in geometry) is not strictly needed.
+ # But we do not want to implement a hack so till then we ignore these PMTs.
+ IgnoreChannel: [  32,  33,  34,  35,
+                  132, 133, 134, 135,
+                  232, 233, 234, 235,
+                  332, 333, 334, 335 ] 
  #
  # NOTE: the following corrections are the same as those in correct_saturation_afterRun3701.fcl 
  #
