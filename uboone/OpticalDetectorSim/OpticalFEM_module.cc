@@ -405,7 +405,10 @@ namespace opdet {
 	optdata::Channel_t channel = channelData.ChannelNumber();
 	unsigned int crate, slot, femch;
 	ch_map->GetCrateSlotFEMChFromReadoutChannel(channel,crate,slot,femch);
-	if(_debug) std::cout << "Corresponding hardware address: Crate = " << crate << " Slot = " << slot << " FEMCh = " << femch << std::endl;
+	if(_debug) std::cout << "Channel " << channel
+			     << " corresponding hardware address: Crate = " << crate 
+			     << " Slot = " << slot 
+			     << " FEMCh = " << femch << std::endl;
 	if(slot >= fm_slots.size() || fm_slots[slot] < 0) {
 	  if(_debug) std::cout << "Line " << __LINE__ << ": skipping channel " 
 			       << channel << " (FEM " << slot << " not in config!)" << std::endl;
