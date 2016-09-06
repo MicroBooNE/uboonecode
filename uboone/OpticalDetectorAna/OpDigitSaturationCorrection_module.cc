@@ -5,6 +5,10 @@
 //
 // Generated at Sun Oct 25 16:07:45 2015 by David Caratelli using artmod
 // from cetpkgsupport v1_08_07.
+
+// DOCUMENTATION FOR THIS MODULE CAN BE FOUND @ DOCDB 4979
+// http://microboone-docdb.fnal.gov:8080/cgi-bin/ShowDocument?docid=4979
+
 ////////////////////////////////////////////////////////////////////////
 
 #include "art/Framework/Core/EDProducer.h"
@@ -128,8 +132,18 @@ private:
   // baseline?
   short unsigned int _baseline;
 
+  // vector storing channel number for calibration correction
+  std::vector<unsigned int> _gain_chan_v;
   // vector holding the calibration correction factors per PMT
-  std::vector<double> _calibration_corr;
+  std::vector<double>       _gain_vals_v;
+
+  // vector storing channel number for baseline values
+  std::vector<unsigned int> _baseline_chan_v;
+  // vector storing baseline value
+  std::vector<double>       _baseline_vals_v;
+
+  // save waveforms in ttree
+  bool _save_wfs;
 
   // flat to allow use LG Beam FEM for HG Cosmic correction 
   // If enabled, _LG_cosmic_* must be empty (else exception)
@@ -181,6 +195,12 @@ private:
   // Ignore set of channels
   std::set<size_t> _ignore_channels;
 
+  // OpChannel to baseline
+  std::vector<double> _opch_to_baseline_m;
+  
+  // OpChannel to Gain
+  std::vector<double> _opch_to_gain_m;
+
   // Tree variables
   TTree* _tree;
   int    _event;
@@ -191,10 +211,11 @@ private:
   int    _nticks_HG, _nticks_LG;
   int    _pmt;       // OpDet PMT number
   int    _matched;   // boolean matched HG to LG
+  int    _swapped;   // LG corrected swapped in for HG
   double _time_HG, _time_LG;
   int    _max_adc_HG, _max_adc_LG;
   int    _max_tdc_HG, _max_tdc_LG;
-  std::vector<short> _wf_HG, _wf_LG;
+  std::vector<short> _wf_HG, _wf_LG, _wf_corr;
   int    _max_adc_corr; // the maximum ADC assigned to the LG corrected WF that replaced the HG saturated WF
 };
 
@@ -232,13 +253,21 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
   produces< std::vector<raw::OpDetWaveform> >( opdet::UBOpChannelEnumName( opdet::OpdetCosmicHighGain ) );
 
   // load per-PMT calibration correction factors
-  _calibration_corr = p.get< std::vector<double> > ( "CalibrationCorr" );
-  // if we did not provide 32 values (one per PMT) raise an exception
-  if(_calibration_corr.size() != 32) {
-    std::cerr<<"\033[93m[ERROR]\033[00m Calibration Correction vector does not have 32 elements!"<<std::endl;
+  _gain_chan_v = p.get< std::vector<unsigned int> > ( "GainChannelNumber" );
+  _gain_vals_v = p.get< std::vector<double>       > ( "GainValues"        );
+  if (_gain_chan_v.size() != _gain_vals_v.size() ){
+    std::cerr << "Calibration Correction values and channel-list vectors do not agree in size...";
     throw std::exception();
   }
 
+  // load per-channel baseline values
+  _baseline_chan_v = p.get< std::vector<unsigned int> > ("BaselineChannelNumber");
+  _baseline_vals_v = p.get< std::vector<double>       > ("BaselineValues"       );
+  if (_baseline_chan_v.size() != _baseline_vals_v.size() ){
+    std::cerr << "Baseline values and channel-list vectors do not agree in size...";
+    throw std::exception();
+  }
+ 
   // Take care of a beamgate if specified
   _include_beamgate = p.get<bool>("IncludeBeamgate");
 
@@ -251,7 +280,7 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
   // scale LG to HG
   _gain_fact = 10.;
 
-  // set baseline
+  // set default baseline
   _baseline = 2048;
 
   // max ADC
@@ -263,9 +292,6 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
   // verbosity flag
   _verbose = p.get<bool>("verbose");
 
-  // make tree
-  MakeTree();
-
   // producer name/labels
   _LG_producer  = p.get<std::string>( "LGProducer"  );
   _LG_label     = p.get<std::string>( "LGLabel","*" );
@@ -275,6 +301,11 @@ OpDigitSaturationCorrection::OpDigitSaturationCorrection(fhicl::ParameterSet con
   _LG_cosmic_label    = p.get<std::string>( "LGLabelCosmic","*" );
   _HG_cosmic_producer = p.get<std::string>( "HGProducerCosmic"  );
   _HG_cosmic_label    = p.get<std::string>( "HGLabelCosmic","*" );
+
+  _save_wfs = p.get<bool>("SaveWaveformInTTree");
+  
+  // make tree
+  MakeTree();
 
   _use_LG_beam_for_HG_cosmic = p.get<bool>("UseLGBeamForHGCosmic");
   if(_use_LG_beam_for_HG_cosmic && (!_LG_cosmic_producer.empty() || !_LG_cosmic_label.empty())) {
@@ -308,6 +339,8 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
       _opch_to_chtype_m.resize(ch+1,opdet::Undefined);
       _opch_to_chcategory_m.resize(ch+1,opdet::Uncategorized);
       _opch_to_opdet_m.resize(ch+1,-1);
+      _opch_to_baseline_m.resize(ch+1,_baseline);
+      _opch_to_gain_m.resize(ch+1,1.);
     }
 
     bool skip=true;
@@ -325,7 +358,26 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
     _opch_to_chtype_m[ch] = ub_geom->GetChannelType(ch);
 
     if(skip) _opch_to_opdet_m[ch] = -1;
-    else _opch_to_opdet_m[ch] = geom->OpDetFromOpChannel(ch);      
+    else _opch_to_opdet_m[ch] = geom->OpDetFromOpChannel(ch);
+
+    // if this channel is found in the user-defined baseline map, add baseline value
+    for (size_t i=0; i < _baseline_chan_v.size(); i++){
+      auto const& chan = _baseline_chan_v[i];
+      if (chan == ch){
+	_opch_to_baseline_m[ ch ] = _baseline_vals_v[ i ];
+	break;
+      }
+    }
+
+    // if this channel is found in the user-defined gain map, add baseline value
+    for (size_t i=0; i < _gain_chan_v.size(); i++){
+      auto const& chan = _gain_chan_v[i];
+      if (chan == ch){
+	_opch_to_gain_m[ ch ] = _gain_vals_v[ i ];
+	break;
+      }
+    }
+    
   }
 
   // Reverse-engineer OpDet => set of OpChannel mapping (probably not really useful)
@@ -403,6 +455,19 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
       std::cout << std::endl;
     }
     std::cout << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "Loaded OpChan => Baseline mapping" << std::endl;
+    for(size_t opch=0; opch < _opch_to_baseline_m.size(); ++opch) 
+      std::cout << opch << " => " << _opch_to_baseline_m[ opch ] << std::endl;
+    std::cout << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "Loaded OpChan => Gain mapping" << std::endl;
+    for(size_t opch=0; opch < _opch_to_gain_m.size(); ++opch) 
+      std::cout << opch << " => " << _opch_to_gain_m[ opch ] << std::endl;
+    std::cout << std::endl;
+
   }
 }
 
@@ -672,13 +737,14 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     
     auto const& max_idx = getMaxADC(wf_HG);
     double wf_time = wf_HG.TimeStamp() - _TrigTime;
-    
+
+    _chan_HG    = wf_HG.ChannelNumber();    
     _time_HG    = wf_time;
-    _max_adc_HG = wf_HG.at(max_idx) - _baseline;
+    _max_adc_HG = wf_HG.at(max_idx) - _opch_to_baseline_m[ _chan_HG ];
     _max_tdc_HG = max_idx;
-    _chan_HG    = wf_HG.ChannelNumber();
     _pmt        = opdet;
     _matched    = 0;
+    _swapped    = 0;
     _wf_HG      = wf_HG;
     _nticks_HG  = wf_HG.size();
 
@@ -713,16 +779,16 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
       _matched      = 1;
       _chan_LG      = wf_LG.ChannelNumber();
       _time_LG      = wf_LG.TimeStamp() - _TrigTime;
-      _max_adc_LG   = wf_LG.at(max_idx_LG) - _baseline;
+      _max_adc_LG   = wf_LG.at(max_idx_LG) - _opch_to_baseline_m[ _chan_LG ];
       _max_tdc_LG   = max_idx_LG;
-      _max_adc_corr = _max_adc_LG * ( _gain_fact * _calibration_corr[ wf_LG.ChannelNumber() % 100 ] );
+      _max_adc_corr = _max_adc_LG * ( _gain_fact * _opch_to_gain_m[ _chan_HG ] );
       _wf_LG        = wf_LG;
       _nticks_LG    = wf_LG.size();
       if (_verbose)
 	std::cout << "finished getting corresponding LG pulse w/ idx " << LG_idx << std::endl;
       
       // if the max ADC value for the HG was below saturation -> add the HG wf
-      if (_max_adc_HG < (4095-_baseline) ){
+      if (_max_adc_HG + 10 < (4095 - _opch_to_baseline_m[ _chan_HG ]) ){
 	if (_verbose)
 	  std::cout << "HG pulse not saturated -> add HG pulse" << std::endl;
 	corrected_beam_wfs->push_back(wf_HG);
@@ -733,17 +799,17 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 	  // create a new waveform by editing the LG one
 	  if (_verbose)
 	    std::cout << "corr factor for chan " << wf_LG.ChannelNumber()
-		      << " : " << _calibration_corr[ wf_LG.ChannelNumber() % 100 ] << std::endl;
+		      << " : " << _opch_to_gain_m[ _chan_HG ] << std::endl;
 	  std::vector<short unsigned int> adcs;
 	  for (size_t n=0; n < wf_LG.size(); n++){
-	    int this_ADC_above_baseline = wf_LG.at(n) - _baseline;
+	    int this_ADC_above_baseline = wf_LG.at(n) - _opch_to_baseline_m [ _chan_LG ];
 	    // make sure we don't overflow the data-product (not the firmware waveform...)
-	    if (this_ADC_above_baseline > (int)( ADC_max / (_gain_fact * _calibration_corr[ wf_LG.ChannelNumber() % 100 ] ) ) ){
+	    if (this_ADC_above_baseline > (int)( ADC_max / (_gain_fact * _opch_to_gain_m[ _chan_HG ] ) ) ){
 	      if (_verbose) std::cout << "new ADC (saturated) : " << ADC_max << std::endl;
 	      adcs.push_back(ADC_max);
 	    }
 	    else{
-	      short unsigned int new_ADC = (short unsigned int)( this_ADC_above_baseline * (_gain_fact * _calibration_corr[ wf_LG.ChannelNumber() % 100 ] ) + _baseline );
+	      short unsigned int new_ADC = (short unsigned int)( this_ADC_above_baseline * (_gain_fact * _opch_to_gain_m[ _chan_HG ] ) + _opch_to_baseline_m[ _chan_LG ] );
 	      if (_verbose) std::cout << "new ADC (not saturated) : " << new_ADC << std::endl;
 	      adcs.push_back( new_ADC );
 	    }
@@ -752,6 +818,10 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 				    _opchLG_to_opchHG_m [ wf_LG.ChannelNumber() ],
 				    adcs);
 	  corrected_beam_wfs->push_back(new_wf);
+	  _wf_corr = new_wf;
+	  _swapped = 1;
+	  if (_verbose)
+	    std::cout << "saved a corrected waveform w/ " << _wf_corr.size() << " ticks" << std::endl;
       }// if this waveform saturates
     }// if LG wf was found
     
@@ -763,7 +833,6 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
       std::cout << "move to next wf..." << std::endl;
     
   }// for all WFs
-
 
   // loop through HG COSMICS waveforms
   for (size_t idx = 0; idx < opwf_HG_cosmic_v->size(); idx++){
@@ -796,13 +865,14 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
     
     auto const& max_idx = getMaxADC(wf_HG);
     double wf_time = wf_HG.TimeStamp() - _TrigTime;
-    
+
+    _chan_HG    = wf_HG.ChannelNumber();    
     _time_HG    = wf_time;
-    _max_adc_HG = wf_HG.at(max_idx) - _baseline;
+    _max_adc_HG = wf_HG.at(max_idx) - _opch_to_baseline_m[ _chan_HG ];
     _max_tdc_HG = max_idx;
-    _chan_HG    = wf_HG.ChannelNumber();
     _pmt        = opdet;
     _matched    = 0;
+    _swapped    = 0;
     _wf_HG      = wf_HG;
     _nticks_HG  = wf_HG.size();
 
@@ -836,16 +906,16 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
       _matched      = 1;
       _chan_LG      = wf_LG.ChannelNumber();
       _time_LG      = wf_LG.TimeStamp() - _TrigTime;
-      _max_adc_LG   = wf_LG.at(max_idx_LG) - _baseline;
+      _max_adc_LG   = wf_LG.at(max_idx_LG) - _opch_to_baseline_m[ _chan_LG ];
       _max_tdc_LG   = max_idx_LG;
-      _max_adc_corr = _max_adc_LG * ( _gain_fact * _calibration_corr[  wf_LG.ChannelNumber() % 100 ] );
+      _max_adc_corr = _max_adc_LG * ( _gain_fact * _opch_to_gain_m[ _chan_HG ] );
       _wf_LG        = wf_LG;
       _nticks_LG    = wf_LG.size();
       if (_verbose)
 	std::cout << "finished getting corresponding LG pulse w/ idx " << LG_idx << std::endl;
       
       // if the max ADC value for the HG was below saturation -> add the HG wf
-      if (_max_adc_HG < (4095-_baseline) ){
+      if (_max_adc_HG + 10 < (4095 - _opch_to_baseline_m[ _chan_HG ]) ){
 	if (_verbose)
 	  std::cout << "HG pulse not saturated -> add HG pulse" << std::endl;
 	corrected_cosmic_wfs->push_back(wf_HG);
@@ -856,24 +926,28 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 	  // create a new waveform by editing the LG one
 	  if (_verbose)
 	    std::cout << "corr factor for chan " << wf_LG.ChannelNumber()
-		      << " : " << _calibration_corr[ wf_LG.ChannelNumber() % 100 ] << std::endl;
+		      << " : " << _opch_to_gain_m[ _chan_HG ] << std::endl;
 	  std::vector<short unsigned int> adcs;
 	  for (size_t n=0; n < wf_LG.size(); n++){
-	    int this_ADC_above_baseline = wf_LG.at(n) - _baseline;
+	    int this_ADC_above_baseline = wf_LG.at(n) - _opch_to_baseline_m[ _chan_LG ];
 	    // make sure we don't overflow the data-product (not the firmware waveform...)
-	    if (this_ADC_above_baseline > (int)( ADC_max / (_gain_fact * _calibration_corr[ wf_LG.ChannelNumber() % 100 ] ) ) ){
+	    if (this_ADC_above_baseline > (int)( ADC_max / (_gain_fact * _opch_to_gain_m[ _chan_HG ] ) ) ){
 	      if (_verbose) std::cout << "new ADC (saturated) : " << ADC_max << std::endl;
 	      adcs.push_back(ADC_max);
 	    }
 	    else{
-	      short unsigned int new_ADC = (short unsigned int)( this_ADC_above_baseline * (_gain_fact * _calibration_corr[ wf_LG.ChannelNumber() % 100 ] ) + _baseline );
+	      short unsigned int new_ADC = (short unsigned int)( this_ADC_above_baseline * (_gain_fact * _opch_to_gain_m[ _chan_HG ] ) + _opch_to_baseline_m[ _chan_LG ] );
 	      if (_verbose) std::cout << "new ADC (not saturated) : " << new_ADC << std::endl;
 	      adcs.push_back( new_ADC );
 	    }
 	  }// for all ADCs
 	  raw::OpDetWaveform new_wf(wf_LG.TimeStamp(),
-				    _opchLG_to_opchHG_m [ wf_LG.ChannelNumber() ],
+				    _opchLG_to_opchHG_m [ _chan_LG ],
 				    adcs);
+	  _wf_corr = new_wf;
+	  _swapped = 1;
+	  if (_verbose)
+	    std::cout << "saved a corrected waveform w/ " << _wf_corr.size() << " ticks" << std::endl;
 	  corrected_cosmic_wfs->push_back(new_wf);
       }// if this waveform saturates
     }// if LG wf was found
@@ -910,18 +984,21 @@ void OpDigitSaturationCorrection::MakeTree()
   _tree->Branch ( "chan_LG",    &_chan_LG,    "chan_LG/i"   );
   _tree->Branch ( "pmt",        &_pmt,        "pmt/i"       );
   _tree->Branch ( "matched",    &_matched,    "matched/I"   ); // both HG and LG wfs present
+  _tree->Branch ( "swapped",    &_swapped,    "swapped/I"   ); // LG corrected swapped in for HG 
   _tree->Branch ( "_nticks_LG",   &_nticks_LG,    "nticks_LG/I"   ); // number of ticks in waveform
   _tree->Branch ( "_nticks_HG",   &_nticks_HG,    "nticks_HG/I"   ); // number of ticks in waveform
   _tree->Branch ( "time_HG",    &_time_HG,    "time_HG/D"   );
   _tree->Branch ( "max_adc_HG", &_max_adc_HG, "max_adc_HG/I");
   _tree->Branch ( "max_tdc_HG", &_max_tdc_HG, "max_tdc_HG/I");
-  //_tree->Branch ( "_wf_HG","std::vector<short>", &_wf_HG      );
   _tree->Branch ( "time_LG",    &_time_LG,    "time_LG/D"   );
   _tree->Branch ( "max_adc_LG", &_max_adc_LG, "max_adc_LG/I");
   _tree->Branch ( "max_tdc_LG", &_max_tdc_LG, "max_tdc_LG/I");
-  //_tree->Branch ( "_wf_LG","std::vector<short>", &_wf_LG      );
   _tree->Branch ( "max_adc_corr", &_max_adc_corr, "max_adc_corr/I");
-
+  if (_save_wfs == true){
+    _tree->Branch ( "_wf_LG","std::vector<short>", &_wf_LG    );
+    _tree->Branch ( "_wf_HG","std::vector<short>", &_wf_HG    );
+    _tree->Branch ( "_wf_corr","std::vector<short>", &_wf_corr    );
+  }
 }
 
 DEFINE_ART_MODULE(OpDigitSaturationCorrection)
