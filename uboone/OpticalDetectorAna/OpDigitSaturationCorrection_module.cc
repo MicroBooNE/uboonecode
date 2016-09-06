@@ -390,25 +390,29 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
 
   // loop through _opdet_to_opch_m and for the various entries find which HG and LG channel numbers
   // are associated with the same FEM
-  for(size_t opdet=0; opdet < _opdet_to_opch_m.size(); opdet++) {
+  for(auto const& opch_set : _opdet_to_opch_m) {
     
-    // get all channel numbers associated with this opdet PMG
-    auto const& opch_set = _opdet_to_opch_m[ opdet ];
     // map beamgate LG to HG
-    for (std::set<int>::iterator it1 = opch_set.begin(); it1 != opch_set.end(); ++it1){
-      auto const& opch1 = *it1;
+    for (auto const& opch1 : opch_set) {
+
       if ( _opch_to_chcategory_m[opch1] == opdet::OpdetBeamHighGain){
-	for (std::set<int>::iterator it2 = opch_set.begin(); it2 != opch_set.end(); ++it2){
-	  auto const& opch2 = *it2;
-	  if ( _opch_to_chcategory_m[opch2] == opdet::OpdetBeamLowGain)
+	for(auto const& opch2 : opch_set) {
+	  if ( _opch_to_chcategory_m[opch2] == opdet::OpdetBeamLowGain) {
 	    _opchLG_to_opchHG_m[ opch2 ] = opch1;
+	    break;
+	  }
 	}
       }// map Beam LG => HG
       if ( _opch_to_chcategory_m[opch1] == opdet::OpdetCosmicHighGain){
-	for (std::set<int>::iterator it2 = opch_set.begin(); it2 != opch_set.end(); ++it2){
-	  auto const& opch2 = *it2;
-	  if ( _opch_to_chcategory_m[opch2] == opdet::OpdetCosmicLowGain)
+	for(auto const& opch2 : opch_set) {
+	  if ( !_use_LG_beam_for_HG_cosmic && _opch_to_chcategory_m[opch2] == opdet::OpdetCosmicLowGain) {
 	    _opchLG_to_opchHG_m[ opch2 ] = opch1;
+	    break;
+	  }
+	  if ( _use_LG_beam_for_HG_cosmic && _opch_to_chcategory_m[opch2] == opdet::OpdetBeamLowGain) {
+	    _opchLG_to_opchHG_m[ opch2 ] = opch1;
+	    break;
+	  } 
 	}
       }// map Cosmic LG => HG
     }
