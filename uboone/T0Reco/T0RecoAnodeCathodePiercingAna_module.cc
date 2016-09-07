@@ -24,7 +24,9 @@
 // data-products
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/AnalysisBase/T0.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/MCBase/MCTrack.h"
+#include "lardataobj/RecoBase/OpFlash.h"
 #include "lardata/Utilities/AssociationUtil.h"
 
 // C++
@@ -60,12 +62,29 @@ private:
   // Declare member data here.
   std::string fTrackProducer;
   std::string fT0Producer;
+  std::string fFlashProducer;
+
+  bool        fUseMC;
   double      fResolution; // cm resolution to allow mc-reco track matching. [Y,Z] must be within this distance
+
 
   TTree* _tree;
   double _mc_time;
   double _rc_time;
+  double _t_match;
+  double _dt_flash;
+  double _pe_flash;
+  double _length;
+  double _rc_x_start, _rc_x_end;
+  double _rc_y_start, _rc_y_end;
+  double _rc_z_start, _rc_z_end;
+  double _mc_x_start, _mc_x_end;
+  double _mc_y_start, _mc_y_end;
+  double _mc_z_start, _mc_z_end;
   int    _matched;
+
+  TTree* _mucs_tree;
+  double _reco_time;
 
   bool MatchTracks(const recob::Track& track, const sim::MCTrack& mctrk, const double& res);
 
@@ -74,12 +93,14 @@ private:
 
 T0RecoAnodeCathodePiercingAna::T0RecoAnodeCathodePiercingAna(fhicl::ParameterSet const & p)
   :
-  EDAnalyzer(p)  // ,
- // More initializers here.
+  EDAnalyzer(p)
 {
-  fTrackProducer = p.get<std::string>("TrackProducer");
-  fT0Producer    = p.get<std::string>("T0Producer");
-  fResolution    = p.get<double>("Resolution");
+  fTrackProducer     = p.get<std::string>("TrackProducer"    );
+  fT0Producer        = p.get<std::string>("T0Producer"       );
+  fFlashProducer     = p.get<std::string>("FlashProducer"    );
+  fUseMC             = p.get<bool>       ("UseMC"            );
+  fResolution        = p.get<double>     ("Resolution"       );
+
 }
 
 void T0RecoAnodeCathodePiercingAna::beginJob()
@@ -89,7 +110,37 @@ void T0RecoAnodeCathodePiercingAna::beginJob()
   _tree = tfs->make<TTree>("_tree","T0 reco performance");
   _tree->Branch("_mc_time",&_mc_time,"mc_time/D");
   _tree->Branch("_rc_time",&_rc_time,"rc_time/D");
+  _tree->Branch("_t_match",&_t_match,"t_match/D");
+  _tree->Branch("_dt_flash",&_dt_flash,"dt_flash/D");
+  _tree->Branch("_pe_flash",&_pe_flash,"pe_flash/D");
+  _tree->Branch("_length", &_length, "length/D");
   _tree->Branch("_matched",&_matched,"matched/I");
+  // Add branches for the first and last x, y, and z coordinates of the rc tracks and the mc tracks
+  _tree->Branch("_mc_x_start",&_mc_x_start,"mc_x_start/D");
+  _tree->Branch("_mc_y_start",&_mc_y_start,"mc_y_start/D");
+  _tree->Branch("_mc_z_start",&_mc_z_start,"mc_z_start/D");
+  _tree->Branch("_mc_x_end",&_mc_x_end,"mc_x_end/D");
+  _tree->Branch("_mc_y_end",&_mc_y_end,"mc_y_end/D");
+  _tree->Branch("_mc_z_end",&_mc_z_end,"mc_z_end/D");
+  _tree->Branch("_rc_x_start",&_rc_x_start,"rc_x_start/D");
+  _tree->Branch("_rc_y_start",&_rc_y_start,"rc_y_start/D");
+  _tree->Branch("_rc_z_start",&_rc_z_start,"rc_z_start/D");
+  _tree->Branch("_rc_x_end",&_rc_x_end,"rc_x_end/D");
+  _tree->Branch("_rc_y_end",&_rc_y_end,"rc_y_end/D");
+  _tree->Branch("_rc_z_end",&_rc_z_end,"rc_z_end/D");
+
+  _mucs_tree = tfs->make<TTree>("_mucs_tree","MuCS tagged tracks tree");
+  _mucs_tree->Branch("_reco_time",&_reco_time,"reco_time/D");
+  _mucs_tree->Branch("_length", &_length, "length/D");
+  _mucs_tree->Branch("_t_match",&_t_match,"t_match/D");
+  _mucs_tree->Branch("_dt_flash",&_dt_flash,"dt_flash/D");
+  _mucs_tree->Branch("_pe_flash",&_pe_flash,"pe_flash/D");
+  _mucs_tree->Branch("_rc_x_start",&_rc_x_start,"rc_x_start/D");
+  _mucs_tree->Branch("_rc_y_start",&_rc_y_start,"rc_y_start/D");
+  _mucs_tree->Branch("_rc_z_start",&_rc_z_start,"rc_z_start/D");
+  _mucs_tree->Branch("_rc_x_end",&_rc_x_end,"rc_x_end/D");
+  _mucs_tree->Branch("_rc_y_end",&_rc_y_end,"rc_y_end/D");
+  _mucs_tree->Branch("_rc_z_end",&_rc_z_end,"rc_z_end/D");
 
   fResolution = 10; // cm
 
@@ -112,53 +163,119 @@ void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
   // load MCtracks
   art::Handle<std::vector<sim::MCTrack> > mctrk_h;
   e.getByLabel("mcreco",mctrk_h);
-  
-  // make sure tracks look good
-  if(!mctrk_h.isValid()) {
-    std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate MCTrack!"<<std::endl;
-    throw std::exception();
-  }
+
+  // if we should use MCTrack
+  if (fUseMC){
+    // make sure tracks look good
+    if(!mctrk_h.isValid()) {
+      std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate MCTrack!"<<std::endl;
+      throw std::exception();
+    }
+  }// if use MCTrack
 
   // grab T0 objects associated with tracks
   art::FindMany<anab::T0> trk_t0_assn_v(track_h, e, fT0Producer );
+
+  // grab flashes associated with tracks
+  art::FindMany<recob::OpFlash> trk_flash_assn_v(track_h, e, fFlashProducer );
+
+  // grab CosmicTag objects associated with tracks
+  // art::FindMany<anab::CosmicTag> trk_cosmictag_assn_v(track_h, e, fCosmicTagProducer);
 
   for (size_t i=0; i < track_h->size(); i++){
 
     auto const& track = track_h->at(i);
 
+    // Here is where I'll set the coordinates for the start and end of the rc track
+    if (_rc_y_start > _rc_y_end){
+      _rc_x_start = track.Vertex().X();
+      _rc_y_start = track.Vertex().Y();
+      _rc_z_start = track.Vertex().Z();
+      _rc_x_end   = track.End().X();
+      _rc_y_end   = track.End().Y();
+      _rc_z_end   = track.End().Z();
+    }
+    // travelling downward
+    else {
+      _rc_x_start = track.End().X();
+      _rc_y_start = track.End().Y();
+      _rc_z_start = track.End().Z();
+      _rc_x_end   = track.Vertex().X();
+      _rc_y_end   = track.Vertex().Y();
+      _rc_z_end   = track.Vertex().Z();
+    }
+
+
+    _length = track.Length();
+
     _matched = 0;
 
     std::vector<const anab::T0*> T0_v = trk_t0_assn_v.at(i);
+
+    std::vector<const recob::OpFlash*> flash_v = trk_flash_assn_v.at(i);
 
     // grab T0 object
     if (T0_v.size() == 1){
 
       auto t0 = T0_v.at(0);
-
+      
       // reconstructed time comes from T0 object
       _rc_time = t0->Time();
-      
-      // loop through MCTracks to find the one that matches.
-      for (size_t j=0; j < mctrk_h->size(); j++){
+
+      // if there is an associated optical flash
+      if (flash_v.size() == 1){
 	
-	auto const& mctrk = mctrk_h->at(j);
+	auto flash = flash_v.at(0);
+	
+	_pe_flash = flash->TotalPE();
+	_t_match  = flash->Time();
+	_dt_flash = flash->Time() - _rc_time;
 
-	// try matching to MC
-	if (MatchTracks(track, mctrk, fResolution) == false)
-	  continue;
+	std::cout << "The _t_match = " << _t_match << "." << std::endl;
+	std::cout << "The _dt_flash = " << _dt_flash << "." << std::endl;
+	std::cout<< "The _pe_flash = " << _pe_flash << "." << std::endl;
+      } // if there is an optical flash
 
-	// matched -> get MCTrack time and reconstructed track reconstructed T0
-	_mc_time = mctrk.at(0).T() / 1000.;
-	_matched = 1;
+      // if we should use MC info -> continue w/ MC validation
+      if (fUseMC == true){
+	// loop through MCTracks to find the one that matches.
+	for (size_t j=0; j < mctrk_h->size(); j++){
+	  
+	  auto const& mctrk = mctrk_h->at(j);
+	  
+	  // try matching to MC
+	  if (MatchTracks(track, mctrk, fResolution) == false)
+	    continue;
+	  
+	  // matched -> get MCTrack time and reconstructed track reconstructed T0
+	  _mc_time = mctrk.at(0).T() / 1000.;
+	  _matched = 1;
 
-      } // for all MCTracks
 
+	  // Here is where I'll set the coordinates for the start and end of the mc tracks
+	  _mc_x_start = mctrk.at(0).X();
+	  _mc_y_start = mctrk.at(0).Y();
+	  _mc_z_start = mctrk.at(0).Z();
+	  _mc_x_end   = mctrk.at(mctrk.size() - 1).X();
+	  _mc_y_end   = mctrk.at(mctrk.size() - 1).Y();
+	  _mc_z_end   = mctrk.at(mctrk.size() - 1).Z();
+	  
+	} // for all MCTracks
+      }// if we should use MCTracks
+      
       _tree->Fill();
       
+      // check if there is a cosmic tag, if so assume MuCS-tagged track
+      // std::vector<const anab::CosmicTag*> CosmicTag_v = trk_cosmictag_assn_v.at(i);
+      
+      // if (CosmicTag_v.size() == 1){
+      // _reco_time = _rc_time;
+      // _mucs_tree->Fill();
+      // }
     } // if there is a reconstructed T0
     
   } // for all reconstructed tracks
-
+  
 }
 
 
@@ -175,25 +292,25 @@ bool T0RecoAnodeCathodePiercingAna::MatchTracks(const recob::Track& track, const
   auto const& mctrk_e = mctrk.at( mctrk.size() - 1 );
   auto const& track_s = track.Vertex();
   auto const& track_e = track.End();
-    
+
   // if track start is above and mctrk start is above
   if ( ( track_s.Y() > track_e.Y() ) and ( mctrk_s.Y() > mctrk_e.Y() ) ){
-    if ( (fabs(mctrk_s.Y()-track_s.Y()) < res) and (fabs(mctrk_s.Z()-track_s.Z()) < res) )
+    if ( (fabs(mctrk_s.Y()-track_s.Y()) < res) and (fabs(mctrk_s.Z()-track_s.Z()) < res) and (fabs(mctrk_e.Y()-track_e.Y()) < res) and (fabs(mctrk_e.Z()-track_e.Z()) < res) )
       return true;
   }
   // if tarck start is above and mctrk start is below
   if ( ( track_s.Y() > track_e.Y() ) and ( mctrk_s.Y() < mctrk_e.Y() ) ){
-    if ( (fabs(mctrk_e.Y()-track_s.Y()) < res) and (fabs(mctrk_e.Z()-track_s.Z()) < res) )
+    if ( (fabs(mctrk_e.Y()-track_s.Y()) < res) and (fabs(mctrk_e.Z()-track_s.Z()) < res) and (fabs(mctrk_s.Y()-track_e.Y()) < res) and (fabs(mctrk_s.Z() - track_e.Z()) < res) )
       return true;
   }
   // if track start is below and mctrk start is above
   if ( ( track_s.Y() < track_e.Y() ) and ( mctrk_s.Y() > mctrk_e.Y() ) ){
-    if ( (fabs(mctrk_s.Y()-track_e.Y()) < res) and (fabs(mctrk_s.Z()-track_e.Z()) < res) )
+    if ( (fabs(mctrk_s.Y()-track_e.Y()) < res) and (fabs(mctrk_s.Z()-track_e.Z()) < res) and (fabs(mctrk_e.Y()-track_s.Y()) < res) and (fabs(mctrk_e.Z()-track_s.Z()) < res) )
       return true;
   }
   // if track start is below and mctrk start is below
   if ( ( track_s.Y() < track_e.Y() ) and ( mctrk_s.Y() < mctrk_e.Y() ) ){
-    if ( (fabs(mctrk_e.Y()-track_e.Y()) < res) and (fabs(mctrk_e.Z()-track_e.Z()) < res) )
+    if ( (fabs(mctrk_e.Y()-track_e.Y()) < res) and (fabs(mctrk_e.Z()-track_e.Z()) < res) and (fabs(mctrk_s.Y() - track_s.Y()) < res) and (fabs(mctrk_s.Z()-track_s.Z()) < res) )
       return true;
   }
   

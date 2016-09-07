@@ -1,9 +1,11 @@
 
 BEGIN_PROLOG
 T0RecoAnodeCathodePiercing: {
- module_type   : "T0RecoAnodeCathodePiercing"  
- TrackProducer : "pandoraCosmic"
- Resolution    : 10
- DriftVelocity : 0.11
+ module_type    : "T0RecoAnodeCathodePiercing"  
+ TrackProducer  : "pandoraCosmic"
+ FlashProducer  : "opflashSat"
+ Resolution     : 10
+ DriftVelocity  : 0.11
+ TimeResolution : 20
 }
 END_PROLOG
