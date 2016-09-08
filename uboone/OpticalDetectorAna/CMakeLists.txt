@@ -10,11 +10,12 @@ art_make( BASENAME_ONLY
 	  	        larcore_Geometry_Geometry_service
 		        lardata_Utilities
 	                uboone_Geometry
+			UBOpReadoutMap_service
                         lardataobj_OpticalDetectorData
 			larana_OpticalDetector
                         lardataobj_RawData
 			lardataobj_RecoBase
-			larsim_Simulation larsimobj_Simulation
+			larsim_Simulation lardataobj_Simulation
 			nusimdata_SimulationBase
 			larsim_PhotonPropagation
 			uboone_OpticalDetectorAna

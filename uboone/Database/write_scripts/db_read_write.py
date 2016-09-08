@@ -174,7 +174,7 @@ def main():
     elif o in ("--is_playlist"):
       is_playlist = True
     elif o in ("--production"):
-      host = "ifdb02.fnal.gov"
+      host = "ifdb05.fnal.gov"
       dbname = "microboone_prod"
     else:
       assert False, "unhandled option "+o

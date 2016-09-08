@@ -1,0 +1,102 @@
+#include "reco_uboone_data_Feb2016.fcl"
+
+process_name : ACTrackFilter      #The process name must NOT contain any underscores
+
+source : {
+  module_type : RootInput
+  maxEvents   : -1
+  inputCommands: [ "keep *_*_*_*",
+  		   "drop raw::raw::ubdaqSoftwareTriggerData_*_*_*" ]
+}
+
+services : {
+
+  TFileService: { fileName: "ACTrackFilter_hist.root" }
+  #TimeTracker:       {}
+  Timing: {}
+  MemoryTracker:     {}
+  RandomNumberGenerator: {}                     #ART native random number generator
+
+  @table::microboone_reco_data_services
+
+  message:      @local::standard_info
+
+}
+
+outputs: {
+  out: { module_type: RootOutput
+  	         fileName: "ACTrackFilter_Output.root"
+		 fastCloning: true
+		 compressionLevel: 1
+		 writeParameterSets: false}
+}
+
+physics: {
+
+  producers : {
+
+    rffhit: {
+      module_type:           "RFFHitFinder"
+      WireModuleLabel:       "caldata"
+      RFFHitFinderAlgParams: {
+        AmplitudeThreshold:   [ 4.0, 4.0, 5.0 ]
+    	MeanMatchThreshold:   [ 2.0 ]
+    	MinMergeMultiplicity: [ 2 ]
+      }
+    }
+
+    @table::microboone_reco_data_producers
+
+  }
+
+  analyzers: {
+    actrackana: {
+      module_type: "AnodeCathodeTrackAna" #module name
+      HitLabel: "gaushit"                 #hit collection to use
+      TrackLabels: ["trackkalmanhit"]     #track collections (should be vector)
+      Verbose: true                       #print small messages
+      TrackMinDeltaX: 0.                  #minimum dX to consider tracks
+      TrackMaxDeltaX: 300.                #maximum dX to consider tracks
+      AnodeCathodPMAlg:{
+        PlaneID: 2	                  #plane ID to do pattern matching on
+	WiresPerBin: 64                   #wires per bin in pattern matching
+	TimeTicksPerBin: 100              #time ticks per bin in pattern matching
+	NtimeTicksPattern: 4000           #total time range to consider for patterns
+	IntegralThreshold: 10             #threshold for integral charge in bin to consider matched
+      }
+    }
+  }
+
+  filters : {
+    acfilter: {
+      module_type: "AnodeCathodeTrackFilter" #module name
+      HitLabel: "gaushit"		     #hit collection to use as input
+      FractionMatchingThreshold: 0.9	     #minimum pattern matching threshold for filter (>val returns true)
+      Verbose: true		 	     #print small messages
+      AnodeCathodPMAlg:{
+        PlaneID: 2	                  #plane ID to do pattern matching on
+	WiresPerBin: 64                   #wires per bin in pattern matching
+	TimeTicksPerBin: 100              #time ticks per bin in pattern matching
+	NtimeTicksPattern: 4000           #total time range to consider for patterns
+	IntegralThreshold: 10             #threshold for integral charge in bin to consider matched
+      }
+    }
+  }
+
+  # trigger_paths: [ path0, path1 ]
+  # end_paths:     [ path2, path3 ]
+
+
+  ac_path : [ acfilter ]
+  reco    : [ fuzzycluster, trackkalmanhit ]
+  trigger_paths : [ ]
+
+  ana: [actrackana]
+  output : [ out ]
+  end_paths: [ ana ]
+
+}
+
+#services.ChannelStatusService.ChannelStatusProvider.UseDB: false
+#services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: false
+#physics.producers.digitfilter.DigitModuleLabel: "mixer"

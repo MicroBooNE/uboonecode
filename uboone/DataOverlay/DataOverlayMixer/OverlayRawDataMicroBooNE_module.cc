@@ -30,9 +30,9 @@
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "nusimdata/SimulationBase/MCParticle.h"
 
-#include "larsimobj/Simulation/SimChannel.h"
-#include "larsimobj/Simulation/SimPhotons.h"
-#include "larsimobj/Simulation/AuxDetSimChannel.h"
+#include "lardataobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimPhotons.h"
+#include "lardataobj/Simulation/AuxDetSimChannel.h"
 
 #include "lardataobj/MCBase/MCTrack.h"
 #include "lardataobj/MCBase/MCShower.h"
@@ -151,7 +151,7 @@ mix::OverlayRawDataDetailMicroBooNE::OverlayRawDataDetailMicroBooNE(fhicl::Param
   fInputFileIsData(fpset.get<bool>("InputFileIsData")),
   fRawDigitDataModuleLabel(fpset.get<std::string>("RawDigitDataModuleLabel")),
   fOpDetDataModuleLabel(fpset.get<std::string>("OpDetMCModuleLabel")),
-  fRawDigitMCModuleLabel(fpset.get<std::string>("RawDigitDataModuleLabel")),
+  fRawDigitMCModuleLabel(fpset.get<std::string>("RawDigitMCModuleLabel")),
   fOpDetMCModuleLabel(fpset.get<std::string>("OpDetMCModuleLabel")),
   fEventsToMix(fpset.get<size_t>("EventsToMix",1)),
   fDefaultMCRawDigitScale(fpset.get<float>("DefaultMCRawDigitScale",1)),

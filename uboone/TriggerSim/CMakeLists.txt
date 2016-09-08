@@ -15,7 +15,7 @@ art_make( BASENAME_ONLY
                         ${Boost_SYSTEM_LIBRARY}
                         ${ROOT_BASIC_LIB_LIST}
 	  MODULE_LIBRARIES
-			larsim_Simulation larsimobj_Simulation
+			larsim_Simulation lardataobj_Simulation
 			lardataobj_RawData
 			lardataobj_OpticalDetectorData
 			lardata_Utilities

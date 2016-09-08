@@ -41,13 +41,13 @@
 #include "lardataobj/OpticalDetectorData/ChannelDataGroup.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
-#include "larsimobj/Simulation/SimPhotons.h"
+#include "lardataobj/Simulation/SimPhotons.h"
 #include "UBOpticalADC.h" // uboonecode
 #include "UBLogicPulseADC.h" // uboonecode
 #include "uboone/Geometry/UBOpReadoutMap.h" // uboone
 
 /// nutools
-#include "larsimobj/Simulation/BeamGateInfo.h"
+#include "lardataobj/Simulation/BeamGateInfo.h"
 
 // Other
 #include "TF1.h"

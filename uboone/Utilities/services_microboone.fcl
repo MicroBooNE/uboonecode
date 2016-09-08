@@ -19,6 +19,7 @@ microboone_services_reco.LArFFT:                         @local::microboone_larf
 microboone_services_reco.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
 microboone_services_reco.DetPedestalService:            @local::microboone_detpedestalservice
 microboone_services_reco.ChannelStatusService:          @local::microboone_channelstatus_service
+microboone_services_reco.UBOpReadoutMap:                @local::microboone_opreadoutmap
 microboone_services_reco.MemoryPeakReporter: {}
 
 # Define microboone_full_services ... this includes ALL services and we don't care about resource usage!

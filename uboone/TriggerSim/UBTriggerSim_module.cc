@@ -41,7 +41,7 @@
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 /// nutools
-#include "larsimobj/Simulation/BeamGateInfo.h"
+#include "lardataobj/Simulation/BeamGateInfo.h"
 
 namespace trigger {
   /**
