@@ -7,5 +7,7 @@ T0RecoAnodeCathodePiercing: {
  Resolution     : 10
  DriftVelocity  : 0.11
  TimeResolution : 20
+ top2side       : true
+ side2bottom    : true
 }
 END_PROLOG
