@@ -35,6 +35,8 @@ namespace geo {
       throw std::runtime_error("Creating second copy of this class.  Should only be one.");
     }
     __fInstances__++;
+
+    //reg.sPreBeginRun.watch     (this, &UBOpReadoutMap::CheckValidity);
   }
 
   //----------------------------------------------------------------------------
@@ -165,6 +167,10 @@ namespace geo {
 	  int start = (*it).second.at(0);
 	  int end   = (*it).second.at(1);
 	  if ( start<=requested_run && requested_run<=end ) {
+	    if(fVerbose)
+	      std::cout << "Found requested run (" << requested_run
+			<< ") in the range: " << start
+			<< " => " << end << std::endl;
 	    found = true;
 	    index = (*it).first;
 	    loadedmap_runrange_start = start;
@@ -172,6 +178,14 @@ namespace geo {
 	    loadedmap_timerange_start = timerange_opmaps[ index ].at(0);
 	    loadedmap_timerange_end = timerange_opmaps[ index ].at(1);
 	    requested_time = loadedmap_timerange_start;
+	    if(fVerbose) {
+	      char zstart[200];
+	      strftime( zstart, 200, "%Y-%m-%d %H:%M:%S %Z", localtime( &timerange_opmaps[index].at(0) ) );
+	      char zend[200];
+	      strftime( zend, 200, "%Y-%m-%d %H:%M:%S %Z", localtime( &timerange_opmaps[index].at(1) ) );
+	      std::cout << "New map index " << index
+			<< " ... Time Range: " << zstart << " => " << zend << std::endl;
+	    }
 	    break;
 	  }
 	}
@@ -299,7 +313,8 @@ namespace geo {
       }
     }//end loop over categories
 
-    //std::cout << "Number of defined readout channels: " << fNReadoutChannels << std::endl;
+    if(fVerbose)
+      std::cout << "Number of defined readout channels: " << fNReadoutChannels << std::endl;
 
     // ----------------------------------------------------------------------
     // Read in Crate, Slot, FEMCh
@@ -310,11 +325,13 @@ namespace geo {
       if ( fichl_csf.size()!=3 ) {
 	throw std::runtime_error( "Need to have 3 entries for Crate, Slot, FEMCh map." );
       }
-      //std::cout << "reading in " << readoutname << " : " << fichl_csf.at(0) << ", " << fichl_csf.at(1) << ", " << fichl_csf.at(2) << std::endl;
+      if(fVerbose)
+	std::cout << "reading in " << readoutname << " : " << fichl_csf.at(0) << ", " << fichl_csf.at(1) << ", " << fichl_csf.at(2) << std::endl;
       fReadout2CSF.insert( std::make_pair( v, CrateSlotFEMCh( fichl_csf.at(0), fichl_csf.at(1), fichl_csf.at(2) ) ) );
       fCSF2Readout.insert( std::make_pair( CrateSlotFEMCh( fichl_csf.at(0), fichl_csf.at(1), fichl_csf.at(2) ), v ) );
     }
-    //std::cout << "size of csf2readout: " << fCSF2Readout.size() << std::endl;
+    if(fVerbose)
+      std::cout << "size of csf2readout: " << fCSF2Readout.size() << std::endl;
   }
 
   

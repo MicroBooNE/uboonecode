@@ -3,7 +3,9 @@ BEGIN_PROLOG
 T0RecoAnodeCathodePiercingAna: {
  module_type : "T0RecoAnodeCathodePiercingAna"
  TrackProducer : "pandoraCosmic"
+ FlashProducer : "t0reco"
  T0Producer    : "t0reco"
+ UseMC         : false
  Resolution    : 10
 }
 END_PROLOG
