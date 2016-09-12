@@ -17,6 +17,7 @@
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 
 // C++ libraries
 #include <iostream>
@@ -147,8 +148,11 @@ SWTrigger::SWTrigger(fhicl::ParameterSet const & p)
 // :
 // Initialize member data here.
 {
-    // Declare handle to analyzer file
+  // Declare handle to analyzer file
   art::ServiceHandle<art::TFileService> out_file;
+
+  // Declare data products.
+  produces<raw::ubdaqSoftwareTriggerData>();
 
   // Load Parameters
   fDAQHeaderModule = p.get<std::string>("DAQHeaderModule");
@@ -263,6 +267,9 @@ bool SWTrigger::filter(art::Event & evt)
   numi=-1;
 
   clearVariables();
+
+  // Make software trigger data product.
+  auto pswtrig = std::make_unique<raw::ubdaqSoftwareTriggerData>();
 
   // initialize data handles and services
   art::ServiceHandle<geo::UBOpReadoutMap> ub_PMT_channel_map;
@@ -461,9 +468,23 @@ bool SWTrigger::filter(art::Event & evt)
       pass = true;
     }
     else { offline_trigpass.push_back( 0 ); }
+
+    // Update software trigger data product that we put into the event.
+
+    pswtrig->addAlgorithm((*it).algo_instance_name,   // Algorithm name.
+			  (*it).pass_algo,            // Pass algorithm flag.
+			  (*it).pass_prescale,        // Pass prescale flag.
+			  (*it).amplitude,            // PHMAX.
+			  (*it).multiplicity,         // Multiplicity.
+			  (*it).time,                 // Tick.
+			  0.,                         // Time.
+			  (*it).prescale_weight);     // Prescale factor.
   }
   // save phmax vector
   fTwindow->Fill();
+
+  // Stick software trigger data product into the event.
+  evt.put(std::move(pswtrig));
 
   return pass;
 }
