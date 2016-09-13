@@ -1,19 +1,5 @@
-
+#include "correct_saturation.fcl"
 BEGIN_PROLOG
-correct_saturation: {
- module_type : "OpDigitSaturationCorrection"  
- LGProducer  : "pmtreadout"
- LGLabel     : "OpdetBeamLowGain"
- HGProducer  : "pmtreadout"
- HGLabel     : "OpdetBeamHighGain"
- HGProducerCosmic  : "pmtreadout"
- HGLabelCosmic     : "OpdetCosmicHighGain"
- verbose     : false 
- IncludeBeamgate : true
- #
- # NOTE: the following corrections are appropriate only for MC data
- #
- CalibrationCorr : [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,
-                    1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]  # for MC 
-}
+correct_saturation.CalibrationCorr : [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,
+                                      1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]  # for MC 
 END_PROLOG
