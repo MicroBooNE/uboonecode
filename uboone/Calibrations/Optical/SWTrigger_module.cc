@@ -363,6 +363,7 @@ bool SWTrigger::filter(art::Event & evt)
   }
   if(target_time==1e12) {
     std::cerr<<"\033[93m[ERROR]\033[00m Did not find target time... SKIPPING EVENT" <<std::endl;
+    evt.put(std::move(pswtrig));
     return false;
   }
 
@@ -386,6 +387,7 @@ bool SWTrigger::filter(art::Event & evt)
 
     if(!wfms[ch].empty()) {
       std::cerr<<"\033[93m[ERROR]\033[00m Found > 1 waveform with same time for channel "<<ch<<" ... SKIPPING EVENT" << std::endl;
+      evt.put(std::move(pswtrig));
       return false;
     }
     wfms[ch].resize( fMinReadoutTicks, 0 );
@@ -433,7 +435,10 @@ bool SWTrigger::filter(art::Event & evt)
     }
   }
 
-  if(missing) return false;
+  if(missing) {
+    evt.put(std::move(pswtrig));
+    return false;
+  }
   
   // Apply Triggers
   applied=1;
