@@ -230,7 +230,7 @@ physics:
   path_ext_bnb:       [ @sequence::reco, swtrigextbnb ]
   path_ext_numi:      [ @sequence::reco, swtrigextnumi ]
   path_ext_unbiased:  [ @sequence::reco, swtrigextunbiased ]
-  path_mucs:          [ @sequence::reco, trigmucs ]
+  path_mucs:          [ trigmucs ]
 
   trigger_paths: [ path_notpc,
                    path_bnb,
