@@ -10,7 +10,7 @@ services:
   #TFileService: { fileName: "MuCSDT.root" }
   Timing:       {}
   message:      @local::standard_info
-  user:         @local::microboone_simulation_services
+  @table::microboone_simulation_services
 }
 
 source:
@@ -49,4 +49,4 @@ physics:
 
 physics.producers.MuCSDT.MuCSFile: "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_144_0.333_0.root"
 DetectorClocksService.InheritClockConfig: false
-services.user.DetectorClocksService.InheritClockConfig: false
+services.DetectorClocksService.InheritClockConfig: false

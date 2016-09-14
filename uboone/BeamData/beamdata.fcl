@@ -9,7 +9,6 @@ services:
   TFileService: { fileName: "beam_%07r_%05s_%#.root" }
   Timing:       {}
   RandomNumberGenerator: {} #ART native random number generator
-  user:         { }
   FileCatalogMetadata:    @local::art_file_catalog_data
   IFDH:  {}
   message:                    @local::standard_debug
