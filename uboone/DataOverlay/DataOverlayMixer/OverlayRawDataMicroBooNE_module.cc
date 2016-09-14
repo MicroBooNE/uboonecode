@@ -308,7 +308,7 @@ mix::OverlayRawDataDetailMicroBooNE::OverlayRawDataDetailMicroBooNE(fhicl::Param
 
     // Get hostname.
 
-    char hostname[HOST_NAME_MAX];
+    char hostname[256];
     gethostname(hostname, sizeof hostname);
 
     // Get user.
