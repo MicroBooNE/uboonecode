@@ -159,7 +159,8 @@ SWTrigger::SWTrigger(fhicl::ParameterSet const & p)
   fOpDataModule    = p.get<std::string>("OpDataModule");
   fOpFlashModule   = p.get<std::string>("OpFlashModule");
   fNChannels       = p.get<int>("NumberOfChannels");
-  fFEMslot         = p.get<int>("FEMslot");
+  //fFEMslot         = p.get<int>("FEMslot");
+  fFEMslot         = 0;
   fMinReadoutTicks = p.get<int>("MinReadoutTicks");
   std::vector<std::string> triggertypes = p.get<std::vector<std::string>>("swtrg_algotype");
   std::vector<std::string> triggernames = p.get<std::vector<std::string>>("swtrg_algonames");
@@ -280,6 +281,12 @@ bool SWTrigger::filter(art::Event & evt)
 
   // Get OpMap
   ub_PMT_channel_map->SetOpMapRun( evt.run() );
+
+
+  // Update fem slot.
+  unsigned int c,s,f;
+  ub_PMT_channel_map->GetCrateSlotFEMChFromReadoutChannel(0, c, s, f);
+  fFEMslot = s;
   
   // Get Trigger Bit
   evt.getByLabel( fDAQHeaderModule, trigHandle );

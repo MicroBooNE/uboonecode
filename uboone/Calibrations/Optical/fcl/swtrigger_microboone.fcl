@@ -8,7 +8,6 @@ microboone_swtrigger_data:
     OpDataModule:     "pmtreadout"
     OpFlashModule:    "opflashsat"
     NumberOfChannels: 32
-    FEMslot:          4
     MinReadoutTicks:  1499
 
     drop_event : true
@@ -111,7 +110,6 @@ microboone_swtrigger_mc:
     OpDataModule:     "pmtreadout"
     OpFlashModule:    "opflashsat"
     NumberOfChannels: 32
-    FEMslot:          4
     MinReadoutTicks:  1499
 
     drop_event : true
