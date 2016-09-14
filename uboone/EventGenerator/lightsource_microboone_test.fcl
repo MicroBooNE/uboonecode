@@ -18,11 +18,11 @@ services:
   TFileService: { fileName: "single_hist_uboone.root" }
   Timing:       {}
   RandomNumberGenerator: {} #ART native random number generator
-  user:         @local::microboone_full_services
-#  user:         @local::microboone_services
+  @table::microboone_full_services
+#  @table::microboone_services
 }
-#services.user.BackTracker: @local::microboone_backtracker
-services.user.OpDigiProperties: @local::microboone_opdigiproperties
+#services.BackTracker: @local::microboone_backtracker
+services.OpDigiProperties: @local::microboone_opdigiproperties
 
 #Start each new event with an empty event.
 source:
@@ -114,8 +114,8 @@ physics.producers.generator.T0:         800.0      # Central time for photon pro
 physics.producers.generator.FillTree: true
 
 # Must use custom physics list to add optical info
-services.user.LArG4Parameters.UseCustomPhysics: true
-services.user.LArG4Parameters.EnabledPhysics:   [ "Em",
+services.LArG4Parameters.UseCustomPhysics: true
+services.LArG4Parameters.EnabledPhysics:   [ "Em",
                                                   "Optical",
                                                   "SynchrotronAndGN",
                                                   "Ion",

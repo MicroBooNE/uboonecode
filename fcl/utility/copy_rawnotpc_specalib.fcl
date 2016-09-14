@@ -10,10 +10,8 @@ services:
   TFileService: { fileName: "SPEcalibration_output.root" }
   FileCatalogMetadata:  @local::art_file_catalog_data
   DatabaseUtil:         @local::microboone_database
-  user: {
-          DetectorClocksService:            @local::microboone_detectorclocks
-          UBOpReadoutMap:         @local::microboone_opreadoutmap
-	}
+  DetectorClocksService:            @local::microboone_detectorclocks
+  UBOpReadoutMap:         @local::microboone_opreadoutmap
 }
 
 microboone_tfile_metadata:

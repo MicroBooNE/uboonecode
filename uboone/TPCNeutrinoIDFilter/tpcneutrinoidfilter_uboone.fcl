@@ -53,7 +53,7 @@ outputs:
    fileName:    "%ifb_%tc_wflash.root"
 #   sam_ignore:  true
    dataTier:    "reconstructed-2d"
-   SelectEvents: { SelectEvents: [ reco ] }
+   SelectEvents: [ reco ]
    compressionLevel: 1
  } 
 }

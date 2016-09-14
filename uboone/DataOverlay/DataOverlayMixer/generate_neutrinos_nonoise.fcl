@@ -24,39 +24,36 @@ services : {
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 }     #default is one
   RandomNumberGenerator: {}                     #ART native random number generator
-  user:
-  {
-	IChannelStatusService:          @local::microboone_channelstatus_service
-  	Geometry:                       @local::microboone_geo
-  	ExptGeoHelperInterface:         @local::microboone_geometry_helper
+  IChannelStatusService:          @local::microboone_channelstatus_service
+  Geometry:                       @local::microboone_geo
+  ExptGeoHelperInterface:         @local::microboone_geometry_helper
 
-	#BELOW you see a list of the common services! Uncomment the ones you need.
-  	#ExptGeoHelperInterface:         @local::microboone_geometry_helper
-  	#Geometry:                       @local::microboone_geo
- 	DetectorProperties:             @local::microboone_detproperties
- 	LArProperties:                  @local::microboone_properties
- 	DatabaseUtil:                   @local::microboone_database
-	DetectorClocksService:            @local::microboone_detectorclocks
- 	SpaceCharge:                    @local::microboone_spacecharge
- 	LArSeedService:                    @local::microboone_seedservice
-	LArFFT:                         @local::microboone_larfft
-	LArG4Parameters:          @local::microboone_largeantparameters
-	LArVoxelCalculator:       @local::microboone_larvoxelcalculator
-	MagneticField:            @local::no_mag_larsoft
-	SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
-	UBOpticalChConfig: @local::microboone_optical_ch_config
-	UBOpReadoutMap:                  @local::microboone_opreadoutmap
-	DetPedestalService:            @local::microboone_detpedestalservice
-	#BackTracker:                    @local::microboone_backtracker  
-	#MemoryPeakReporter: {}
-	OpDigiProperties:               @local::microboone_opdigiproperties
-  }
+  #BELOW you see a list of the common services! Uncomment the ones you need.
+  #ExptGeoHelperInterface:         @local::microboone_geometry_helper
+  #Geometry:                       @local::microboone_geo
+  DetectorProperties:             @local::microboone_detproperties
+  LArProperties:                  @local::microboone_properties
+  DatabaseUtil:                   @local::microboone_database
+  DetectorClocksService:            @local::microboone_detectorclocks
+  SpaceCharge:                    @local::microboone_spacecharge
+  LArSeedService:                    @local::microboone_seedservice
+  LArFFT:                         @local::microboone_larfft
+  LArG4Parameters:          @local::microboone_largeantparameters
+  LArVoxelCalculator:       @local::microboone_larvoxelcalculator
+  MagneticField:            @local::no_mag_larsoft
+  SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+  UBOpticalChConfig: @local::microboone_optical_ch_config
+  UBOpReadoutMap:                  @local::microboone_opreadoutmap
+  DetPedestalService:            @local::microboone_detpedestalservice
+  #BackTracker:                    @local::microboone_backtracker  
+  #MemoryPeakReporter: {}
+  OpDigiProperties:               @local::microboone_opdigiproperties
 
   message:      @local::standard_info
 
 }
-services.user.IChannelStatusService.ChannelStatusProvider.UseDB: false
-services.user.DetPedestalService.DetPedestalRetrievalAlg.UseDB: false
+services.IChannelStatusService.ChannelStatusProvider.UseDB: false
+services.DetPedestalService.DetPedestalRetrievalAlg.UseDB: false
 
 outputs: {
   out: { module_type: RootOutput

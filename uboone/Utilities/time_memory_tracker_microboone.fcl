@@ -12,7 +12,10 @@ microboone_memory_tracker: {
   ignoreTotal       : 0 # no. of events to exclude - '1' by default
   printSummaries    : ["*"] # or any combination of ["general","event","module"]
   includeMallocInfo : true
-  filename          : "mem.db" 
+  dbOutput     : {
+    filename   :  "mem.db"
+    overwrite  :  true
+  }
 }
 
 END_PROLOG

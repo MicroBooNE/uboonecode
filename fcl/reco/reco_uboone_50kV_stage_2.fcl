@@ -9,6 +9,6 @@ outputs.out1.fileName: "%ifb_%tc_50kV_reco2.root"
 #we set the wire bias to match (a) to match to data 
 #although we are currently running at (b)
 
-#services.user.DetectorPropertiesService.Efield: [0.195,0.367,0.767]  #0.195 corresponds to 50kV
-services.user.DetectorPropertiesService.Efield: [0.195,0.527,0.79]   #0.195 corresponds to 50kV
+#services.DetectorPropertiesService.Efield: [0.195,0.367,0.767]  #0.195 corresponds to 50kV
+services.DetectorPropertiesService.Efield: [0.195,0.527,0.79]   #0.195 corresponds to 50kV
 

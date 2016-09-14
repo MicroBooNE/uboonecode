@@ -12,10 +12,13 @@
 #include "art/Framework/IO/ProductMix/MixHelper.h"
 #include "art/Framework/Core/PtrRemapper.h"
 #include "art/Persistency/Common/CollectionUtilities.h"
+#include "art/Framework/Services/System/FileCatalogMetadata.h"
 #include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
+#include "IFDH_service.h"
 
 #include <memory>
 #include <string>
@@ -23,6 +26,7 @@
 #include <unordered_map>
 #include <exception>
 #include <sstream>
+#include <unistd.h>
 
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
@@ -56,6 +60,7 @@ public:
 
   OverlayRawDataDetailMicroBooNE(fhicl::ParameterSet const& p,
 				 art::MixHelper &helper);
+  ~OverlayRawDataDetailMicroBooNE();
 
   void startEvent(const art::Event&);  //called at the start of every event
   void finalizeEvent(art::Event &);    //called at the end of every event
@@ -87,6 +92,9 @@ public:
 				  std::vector<raw::OpDetWaveform> & output,
 				  art::PtrRemapper const &);
 
+  // Choose mix file.
+
+  std::string getMixFile();
 		   
   
 private:
@@ -120,6 +128,22 @@ private:
   size_t               fEventsToMix;
   float                fDefaultMCRawDigitScale;
   float                fDefaultMCOpDetScale;
+
+  std::string          fSamDefname;
+  std::string          fSamProject;
+  std::string          fSamStation;
+  std::string          fSamAppFamily;
+  std::string          fSamAppName;
+  std::string          fSamAppVersion;
+  std::string          fSamUser;
+  std::string          fSamDescription;
+  int                  fSamFileLimit;
+  std::string          fSamSchema;
+
+  std::string          fSamProjectURI;
+  std::string          fSamProcessID;
+  std::string          fSamCurrentFileURI;
+  std::string          fSamCurrentFileName;
   
   art::Handle< std::vector<raw::RawDigit> > inputDigitHandle;
   art::Handle< std::vector<raw::OpDetWaveform> > inputOpDetHandle_HighGain;
@@ -156,6 +180,22 @@ mix::OverlayRawDataDetailMicroBooNE::OverlayRawDataDetailMicroBooNE(fhicl::Param
   fEventsToMix(fpset.get<size_t>("EventsToMix",1)),
   fDefaultMCRawDigitScale(fpset.get<float>("DefaultMCRawDigitScale",1)),
   fDefaultMCOpDetScale(fpset.get<float>("DefaultMCOpDetScale",1)),
+
+  // Get sam related parameters.
+  // These parameters should normally be set by the work flow.
+  // Usually, the only ones that should need to be set are "SamDefname" and "SamProject."
+
+  fSamDefname(fpset.get<std::string>("SamDefname", "")),
+  fSamProject(fpset.get<std::string>("SamProject", "")),
+  fSamStation(fpset.get<std::string>("SamStation", "")),
+  fSamAppFamily(fpset.get<std::string>("SamAppFamily", "art")),
+  fSamAppName(fpset.get<std::string>("SamAppName", "mix")),
+  fSamAppVersion(fpset.get<std::string>("SamAppVersion", "1")),
+  fSamUser(fpset.get<std::string>("SamUser", "")),
+  fSamDescription(fpset.get<std::string>("SamDescription", "")),
+  fSamFileLimit(fpset.get<int>("SamFileLimit", 100)),
+  fSamSchema(fpset.get<std::string>("SamSchema", "root")),    // xrootd by default.
+
   fEventMixingSummary(nullptr)
 {
   
@@ -234,6 +274,100 @@ mix::OverlayRawDataDetailMicroBooNE::OverlayRawDataDetailMicroBooNE(fhicl::Param
 
   //If it produces something on its own, declare it here
   helper.produces< std::vector<mix::EventMixingSummary> >();
+
+  // Following block handles case of mix input from sam.
+
+  if(!fSamDefname.empty()) {
+
+    // Register getMixFile method with MixHelper.
+
+    helper.registerSecondaryFileNameProvider(std::bind(&mix::OverlayRawDataDetailMicroBooNE::getMixFile, this));
+
+    // Get IFDH art service.
+
+    art::ServiceHandle<ifdh_ns::IFDH> ifdh;
+
+    // Get sam station.
+    // If the station was not specified by a fcl parameter, use environment variable
+    // $SAM_STATION, or else use a default value of "uboone."
+
+    if(fSamStation.empty()) {
+      const char* c = getenv("SAM_STATION");
+      if(c == 0 || *c == 0)
+	c = "uboone";
+      fSamStation = c;
+      //std::cout << "Mix SAM: Station = " << fSamStation << std::endl;
+    }
+
+    // Find project uri.
+
+    fSamProjectURI = ifdh->findProject(fSamProject, fSamStation);
+    //std::cout << "Mix SAM: project uri = " << fSamProjectURI << std::endl;
+    if(fSamProjectURI.empty())
+      throw cet::exception("OverlayRawDataMicroBooNE") << "Failed to find project uri.";
+
+    // Get hostname.
+
+    char hostname[HOST_NAME_MAX];
+    gethostname(hostname, sizeof hostname);
+
+    // Get user.
+    // If the user was not specified by a fcl parameter, use environment variable
+    // $SAM_USER (this should work on grid), or else use environment variable $LOGNAME.
+
+    if(fSamUser.empty()) {
+      const char* c = getenv("SAM_USER");
+      if(c == 0 || *c == 0)
+	c = getenv("LOGNAME");
+      if(c != 0 && *c != 0)
+	fSamUser = c;
+      //std::cout << "Mix SAM: User = " << fSamUser << std::endl;
+    }
+
+    // Join project.
+
+    fSamProcessID = ifdh->establishProcess(fSamProjectURI,
+					   fSamAppName,
+					   fSamAppVersion,
+					   hostname,
+					   fSamUser,
+					   fSamAppFamily,
+					   fSamDescription,
+					   fSamFileLimit,
+					   fSamSchema);
+    mf::LogInfo("OverlayRawDigitMicroBooNE") << "Overlay sam definition: " << fSamDefname << "\n"
+					     << "Overlay sam project: " << fSamProject;
+
+    //std::cout << "Mix SAM: process id = " << fSamProcessID << std::endl;
+    if(fSamProcessID.empty())
+      throw cet::exception("OverlayRawDataMicroBooNE") << "Failed to start sam process.";
+  }
+}
+
+// Destructor.
+mix::OverlayRawDataDetailMicroBooNE::~OverlayRawDataDetailMicroBooNE()
+{
+  if(!fSamProcessID.empty()) {
+
+    // Get IFDH art service.
+
+    art::ServiceHandle<ifdh_ns::IFDH> ifdh;
+
+    // Mark current file as consumed.
+
+    if(!fSamCurrentFileName.empty()) {
+      ifdh->updateFileStatus(fSamProjectURI,
+			     fSamProcessID,
+			     fSamCurrentFileName,
+			     "consumed");
+      //std::cout << "Mix SAM: File " << fSamCurrentFileName << " status changed to consumed." << std::endl;
+    }
+
+    // Stop process.
+
+    ifdh->endProcess(fSamProjectURI, fSamProcessID);
+    //std::cout << "Mix SAM: End process." << std::endl;
+  }
 }
 
 //Initialize for each event
@@ -399,5 +533,66 @@ bool mix::OverlayRawDataDetailMicroBooNE::MixOpDetWaveforms_LowGain( std::vector
   
   return true;
 }
+
+// Return next file to mix.
+
+std::string mix::OverlayRawDataDetailMicroBooNE::getMixFile()
+{
+  std::string result;
+
+  if(!fSamProcessID.empty()) {
+
+    // Get IFDH art service.
+
+    art::ServiceHandle<ifdh_ns::IFDH> ifdh;
+
+    // Update status of current file, if any, to "consumed."
+
+    if(!fSamCurrentFileName.empty()) {
+      ifdh->updateFileStatus(fSamProjectURI,
+			     fSamProcessID,
+			     fSamCurrentFileName,
+			     "consumed");
+
+      //std::cout << "Mix SAM: File " << fSamCurrentFileName << " status changed to consumed." << std::endl;
+      fSamCurrentFileURI = std::string();
+      fSamCurrentFileName = std::string();
+    }
+
+    // Get next file uri.
+
+    fSamCurrentFileURI = fSamCurrentFileURI = ifdh->getNextFile(fSamProjectURI,	fSamProcessID);
+    unsigned int n = fSamCurrentFileURI.find_last_of('/') + 1;
+    fSamCurrentFileName = fSamCurrentFileURI.substr(n);
+    //std::cout << "Mix SAM: Next file uri = " << fSamCurrentFileURI << std::endl;
+    //std::cout << "Mix SAM: Next file name = " << fSamCurrentFileName << std::endl;
+    mf::LogInfo("OverlayRawDigitMicroBooNE") << "Next mix file uri: " << fSamCurrentFileURI << "\n"
+					     << "Next mix file name: " << fSamCurrentFileName;
+
+    // Throw an exception if we didn't get a next file.
+
+    if(fSamCurrentFileURI.empty() || fSamCurrentFileName.empty())
+      throw cet::exception("OverlayRawDataMicroBooNE") << "Failed to get next mix file.";
+
+    // Here is where we would copy the file to the local node, if that were necessary.
+    // Since we are using schema "root" (i.e. xrootd) to stream files, copying the 
+    // file is not necessary.
+    // Note further that we should not update the file status to "transferred" for
+    // streaming files, since that can in principle allow the file to be deleted from
+    // disk cache.
+
+    // Update metadata.
+
+    art::ServiceHandle<art::FileCatalogMetadata> md;
+    md->addMetadataString("mixparent", fSamCurrentFileName);
+
+    // Done.
+
+    result = fSamCurrentFileURI;
+  }
+
+  return result;
+}
+
 
 DEFINE_ART_MODULE(mix::OverlayRawDataMicroBooNE)

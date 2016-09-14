@@ -5,7 +5,7 @@ process_name: KalmanFilterTest
 
 services:
 {
-  user: @local::microboone_basic_services
+  @table::microboone_basic_services
 }
 
 source:
