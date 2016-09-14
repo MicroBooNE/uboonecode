@@ -29,6 +29,9 @@
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
+#include "UbooneElectronLifetimeService.h"
+#include "UbooneElectronLifetimeProvider.h"
+
 
 // ROOT
 #include "TH1D.h"
@@ -101,6 +104,9 @@ void TestDBI::analyze(art::Event const & evt)
   c.SaveAs("CollHist.png");
   fHist_Ind->Draw();
   c.SaveAs("IndHist.png");
+  
+  const lariov::UbooneElectronLifetimeProvider& elifetime_provider = art::ServiceHandle<lariov::UbooneElectronLifetimeService>()->GetProvider();
+  std::cout<<"LIFETIME: "<<elifetime_provider.ExpOffset()<<" "<<elifetime_provider.TimeConstantErr()<<std::endl;
 }
 
 DEFINE_ART_MODULE(TestDBI)
