@@ -61,7 +61,7 @@ services:
   TFileService: { fileName: "single_hist_uboone.root" }
   Timing:       {}
   RandomNumberGenerator: {} #ART native random number generator
-  user:         @local::microboone_full_services
+  @table::microboone_full_services
 }
 
 #Start each new event with an empty event.

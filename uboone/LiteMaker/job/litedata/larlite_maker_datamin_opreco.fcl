@@ -152,8 +152,8 @@ outputs:
  }
 }
 
-services.user.DetectorClocksService.TrigModuleName: "daq"
-services.user.DetectorClocksService.InheritClockConfig: false
+services.DetectorClocksService.TrigModuleName: "daq"
+services.DetectorClocksService.InheritClockConfig: false
 
 physics.analyzers.wire.stream:        "wire"
 physics.analyzers.reco2d.stream:      "reco2d"

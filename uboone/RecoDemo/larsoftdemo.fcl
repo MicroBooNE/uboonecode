@@ -40,10 +40,10 @@ services:
   Timing:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
-  user:         @local::microboone_simulation_services
+  @table::microboone_simulation_services
 }
 
-services.user.LArFFT.FFTOption: "" 
+services.LArFFT.FFTOption: "" 
 
 #Start each new event with an empty event.
 source:
@@ -168,7 +168,7 @@ outputs:
   out2: {
    module_type: RootOutput
    fileName: "neutronsYale.protons.root"
-   SelectEvents: { SelectEvents: [ mode1 ] }
+   SelectEvents: [ mode1 ]
   }
 
 }

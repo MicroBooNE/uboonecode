@@ -1,9 +1,9 @@
 #include "standard_detsim_uboone.fcl"
 
-services.user.LArSeedService.policy: "preDefinedSeed"
-services.user.LArSeedService.baseSeed: 1234
-services.user.LArSeedService.daq.noise: 1234
-services.user.LArSeedService.daq.pedestal: 1234
+services.LArSeedService.policy: "preDefinedSeed"
+services.LArSeedService.baseSeed: 1234
+services.LArSeedService.daq.noise: 1234
+services.LArSeedService.daq.pedestal: 1234
 
 services.RandomNumberGenerator.restoreFrom: "DetSimRandomSeeds_Ref.dat"
 services.RandomNumberGenerator.saveTo: "DetSimRandomSeeds.dat"

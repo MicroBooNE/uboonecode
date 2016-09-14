@@ -18,10 +18,7 @@ microboone_reco_notpc_services:
   Geometry:               @local::microboone_geo
   UBOpReadoutMap:           @local::microboone_opreadoutmap
   DetectorClocksService:            @local::microboone_detectorclocks
-  user:
-  {
-    IFDH:                   {}
-  }
+  IFDH:                   {}
 }
 
 microboone_reco_notpc_producers: {
