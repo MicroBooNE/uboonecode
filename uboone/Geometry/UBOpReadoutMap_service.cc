@@ -259,6 +259,10 @@ namespace geo {
   void UBOpReadoutMap::LoadOpticalReadoutMapData( fhicl::ParameterSet const& pset ) {
     
     // ----------------------------------------------------------------------
+
+    // Read trigger fem slot.
+    fTriggerFEMSlot = pset.get<unsigned int>("TriggerFEMSlot");
+
     // read in channel types
     fNReadoutChannels = 0;
     fLogicChannels.clear();

@@ -159,7 +159,6 @@ SWTrigger::SWTrigger(fhicl::ParameterSet const & p)
   fOpDataModule    = p.get<std::string>("OpDataModule");
   fOpFlashModule   = p.get<std::string>("OpFlashModule");
   fNChannels       = p.get<int>("NumberOfChannels");
-  //fFEMslot         = p.get<int>("FEMslot");
   fFEMslot         = 0;
   fMinReadoutTicks = p.get<int>("MinReadoutTicks");
   std::vector<std::string> triggertypes = p.get<std::vector<std::string>>("swtrg_algotype");
@@ -282,11 +281,8 @@ bool SWTrigger::filter(art::Event & evt)
   // Get OpMap
   ub_PMT_channel_map->SetOpMapRun( evt.run() );
 
-
   // Update fem slot.
-  unsigned int c,s,f;
-  ub_PMT_channel_map->GetCrateSlotFEMChFromReadoutChannel(0, c, s, f);
-  fFEMslot = s;
+  fFEMslot = ub_PMT_channel_map->GetTriggerFEMSlot();
   
   // Get Trigger Bit
   evt.getByLabel( fDAQHeaderModule, trigHandle );
@@ -431,7 +427,7 @@ bool SWTrigger::filter(art::Event & evt)
       std::string name = swtrig.getTriggerAlgorithm(i);
       float weight = swtrig.getPrescale(i);
       
-      std::cout << "  [" << pass << "] " << name << " tick=" << tick << " PHMAX=" << phmax << " weight=" << weight << std::endl;
+      std::cout << "  [" << pass << "] " << name << " tick=" << tick << " dt=" << dt << " PHMAX=" << phmax << " weight=" << weight << std::endl;
       online_PHMAX.push_back( phmax );
       online_multiplicity.push_back( multi );
       online_weights.push_back( weight );
@@ -455,11 +451,13 @@ bool SWTrigger::filter(art::Event & evt)
   offline_runtime = _stopwatch.RealTime();
   std::cout << "[FEMemulator Module: Running offline algo on event=" << event << " hwtrigbit=" << trig.TriggerBits()  << "]" << std::endl;
   bool pass = false;
+  double dt = 0.;
   for ( std::vector< trigger::Result >::iterator it=m_results.begin(); it!=m_results.end(); it++ ) {
     std::cout << "  [" << (*it).pass << "] "
 	      << (*it).algo_instance_name 
 	      << " algo=" << (*it).pass_algo << " ps=" << (*it).pass_prescale 
 	      << " tick=" << (*it).time
+	      << " dt=" << dt
 	      << " PHMAX=" << (*it).amplitude << " weight=" << (*it).prescale_weight << std::endl;
     if ( (*it).algo_instance_name.find("FEM")!=std::string::npos ) {
       trigger::AlgoBase* pAlgo = &(m_algos.GetAlgo( (*it).algo_instance_name ));
@@ -489,7 +487,7 @@ bool SWTrigger::filter(art::Event & evt)
 			  (*it).amplitude,            // PHMAX.
 			  (*it).multiplicity,         // Multiplicity.
 			  (*it).time,                 // Tick.
-			  0.,                         // Time.
+			  dt,                         // Time difference.
 			  (*it).prescale_weight);     // Prescale factor.
   }
   // save phmax vector
