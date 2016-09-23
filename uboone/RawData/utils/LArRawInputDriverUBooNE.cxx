@@ -1217,9 +1217,9 @@ namespace lris {
       detinfo::ElecClock trig_clock = timeService->OpticalClock( sample_64MHz, frame);
 
       double trigger_time = trig_clock.Time();
-      double beam_time = -1;
-      if ( trig_data.Trig_Gate1() || trig_data.Trig_Gate2() ) // 1) NUMI : 2) BNB
-	beam_time = trigger_time;
+//      double beam_time = -1;
+//      if ( trig_data.Trig_Gate1() || trig_data.Trig_Gate2() ) // 1) NUMI : 2) BNB
+//	    beam_time = trigger_time;
       uint32_t trig_bits = trig_data.getPMTTrigData();
       if( trig_data.Trig_PC()       ) trig_bits += ( 0x1 << ::trigger::kTriggerPC    ); 
       if( trig_data.Trig_EXT()      ) trig_bits += ( 0x1 << ::trigger::kTriggerEXT   );
@@ -1231,10 +1231,54 @@ namespace lris {
       if( trig_data.Trig_GateFake() ) trig_bits += ( 0x1 << ::trigger::kFakeGate     );
       if( trig_data.Trig_BeamFake() ) trig_bits += ( 0x1 << ::trigger::kFakeBeam     );
       if( trig_data.Trig_Spare1()   ) trig_bits += ( 0x1 << ::trigger::kSpare        );
-	  
+	 
+      //
+      // Figure out time w.r.t. Trigger - dirty but works.
+      //
+      uint64_t trig_sample_number = trig_header.get2MHzSampleNumber() * 32;
+      trig_sample_number += trig_header.get16MHzRemainderNumber() * 4;
+      trig_sample_number += trig_data.getPhase();
+  
+      uint64_t trig_tick = trig_sample_number + trig_header.getFrame() * trig_clock.FrameTicks();
+  
+  
+      auto const& crate_data = event_record.getPMTSEBMap().begin()->second;
+      uint64_t beam_ro_tick = 0;
+      auto const& card_data = crate_data.getCards().front();
+      uint64_t min_dt = 1e12; //FIXME this should be set to max integer value from compiler
+      // First search the target timing
+      for(auto const& ch_data : card_data.getChannels()){
+    
+        for(auto const& window : ch_data.getWindows()) {
+       
+          if(window.header().getDiscriminantor()!=ub_PMT_DiscriminatorTypes_v6::BEAM && 
+             window.header().getDiscriminantor()!=ub_PMT_DiscriminatorTypes_v6::BEAM_GATE){
+            continue; //ignore non-BEAM signals
+          }
+        
+          uint64_t window_time = RollOver(card_data.getFrame(), window.header().getFrame(), 3) * 102400;
+          window_time += window.header().getSample();
+          uint64_t window_trigger_dt = 
+            ( window_time < trig_tick ? trig_tick - window_time : window_time - trig_tick );
+          
+          if( min_dt > window_trigger_dt ) {
+            min_dt       = window_trigger_dt;
+            beam_ro_tick = window_time;
+          }
+        }
+      }
+      if(beam_ro_tick > trig_tick){
+        _trigger_beam_window_time = beam_ro_tick - trig_tick;
+      }
+      else{
+        _trigger_beam_window_time = trig_tick - beam_ro_tick;
+        _trigger_beam_window_time *= -1.;
+      }
+      //AF
+
       raw::Trigger swiz_trig( trig_card.getTrigNumber(),
 			      trigger_time,
-			      beam_time,
+			      _trigger_beam_window_time,
 			      trig_bits );
       if (not kazuTestSwizzleTrigger){return;}
       trigInfo.emplace_back( swiz_trig );
@@ -1275,22 +1319,8 @@ namespace lris {
         std::cout << "The SWTriggerOutputVector was empty, so setting all values to the default." << std::endl;
         return;
     }
-    //
-    // Figure out time w.r.t. Trigger - dirty but works.
-    //
+    
     auto const& opt_clock = timeService->OpticalClock();
-    //auto const& trg_clock = timeService->TriggerClock();
-    //auto const& tpc_clock = timeService->TPCClock();
-    auto const& trig_map  = event_record.getTRIGSEBMap();
-    auto const& trig_header = trig_map.begin()->second.getTriggerHeader();
-    auto const& trig_data = trig_map.begin()->second.getTriggerCardData().getTriggerData();
-    uint64_t trig_sample_number = trig_header.get2MHzSampleNumber() * 32;
-    trig_sample_number += trig_header.get16MHzRemainderNumber() * 4;
-    trig_sample_number += trig_data.getPhase();
-    double trigger_time = (double)(trig_header.getFrame() * opt_clock.FramePeriod());
-    trigger_time += ((double)trig_sample_number) * opt_clock.TickPeriod();
-
-    uint64_t trig_tick = trig_sample_number + trig_header.getFrame() * opt_clock.FrameTicks();
      
     //NOTE that if there's no PMT Data, there isn't gonna be any SW Trigger information.
     //need to make this more complicated if there are ever triggers based on things other than PMTS
@@ -1299,43 +1329,6 @@ namespace lris {
     if (seb_pmt_map.empty()) {
         std::cout << "The PMTSEBMap was empty and there was no PMT data, so setting all SWTrigger values to the default." << std::endl;
         return;
-    }
-
-    auto const& crate_data = event_record.getPMTSEBMap().begin()->second;
-     
-    //auto const& pmt_card    = crate_data.getCards().at(0);
-    
-    uint64_t beam_ro_tick = 0;
-    auto const& card_data = crate_data.getCards().front();
-    uint64_t min_dt = 1e12; //FIXME this should be set to max integer value from compiler
-    // First search the target timing
-    for(auto const& ch_data : card_data.getChannels()){
-  
-      for(auto const& window : ch_data.getWindows()) {
-     
-        if(window.header().getDiscriminantor()!=ub_PMT_DiscriminatorTypes_v6::BEAM && 
-           window.header().getDiscriminantor()!=ub_PMT_DiscriminatorTypes_v6::BEAM_GATE){
-          continue; //ignore non-BEAM signals
-        }
-      
-        uint64_t window_time = RollOver(card_data.getFrame(), window.header().getFrame(), 3) * 102400;
-        window_time += window.header().getSample();
-        uint64_t window_trigger_dt = 
-          ( window_time < trig_tick ? trig_tick - window_time : window_time - trig_tick );
-        
-        if( min_dt > window_trigger_dt ) {
-          min_dt       = window_trigger_dt;
-          beam_ro_tick = window_time;
-        }
-      }
-    }
-
-    if(beam_ro_tick > trig_tick){
-      _trigger_beam_window_time = beam_ro_tick - trig_tick;
-    }
-    else{
-      _trigger_beam_window_time = trig_tick - beam_ro_tick;
-      _trigger_beam_window_time *= -1.;
     }
     
     for (unsigned int i(0); i < swTrig_vect.size(); ++i){ // loop through swtrigger algos filling info

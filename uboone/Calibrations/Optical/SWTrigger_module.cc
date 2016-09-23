@@ -35,6 +35,7 @@
 #include "larcore/SimpleTypesAndConstants/RawTypes.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
 //#include "larcore/LArUtilities/TimeService.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "uboonecode/uboone/TriggerSim/UBTriggerTypes.h"
 
@@ -257,6 +258,9 @@ SWTrigger::SWTrigger(fhicl::ParameterSet const & p)
 bool SWTrigger::filter(art::Event & evt)
 {
 
+  auto const* timeServie = lar::providerFrom<detinfo::DetectorClocksService>();
+  auto const& opt_clock = timeService->OpticalClock();
+
   // Implementation of required member function here.
   run    = (int)evt.run();
   subrun = (int)evt.subRun();
@@ -452,7 +456,9 @@ bool SWTrigger::filter(art::Event & evt)
   std::cout << "[FEMemulator Module: Running offline algo on event=" << event << " hwtrigbit=" << trig.TriggerBits()  << "]" << std::endl;
   bool pass = false;
   double dt = 0.;
+
   for ( std::vector< trigger::Result >::iterator it=m_results.begin(); it!=m_results.end(); it++ ) {
+    dt = trig.BeamGateTime() + (*it).time * opt_clock.TickPeriod();
     std::cout << "  [" << (*it).pass << "] "
 	      << (*it).algo_instance_name 
 	      << " algo=" << (*it).pass_algo << " ps=" << (*it).pass_prescale 
