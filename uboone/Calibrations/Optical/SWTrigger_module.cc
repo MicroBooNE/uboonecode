@@ -258,7 +258,7 @@ SWTrigger::SWTrigger(fhicl::ParameterSet const & p)
 bool SWTrigger::filter(art::Event & evt)
 {
 
-  auto const* timeServie = lar::providerFrom<detinfo::DetectorClocksService>();
+  auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
   auto const& opt_clock = timeService->OpticalClock();
 
   // Implementation of required member function here.
