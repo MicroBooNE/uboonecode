@@ -342,8 +342,9 @@ microboone_reco_data_producers.caldata.DigitModuleLabel:                        
 microboone_reco_data_producers.caldata.DodQdxCalib:                              true
 
 microboone_reco_data_producers.gaushit.CalDataModuleLabel:                       "caldata"
-microboone_reco_data_producers.gaushit.MinSig:                                   [4.0, 4.0, 5.0]
+microboone_reco_data_producers.gaushit.MinSig:                                   [2.6, 2.6, 3.25]
 microboone_reco_data_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
+microboone_reco_data_producers.gaushit.MaxMultiHit:                              4
 #microboone_reco_data_producers.gaushit.FilterHits:                               true
 
 # Fuzzy Cluster related
