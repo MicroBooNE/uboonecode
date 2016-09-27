@@ -840,7 +840,7 @@ namespace detsim {
     Double_t MaxPoissArg = 100.;
 
     if(!_pfn_MyPoisson) _pfn_MyPoisson = new TF1("_pfn_MyPoisson",PFNPoissonReal,0.,MaxPoissArg,1);
-    if(!_pfn_f1) _pfn_f1 = new TF1("_pfn_f1",Form("[0]+([1]+[2]*min(%g-x,x))*exp(-[3]*pow(min(%g-x,x),[4]))",(double)waveform_size,(double)waveform_size),0.0,(double)waveform_size);
+    if(!_pfn_f1) _pfn_f1 = new TF1("_pfn_f1",Form("[0]+([1]+[2]*x*%g/2.)*exp(-[3]*pow(x*%g/2.,[4]))",(double)waveform_size,(double)waveform_size),0.0,(double)waveform_size);
     if(_pfn_rho_v.empty()) _pfn_rho_v.resize(waveform_size);
     if(_pfn_value_re.empty()) _pfn_value_re.resize(waveform_size);
     if(_pfn_value_im.empty()) _pfn_value_im.resize(waveform_size);
@@ -848,14 +848,14 @@ namespace detsim {
     //**Setting lambda**//
     Double_t params[1] = {0.};
     Double_t fitpar[5] = {0.};
-    
+ 
     if(ShapingTime==2.0) {
       params[0] = 3.3708; //2us
-      fitpar[0] = 16.8;
-      fitpar[1] = 45.7;
-      fitpar[2] = 0.0028;
-      fitpar[3] = 9.5e-9;
-      fitpar[4] = 2.6;
+      fitpar[0] = 4.27132e+01;
+      fitpar[1] = 6.22750e+02;
+      fitpar[2] = -2.53535e-01;
+      fitpar[3] = 8.07578e-05;
+      fitpar[4] = 1.35510e+00;
     }
     else if(ShapingTime==1.0) {
       params[0] = 3.5125; //1us new
@@ -884,11 +884,12 @@ namespace detsim {
         freq = (n-i)*2./n;
       }
 
-      _pfn_rho_v[i] = _pfn_f1->Eval(freq) * _pfn_MyPoisson->GetRandom();
+      _pfn_rho_v[i] = _pfn_f1->Eval(freq) * _pfn_MyPoisson->GetRandom()/3.3708;
 
       Double_t rho = _pfn_rho_v[i];
 
-      Double_t phi = 2*TMath::Pi()*rand.Rndm(1) - TMath::Pi();
+      //Double_t phi = 2*TMath::Pi()*rand.Rndm(1) - TMath::Pi();
+      Double_t phi = gRandom->Uniform(0,1) * 2. * TMath::Pi();	 
 
       _pfn_value_re[i] = rho*cos(phi)/((double)waveform_size);
       _pfn_value_im[i] = phi*sin(phi)/((double)waveform_size);
