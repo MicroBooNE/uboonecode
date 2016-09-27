@@ -143,6 +143,8 @@ T0RecoAnodeCathodePiercing::T0RecoAnodeCathodePiercing(fhicl::ParameterSet const
 void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 {
 
+  std::cout << "NEW EVENT" << std::endl;
+
   _flash_times.clear();
   _flash_idx_v.clear();
 
@@ -176,9 +178,6 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 
   // prepare a vector of optical flash times, if flash above some PE cut value
 
-  // Include a print statement before the flash function
-  std::cout << "Starting the function to fill a vector with all of the flash times with greater than 50 PEs from this event." << std::endl;
-
   size_t flash_ctr = 0;
   for (auto const& flash : *flash_h){
     if (flash.TotalPE() > 50){
@@ -187,9 +186,6 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
     }
     flash_ctr += 1;
   }// for all flashes
-
-  std::cout << "Ending the function to fill a vector with all of the flash times with greater than 50 PEs from this event." << std::endl;
-  std::cout << "\n" << std::endl;
 
   // loop through reconstructed tracks
   size_t trk_ctr = 0;
@@ -225,10 +221,10 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 
       // The 'trkX' enters on the anode, the side of the TPC with a lower x value than the cathode
       if (enters_anode)
-	trkT = trkX / fDriftVelocity + 0.25;
+	trkT = trkX / fDriftVelocity + 3.4;
       // This will also give a small T0 value, because the cathode is a distance of _det_width from the anode
       else
-	trkT = (trkX - _det_width) / fDriftVelocity - 14.5; 
+	trkT = (trkX - _det_width) / fDriftVelocity - 14; 
       
     } // This can end the case in which the track exits through the bottom 
     
@@ -252,10 +248,10 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
       // reconstruct track T0 w.r.t. trigger time
       // The 'trkX' exits on the anode, the side of the TPC with a lower x value than the cathode
       if (exits_anode)
-	trkT = trkX / fDriftVelocity + 0.25; 
+	trkT = trkX / fDriftVelocity + 3.4; 
       // This will also give a small T0 value, because the cathode is a distance of _det_width from the anode
       else
-	trkT = (trkX - _det_width) / fDriftVelocity - 14.5; 
+	trkT = (trkX - _det_width) / fDriftVelocity - 14; 
       
     } // This can end the case in which the track enters through the top 
     
@@ -299,7 +295,7 @@ std::pair<double,size_t> T0RecoAnodeCathodePiercing::FlashMatch(const double rec
 
   for (size_t i=0; i < _flash_times.size(); i++){
     auto const& time = _flash_times[i];
-    double dt = fabs(time - reco_time);
+    double dt = fabs(time - reco_time - 3.1);
     if (dt < dt_min){
       dt_min  = dt;
       idx_min = _flash_idx_v[i];
