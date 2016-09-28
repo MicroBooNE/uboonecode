@@ -113,6 +113,7 @@ private:
   std::vector< unsigned short > offline_multiplicity;
   std::vector< unsigned short > offline_PHMAX;
   std::vector< unsigned short > offline_trigtick;
+  std::vector< double > offline_dttrig;
   std::vector< float > offline_weights;
   std::vector< std::string > offline_algonames;
   std::vector< int > offline_trigpass;
@@ -226,6 +227,7 @@ SWTrigger::SWTrigger(fhicl::ParameterSet const & p)
   fTwindow->Branch( "PHMAX_vect", &offline_PHMAX_vect );
   fTwindow->Branch( "swtrigtick", &offline_trigtick );
   fTwindow->Branch( "weights", &offline_weights );
+  fTwindow->Branch( "dttrig", &offline_dttrig );
   fTwindow->Branch( "algonames", &offline_algonames );
   fTwindow->Branch( "swtrigpass", &offline_trigpass );
   fTwindow->Branch( "algopass", &offline_algopass );
@@ -477,6 +479,7 @@ bool SWTrigger::filter(art::Event & evt)
     offline_weights.push_back( (*it).prescale_weight );
     offline_algonames.push_back( (*it).algo_instance_name );
     offline_trigtick.push_back( (*it).time );
+    offline_dttrig.push_back( dt );
     if ( (*it).pass_algo ) offline_algopass.push_back( 1 ); else offline_algopass.push_back( 0 );
     if ( (*it).pass_prescale ) offline_prescalepass.push_back( 1 ); else offline_prescalepass.push_back( 0 );
     if ( (*it).pass ) {
@@ -512,6 +515,7 @@ void SWTrigger::clearVariables() {
   offline_PHMAX.clear();
   offline_multiplicity.clear();
   offline_trigtick.clear();
+  offline_dttrig.clear();
   offline_weights.clear();
   offline_algonames.clear();
   offline_trigpass.clear();
