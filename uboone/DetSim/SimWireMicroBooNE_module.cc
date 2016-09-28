@@ -918,7 +918,7 @@ namespace detsim {
         freq = (n-i)*2./n;
       }
 
-      _pfn_rho_v[i] = _pfn_f1->Eval(freq) * _pfn_MyPoisson->GetRandom()/3.3708;
+      _pfn_rho_v[i] = _pfn_f1->Eval(freq) * _pfn_MyPoisson->GetRandom()/params[0];
 
       Double_t rho = _pfn_rho_v[i];
 
@@ -951,18 +951,20 @@ namespace detsim {
     // Method 2 uses the 16th, 50th, and 84th percentiles to calculate the RMS.
     // Because the signal is expected to be above the 84th percentile, this 
     // effectively vetos the signal.
-   
-    TH1F* h_rms = new TH1F("h_rms", "", 100000, 0, 50);
+  
+    Double_t min = fb->GetMinimum();
+    Double_t max = fb->GetMaximum();	 
+    TH1F* h_rms = new TH1F("h_rms", "h_rms", Int_t(10*(max-min+1)), min, max+1);
 
     // Method 1 -----------------------------------------------------------
     double irms = 0;
-    double ithrms;
+    //double ithrms;
     for(size_t i=0; i < waveform_size; ++i){
     
-      ithrms = sqrt(std::pow(fb->GetBinContent(i+1),2));
-      h_rms->Fill(ithrms);
+      //ithrms = sqrt(std::pow(fb->GetBinContent(i+1),2));
+      //h_rms->Fill(ithrms);
       irms+= std::pow(fb->GetBinContent(i+1),2);
-
+      h_rms->Fill(fb->GetBinContent(i+1));
     }
     irms = std::sqrt(irms/waveform_size);
     
@@ -974,7 +976,8 @@ namespace detsim {
    
     // Method 2 ------------------------------------------------------------ 
     double par[3];
-    double rms_quantilemethod;
+    double rms_quantilemethod = 0.0;
+    if (h_rms->GetSum()>0){
     double xq = 0.5-0.34;
     h_rms->GetQuantiles(1, &par[0], &xq);
     
@@ -985,7 +988,7 @@ namespace detsim {
     h_rms->GetQuantiles(1, &par[2], &xq);
     
     rms_quantilemethod = sqrt((pow(par[1]-par[0],2)+pow(par[2]-par[1],2))/2.);
-    
+    }
     //rms.push_back(std::move(rms_quantilemethod));
     //std::cout << "RMS using the quantile method is: " << rms_quantilemethod << std::endl;
 
@@ -994,7 +997,7 @@ namespace detsim {
 
     // baseline found by averaging RMS over 1000 waveforms, and hardcoded for speed.
     // baseline without removing signal waveforms: 1.88567
-    double baseline = 1.16117;
+    double baseline = 1.79349;
     double scalefactor = (rms_quantilemethod/baseline)*(1.020+0.0018*(wirelength));
     for(size_t i=0; i<waveform_size; ++i) {
       noise[i] = fb->GetBinContent(i+1)*scalefactor;
