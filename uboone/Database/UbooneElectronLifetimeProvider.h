@@ -59,9 +59,9 @@ namespace lariov {
       bool Update(DBTimeStamp_t ts);
       
       /// Retrieve lifetime information
-      float Lifetime() const override;
+      float Lifetime(float t) const override;
       float Purity() const override;
-      float LifetimeErr() const override;
+      float LifetimeErr(float t) const override;
       float PurityErr() const override;
       
       const ElectronLifetimeContainer& LifetimeContainer() const;

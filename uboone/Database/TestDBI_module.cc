@@ -106,7 +106,7 @@ void TestDBI::analyze(art::Event const & evt)
   c.SaveAs("IndHist.png");
   
   const lariov::ElectronLifetimeProvider& elifetime_provider = art::ServiceHandle<lariov::ElectronLifetimeService>()->GetProvider();
-  std::cout<<"LIFETIME: "<<elifetime_provider.Purity()<<" "<<elifetime_provider.PurityErr()<<std::endl;
+  std::cout<<"LIFETIME: "<<elifetime_provider.Lifetime(1100.0)<<" "<<elifetime_provider.LifetimeErr(1100.0)<<std::endl;
 }
 
 DEFINE_ART_MODULE(TestDBI)
