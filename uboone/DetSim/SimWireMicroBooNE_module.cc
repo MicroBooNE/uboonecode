@@ -150,7 +150,7 @@ namespace detsim {
     std::vector<double> _pfn_value_re;
     std::vector<double> _pfn_value_im;
 
-    //std::vector<double> rms;
+    //std::vector<double> rms;  //For calculating baseline
 
   }; // class SimWireMicroBooNE
 
