@@ -81,8 +81,14 @@ private:
   // detector width [drift-coord]
   double _det_width; // [cm]
 
-  // time resolution for flashes to match [us]
-  double fTimeRes;
+  // time resolution for flashes to match [us] (separate values for Anode and Cathode)
+  double fTimeResA, fTimeResC;
+  
+  // minimum PE threshold for flash to make it into match
+  double fPEmin;
+
+  // time-adjustment (us) to align reconstructed T0 for Anode and Cathode-crossing tracks to reconstructed flash-times
+  double fRecoT0TimeOffsetA, fRecoT0TimeOffsetC;
 
   // functions to be used throughout module
   bool   TrackEntersTop     (const std::vector<TVector3>& sorted_trk);
@@ -113,13 +119,16 @@ T0RecoAnodeCathodePiercing::T0RecoAnodeCathodePiercing(fhicl::ParameterSet const
   produces< art::Assns <recob::Track, anab::T0> >();
   produces< art::Assns <recob::Track, recob::OpFlash> >();
 
-  fTrackProducer = p.get<std::string>("TrackProducer");
-  fFlashProducer = p.get<std::string>("FlashProducer");
-  fResolution    = p.get<double>     ("Resolution");
-  // fDriftVelocity = p.get<double>     ("DriftVelocity");
-  fTimeRes       = p.get<double>     ("TimeResolution");
-  top2side       = p.get<bool>       ("top2side");
-  side2bottom    = p.get<bool>       ("side2bottom");
+  fTrackProducer     = p.get<std::string>("TrackProducer");
+  fFlashProducer     = p.get<std::string>("FlashProducer");
+  fResolution        = p.get<double>     ("Resolution");
+  fTimeResA          = p.get<double>     ("TimeResA");
+  fTimeResC          = p.get<double>     ("TimeResC");
+  fRecoT0TimeOffsetA = p.get<double>     ("RecoT0TimeOffsetA");
+  fRecoT0TimeOffsetC = p.get<double>     ("RecoT0TimeOffsetC");
+  fPEmin             = p.get<double>     ("PEmin");
+  top2side           = p.get<bool>       ("top2side");
+  side2bottom        = p.get<bool>       ("side2bottom");
   
   // get boundaries based on detector bounds
   auto const* geom = lar::providerFrom<geo::Geometry>();
@@ -180,7 +189,7 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 
   size_t flash_ctr = 0;
   for (auto const& flash : *flash_h){
-    if (flash.TotalPE() > 50){
+    if (flash.TotalPE() > fPEmin){
       _flash_times.push_back( flash.Time() );
       _flash_idx_v.push_back(flash_ctr);
     }
@@ -189,6 +198,7 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 
   // loop through reconstructed tracks
   size_t trk_ctr = 0;
+
   for (auto& track : TrkVec){
 
     trk_ctr += 1;
@@ -199,6 +209,9 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 
     // Declare the variable 'trkT' up here so that I can continue and not fill the t0 object if trkT is still equal to 0
     double trkT = 0.;
+
+    // keep track of whether it goes thorugh the anode or cathode
+    bool anode = 0;
     
     // check if the track is of good quality:                                                                                                                              
     // the first type: must exit through the bottom [indicates track reconstruction has gone 'till the end] and enter through the anode or cathode                         
@@ -220,11 +233,16 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
       // reconstruct track T0 w.r.t. trigger time                                                                                                                              
 
       // The 'trkX' enters on the anode, the side of the TPC with a lower x value than the cathode
-      if (enters_anode)
-	trkT = trkX / fDriftVelocity + 3.4;
+      if (enters_anode){
+	trkT = trkX / fDriftVelocity + fRecoT0TimeOffsetA;
+	anode = 1;
+      }
+
       // This will also give a small T0 value, because the cathode is a distance of _det_width from the anode
-      else
-	trkT = (trkX - _det_width) / fDriftVelocity - 14; 
+      else{
+	trkT = (trkX - _det_width) / fDriftVelocity + fRecoT0TimeOffsetC; 
+	anode = 0;
+      }
       
     } // This can end the case in which the track exits through the bottom 
     
@@ -247,17 +265,24 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 
       // reconstruct track T0 w.r.t. trigger time
       // The 'trkX' exits on the anode, the side of the TPC with a lower x value than the cathode
-      if (exits_anode)
-	trkT = trkX / fDriftVelocity + 3.4; 
+      if (exits_anode){
+	trkT = trkX / fDriftVelocity + fRecoT0TimeOffsetA; 
+	anode = 1;
+      }
       // This will also give a small T0 value, because the cathode is a distance of _det_width from the anode
-      else
-	trkT = (trkX - _det_width) / fDriftVelocity - 14; 
+      else{
+	trkT = (trkX - _det_width) / fDriftVelocity + fRecoT0TimeOffsetC; 
+	anode = 0;
+      }
       
     } // This can end the case in which the track enters through the top 
     
+
     // if the time does not match one from optical flashes -> don't reconstruct
     auto const& flash_match_result = FlashMatch(trkT);
-    if (flash_match_result.first > fTimeRes)
+    if ( (flash_match_result.first > fTimeResA) && (anode == 1) )
+      continue;
+    if ( (flash_match_result.first > fTimeResC) && (anode == 0) )
       continue;
     
     // DON'T CREATE the t0 object unless the reconstructed t0 is some value other than 0
