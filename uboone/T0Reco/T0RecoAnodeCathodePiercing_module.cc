@@ -320,7 +320,7 @@ std::pair<double,size_t> T0RecoAnodeCathodePiercing::FlashMatch(const double rec
 
   for (size_t i=0; i < _flash_times.size(); i++){
     auto const& time = _flash_times[i];
-    double dt = fabs(time - reco_time - 3.1);
+    double dt = fabs(time - reco_time);
     if (dt < dt_min){
       dt_min  = dt;
       idx_min = _flash_idx_v[i];
