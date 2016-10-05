@@ -262,6 +262,9 @@ physics:
                    stream_ext_unbiased,
                    stream_mucs ]
 }
+physics.filters.swtrigger.EXT_NUMIwin_FEMBeamTriggerAlgo.PrescaleFactor: 1.0
+physics.filters.swtrigger.EXT_unbiased_PrescaleAlgo.PrescaleFactor: 1.0
+
 physics.filters.trigbnb.HardwareTriggerProducer: "daq"
 physics.filters.trigbnb.SoftwareTriggerProducer: "swtrigger"
 physics.filters.trigbnb.IncludeBits: [ "TriggerBNB" ]
