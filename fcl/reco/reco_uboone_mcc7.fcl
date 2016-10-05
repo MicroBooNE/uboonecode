@@ -37,7 +37,6 @@ microboone_reco_mcc7_services.DetectorPropertiesService.ReadOutWindowSize:      
 microboone_reco_mcc7_services.DetectorClocksService.InheritClockConfig:           false
 microboone_reco_mcc7_services.DetectorClocksService.TriggerOffsetTPC:             -0.400e3
 
-microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.StretchFullResponse: true
 microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.NConfigs:            2
 
 microboone_reco_mcc7_services_fullrawdigits:
