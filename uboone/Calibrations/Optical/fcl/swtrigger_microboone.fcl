@@ -68,7 +68,7 @@ microboone_swtrigger_data:
       Discr3threshold : 10
       Discr3width : 6
       MinReadoutTicks : 500
-      PrescaleFactor : 0.175
+      PrescaleFactor : 1.0
       TriggerThresMult : 1
       TriggerThresPHMAX : 190
       TriggerWindowSize : 750
@@ -76,7 +76,7 @@ microboone_swtrigger_data:
       Verbosity : 3
     }
     EXT_unbiased_PrescaleAlgo:{
-      PrescaleFactor : 0.02
+      PrescaleFactor : 1.0
     }
     NUMI_FEMBeamTriggerAlgo:{
       Discr0deadtime : 6
