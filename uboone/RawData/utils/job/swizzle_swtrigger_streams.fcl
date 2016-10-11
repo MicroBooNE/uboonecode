@@ -12,7 +12,6 @@
 process_name: Swizzler
 services:
 {
-  scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "daq_hist.root" }
   Timing:       {}
   RandomNumberGenerator: {} 
@@ -76,7 +75,11 @@ outputs:
    streamName: "outbnb"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ path_bnb ] }
+   SelectEvents: [ path_bnb ]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
  outbnbunbiased:
   {
@@ -86,7 +89,11 @@ outputs:
    streamName: "outbnbunbiased"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ path_bnb_unbiased ] }
+   SelectEvents: [ path_bnb_unbiased ]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
  outnumi:
   {
@@ -96,7 +103,11 @@ outputs:
    streamName: "outnumi"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ path_numi ] }
+   SelectEvents: [ path_numi ]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
  outnumiunbiased:
   {
@@ -106,7 +117,11 @@ outputs:
    streamName: "outnumiunbiased"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ path_numi_unbiased ] }
+   SelectEvents: [ path_numi_unbiased ]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
  outextbnb:
   {
@@ -116,7 +131,11 @@ outputs:
    streamName: "outextbnb"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ path_ext_bnb ] }
+   SelectEvents: [ path_ext_bnb ]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
  outextnumi:
   {
@@ -126,7 +145,11 @@ outputs:
    streamName: "outextnumi"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ path_ext_numi ] }
+   SelectEvents: [ path_ext_numi ]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
  outextunbiased:
   {
@@ -136,7 +159,11 @@ outputs:
    streamName: "outextunbiased"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ path_ext_unbiased ] }
+   SelectEvents: [ path_ext_unbiased ]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
  outmucs:
   {
@@ -146,7 +173,11 @@ outputs:
    streamName: "outmucs"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ path_mucs ] }
+   SelectEvents: [ path_mucs ]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
  outnotpc:
   {
@@ -158,6 +189,10 @@ outputs:
    saveMemoryObjectThreshold: 0
    outputCommands: ["keep *_*_*_*",
                     "drop raw::RawDigits_*_*_*"]
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
 }
 
