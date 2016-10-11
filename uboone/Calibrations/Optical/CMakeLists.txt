@@ -63,8 +63,8 @@ simple_plugin( FEMemulator "module"
 simple_plugin( SWTrigger "module"
 	       UBOpReadoutMap_service
 	       uboone_RawData
-	       lardata_RawData
-	       lardata_RecoBase
+	       lardataobj_RawData
+	       lardataobj_RecoBase
 	       ${ART_FRAMEWORK_CORE}
 	       ${ART_FRAMEWORK_IO_SOURCES}
                ${ART_FRAMEWORK_PRINCIPAL}
