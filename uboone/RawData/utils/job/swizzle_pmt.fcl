@@ -13,15 +13,13 @@ services:
   Timing:       {}
   RandomNumberGenerator: {} 
   FileCatalogMetadata:    @local::art_file_catalog_data
-  user: {
-          ExptGeoHelperInterface: @local::microboone_geometry_helper
-          Geometry:               @local::microboone_geo
-	  UBOpReadoutMap:           @local::microboone_opreadoutmap
-          DetectorClocksService:            @local::microboone_detectorclocks
-          DatabaseUtil:           @local::microboone_database
-          }
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  Geometry:               @local::microboone_geo
+  UBOpReadoutMap:           @local::microboone_opreadoutmap
+  DetectorClocksService:            @local::microboone_detectorclocks
+  DatabaseUtil:           @local::microboone_database
 }
-services.user.DetectorClocksService.InheritClockConfig: false
+services.DetectorClocksService.InheritClockConfig: false
 
 microboone_tfile_metadata:
 {
@@ -32,14 +30,14 @@ microboone_tfile_metadata:
 }
 
 # Database settings
-services.user.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
-services.user.DatabaseUtil.DBName:        "hootgibson_prod"
-services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
-services.user.DatabaseUtil.Port:          5444
-services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
-services.user.DatabaseUtil.ToughErrorTreatment: true
-services.user.DatabaseUtil.ShouldConnect: true
-services.user.DatabaseUtil.TableName: "main_run"
+services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: true
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
 
 source:
 {
@@ -99,4 +97,4 @@ physics:
  end_paths: [ stream1 ]
 }
 
-services.user.DetectorClocksService.TrigModuleName: "daq"
+services.DetectorClocksService.TrigModuleName: "daq"
