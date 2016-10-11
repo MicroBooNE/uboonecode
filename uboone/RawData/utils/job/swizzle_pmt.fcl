@@ -9,7 +9,6 @@
 process_name: Swizzler
 services:
 {
-  scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "daq_hist.root" }
   Timing:       {}
   RandomNumberGenerator: {} 
@@ -71,6 +70,10 @@ outputs:
    fileName: "%ifb_%tc.root"
    dataTier: "raw"
    compressionLevel: 3
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
   }
 }
 
