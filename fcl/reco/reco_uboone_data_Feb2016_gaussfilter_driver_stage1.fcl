@@ -1,0 +1,10 @@
+#include "reco_uboone_data_Feb2016_driver_stage1.fcl"
+
+process_name: DataApr2016GausFilterRecoStage1
+
+services.SignalShapingServiceMicroBooNE.FilterFuncVec:  [ "(x>0.0)*gaus", "(x>0.0)*gaus", "(x>0.0)*gaus" ]
+services.SignalShapingServiceMicroBooNE.FilterParamsVec:   [ [ 1.0, 0.0, 0.1 ], [ 1.0, 0.0, 0.1 ], [ 1.0, 0.0, 0.1 ] ]
+services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor:  [ 0.738, 0.738, 0.738 ]
+
+physics.producers.gaushit.MinSig:       [4, 2.8, 4.2]
+physics.producers.gaushit.MaxMultiHit:  4

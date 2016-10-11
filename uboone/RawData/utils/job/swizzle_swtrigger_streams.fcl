@@ -1,0 +1,318 @@
+#include "geometry_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "opticaldetectormodules_microboone.fcl"
+#include "triggerenforcement.fcl"
+#include "swtrigger_microboone.fcl"
+#include "correct_saturation.fcl"
+#include "beamdata_microboone.fcl"
+
+process_name: Swizzler
+services:
+{
+  scheduler: { fileMode: NOMERGE }
+  TFileService: { fileName: "daq_hist.root" }
+  Timing:       {}
+  RandomNumberGenerator: {} 
+  FileCatalogMetadata:    @local::art_file_catalog_data
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  Geometry:               @local::microboone_geo
+  UBOpReadoutMap:         @local::microboone_opreadoutmap
+  DetectorClocksService:  @local::microboone_detectorclocks
+  DatabaseUtil:           @local::microboone_database
+  IFDH:                   {}
+}
+services.DetectorClocksService.InheritClockConfig: false
+services.DetectorClocksService.TrigModuleName: "daq"
+
+microboone_tfile_metadata:
+{
+  JSONFileName:          "daq_hist.root.json"
+  GenerateTFileMetadata: false
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
+}
+
+# Database settings
+services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: true
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
+
+source:
+{
+  fileNames:       []
+  module_type:	   LArRawInputSourceUBooNE
+  maxEvents:       -1
+  huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTrigger:  true
+
+  swizzleTriggerType: ALL ## This is the only option that works currently!
+#  swizzleTriggerType: BNB
+#  swizzleTriggerType: EXT
+#  swizzleTriggerType: NuMI
+#  swizzleTriggerType: CALIB
+  beam_histograms: [ "E:TOR101, 100, 0, 50",
+                     "E:TORTGT, 100, 0, 50",
+                     "E:TOR860, 100, 0, 5",
+                     "E:TOR875, 100, 0, 5" ]
+}
+
+outputs:
+{
+ outbnb:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_bnb.root"
+   dataTier: "raw"
+   streamName: "outbnb"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_bnb ] }
+  }
+ outbnbunbiased:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_bnb_unbiased.root"
+   dataTier: "raw"
+   streamName: "outbnbunbiased"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_bnb_unbiased ] }
+  }
+ outnumi:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_numi.root"
+   dataTier: "raw"
+   streamName: "outnumi"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_numi ] }
+  }
+ outnumiunbiased:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_numi_unbiased.root"
+   dataTier: "raw"
+   streamName: "outnumiunbiased"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_numi_unbiased ] }
+  }
+ outextbnb:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_ext_bnb.root"
+   dataTier: "raw"
+   streamName: "outextbnb"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_ext_bnb ] }
+  }
+ outextnumi:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_ext_numi.root"
+   dataTier: "raw"
+   streamName: "outextnumi"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_ext_numi ] }
+  }
+ outextunbiased:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_ext_unbiased.root"
+   dataTier: "raw"
+   streamName: "outextunbiased"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_ext_unbiased ] }
+  }
+ outmucs:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_mucs.root"
+   dataTier: "raw"
+   streamName: "outmucs"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   SelectEvents: { SelectEvents: [ path_mucs ] }
+  }
+ outnotpc:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_notpc.root"
+   dataTier: "raw"
+   streamName: "outnotpc"
+   compressionLevel: 3
+   saveMemoryObjectThreshold: 0
+   outputCommands: ["keep *_*_*_*",
+                    "drop raw::RawDigits_*_*_*"]
+  }
+}
+
+# Standard reconstruction sequence.
+
+reco: [ saturation,
+        ophit,
+        ophitSat,
+        ophitLow,
+        ophitCosmic,
+        ophitCosmicLow,
+        opflash,
+        sflash,
+        opflashSat,
+        sflashSat,
+        opflashLow,
+        opflashCosmic,
+        opflashCosmicLow,
+        beamdata,
+        swtrigger ]
+
+physics:
+{
+  producers: {
+    saturation       : @local::correct_saturation
+    ophit            : @local::microboone_ophit_beam_highgain
+    ophitSat         : @local::microboone_ophit_saturation
+    ophitLow         : @local::microboone_ophit_beam_lowgain
+    ophitCosmic      : @local::microboone_ophit_cosmic_highgain
+    ophitCosmicLow   : @local::microboone_ophit_cosmic_lowgain
+    opflash          : @local::microboone_opflash_beam_highgain
+    sflash           : @local::microboone_simple_flash
+    opflashSat       : @local::microboone_opflash_saturation
+    sflashSat        : @local::microboone_simple_flash_sat
+    opflashLow       : @local::microboone_opflash_beam_lowgain
+    opflashCosmic    : @local::microboone_opflash_cosmic_highgain
+    opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
+    beamdata         : @local::microboone_beamdata
+  }
+
+  filters: {
+
+    # Software trigger emulation.
+
+    swtrigger: @local::microboone_swtrigger_data
+
+    # Hardware triggers.
+
+    trigbnb:  @local::trigger_enforcement
+    trignumi: @local::trigger_enforcement
+    trigext:  @local::trigger_enforcement
+    trigmucs: @local::trigger_enforcement
+
+    # Software triggers.
+
+    swtrigbnb:          @local::trigger_enforcement
+    swtrigbnbunbiased:  @local::trigger_enforcement
+    swtrignumi:         @local::trigger_enforcement
+    swtrignumiunbiased: @local::trigger_enforcement
+    swtrigextbnb:       @local::trigger_enforcement
+    swtrigextnumi:      @local::trigger_enforcement
+    swtrigextunbiased:  @local::trigger_enforcement
+  }
+
+  path_notpc:         [ @sequence::reco ]
+  path_bnb:           [ @sequence::reco, swtrigbnb ]
+  path_bnb_unbiased:  [ @sequence::reco, swtrigbnbunbiased ]
+  path_numi:          [ @sequence::reco, swtrignumi ]
+  path_numi_unbiased: [ @sequence::reco, swtrignumiunbiased ]
+  path_ext_bnb:       [ @sequence::reco, swtrigextbnb ]
+  path_ext_numi:      [ @sequence::reco, swtrigextnumi ]
+  path_ext_unbiased:  [ @sequence::reco, swtrigextunbiased ]
+  path_mucs:          [ trigmucs ]
+
+  trigger_paths: [ path_notpc,
+                   path_bnb,
+                   path_bnb_unbiased,
+                   path_numi,
+                   path_numi_unbiased,
+                   path_ext_bnb,
+                   path_ext_numi,
+                   path_ext_unbiased,
+                   path_mucs ]
+
+  stream_notpc:         [ outnotpc ]
+  stream_bnb:           [ outbnb ]
+  stream_bnb_unbiased:  [ outbnbunbiased ]
+  stream_numi:          [ outnumi ]
+  stream_numi_unbiased: [ outnumiunbiased ]
+  stream_ext_bnb:       [ outextbnb ]
+  stream_ext_numi:      [ outextnumi ]
+  stream_ext_unbiased:  [ outextunbiased ]
+  stream_mucs:          [ outmucs ]
+
+  end_paths:     [ stream_notpc,
+                   stream_bnb,
+                   stream_bnb_unbiased,
+                   stream_numi,
+                   stream_numi_unbiased,
+                   stream_ext_bnb,
+                   stream_ext_numi,
+                   stream_ext_unbiased,
+                   stream_mucs ]
+}
+physics.filters.swtrigger.EXT_NUMIwin_FEMBeamTriggerAlgo.PrescaleFactor: 1.0
+physics.filters.swtrigger.EXT_unbiased_PrescaleAlgo.PrescaleFactor: 1.0
+
+physics.filters.trigbnb.HardwareTriggerProducer: "daq"
+physics.filters.trigbnb.SoftwareTriggerProducer: "swtrigger"
+physics.filters.trigbnb.IncludeBits: [ "TriggerBNB" ]
+
+physics.filters.trignumi.HardwareTriggerProducer: "daq"
+physics.filters.trignumi.SoftwareTriggerProducer: "swtrigger"
+physics.filters.trignumi.IncludeBits: [ "TriggerNuMI" ]
+
+physics.filters.trigext.HardwareTriggerProducer: "daq"
+physics.filters.trigext.SoftwareTriggerProducer: "swtrigger"
+physics.filters.trigext.IncludeBits: [ "TriggerEXT" ]
+
+physics.filters.trigmucs.HardwareTriggerProducer: "daq"
+physics.filters.trigmucs.SoftwareTriggerProducer: "swtrigger"
+physics.filters.trigmucs.IncludeBits: [ "Spare" ]
+
+physics.filters.swtrigbnb.HardwareTriggerProducer: "daq"
+physics.filters.swtrigbnb.SoftwareTriggerProducer: "swtrigger"
+physics.filters.swtrigbnb.IncludeBits: [ "TriggerBNB" ]
+physics.filters.swtrigbnb.includeSoftwareTriggers: [ "BNB_FEMBeamTriggerAlgo" ]
+
+physics.filters.swtrigbnbunbiased.HardwareTriggerProducer: "daq"
+physics.filters.swtrigbnbunbiased.SoftwareTriggerProducer: "swtrigger"
+physics.filters.swtrigbnbunbiased.IncludeBits: [ "TriggerBNB" ]
+physics.filters.swtrigbnbunbiased.includeSoftwareTriggers: [ "BNB_unbiased_PrescaleAlgo" ]
+
+physics.filters.swtrignumi.HardwareTriggerProducer: "daq"
+physics.filters.swtrignumi.SoftwareTriggerProducer: "swtrigger"
+physics.filters.swtrignumi.IncludeBits: [ "TriggerNuMI" ]
+physics.filters.swtrignumi.includeSoftwareTriggers: [ "NUMI_FEMBeamTriggerAlgo" ]
+
+physics.filters.swtrignumiunbiased.HardwareTriggerProducer: "daq"
+physics.filters.swtrignumiunbiased.SoftwareTriggerProducer: "swtrigger"
+physics.filters.swtrignumiunbiased.IncludeBits: [ "TriggerNuMI" ]
+physics.filters.swtrignumiunbiased.includeSoftwareTriggers: [ "NUMI_unbiased_PrescaleAlgo" ]
+
+physics.filters.swtrigextbnb.HardwareTriggerProducer: "daq"
+physics.filters.swtrigextbnb.SoftwareTriggerProducer: "swtrigger"
+physics.filters.swtrigextbnb.IncludeBits: [ "TriggerEXT" ]
+physics.filters.swtrigextbnb.includeSoftwareTriggers: [ "EXT_BNBwin_FEMBeamTriggerAlgo" ]
+
+physics.filters.swtrigextnumi.HardwareTriggerProducer: "daq"
+physics.filters.swtrigextnumi.SoftwareTriggerProducer: "swtrigger"
+physics.filters.swtrigextnumi.IncludeBits: [ "TriggerEXT" ]
+physics.filters.swtrigextnumi.includeSoftwareTriggers: [ "EXT_NUMIwin_FEMBeamTriggerAlgo" ]
+
+physics.filters.swtrigextunbiased.HardwareTriggerProducer: "daq"
+physics.filters.swtrigextunbiased.SoftwareTriggerProducer: "swtrigger"
+physics.filters.swtrigextunbiased.IncludeBits: [ "TriggerEXT" ]
+physics.filters.swtrigextunbiased.includeSoftwareTriggers: [ "EXT_unbiased_PrescaleAlgo" ]
+

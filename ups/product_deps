@@ -31,6 +31,7 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
+swtrigger       v2_02_02
 larsoft         v06_09_00
 ubutil          v06_09_00
 uboone_data     v01_07_00
@@ -43,10 +44,10 @@ end_product_list
 # We now define allowed qualifiers and the corresponding qualifiers for the depdencies.
 # Make a table by adding columns before "notes". 
 # e10  - with gcc 4.9.3 and -std=c++1y
-qualifier	larsoft		ubutil		uboone_data	uboonedaq_datatypes	notes
-e10:debug	e10:debug	e10:debug	-nq-		e10:debug
-e10:opt		e10:opt		e10:opt		-nq-        	e10:opt
-e10:prof	e10:prof	e10:prof	-nq-        	e10:prof
+qualifier	swtrigger	larsoft		ubutil		uboone_data	uboonedaq_datatypes	notes
+e10:debug	e10:debug	e10:debug	e10:debug	-nq-		e10:debug
+e10:opt		e10:opt		e10:opt		e10:opt		-nq-        	e10:opt
+e10:prof	e10:prof	e10:prof	e10:prof	-nq-        	e10:prof
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
