@@ -8,15 +8,13 @@ services:
 {
   TFileService: { fileName: "FEMemulator.root" }
   Timing:       {}
-  user: {
-          ExptGeoHelperInterface: @local::microboone_geometry_helper
-          Geometry:               @local::microboone_geo
-          DetectorClocksService:            @local::microboone_detectorclocks
-	  UBOpReadoutMap:         @local::microboone_opreadoutmap
-         }
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  Geometry:               @local::microboone_geo
+  DetectorClocksService:            @local::microboone_detectorclocks
+  UBOpReadoutMap:         @local::microboone_opreadoutmap
 }
 
-services.user.DetectorClocksService.TrigModuleName: "daq"
+services.DetectorClocksService.TrigModuleName: "daq"
 
 outputs:
 {
@@ -28,7 +26,7 @@ outputs:
    streamName: "out_swtrigger"
    compressionLevel: 3
    saveMemoryObjectThreshold: 0
-   SelectEvents: { SelectEvents: [ swtrg_path ] }
+   SelectEvents: [ swtrg_path ]
   }
 }
 

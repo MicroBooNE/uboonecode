@@ -8,15 +8,13 @@ services:
 {
   TFileService: { fileName: "FEMemulator.root" }
   Timing:       {}
-  user: {
-          ExptGeoHelperInterface: @local::microboone_geometry_helper
-          Geometry:               @local::microboone_geo
-          DetectorClocksService:            @local::microboone_detectorclocks
-	  UBOpReadoutMap:         @local::microboone_opreadoutmap
-         }
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  Geometry:               @local::microboone_geo
+  DetectorClocksService:            @local::microboone_detectorclocks
+  UBOpReadoutMap:         @local::microboone_opreadoutmap
 }
 
-services.user.DetectorClocksService.TrigModuleName: "daq"
+services.DetectorClocksService.TrigModuleName: "daq"
 
 outputs:
 {
