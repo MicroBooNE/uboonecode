@@ -31,7 +31,7 @@ table_fragment_end
 # Add the dependent product and version
 
 product          version
-swtrigger       v2_02_02
+swtrigger       v02_02_03
 larsoft         v06_09_00
 ubutil          v06_09_00
 uboone_data     v01_07_00
