@@ -46,7 +46,7 @@
 #include "lardataobj/RecoBase/Vertex.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/RecoObjects/BezierTrack.h"
+#include "larreco/Deprecated/BezierTrack.h"
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/AnalysisBase/FlashMatch.h"
