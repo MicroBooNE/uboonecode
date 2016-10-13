@@ -19,13 +19,13 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   uboone_Geometry
 		   uboonecode_uboone_MuCS
 		   larcore_Geometry_Geometry_service
-	   	   larsim_Simulation lardataobj_Simulation
+	   	   larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation
 		   lardataobj_RecoBase
 		   nusimdata_SimulationBase
 		   lardataobj_MCBase
 		   larcoreobj_SummaryData
 		   lardataobj_RawData
-		   lardata_RecoObjects
+		   lardata_RecoObjects larreco_Deprecated
 		   ${UBOONECODE_LIB}
 		   nusimdata_SimulationBase
 		   ${LARRECO_LIB}
@@ -57,14 +57,14 @@ art_make( EXCLUDE LLMetaMaker_service.cc
 		   larcore_Geometry
 		   uboone_Geometry
 		   larcore_Geometry_Geometry_service
-		   larsim_Simulation lardataobj_Simulation
+		   larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation
 		   nusimdata_SimulationBase
 		   lardata_Utilities
 		   lardataobj_MCBase
 		   larcoreobj_SummaryData
 		   lardataobj_RawData
 		   lardataobj_RecoBase
-		   lardata_RecoObjects
+		   lardata_RecoObjects larreco_Deprecated
                    larevt_Filters
                    larevt_CalibrationDBI_IOVData
                    larevt_CalibrationDBI_Providers
