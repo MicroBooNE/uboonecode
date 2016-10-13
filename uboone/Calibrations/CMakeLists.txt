@@ -2,6 +2,7 @@
 add_subdirectory(Optical)
 
 art_make( BASENAME_ONLY
+	  EXCLUDE Lifetime.C
 	  LIBRARY_NAME  uboonecode_uboone_Calibrations
 	  LIB_LIBRARIES
                         lardata_Utilities_LArFFT_service
@@ -19,9 +20,9 @@ art_make( BASENAME_ONLY
 			larcore_Geometry
 			larcore_Geometry_Geometry_service
 			larsim_MCCheater_BackTracker_service
-			larsim_Simulation lardataobj_Simulation
+			larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation
 			lardataobj_RecoBase
-			lardata_RecoObjects  
+			lardata_RecoObjects larreco_Deprecated  
 			larreco_RecoAlg
 			lardata_Utilities
 			larevt_Filters
@@ -48,6 +49,8 @@ art_make( BASENAME_ONLY
                         ${ROOT_XMLIO}
                         ${ROOT_GDML}
 			${ROOT_BASIC_LIB_LIST}
+			${ROOT_MINUIT}
+			${ROOT_MINUIT2}	
         )
 
 install_headers()
