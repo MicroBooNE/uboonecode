@@ -47,27 +47,25 @@ process_name: SubEventBuilder
 services:
 {
   TFileService: { fileName: "raw_digits.root" }
-  user: {
-          ExptGeoHelperInterface: @local::microboone_geometry_helper
-          Geometry:               @local::microboone_geo
-          DetectorClocksService:            @local::microboone_detectorclocks
-          #DatabaseUtil:           @local::microboone_database
-	  UBOpReadoutMap:         @local::microboone_opreadoutmap
-         }
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  Geometry:               @local::microboone_geo
+  DetectorClocksService:            @local::microboone_detectorclocks
+  #DatabaseUtil:           @local::microboone_database
+  UBOpReadoutMap:         @local::microboone_opreadoutmap
 }
 
 # Time Service
-services.user.DetectorClocksService.TrigModuleName: "daq"
+services.DetectorClocksService.TrigModuleName: "daq"
 
 # Database settings
-services.user.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
-services.user.DatabaseUtil.DBName:        "uboonedaq_dev"
-services.user.DatabaseUtil.DBUser:        "uboonedaq_web"
-services.user.DatabaseUtil.Port:          5436
-services.user.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
-services.user.DatabaseUtil.ToughErrorTreatment: true
-services.user.DatabaseUtil.ShouldConnect: true
-services.user.DatabaseUtil.TableName: "main_run"
+services.DatabaseUtil.DBHostName:    "fnalpgsdev.fnal.gov"
+services.DatabaseUtil.DBName:        "uboonedaq_dev"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5436
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: true
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
 
 outputs:
 {

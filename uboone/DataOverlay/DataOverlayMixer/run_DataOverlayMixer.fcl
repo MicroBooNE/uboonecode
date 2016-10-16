@@ -73,5 +73,5 @@ physics: {
 
 }
 
-#services.user.IChannelStatusService.ChannelStatusProvider.UseDB: false
+#services.IChannelStatusService.ChannelStatusProvider.UseDB: false
 physics.producers.digitfilter.DigitModuleLabel: "mixer"

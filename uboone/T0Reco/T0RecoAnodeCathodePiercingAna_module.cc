@@ -24,7 +24,9 @@
 // data-products
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/AnalysisBase/T0.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/MCBase/MCTrack.h"
+#include "lardataobj/RecoBase/OpFlash.h"
 #include "lardata/Utilities/AssociationUtil.h"
 
 // C++
@@ -60,12 +62,50 @@ private:
   // Declare member data here.
   std::string fTrackProducer;
   std::string fT0Producer;
+  std::string fFlashProducer;
+
+  bool        fUseMC;
   double      fResolution; // cm resolution to allow mc-reco track matching. [Y,Z] must be within this distance
+
+  // define top, bottom, front and back boundaries of TPC
+  double _TOP, _BOTTOM, _FRONT, _BACK;
+
 
   TTree* _tree;
   double _mc_time;
   double _rc_time;
+  double _t_match;
+  double _dt_flash;
+  double _pe_flash;
+  double _length;
+  double _rc_x_start, _rc_x_end;
+  double _rc_y_start, _rc_y_end;
+  double _rc_z_start, _rc_z_end;
+  double _mc_x_start, _mc_x_end;
+  double _mc_y_start, _mc_y_end;
+  double _mc_z_start, _mc_z_end;
   int    _matched;
+  int    _enter_top;
+  int    _enter_side;
+  int    _exit_bottom;
+  int    _exit_side;
+  int    _enter_anode;
+  int    _exit_anode;
+
+  TTree* _mucs_tree;
+  double _reco_time;
+
+  // functions to be used throughout module
+  bool   TrackEntersTop     (const std::vector<TVector3>& sorted_trk);
+  bool   TrackEntersAnode   (const std::vector<TVector3>& sorted_trk);
+  bool   TrackEntersSide    (const std::vector<TVector3>& sorted_trk);
+  bool   TrackExitsBottom   (const std::vector<TVector3>& sorted_trk);
+  bool   TrackExitsAnode    (const std::vector<TVector3>& sorted_trk);
+  bool   TrackExitsSide     (const std::vector<TVector3>& sorted_trk);
+
+  // functions to be used for organization in the module
+  void   SortTrackPoints      (const recob::Track& track,
+			       std::vector<TVector3>& sorted_trk);
 
   bool MatchTracks(const recob::Track& track, const sim::MCTrack& mctrk, const double& res);
 
@@ -74,12 +114,22 @@ private:
 
 T0RecoAnodeCathodePiercingAna::T0RecoAnodeCathodePiercingAna(fhicl::ParameterSet const & p)
   :
-  EDAnalyzer(p)  // ,
- // More initializers here.
+  EDAnalyzer(p)
 {
-  fTrackProducer = p.get<std::string>("TrackProducer");
-  fT0Producer    = p.get<std::string>("T0Producer");
-  fResolution    = p.get<double>("Resolution");
+  fTrackProducer     = p.get<std::string>("TrackProducer"    );
+  fT0Producer        = p.get<std::string>("T0Producer"       );
+  fFlashProducer     = p.get<std::string>("FlashProducer"    );
+  fUseMC             = p.get<bool>       ("UseMC"            );
+  fResolution        = p.get<double>     ("Resolution"       );
+
+  // get boundaries based on detector bounds
+  auto const* geom = lar::providerFrom<geo::Geometry>();
+
+  _TOP    =   geom->DetHalfHeight() - fResolution;
+  _BOTTOM = - geom->DetHalfHeight() + fResolution;
+  _FRONT  =   fResolution;
+  _BACK   =   geom->DetLength() - fResolution;
+
 }
 
 void T0RecoAnodeCathodePiercingAna::beginJob()
@@ -89,7 +139,50 @@ void T0RecoAnodeCathodePiercingAna::beginJob()
   _tree = tfs->make<TTree>("_tree","T0 reco performance");
   _tree->Branch("_mc_time",&_mc_time,"mc_time/D");
   _tree->Branch("_rc_time",&_rc_time,"rc_time/D");
+  _tree->Branch("_t_match",&_t_match,"t_match/D");
+  _tree->Branch("_dt_flash",&_dt_flash,"dt_flash/D");
+  _tree->Branch("_pe_flash",&_pe_flash,"pe_flash/D");
+  _tree->Branch("_length", &_length, "length/D");
   _tree->Branch("_matched",&_matched,"matched/I");
+  // Add branches for the first and last x, y, and z coordinates of the rc tracks and the mc tracks
+  _tree->Branch("_mc_x_start",&_mc_x_start,"mc_x_start/D");
+  _tree->Branch("_mc_y_start",&_mc_y_start,"mc_y_start/D");
+  _tree->Branch("_mc_z_start",&_mc_z_start,"mc_z_start/D");
+  _tree->Branch("_mc_x_end",&_mc_x_end,"mc_x_end/D");
+  _tree->Branch("_mc_y_end",&_mc_y_end,"mc_y_end/D");
+  _tree->Branch("_mc_z_end",&_mc_z_end,"mc_z_end/D");
+  _tree->Branch("_rc_x_start",&_rc_x_start,"rc_x_start/D");
+  _tree->Branch("_rc_y_start",&_rc_y_start,"rc_y_start/D");
+  _tree->Branch("_rc_z_start",&_rc_z_start,"rc_z_start/D");
+  _tree->Branch("_rc_x_end",&_rc_x_end,"rc_x_end/D");
+  _tree->Branch("_rc_y_end",&_rc_y_end,"rc_y_end/D");
+  _tree->Branch("_rc_z_end",&_rc_z_end,"rc_z_end/D");
+  // information on whether track enters/exits which sides
+  _tree->Branch("_enter_top",&_enter_top,"enter_top/I");
+  _tree->Branch("_enter_side",&_enter_side,"enter_side/I");
+  _tree->Branch("_exit_bottom",&_exit_bottom,"exit_bottom/I");
+  _tree->Branch("_exit_side",&_exit_side,"exit_side/I");
+  _tree->Branch("_enter_anode",&_enter_anode,"enter_anode/I");
+  _tree->Branch("_exit_anode",&_exit_anode,"exit_anode/I");
+
+  _mucs_tree = tfs->make<TTree>("_mucs_tree","MuCS tagged tracks tree");
+  _mucs_tree->Branch("_reco_time",&_reco_time,"reco_time/D");
+  _mucs_tree->Branch("_length", &_length, "length/D");
+  _mucs_tree->Branch("_t_match",&_t_match,"t_match/D");
+  _mucs_tree->Branch("_dt_flash",&_dt_flash,"dt_flash/D");
+  _mucs_tree->Branch("_pe_flash",&_pe_flash,"pe_flash/D");
+  _mucs_tree->Branch("_rc_x_start",&_rc_x_start,"rc_x_start/D");
+  _mucs_tree->Branch("_rc_y_start",&_rc_y_start,"rc_y_start/D");
+  _mucs_tree->Branch("_rc_z_start",&_rc_z_start,"rc_z_start/D");
+  _mucs_tree->Branch("_rc_x_end",&_rc_x_end,"rc_x_end/D");
+  _mucs_tree->Branch("_rc_y_end",&_rc_y_end,"rc_y_end/D");
+  _mucs_tree->Branch("_rc_z_end",&_rc_z_end,"rc_z_end/D");
+  _mucs_tree->Branch("_enter_top",&_enter_top,"enter_top/I");
+  _mucs_tree->Branch("_enter_side",&_enter_side,"enter_side/I");
+  _mucs_tree->Branch("_exit_bottom",&_exit_bottom,"exit_bottom/I");
+  _mucs_tree->Branch("_exit_side",&_exit_side,"exit_side/I");
+  _mucs_tree->Branch("_enter_anode",&_enter_anode,"enter_anode/I");
+  _mucs_tree->Branch("_exit_anode",&_exit_anode,"exit_anode/I");
 
   fResolution = 10; // cm
 
@@ -112,15 +205,24 @@ void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
   // load MCtracks
   art::Handle<std::vector<sim::MCTrack> > mctrk_h;
   e.getByLabel("mcreco",mctrk_h);
-  
-  // make sure tracks look good
-  if(!mctrk_h.isValid()) {
-    std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate MCTrack!"<<std::endl;
-    throw std::exception();
-  }
+
+  // if we should use MCTrack
+  if (fUseMC){
+    // make sure tracks look good
+    if(!mctrk_h.isValid()) {
+      std::cerr<<"\033[93m[ERROR]\033[00m ... could not locate MCTrack!"<<std::endl;
+      throw std::exception();
+    }
+  }// if use MCTrack
 
   // grab T0 objects associated with tracks
   art::FindMany<anab::T0> trk_t0_assn_v(track_h, e, fT0Producer );
+
+  // grab flashes associated with tracks
+  art::FindMany<recob::OpFlash> trk_flash_assn_v(track_h, e, fFlashProducer );
+
+  // grab CosmicTag objects associated with tracks
+  // art::FindMany<anab::CosmicTag> trk_cosmictag_assn_v(track_h, e, fCosmicTagProducer);
 
   for (size_t i=0; i < track_h->size(); i++){
 
@@ -130,35 +232,97 @@ void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
 
     std::vector<const anab::T0*> T0_v = trk_t0_assn_v.at(i);
 
+    std::vector<const recob::OpFlash*> flash_v = trk_flash_assn_v.at(i);
+
     // grab T0 object
     if (T0_v.size() == 1){
 
       auto t0 = T0_v.at(0);
 
+      // get sorted points for the track object [assuming downwards going]
+      std::vector<TVector3> sorted_trk;
+      SortTrackPoints(track,sorted_trk);
+
+      auto const& top    = sorted_trk.at(0);
+      auto const& bottom = sorted_trk.at(sorted_trk.size() - 1);
+      
+      _rc_x_start = top.X();
+      _rc_y_start = top.Y();
+      _rc_z_start = top.Z();
+      _rc_x_end   = bottom.X();
+      _rc_y_end   = bottom.Y();
+      _rc_z_end   = bottom.Z();
+      _length     = track.Length();
+
+      _exit_bottom = _exit_side = _enter_top = _enter_side = _exit_anode = _enter_anode = 0;
+
+      if (TrackExitsBottom(sorted_trk) == true)
+	_exit_bottom = 1;
+      if (TrackEntersSide(sorted_trk) == true)
+	_enter_side = 1;
+      if (TrackExitsSide(sorted_trk) == true)
+	_exit_side = 1;
+      if (TrackEntersTop(sorted_trk) == true)
+	_enter_top = 1;
+      if (TrackEntersAnode(sorted_trk) == true)
+	_enter_anode = 1;
+      if (TrackExitsAnode(sorted_trk) == true)
+	_exit_anode = 1;
+      
       // reconstructed time comes from T0 object
       _rc_time = t0->Time();
-      
-      // loop through MCTracks to find the one that matches.
-      for (size_t j=0; j < mctrk_h->size(); j++){
+
+      // if there is an associated optical flash
+      if (flash_v.size() == 1){
 	
-	auto const& mctrk = mctrk_h->at(j);
+	auto flash = flash_v.at(0);
+	
+	_pe_flash = flash->TotalPE();
+	_t_match  = flash->Time();
+	_dt_flash = flash->Time() - _rc_time;
 
-	// try matching to MC
-	if (MatchTracks(track, mctrk, fResolution) == false)
-	  continue;
+      } // if there is an optical flash
 
-	// matched -> get MCTrack time and reconstructed track reconstructed T0
-	_mc_time = mctrk.at(0).T() / 1000.;
-	_matched = 1;
+      // if we should use MC info -> continue w/ MC validation
+      if (fUseMC == true){
+	// loop through MCTracks to find the one that matches.
+	for (size_t j=0; j < mctrk_h->size(); j++){
+	  
+	  auto const& mctrk = mctrk_h->at(j);
+	  
+	  // try matching to MC
+	  if (MatchTracks(track, mctrk, fResolution) == false)
+	    continue;
+	  
+	  // matched -> get MCTrack time and reconstructed track reconstructed T0
+	  _mc_time = mctrk.at(0).T() / 1000.;
+	  _matched = 1;
 
-      } // for all MCTracks
 
+	  // Here is where I'll set the coordinates for the start and end of the mc tracks
+	  _mc_x_start = mctrk.at(0).X();
+	  _mc_y_start = mctrk.at(0).Y();
+	  _mc_z_start = mctrk.at(0).Z();
+	  _mc_x_end   = mctrk.at(mctrk.size() - 1).X();
+	  _mc_y_end   = mctrk.at(mctrk.size() - 1).Y();
+	  _mc_z_end   = mctrk.at(mctrk.size() - 1).Z();
+	  
+	} // for all MCTracks
+      }// if we should use MCTracks
+      
       _tree->Fill();
       
+      // check if there is a cosmic tag, if so assume MuCS-tagged track
+      // std::vector<const anab::CosmicTag*> CosmicTag_v = trk_cosmictag_assn_v.at(i);
+      
+      // if (CosmicTag_v.size() == 1){
+      // _reco_time = _rc_time;
+      // _mucs_tree->Fill();
+      // }
     } // if there is a reconstructed T0
     
   } // for all reconstructed tracks
-
+  
 }
 
 
@@ -175,30 +339,177 @@ bool T0RecoAnodeCathodePiercingAna::MatchTracks(const recob::Track& track, const
   auto const& mctrk_e = mctrk.at( mctrk.size() - 1 );
   auto const& track_s = track.Vertex();
   auto const& track_e = track.End();
-    
+
   // if track start is above and mctrk start is above
   if ( ( track_s.Y() > track_e.Y() ) and ( mctrk_s.Y() > mctrk_e.Y() ) ){
-    if ( (fabs(mctrk_s.Y()-track_s.Y()) < res) and (fabs(mctrk_s.Z()-track_s.Z()) < res) )
+    if ( (fabs(mctrk_s.Y()-track_s.Y()) < res) and (fabs(mctrk_s.Z()-track_s.Z()) < res) and (fabs(mctrk_e.Y()-track_e.Y()) < res) and (fabs(mctrk_e.Z()-track_e.Z()) < res) )
       return true;
   }
   // if tarck start is above and mctrk start is below
   if ( ( track_s.Y() > track_e.Y() ) and ( mctrk_s.Y() < mctrk_e.Y() ) ){
-    if ( (fabs(mctrk_e.Y()-track_s.Y()) < res) and (fabs(mctrk_e.Z()-track_s.Z()) < res) )
+    if ( (fabs(mctrk_e.Y()-track_s.Y()) < res) and (fabs(mctrk_e.Z()-track_s.Z()) < res) and (fabs(mctrk_s.Y()-track_e.Y()) < res) and (fabs(mctrk_s.Z() - track_e.Z()) < res) )
       return true;
   }
   // if track start is below and mctrk start is above
   if ( ( track_s.Y() < track_e.Y() ) and ( mctrk_s.Y() > mctrk_e.Y() ) ){
-    if ( (fabs(mctrk_s.Y()-track_e.Y()) < res) and (fabs(mctrk_s.Z()-track_e.Z()) < res) )
+    if ( (fabs(mctrk_s.Y()-track_e.Y()) < res) and (fabs(mctrk_s.Z()-track_e.Z()) < res) and (fabs(mctrk_e.Y()-track_s.Y()) < res) and (fabs(mctrk_e.Z()-track_s.Z()) < res) )
       return true;
   }
   // if track start is below and mctrk start is below
   if ( ( track_s.Y() < track_e.Y() ) and ( mctrk_s.Y() < mctrk_e.Y() ) ){
-    if ( (fabs(mctrk_e.Y()-track_e.Y()) < res) and (fabs(mctrk_e.Z()-track_e.Z()) < res) )
+    if ( (fabs(mctrk_e.Y()-track_e.Y()) < res) and (fabs(mctrk_e.Z()-track_e.Z()) < res) and (fabs(mctrk_s.Y() - track_s.Y()) < res) and (fabs(mctrk_s.Z()-track_s.Z()) < res) )
       return true;
   }
   
   return false;
 }
 
+
+bool   T0RecoAnodeCathodePiercingAna::TrackEntersTop(const std::vector<TVector3>& sorted_trk)
+{
+  // check that the first point in the track
+  // pierces the top boundary of the TPC
+  // This track either will pierce the top of the TPC or is just about to (the '_TOP' variable is just below the actual coordinate position of the top in Y)
+
+  if (sorted_trk.at(0).Y() > _TOP)
+    return true;
+
+  return false;
+}
+
+bool   T0RecoAnodeCathodePiercingAna::TrackEntersAnode(const std::vector<TVector3>& sorted_trk)
+{
+
+  // we know the track enters either the                                                                                                                               
+  // anode or cathode                                                                                                                                                        
+  // at this point figure out                                                                                                                                                
+  // if it ENTERS the ANODE or CATHODE                                                                                         
+  // ANODE: top point must be at lower X-coord                                                                                                
+  // than bottom point                                                                                              
+  // CATHODE: top point must be at larger X-coord                                                                                                                              
+  // than bottom point
+  // assume track has already been sorted                                                                                                                                     
+  // such that the 1st point is the most elevated in Y coord.                                                                                                                 
+  // return TRUE if passes the ANODE                                                                                                                                                
+  
+  auto const& top    = sorted_trk.at(0);
+  auto const& bottom = sorted_trk.at( sorted_trk.size() - 1 );
+
+  if (top.X() < bottom.X())
+    return true;
+  
+  return false;
+}
+
+
+bool   T0RecoAnodeCathodePiercingAna::TrackEntersSide(const std::vector<TVector3>& sorted_trk)
+{
+  
+  // check that the top-most point                                                                                                                                            
+  // is not on the top of the TPC                                                                                                                                              
+  // nor on the front & back of the TPC                                                                                                                                           
+  
+  auto const& top_pt = sorted_trk.at(0);
+
+  // if highest point above the TOP -> false                                                                                                                                   
+  if (top_pt.Y() > _TOP)
+    return false;
+
+  // if highest point in Z close to front or back                                                                                                                              
+  // -> FALSE                                                                                                                                                                 
+  if ( (top_pt.Z() < _FRONT) or (top_pt.Z() > _BACK) )
+    return false;
+
+
+  // If the function makes it this far, then it will enter through one of the sides of the TPC
+  return true;
+}
+
+bool   T0RecoAnodeCathodePiercingAna::TrackExitsBottom(const std::vector<TVector3>& sorted_trk)
+{
+
+  // check that the last point in the track                                                                                                                                    
+  // pierces the bottom boundary of the TPC                                                                                                                                   
+  if ( sorted_trk.at( sorted_trk.size() - 1).Y() < _BOTTOM )
+    return true;
+
+  return false;
+}
+
+bool   T0RecoAnodeCathodePiercingAna::TrackExitsAnode(const std::vector<TVector3>& sorted_trk)
+{
+
+  // Check, once it's known that the track doesn't exit out of the bottom, whether it's the anode or                                                                           
+  // the cathode that it exits out of                                                                                                                                         
+  // This can be done by direct analogy with the 'Anode' function (shown in this file as the 'TrackEntersAnode') function written by D. Caratelli                             
+  // Define 'top' as the point at the start of the track, and 'bottom' as the point at the end of the track                                                                     
+
+  auto const& top    = sorted_trk.at(0);
+  auto const& bottom = sorted_trk.at(sorted_trk.size() - 1);
+
+  // Check to see which point has a lower x coordinate                                                                                                                         
+  // If the bottom does, then it exits out of the anode                                                                                                                       
+  // If the top does, then it exits out of the cathode                                                                                                                          
+  if (bottom.X() < top.X()) 
+    return true;
+
+  return false; // Otherwise, the top is less than the bottom, so the track ended closer to the cathode and exited there                                                          
+}
+
+
+bool   T0RecoAnodeCathodePiercingAna::TrackExitsSide(const std::vector<TVector3>& sorted_trk)
+{
+
+  // check that the bottom-most point                                                                                                                                           
+  // is not on the bottom of the TPC                                                                                                                                            
+  // nor on the front & back of the TPC                                                                                                                                              
+
+  auto const& bottom_pt = sorted_trk.at(sorted_trk.size() - 1);
+
+  // if lowest point below the BOTTOM -> false                                                                                                            
+  // Within this resolution, this means that it's likely that the track exited out of the bottom (at a point earlier on in the process than the last point) OR is just about to
+
+  if (bottom_pt.Y() <  _BOTTOM)
+    return false;
+
+  // if lowest point in Z close to front or back                                                                                                         
+  // -> FALSE                                                                                                                                              
+  // If the the bottom point is less than the front, then the track has already pierced the front of the TPC and exited that way OR is likely just about to
+  // If the bottom point is greater than the back, then the track has already pierced the back of the TPC and exited that way OR is likely just about to
+  if ( (bottom_pt.Z() < _FRONT) or (bottom_pt.Z() > _BACK) )
+    return false;
+
+  return true;
+}
+
+void   T0RecoAnodeCathodePiercingAna::SortTrackPoints(const recob::Track& track, std::vector<TVector3>& sorted_trk)
+{
+
+  // vector to store 3D coordinates of                                                                                                                                           
+  // ordered track                              
+  sorted_trk.clear();
+
+  // take the reconstructed 3D track                                                                                                                                           
+  // and assuming it is downwards                                                                                                    
+  // going, sort points so that                                                                                                              
+  // the track starts at the top                                                                                                     
+  // which point is further up in Y coord?                                                                                                                  
+  // start or end?                                                                                                                 
+  auto const&N = track.NumberTrajectoryPoints();
+  auto const&start = track.LocationAtPoint(0);
+  auto const&end   = track.LocationAtPoint( N - 1 );
+
+  // if points are ordered correctly                                                                                                                                       
+  if (start.Y() > end.Y()){
+    for (size_t i=0; i < N; i++)
+      sorted_trk.push_back( track.LocationAtPoint(i) );
+  }
+  
+  // otherwise flip order                                                                                                                                                 
+  else {
+    for (size_t i=0; i < N; i++)
+      sorted_trk.push_back( track.LocationAtPoint( N - i - 1) );
+  }
+}
 
 DEFINE_ART_MODULE(T0RecoAnodeCathodePiercingAna)

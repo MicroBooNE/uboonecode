@@ -19,7 +19,7 @@ art_make( BASENAME_ONLY
 			larcore_Geometry
 			larcore_Geometry_Geometry_service
 			larsim_MCCheater_BackTracker_service
-			larsim_Simulation larsimobj_Simulation
+			larsim_Simulation lardataobj_Simulation
 			lardataobj_RecoBase
 			lardata_RecoObjects  
 			larreco_RecoAlg

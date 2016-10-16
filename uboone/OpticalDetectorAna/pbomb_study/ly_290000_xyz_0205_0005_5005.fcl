@@ -1,11 +1,11 @@
 #include "pbomb.fcl"
 
-services.user.PhotonVisibilityService.XMin: 20
-services.user.PhotonVisibilityService.XMax: 21
-services.user.PhotonVisibilityService.YMin: 0
-services.user.PhotonVisibilityService.YMax: 1
-services.user.PhotonVisibilityService.ZMin: 500
-services.user.PhotonVisibilityService.ZMax: 501
+services.PhotonVisibilityService.XMin: 20
+services.PhotonVisibilityService.XMax: 21
+services.PhotonVisibilityService.YMin: 0
+services.PhotonVisibilityService.YMax: 1
+services.PhotonVisibilityService.ZMin: 500
+services.PhotonVisibilityService.ZMax: 501
 
 physics.producers.generator.N: 290000
 physics.producers.generator.T: 0

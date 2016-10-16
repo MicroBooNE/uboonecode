@@ -21,7 +21,7 @@ art_make( EXCLUDE UBOpticalChConfig_service.cc OpticalDRAMReadout_module.cc
 	                ${FHICLCPP}
 			${CETLIB}
                         ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES larsim_Simulation larsimobj_Simulation
+          MODULE_LIBRARIES larsim_Simulation lardataobj_Simulation
 			lardataobj_OpticalDetectorData
 			UBOpticalChConfig_service
 			UBOpReadoutMap_service
@@ -63,7 +63,7 @@ simple_plugin(UBOpticalChConfig "service"
 )
 
 simple_plugin(OpticalDRAMReadout "module"
-                  larsim_Simulation larsimobj_Simulation
+                  larsim_Simulation lardataobj_Simulation
                   lardata_DetectorInfoServices_DetectorClocksServiceStandard_service # BUG note that we link to a specific service implementation
                   lardataobj_OpticalDetectorData
                   UBOpticalChConfig_service
