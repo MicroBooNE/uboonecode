@@ -49,7 +49,7 @@
 
 #include "lardataobj/RecoBase/OpFlash.h"  
 
-#include "lardata/RecoObjects/BezierTrack.h"
+#include "larreco/Deprecated/BezierTrack.h"
 
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
 

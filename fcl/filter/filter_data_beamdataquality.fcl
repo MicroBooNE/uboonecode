@@ -1,5 +1,6 @@
 #include "services_microboone.fcl"
 #include "beamdataquality.fcl"
+#include "beamdata_microboone.fcl"
 #include "time_memory_tracker_microboone.fcl"
 
 process_name: BeamDataQualityFilter
@@ -29,6 +30,7 @@ source:
 {
   module_type: RootInput
   maxEvents:  10        # Number of events to create
+  inputCommands: ["keep *_*_*_*", "drop raw::BeamInfo_beamdata_*_*" ]
   saveMemoryObjectThreshold: 0
 }
 
@@ -38,6 +40,11 @@ source:
 physics:
 {
 
+ producers:
+ {
+   beamdata       : @local::microboone_beamdata   
+ }
+
  filters:
  {
    beamdataquality: @local::beam_data_quality
@@ -45,7 +52,7 @@ physics:
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- filter: [ beamdataquality ]
+ filter: [ beamdata, beamdataquality ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]

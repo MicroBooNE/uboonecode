@@ -14,6 +14,8 @@ services:
   message:                 @local::standard_info
 }
 
+services.DetectorClocksService.InheritClockConfig: false
+
 # Database settings
 services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
 services.DatabaseUtil.DBName:        "hootgibson_prod"

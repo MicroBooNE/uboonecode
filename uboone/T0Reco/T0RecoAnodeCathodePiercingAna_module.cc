@@ -63,6 +63,7 @@ private:
   std::string fTrackProducer;
   std::string fT0Producer;
   std::string fFlashProducer;
+  std::string fCosmicTagProducer;
 
   bool        fUseMC;
   double      fResolution; // cm resolution to allow mc-reco track matching. [Y,Z] must be within this distance
@@ -91,6 +92,7 @@ private:
   int    _exit_side;
   int    _enter_anode;
   int    _exit_anode;
+  int    _run, _subrun, _event;
 
   TTree* _mucs_tree;
   double _reco_time;
@@ -119,6 +121,7 @@ T0RecoAnodeCathodePiercingAna::T0RecoAnodeCathodePiercingAna(fhicl::ParameterSet
   fTrackProducer     = p.get<std::string>("TrackProducer"    );
   fT0Producer        = p.get<std::string>("T0Producer"       );
   fFlashProducer     = p.get<std::string>("FlashProducer"    );
+  fCosmicTagProducer = p.get<std::string>("CosmicTagProducer");
   fUseMC             = p.get<bool>       ("UseMC"            );
   fResolution        = p.get<double>     ("Resolution"       );
 
@@ -164,6 +167,9 @@ void T0RecoAnodeCathodePiercingAna::beginJob()
   _tree->Branch("_exit_side",&_exit_side,"exit_side/I");
   _tree->Branch("_enter_anode",&_enter_anode,"enter_anode/I");
   _tree->Branch("_exit_anode",&_exit_anode,"exit_anode/I");
+  _tree->Branch("_run",&_run,"run/I");
+  _tree->Branch("_subrun",&_subrun,"subrun/I");
+  _tree->Branch("_event",&_event,"event/I");
 
   _mucs_tree = tfs->make<TTree>("_mucs_tree","MuCS tagged tracks tree");
   _mucs_tree->Branch("_reco_time",&_reco_time,"reco_time/D");
@@ -183,6 +189,9 @@ void T0RecoAnodeCathodePiercingAna::beginJob()
   _mucs_tree->Branch("_exit_side",&_exit_side,"exit_side/I");
   _mucs_tree->Branch("_enter_anode",&_enter_anode,"enter_anode/I");
   _mucs_tree->Branch("_exit_anode",&_exit_anode,"exit_anode/I");
+  _mucs_tree->Branch("_run",&_run,"run/I");
+  _mucs_tree->Branch("_subrun",&_subrun,"subrun/I");
+  _mucs_tree->Branch("_event",&_event,"event/I");
 
   fResolution = 10; // cm
 
@@ -190,6 +199,11 @@ void T0RecoAnodeCathodePiercingAna::beginJob()
 
 void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
 {
+
+  _event  = e.event();
+  _subrun = e.subRun();
+  _run    = e.run();
+
   // Implementation of required member function here.
 
   // load tracks previously created for which T0 reconstruction is requested
@@ -222,7 +236,7 @@ void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
   art::FindMany<recob::OpFlash> trk_flash_assn_v(track_h, e, fFlashProducer );
 
   // grab CosmicTag objects associated with tracks
-  // art::FindMany<anab::CosmicTag> trk_cosmictag_assn_v(track_h, e, fCosmicTagProducer);
+  art::FindMany<anab::CosmicTag> trk_cosmictag_assn_v(track_h, e, fCosmicTagProducer);
 
   for (size_t i=0; i < track_h->size(); i++){
 
@@ -279,7 +293,7 @@ void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
 	
 	_pe_flash = flash->TotalPE();
 	_t_match  = flash->Time();
-	_dt_flash = flash->Time() - _rc_time;
+	_dt_flash = fabs( flash->Time() - _rc_time );
 
       } // if there is an optical flash
 
@@ -313,12 +327,12 @@ void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
       _tree->Fill();
       
       // check if there is a cosmic tag, if so assume MuCS-tagged track
-      // std::vector<const anab::CosmicTag*> CosmicTag_v = trk_cosmictag_assn_v.at(i);
+      std::vector<const anab::CosmicTag*> CosmicTag_v = trk_cosmictag_assn_v.at(i);
       
-      // if (CosmicTag_v.size() == 1){
-      // _reco_time = _rc_time;
-      // _mucs_tree->Fill();
-      // }
+      if (CosmicTag_v.size() == 1){
+	_reco_time = _rc_time;
+	_mucs_tree->Fill();
+      }
     } // if there is a reconstructed T0
     
   } // for all reconstructed tracks

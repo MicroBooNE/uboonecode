@@ -13,6 +13,9 @@ microboone_twofem_opmap:
  BNBLogicPulse:  [ 46 ]
  NUMILogicPulse: [ 47 ]
 
+ # Trigger FEM slot
+ TriggerFEMSlot: 5
+
  # Crate, slot, FEM channel map for each optical readout channel number
  # Optical Detector Readout Channels
  ReadoutChannel0:  [ 10, 5,  0 ]
