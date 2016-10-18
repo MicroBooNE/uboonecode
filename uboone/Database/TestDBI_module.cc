@@ -29,8 +29,15 @@
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
-#include "UbooneElectronLifetimeService.h"
-#include "UbooneElectronLifetimeProvider.h"
+#include "larevt/CalibrationDBI/Interface/PmtGainService.h"
+#include "larevt/CalibrationDBI/Interface/PmtGainProvider.h"
+
+#include "larevt/CalibrationDBI/IOVData/CalibrationExtraInfo.h"
+#include "larevt/CalibrationDBI/IOVData/IOVDataError.h"
+
+//#include "UbooneElectronLifetimeService.h"
+//#include "UbooneElectronLifetimeProvider.h"
+
 
 
 // ROOT
@@ -72,6 +79,7 @@ void TestDBI::analyze(art::Event const & evt)
 
   art::ServiceHandle<geo::Geometry> geo;
   art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
+  
   evt.getByLabel("daq", digitVecHandle);
   for (auto iter = digitVecHandle->begin(); iter != digitVecHandle->end(); ++iter) {
     raw::RawDigit digit = *iter;
@@ -94,6 +102,8 @@ void TestDBI::analyze(art::Event const & evt)
     }
   }//end loop over digits
 
+  std::cout<<"Calibration info at time: "<<evt.time().value()<<std::endl;
+
   const lariov::DetPedestalProvider& pedestalRetrievalAlg = art::ServiceHandle<lariov::DetPedestalService>()->GetPedestalProvider();
   std::cout<<"PEDESTAL "<<pedestalRetrievalAlg.PedMean(8100)<<std::endl;   
 
@@ -105,8 +115,141 @@ void TestDBI::analyze(art::Event const & evt)
   fHist_Ind->Draw();
   c.SaveAs("IndHist.png");
   
-  const lariov::UbooneElectronLifetimeProvider& elifetime_provider = art::ServiceHandle<lariov::UbooneElectronLifetimeService>()->GetProvider();
-  std::cout<<"LIFETIME: "<<elifetime_provider.ExpOffset()<<" "<<elifetime_provider.TimeConstantErr()<<std::endl;
+  //const lariov::UbooneElectronLifetimeProvider& elifetime_provider = art::ServiceHandle<lariov::UbooneElectronLifetimeService>()->GetProvider();
+  //std::cout<<"LIFETIME: "<<elifetime_provider.ExpOffset()<<" "<<elifetime_provider.TimeConstantErr()<<std::endl;
+  
+  const lariov::PmtGainProvider& gain_provider = art::ServiceHandle<lariov::PmtGainService>()->GetProvider();
+  for (unsigned int i=0; i!= geo->NOpDets(); ++i) {
+    if (geo->IsValidOpChannel(i) && i<32) {
+      std::cout<<"Channel "<<i <<" GAIN: "<<gain_provider.Gain(i)<<" "<<gain_provider.GainErr(i) <<std::endl;
+    }
+    else if (geo->IsValidOpChannel(i)) {
+      std::cout<<"Channel "<<i<<std::endl;
+    }
+  }
+  
+  lariov::CalibrationExtraInfo extraInfo("test_info");
+  extraInfo.AddOrReplaceIntData("dA",1);
+  extraInfo.AddOrReplaceFloatData("dB",2.2);
+  std::vector<int> dC; dC.push_back(3); dC.push_back(4);
+  std::vector<float> dD; dD.push_back(5.5); dD.push_back(6.6);
+  extraInfo.AddOrReplaceVecIntData("dC",dC);
+  extraInfo.AddOrReplaceVecFloatData("dD",dD);
+  extraInfo.AddOrReplaceStringData("dE","seven");
+  
+  std::cout<<"Extra data: "<<extraInfo.GetIntData("dA")<<" "
+                           <<extraInfo.GetFloatData("dB")<<" "
+			   <<extraInfo.GetVecIntData("dC")[0]<<" "
+			   <<extraInfo.GetVecIntData("dC")[1]<<" "
+			   <<extraInfo.GetVecFloatData("dD")[0]<<" "
+			   <<extraInfo.GetVecFloatData("dD")[1]<<" "
+			   <<extraInfo.GetStringData("dE")<<std::endl;
+			   
+  extraInfo.AddOrReplaceIntData("dA",7);
+  extraInfo.AddOrReplaceFloatData("dB",6.6);
+  dC.clear(); dC.push_back(5); dC.push_back(4);
+  dD.clear(); dD.push_back(3.3); dD.push_back(2.2);
+  extraInfo.AddOrReplaceVecIntData("dC",dC);
+  extraInfo.AddOrReplaceVecFloatData("dD",dD);
+  extraInfo.AddOrReplaceStringData("dE","one");	
+  
+  std::cout<<"Extra data2: "<<extraInfo.GetIntData("dA")<<" "
+                           <<extraInfo.GetFloatData("dB")<<" "
+			   <<extraInfo.GetVecIntData("dC")[0]<<" "
+			   <<extraInfo.GetVecIntData("dC")[1]<<" "
+			   <<extraInfo.GetVecFloatData("dD")[0]<<" "
+			   <<extraInfo.GetVecFloatData("dD")[1]<<" "
+			   <<extraInfo.GetStringData("dE")<<std::endl;		   
+  
+  extraInfo.ClearDataByLabel("dA");
+  extraInfo.ClearDataByLabel("dB");
+  extraInfo.ClearDataByLabel("dC");
+  extraInfo.ClearDataByLabel("dD");
+  extraInfo.ClearDataByLabel("dE");
+  
+  try {
+    extraInfo.GetIntData("dA");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dA"<<e.what()<<std::endl;
+  }
+  
+  try {
+    extraInfo.GetFloatData("dB");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dB"<<e.what()<<std::endl;
+  }
+  
+  try {
+    extraInfo.GetVecIntData("dC");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dC"<<e.what()<<std::endl;
+  }
+  
+  try {
+    extraInfo.GetVecFloatData("dD");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dD"<<e.what()<<std::endl;
+  }
+  
+  try {
+    extraInfo.GetStringData("dE");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dE"<<e.what()<<std::endl;
+  }
+  
+  extraInfo.AddOrReplaceIntData("dA",7);
+  extraInfo.AddOrReplaceFloatData("dB",6.0);
+  dC.clear(); dC.push_back(5); dC.push_back(4);
+  dD.clear(); dD.push_back(3.0); dD.push_back(2.0);
+  extraInfo.AddOrReplaceVecIntData("dC",dC);
+  extraInfo.AddOrReplaceVecFloatData("dD",dD);
+  extraInfo.AddOrReplaceStringData("dE","one");
+  
+  extraInfo.ClearAllData();
+  
+  try {
+    extraInfo.GetIntData("dA");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dA"<<e.what()<<std::endl;
+  }
+  
+  try {
+    extraInfo.GetFloatData("dB");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dB"<<e.what()<<std::endl;
+  }
+  
+  try {
+    extraInfo.GetVecIntData("dC");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dC"<<e.what()<<std::endl;
+  }
+  
+  try {
+    extraInfo.GetVecFloatData("dD");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dD"<<e.what()<<std::endl;
+  }
+  
+  try {
+    extraInfo.GetStringData("dE");
+  }
+  catch (lariov::IOVDataError e) {
+    std::cout <<"Exception dE"<<e.what()<<std::endl;
+  }
+  
+  extraInfo.AddOrReplaceIntData("dA",7);
+  extraInfo.AddOrReplaceFloatData("dA",6.0);
+  extraInfo.ClearDataByLabel("dA");
 }
 
 DEFINE_ART_MODULE(TestDBI)
