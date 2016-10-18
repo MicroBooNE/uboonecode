@@ -180,9 +180,9 @@ class dbfolder():
 	    if not line: continue
 	    words = line.split()
 	    if words[0][0] == '#':
-	        if words[1] == 'time':
+	        if words[1].lower() == 'time':
 		    t0 = float(words[2])
-		elif words[1] == 'channel':
+		elif words[1].lower() == 'channel':
 		    column_names = words[2:]   #expects column names to be last line of header!
 		else:
 		    print '\nInvalid header in file ',fname,'!'
