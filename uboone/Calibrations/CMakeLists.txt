@@ -24,6 +24,7 @@ art_make( BASENAME_ONLY
 			lardataobj_RecoBase
 			lardata_RecoObjects larreco_Deprecated  
 			larreco_RecoAlg
+                        larreco_Calorimetry
 			lardata_Utilities
 			larevt_Filters
                         lardata_Utilities_LArFFT_service

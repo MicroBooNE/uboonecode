@@ -5,6 +5,7 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "larevt/CalibrationDBI/Interface/ElectronLifetimeService.h"
 #include "UbooneElectronLifetimeProvider.h"
 
 namespace lariov{
@@ -15,7 +16,7 @@ namespace lariov{
      an electron lifetime retrieval service for database scheme in which 
      all elements in a database folder share a common interval of validity
   */
-  class UbooneElectronLifetimeService {
+  class UbooneElectronLifetimeService : public ElectronLifetimeService {
   
     public:
     
@@ -25,17 +26,17 @@ namespace lariov{
       void PreProcessEvent(const art::Event& evt) {
         fProvider.Update( (DBTimeStamp_t)evt.run() );
       }
-      
-      const UbooneElectronLifetimeProvider& GetProvider() const {
-        return fProvider;
-      }
      
     private:
+    
+      const ElectronLifetimeProvider& DoGetProvider() const override {
+        return fProvider;
+      }
 
       UbooneElectronLifetimeProvider fProvider;
   };
 }//end namespace lariov
       
-DECLARE_ART_SERVICE(lariov::UbooneElectronLifetimeService, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneElectronLifetimeService, lariov::ElectronLifetimeService,LEGACY)
 
 #endif

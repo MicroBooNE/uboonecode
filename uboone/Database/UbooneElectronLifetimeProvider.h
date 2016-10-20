@@ -19,8 +19,9 @@
 #include "larevt/CalibrationDBI/IOVData/Snapshot.h"
 #include "larevt/CalibrationDBI/IOVData/IOVDataConstants.h"
 #include "larevt/CalibrationDBI/Providers/DatabaseRetrievalAlg.h"
+#include "larevt/CalibrationDBI/Interface/ElectronLifetimeProvider.h"
 
-#include "uboonecode/uboone/Database/ElectronLifetimeContainer.h"
+#include "larevt/CalibrationDBI/IOVData/ElectronLifetimeContainer.h"
 
 namespace lariov {
 
@@ -40,7 +41,7 @@ namespace lariov {
    * - *DefaultIndMean* (real, default: 2048.0): constant parameter returned
    *   when /UseDB/ and /UseFile/ parameters are false
    */
-  class UbooneElectronLifetimeProvider : public DatabaseRetrievalAlg {
+  class UbooneElectronLifetimeProvider : public DatabaseRetrievalAlg, public ElectronLifetimeProvider {
   
     public:
     
@@ -58,6 +59,11 @@ namespace lariov {
       bool Update(DBTimeStamp_t ts);
       
       /// Retrieve lifetime information
+      float Lifetime(float t) const override;
+      float Purity() const override;
+      float LifetimeErr(float t) const override;
+      float PurityErr() const override;
+      
       const ElectronLifetimeContainer& LifetimeContainer() const;
       float ExpOffset() const;
       float TimeConstant() const;

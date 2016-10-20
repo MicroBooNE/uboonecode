@@ -66,6 +66,7 @@ microboone_electronlifetime_provider.DatabaseRetrievalAlg.DBUrl: "http://dbdata0
 
 microboone_electronlifetime_service:
 {
+  service_provider: UbooneElectronLifetimeService
   ElectronLifetimeProvider: @local::microboone_electronlifetime_provider
 }
   
