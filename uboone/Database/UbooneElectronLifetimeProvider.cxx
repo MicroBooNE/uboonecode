@@ -136,6 +136,40 @@ namespace lariov {
   const ElectronLifetimeContainer& UbooneElectronLifetimeProvider::LifetimeContainer() const {     
     return fData.GetRow(fLifetimeChannel);
   }
+  
+  float UbooneElectronLifetimeProvider::Lifetime(float t) const {
+    float offset = this->ExpOffset();
+    float c = this->TimeConstant();
+    return (1.0+exp(offset))/(1.0+exp(offset + c*t));
+  }
+  
+  float UbooneElectronLifetimeProvider::LifetimeErr(float t) const {
+    float offset = this->ExpOffset();
+    float c = this->TimeConstant();
+    float offset_err = this->ExpOffsetErr();
+    float c_err = this->TimeConstantErr();
+    
+    float vb = pow(exp(offset)*(1.0-exp(c*t))*offset_err,2.0);
+    float vc = pow(t*(1.0+exp(offset))*exp(offset+c*t)*c_err,2.0);
+    return sqrt(vb+vc)/pow(1.0+exp(offset+c*t),2.0);
+  }
+   
+  float UbooneElectronLifetimeProvider::Purity() const {
+    float offset = this->ExpOffset();
+    float c = this->TimeConstant();
+    return (1.0 + exp(offset + 2200.0*c))/(1.0 + exp(offset));
+  }
+  
+  float UbooneElectronLifetimeProvider::PurityErr() const {
+    float offset = this->ExpOffset();
+    float c = this->TimeConstant();
+    float offset_err = this->ExpOffsetErr();
+    float c_err = this->TimeConstantErr();
+    
+    float vb = pow(offset_err*exp(offset)*(exp(2200.0*c)-1.0)/pow(1.0+exp(offset),2.0),2.0);
+    float vc = pow(c_err*2200.0*exp(offset+2200.0*c)/(1.0+exp(offset)),2.0);
+    return sqrt(vb+vc);
+  }   
       
   float UbooneElectronLifetimeProvider::ExpOffset() const {
     return this->LifetimeContainer().ExpOffset();
