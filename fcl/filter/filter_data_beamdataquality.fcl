@@ -10,7 +10,7 @@ services:
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "beamdataquality_hist.root" }
-  Timing:  {}
+  TimeTracker:  {}
   #TimeTracker:             @local::microboone_time_tracker
   MemoryTracker:           @local::microboone_memory_tracker
   FileCatalogMetadata:  @local::art_file_catalog_data
