@@ -16,7 +16,7 @@ process_name: FEMemulator
 services:
 {
   TFileService: { fileName: "FEMemulator.root" }
-  Timing:       {}
+  TimeTracker:  {}
   FileCatalogMetadata:    @local::art_file_catalog_data
   ExptGeoHelperInterface: @local::microboone_geometry_helper
   Geometry:               @local::microboone_geo

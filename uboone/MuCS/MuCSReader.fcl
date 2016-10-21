@@ -24,7 +24,7 @@ services:
   # takes for each event. The only parameter you can put in here is
   # "summaryOnly: true" if you want to suppress this output.
 
-  Timing:       {}
+  TimeTracker:  {}
 
   # ART native random number generator. Normally this is only needed
   # for simulations, but you never know.
