@@ -1,1731 +1,1731 @@
 <!-- Bottom Plane -->
 <physvol>
 <volumeref ref="volModule_0_strip_0"/> 
-<position name="posAMod_0_strip_0" unit="cm" x="-261.6" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_0" unit="cm" x="-261.6" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_1"/> 
-<position name="posAMod_0_strip_1" unit="cm" x="-250.7" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_1" unit="cm" x="-250.7" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_2"/> 
-<position name="posAMod_0_strip_2" unit="cm" x="-239.8" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_2" unit="cm" x="-239.8" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_3"/> 
-<position name="posAMod_0_strip_3" unit="cm" x="-228.9" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_3" unit="cm" x="-228.9" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_4"/> 
-<position name="posAMod_0_strip_4" unit="cm" x="-218" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_4" unit="cm" x="-218" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_5"/> 
-<position name="posAMod_0_strip_5" unit="cm" x="-207.1" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_5" unit="cm" x="-207.1" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_6"/> 
-<position name="posAMod_0_strip_6" unit="cm" x="-196.2" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_6" unit="cm" x="-196.2" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_7"/> 
-<position name="posAMod_0_strip_7" unit="cm" x="-185.3" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_7" unit="cm" x="-185.3" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_8"/> 
-<position name="posAMod_0_strip_8" unit="cm" x="-174.4" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_8" unit="cm" x="-174.4" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_9"/> 
-<position name="posAMod_0_strip_9" unit="cm" x="-163.5" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_9" unit="cm" x="-163.5" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_10"/> 
-<position name="posAMod_0_strip_10" unit="cm" x="-152.6" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_10" unit="cm" x="-152.6" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_11"/> 
-<position name="posAMod_0_strip_11" unit="cm" x="-141.7" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_11" unit="cm" x="-141.7" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_12"/> 
-<position name="posAMod_0_strip_12" unit="cm" x="-130.8" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_12" unit="cm" x="-130.8" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_13"/> 
-<position name="posAMod_0_strip_13" unit="cm" x="-119.9" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_13" unit="cm" x="-119.9" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_14"/> 
-<position name="posAMod_0_strip_14" unit="cm" x="-109" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_14" unit="cm" x="-109" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_15"/> 
-<position name="posAMod_0_strip_15" unit="cm" x="-98.1001" y="-245" z="-69.45" /> 
+<position name="posAMod_0_strip_15" unit="cm" x="-98.1001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_0"/> 
-<position name="posAMod_1_strip_0" unit="cm" x="-87.2001" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_0" unit="cm" x="-87.2001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_1"/> 
-<position name="posAMod_1_strip_1" unit="cm" x="-76.3001" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_1" unit="cm" x="-76.3001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_2"/> 
-<position name="posAMod_1_strip_2" unit="cm" x="-65.4001" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_2" unit="cm" x="-65.4001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_3"/> 
-<position name="posAMod_1_strip_3" unit="cm" x="-54.5001" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_3" unit="cm" x="-54.5001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_4"/> 
-<position name="posAMod_1_strip_4" unit="cm" x="-43.6001" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_4" unit="cm" x="-43.6001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_5"/> 
-<position name="posAMod_1_strip_5" unit="cm" x="-32.7001" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_5" unit="cm" x="-32.7001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_6"/> 
-<position name="posAMod_1_strip_6" unit="cm" x="-21.8001" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_6" unit="cm" x="-21.8001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_7"/> 
-<position name="posAMod_1_strip_7" unit="cm" x="-10.9001" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_7" unit="cm" x="-10.9001" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_8"/> 
-<position name="posAMod_1_strip_8" unit="cm" x="-6.63757e-05" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_8" unit="cm" x="-6.63757e-05" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_9"/> 
-<position name="posAMod_1_strip_9" unit="cm" x="10.8999" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_9" unit="cm" x="10.8999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_10"/> 
-<position name="posAMod_1_strip_10" unit="cm" x="21.7999" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_10" unit="cm" x="21.7999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_11"/> 
-<position name="posAMod_1_strip_11" unit="cm" x="32.6999" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_11" unit="cm" x="32.6999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_12"/> 
-<position name="posAMod_1_strip_12" unit="cm" x="43.5999" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_12" unit="cm" x="43.5999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_13"/> 
-<position name="posAMod_1_strip_13" unit="cm" x="54.4999" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_13" unit="cm" x="54.4999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_14"/> 
-<position name="posAMod_1_strip_14" unit="cm" x="65.3999" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_14" unit="cm" x="65.3999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_15"/> 
-<position name="posAMod_1_strip_15" unit="cm" x="76.2999" y="-245" z="-69.45" /> 
+<position name="posAMod_1_strip_15" unit="cm" x="76.2999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_0"/> 
-<position name="posAMod_2_strip_0" unit="cm" x="87.1999" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_0" unit="cm" x="87.1999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_1"/> 
-<position name="posAMod_2_strip_1" unit="cm" x="98.0999" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_1" unit="cm" x="98.0999" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_2"/> 
-<position name="posAMod_2_strip_2" unit="cm" x="109" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_2" unit="cm" x="109" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_3"/> 
-<position name="posAMod_2_strip_3" unit="cm" x="119.9" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_3" unit="cm" x="119.9" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_4"/> 
-<position name="posAMod_2_strip_4" unit="cm" x="130.8" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_4" unit="cm" x="130.8" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_5"/> 
-<position name="posAMod_2_strip_5" unit="cm" x="141.7" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_5" unit="cm" x="141.7" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_6"/> 
-<position name="posAMod_2_strip_6" unit="cm" x="152.6" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_6" unit="cm" x="152.6" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_7"/> 
-<position name="posAMod_2_strip_7" unit="cm" x="163.5" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_7" unit="cm" x="163.5" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_8"/> 
-<position name="posAMod_2_strip_8" unit="cm" x="174.4" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_8" unit="cm" x="174.4" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_9"/> 
-<position name="posAMod_2_strip_9" unit="cm" x="185.3" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_9" unit="cm" x="185.3" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_10"/> 
-<position name="posAMod_2_strip_10" unit="cm" x="196.2" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_10" unit="cm" x="196.2" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_11"/> 
-<position name="posAMod_2_strip_11" unit="cm" x="207.1" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_11" unit="cm" x="207.1" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_12"/> 
-<position name="posAMod_2_strip_12" unit="cm" x="218" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_12" unit="cm" x="218" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_13"/> 
-<position name="posAMod_2_strip_13" unit="cm" x="228.9" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_13" unit="cm" x="228.9" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_14"/> 
-<position name="posAMod_2_strip_14" unit="cm" x="239.8" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_14" unit="cm" x="239.8" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_15"/> 
-<position name="posAMod_2_strip_15" unit="cm" x="250.7" y="-245" z="-69.45" /> 
+<position name="posAMod_2_strip_15" unit="cm" x="250.7" y="-247" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_0"/> 
-<position name="posBMod_0_strip_0" unit="cm" x="-261.6" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_0" unit="cm" x="-261.6" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_1"/> 
-<position name="posBMod_0_strip_1" unit="cm" x="-250.7" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_1" unit="cm" x="-250.7" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_2"/> 
-<position name="posBMod_0_strip_2" unit="cm" x="-239.8" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_2" unit="cm" x="-239.8" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_3"/> 
-<position name="posBMod_0_strip_3" unit="cm" x="-228.9" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_3" unit="cm" x="-228.9" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_4"/> 
-<position name="posBMod_0_strip_4" unit="cm" x="-218" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_4" unit="cm" x="-218" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_5"/> 
-<position name="posBMod_0_strip_5" unit="cm" x="-207.1" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_5" unit="cm" x="-207.1" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_6"/> 
-<position name="posBMod_0_strip_6" unit="cm" x="-196.2" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_6" unit="cm" x="-196.2" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_7"/> 
-<position name="posBMod_0_strip_7" unit="cm" x="-185.3" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_7" unit="cm" x="-185.3" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_8"/> 
-<position name="posBMod_0_strip_8" unit="cm" x="-174.4" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_8" unit="cm" x="-174.4" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_9"/> 
-<position name="posBMod_0_strip_9" unit="cm" x="-163.5" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_9" unit="cm" x="-163.5" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_10"/> 
-<position name="posBMod_0_strip_10" unit="cm" x="-152.6" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_10" unit="cm" x="-152.6" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_11"/> 
-<position name="posBMod_0_strip_11" unit="cm" x="-141.7" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_11" unit="cm" x="-141.7" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_12"/> 
-<position name="posBMod_0_strip_12" unit="cm" x="-130.8" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_12" unit="cm" x="-130.8" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_13"/> 
-<position name="posBMod_0_strip_13" unit="cm" x="-119.9" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_13" unit="cm" x="-119.9" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_14"/> 
-<position name="posBMod_0_strip_14" unit="cm" x="-109" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_14" unit="cm" x="-109" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_0_strip_15"/> 
-<position name="posBMod_0_strip_15" unit="cm" x="-98.1001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_0_strip_15" unit="cm" x="-98.1001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_0"/> 
-<position name="posBMod_1_strip_0" unit="cm" x="-87.2001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_0" unit="cm" x="-87.2001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_1"/> 
-<position name="posBMod_1_strip_1" unit="cm" x="-76.3001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_1" unit="cm" x="-76.3001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_2"/> 
-<position name="posBMod_1_strip_2" unit="cm" x="-65.4001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_2" unit="cm" x="-65.4001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_3"/> 
-<position name="posBMod_1_strip_3" unit="cm" x="-54.5001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_3" unit="cm" x="-54.5001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_4"/> 
-<position name="posBMod_1_strip_4" unit="cm" x="-43.6001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_4" unit="cm" x="-43.6001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_5"/> 
-<position name="posBMod_1_strip_5" unit="cm" x="-32.7001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_5" unit="cm" x="-32.7001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_6"/> 
-<position name="posBMod_1_strip_6" unit="cm" x="-21.8001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_6" unit="cm" x="-21.8001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_7"/> 
-<position name="posBMod_1_strip_7" unit="cm" x="-10.9001" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_7" unit="cm" x="-10.9001" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_8"/> 
-<position name="posBMod_1_strip_8" unit="cm" x="-6.63757e-05" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_8" unit="cm" x="-6.63757e-05" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_9"/> 
-<position name="posBMod_1_strip_9" unit="cm" x="10.8999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_9" unit="cm" x="10.8999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_10"/> 
-<position name="posBMod_1_strip_10" unit="cm" x="21.7999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_10" unit="cm" x="21.7999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_11"/> 
-<position name="posBMod_1_strip_11" unit="cm" x="32.6999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_11" unit="cm" x="32.6999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_12"/> 
-<position name="posBMod_1_strip_12" unit="cm" x="43.5999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_12" unit="cm" x="43.5999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_13"/> 
-<position name="posBMod_1_strip_13" unit="cm" x="54.4999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_13" unit="cm" x="54.4999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_14"/> 
-<position name="posBMod_1_strip_14" unit="cm" x="65.3999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_14" unit="cm" x="65.3999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_1_strip_15"/> 
-<position name="posBMod_1_strip_15" unit="cm" x="76.2999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_1_strip_15" unit="cm" x="76.2999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_0"/> 
-<position name="posBMod_2_strip_0" unit="cm" x="87.1999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_0" unit="cm" x="87.1999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_1"/> 
-<position name="posBMod_2_strip_1" unit="cm" x="98.0999" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_1" unit="cm" x="98.0999" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_2"/> 
-<position name="posBMod_2_strip_2" unit="cm" x="109" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_2" unit="cm" x="109" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_3"/> 
-<position name="posBMod_2_strip_3" unit="cm" x="119.9" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_3" unit="cm" x="119.9" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_4"/> 
-<position name="posBMod_2_strip_4" unit="cm" x="130.8" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_4" unit="cm" x="130.8" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_5"/> 
-<position name="posBMod_2_strip_5" unit="cm" x="141.7" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_5" unit="cm" x="141.7" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_6"/> 
-<position name="posBMod_2_strip_6" unit="cm" x="152.6" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_6" unit="cm" x="152.6" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_7"/> 
-<position name="posBMod_2_strip_7" unit="cm" x="163.5" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_7" unit="cm" x="163.5" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_8"/> 
-<position name="posBMod_2_strip_8" unit="cm" x="174.4" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_8" unit="cm" x="174.4" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_9"/> 
-<position name="posBMod_2_strip_9" unit="cm" x="185.3" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_9" unit="cm" x="185.3" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_10"/> 
-<position name="posBMod_2_strip_10" unit="cm" x="196.2" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_10" unit="cm" x="196.2" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_11"/> 
-<position name="posBMod_2_strip_11" unit="cm" x="207.1" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_11" unit="cm" x="207.1" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_12"/> 
-<position name="posBMod_2_strip_12" unit="cm" x="218" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_12" unit="cm" x="218" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_13"/> 
-<position name="posBMod_2_strip_13" unit="cm" x="228.9" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_13" unit="cm" x="228.9" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_14"/> 
-<position name="posBMod_2_strip_14" unit="cm" x="239.8" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_14" unit="cm" x="239.8" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_2_strip_15"/> 
-<position name="posBMod_2_strip_15" unit="cm" x="250.7" y="-243.9" z="-69.45" /> 
+<position name="posBMod_2_strip_15" unit="cm" x="250.7" y="-246" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_0"/> 
-<position name="posCMod_0_strip_0" unit="cm" x="-261.6" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_0" unit="cm" x="-261.6" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_1"/> 
-<position name="posCMod_0_strip_1" unit="cm" x="-250.7" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_1" unit="cm" x="-250.7" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_2"/> 
-<position name="posCMod_0_strip_2" unit="cm" x="-239.8" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_2" unit="cm" x="-239.8" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_3"/> 
-<position name="posCMod_0_strip_3" unit="cm" x="-228.9" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_3" unit="cm" x="-228.9" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_4"/> 
-<position name="posCMod_0_strip_4" unit="cm" x="-218" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_4" unit="cm" x="-218" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_5"/> 
-<position name="posCMod_0_strip_5" unit="cm" x="-207.1" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_5" unit="cm" x="-207.1" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_6"/> 
-<position name="posCMod_0_strip_6" unit="cm" x="-196.2" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_6" unit="cm" x="-196.2" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_7"/> 
-<position name="posCMod_0_strip_7" unit="cm" x="-185.3" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_7" unit="cm" x="-185.3" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_8"/> 
-<position name="posCMod_0_strip_8" unit="cm" x="-174.4" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_8" unit="cm" x="-174.4" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_9"/> 
-<position name="posCMod_0_strip_9" unit="cm" x="-163.5" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_9" unit="cm" x="-163.5" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_10"/> 
-<position name="posCMod_0_strip_10" unit="cm" x="-152.6" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_10" unit="cm" x="-152.6" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_11"/> 
-<position name="posCMod_0_strip_11" unit="cm" x="-141.7" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_11" unit="cm" x="-141.7" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_12"/> 
-<position name="posCMod_0_strip_12" unit="cm" x="-130.8" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_12" unit="cm" x="-130.8" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_13"/> 
-<position name="posCMod_0_strip_13" unit="cm" x="-119.9" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_13" unit="cm" x="-119.9" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_14"/> 
-<position name="posCMod_0_strip_14" unit="cm" x="-109" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_14" unit="cm" x="-109" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_0_strip_15"/> 
-<position name="posCMod_0_strip_15" unit="cm" x="-98.1001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_0_strip_15" unit="cm" x="-98.1001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_0"/> 
-<position name="posCMod_1_strip_0" unit="cm" x="-87.2001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_0" unit="cm" x="-87.2001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_1"/> 
-<position name="posCMod_1_strip_1" unit="cm" x="-76.3001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_1" unit="cm" x="-76.3001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_2"/> 
-<position name="posCMod_1_strip_2" unit="cm" x="-65.4001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_2" unit="cm" x="-65.4001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_3"/> 
-<position name="posCMod_1_strip_3" unit="cm" x="-54.5001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_3" unit="cm" x="-54.5001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_4"/> 
-<position name="posCMod_1_strip_4" unit="cm" x="-43.6001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_4" unit="cm" x="-43.6001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_5"/> 
-<position name="posCMod_1_strip_5" unit="cm" x="-32.7001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_5" unit="cm" x="-32.7001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_6"/> 
-<position name="posCMod_1_strip_6" unit="cm" x="-21.8001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_6" unit="cm" x="-21.8001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_7"/> 
-<position name="posCMod_1_strip_7" unit="cm" x="-10.9001" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_7" unit="cm" x="-10.9001" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_8"/> 
-<position name="posCMod_1_strip_8" unit="cm" x="-6.63757e-05" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_8" unit="cm" x="-6.63757e-05" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_9"/> 
-<position name="posCMod_1_strip_9" unit="cm" x="10.8999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_9" unit="cm" x="10.8999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_10"/> 
-<position name="posCMod_1_strip_10" unit="cm" x="21.7999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_10" unit="cm" x="21.7999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_11"/> 
-<position name="posCMod_1_strip_11" unit="cm" x="32.6999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_11" unit="cm" x="32.6999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_12"/> 
-<position name="posCMod_1_strip_12" unit="cm" x="43.5999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_12" unit="cm" x="43.5999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_13"/> 
-<position name="posCMod_1_strip_13" unit="cm" x="54.4999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_13" unit="cm" x="54.4999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_14"/> 
-<position name="posCMod_1_strip_14" unit="cm" x="65.3999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_14" unit="cm" x="65.3999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_1_strip_15"/> 
-<position name="posCMod_1_strip_15" unit="cm" x="76.2999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_1_strip_15" unit="cm" x="76.2999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_0"/> 
-<position name="posCMod_2_strip_0" unit="cm" x="87.1999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_0" unit="cm" x="87.1999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_1"/> 
-<position name="posCMod_2_strip_1" unit="cm" x="98.0999" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_1" unit="cm" x="98.0999" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_2"/> 
-<position name="posCMod_2_strip_2" unit="cm" x="109" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_2" unit="cm" x="109" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_3"/> 
-<position name="posCMod_2_strip_3" unit="cm" x="119.9" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_3" unit="cm" x="119.9" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_4"/> 
-<position name="posCMod_2_strip_4" unit="cm" x="130.8" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_4" unit="cm" x="130.8" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_5"/> 
-<position name="posCMod_2_strip_5" unit="cm" x="141.7" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_5" unit="cm" x="141.7" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_6"/> 
-<position name="posCMod_2_strip_6" unit="cm" x="152.6" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_6" unit="cm" x="152.6" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_7"/> 
-<position name="posCMod_2_strip_7" unit="cm" x="163.5" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_7" unit="cm" x="163.5" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_8"/> 
-<position name="posCMod_2_strip_8" unit="cm" x="174.4" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_8" unit="cm" x="174.4" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_9"/> 
-<position name="posCMod_2_strip_9" unit="cm" x="185.3" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_9" unit="cm" x="185.3" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_10"/> 
-<position name="posCMod_2_strip_10" unit="cm" x="196.2" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_10" unit="cm" x="196.2" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_11"/> 
-<position name="posCMod_2_strip_11" unit="cm" x="207.1" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_11" unit="cm" x="207.1" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_12"/> 
-<position name="posCMod_2_strip_12" unit="cm" x="218" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_12" unit="cm" x="218" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_13"/> 
-<position name="posCMod_2_strip_13" unit="cm" x="228.9" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_13" unit="cm" x="228.9" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_14"/> 
-<position name="posCMod_2_strip_14" unit="cm" x="239.8" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_14" unit="cm" x="239.8" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_2_strip_15"/> 
-<position name="posCMod_2_strip_15" unit="cm" x="250.7" y="-243.6" z="-69.45" /> 
+<position name="posCMod_2_strip_15" unit="cm" x="250.7" y="-244.5" z="-69.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_0"/> 
-<position name="posAMod_3_strip_0" unit="cm" x="-130" y="-243.3" z="-233.45" /> 
+<position name="posAMod_3_strip_0" unit="cm" x="-130" y="-243.5" z="-233.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_1"/> 
-<position name="posAMod_3_strip_1" unit="cm" x="-130" y="-243.3" z="-222.55" /> 
+<position name="posAMod_3_strip_1" unit="cm" x="-130" y="-243.5" z="-222.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_2"/> 
-<position name="posAMod_3_strip_2" unit="cm" x="-130" y="-243.3" z="-211.65" /> 
+<position name="posAMod_3_strip_2" unit="cm" x="-130" y="-243.5" z="-211.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_3"/> 
-<position name="posAMod_3_strip_3" unit="cm" x="-130" y="-243.3" z="-200.75" /> 
+<position name="posAMod_3_strip_3" unit="cm" x="-130" y="-243.5" z="-200.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_4"/> 
-<position name="posAMod_3_strip_4" unit="cm" x="-130" y="-243.3" z="-189.85" /> 
+<position name="posAMod_3_strip_4" unit="cm" x="-130" y="-243.5" z="-189.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_5"/> 
-<position name="posAMod_3_strip_5" unit="cm" x="-130" y="-243.3" z="-178.95" /> 
+<position name="posAMod_3_strip_5" unit="cm" x="-130" y="-243.5" z="-178.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_6"/> 
-<position name="posAMod_3_strip_6" unit="cm" x="-130" y="-243.3" z="-168.05" /> 
+<position name="posAMod_3_strip_6" unit="cm" x="-130" y="-243.5" z="-168.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_7"/> 
-<position name="posAMod_3_strip_7" unit="cm" x="-130" y="-243.3" z="-157.15" /> 
+<position name="posAMod_3_strip_7" unit="cm" x="-130" y="-243.5" z="-157.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_8"/> 
-<position name="posAMod_3_strip_8" unit="cm" x="-130" y="-243.3" z="-146.25" /> 
+<position name="posAMod_3_strip_8" unit="cm" x="-130" y="-243.5" z="-146.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_9"/> 
-<position name="posAMod_3_strip_9" unit="cm" x="-130" y="-243.3" z="-135.35" /> 
+<position name="posAMod_3_strip_9" unit="cm" x="-130" y="-243.5" z="-135.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_10"/> 
-<position name="posAMod_3_strip_10" unit="cm" x="-130" y="-243.3" z="-124.45" /> 
+<position name="posAMod_3_strip_10" unit="cm" x="-130" y="-243.5" z="-124.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_11"/> 
-<position name="posAMod_3_strip_11" unit="cm" x="-130" y="-243.3" z="-113.55" /> 
+<position name="posAMod_3_strip_11" unit="cm" x="-130" y="-243.5" z="-113.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_12"/> 
-<position name="posAMod_3_strip_12" unit="cm" x="-130" y="-243.3" z="-102.65" /> 
+<position name="posAMod_3_strip_12" unit="cm" x="-130" y="-243.5" z="-102.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_13"/> 
-<position name="posAMod_3_strip_13" unit="cm" x="-130" y="-243.3" z="-91.75" /> 
+<position name="posAMod_3_strip_13" unit="cm" x="-130" y="-243.5" z="-91.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_14"/> 
-<position name="posAMod_3_strip_14" unit="cm" x="-130" y="-243.3" z="-80.85" /> 
+<position name="posAMod_3_strip_14" unit="cm" x="-130" y="-243.5" z="-80.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_15"/> 
-<position name="posAMod_3_strip_15" unit="cm" x="-130" y="-243.3" z="-69.95" /> 
+<position name="posAMod_3_strip_15" unit="cm" x="-130" y="-243.5" z="-69.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_0"/> 
-<position name="posAMod_4_strip_0" unit="cm" x="-130" y="-243.3" z="-59.05" /> 
+<position name="posAMod_4_strip_0" unit="cm" x="-130" y="-243.5" z="-59.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_1"/> 
-<position name="posAMod_4_strip_1" unit="cm" x="-130" y="-243.3" z="-48.15" /> 
+<position name="posAMod_4_strip_1" unit="cm" x="-130" y="-243.5" z="-48.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_2"/> 
-<position name="posAMod_4_strip_2" unit="cm" x="-130" y="-243.3" z="-37.25" /> 
+<position name="posAMod_4_strip_2" unit="cm" x="-130" y="-243.5" z="-37.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_3"/> 
-<position name="posAMod_4_strip_3" unit="cm" x="-130" y="-243.3" z="-26.35" /> 
+<position name="posAMod_4_strip_3" unit="cm" x="-130" y="-243.5" z="-26.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_4"/> 
-<position name="posAMod_4_strip_4" unit="cm" x="-130" y="-243.3" z="-15.45" /> 
+<position name="posAMod_4_strip_4" unit="cm" x="-130" y="-243.5" z="-15.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_5"/> 
-<position name="posAMod_4_strip_5" unit="cm" x="-130" y="-243.3" z="-4.55004" /> 
+<position name="posAMod_4_strip_5" unit="cm" x="-130" y="-243.5" z="-4.55004" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_6"/> 
-<position name="posAMod_4_strip_6" unit="cm" x="-130" y="-243.3" z="6.34996" /> 
+<position name="posAMod_4_strip_6" unit="cm" x="-130" y="-243.5" z="6.34996" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_7"/> 
-<position name="posAMod_4_strip_7" unit="cm" x="-130" y="-243.3" z="17.25" /> 
+<position name="posAMod_4_strip_7" unit="cm" x="-130" y="-243.5" z="17.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_8"/> 
-<position name="posAMod_4_strip_8" unit="cm" x="-130" y="-243.3" z="28.15" /> 
+<position name="posAMod_4_strip_8" unit="cm" x="-130" y="-243.5" z="28.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_9"/> 
-<position name="posAMod_4_strip_9" unit="cm" x="-130" y="-243.3" z="39.05" /> 
+<position name="posAMod_4_strip_9" unit="cm" x="-130" y="-243.5" z="39.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_10"/> 
-<position name="posAMod_4_strip_10" unit="cm" x="-130" y="-243.3" z="49.95" /> 
+<position name="posAMod_4_strip_10" unit="cm" x="-130" y="-243.5" z="49.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_11"/> 
-<position name="posAMod_4_strip_11" unit="cm" x="-130" y="-243.3" z="60.85" /> 
+<position name="posAMod_4_strip_11" unit="cm" x="-130" y="-243.5" z="60.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_12"/> 
-<position name="posAMod_4_strip_12" unit="cm" x="-130" y="-243.3" z="71.75" /> 
+<position name="posAMod_4_strip_12" unit="cm" x="-130" y="-243.5" z="71.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_13"/> 
-<position name="posAMod_4_strip_13" unit="cm" x="-130" y="-243.3" z="82.65" /> 
+<position name="posAMod_4_strip_13" unit="cm" x="-130" y="-243.5" z="82.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_14"/> 
-<position name="posAMod_4_strip_14" unit="cm" x="-130" y="-243.3" z="93.55" /> 
+<position name="posAMod_4_strip_14" unit="cm" x="-130" y="-243.5" z="93.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_15"/> 
-<position name="posAMod_4_strip_15" unit="cm" x="-130" y="-243.3" z="104.45" /> 
+<position name="posAMod_4_strip_15" unit="cm" x="-130" y="-243.5" z="104.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_0"/> 
-<position name="posBMod_3_strip_0" unit="cm" x="-130" y="-242.2" z="-233.45" /> 
+<position name="posBMod_3_strip_0" unit="cm" x="-130" y="-242.5" z="-233.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_1"/> 
-<position name="posBMod_3_strip_1" unit="cm" x="-130" y="-242.2" z="-222.55" /> 
+<position name="posBMod_3_strip_1" unit="cm" x="-130" y="-242.5" z="-222.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_2"/> 
-<position name="posBMod_3_strip_2" unit="cm" x="-130" y="-242.2" z="-211.65" /> 
+<position name="posBMod_3_strip_2" unit="cm" x="-130" y="-242.5" z="-211.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_3"/> 
-<position name="posBMod_3_strip_3" unit="cm" x="-130" y="-242.2" z="-200.75" /> 
+<position name="posBMod_3_strip_3" unit="cm" x="-130" y="-242.5" z="-200.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_4"/> 
-<position name="posBMod_3_strip_4" unit="cm" x="-130" y="-242.2" z="-189.85" /> 
+<position name="posBMod_3_strip_4" unit="cm" x="-130" y="-242.5" z="-189.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_5"/> 
-<position name="posBMod_3_strip_5" unit="cm" x="-130" y="-242.2" z="-178.95" /> 
+<position name="posBMod_3_strip_5" unit="cm" x="-130" y="-242.5" z="-178.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_6"/> 
-<position name="posBMod_3_strip_6" unit="cm" x="-130" y="-242.2" z="-168.05" /> 
+<position name="posBMod_3_strip_6" unit="cm" x="-130" y="-242.5" z="-168.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_7"/> 
-<position name="posBMod_3_strip_7" unit="cm" x="-130" y="-242.2" z="-157.15" /> 
+<position name="posBMod_3_strip_7" unit="cm" x="-130" y="-242.5" z="-157.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_8"/> 
-<position name="posBMod_3_strip_8" unit="cm" x="-130" y="-242.2" z="-146.25" /> 
+<position name="posBMod_3_strip_8" unit="cm" x="-130" y="-242.5" z="-146.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_9"/> 
-<position name="posBMod_3_strip_9" unit="cm" x="-130" y="-242.2" z="-135.35" /> 
+<position name="posBMod_3_strip_9" unit="cm" x="-130" y="-242.5" z="-135.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_10"/> 
-<position name="posBMod_3_strip_10" unit="cm" x="-130" y="-242.2" z="-124.45" /> 
+<position name="posBMod_3_strip_10" unit="cm" x="-130" y="-242.5" z="-124.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_11"/> 
-<position name="posBMod_3_strip_11" unit="cm" x="-130" y="-242.2" z="-113.55" /> 
+<position name="posBMod_3_strip_11" unit="cm" x="-130" y="-242.5" z="-113.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_12"/> 
-<position name="posBMod_3_strip_12" unit="cm" x="-130" y="-242.2" z="-102.65" /> 
+<position name="posBMod_3_strip_12" unit="cm" x="-130" y="-242.5" z="-102.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_13"/> 
-<position name="posBMod_3_strip_13" unit="cm" x="-130" y="-242.2" z="-91.75" /> 
+<position name="posBMod_3_strip_13" unit="cm" x="-130" y="-242.5" z="-91.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_14"/> 
-<position name="posBMod_3_strip_14" unit="cm" x="-130" y="-242.2" z="-80.85" /> 
+<position name="posBMod_3_strip_14" unit="cm" x="-130" y="-242.5" z="-80.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_3_strip_15"/> 
-<position name="posBMod_3_strip_15" unit="cm" x="-130" y="-242.2" z="-69.95" /> 
+<position name="posBMod_3_strip_15" unit="cm" x="-130" y="-242.5" z="-69.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_0"/> 
-<position name="posBMod_4_strip_0" unit="cm" x="-130" y="-242.2" z="-59.05" /> 
+<position name="posBMod_4_strip_0" unit="cm" x="-130" y="-242.5" z="-59.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_1"/> 
-<position name="posBMod_4_strip_1" unit="cm" x="-130" y="-242.2" z="-48.15" /> 
+<position name="posBMod_4_strip_1" unit="cm" x="-130" y="-242.5" z="-48.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_2"/> 
-<position name="posBMod_4_strip_2" unit="cm" x="-130" y="-242.2" z="-37.25" /> 
+<position name="posBMod_4_strip_2" unit="cm" x="-130" y="-242.5" z="-37.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_3"/> 
-<position name="posBMod_4_strip_3" unit="cm" x="-130" y="-242.2" z="-26.35" /> 
+<position name="posBMod_4_strip_3" unit="cm" x="-130" y="-242.5" z="-26.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_4"/> 
-<position name="posBMod_4_strip_4" unit="cm" x="-130" y="-242.2" z="-15.45" /> 
+<position name="posBMod_4_strip_4" unit="cm" x="-130" y="-242.5" z="-15.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_5"/> 
-<position name="posBMod_4_strip_5" unit="cm" x="-130" y="-242.2" z="-4.55004" /> 
+<position name="posBMod_4_strip_5" unit="cm" x="-130" y="-242.5" z="-4.55004" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_6"/> 
-<position name="posBMod_4_strip_6" unit="cm" x="-130" y="-242.2" z="6.34996" /> 
+<position name="posBMod_4_strip_6" unit="cm" x="-130" y="-242.5" z="6.34996" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_7"/> 
-<position name="posBMod_4_strip_7" unit="cm" x="-130" y="-242.2" z="17.25" /> 
+<position name="posBMod_4_strip_7" unit="cm" x="-130" y="-242.5" z="17.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_8"/> 
-<position name="posBMod_4_strip_8" unit="cm" x="-130" y="-242.2" z="28.15" /> 
+<position name="posBMod_4_strip_8" unit="cm" x="-130" y="-242.5" z="28.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_9"/> 
-<position name="posBMod_4_strip_9" unit="cm" x="-130" y="-242.2" z="39.05" /> 
+<position name="posBMod_4_strip_9" unit="cm" x="-130" y="-242.5" z="39.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_10"/> 
-<position name="posBMod_4_strip_10" unit="cm" x="-130" y="-242.2" z="49.95" /> 
+<position name="posBMod_4_strip_10" unit="cm" x="-130" y="-242.5" z="49.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_11"/> 
-<position name="posBMod_4_strip_11" unit="cm" x="-130" y="-242.2" z="60.85" /> 
+<position name="posBMod_4_strip_11" unit="cm" x="-130" y="-242.5" z="60.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_12"/> 
-<position name="posBMod_4_strip_12" unit="cm" x="-130" y="-242.2" z="71.75" /> 
+<position name="posBMod_4_strip_12" unit="cm" x="-130" y="-242.5" z="71.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_13"/> 
-<position name="posBMod_4_strip_13" unit="cm" x="-130" y="-242.2" z="82.65" /> 
+<position name="posBMod_4_strip_13" unit="cm" x="-130" y="-242.5" z="82.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_14"/> 
-<position name="posBMod_4_strip_14" unit="cm" x="-130" y="-242.2" z="93.55" /> 
+<position name="posBMod_4_strip_14" unit="cm" x="-130" y="-242.5" z="93.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_4_strip_15"/> 
-<position name="posBMod_4_strip_15" unit="cm" x="-130" y="-242.2" z="104.45" /> 
+<position name="posBMod_4_strip_15" unit="cm" x="-130" y="-242.5" z="104.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_0"/> 
-<position name="posCMod_3_strip_0" unit="cm" x="-130" y="-241.5" z="-233.45" /> 
+<position name="posCMod_3_strip_0" unit="cm" x="-130" y="-241" z="-233.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_1"/> 
-<position name="posCMod_3_strip_1" unit="cm" x="-130" y="-241.5" z="-222.55" /> 
+<position name="posCMod_3_strip_1" unit="cm" x="-130" y="-241" z="-222.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_2"/> 
-<position name="posCMod_3_strip_2" unit="cm" x="-130" y="-241.5" z="-211.65" /> 
+<position name="posCMod_3_strip_2" unit="cm" x="-130" y="-241" z="-211.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_3"/> 
-<position name="posCMod_3_strip_3" unit="cm" x="-130" y="-241.5" z="-200.75" /> 
+<position name="posCMod_3_strip_3" unit="cm" x="-130" y="-241" z="-200.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_4"/> 
-<position name="posCMod_3_strip_4" unit="cm" x="-130" y="-241.5" z="-189.85" /> 
+<position name="posCMod_3_strip_4" unit="cm" x="-130" y="-241" z="-189.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_5"/> 
-<position name="posCMod_3_strip_5" unit="cm" x="-130" y="-241.5" z="-178.95" /> 
+<position name="posCMod_3_strip_5" unit="cm" x="-130" y="-241" z="-178.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_6"/> 
-<position name="posCMod_3_strip_6" unit="cm" x="-130" y="-241.5" z="-168.05" /> 
+<position name="posCMod_3_strip_6" unit="cm" x="-130" y="-241" z="-168.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_7"/> 
-<position name="posCMod_3_strip_7" unit="cm" x="-130" y="-241.5" z="-157.15" /> 
+<position name="posCMod_3_strip_7" unit="cm" x="-130" y="-241" z="-157.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_8"/> 
-<position name="posCMod_3_strip_8" unit="cm" x="-130" y="-241.5" z="-146.25" /> 
+<position name="posCMod_3_strip_8" unit="cm" x="-130" y="-241" z="-146.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_9"/> 
-<position name="posCMod_3_strip_9" unit="cm" x="-130" y="-241.5" z="-135.35" /> 
+<position name="posCMod_3_strip_9" unit="cm" x="-130" y="-241" z="-135.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_10"/> 
-<position name="posCMod_3_strip_10" unit="cm" x="-130" y="-241.5" z="-124.45" /> 
+<position name="posCMod_3_strip_10" unit="cm" x="-130" y="-241" z="-124.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_11"/> 
-<position name="posCMod_3_strip_11" unit="cm" x="-130" y="-241.5" z="-113.55" /> 
+<position name="posCMod_3_strip_11" unit="cm" x="-130" y="-241" z="-113.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_12"/> 
-<position name="posCMod_3_strip_12" unit="cm" x="-130" y="-241.5" z="-102.65" /> 
+<position name="posCMod_3_strip_12" unit="cm" x="-130" y="-241" z="-102.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_13"/> 
-<position name="posCMod_3_strip_13" unit="cm" x="-130" y="-241.5" z="-91.75" /> 
+<position name="posCMod_3_strip_13" unit="cm" x="-130" y="-241" z="-91.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_14"/> 
-<position name="posCMod_3_strip_14" unit="cm" x="-130" y="-241.5" z="-80.85" /> 
+<position name="posCMod_3_strip_14" unit="cm" x="-130" y="-241" z="-80.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_3_strip_15"/> 
-<position name="posCMod_3_strip_15" unit="cm" x="-130" y="-241.5" z="-69.95" /> 
+<position name="posCMod_3_strip_15" unit="cm" x="-130" y="-241" z="-69.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_0"/> 
-<position name="posCMod_4_strip_0" unit="cm" x="-130" y="-241.5" z="-59.05" /> 
+<position name="posCMod_4_strip_0" unit="cm" x="-130" y="-241" z="-59.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_1"/> 
-<position name="posCMod_4_strip_1" unit="cm" x="-130" y="-241.5" z="-48.15" /> 
+<position name="posCMod_4_strip_1" unit="cm" x="-130" y="-241" z="-48.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_2"/> 
-<position name="posCMod_4_strip_2" unit="cm" x="-130" y="-241.5" z="-37.25" /> 
+<position name="posCMod_4_strip_2" unit="cm" x="-130" y="-241" z="-37.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_3"/> 
-<position name="posCMod_4_strip_3" unit="cm" x="-130" y="-241.5" z="-26.35" /> 
+<position name="posCMod_4_strip_3" unit="cm" x="-130" y="-241" z="-26.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_4"/> 
-<position name="posCMod_4_strip_4" unit="cm" x="-130" y="-241.5" z="-15.45" /> 
+<position name="posCMod_4_strip_4" unit="cm" x="-130" y="-241" z="-15.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_5"/> 
-<position name="posCMod_4_strip_5" unit="cm" x="-130" y="-241.5" z="-4.55004" /> 
+<position name="posCMod_4_strip_5" unit="cm" x="-130" y="-241" z="-4.55004" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_6"/> 
-<position name="posCMod_4_strip_6" unit="cm" x="-130" y="-241.5" z="6.34996" /> 
+<position name="posCMod_4_strip_6" unit="cm" x="-130" y="-241" z="6.34996" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_7"/> 
-<position name="posCMod_4_strip_7" unit="cm" x="-130" y="-241.5" z="17.25" /> 
+<position name="posCMod_4_strip_7" unit="cm" x="-130" y="-241" z="17.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_8"/> 
-<position name="posCMod_4_strip_8" unit="cm" x="-130" y="-241.5" z="28.15" /> 
+<position name="posCMod_4_strip_8" unit="cm" x="-130" y="-241" z="28.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_9"/> 
-<position name="posCMod_4_strip_9" unit="cm" x="-130" y="-241.5" z="39.05" /> 
+<position name="posCMod_4_strip_9" unit="cm" x="-130" y="-241" z="39.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_10"/> 
-<position name="posCMod_4_strip_10" unit="cm" x="-130" y="-241.5" z="49.95" /> 
+<position name="posCMod_4_strip_10" unit="cm" x="-130" y="-241" z="49.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_11"/> 
-<position name="posCMod_4_strip_11" unit="cm" x="-130" y="-241.5" z="60.85" /> 
+<position name="posCMod_4_strip_11" unit="cm" x="-130" y="-241" z="60.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_12"/> 
-<position name="posCMod_4_strip_12" unit="cm" x="-130" y="-241.5" z="71.75" /> 
+<position name="posCMod_4_strip_12" unit="cm" x="-130" y="-241" z="71.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_13"/> 
-<position name="posCMod_4_strip_13" unit="cm" x="-130" y="-241.5" z="82.65" /> 
+<position name="posCMod_4_strip_13" unit="cm" x="-130" y="-241" z="82.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_14"/> 
-<position name="posCMod_4_strip_14" unit="cm" x="-130" y="-241.5" z="93.55" /> 
+<position name="posCMod_4_strip_14" unit="cm" x="-130" y="-241" z="93.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_4_strip_15"/> 
-<position name="posCMod_4_strip_15" unit="cm" x="-130" y="-241.5" z="104.45" /> 
+<position name="posCMod_4_strip_15" unit="cm" x="-130" y="-241" z="104.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_0"/> 
-<position name="posAMod_5_strip_0" unit="cm" x="130" y="-243.3" z="-233.45" /> 
+<position name="posAMod_5_strip_0" unit="cm" x="130" y="-243.5" z="-233.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_1"/> 
-<position name="posAMod_5_strip_1" unit="cm" x="130" y="-243.3" z="-222.55" /> 
+<position name="posAMod_5_strip_1" unit="cm" x="130" y="-243.5" z="-222.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_2"/> 
-<position name="posAMod_5_strip_2" unit="cm" x="130" y="-243.3" z="-211.65" /> 
+<position name="posAMod_5_strip_2" unit="cm" x="130" y="-243.5" z="-211.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_3"/> 
-<position name="posAMod_5_strip_3" unit="cm" x="130" y="-243.3" z="-200.75" /> 
+<position name="posAMod_5_strip_3" unit="cm" x="130" y="-243.5" z="-200.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_4"/> 
-<position name="posAMod_5_strip_4" unit="cm" x="130" y="-243.3" z="-189.85" /> 
+<position name="posAMod_5_strip_4" unit="cm" x="130" y="-243.5" z="-189.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_5"/> 
-<position name="posAMod_5_strip_5" unit="cm" x="130" y="-243.3" z="-178.95" /> 
+<position name="posAMod_5_strip_5" unit="cm" x="130" y="-243.5" z="-178.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_6"/> 
-<position name="posAMod_5_strip_6" unit="cm" x="130" y="-243.3" z="-168.05" /> 
+<position name="posAMod_5_strip_6" unit="cm" x="130" y="-243.5" z="-168.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_7"/> 
-<position name="posAMod_5_strip_7" unit="cm" x="130" y="-243.3" z="-157.15" /> 
+<position name="posAMod_5_strip_7" unit="cm" x="130" y="-243.5" z="-157.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_8"/> 
-<position name="posAMod_5_strip_8" unit="cm" x="130" y="-243.3" z="-146.25" /> 
+<position name="posAMod_5_strip_8" unit="cm" x="130" y="-243.5" z="-146.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_9"/> 
-<position name="posAMod_5_strip_9" unit="cm" x="130" y="-243.3" z="-135.35" /> 
+<position name="posAMod_5_strip_9" unit="cm" x="130" y="-243.5" z="-135.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_10"/> 
-<position name="posAMod_5_strip_10" unit="cm" x="130" y="-243.3" z="-124.45" /> 
+<position name="posAMod_5_strip_10" unit="cm" x="130" y="-243.5" z="-124.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_11"/> 
-<position name="posAMod_5_strip_11" unit="cm" x="130" y="-243.3" z="-113.55" /> 
+<position name="posAMod_5_strip_11" unit="cm" x="130" y="-243.5" z="-113.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_12"/> 
-<position name="posAMod_5_strip_12" unit="cm" x="130" y="-243.3" z="-102.65" /> 
+<position name="posAMod_5_strip_12" unit="cm" x="130" y="-243.5" z="-102.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_13"/> 
-<position name="posAMod_5_strip_13" unit="cm" x="130" y="-243.3" z="-91.75" /> 
+<position name="posAMod_5_strip_13" unit="cm" x="130" y="-243.5" z="-91.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_14"/> 
-<position name="posAMod_5_strip_14" unit="cm" x="130" y="-243.3" z="-80.85" /> 
+<position name="posAMod_5_strip_14" unit="cm" x="130" y="-243.5" z="-80.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_15"/> 
-<position name="posAMod_5_strip_15" unit="cm" x="130" y="-243.3" z="-69.95" /> 
+<position name="posAMod_5_strip_15" unit="cm" x="130" y="-243.5" z="-69.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_0"/> 
-<position name="posAMod_6_strip_0" unit="cm" x="130" y="-243.3" z="-59.05" /> 
+<position name="posAMod_6_strip_0" unit="cm" x="130" y="-243.5" z="-59.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_1"/> 
-<position name="posAMod_6_strip_1" unit="cm" x="130" y="-243.3" z="-48.15" /> 
+<position name="posAMod_6_strip_1" unit="cm" x="130" y="-243.5" z="-48.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_2"/> 
-<position name="posAMod_6_strip_2" unit="cm" x="130" y="-243.3" z="-37.25" /> 
+<position name="posAMod_6_strip_2" unit="cm" x="130" y="-243.5" z="-37.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_3"/> 
-<position name="posAMod_6_strip_3" unit="cm" x="130" y="-243.3" z="-26.35" /> 
+<position name="posAMod_6_strip_3" unit="cm" x="130" y="-243.5" z="-26.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_4"/> 
-<position name="posAMod_6_strip_4" unit="cm" x="130" y="-243.3" z="-15.45" /> 
+<position name="posAMod_6_strip_4" unit="cm" x="130" y="-243.5" z="-15.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_5"/> 
-<position name="posAMod_6_strip_5" unit="cm" x="130" y="-243.3" z="-4.55004" /> 
+<position name="posAMod_6_strip_5" unit="cm" x="130" y="-243.5" z="-4.55004" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_6"/> 
-<position name="posAMod_6_strip_6" unit="cm" x="130" y="-243.3" z="6.34996" /> 
+<position name="posAMod_6_strip_6" unit="cm" x="130" y="-243.5" z="6.34996" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_7"/> 
-<position name="posAMod_6_strip_7" unit="cm" x="130" y="-243.3" z="17.25" /> 
+<position name="posAMod_6_strip_7" unit="cm" x="130" y="-243.5" z="17.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_8"/> 
-<position name="posAMod_6_strip_8" unit="cm" x="130" y="-243.3" z="28.15" /> 
+<position name="posAMod_6_strip_8" unit="cm" x="130" y="-243.5" z="28.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_9"/> 
-<position name="posAMod_6_strip_9" unit="cm" x="130" y="-243.3" z="39.05" /> 
+<position name="posAMod_6_strip_9" unit="cm" x="130" y="-243.5" z="39.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_10"/> 
-<position name="posAMod_6_strip_10" unit="cm" x="130" y="-243.3" z="49.95" /> 
+<position name="posAMod_6_strip_10" unit="cm" x="130" y="-243.5" z="49.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_11"/> 
-<position name="posAMod_6_strip_11" unit="cm" x="130" y="-243.3" z="60.85" /> 
+<position name="posAMod_6_strip_11" unit="cm" x="130" y="-243.5" z="60.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_12"/> 
-<position name="posAMod_6_strip_12" unit="cm" x="130" y="-243.3" z="71.75" /> 
+<position name="posAMod_6_strip_12" unit="cm" x="130" y="-243.5" z="71.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_13"/> 
-<position name="posAMod_6_strip_13" unit="cm" x="130" y="-243.3" z="82.65" /> 
+<position name="posAMod_6_strip_13" unit="cm" x="130" y="-243.5" z="82.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_14"/> 
-<position name="posAMod_6_strip_14" unit="cm" x="130" y="-243.3" z="93.55" /> 
+<position name="posAMod_6_strip_14" unit="cm" x="130" y="-243.5" z="93.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_15"/> 
-<position name="posAMod_6_strip_15" unit="cm" x="130" y="-243.3" z="104.45" /> 
+<position name="posAMod_6_strip_15" unit="cm" x="130" y="-243.5" z="104.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_0"/> 
-<position name="posBMod_5_strip_0" unit="cm" x="130" y="-242.2" z="-233.45" /> 
+<position name="posBMod_5_strip_0" unit="cm" x="130" y="-242.5" z="-233.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_1"/> 
-<position name="posBMod_5_strip_1" unit="cm" x="130" y="-242.2" z="-222.55" /> 
+<position name="posBMod_5_strip_1" unit="cm" x="130" y="-242.5" z="-222.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_2"/> 
-<position name="posBMod_5_strip_2" unit="cm" x="130" y="-242.2" z="-211.65" /> 
+<position name="posBMod_5_strip_2" unit="cm" x="130" y="-242.5" z="-211.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_3"/> 
-<position name="posBMod_5_strip_3" unit="cm" x="130" y="-242.2" z="-200.75" /> 
+<position name="posBMod_5_strip_3" unit="cm" x="130" y="-242.5" z="-200.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_4"/> 
-<position name="posBMod_5_strip_4" unit="cm" x="130" y="-242.2" z="-189.85" /> 
+<position name="posBMod_5_strip_4" unit="cm" x="130" y="-242.5" z="-189.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_5"/> 
-<position name="posBMod_5_strip_5" unit="cm" x="130" y="-242.2" z="-178.95" /> 
+<position name="posBMod_5_strip_5" unit="cm" x="130" y="-242.5" z="-178.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_6"/> 
-<position name="posBMod_5_strip_6" unit="cm" x="130" y="-242.2" z="-168.05" /> 
+<position name="posBMod_5_strip_6" unit="cm" x="130" y="-242.5" z="-168.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_7"/> 
-<position name="posBMod_5_strip_7" unit="cm" x="130" y="-242.2" z="-157.15" /> 
+<position name="posBMod_5_strip_7" unit="cm" x="130" y="-242.5" z="-157.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_8"/> 
-<position name="posBMod_5_strip_8" unit="cm" x="130" y="-242.2" z="-146.25" /> 
+<position name="posBMod_5_strip_8" unit="cm" x="130" y="-242.5" z="-146.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_9"/> 
-<position name="posBMod_5_strip_9" unit="cm" x="130" y="-242.2" z="-135.35" /> 
+<position name="posBMod_5_strip_9" unit="cm" x="130" y="-242.5" z="-135.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_10"/> 
-<position name="posBMod_5_strip_10" unit="cm" x="130" y="-242.2" z="-124.45" /> 
+<position name="posBMod_5_strip_10" unit="cm" x="130" y="-242.5" z="-124.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_11"/> 
-<position name="posBMod_5_strip_11" unit="cm" x="130" y="-242.2" z="-113.55" /> 
+<position name="posBMod_5_strip_11" unit="cm" x="130" y="-242.5" z="-113.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_12"/> 
-<position name="posBMod_5_strip_12" unit="cm" x="130" y="-242.2" z="-102.65" /> 
+<position name="posBMod_5_strip_12" unit="cm" x="130" y="-242.5" z="-102.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_13"/> 
-<position name="posBMod_5_strip_13" unit="cm" x="130" y="-242.2" z="-91.75" /> 
+<position name="posBMod_5_strip_13" unit="cm" x="130" y="-242.5" z="-91.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_14"/> 
-<position name="posBMod_5_strip_14" unit="cm" x="130" y="-242.2" z="-80.85" /> 
+<position name="posBMod_5_strip_14" unit="cm" x="130" y="-242.5" z="-80.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_5_strip_15"/> 
-<position name="posBMod_5_strip_15" unit="cm" x="130" y="-242.2" z="-69.95" /> 
+<position name="posBMod_5_strip_15" unit="cm" x="130" y="-242.5" z="-69.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_0"/> 
-<position name="posBMod_6_strip_0" unit="cm" x="130" y="-242.2" z="-59.05" /> 
+<position name="posBMod_6_strip_0" unit="cm" x="130" y="-242.5" z="-59.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_1"/> 
-<position name="posBMod_6_strip_1" unit="cm" x="130" y="-242.2" z="-48.15" /> 
+<position name="posBMod_6_strip_1" unit="cm" x="130" y="-242.5" z="-48.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_2"/> 
-<position name="posBMod_6_strip_2" unit="cm" x="130" y="-242.2" z="-37.25" /> 
+<position name="posBMod_6_strip_2" unit="cm" x="130" y="-242.5" z="-37.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_3"/> 
-<position name="posBMod_6_strip_3" unit="cm" x="130" y="-242.2" z="-26.35" /> 
+<position name="posBMod_6_strip_3" unit="cm" x="130" y="-242.5" z="-26.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_4"/> 
-<position name="posBMod_6_strip_4" unit="cm" x="130" y="-242.2" z="-15.45" /> 
+<position name="posBMod_6_strip_4" unit="cm" x="130" y="-242.5" z="-15.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_5"/> 
-<position name="posBMod_6_strip_5" unit="cm" x="130" y="-242.2" z="-4.55004" /> 
+<position name="posBMod_6_strip_5" unit="cm" x="130" y="-242.5" z="-4.55004" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_6"/> 
-<position name="posBMod_6_strip_6" unit="cm" x="130" y="-242.2" z="6.34996" /> 
+<position name="posBMod_6_strip_6" unit="cm" x="130" y="-242.5" z="6.34996" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_7"/> 
-<position name="posBMod_6_strip_7" unit="cm" x="130" y="-242.2" z="17.25" /> 
+<position name="posBMod_6_strip_7" unit="cm" x="130" y="-242.5" z="17.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_8"/> 
-<position name="posBMod_6_strip_8" unit="cm" x="130" y="-242.2" z="28.15" /> 
+<position name="posBMod_6_strip_8" unit="cm" x="130" y="-242.5" z="28.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_9"/> 
-<position name="posBMod_6_strip_9" unit="cm" x="130" y="-242.2" z="39.05" /> 
+<position name="posBMod_6_strip_9" unit="cm" x="130" y="-242.5" z="39.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_10"/> 
-<position name="posBMod_6_strip_10" unit="cm" x="130" y="-242.2" z="49.95" /> 
+<position name="posBMod_6_strip_10" unit="cm" x="130" y="-242.5" z="49.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_11"/> 
-<position name="posBMod_6_strip_11" unit="cm" x="130" y="-242.2" z="60.85" /> 
+<position name="posBMod_6_strip_11" unit="cm" x="130" y="-242.5" z="60.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_12"/> 
-<position name="posBMod_6_strip_12" unit="cm" x="130" y="-242.2" z="71.75" /> 
+<position name="posBMod_6_strip_12" unit="cm" x="130" y="-242.5" z="71.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_13"/> 
-<position name="posBMod_6_strip_13" unit="cm" x="130" y="-242.2" z="82.65" /> 
+<position name="posBMod_6_strip_13" unit="cm" x="130" y="-242.5" z="82.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_14"/> 
-<position name="posBMod_6_strip_14" unit="cm" x="130" y="-242.2" z="93.55" /> 
+<position name="posBMod_6_strip_14" unit="cm" x="130" y="-242.5" z="93.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_6_strip_15"/> 
-<position name="posBMod_6_strip_15" unit="cm" x="130" y="-242.2" z="104.45" /> 
+<position name="posBMod_6_strip_15" unit="cm" x="130" y="-242.5" z="104.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_0"/> 
-<position name="posCMod_5_strip_0" unit="cm" x="130" y="-241.5" z="-233.45" /> 
+<position name="posCMod_5_strip_0" unit="cm" x="130" y="-241" z="-233.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_1"/> 
-<position name="posCMod_5_strip_1" unit="cm" x="130" y="-241.5" z="-222.55" /> 
+<position name="posCMod_5_strip_1" unit="cm" x="130" y="-241" z="-222.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_2"/> 
-<position name="posCMod_5_strip_2" unit="cm" x="130" y="-241.5" z="-211.65" /> 
+<position name="posCMod_5_strip_2" unit="cm" x="130" y="-241" z="-211.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_3"/> 
-<position name="posCMod_5_strip_3" unit="cm" x="130" y="-241.5" z="-200.75" /> 
+<position name="posCMod_5_strip_3" unit="cm" x="130" y="-241" z="-200.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_4"/> 
-<position name="posCMod_5_strip_4" unit="cm" x="130" y="-241.5" z="-189.85" /> 
+<position name="posCMod_5_strip_4" unit="cm" x="130" y="-241" z="-189.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_5"/> 
-<position name="posCMod_5_strip_5" unit="cm" x="130" y="-241.5" z="-178.95" /> 
+<position name="posCMod_5_strip_5" unit="cm" x="130" y="-241" z="-178.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_6"/> 
-<position name="posCMod_5_strip_6" unit="cm" x="130" y="-241.5" z="-168.05" /> 
+<position name="posCMod_5_strip_6" unit="cm" x="130" y="-241" z="-168.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_7"/> 
-<position name="posCMod_5_strip_7" unit="cm" x="130" y="-241.5" z="-157.15" /> 
+<position name="posCMod_5_strip_7" unit="cm" x="130" y="-241" z="-157.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_8"/> 
-<position name="posCMod_5_strip_8" unit="cm" x="130" y="-241.5" z="-146.25" /> 
+<position name="posCMod_5_strip_8" unit="cm" x="130" y="-241" z="-146.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_9"/> 
-<position name="posCMod_5_strip_9" unit="cm" x="130" y="-241.5" z="-135.35" /> 
+<position name="posCMod_5_strip_9" unit="cm" x="130" y="-241" z="-135.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_10"/> 
-<position name="posCMod_5_strip_10" unit="cm" x="130" y="-241.5" z="-124.45" /> 
+<position name="posCMod_5_strip_10" unit="cm" x="130" y="-241" z="-124.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_11"/> 
-<position name="posCMod_5_strip_11" unit="cm" x="130" y="-241.5" z="-113.55" /> 
+<position name="posCMod_5_strip_11" unit="cm" x="130" y="-241" z="-113.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_12"/> 
-<position name="posCMod_5_strip_12" unit="cm" x="130" y="-241.5" z="-102.65" /> 
+<position name="posCMod_5_strip_12" unit="cm" x="130" y="-241" z="-102.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_13"/> 
-<position name="posCMod_5_strip_13" unit="cm" x="130" y="-241.5" z="-91.75" /> 
+<position name="posCMod_5_strip_13" unit="cm" x="130" y="-241" z="-91.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_14"/> 
-<position name="posCMod_5_strip_14" unit="cm" x="130" y="-241.5" z="-80.85" /> 
+<position name="posCMod_5_strip_14" unit="cm" x="130" y="-241" z="-80.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_5_strip_15"/> 
-<position name="posCMod_5_strip_15" unit="cm" x="130" y="-241.5" z="-69.95" /> 
+<position name="posCMod_5_strip_15" unit="cm" x="130" y="-241" z="-69.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_0"/> 
-<position name="posCMod_6_strip_0" unit="cm" x="130" y="-241.5" z="-59.05" /> 
+<position name="posCMod_6_strip_0" unit="cm" x="130" y="-241" z="-59.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_1"/> 
-<position name="posCMod_6_strip_1" unit="cm" x="130" y="-241.5" z="-48.15" /> 
+<position name="posCMod_6_strip_1" unit="cm" x="130" y="-241" z="-48.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_2"/> 
-<position name="posCMod_6_strip_2" unit="cm" x="130" y="-241.5" z="-37.25" /> 
+<position name="posCMod_6_strip_2" unit="cm" x="130" y="-241" z="-37.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_3"/> 
-<position name="posCMod_6_strip_3" unit="cm" x="130" y="-241.5" z="-26.35" /> 
+<position name="posCMod_6_strip_3" unit="cm" x="130" y="-241" z="-26.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_4"/> 
-<position name="posCMod_6_strip_4" unit="cm" x="130" y="-241.5" z="-15.45" /> 
+<position name="posCMod_6_strip_4" unit="cm" x="130" y="-241" z="-15.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_5"/> 
-<position name="posCMod_6_strip_5" unit="cm" x="130" y="-241.5" z="-4.55004" /> 
+<position name="posCMod_6_strip_5" unit="cm" x="130" y="-241" z="-4.55004" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_6"/> 
-<position name="posCMod_6_strip_6" unit="cm" x="130" y="-241.5" z="6.34996" /> 
+<position name="posCMod_6_strip_6" unit="cm" x="130" y="-241" z="6.34996" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_7"/> 
-<position name="posCMod_6_strip_7" unit="cm" x="130" y="-241.5" z="17.25" /> 
+<position name="posCMod_6_strip_7" unit="cm" x="130" y="-241" z="17.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_8"/> 
-<position name="posCMod_6_strip_8" unit="cm" x="130" y="-241.5" z="28.15" /> 
+<position name="posCMod_6_strip_8" unit="cm" x="130" y="-241" z="28.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_9"/> 
-<position name="posCMod_6_strip_9" unit="cm" x="130" y="-241.5" z="39.05" /> 
+<position name="posCMod_6_strip_9" unit="cm" x="130" y="-241" z="39.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_10"/> 
-<position name="posCMod_6_strip_10" unit="cm" x="130" y="-241.5" z="49.95" /> 
+<position name="posCMod_6_strip_10" unit="cm" x="130" y="-241" z="49.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_11"/> 
-<position name="posCMod_6_strip_11" unit="cm" x="130" y="-241.5" z="60.85" /> 
+<position name="posCMod_6_strip_11" unit="cm" x="130" y="-241" z="60.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_12"/> 
-<position name="posCMod_6_strip_12" unit="cm" x="130" y="-241.5" z="71.75" /> 
+<position name="posCMod_6_strip_12" unit="cm" x="130" y="-241" z="71.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_13"/> 
-<position name="posCMod_6_strip_13" unit="cm" x="130" y="-241.5" z="82.65" /> 
+<position name="posCMod_6_strip_13" unit="cm" x="130" y="-241" z="82.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_14"/> 
-<position name="posCMod_6_strip_14" unit="cm" x="130" y="-241.5" z="93.55" /> 
+<position name="posCMod_6_strip_14" unit="cm" x="130" y="-241" z="93.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_6_strip_15"/> 
-<position name="posCMod_6_strip_15" unit="cm" x="130" y="-241.5" z="104.45" /> 
+<position name="posCMod_6_strip_15" unit="cm" x="130" y="-241" z="104.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_0"/> 
-<position name="posAMod_7_strip_0" unit="cm" x="-261.6" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_0" unit="cm" x="-261.6" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_1"/> 
-<position name="posAMod_7_strip_1" unit="cm" x="-250.7" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_1" unit="cm" x="-250.7" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_2"/> 
-<position name="posAMod_7_strip_2" unit="cm" x="-239.8" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_2" unit="cm" x="-239.8" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_3"/> 
-<position name="posAMod_7_strip_3" unit="cm" x="-228.9" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_3" unit="cm" x="-228.9" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_4"/> 
-<position name="posAMod_7_strip_4" unit="cm" x="-218" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_4" unit="cm" x="-218" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_5"/> 
-<position name="posAMod_7_strip_5" unit="cm" x="-207.1" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_5" unit="cm" x="-207.1" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_6"/> 
-<position name="posAMod_7_strip_6" unit="cm" x="-196.2" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_6" unit="cm" x="-196.2" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_7"/> 
-<position name="posAMod_7_strip_7" unit="cm" x="-185.3" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_7" unit="cm" x="-185.3" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_8"/> 
-<position name="posAMod_7_strip_8" unit="cm" x="-174.4" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_8" unit="cm" x="-174.4" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_9"/> 
-<position name="posAMod_7_strip_9" unit="cm" x="-163.5" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_9" unit="cm" x="-163.5" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_10"/> 
-<position name="posAMod_7_strip_10" unit="cm" x="-152.6" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_10" unit="cm" x="-152.6" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_11"/> 
-<position name="posAMod_7_strip_11" unit="cm" x="-141.7" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_11" unit="cm" x="-141.7" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_12"/> 
-<position name="posAMod_7_strip_12" unit="cm" x="-130.8" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_12" unit="cm" x="-130.8" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_13"/> 
-<position name="posAMod_7_strip_13" unit="cm" x="-119.9" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_13" unit="cm" x="-119.9" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_14"/> 
-<position name="posAMod_7_strip_14" unit="cm" x="-109" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_14" unit="cm" x="-109" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_15"/> 
-<position name="posAMod_7_strip_15" unit="cm" x="-98.1001" y="-241.2" z="171.45" /> 
+<position name="posAMod_7_strip_15" unit="cm" x="-98.1001" y="-240" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_0"/> 
-<position name="posBMod_7_strip_0" unit="cm" x="-261.6" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_0" unit="cm" x="-261.6" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_1"/> 
-<position name="posBMod_7_strip_1" unit="cm" x="-250.7" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_1" unit="cm" x="-250.7" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_2"/> 
-<position name="posBMod_7_strip_2" unit="cm" x="-239.8" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_2" unit="cm" x="-239.8" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_3"/> 
-<position name="posBMod_7_strip_3" unit="cm" x="-228.9" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_3" unit="cm" x="-228.9" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_4"/> 
-<position name="posBMod_7_strip_4" unit="cm" x="-218" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_4" unit="cm" x="-218" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_5"/> 
-<position name="posBMod_7_strip_5" unit="cm" x="-207.1" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_5" unit="cm" x="-207.1" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_6"/> 
-<position name="posBMod_7_strip_6" unit="cm" x="-196.2" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_6" unit="cm" x="-196.2" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_7"/> 
-<position name="posBMod_7_strip_7" unit="cm" x="-185.3" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_7" unit="cm" x="-185.3" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_8"/> 
-<position name="posBMod_7_strip_8" unit="cm" x="-174.4" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_8" unit="cm" x="-174.4" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_9"/> 
-<position name="posBMod_7_strip_9" unit="cm" x="-163.5" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_9" unit="cm" x="-163.5" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_10"/> 
-<position name="posBMod_7_strip_10" unit="cm" x="-152.6" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_10" unit="cm" x="-152.6" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_11"/> 
-<position name="posBMod_7_strip_11" unit="cm" x="-141.7" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_11" unit="cm" x="-141.7" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_12"/> 
-<position name="posBMod_7_strip_12" unit="cm" x="-130.8" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_12" unit="cm" x="-130.8" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_13"/> 
-<position name="posBMod_7_strip_13" unit="cm" x="-119.9" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_13" unit="cm" x="-119.9" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_14"/> 
-<position name="posBMod_7_strip_14" unit="cm" x="-109" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_14" unit="cm" x="-109" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_7_strip_15"/> 
-<position name="posBMod_7_strip_15" unit="cm" x="-98.1001" y="-240" z="171.45" /> 
+<position name="posBMod_7_strip_15" unit="cm" x="-98.1001" y="-239" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_0"/> 
-<position name="posCMod_7_strip_0" unit="cm" x="-261.6" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_0" unit="cm" x="-261.6" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_1"/> 
-<position name="posCMod_7_strip_1" unit="cm" x="-250.7" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_1" unit="cm" x="-250.7" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_2"/> 
-<position name="posCMod_7_strip_2" unit="cm" x="-239.8" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_2" unit="cm" x="-239.8" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_3"/> 
-<position name="posCMod_7_strip_3" unit="cm" x="-228.9" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_3" unit="cm" x="-228.9" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_4"/> 
-<position name="posCMod_7_strip_4" unit="cm" x="-218" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_4" unit="cm" x="-218" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_5"/> 
-<position name="posCMod_7_strip_5" unit="cm" x="-207.1" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_5" unit="cm" x="-207.1" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_6"/> 
-<position name="posCMod_7_strip_6" unit="cm" x="-196.2" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_6" unit="cm" x="-196.2" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_7"/> 
-<position name="posCMod_7_strip_7" unit="cm" x="-185.3" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_7" unit="cm" x="-185.3" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_8"/> 
-<position name="posCMod_7_strip_8" unit="cm" x="-174.4" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_8" unit="cm" x="-174.4" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_9"/> 
-<position name="posCMod_7_strip_9" unit="cm" x="-163.5" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_9" unit="cm" x="-163.5" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_10"/> 
-<position name="posCMod_7_strip_10" unit="cm" x="-152.6" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_10" unit="cm" x="-152.6" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_11"/> 
-<position name="posCMod_7_strip_11" unit="cm" x="-141.7" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_11" unit="cm" x="-141.7" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_12"/> 
-<position name="posCMod_7_strip_12" unit="cm" x="-130.8" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_12" unit="cm" x="-130.8" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_13"/> 
-<position name="posCMod_7_strip_13" unit="cm" x="-119.9" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_13" unit="cm" x="-119.9" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_14"/> 
-<position name="posCMod_7_strip_14" unit="cm" x="-109" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_14" unit="cm" x="-109" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_7_strip_15"/> 
-<position name="posCMod_7_strip_15" unit="cm" x="-98.1001" y="-239.4" z="171.45" /> 
+<position name="posCMod_7_strip_15" unit="cm" x="-98.1001" y="-237.5" z="171.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_0"/> 
-<position name="posAMod_8_strip_0" unit="cm" x="-148.1" y="-239.1" z="116.45" /> 
+<position name="posAMod_8_strip_0" unit="cm" x="-148.1" y="-236.5" z="116.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_1"/> 
-<position name="posAMod_8_strip_1" unit="cm" x="-148.1" y="-239.1" z="127.35" /> 
+<position name="posAMod_8_strip_1" unit="cm" x="-148.1" y="-236.5" z="127.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_2"/> 
-<position name="posAMod_8_strip_2" unit="cm" x="-148.1" y="-239.1" z="138.25" /> 
+<position name="posAMod_8_strip_2" unit="cm" x="-148.1" y="-236.5" z="138.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_3"/> 
-<position name="posAMod_8_strip_3" unit="cm" x="-148.1" y="-239.1" z="149.15" /> 
+<position name="posAMod_8_strip_3" unit="cm" x="-148.1" y="-236.5" z="149.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_4"/> 
-<position name="posAMod_8_strip_4" unit="cm" x="-148.1" y="-239.1" z="160.05" /> 
+<position name="posAMod_8_strip_4" unit="cm" x="-148.1" y="-236.5" z="160.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_5"/> 
-<position name="posAMod_8_strip_5" unit="cm" x="-148.1" y="-239.1" z="170.95" /> 
+<position name="posAMod_8_strip_5" unit="cm" x="-148.1" y="-236.5" z="170.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_6"/> 
-<position name="posAMod_8_strip_6" unit="cm" x="-148.1" y="-239.1" z="181.85" /> 
+<position name="posAMod_8_strip_6" unit="cm" x="-148.1" y="-236.5" z="181.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_7"/> 
-<position name="posAMod_8_strip_7" unit="cm" x="-148.1" y="-239.1" z="192.75" /> 
+<position name="posAMod_8_strip_7" unit="cm" x="-148.1" y="-236.5" z="192.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_8"/> 
-<position name="posAMod_8_strip_8" unit="cm" x="-148.1" y="-239.1" z="203.65" /> 
+<position name="posAMod_8_strip_8" unit="cm" x="-148.1" y="-236.5" z="203.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_9"/> 
-<position name="posAMod_8_strip_9" unit="cm" x="-148.1" y="-239.1" z="214.55" /> 
+<position name="posAMod_8_strip_9" unit="cm" x="-148.1" y="-236.5" z="214.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_10"/> 
-<position name="posAMod_8_strip_10" unit="cm" x="-148.1" y="-239.1" z="225.45" /> 
+<position name="posAMod_8_strip_10" unit="cm" x="-148.1" y="-236.5" z="225.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_11"/> 
-<position name="posAMod_8_strip_11" unit="cm" x="-148.1" y="-239.1" z="236.35" /> 
+<position name="posAMod_8_strip_11" unit="cm" x="-148.1" y="-236.5" z="236.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_12"/> 
-<position name="posAMod_8_strip_12" unit="cm" x="-148.1" y="-239.1" z="247.25" /> 
+<position name="posAMod_8_strip_12" unit="cm" x="-148.1" y="-236.5" z="247.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_13"/> 
-<position name="posAMod_8_strip_13" unit="cm" x="-148.1" y="-239.1" z="258.15" /> 
+<position name="posAMod_8_strip_13" unit="cm" x="-148.1" y="-236.5" z="258.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_14"/> 
-<position name="posAMod_8_strip_14" unit="cm" x="-148.1" y="-239.1" z="269.05" /> 
+<position name="posAMod_8_strip_14" unit="cm" x="-148.1" y="-236.5" z="269.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_15"/> 
-<position name="posAMod_8_strip_15" unit="cm" x="-148.1" y="-239.1" z="279.95" /> 
+<position name="posAMod_8_strip_15" unit="cm" x="-148.1" y="-236.5" z="279.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_0"/> 
-<position name="posBMod_8_strip_0" unit="cm" x="-148.1" y="-238" z="116.45" /> 
+<position name="posBMod_8_strip_0" unit="cm" x="-148.1" y="-235" z="116.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_1"/> 
-<position name="posBMod_8_strip_1" unit="cm" x="-148.1" y="-238" z="127.35" /> 
+<position name="posBMod_8_strip_1" unit="cm" x="-148.1" y="-235" z="127.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_2"/> 
-<position name="posBMod_8_strip_2" unit="cm" x="-148.1" y="-238" z="138.25" /> 
+<position name="posBMod_8_strip_2" unit="cm" x="-148.1" y="-235" z="138.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_3"/> 
-<position name="posBMod_8_strip_3" unit="cm" x="-148.1" y="-238" z="149.15" /> 
+<position name="posBMod_8_strip_3" unit="cm" x="-148.1" y="-235" z="149.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_4"/> 
-<position name="posBMod_8_strip_4" unit="cm" x="-148.1" y="-238" z="160.05" /> 
+<position name="posBMod_8_strip_4" unit="cm" x="-148.1" y="-235" z="160.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_5"/> 
-<position name="posBMod_8_strip_5" unit="cm" x="-148.1" y="-238" z="170.95" /> 
+<position name="posBMod_8_strip_5" unit="cm" x="-148.1" y="-235" z="170.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_6"/> 
-<position name="posBMod_8_strip_6" unit="cm" x="-148.1" y="-238" z="181.85" /> 
+<position name="posBMod_8_strip_6" unit="cm" x="-148.1" y="-235" z="181.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_7"/> 
-<position name="posBMod_8_strip_7" unit="cm" x="-148.1" y="-238" z="192.75" /> 
+<position name="posBMod_8_strip_7" unit="cm" x="-148.1" y="-235" z="192.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_8"/> 
-<position name="posBMod_8_strip_8" unit="cm" x="-148.1" y="-238" z="203.65" /> 
+<position name="posBMod_8_strip_8" unit="cm" x="-148.1" y="-235" z="203.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_9"/> 
-<position name="posBMod_8_strip_9" unit="cm" x="-148.1" y="-238" z="214.55" /> 
+<position name="posBMod_8_strip_9" unit="cm" x="-148.1" y="-235" z="214.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_10"/> 
-<position name="posBMod_8_strip_10" unit="cm" x="-148.1" y="-238" z="225.45" /> 
+<position name="posBMod_8_strip_10" unit="cm" x="-148.1" y="-235" z="225.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_11"/> 
-<position name="posBMod_8_strip_11" unit="cm" x="-148.1" y="-238" z="236.35" /> 
+<position name="posBMod_8_strip_11" unit="cm" x="-148.1" y="-235" z="236.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_12"/> 
-<position name="posBMod_8_strip_12" unit="cm" x="-148.1" y="-238" z="247.25" /> 
+<position name="posBMod_8_strip_12" unit="cm" x="-148.1" y="-235" z="247.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_13"/> 
-<position name="posBMod_8_strip_13" unit="cm" x="-148.1" y="-238" z="258.15" /> 
+<position name="posBMod_8_strip_13" unit="cm" x="-148.1" y="-235" z="258.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_14"/> 
-<position name="posBMod_8_strip_14" unit="cm" x="-148.1" y="-238" z="269.05" /> 
+<position name="posBMod_8_strip_14" unit="cm" x="-148.1" y="-235" z="269.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volAuxDet_Module_8_strip_15"/> 
-<position name="posBMod_8_strip_15" unit="cm" x="-148.1" y="-238" z="279.95" /> 
+<position name="posBMod_8_strip_15" unit="cm" x="-148.1" y="-235" z="279.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_0"/> 
-<position name="posCMod_8_strip_0" unit="cm" x="-148.1" y="-237.4" z="116.45" /> 
+<position name="posCMod_8_strip_0" unit="cm" x="-148.1" y="-234" z="116.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_1"/> 
-<position name="posCMod_8_strip_1" unit="cm" x="-148.1" y="-237.4" z="127.35" /> 
+<position name="posCMod_8_strip_1" unit="cm" x="-148.1" y="-234" z="127.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_2"/> 
-<position name="posCMod_8_strip_2" unit="cm" x="-148.1" y="-237.4" z="138.25" /> 
+<position name="posCMod_8_strip_2" unit="cm" x="-148.1" y="-234" z="138.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_3"/> 
-<position name="posCMod_8_strip_3" unit="cm" x="-148.1" y="-237.4" z="149.15" /> 
+<position name="posCMod_8_strip_3" unit="cm" x="-148.1" y="-234" z="149.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_4"/> 
-<position name="posCMod_8_strip_4" unit="cm" x="-148.1" y="-237.4" z="160.05" /> 
+<position name="posCMod_8_strip_4" unit="cm" x="-148.1" y="-234" z="160.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_5"/> 
-<position name="posCMod_8_strip_5" unit="cm" x="-148.1" y="-237.4" z="170.95" /> 
+<position name="posCMod_8_strip_5" unit="cm" x="-148.1" y="-234" z="170.95" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_6"/> 
-<position name="posCMod_8_strip_6" unit="cm" x="-148.1" y="-237.4" z="181.85" /> 
+<position name="posCMod_8_strip_6" unit="cm" x="-148.1" y="-234" z="181.85" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_7"/> 
-<position name="posCMod_8_strip_7" unit="cm" x="-148.1" y="-237.4" z="192.75" /> 
+<position name="posCMod_8_strip_7" unit="cm" x="-148.1" y="-234" z="192.75" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_8"/> 
-<position name="posCMod_8_strip_8" unit="cm" x="-148.1" y="-237.4" z="203.65" /> 
+<position name="posCMod_8_strip_8" unit="cm" x="-148.1" y="-234" z="203.65" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_9"/> 
-<position name="posCMod_8_strip_9" unit="cm" x="-148.1" y="-237.4" z="214.55" /> 
+<position name="posCMod_8_strip_9" unit="cm" x="-148.1" y="-234" z="214.55" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_10"/> 
-<position name="posCMod_8_strip_10" unit="cm" x="-148.1" y="-237.4" z="225.45" /> 
+<position name="posCMod_8_strip_10" unit="cm" x="-148.1" y="-234" z="225.45" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_11"/> 
-<position name="posCMod_8_strip_11" unit="cm" x="-148.1" y="-237.4" z="236.35" /> 
+<position name="posCMod_8_strip_11" unit="cm" x="-148.1" y="-234" z="236.35" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_12"/> 
-<position name="posCMod_8_strip_12" unit="cm" x="-148.1" y="-237.4" z="247.25" /> 
+<position name="posCMod_8_strip_12" unit="cm" x="-148.1" y="-234" z="247.25" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_13"/> 
-<position name="posCMod_8_strip_13" unit="cm" x="-148.1" y="-237.4" z="258.15" /> 
+<position name="posCMod_8_strip_13" unit="cm" x="-148.1" y="-234" z="258.15" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_14"/> 
-<position name="posCMod_8_strip_14" unit="cm" x="-148.1" y="-237.4" z="269.05" /> 
+<position name="posCMod_8_strip_14" unit="cm" x="-148.1" y="-234" z="269.05" /> 
 </physvol>
 <physvol>
 <volumeref ref="volModule_8_strip_15"/> 
-<position name="posCMod_8_strip_15" unit="cm" x="-148.1" y="-237.4" z="279.95" /> 
+<position name="posCMod_8_strip_15" unit="cm" x="-148.1" y="-234" z="279.95" /> 
 </physvol>
 <!-- Bottom Plane -->
 <!-- Feedthrough Side -->
