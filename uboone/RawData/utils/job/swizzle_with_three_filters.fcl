@@ -16,7 +16,7 @@ process_name: Swizzler
 services:
 {
   TFileService: { fileName: "daq_hist.root" }
-  Timing:       {}
+  TimeTracker:  {}
   RandomNumberGenerator: {} 
   LArSeedService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data

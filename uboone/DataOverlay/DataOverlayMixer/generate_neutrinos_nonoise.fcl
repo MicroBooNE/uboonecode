@@ -21,8 +21,8 @@ source : {
 services : {
 
   TFileService: { fileName: "Simulation_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 }     #default is one
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 }     #default is one
   RandomNumberGenerator: {}                     #ART native random number generator
   IChannelStatusService:          @local::microboone_channelstatus_service
   Geometry:                       @local::microboone_geo

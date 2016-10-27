@@ -8,7 +8,7 @@ process_name: MuCSDT
 services:
 {
   #TFileService: { fileName: "MuCSDT.root" }
-  Timing:       {}
+  TimeTracker:  {}
   message:      @local::standard_info
   @table::microboone_simulation_services
 }
