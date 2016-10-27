@@ -7,7 +7,7 @@ process_name: FEMemulator
 services:
 {
   TFileService: { fileName: "FEMemulator.root" }
-  Timing:       {}
+  TimeTracker:  {}
   ExptGeoHelperInterface: @local::microboone_geometry_helper
   Geometry:               @local::microboone_geo
   DetectorClocksService:            @local::microboone_detectorclocks

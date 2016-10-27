@@ -8,7 +8,7 @@ process_name: SPEcalibration
 services:
 {
   TFileService: { fileName: "SPEcalibration_output.root" }
-  Timing:       {}
+  TimeTracker:  {}
   ExptGeoHelperInterface: @local::microboone_geometry_helper
   Geometry:               @local::microboone_geo
   DetectorClocksService:            @local::microboone_detectorclocks
