@@ -10,7 +10,7 @@ process_name: MuCSReco
 services:
 {
   TFileService:               { fileName: "MuCSReco.root" }
-  Timing:                     {}
+  TimeTracker:                {}
   RandomNumberGenerator:      {} 
   message:                    @local::standard_info
 }

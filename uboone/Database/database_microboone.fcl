@@ -32,7 +32,6 @@ microboone_detpedestalservice:
 }
 
 
-
 microboone_channelstatus_provider:
 {
   DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg
@@ -48,6 +47,7 @@ microboone_channelstatus_service:
   ChannelStatusProvider: @local::microboone_channelstatus_provider
   FindNoisyChannels: false
 }
+
 
 microboone_electronlifetime_provider:
 {
@@ -69,5 +69,24 @@ microboone_electronlifetime_service:
   service_provider: UbooneElectronLifetimeService
   ElectronLifetimeProvider: @local::microboone_electronlifetime_provider
 }
-  
+
+microboone_pmtgain_provider:
+{
+    DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg   
+    
+    UseDB: true
+    UseFile: false
+    
+    DefaultGain:       20.0
+    DefaultGainErr:    0.02
+}
+microboone_pmtgain_provider.DatabaseRetrievalAlg.DBFolderName: "pmtgains_data"
+microboone_pmtgain_provider.DatabaseRetrievalAlg.DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+
+microboone_pmtgain_service:
+{
+  service_provider: SIOVPmtGainService
+  PmtGainProvider: @local::microboone_pmtgain_provider
+}  
+
 END_PROLOG

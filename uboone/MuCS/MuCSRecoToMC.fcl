@@ -13,7 +13,7 @@ process_name: MuCSRecoToMC
 services:
 {
   #TFileService:               { fileName: "MuCSReco.root" }
-  Timing:                     {}
+  TimeTracker:                {}
   RandomNumberGenerator:      {} 
   message:                    @local::standard_info
   @table::microboone_reco_mcc7_services

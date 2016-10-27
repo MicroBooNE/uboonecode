@@ -50,6 +50,8 @@ microboone_detsim_dark_services.LArFFT:                         @local::microboo
 microboone_detsim_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
 microboone_detsim_dark_services.DetPedestalService:            @local::microboone_detpedestalservice
 microboone_detsim_dark_services.ChannelStatusService:          @local::microboone_channelstatus_service
+microboone_detsim_dark_services.PmtGainService:    @local::microboone_pmtgain_service
+
 
 # Define microboone_simulation_dark ... (all) = (0) + (1) + (2)
 microboone_simulation_dark_services:                                @local::microboone_g4_dark_services
@@ -57,6 +59,7 @@ microboone_simulation_dark_services.LArFFT:                         @local::micr
 microboone_simulation_dark_services.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
 microboone_simulation_dark_services.DetPedestalService:            @local::microboone_detpedestalservice
 microboone_simulation_dark_services.ChannelStatusService:          @local::microboone_channelstatus_service
+microboone_simulation_dark_services.PmtGainService:    @local::microboone_pmtgain_service
 
 #
 # Define optical simulation included ones
@@ -114,5 +117,7 @@ microboone_simulation_services.UBOpReadoutMap:                  @local::microboo
 microboone_simulation_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
 microboone_simulation_services.DetPedestalService:             @local::microboone_detpedestalservice
 microboone_simulation_services.ChannelStatusService:           @local::microboone_channelstatus_service
+microboone_simulation_services.PmtGainService:     @local::microboone_pmtgain_service
+
 
 END_PROLOG

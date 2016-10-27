@@ -8,7 +8,7 @@ services:
 {
   #TFileService:               { fileName: "/uboone/data/users/kalousis/MuCS/merged/mucs_merger_hist_myrun_mygroup.root" }
   #Timing:                     {}
-  # SimpleMemoryCheck:          { ignoreTotal: 1 }
+  # MemoryTracker:          { ignoreTotal: 1 }
   #RandomNumberGenerator:      {} 
   message:                    @local::standard_info
   # FileCatalogMetadata:        @local::art_file_catalog_mc
