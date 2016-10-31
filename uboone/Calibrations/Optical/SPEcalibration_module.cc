@@ -276,7 +276,8 @@ void SPEcalibration::CloseoutTFile( TFile* file ) {
 }
 
 void SPEcalibration::endJob() {
-  CloseoutTFile( fOutfile );
+  if ( fHandleOwnTFile )
+    CloseoutTFile( fOutfile );
 }
 
 void SPEcalibration::SetupBranches() {
