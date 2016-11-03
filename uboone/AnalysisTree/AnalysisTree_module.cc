@@ -313,6 +313,7 @@
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "larreco/Deprecated/BezierTrack.h"
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
+#include "uboone/EventWeight/MCEventWeight.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/AnalysisBase/FlashMatch.h"
 #include "lardataobj/AnalysisBase/T0.h"
@@ -351,6 +352,9 @@ constexpr int kMaxTicks   = 9600;   //maximum number of ticks (time samples)
 constexpr int kMaxNDaughtersPerPFP = 100; //maximum number of daughters per PFParticle
 constexpr int kMaxNClustersPerPFP  = 100; //maximum number of clusters per PFParticle
 constexpr int kMaxNPFPNeutrinos    = 10;  //maximum number of reconstructed neutrino PFParticles
+
+constexpr int kMaxSysts = 1000;
+constexpr int kMaxWeights = 1000;
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -822,6 +826,11 @@ namespace microboone {
     Double_t     potbnb;             //pot per event (BNB E:TOR860)
     Double_t     potnumitgt;         //pot per event (NuMI E:TORTGT)
     Double_t     potnumi101;         //pot per event (NuMI E:TOR101)
+
+    std::vector<std::string> evtwgt_funcname;          // the name of the functions used
+    std::vector<std::vector<double>> evtwgt_weight;    // the weights (a vector for each function used)
+    std::vector<int> evtwgt_nweight;                   // number of weights for each function
+    Int_t evtwgt_nfunc;                                // number of functions used
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
@@ -2599,6 +2608,10 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   potnumitgt = 0;
   potnumi101 = 0;
 
+  evtwgt_nfunc = 0;
+  FillWith(evtwgt_funcname, "noname");
+  FillWith(evtwgt_nweight, 0);
+
   no_hits = 0;
   no_hits_stored = 0;  
   
@@ -3164,6 +3177,12 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("potbnb",&potbnb,"potbnb/D");
   CreateBranch("potnumitgt",&potnumitgt,"potnumitgt/D");
   CreateBranch("potnumi101",&potnumi101,"potnumi101/D");
+
+  CreateBranch("evtwgt_funcname",evtwgt_funcname);
+  CreateBranch("evtwgt_weight",evtwgt_weight);
+  CreateBranch("evtwgt_nweight",evtwgt_nweight);
+  CreateBranch("evtwgt_nfunc",&evtwgt_nfunc,"evtwgt_nfunc/I");
+
 
   if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
@@ -4050,6 +4069,38 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     }
   }
 
+  //*****************************
+  //
+  // EventWeight
+  //
+  //*****************************
+
+  art::Handle< std::vector< evwgh::MCEventWeight > > evtWeights;
+
+  if (evt.getByLabel("eventweight",evtWeights)) {
+    const std::vector< evwgh::MCEventWeight > * evtwgt_vec = evtWeights.product();
+
+    evwgh::MCEventWeight evtwgt = evtwgt_vec->at(0); // just for the first neutrino interaction
+    std::map<std::string, std::vector<double>> evtwgt_map = evtwgt.fWeight;
+    int countFunc = 0;
+    // loop over the map and save the name of the function and the vector of weights for each function
+    for(std::map<std::string, std::vector<double>>::iterator it = evtwgt_map.begin(); it != evtwgt_map.end(); ++it) {
+      fData->evtwgt_funcname.push_back(it->first);      // filling the name of the function
+      fData->evtwgt_weight.push_back(it->second);       // filling the vector with the weights
+      std::vector<double> mytemp = it->second;          // getting the vector of weights
+
+      std::cout<<" *************************************"<<std::endl;
+      std::cout<<" mytemp : "<<mytemp.size()<<std::endl;
+      for(unsigned int nweight =0; nweight < mytemp.size(); nweight++) std::cout<<" weight : "<<mytemp[nweight]<<std::endl;
+      std::cout<<" *************************************"<<std::endl;
+
+      fData->evtwgt_nweight.push_back(mytemp.size());   // filling the number of weights
+      countFunc++;
+    }
+    fData->evtwgt_nweight.resize(countFunc);
+    fData->evtwgt_funcname.resize(countFunc);
+    fData->evtwgt_nfunc = countFunc;                    // saving the number of functions used
+  }
 
   //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
   //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;

@@ -1,0 +1,105 @@
+BEGIN_PROLOG
+
+microboone_eventweight:
+{
+ module_type:	"EventWeight"
+  #weight_functions:   [ func1, bnbcorrection, piplus, piminus, kzero, kplus]
+  #weight_functions:   [ piplussplines]
+  weight_functions:   [ func1, bnbcorrection, piplussplines, piminus, kzero, kplus]
+
+ #throw exception if weight outside limits
+ min_weight: 0
+ max_weight: 100
+
+ genie_module_label:    generator	
+
+ func1: {
+ #this parameter set will be passed to the function
+ #type XXX should correspond to XXXWeightCalc.cxx in the function name
+ 	  type: FluxHist
+	  cv_hist_file: "/pnfs/uboone/persistent/users/rcastill/beamData/data/gsimple_flux.root"
+	  #cv_hist_file: "./gsimple_flux.root"
+	  rw_hist_file: "/pnfs/uboone/persistent/users/rcastill/beamData/data/redecay_flux.root"
+	  #rw_hist_file: "./redecay_flux.root"
+          random_seed: 1
+          mode: multisim
+	  number_of_multisims: 10
+ 	}
+ bnbcorrection: {
+ 
+	  type: FluxHist
+	  cv_hist_file: "/pnfs/uboone/persistent/users/rcastill/beamData/data/gsimple_flux.root"
+          #cv_hist_file: "./gsimple_flux.root"
+	  rw_hist_file: "/pnfs/uboone/persistent/users/rcastill/beamData/data/redecay_flux.root"
+          #rw_hist_file: "./redecay_flux.root"
+ 
+         random_seed: 1
+          mode: reweight
+	  number_of_multisims: 1
+ 	}
+	
+ piplus:{
+       type: PrimaryHadronSW
+#       random_seed: 1
+       parameter_list: ["piplus"]
+       parameter_sigma: 1
+       mode: multisim
+       number_of_multisims: 10
+       PrimaryHadronGeantCode: 211 # geant code for particle production on Be
+       ExternalData:"/pnfs/uboone/persistent/users/rcastill/beamData/ExternalData/BNBExternalData_uBooNE.root"
+}
+
+ piplussplines:{
+       type: PrimaryHadronSplines
+       parameter_list: ["piplus"]
+       parameter_sigma: 1
+       mode: multisim
+       number_of_multisims: 10
+       PrimaryHadronGeantCode: 211 # geant code for particle production on Be
+      # ExternalData:"/uboone/data/users/rcastill/EventWeightData/ExternalData/BNBExternalData_uBooNE_SplinesHARP.root"
+       ExternalData:"/pnfs/uboone/persistent/users/rcastill/beamData/ExternalData/BNBExternalData_uBooNE_SplinesHARP.root"
+       #ExternalData:"./BNBExternalData_uBooNE_SplinesHARP.root"
+}
+
+
+ piminus:{
+       type: PrimaryHadronSW
+#       random_seed: 1
+       parameter_list: ["piminus"]
+       parameter_sigma: 1
+       mode: multisim
+       number_of_multisims: 10
+       PrimaryHadronGeantCode: -211 # geant code for particle production on Be
+       #ExternalData:"/uboone/app/users/rcastill/uboone_v06_06_01/srcs/uboonecode/uboone/EventWeight/BNBExternalData_uBooNE.root"
+       ExternalData:"/pnfs/uboone/persistent/users/rcastill/beamData/ExternalData/BNBExternalData_uBooNE.root"
+       #ExternalData:"./BNBExternalData_uBooNE.root"
+}
+
+ kzero:{
+       type: PrimaryHadronSW
+#       random_seed: 1
+       parameter_list: ["kzero"]
+       parameter_sigma: 1
+       mode: multisim
+       number_of_multisims: 10
+       PrimaryHadronGeantCode: 310 # geant code for particle production on Be
+       ExternalData:"/pnfs/uboone/persistent/users/rcastill/beamData/ExternalData/BNBExternalData_uBooNE.root"
+#       ExternalData:"./BNBExternalData_uBooNE.root"
+}
+
+ kplus:{
+       type: PrimaryHadronFS
+#       random_seed: 1
+       parameter_list: ["kplus"]
+       parameter_sigma: 1
+ 
+       mode: multisim
+       number_of_multisims: 10
+       PrimaryHadronGeantCode: 321 # geant code for particle production on Be
+       ExternalData:"/pnfs/uboone/persistent/users/rcastill/beamData/ExternalData/BNBExternalData_uBooNE.root"
+       #ExternalData:"./BNBExternalData_uBooNE.root"
+}
+
+}	
+
+END_PROLOG
