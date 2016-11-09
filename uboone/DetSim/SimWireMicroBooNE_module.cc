@@ -285,8 +285,7 @@ namespace detsim {
         throw cet::exception(__FUNCTION__)<<"Invalid test wire channel: "<<fTestWire;
 
       std::vector<unsigned int> channels;
-      channels.reserve(geo->PlaneIDs().size());
-      for(auto const& plane_id : geo->PlaneIDs())
+      for(auto const& plane_id : geo->IteratePlaneIDs())
         channels.push_back(geo->PlaneWireToChannel(plane_id.Plane,fTestWire));
 
       double xyz[3] = { std::numeric_limits<double>::max() };
