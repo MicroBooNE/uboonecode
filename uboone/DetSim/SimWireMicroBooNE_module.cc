@@ -83,7 +83,7 @@ namespace detsim {
 
     void GenNoiseInTime(std::vector<float> &noise, double noise_factor) const;
     void GenNoiseInFreq(std::vector<float> &noise, double noise_factor) const;
-    void GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view);
+    void GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view, int chan);
     void MakeADCVec(std::vector<short>& adc, std::vector<float> const& noise, 
                     std::vector<double> const& charge, float ped_mean) const;
 
@@ -591,7 +591,7 @@ namespace detsim {
         else if(fGenNoise==2)
           GenNoiseInFreq(noisetmp, noise_factor);
 	else if(fGenNoise==3)
-	  GenNoisePostFilter(noisetmp, noise_factor, view);
+	  GenNoisePostFilter(noisetmp, noise_factor, view, chan);
       }
       
       //Add Noise to NoiseDist Histogram
@@ -807,7 +807,7 @@ namespace detsim {
     return fitpar[0] + ( fitpar[1] + fitpar[2] * x * waveform_size/2.) * TMath::Exp(-fitpar[3] * TMath::Power( x * waveform_size/2., fitpar[4]));
   }
   
-  void SimWireMicroBooNE::GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view)
+  void SimWireMicroBooNE::GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view, int chan)
   {
     // noise is a vector of size fNTicks, which is the number of ticks
     const size_t waveform_size = noise.size();
