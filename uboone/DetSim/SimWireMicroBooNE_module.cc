@@ -17,6 +17,8 @@
 #include <algorithm> // std::fill()
 #include <functional>
 #include <fstream>
+#include <random>
+#include <chrono>
 
 // CLHEP libraries
 #include "CLHEP/Random/RandFlat.h"
@@ -45,16 +47,16 @@
 #include "larsim/RandomUtils/LArSeedService.h"
 
 // LArSoft libraries
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
-#include "lardata/RawData/TriggerData.h"
-#include "larsim/Simulation/SimChannel.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
+#include "lardataobj/RawData/TriggerData.h"
+#include "lardataobj/Simulation/SimChannel.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "larsim/Simulation/sim.h"
+#include "lardataobj/Simulation/sim.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
@@ -851,10 +853,10 @@ namespace detsim {
   }
 
   //---------------------------------------------------------
-  Double_t PFNPoissonReal(const Double_t *k,  const Double_t *lambda) {
-    return TMath::Exp(k[0]*TMath::Log(lambda[0])-lambda[0]) / TMath::Gamma(k[0]+1.);
+  Double_t rpfn_f1(double waveform_size, Double_t fitpar[], Double_t x) {
+    return fitpar[0] + ( fitpar[1] + fitpar[2] * x * waveform_size/2.) * TMath::Exp(-fitpar[3] * TMath::Power( x * waveform_size/2., fitpar[4]));
   }
-
+  
   void SimWireMicroBooNE::GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view, int chan)
   {
     // noise is a vector of size fNTicks, which is the number of ticks
@@ -866,13 +868,7 @@ namespace detsim {
 	<< "GenNoisePostFilter encounters unknown view!" << std::endl;
 
     Double_t ShapingTime = _pfn_shaping_time_v[view];
-    Double_t MaxPoissArg = 100.;
 
-    
-    if(!_pfn_MyPoisson) _pfn_MyPoisson = new TF1("_pfn_MyPoisson",PFNPoissonReal,0.,MaxPoissArg,1);
-
-    if(!_pfn_f1) _pfn_f1 = new TF1("_pfn_f1",Form("[0]+([1]+[2]*x*%g/2.)*exp(-[3]*pow(x*%g/2.,[4]))",(double)waveform_size,(double)waveform_size),0.0,(double)waveform_size);   
- 
     if(_pfn_rho_v.empty()) _pfn_rho_v.resize(waveform_size);
     if(_pfn_value_re.empty()) _pfn_value_re.resize(waveform_size);
     if(_pfn_value_im.empty()) _pfn_value_im.resize(waveform_size);
@@ -890,7 +886,7 @@ namespace detsim {
       fitpar[4] = 1.35510e+00;
     }
     else if(ShapingTime==1.0) {
-      params[0] = 3.5125; //1us new
+      params[0] = 3.5125; //1us 
       fitpar[0] = 14.4;
       fitpar[1] = 35.1;
       fitpar[2] = 0.049;
@@ -899,14 +895,15 @@ namespace detsim {
     }else
       throw cet::exception("SimWireMicroBooNE") << "<<" << __FUNCTION__ << ">> not supported shaping time " << ShapingTime << std::endl;
 
-    _pfn_MyPoisson->SetParameters(params);
-    _pfn_f1->SetParameters(fitpar);
-
     Int_t n = waveform_size;
 
     TVirtualFFT::SetTransform(0);
-    //**Inverse FFT**//
-    TRandom3 rand(0);
+   
+    // seed gamma-distibuted random number with mean params[0]
+    // replacing continuous Poisson distribution from ROOT
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
+    std::gamma_distribution<double> distribution(params[0]);
 
     // For every tick...
     for(size_t i=0; i<waveform_size; i++){
@@ -918,18 +915,19 @@ namespace detsim {
         freq = (n-i)*2./n;
       }
 
-      _pfn_rho_v[i] = _pfn_f1->Eval(freq) * _pfn_MyPoisson->GetRandom()/params[0];
+      // Draw gamma-dstributed random number
+      gammaRand = distribution(generator); 
 
+      // Define FFT parameters
+      _pfn_rho_v[i] = rpfn_f1(waveform_size, fitpar, freq) * gammaRand /params[0];
       Double_t rho = _pfn_rho_v[i];
-
-      
       Double_t phi = gRandom->Uniform(0,1) * 2. * TMath::Pi();
-
 
       _pfn_value_re[i] = rho*cos(phi)/((double)waveform_size);
       _pfn_value_im[i] = rho*sin(phi)/((double)waveform_size);
     }
 
+    // Inverse FFT
     if(!_pfn_ifft) _pfn_ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     _pfn_ifft->SetPointsComplex(&_pfn_value_re[0],&_pfn_value_im[0]);
     _pfn_ifft->Transform();
@@ -945,10 +943,7 @@ namespace detsim {
     double wirelength = wire.HalfL() * 2;
     
     // Calculate RMS -----------------------------------------------------
-    // There are several ways of calculating rms. 
-    // Method 1 here is the raw RMS which does not remove any signal etc. 
-    // from the event.
-    // Method 2 uses the 16th, 50th, and 84th percentiles to calculate the RMS.
+    // Calculating using the 16th, 50th, and 84th percentiles.
     // Because the signal is expected to be above the 84th percentile, this 
     // effectively vetos the signal.
   
@@ -956,25 +951,10 @@ namespace detsim {
     Double_t max = fb->GetMaximum();	 
     TH1F* h_rms = new TH1F("h_rms", "h_rms", Int_t(10*(max-min+1)), min, max+1);
 
-    // Method 1 -----------------------------------------------------------
-    double irms = 0;
-    //double ithrms;
     for(size_t i=0; i < waveform_size; ++i){
-    
-      //ithrms = sqrt(std::pow(fb->GetBinContent(i+1),2));
-      //h_rms->Fill(ithrms);
-      irms+= std::pow(fb->GetBinContent(i+1),2);
       h_rms->Fill(fb->GetBinContent(i+1));
     }
-    irms = std::sqrt(irms/waveform_size);
     
-    // std::cout << "RMS using standard method is: " << irms << std::endl;
-
-    // used in calculation of baseline, now hardcoded
-    // rms.push_back(std::move(irms));
-    //----------------------------------------------------------------------
-   
-    // Method 2 ------------------------------------------------------------ 
     double par[3];
     double rms_quantilemethod = 0.0;
     if (h_rms->GetSum()>0){
@@ -989,27 +969,17 @@ namespace detsim {
     
     rms_quantilemethod = sqrt((pow(par[1]-par[0],2)+pow(par[2]-par[1],2))/2.);
     }
-    //rms.push_back(std::move(rms_quantilemethod));
-    //std::cout << "RMS using the quantile method is: " << rms_quantilemethod << std::endl;
+    
+    // Used for calculation of baseline
+    // rms.push_back(std::move(rms_quantilemethod));
 
-
-    // ---------------------------------------------------------------------
-
-    // baseline found by averaging RMS over 1000 waveforms, and hardcoded for speed.
-    // baseline without removing signal waveforms: 1.88567
+    // Scaling noise RMS with wire length dependance
     double baseline = 1.79349;
-    double scalefactor = (rms_quantilemethod/baseline)*(1.020+0.0018*(wirelength));
+    double scalefactor = (rms_quantilemethod/baseline)*(1.019+0.00173*(wirelength));
     for(size_t i=0; i<waveform_size; ++i) {
       noise[i] = fb->GetBinContent(i+1)*scalefactor;
     }
-
-    ////////////////////////////////////////////////////////////////
-    /*
-    double average=0;
-    for(auto const& v : noise) average += v;
-    average /= ((double)waveform_size);
-    std::cout<<"\033[93m Average ADC: \033[00m" << average << std::endl;
-    */
+    
     delete fb;
     delete h_rms;
   }
