@@ -47,16 +47,25 @@
 #include "larsim/RandomUtils/LArSeedService.h"
 
 // LArSoft libraries
-#include "lardataobj/RawData/RawDigit.h"
-#include "lardataobj/RawData/raw.h"
-#include "lardataobj/RawData/TriggerData.h"
-#include "lardataobj/Simulation/SimChannel.h"
+// v05_11_01 dependencies
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/TriggerData.h"
+#include "larsim/Simulation/SimChannel.h"
+#include "larsim/Simulation/sim.h"
+
+
+// LArSoft libraries
+// #include "lardataobj/RawData/RawDigit.h"
+// #include "lardataobj/RawData/raw.h"
+// #include "lardataobj/RawData/TriggerData.h"
+// #include "lardataobj/Simulation/SimChannel.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-#include "lardataobj/Simulation/sim.h"
+//#include "lardataobj/Simulation/sim.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
@@ -143,6 +152,7 @@ namespace detsim {
     //
     // Needed for post-filter noise (pfn) generator by Jyoti 
     //
+
     std::vector<double> _pfn_shaping_time_v;
     TF1  *_pfn_f1;
     TF1  *_pfn_MyPoisson;
@@ -151,11 +161,7 @@ namespace detsim {
     std::vector<double> _pfn_value_re;
     std::vector<double> _pfn_value_im;
 
-    //
-    // Needed for calculating Noise baseline
-    //
-    
-    //std::vector<double> rms;
+    //std::vector<double> rms;  //For calculating baseline
 
   }; // class SimWireMicroBooNE
 
@@ -713,8 +719,10 @@ namespace detsim {
       // and used on the next loop.
       MakeADCVec(adcvec, noisetmp, chargeWork, ped_mean);
       raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
-      rd.SetPedestal(ped_mean);
-      digcol->push_back(std::move(rd)); // we do move the raw digit copy, though
+      rd.SetPedestal(ped_mean); 
+    
+
+        digcol->push_back(std::move(rd)); // we do move the raw digit copy, though
 
     }// end of 2nd loop over channels
 
@@ -730,13 +738,12 @@ namespace detsim {
 
       double baselinerms = total/1000;
 
-      std::cout << "\nmn\n\n\n\n\n The average RMS is:" << baselinerms << "\n\n\n\n\n\n\n" << std::endl;
-    
-    */
+      std::cout << "\n\n\n\n\n\n The average RMS is:" << baselinerms << "\n\n\n\n\n\n\n" << std::endl;
+    */      
     evt.put(std::move(digcol));
     return;
   }
-
+  
 
   //-------------------------------------------------
   void SimWireMicroBooNE::MakeADCVec(std::vector<short>& adcvec, std::vector<float> const& noisevec, 
@@ -950,6 +957,7 @@ namespace detsim {
     Double_t min = fb->GetMinimum();
     Double_t max = fb->GetMaximum();	 
     TH1F* h_rms = new TH1F("h_rms", "h_rms", Int_t(10*(max-min+1)), min, max+1);
+    
 
     for(size_t i=0; i < waveform_size; ++i){
       h_rms->Fill(fb->GetBinContent(i+1));
@@ -958,16 +966,16 @@ namespace detsim {
     double par[3];
     double rms_quantilemethod = 0.0;
     if (h_rms->GetSum()>0){
-    double xq = 0.5-0.34;
-    h_rms->GetQuantiles(1, &par[0], &xq);
+      double xq = 0.5-0.34;
+      h_rms->GetQuantiles(1, &par[0], &xq);
     
-    xq = 0.5;
-    h_rms->GetQuantiles(1, &par[1], &xq);
+      xq = 0.5;
+      h_rms->GetQuantiles(1, &par[1], &xq);
 
-    xq = 0.5+0.34;
-    h_rms->GetQuantiles(1, &par[2], &xq);
+      xq = 0.5+0.34;
+      h_rms->GetQuantiles(1, &par[2], &xq);
     
-    rms_quantilemethod = sqrt((pow(par[1]-par[0],2)+pow(par[2]-par[1],2))/2.);
+      rms_quantilemethod = sqrt((pow(par[1]-par[0],2)+pow(par[2]-par[1],2))/2.);
     }
     
     // Used for calculation of baseline
@@ -979,9 +987,10 @@ namespace detsim {
     for(size_t i=0; i<waveform_size; ++i) {
       noise[i] = fb->GetBinContent(i+1)*scalefactor;
     }
-    
+
     delete fb;
     delete h_rms;
   }
   
 }
+
