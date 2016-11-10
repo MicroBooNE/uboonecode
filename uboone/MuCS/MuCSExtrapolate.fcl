@@ -8,7 +8,7 @@ process_name: MuCSExtrapolate
 services:
 {
   TFileService:               { fileName: "MuCSExtrapolate.root" }
-  Timing:                     {}
+  TimeTracker:                {}
   message:                    @local::standard_info
 }
 

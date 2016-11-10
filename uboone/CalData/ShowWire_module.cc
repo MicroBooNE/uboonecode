@@ -9,22 +9,22 @@
 
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Core/FindOneP.h"
+#include "canvas/Persistency/Common/FindOneP.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
-#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::SigType_t
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RawData/RawDigit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RawData/RawDigit.h"
 
 #include "TH1.h"
 #include "TH2.h"

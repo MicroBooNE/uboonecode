@@ -127,8 +127,8 @@ microboone_reco_mcc7_producers:
   pandoraNuKHit:               @local::microboone_track3Dkalmanhit
 
   ### pandora cosmic kalmanhit
-  pandoraCosmicPMA:          @local::microboone_pmalgtrackmaker
-  pandoraNuPMA:              @local::microboone_pmalgtrackmaker
+  pandoraCosmicPMA:          @local::microboone_pmalgtrajfitter
+  pandoraNuPMA:              @local::microboone_pmalgtrajfitter
 
   ### pandora cosmic pfparticle
   pandoraCosmicKHitPFPart:     @local::microboone_cosmicpfparticletagger
@@ -346,8 +346,9 @@ microboone_reco_mcc7_producers.caldata.DigitModuleLabel:                        
 microboone_reco_mcc7_producers.caldata.DodQdxCalib:                              false
 
 microboone_reco_mcc7_producers.gaushit.CalDataModuleLabel:                       "caldata"
-microboone_reco_mcc7_producers.gaushit.MinSig:                                   [3.8, 3.8, 4.3]
+microboone_reco_mcc7_producers.gaushit.MinSig:                                   [2.5, 2.5, 2.8]
 microboone_reco_mcc7_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
+microboone_reco_mcc7_producers.gaushit.MaxMultiHit:                              4
 #microboone_reco_mcc7_producers.gaushit.FilterHits:                               true
 
 # Fuzzy Cluster related
@@ -456,9 +457,7 @@ microboone_reco_mcc7_producers.pandoraCosmicKHit.ClusterModuleLabel:            
 microboone_reco_mcc7_producers.pandoraCosmicKHit.PFParticleModuleLabel:          "pandoraCosmic"
 
 microboone_reco_mcc7_producers.pandoraCosmicPMA.HitModuleLabel:                  "gaushit"
-microboone_reco_mcc7_producers.pandoraCosmicPMA.ClusterModuleLabel:              "pandoraCosmic"
-microboone_reco_mcc7_producers.pandoraCosmicPMA.PFParticleModuleLabel:           "pandoraCosmic"
-microboone_reco_mcc7_producers.pandoraCosmicPMA.CluMatchingAlg:                  3
+microboone_reco_mcc7_producers.pandoraCosmicPMA.PfpModuleLabel:              "pandoraCosmic"
 
 microboone_reco_mcc7_producers.pandoraCosmicKHittag.TrackModuleLabel:            "pandoraCosmicKHit"
 
@@ -502,11 +501,7 @@ microboone_reco_mcc7_producers.pandoraNuKHit.ClusterModuleLabel:                
 microboone_reco_mcc7_producers.pandoraNuKHit.HitFinderModuleLabel:               "pandoraCosmicKHitRemoval"
 
 microboone_reco_mcc7_producers.pandoraNuPMA.HitModuleLabel:                      "pandoraCosmicKHitRemoval"
-microboone_reco_mcc7_producers.pandoraNuPMA.ClusterModuleLabel:                  "pandoraNu"
-microboone_reco_mcc7_producers.pandoraNuPMA.PFParticleModuleLabel:               "pandoraNu"
-microboone_reco_mcc7_producers.pandoraNuPMA.CluMatchingAlg:                      3
-microboone_reco_mcc7_producers.pandoraNuPMA.FlipDownward:                        false
-microboone_reco_mcc7_producers.pandoraNuPMA.FlipToBeam:                          true
+microboone_reco_mcc7_producers.pandoraNuPMA.PfpModuleLabel:                  "pandoraNu"
 
 microboone_reco_mcc7_producers.pandoraNutag.TrackModuleLabel:                    "pandoraNu"
 
@@ -541,9 +536,7 @@ microboone_reco_mcc7_producers.showerrecopandora.InputProducer:                 
 
 microboone_reco_mcc7_producers.pmtrack.ClusterModuleLabel:                       "linecluster"
 microboone_reco_mcc7_producers.pmtrack.HitModuleLabel:                           "linecluster"
-microboone_reco_mcc7_producers.pmtrack.RunVertexing:                             true
-microboone_reco_mcc7_producers.pmtrack.FlipToBeam:                               true
-microboone_reco_mcc7_producers.pmtrack.StitchBetweenTPCs:                        false
+
 microboone_reco_mcc7_producers.pmtracktag.TrackModuleLabel:                      "pmtrack"
 microboone_reco_mcc7_producers.pmtrackcalo.TrackModuleLabel:                     "pmtrack"
 microboone_reco_mcc7_producers.pmtrackcalo.SpacePointModuleLabel:                "pmtrack"

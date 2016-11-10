@@ -14,8 +14,8 @@
 
 // LArSoft libraries
 #include "test/Geometry/geometry_unit_test_uboone.h"
-#include "test/Geometry/boost_unit_test_base.h"
 #include "test/Geometry/GeometryIteratorTestAlg.h"
+#include "larcore/TestUtils/boost_unit_test_base.h"
 #include "larcore/Geometry/ChannelMapStandardAlg.h"
 
 //------------------------------------------------------------------------------
@@ -65,7 +65,7 @@ class MicroBooNEGeometryIteratorTestFixture:
 
 BOOST_FIXTURE_TEST_SUITE
   (GeometryIteratorsMicroBooNE, MicroBooNEGeometryIteratorTestFixture)
-// BOOST_GLOBAL_FIXTURE(MicroBooNEGeometryIteratorTestFixture)
+// BOOST_GLOBAL_FIXTURE(MicroBooNEGeometryIteratorTestFixture);
 
 
 BOOST_AUTO_TEST_CASE( AllTests )

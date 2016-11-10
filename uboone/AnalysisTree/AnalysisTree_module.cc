@@ -273,48 +273,50 @@
 #include "art/Framework/Principal/SubRun.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/View.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
-#include "art/Framework/Core/FindMany.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Persistency/Common/FindMany.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "larcore/Geometry/Geometry.h"
-#include "SimulationBase/MCTruth.h"
-#include "lardata/MCBase/MCShower.h"
-#include "lardata/MCBase/MCTrack.h"
-#include "lardata/MCBase/MCStep.h"
-#include "SimulationBase/MCFlux.h"
-#include "larsim/Simulation/SimChannel.h"
-#include "larsim/Simulation/AuxDetSimChannel.h"
-#include "lardata/AnalysisBase/Calorimetry.h"
-#include "lardata/AnalysisBase/ParticleID.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/TriggerData.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "lardataobj/MCBase/MCShower.h"
+#include "lardataobj/MCBase/MCTrack.h"
+#include "lardataobj/MCBase/MCStep.h"
+#include "nusimdata/SimulationBase/MCFlux.h"
+#include "lardataobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/AuxDetSimChannel.h"
+#include "lardataobj/AnalysisBase/Calorimetry.h"
+#include "lardataobj/AnalysisBase/ParticleID.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
+#include "lardataobj/RawData/BeamInfo.h"
+#include "lardataobj/RawData/TriggerData.h"
 #include "lardata/Utilities/AssociationUtil.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "larcore/SummaryData/POTSummary.h"
+#include "larcoreobj/SummaryData/POTSummary.h"
 #include "larsim/MCCheater/BackTracker.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/Shower.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/EndPoint2D.h"
-#include "lardata/RecoBase/Vertex.h"
-#include "lardata/RecoBase/OpFlash.h"
-#include "lardata/RecoBase/PFParticle.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/RecoObjects/BezierTrack.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/EndPoint2D.h"
+#include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/OpFlash.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
+#include "larreco/Deprecated/BezierTrack.h"
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
-#include "lardata/AnalysisBase/CosmicTag.h"
-#include "lardata/AnalysisBase/FlashMatch.h"
-#include "lardata/AnalysisBase/T0.h"
+#include "uboone/EventWeight/MCEventWeight.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
+#include "lardataobj/AnalysisBase/FlashMatch.h"
+#include "lardataobj/AnalysisBase/T0.h"
 
 #include "larpandora/LArPandoraInterface/LArPandoraHelper.h"
 
@@ -345,10 +347,14 @@ constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
 constexpr int kMaxShowerHits = 10000;  //maximum number of hits on a shower
 constexpr int kMaxTruth      = 10;     //maximum number of neutrino truth interactions
 constexpr int kMaxClusters   = 1000;   //maximum number of clusters;
+constexpr int kMaxTicks   = 9600;   //maximum number of ticks (time samples)
 
 constexpr int kMaxNDaughtersPerPFP = 100; //maximum number of daughters per PFParticle
 constexpr int kMaxNClustersPerPFP  = 100; //maximum number of clusters per PFParticle
 constexpr int kMaxNPFPNeutrinos    = 10;  //maximum number of reconstructed neutrino PFParticles
+
+constexpr int kMaxSysts = 1000;
+constexpr int kMaxWeights = 1000;
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -410,6 +416,69 @@ namespace microboone {
       
     }; // BoxedArray
     
+    /// Raw Waveform results
+    /// 
+    /// Can connect to a tree, clear its fields and resize its data.
+    class RawDataStruct {
+    public:
+      template <typename T>
+      using RawData_t = std::vector<T>;
+      template <typename T>
+      using RawWaveFormData_t = std::vector<BoxedArray<T[kMaxTicks]>>;
+      
+      size_t MaxRawChannels; ///< maximum number of storable 
+      
+      Short_t  raw_nchannels;             //number of raw channels
+      RawData_t<Short_t>            raw_channelId;
+      RawWaveFormData_t<Short_t>    raw_wf; 
+      
+      /// Creates a RawData data structure allowing up to maxRawChannels Raw channels
+      RawDataStruct(size_t maxRawChannels = 0):
+        MaxRawChannels(maxRawChannels) { Clear(); }
+      
+      void Clear();
+      void SetMaxRawChannels(size_t maxRawChannels)
+      { MaxRawChannels = maxRawChannels; Resize(MaxRawChannels); }
+      void Resize(size_t raw_nChannels);
+      void SetAddresses(TTree* pTree);
+      
+      size_t GetMaxRawChannels() const { return MaxRawChannels; }
+      size_t GetMaxTicksPerRawChannel(int /* irawChannel */ = 0) const
+      { return (size_t) kMaxTicks; }    
+    }; // class RawDataStruct
+    
+    
+    /// Calibration Waveform results
+    /// 
+    /// Can connect to a tree, clear its fields and resize its data.
+    class CalibDataStruct {
+    public:
+      template <typename T>
+      using CalibData_t = std::vector<T>;
+      template <typename T>
+      using CalibWaveFormData_t = std::vector<BoxedArray<T[kMaxTicks]>>;
+      
+      size_t MaxCalibChannels; ///< maximum number of storable 
+      
+      Short_t  calib_nchannels;        //number of calibration channels
+      CalibData_t<Short_t>            calib_channelId;
+      CalibWaveFormData_t<Short_t>    calib_wf; 
+      
+      /// Creates a CalibData data structure allowing up to maxCalibChannels Calib channels
+      CalibDataStruct(size_t maxCalibChannels = 0):
+        MaxCalibChannels(maxCalibChannels) { Clear(); }
+      
+      void Clear();
+      void SetMaxCalibChannels(size_t maxCalibChannels)
+      { MaxCalibChannels = maxCalibChannels; Resize(MaxCalibChannels); }
+      void Resize(size_t calib_nChannels);
+      void SetAddresses(TTree* pTree);
+      
+      size_t GetMaxCalibChannels() const { return MaxCalibChannels; }
+      size_t GetMaxTicksPerCalibChannel(int /* icalibChannel */ = 0) const
+      { return (size_t) kMaxTicks; }    
+    }; // class CalibDataStruct
+    
     /// Tracker algorithm result
     /// 
     /// Can connect to a tree, clear its fields and resize its data.
@@ -468,6 +537,7 @@ namespace microboone {
       TrackData_t<Float_t> trkendy;       // ending y position.
       TrackData_t<Float_t> trkendz;       // ending z position.
       TrackData_t<Float_t> trkendd;       // ending distance to boundary.
+      TrackData_t<Float_t> trkACpierceT0;   // t0 per track from anode or cathode piercing tracks (in ns)     
       TrackData_t<Float_t> trkflashT0;   // t0 per track from matching tracks to flashes (in ns)
       TrackData_t<Float_t> trktrueT0;    // t0 per track from truth information (in ns)
       TrackData_t<Float_t> trkpurity;    // track purity based on hit information
@@ -548,6 +618,7 @@ namespace microboone {
 
       size_t GetMaxVertices() const { return MaxVertices; }
     }; // class VertexDataStruct 
+
 
 
     /// Shower algorithm result
@@ -697,8 +768,12 @@ namespace microboone {
 	tdMCtrk  = 0x400,
 	tdCluster = 0x800,
 	tdRawDigit = 0x1000,
-        tdPandoraNuVertex = 0x2000,
-         tdPFParticle = 0x4000,
+	tdCalWire  = 0x2000,
+	tdSimChannel = 0x4000,
+	tdRawWaveForm = 0x8000,
+	tdCalibWaveForm = 0x10000,
+        tdPandoraNuVertex = 0x20000,
+        tdPFParticle = 0x40000,
 	tdDefault = 0
 	}; // DataBits_t
     
@@ -752,6 +827,11 @@ namespace microboone {
     Double_t     potnumitgt;         //pot per event (NuMI E:TORTGT)
     Double_t     potnumi101;         //pot per event (NuMI E:TOR101)
 
+    std::vector<std::string> evtwgt_funcname;          // the name of the functions used
+    std::vector<std::vector<double>> evtwgt_weight;    // the weights (a vector for each function used)
+    std::vector<int> evtwgt_nweight;                   // number of weights for each function
+    Int_t evtwgt_nfunc;                                // number of functions used
+
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
     Int_t    no_hits_stored;                  //number of hits actually stored in the tree    
@@ -774,11 +854,26 @@ namespace microboone {
     Short_t  hit_clusterid[kMaxHits];  //is this hit associated with a reco cluster?
     Short_t  hit_clusterKey[kMaxHits];  //is this hit associated with a reco cluster, if so associate a unique cluster key ID?
 
-    Float_t rawD_ph[kMaxHits];  
-    Float_t rawD_peakT[kMaxHits];  
-    Float_t rawD_charge[kMaxHits];  
-    Float_t rawD_fwhh[kMaxHits];  
+    //RawDigit information
+    Float_t  rawD_ph[kMaxHits];  
+    Int_t    rawD_peakT[kMaxHits];  
+    Float_t  rawD_charge[kMaxHits];  
+    Float_t  rawD_fwhh[kMaxHits];  
     Double_t rawD_rms[kMaxHits]; 
+    
+    //CalWire information
+    Float_t  calwire_ph[kMaxHits];  
+    Int_t    calwire_peakT[kMaxHits];  
+    Float_t  calwire_charge[kMaxHits];  
+    Float_t  calwire_fwhh[kMaxHits];  
+    Double_t calwire_rms[kMaxHits]; 
+    
+    //SimChannel information
+    Float_t  sim_ph[kMaxHits];  
+    Int_t    sim_tdc[kMaxHits];  
+    Float_t  sim_charge[kMaxHits];  
+    Float_t  sim_fwhh[kMaxHits];  
+    Double_t sim_rms[kMaxHits]; 
 
     //Pandora Nu Vertex information
     Short_t nnuvtx;
@@ -836,6 +931,12 @@ namespace microboone {
 
     // PFParticle information
     PFParticleDataStruct PFParticleData;
+    
+    // Raw Waveform information
+    RawDataStruct RawData;
+    
+    // Calibration Waveform information
+    CalibDataStruct CalibData;
 
     //mctruth information
     Int_t     mcevts_truth;    //number of neutrino Int_teractions in the spill
@@ -1006,7 +1107,7 @@ namespace microboone {
     std::vector<Int_t>    process_primary;
     std::vector<std::string> processname;
     std::vector<Int_t>    MergedId; //geant track segments, which belong to the same particle, get the same
-    std::vector<Int_t>    origin;   ////0: unknown, 1: cosmic, 2: neutrino, 3: supernova, 4: singles 
+    std::vector<Int_t>    origin;   ////0: unknown, 1: neutrino, 2: cosmic, 3: supernova, 4: singles 
     std::vector<Int_t>    MCTruthIndex; //this geant particle comes from the neutrino interaction of the _truth variables with this index
 
     //MC Shower information
@@ -1145,6 +1246,18 @@ namespace microboone {
 
     /// Returns whether we have Hit data
     bool hasRawDigitInfo() const { return bits & tdRawDigit; }
+    
+    /// Returns whether we have Sim Channel data
+    bool hasSimChannelInfo() const { return bits & tdSimChannel; }
+    
+    /// Returns whether we have CalWire data
+    bool hasCalWireInfo() const { return bits & tdCalWire; }
+    
+    /// Returns whether we have Raw WaveForm data
+    bool hasRawWaveFormInfo() const { return bits & tdRawWaveForm; }
+
+    /// Returns whether we have Calibration WaveForm data
+    bool hasCalibWaveFormInfo() const { return bits & tdCalibWaveForm; }
 
     /// Returns whether we have Track data
     bool hasTrackInfo() const { return bits & tdTrack; }
@@ -1199,6 +1312,16 @@ namespace microboone {
       { return PFParticleData; }
     const PFParticleDataStruct& GetPFParticleData() const
       { return PFParticleData; }
+      
+    RawDataStruct& GetRawData()
+      { return RawData; }
+    const RawDataStruct& GetRawData() const
+      { return RawData; }  
+      
+    CalibDataStruct& GetCalibData()
+      { return CalibData; }
+    const CalibDataStruct& GetCalibData() const
+      { return CalibData; }    
     
     /// Clear all fields if this object (not the tracker algorithm data)
     void ClearLocalData();
@@ -1426,6 +1549,8 @@ namespace microboone {
     std::vector<std::string> fShowerModuleLabel;
     std::vector<std::string> fCalorimetryModuleLabel;
     std::vector<std::string> fParticleIDModuleLabel;
+    std::vector<std::string> fT0FinderLabel;   
+    std::vector<std::string> fT0RecoAnodeCathodePiercingLabel; 
     std::vector<std::string> fFlashT0FinderLabel;
     std::vector<std::string> fMCT0FinderLabel;
     std::string fPOTModuleLabel;
@@ -1439,6 +1564,10 @@ namespace microboone {
     bool fSaveMCTrackInfo; ///whether to extract and save MC Track information
     bool fSaveHitInfo; ///whether to extract and save Hit information
     bool fSaveRawDigitInfo; ///whether to extract and save Raw Digit information
+    bool fSaveCalWireInfo; ///whether to extract and save CalWire information
+    bool fSaveSimChannelInfo; ///whether to extract and save SimChannel information
+    bool fSaveRawWaveFormInfo; ///whether to extract and save Raw WaveForm information    
+    bool fSaveCalibWaveFormInfo; ///whether to extract and save Calib WaveForm information    
     bool fSaveTrackInfo; ///whether to extract and save Track information
     bool fSaveVertexInfo; ///whether to extract and save Vertex information
     bool fSaveClusterInfo;  ///whether to extract and save Cluster information
@@ -1456,6 +1585,10 @@ namespace microboone {
     bool isCosmics;      ///< if it contains cosmics
     bool fSaveCaloCosmics; ///< save calorimetry information for cosmics
     float fG4minE;         ///< Energy threshold to save g4 particle info
+    float fRawDigitROI;    ///< Define ROI +/-sigma for raw digit range
+    float fCalWireROI;     ///< Define ROI +/-sigma for calibrated signal range
+    float fRawDigitThresh; ///< Define Raw digit threshold in terms of % of pulse height for raw digit acceptance 
+    float fCalWireThresh;  ///< Define cal wire threshold in terms of % of pulse height for cal wire acceptance 
     /// Returns the number of trackers configured
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
 
@@ -1481,6 +1614,10 @@ namespace microboone {
 	fData->SetBits(AnalysisTreeDataStruct::tdMCtrk,  !fSaveMCTrackInfo); 
 	fData->SetBits(AnalysisTreeDataStruct::tdHit,    !fSaveHitInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdRawDigit,    !fSaveRawDigitInfo);
+	fData->SetBits(AnalysisTreeDataStruct::tdCalWire,    !fSaveCalWireInfo);
+	fData->SetBits(AnalysisTreeDataStruct::tdSimChannel,    !fSaveSimChannelInfo);
+	fData->SetBits(AnalysisTreeDataStruct::tdRawWaveForm,    !fSaveRawWaveFormInfo);
+	fData->SetBits(AnalysisTreeDataStruct::tdCalibWaveForm,    !fSaveCalibWaveFormInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdFlash,  !fSaveFlashInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdShower, !fSaveShowerInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdCluster,!fSaveClusterInfo);
@@ -1555,6 +1692,22 @@ namespace microboone {
       fData->GetPFParticleData().SetAddresses(fTree);
     } // SetPFParticleAddress()
     
+    /// Sets the addresses of the tree branch of the RawData,
+    /// creating it if missing
+    void SetRawAddress()
+    {
+      CheckData(__func__); CheckTree(__func__);
+      fData->GetRawData().SetAddresses(fTree);
+    } // SetRawAddress()
+    
+     /// Sets the addresses of the tree branch of the CalibData,
+    /// creating it if missing
+    void SetCalibAddress()
+    {
+      CheckData(__func__); CheckTree(__func__);
+      fData->GetCalibData().SetAddresses(fTree);
+    } // SetCalibAddress()
+    
     /// Create the output tree and the data structures, if needed
     void CreateTree(bool bClearData = false);
     
@@ -1618,6 +1771,108 @@ namespace { // local namespace
 
 } // local namespace
 
+//------------------------------------------------------------------------------
+//---  AnalysisTreeDataStruct::RawDataStruct
+//---
+
+void microboone::AnalysisTreeDataStruct::RawDataStruct::Resize(size_t raw_nChannels)
+{
+  MaxRawChannels = raw_nChannels;
+  
+  raw_channelId.resize(MaxRawChannels);
+  raw_wf.resize(MaxRawChannels);
+} // microboone::AnalysisTreeDataStruct::RawDataStruct::Resize()
+
+void microboone::AnalysisTreeDataStruct::RawDataStruct::Clear() {
+  Resize(MaxRawChannels);
+  raw_nchannels = 0;
+  
+  FillWith(raw_channelId        , -9999  );
+  
+  for (size_t irawch = 0; irawch < MaxRawChannels; ++irawch){
+    
+    // the following are BoxedArray's;
+    // their iterators traverse all the array dimensions
+    FillWith(raw_wf[irawch]      , -9999);
+  } // for Raw Channel
+  
+} // microboone::AnalysisTreeDataStruct::RawDataStruct::Clear()
+
+void microboone::AnalysisTreeDataStruct::RawDataStruct::SetAddresses(
+								       TTree* pTree
+								       ) {
+  if (MaxRawChannels == 0) return; // no raw channels, no tree!
+  
+  microboone::AnalysisTreeDataStruct::BranchCreator CreateBranch(pTree);
+  AutoResettingStringSteam sstr;
+  sstr() << kMaxTicks;
+  std::string MaxRawTicksIndexStr("[" + sstr.str() + "]");
+  
+  std::string BranchName;
+
+  BranchName = "raw_nchannels";
+  CreateBranch(BranchName, &raw_nchannels, BranchName + "/S");
+  std::string rawnChannelsIndexStr = "[" + BranchName + "]";
+
+  BranchName = "raw_channelId";
+  CreateBranch(BranchName, raw_channelId, BranchName + rawnChannelsIndexStr + "/S"); 
+  
+  BranchName = "raw_wf";
+  CreateBranch(BranchName, raw_wf, BranchName + rawnChannelsIndexStr + MaxRawTicksIndexStr + "/S");  
+  
+} // microboone::AnalysisTreeDataStruct::RawDataStruct::SetAddresses()
+
+//------------------------------------------------------------------------------
+//---  AnalysisTreeDataStruct::CalibDataStruct
+//---
+
+void microboone::AnalysisTreeDataStruct::CalibDataStruct::Resize(size_t calib_nChannels)
+{
+  MaxCalibChannels = calib_nChannels;
+  
+  calib_channelId.resize(MaxCalibChannels);
+  calib_wf.resize(MaxCalibChannels);
+} // microboone::AnalysisTreeDataStruct::CalibDataStruct::Resize()
+
+void microboone::AnalysisTreeDataStruct::CalibDataStruct::Clear() {
+  Resize(MaxCalibChannels);
+  calib_nchannels = 0;
+  
+  FillWith(calib_channelId        , -9999  );
+  
+  for (size_t icalch = 0; icalch < MaxCalibChannels; ++icalch){
+    
+    // the following are BoxedArray's;
+    // their iterators traverse all the array dimensions
+    FillWith(calib_wf[icalch]      , -9999);
+  } // for Calib Channel
+  
+} // microboone::AnalysisTreeDataStruct::CalibDataStruct::Clear()
+
+void microboone::AnalysisTreeDataStruct::CalibDataStruct::SetAddresses(
+								       TTree* pTree
+								       ) {
+  if (MaxCalibChannels == 0) return; // no calib channels, no tree!
+  
+  microboone::AnalysisTreeDataStruct::BranchCreator CreateBranch(pTree);
+  AutoResettingStringSteam sstr;
+  sstr() << kMaxTicks;
+  std::string MaxCalibTicksIndexStr("[" + sstr.str() + "]");
+  
+  std::string BranchName;
+
+  BranchName = "calib_nchannels";
+  CreateBranch(BranchName, &calib_nchannels, BranchName + "/S");
+  std::string calibnChannelsIndexStr = "[" + BranchName + "]";
+
+  BranchName = "calib_channelId";
+  CreateBranch(BranchName, calib_channelId, BranchName + calibnChannelsIndexStr + "/S"); 
+  
+  BranchName = "calib_wf";
+  CreateBranch(BranchName, calib_wf, BranchName + calibnChannelsIndexStr + MaxCalibTicksIndexStr + "/S");  
+  
+} // microboone::AnalysisTreeDataStruct::CalibDataStruct::SetAddresses()
+
 
 //------------------------------------------------------------------------------
 //---  AnalysisTreeDataStruct::TrackDataStruct
@@ -1645,6 +1900,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Resize(size_t nTracks)
   trkendy.resize(MaxTracks);
   trkendz.resize(MaxTracks);
   trkendd.resize(MaxTracks);
+  trkACpierceT0.resize(MaxTracks);    
   trkflashT0.resize(MaxTracks);  
   trktrueT0.resize(MaxTracks);  
   trktheta.resize(MaxTracks);
@@ -1720,6 +1976,7 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::Clear() {
   FillWith(trkendy      , -99999.);
   FillWith(trkendz      , -99999.);
   FillWith(trkendd      , -99999.);
+  FillWith(trkACpierceT0, -99999.);    
   FillWith(trkflashT0   , -99999.);  
   FillWith(trktrueT0    , -99999.);  
   FillWith(trkg4id      , -99999 );
@@ -1892,6 +2149,9 @@ void microboone::AnalysisTreeDataStruct::TrackDataStruct::SetAddresses(
   
   BranchName = "trkendd_" + TrackLabel;
   CreateBranch(BranchName, trkendd, BranchName + NTracksIndexStr + "/F");
+  
+  BranchName = "trkACpierceT0_" + TrackLabel;
+  CreateBranch(BranchName, trkACpierceT0, BranchName + NTracksIndexStr + "/F");
   
   BranchName = "trkflashT0_" + TrackLabel;
   CreateBranch(BranchName, trkflashT0, BranchName + NTracksIndexStr + "/F");
@@ -2348,6 +2608,10 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   potnumitgt = 0;
   potnumi101 = 0;
 
+  evtwgt_nfunc = 0;
+  FillWith(evtwgt_funcname, "noname");
+  FillWith(evtwgt_nweight, 0);
+
   no_hits = 0;
   no_hits_stored = 0;  
   
@@ -2375,7 +2639,19 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(rawD_charge, rawD_charge + sizeof(rawD_charge)/sizeof(rawD_charge[0]), -99999.);
   std::fill(rawD_fwhh, rawD_fwhh + sizeof(rawD_fwhh)/sizeof(rawD_fwhh[0]), -99999.);
   std::fill(rawD_rms, rawD_rms + sizeof(rawD_rms)/sizeof(rawD_rms[0]), -99999.);
-
+  //cal wire information
+  std::fill(calwire_ph, calwire_ph + sizeof(calwire_ph)/sizeof(calwire_ph[0]), -99999.);
+  std::fill(calwire_peakT, calwire_peakT + sizeof(calwire_peakT)/sizeof(calwire_peakT[0]), -9999);
+  std::fill(calwire_charge, calwire_charge + sizeof(calwire_charge)/sizeof(calwire_charge[0]), -99999.);
+  std::fill(calwire_fwhh, calwire_fwhh + sizeof(calwire_fwhh)/sizeof(calwire_fwhh[0]), -99999.);
+  std::fill(calwire_rms, calwire_rms + sizeof(calwire_rms)/sizeof(calwire_rms[0]), -99999.); 
+  //Sim Channel information
+  std::fill(sim_ph, sim_ph + sizeof(sim_ph)/sizeof(sim_ph[0]), -99999.);
+  std::fill(sim_tdc, sim_tdc + sizeof(sim_tdc)/sizeof(sim_tdc[0]), -9999);
+  std::fill(sim_charge, sim_charge + sizeof(sim_charge)/sizeof(sim_charge[0]), -99999.);
+  std::fill(sim_fwhh, sim_fwhh + sizeof(sim_fwhh)/sizeof(sim_fwhh[0]), -99999.);
+  std::fill(sim_rms, sim_rms + sizeof(sim_rms)/sizeof(sim_rms[0]), -99999.); 
+ 
   no_flashes = 0;
   std::fill(flash_time, flash_time + sizeof(flash_time)/sizeof(flash_time[0]), -9999);
   std::fill(flash_pe, flash_pe + sizeof(flash_pe)/sizeof(flash_pe[0]), -9999);
@@ -2902,6 +3178,12 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("potnumitgt",&potnumitgt,"potnumitgt/D");
   CreateBranch("potnumi101",&potnumi101,"potnumi101/D");
 
+  CreateBranch("evtwgt_funcname",evtwgt_funcname);
+  CreateBranch("evtwgt_weight",evtwgt_weight);
+  CreateBranch("evtwgt_nweight",evtwgt_nweight);
+  CreateBranch("evtwgt_nfunc",&evtwgt_nfunc,"evtwgt_nfunc/I");
+
+
   if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
     CreateBranch("no_hits_stored",&no_hits_stored,"no_hits_stored/I");    
@@ -2931,7 +3213,21 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
       CreateBranch("rawD_charge",rawD_charge,"rawD_charge[no_hits_stored]/F");
       CreateBranch("rawD_fwhh",rawD_fwhh,"rawD_fwhh[no_hits_stored]/F");
       CreateBranch("rawD_rms",rawD_rms,"rawD_rms[no_hits_stored]/D"); 
-    }  
+    } 
+    if (hasCalWireInfo()){
+      CreateBranch("calwire_ph",calwire_ph,"calwire_ph[no_hits_stored]/F");  
+      CreateBranch("calwire_peakT",calwire_peakT,"calwire_peakT[no_hits_stored]/I");
+      CreateBranch("calwire_charge",calwire_charge,"calwire_charge[no_hits_stored]/F");
+      CreateBranch("calwire_fwhh",calwire_fwhh,"calwire_fwhh[no_hits_stored]/F");
+      CreateBranch("calwire_rms",calwire_rms,"calwire_rms[no_hits_stored]/D"); 
+    }	
+    if (hasSimChannelInfo()){
+      CreateBranch("sim_ph",sim_ph,"sim_ph[no_hits_stored]/F");  
+      CreateBranch("sim_tdc",sim_tdc,"sim_tdc[no_hits_stored]/I");
+      CreateBranch("sim_charge",sim_charge,"sim_charge[no_hits_stored]/F");
+      CreateBranch("sim_fwhh",sim_fwhh,"sim_fwhh[no_hits_stored]/F");
+      CreateBranch("sim_rms",sim_rms,"sim_rms[no_hits_stored]/D"); 
+    }	   
   }
 
   if (hasPandoraNuVertexInfo()){
@@ -3014,6 +3310,14 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   if (hasPFParticleInfo()){
     //CreateBranch("kNVertexAlgos",&kNVertexAlgos,"kNVertexAlgos/B"); // What would be the PFParticle equivalent of this? There's only 1 algo!
     PFParticleData.SetAddresses(pTree);
+  }
+  
+  if (hasRawWaveFormInfo()){
+    RawData.SetAddresses(pTree);        	  
+  }
+  
+  if (hasCalibWaveFormInfo()){
+    CalibData.SetAddresses(pTree);        	  
   }
 
   if (hasGenieInfo()){
@@ -3321,6 +3625,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fShowerModuleLabel        (pset.get< std::vector<std::string> >("ShowerModuleLabel")),
   fCalorimetryModuleLabel   (pset.get< std::vector<std::string> >("CalorimetryModuleLabel")),
   fParticleIDModuleLabel    (pset.get< std::vector<std::string> >("ParticleIDModuleLabel")   ),
+  fT0RecoAnodeCathodePiercingLabel (pset.get< std::vector<std::string> >("T0RecoAnodeCathodePiercingLabel") ),
   fFlashT0FinderLabel       (pset.get< std::vector<std::string> >("FlashT0FinderLabel")   ),
   fMCT0FinderLabel          (pset.get< std::vector<std::string> >("MCT0FinderLabel")   ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")),   
@@ -3334,6 +3639,10 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveMCTrackInfo	    (pset.get< bool >("SaveMCTrackInfo", false)), 
   fSaveHitInfo	            (pset.get< bool >("SaveHitInfo", false)), 
   fSaveRawDigitInfo	            (pset.get< bool >("SaveRawDigitInfo", false)), 
+  fSaveCalWireInfo	    (pset.get< bool >("SaveRawDigitInfo", false)), 
+  fSaveSimChannelInfo	    (pset.get< bool >("SaveSimChannelInfo", false)), 
+  fSaveRawWaveFormInfo	    (pset.get< bool >("SaveRawWaveFormInfo", false)), 
+  fSaveCalibWaveFormInfo    (pset.get< bool >("SaveCalibWaveFormInfo", false)),
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
   fSaveClusterInfo	    (pset.get< bool >("SaveClusterInfo", false)),
@@ -3347,13 +3656,20 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   bIgnoreMissingShowers     (pset.get< bool >("IgnoreMissingShowers", false)),
   isCosmics(false),
   fSaveCaloCosmics          (pset.get< bool >("SaveCaloCosmics",false)),
-  fG4minE                   (pset.get< float>("G4minE",0.01))
+  fG4minE                   (pset.get< float>("G4minE",0.01)),
+  fRawDigitROI              (pset.get< float>("RawDigitROI",3.0)), 
+  fCalWireROI               (pset.get< float>("CalWireROI",3.0)), 
+  fRawDigitThresh           (pset.get< float>("RawDigitThresh",10)), 
+  fCalWireThresh            (pset.get< float>("CalWireThresh",10))  
 {
 
   if (fSavePFParticleInfo) fPFParticleModuleLabel = pset.get<std::string>("PFParticleModuleLabel");
 
   if (fSaveAuxDetInfo == true) fSaveGeantInfo = true;
   if (fSaveRawDigitInfo == true) fSaveHitInfo = true;
+  if (fSaveCalWireInfo == true) fSaveHitInfo = true;
+  if (fSaveSimChannelInfo == true) fSaveHitInfo = true;
+  
   mf::LogInfo("AnalysisTree") << "Configuration:"
 			      << "\n  UseBuffers: " << std::boolalpha << fUseBuffer
     ;
@@ -3373,6 +3689,13 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
       << "fParticleIDModuleLabel.size() = "<<fParticleIDModuleLabel.size();
   }
+  
+  if (fTrackModuleLabel.size() != fT0RecoAnodeCathodePiercingLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fT0RecoAnodeCathodePiercingLabel.size() = "<<fT0RecoAnodeCathodePiercingLabel.size();
+  }
+  
   if (fTrackModuleLabel.size() != fFlashT0FinderLabel.size()){
     throw art::Exception(art::errors::Configuration)
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
@@ -3383,6 +3706,23 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
       << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
       << "fMCT0FinderLabel.size() = "<<fMCT0FinderLabel.size();
   }
+  if (fTrackModuleLabel.size() != fCosmicTaggerAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fCosmicTaggerAssocLabel.size() = "<<fCosmicTaggerAssocLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fFlashMatchAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fFlashMatchAssocLabel.size() = "<<fFlashMatchAssocLabel.size();
+  }
+  if (fTrackModuleLabel.size() != fContainmentTaggerAssocLabel.size()){
+    throw art::Exception(art::errors::Configuration)
+      << "fTrackModuleLabel.size() = "<<fTrackModuleLabel.size()<<" does not match "
+      << "fContainmentTaggerAssocLabel.size() = "<<fContainmentTaggerAssocLabel.size();
+  }
+
+
   if (GetNVertexAlgos() > kMaxVertexAlgos) {
     throw art::Exception(art::errors::Configuration)
       << "AnalysisTree currently supports only up to " << kMaxVertexAlgos
@@ -3729,6 +4069,38 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     }
   }
 
+  //*****************************
+  //
+  // EventWeight
+  //
+  //*****************************
+
+  art::Handle< std::vector< evwgh::MCEventWeight > > evtWeights;
+
+  if (evt.getByLabel("eventweight",evtWeights)) {
+    const std::vector< evwgh::MCEventWeight > * evtwgt_vec = evtWeights.product();
+
+    evwgh::MCEventWeight evtwgt = evtwgt_vec->at(0); // just for the first neutrino interaction
+    std::map<std::string, std::vector<double>> evtwgt_map = evtwgt.fWeight;
+    int countFunc = 0;
+    // loop over the map and save the name of the function and the vector of weights for each function
+    for(std::map<std::string, std::vector<double>>::iterator it = evtwgt_map.begin(); it != evtwgt_map.end(); ++it) {
+      fData->evtwgt_funcname.push_back(it->first);      // filling the name of the function
+      fData->evtwgt_weight.push_back(it->second);       // filling the vector with the weights
+      std::vector<double> mytemp = it->second;          // getting the vector of weights
+
+      std::cout<<" *************************************"<<std::endl;
+      std::cout<<" mytemp : "<<mytemp.size()<<std::endl;
+      for(unsigned int nweight =0; nweight < mytemp.size(); nweight++) std::cout<<" weight : "<<mytemp[nweight]<<std::endl;
+      std::cout<<" *************************************"<<std::endl;
+
+      fData->evtwgt_nweight.push_back(mytemp.size());   // filling the number of weights
+      countFunc++;
+    }
+    fData->evtwgt_nweight.resize(countFunc);
+    fData->evtwgt_funcname.resize(countFunc);
+    fData->evtwgt_nfunc = countFunc;                    // saving the number of functions used
+  }
 
   //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
   //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;
@@ -3783,6 +4155,50 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	}
       */
       
+      
+      if (fSaveCalWireInfo){
+      //Hit to CalWire information	    
+      art::FindManyP<recob::Wire> fmwire(hitListHandle,evt,fHitsModuleLabel);
+      
+      if (hitlist[i]->WireID().Plane==2){
+          int dataSize = fmwire.at(i)[0]->NSignal();
+	  int t0 = hitlist[i]->PeakTime() - fCalWireROI*(hitlist[i]->RMS());
+	  if (t0<0) t0 = 0;
+	  int t1 = hitlist[i]->PeakTime() + fCalWireROI*(hitlist[i]->RMS());
+	  if (t1>=dataSize) t1 = dataSize-1;
+	  	  
+          std::vector<float> signal(fmwire.at(i)[0]->Signal());
+      
+          fData->calwire_ph[i]    = -1.0;
+          fData->calwire_peakT[i] = -1.0;
+          for (int j = t0; j<=t1; ++j){
+             if (signal[j]>fData->calwire_ph[i]){
+               fData->calwire_ph[i]     = signal[j];
+               fData->calwire_peakT[i]  = j;
+             }   
+          }
+	  
+	  fData->calwire_charge[i] = 0.0;  
+	  fData->calwire_fwhh[i] = 0.0;  
+      
+          double mean_t = 0.0; 
+          double mean_t2 = 0.0;
+          for (int j = t0; j<=t1; ++j){
+	    if (signal[j]>=0.5*fData->calwire_ph[i]){
+		++fData->calwire_fwhh[i];
+	    } 
+            if (signal[j]>=(fCalWireThresh/100)*fData->calwire_ph[i]){
+              fData->calwire_charge[i] += signal[j];
+              mean_t  += double(j)*(signal[j]);
+              mean_t2 += double(j)*double(j)*(signal[j]);
+            }         
+          }
+          mean_t/=fData->calwire_charge[i];
+          mean_t2/=fData->calwire_charge[i];
+          fData->calwire_rms[i] = sqrt(mean_t2-mean_t*mean_t);
+       }
+     }    
+     
       if (fSaveRawDigitInfo){
 	//Hit to RawDigit information	       
 	art::FindManyP<raw::RawDigit> fmrd(hitListHandle,evt,fHitsModuleLabel);
@@ -3793,9 +4209,9 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
      
 	    std::vector<short> rawadc(dataSize);
 	    raw::Uncompress(fmrd.at(i)[0]->ADCs(), rawadc, fmrd.at(i)[0]->Compression());
-	    int t0 = hitlist[i]->PeakTime() - 3*(hitlist[i]->RMS());
+	    int t0 = hitlist[i]->PeakTime() - fRawDigitROI*(hitlist[i]->RMS());
 	    if (t0<0) t0 = 0;
-	    int t1 = hitlist[i]->PeakTime() + 3*(hitlist[i]->RMS());
+	    int t1 = hitlist[i]->PeakTime() + fRawDigitROI*(hitlist[i]->RMS());
 	    if (t1>=dataSize) t1 = dataSize-1;
 	    fData->rawD_ph[i] = -1;
 	    fData->rawD_peakT[i] = -1;
@@ -3813,7 +4229,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	      if (rawadc[j]-ped>=0.5*fData->rawD_ph[i]){
 		++fData->rawD_fwhh[i];
 	      }
-	      if (rawadc[j]-ped>=0.1*fData->rawD_ph[i]){
+	      if (rawadc[j]-ped>=(fRawDigitThresh/100)*fData->rawD_ph[i]){
 		fData->rawD_charge[i] += rawadc[j]-ped;
 		mean_t += (double)j*(rawadc[j]-ped);
 		mean_t2 += (double)j*(double)j*(rawadc[j]-ped);
@@ -3824,7 +4240,56 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	    fData->rawD_rms[i] = sqrt(mean_t2-mean_t*mean_t);
 	  }   }
       
-
+      //Hit to SimChannel information
+       if (isMC && fSaveSimChannelInfo){
+   	 const sim::SimChannel* chan = 0;
+   	 for(size_t sc = 0; sc < fSimChannels.size(); ++sc){
+   	   if(fSimChannels[sc]->Channel() == hitlist[i]->Channel()) 
+   	      chan = fSimChannels[sc];
+   	 }     
+   	 if (chan){
+   	   auto const& tdcidemap = chan->TDCIDEMap();
+   	   int k=-1;
+   	   double elec[tdcidemap.size()];
+   	   int tdc[tdcidemap.size()];
+   	   for(auto mapitr = tdcidemap.begin(); mapitr != tdcidemap.end(); mapitr++){
+   	      k++;
+   	      tdc[k]=(*mapitr).first;
+   	      const std::vector<sim::IDE> idevec = (*mapitr).second;
+   	      double nelec=0;
+   	      for(size_t iv = 0; iv < idevec.size(); ++iv){
+   		 nelec += idevec[iv].numElectrons;   		 
+   	      }
+   	      elec[k] = nelec;
+   	   }
+   	   fData->sim_ph[i] = -1;
+   	   fData->sim_tdc[i] = -1;
+   	   for(unsigned int f=0;f<tdcidemap.size();f++){
+   	     if (elec[f]>fData->sim_ph[i]){
+   	       fData->sim_ph[i] = elec[f];
+   	       fData->sim_tdc[i] = tdc[f]; 
+   	     }         
+   	   }
+   	   fData->sim_charge[i] = 0;
+	   fData->sim_fwhh[i] = 0;
+   	   double mean_t = 0;
+   	   double mean_t2 = 0;
+   	   for (unsigned int f = 0; f<tdcidemap.size();f++){
+	      if (elec[f]>=0.5*fData->sim_ph[i]){
+		++fData->sim_fwhh[i];
+	      }	   
+   	      if (elec[f]>=0.1*fData->sim_ph[i]){
+   		  fData->sim_charge[i]+= elec[f];
+   		  mean_t+= double(tdc[f])*elec[f];
+   		  mean_t2+= double(tdc[f])*double(tdc[f])*elec[f];
+   	      }
+   	   }
+   	   mean_t/=fData->sim_charge[i];
+   	   mean_t2/=fData->sim_charge[i];
+   	   fData->sim_rms[i] = sqrt(mean_t2-mean_t*mean_t);
+   	 }
+       } 
+      
       if (!evt.isRealData()&&!isCosmics){
 	fData -> hit_nelec[i] = 0;
 	fData -> hit_energy[i] = 0;
@@ -3833,7 +4298,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	  if(fSimChannels[sc]->Channel() == hitlist[i]->Channel()) chan = fSimChannels[sc];
 	}
 	if (chan){
-	  const std::map<unsigned short, std::vector<sim::IDE> >& tdcidemap = chan->TDCIDEMap();
+	  auto const& tdcidemap = chan->TDCIDEMap();
 	  for(auto mapitr = tdcidemap.begin(); mapitr != tdcidemap.end(); mapitr++){
 	    // loop over the vector of IDE objects.
 	    const std::vector<sim::IDE> idevec = (*mapitr).second;
@@ -3878,7 +4343,103 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
     }
   }// end (fSaveHitInfo)
+  
+  if (fSaveRawWaveFormInfo){
+    art::Handle< std::vector<raw::RawDigit> > rawdigit;
+       if (! evt.getByLabel(fDigitModuleLabel, rawdigit)) {
+           cout << "WARNING: no label " << fDigitModuleLabel << endl;
+           return;
+       }
+       std::vector< art::Ptr<raw::RawDigit> >  wires;
+       art::fill_ptr_vector(wires, rawdigit);
 
+    AnalysisTreeDataStruct::RawDataStruct& RawData = fData->GetRawData();
+    size_t NRawChannels = wires.size();
+    
+    RawData.SetMaxRawChannels(std::max(NRawChannels, (size_t) 1));
+    RawData.Clear(); // clear all the data
+
+    RawData.raw_nchannels = (short) NRawChannels;
+
+    // now set the tree addresses to the newly allocated memory;
+    // this creates the tree branches in case they are not there yet
+    SetRawAddress();
+      
+    if (NRawChannels > RawData.GetMaxRawChannels()) {
+      mf::LogError("AnalysisTree:limits") << "event has " << NRawChannels
+                   << " raw channels, only "
+                   << RawData.GetMaxRawChannels() << " stored in tree";
+    }
+    
+    int irch=0;
+    for (auto const& wire: wires) {
+        RawData.raw_channelId[irch]    = wire->Channel();
+    	size_t nSamples = wire->Samples();
+    	std::vector<Short_t> uncompressed(nSamples);
+	if (nSamples > RawData.GetMaxTicksPerRawChannel(irch)) {
+	      // if you get this error, you'll have to increase kMaxTicks
+	      mf::LogError("AnalysisTree:limits")
+		<< "the " << fDigitModuleLabel << " RawChannel #" << irch
+		<< " has " << nSamples << " in raw data channel"
+		<<", only "
+		<< RawData.GetMaxTicksPerRawChannel(irch) << " stored in tree";
+	    }	
+    	raw::Uncompress(wire->ADCs(), uncompressed, wire->Compression());
+	for (size_t j = 0; j<nSamples && j < RawData.GetMaxTicksPerRawChannel(irch); ++j){	   
+	    RawData.raw_wf[irch][j] = uncompressed[j];
+	}    	
+    	irch++;
+    }
+  }   
+  
+  if (fSaveCalibWaveFormInfo){
+     art::Handle< std::vector<recob::Wire> > wires_handle;
+    if (! evt.getByLabel(fCalDataModuleLabel, wires_handle)) {
+        cout << "WARNING: no label " << fCalDataModuleLabel << endl;
+        return;
+    }
+    
+    std::vector< art::Ptr<recob::Wire> >  wires;
+    art::fill_ptr_vector(wires, wires_handle);
+
+    AnalysisTreeDataStruct::CalibDataStruct& CalibData = fData->GetCalibData();
+    size_t NCalibChannels = wires.size();
+    
+    CalibData.SetMaxCalibChannels(std::max(NCalibChannels, (size_t) 1));
+    CalibData.Clear(); // clear all the data
+
+    CalibData.calib_nchannels = (short) NCalibChannels;
+
+    // now set the tree addresses to the newly allocated memory;
+    // this creates the tree branches in case they are not there yet
+    SetCalibAddress();
+      
+    if (NCalibChannels > CalibData.GetMaxCalibChannels()) {
+      mf::LogError("AnalysisTree:limits") << "event has " << NCalibChannels
+                   << " calib channels, only "
+                   << CalibData.GetMaxCalibChannels() << " stored in tree";
+    }
+    
+    int icch=0;
+    for (auto const& wire: wires) {
+        CalibData.calib_channelId[icch]    = wire->Channel();
+	std::vector<float> calibwf = wire->Signal();
+	
+    	size_t nSamples = 9600;
+	if (nSamples > CalibData.GetMaxTicksPerCalibChannel(icch)) {
+	      // if you get this error, you'll have to increase kMaxTicks
+	      mf::LogError("AnalysisTree:limits")
+		<< "the " << fDigitModuleLabel << " CalibChannel #" << icch
+		<< " has " << nSamples << " in calib data channel"
+		<<", only "
+		<< CalibData.GetMaxTicksPerCalibChannel(icch) << " stored in tree";
+	    }	
+	for (size_t j = 0; j<nSamples && j < CalibData.GetMaxTicksPerCalibChannel(icch); ++j){	   
+	    CalibData.calib_wf[icch][j] = calibwf[j];
+	}    	
+    	icch++;
+    }
+  }   
 
    if(fSavePandoraNuVertexInfo) {
      lar_pandora::PFParticleVector particleVector;
@@ -4181,7 +4742,17 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
       for(size_t iTrk=0; iTrk < NTracks; ++iTrk){//loop over tracks
       
-        //save t0 from reconstructed flash track matching for every track
+        //save t0 from anode/cathode piercing tracks
+	art::FindManyP<anab::T0> fmacpt0(trackListHandle[iTracker],evt,fT0RecoAnodeCathodePiercingLabel[iTracker]);
+	if (fmacpt0.isValid()){          
+	  if(fmacpt0.at(iTrk).size()>0){
+	    if(fmacpt0.at(iTrk).size()>1)
+	      std::cerr << "\n Warning : more than one t0 tag per track in module! assigning the first tag to the track" << fT0RecoAnodeCathodePiercingLabel[iTracker];
+	    TrackerData.trkACpierceT0[iTrk] = fmacpt0.at(iTrk).at(0)->Time();
+	  }   
+        }
+	
+	//save t0 from reconstructed flash track matching for every track
         art::FindManyP<anab::T0> fmt0(trackListHandle[iTracker],evt,fFlashT0FinderLabel[iTracker]);
         if (fmt0.isValid()){          
 	  if(fmt0.at(iTrk).size()>0){

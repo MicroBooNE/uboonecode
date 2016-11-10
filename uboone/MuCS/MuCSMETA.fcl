@@ -11,10 +11,10 @@ services:
 {
   #Load the service that manages root files for histograms.
   TFileService: { fileName: "MuCSMETA_anatree.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 }     #default is one
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 }     #default is one
   RandomNumberGenerator: {}                     #ART native random number generator
-  user:         @local::microboone_services
+  @table::microboone_services
   message:      @local::standard_info
 }
 
@@ -103,6 +103,6 @@ physics.producers.MuCSTrackTaggerpandoraCosmicKHit.TrackModuleLabel: "pandoraCos
 physics.producers.MuCSTrackTaggerpmtrack.TrackModuleLabel: "pmtrack"
 
 DetectorClocksService.InheritClockConfig: false
-services.user.DetectorClocksService.InheritClockConfig: false
+services.DetectorClocksService.InheritClockConfig: false
 
 physics.producers.MuCSMerger.MuCSFile: "/uboone/data/users/kalousis/MuCS/muons/mega_micro_ana_158_0.333_0.root" 

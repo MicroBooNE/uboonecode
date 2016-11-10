@@ -1,151 +1,151 @@
-<?xml version='1.0'?>
+<?xml version'1.0'?>
 <gdml>
 <solids>
-  <box name="World" 
-    lunit="cm" 
-    x="148326" 
-    y="106000" 
+  <box name="World"
+    lunit="cm"
+    x="148326"
+    y="106000"
     z="148326"/>
   <box name="VacuumBox"
 	lunit="cm"
 	x="148326"
-    y="53000-1800"
+    y="51200.0"
     z="148326"/>
   <tube name="LArTFVacuumSubtract"
-    rmax="310*2.54"
-    z="(29*12+6)*2.54"
+    rmax="787.4"
+    z="899.16"
     deltaphi="360"
     lunit="cm"
     aunit="deg"/>
- 
+
 <tube name="ConcreteWallAboveGrade0"
-   rmin="292*2.54"
-   rmax="(310)*2.54"
-   z="(29*12+6)*2.54"
+   rmin="741.68"
+   rmax="787.4"
+   z="899.16"
    deltaphi="360"
    lunit="cm"
    aunit="deg"/>
 <tube name="ConcreteWallAboveGradeSegment"
-   rmax="304*2.54"
-   z="(4*12+7)*2.54"
+   rmax="772.16"
+   z="139.7"
    deltaphi="360"
    lunit="cm"
    aunit="deg"/>
 <tube name="ConcreteDiscRoof0"
-	rmax="304*2.54-31.5"
-	z="13*2.54"
+	rmax="740.66"
+	z="33.02"
 	deltaphi="360"
 	lunit="cm"
 	aunit="deg"/>
  <box name="ConcreteSteelBeam0"
   	lunit="cm"
-  	x="48*2.54"
-  	y="2*220*2.54" 
-  	z="(5*12+8)*2.54"/> 
+  	x="121.92"
+  	y="1117.6"
+  	z="172.72"/>
  <box name="ConcreteSteelBeamSegment1"
   	lunit="cm"
-  	x="6*2.54+0.1"
-  	y="2*220*2.54 +0.1" 
-  	z="34*2.54+0.1"/> 
+  	x="15.34"
+  	y="1117.7"
+  	z="86.46"/>
  <box name="ConcreteSteelBeamSegment2"
   	lunit="cm"
-  	x="12*2.54+0.1"
-  	y="2*230*2.54+0.1" 
-  	z="34*2.54+0.1"/> 
+  	x="30.58"
+  	y="1168.5"
+  	z="86.46"/>
 
 <tube name="RoofPlusBars"
-	rmax="304*2.54-31"
-	z="68*2.54 + 0.1"
+	rmax="741.16"
+	z="172.82"
 	deltaphi="360"
 	lunit="cm"
 	aunit="deg"/>
  <box name="SteelGrating"
   	lunit="cm"
-	x="(23*12*2.54)"
-  	y=".5*2.54"
-	z="(43*12-2)*2.54"/>
+	x="701.04"
+  	y="1.27"
+	z="1305.56"/>
  <box name="RemovableRoof"
 	lunit="cm"
-	x="(23*12*2.54+.1)"
-	y="(42*12+10)*2.54"
-	z="(12.5+12.5)*2.54"/>
+	x="701.14"
+	y="1305.56"
+	z="63.5"/>
  <box name="IBeam22_0"
 	lunit="cm"
-	x="4.03*2.54 -0.1"
-	y="(42*12+10)*2.54-0.1"
-	z="12.5*2.54-0.1"/>
+	x="10.1362"
+	y="1305.46"
+	z="31.65"/>
  <box name="IBeam22Segment"
 	lunit="cm"
-	x="(4.03-0.26)*2.54/2"
-	y="(43*12+2)*2.54"
-	z="(12.5-2*0.425)*2.54"/>
+	x="4.7879"
+	y="1315.72"
+	z="29.591"/>
  <box name="IBeam35_0"
 	lunit="cm"
-	x="6.56*2.54-0.1"
-	y="(23*12)*2.54-0.1"
-	z="12.5*2.54-0.1"/>
+	x="16.5624"
+	y="700.94"
+	z="31.65"/>
  <box name="IBeam35Segment"
 	lunit="cm"
-	x="(6.56-0.3)*2.54/2"
-	y="(23*12)*2.54"
-	z="(12.5-2*0.52)*2.54"/>
+	x="7.9502"
+	y="701.04"
+	z="29.1084"/>
 
   <tube name="Ground"
-    rmin="312*2.54"
-    rmax="((50*12)+310)*2.54"
-    z="41*12*2.54"
-    deltaphi="360" 
+    rmin="792.48"
+    rmax="2311.4"
+    z="1249.68"
+    deltaphi="360"
     lunit="cm"
     aunit="deg"/>
   <tube name="GroundBottom"
-    rmax="((50*12)+310)*2.54"
-    z="50*12*2.54"
+    rmax="2311.4"
+    z="1524.0"
     deltaphi="360"
     lunit="cm"
     aunit="deg"/>
   <tube name="ConcreteEnclosure"
-    rmin="292*2.54"
-    rmax="310*2.54"
-    z="38*12*2.54"
-    deltaphi="360" 
+    rmin="741.68"
+    rmax="787.4"
+    z="1158.24"
+    deltaphi="360"
     lunit="cm"
     aunit="deg"/>
   <tube name="PolystyreneEnclosure"
-    rmin="310*2.54"
-    rmax="312*2.54"
-    z="(38*12+36)*2.54"
+    rmin="787.4"
+    rmax="792.48"
+    z="1249.68"
     deltaphi="360"
     lunit="cm"
     aunit="deg"/>
   <tube name="ConcreteEnclosureBottom"
     rmin="0"
-    rmax="310*2.54"
-    z="36*2.54"
-    deltaphi="360" 
+    rmax="787.4"
+    z="91.44"
+    deltaphi="360"
     lunit="cm"
     aunit="deg"/>
   <tube name="PolystyreneEnclosureBottom"
-   rmax="292*2.54"
-   z="2*2.54"
+   rmax="741.68"
+   z="5.08"
    deltaphi="360"
    lunit="cm"
    aunit="deg"/>
   <tube name="Overburden"
-    rmax="292*2.54"
-    z="10*12*2.54"
-    deltaphi="360" 
+    rmax="741.68"
+    z="304.8"
+    deltaphi="360"
     lunit="cm"
     aunit="deg"/>
 
   <subtraction name="VacuumSpace">
    <first ref="VacuumBox"/> <second ref="LArTFVacuumSubtract"/>
    <rotation name="rotLArTFVac" unit="deg" x="90" y="0" z="0"/>
-   <position name="posLArTFVac" unit="cm" x="0.5*256.35" y="-(53000-1800)/2+(29*12+6)*2.54/2" z="0.5*1037" />
+   <position name="posLArTFVac" unit="cm" x="128.175" y="-25150.42" z="518.5" />
   </subtraction>
 
   <subtraction name="ConcreteWallAboveGrade">
     <first ref="ConcreteWallAboveGrade0"/> <second ref="ConcreteWallAboveGradeSegment"/>
-	<position name="posRemoval0" unit="cm" x="0" y="0" z="(122+24+3.5)*2.54"/>
+	<position name="posRemoval0" unit="cm" x="0" y="0" z="379.73"/>
   </subtraction>
 
   <subtraction name="ConcreteDiscRoof">
@@ -155,41 +155,41 @@
 
   <subtraction name="ConcreteSteelBeam1">
     <first ref="ConcreteSteelBeam0"/> <second ref="ConcreteSteelBeamSegment1"/>
-	<position name="posBeamRemoval0" unit="cm" x="21*2.54" y="0" z="17*2.54"/>
+	<position name="posBeamRemoval0" unit="cm" x="53.34" y="0" z="43.18"/>
   </subtraction>
 
   <subtraction name="ConcreteSteelBeam">
     <first ref="ConcreteSteelBeam1"/> <second ref="ConcreteSteelBeamSegment2"/>
-	<position name="posBeamRemoval1" unit="cm" x="-18*2.54" y="0" z="17*2.54"/>
+	<position name="posBeamRemoval1" unit="cm" x="-45.72" y="0" z="43.18"/>
   </subtraction>
 
   <subtraction name="IBeam22_1">
     <first ref="IBeam22_0"/> <second ref="IBeam22Segment"/>
-	<position name="posBeamRemoval2" unit="cm" x="(4.03 -1.885)*0.5*2.54" y="0" z="0"/>
+	<position name="posBeamRemoval2" unit="cm" x="2.72415" y="0" z="0"/>
   </subtraction>
- 
+
   <subtraction name="IBeam22">
     <first ref="IBeam22_1"/> <second ref="IBeam22Segment"/>
-	<position name="posBeamRemoval3" unit="cm" x="-(4.03 -1.885)*0.5*2.54" y="0" z="0"/>
+	<position name="posBeamRemoval3" unit="cm" x="-2.72415" y="0" z="0"/>
   </subtraction>
 
   <subtraction name="IBeam35_1">
     <first ref="IBeam35_0"/> <second ref="IBeam35Segment"/>
-	<position name="posBeamRemoval4" unit="cm" x="(6.56 - 3.13)*0.5*2.54" y="0" z="0"/>
+	<position name="posBeamRemoval4" unit="cm" x="4.3561" y="0" z="0"/>
   </subtraction>
- 
+
   <subtraction name="IBeam35">
     <first ref="IBeam35_1"/> <second ref="IBeam35Segment"/>
-	<position name="posBeamRemoval5" unit="cm" x="-(6.56-3.13)*0.5*2.54" y="0" z="0"/>
+	<position name="posBeamRemoval5" unit="cm" x="-4.3561" y="0" z="0"/>
   </subtraction>
 </solids>
 
 <structure>
- 
+
   <volume name="volVacuumSpace">
     <materialref ref="Vacuum"/>
  	<solidref ref="VacuumSpace"/>
-  </volume>  
+  </volume>
 
   <volume name="volIBeam22">
 	<materialref ref="STEEL_STAINLESS_Fe7Cr2Ni"/>
@@ -249,62 +249,62 @@
 	<solidref ref="RemovableRoof"/>
  	<physvol>
        <volumeref ref="volIBeam22"/>
-       <position name="posIBeam220" unit="cm" x="(3*12+5)*2.54+4.03*0.5*2.54" y="0" z="-(12.5*2.54*0.5)"/>
+       <position name="posIBeam220" unit="cm" x="109.2581" y="0" z="-15.875"/>
      </physvol>
 	 <physvol>
        <volumeref ref="volIBeam22"/>
-       <position name="posIBeam221" unit="cm" x="(3*12+5)*2.54+(6*12+10)*2.54+4.03*0.5*2.54" y="0" z="-(12.5*2.54*0.5)"/>
-     </physvol> 
+       <position name="posIBeam221" unit="cm" x="317.5381" y="0" z="-15.875"/>
+     </physvol>
 	 <physvol>
        <volumeref ref="volIBeam22"/>
-       <position name="posIBeam222" unit="cm" x="-((3*12+5)*2.54+4.03*0.5*2.54)" y="0" z="-(12.5*2.54*0.5)"/>
-     </physvol> 
+       <position name="posIBeam222" unit="cm" x="-109.2581" y="0" z="-15.875"/>
+     </physvol>
 	 <physvol>
        <volumeref ref="volIBeam22"/>
-       <position name="posIBeam223" unit="cm" x="-((3*12+5)*2.54+(6*12+10)*2.54+4.03*0.5*2.54)" y="0" z="-(12.5*2.54*0.5)"/>
-     </physvol> 
-	 
+       <position name="posIBeam223" unit="cm" x="-317.5381" y="0" z="-15.875"/>
+     </physvol>
+
 		<physvol>
 			<volumeref ref="volIBeam35"/>
-			<position name="posIBeam35pos0" unit="cm" x="0" y="38*0.5*2.54+0*(6*12+6)*2.54" z="(12.5*2.54*0.5)"/>
+			<position name="posIBeam35pos0" unit="cm" x="0" y="48.26" z="15.875"/>
 			<rotation name="r90AboutZpos0" unit="deg" x="0" y="0" z="90"/>
 		</physvol>
 		<physvol>
 			<volumeref ref="volIBeam35"/>
-			<position name="posIBeam35neg0" unit="cm" x="0" y="-(38*0.5*2.54+0*(6*12+6)*2.54)" z="(12.5*2.54*0.5)"/>
+			<position name="posIBeam35neg0" unit="cm" x="0" y="-48.26" z="15.875"/>
 			<rotation name="r90AboutZneg0" unit="deg" x="0" y="0" z="90"/>
 		</physvol>
 
 		<physvol>
 			<volumeref ref="volIBeam35"/>
-			<position name="posIBeam35pos1" unit="cm" x="0" y="38*0.5*2.54+1*(6*12+6)*2.54" z="(12.5*2.54*0.5)"/>
+			<position name="posIBeam35pos1" unit="cm" x="0" y="246.38" z="15.875"/>
 			<rotation name="r90AboutZpos1" unit="deg" x="0" y="0" z="90"/>
 		</physvol>
 		<physvol>
 			<volumeref ref="volIBeam35"/>
-			<position name="posIBeam35neg1" unit="cm" x="0" y="-(38*0.5*2.54+1*(6*12+6)*2.54)" z="(12.5*2.54*0.5)"/>
+			<position name="posIBeam35neg1" unit="cm" x="0" y="-246.38" z="15.875"/>
 			<rotation name="r90AboutZneg1" unit="deg" x="0" y="0" z="90"/>
 		</physvol>
 
 		<physvol>
 			<volumeref ref="volIBeam35"/>
-			<position name="posIBeam35pos2" unit="cm" x="0" y="38*0.5*2.54+2*(6*12+6)*2.54" z="(12.5*2.54*0.5)"/>
+			<position name="posIBeam35pos2" unit="cm" x="0" y="444.5" z="15.875"/>
 			<rotation name="r90AboutZpos2" unit="deg" x="0" y="0" z="90"/>
 		</physvol>
 		<physvol>
 			<volumeref ref="volIBeam35"/>
-			<position name="posIBeam35neg2" unit="cm" x="0" y="-(38*0.5*2.54+2*(6*12+6)*2.54)" z="(12.5*2.54*0.5)"/>
+			<position name="posIBeam35neg2" unit="cm" x="0" y="-444.5" z="15.875"/>
 			<rotation name="r90AboutZneg2" unit="deg" x="0" y="0" z="90"/>
 		</physvol>
 
 		<physvol>
 			<volumeref ref="volIBeam35"/>
-			<position name="posIBeam35pos3" unit="cm" x="0" y="38*0.5*2.54+3*(6*12+6)*2.54" z="(12.5*2.54*0.5)"/>
+			<position name="posIBeam35pos3" unit="cm" x="0" y="642.62" z="15.875"/>
 			<rotation name="r90AboutZpos3" unit="deg" x="0" y="0" z="90"/>
 		</physvol>
 		<physvol>
 			<volumeref ref="volIBeam35"/>
-			<position name="posIBeam35neg3" unit="cm" x="0" y="-(38*0.5*2.54+3*(6*12+6)*2.54)" z="(12.5*2.54*0.5)"/>
+			<position name="posIBeam35neg3" unit="cm" x="0" y="-642.62" z="15.875"/>
 			<rotation name="r90AboutZneg3" unit="deg" x="0" y="0" z="90"/>
 		</physvol>
 
@@ -323,11 +323,11 @@
 	</physvol>
 	<physvol>
 		<volumeref ref="volConcreteSteelBeam"/>
-    	<position name="posCBeam1" unit="cm" x="-6*27*2.54" y="0" z="0"/>
+    	<position name="posCBeam1" unit="cm" x="-411.48" y="0" z="0"/>
 	</physvol>
 	<physvol>
 		<volumeref ref="volConcreteSteelBeam"/>
-    	<position name="posCBeam2" unit="cm" x="6*27*2.54" y="0" z="0"/>
+    	<position name="posCBeam2" unit="cm" x="411.48" y="0" z="0"/>
 	</physvol>
 	<physvol>
 		<volumeref ref="volRemovableRoof"/>
@@ -336,56 +336,56 @@
 	</volume>
 
   <volume name="volWorld" >
-    <materialref ref="Air"/> 
+    <materialref ref="Air"/>
     <solidref ref="World"/>
    <physvol>
 	  <volumeref ref="volVacuumSpace"/>
- 	  <position name="posVacuumSpace" unit="cm" x="0" y="(53000-1800)/2 + 624.85" z="0"/>
- 	</physvol> 
+ 	  <position name="posVacuumSpace" unit="cm" x="0" y="26224.85" z="0"/>
+ 	</physvol>
 	<physvol>
       <volumeref ref="volConcreteWallAboveGrade"/>
-      <position name="posConcreteWallAboveGrade" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 + 22.86" z="0.5*1037"/>
+      <position name="posConcreteWallAboveGrade" unit="cm" x="128.175" y="1074.42016916" z="518.5"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol> 
+    </physvol>
 	<physvol>
       <volumeref ref="volRoofPlusBars"/>
-      <position name="posRoofPlusBars" unit="cm" x="0.5*256.35" y="34.50000555*12*2.54 +22.86 +127*2.54" z="0.5*1037"/>
+      <position name="posRoofPlusBars" unit="cm" x="128.175" y="1397.00016916" z="518.5"/>
 	  <rotation name="r39Plus90" unit="deg" x="90" y="0" z="39" />
-    </physvol> 
+    </physvol>
     <physvol>
       <volumeref ref="volConcreteEnclosure"/>
-      <position name="posConcreteEnclosure" unit="cm" x="0.5*256.35" y="36*2.54/2" z="0.5*1037"/>
+      <position name="posConcreteEnclosure" unit="cm" x="128.175" y="45.72" z="518.5"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>  
+    </physvol>
     <physvol>
       <volumeref ref="volConcreteEnclosureBottom"/>
-      <position name="posConcreteEnclosureBottom" unit="cm" x="0.5*256.35" y="-38*12*2.54/2" z="0.5*1037"/>
+      <position name="posConcreteEnclosureBottom" unit="cm" x="128.175" y="-579.12" z="518.5"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>
     <physvol>
       <volumeref ref="volPolystyreneEnclosure"/>
-      <position name="posPolystyreneEnclosure" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
+      <position name="posPolystyreneEnclosure" unit="cm" x="128.175" y="0" z="518.5"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>   
+    </physvol>
     <physvol>
        <volumeref ref="volGround"/>
-      <position name="posGround" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
+      <position name="posGround" unit="cm" x="128.175" y="0" z="518.5"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol> 
+    </physvol>
     <physvol>
        <volumeref ref="volGroundBottom"/>
-      <position name="posGroundBottom" unit="cm" x="0.5*256.35" y="-41*12*2.54/2 -50*12*2.54/2" z="0.5*1037"/>
+      <position name="posGroundBottom" unit="cm" x="128.175" y="-1386.84" z="518.5"/>
       <rotationref ref="rPlus90AboutX"/>
-    </physvol>  
+    </physvol>
   <!-- <physvol>
       <volumeref ref="volOverburden"/>
-      <position name="posOverburden" unit="cm" x="0.5*256.35" y="32.50000555*12*2.54+22.86 +127*2.54+285" z="0.5*1037"/>
+      <position name="posOverburden" unit="cm" x="128.175" y="1621.04016916" z="518.5"/>
       <rotationref ref="rPlus90AboutX"/>
     </physvol>-->
     <physvol>
       <volumeref ref="volDetEnclosure"/>
-      <position name="posDetEnclosure" unit="cm" x="0.5*256.35" y="0" z="0.5*1037"/>
+      <position name="posDetEnclosure" unit="cm" x="128.175" y="0" z="518.5"/>
     </physvol>
-  </volume> 
+  </volume>
 </structure>
 </gdml>

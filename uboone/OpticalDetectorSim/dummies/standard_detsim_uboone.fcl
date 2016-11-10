@@ -8,25 +8,25 @@ services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "detsim_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
 #  FileCatalogMetadata:  @local::art_file_catalog_mc
-#  user:         @local::microboone_optical_simulation_services_1window
-  user:         @local::microboone_simulation_services
+#  @table::microboone_optical_simulation_services_1window
+  @table::microboone_simulation_services
   message:      @local::standard_warning
 }
 #services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 #Reduce charge to represent a more realistic gain (14mV/fC->4.7mV/fC) - Andrzej
-#services.user.SignalShapingServiceMicroBooNE.ColFieldRespAmp:  0.0119     #scaled by 14/4.7 
-#services.user.SignalShapingServiceMicroBooNE.IndFieldRespAmp:  0.00604
+#services.SignalShapingServiceMicroBooNE.ColFieldRespAmp:  0.0119     #scaled by 14/4.7 
+#services.SignalShapingServiceMicroBooNE.IndFieldRespAmp:  0.00604
 
 # Set the time at which pmt readout sim's discrete clock counting starts/ends [us
-#services.user.OpDigiProperties.TimeBegin:     -3200
-#services.user.OpDigiProperties.TimeEnd:        3200
+#services.OpDigiProperties.TimeBegin:     -3200
+#services.OpDigiProperties.TimeEnd:        3200
 
-#services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-#services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
+#services.FileCatalogMetadataExtras:  @local::microboone_file_catalog
+#services.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
 #                                                    "fileFormat", "root",
 #                                                    "runType",    "physics",
 #                                                    "fclName",    "standard_detsim_uboone.fcl",
@@ -34,7 +34,7 @@ services:
 #                                                    "ubProjectStage",   "detsim",
 #                                                    "ubProjectVersion", "v1_3" ]
 
-#services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_detsim.root"
+#services.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_detsim.root"
 
 
 #source is now a root file

@@ -1,0 +1,77 @@
+#include "reco_uboone_data_Feb2016.fcl"
+
+process_name : RawDigitMixer      #The process name must NOT contain any underscores
+
+source : {
+  module_type : RootInput
+  maxEvents   : -1
+}
+
+services : {
+
+  TFileService: { fileName: "DataOverlayMixer_hist.root" }
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 }     #default is one
+  RandomNumberGenerator: {}                     #ART native random number generator
+
+  @table::microboone_reco_data_services
+
+  message:      @local::standard_info
+
+}
+
+outputs: {
+  out: { module_type: RootOutput
+  	         fileName: "DataOverlayMixer.root"
+		 fastCloning: false
+		 compressionLevel: 1 }
+}
+
+physics: {
+
+  producers : {
+    @table::microboone_reco_data_producers
+  }
+
+  analyzers: {
+     # ParameterSets for zero or more analyzer modules
+  }
+
+  filters : {
+  	    mixer: { module_type : OverlayRawDataMicroBooNE
+	    	     fileNames : [ " Neutrinos_NoNoise_Simulation.root " ]
+		     #fileNames : ["~/NuID_Data/PhysicsRun-2015_10_23_22_6_25-0003495-00006_20151025T103919_rawfilter.root" ]
+		     readMode : sequential
+		     wrapFiles : true
+		     coverageFraction : 1
+		     detail : {
+		       RawDigitDataModuleLabel : daq
+		       OpDetDataModuleLabel : pmtreadout
+		       RawDigitMCModuleLabel : daq
+		       OpDetMCModuleLabel : pmtreadout
+		       InputFileIsData : true
+		       G4InputModuleLabel : largeant
+		       GeneratorInputModuleLabel : generator
+		       MCRecoInputModuleLabel : mcreco
+		       EventsToMix: 1
+		       DefaultMCRawDigitScale: 1.0
+		       DefaultMCOpDetScale:    1.0
+		     }
+		   }
+  }
+
+  # trigger_paths: [ path0, path1 ]
+  # end_paths:     [ path2, path3 ]
+
+
+  mixer_path : [ mixer, digitfilter ]
+  trigger_paths : [ mixer_path ]
+
+  # ana1: [userana]
+  output : [ out ]
+  end_paths: [ output ]
+
+}
+
+#services.IChannelStatusService.ChannelStatusProvider.UseDB: false
+physics.producers.digitfilter.DigitModuleLabel: "mixer"

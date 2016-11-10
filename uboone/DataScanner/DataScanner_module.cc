@@ -19,8 +19,8 @@
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Principal/Handle.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
@@ -30,22 +30,22 @@
 
 // LArSoft includes
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/SpacePoint.h"
-#include "lardata/RecoBase/Shower.h"
-#include "lardata/RecoBase/Vertex.h"
-#include "lardata/RecoBase/EndPoint2D.h"
-#include "lardata/AnalysisBase/Calorimetry.h"
-#include "larsim/Simulation/SimChannel.h"
-#include "SimulationBase/MCTruth.h"
-#include "SimulationBase/MCParticle.h"
-#include "lardata/OpticalDetectorData/FIFOChannel.h"
-#include "lardata/OpticalDetectorData/OpticalTypes.h"
-#include "lardata/MCBase/MCShower.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/EndPoint2D.h"
+#include "lardataobj/AnalysisBase/Calorimetry.h"
+#include "lardataobj/Simulation/SimChannel.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
+#include "lardataobj/OpticalDetectorData/FIFOChannel.h"
+#include "lardataobj/OpticalDetectorData/OpticalTypes.h"
+#include "lardataobj/MCBase/MCShower.h"
 //#include "RecoAlg/ClusterParamsAlg.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/Utilities/GeometryUtilities.h"
@@ -53,9 +53,9 @@
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
-#include "art/Framework/Core/FindManyP.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/FindManyP.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 
 // LArLight includes
 #include <Base/Base-TypeDef.hh>
@@ -948,7 +948,7 @@ namespace datascanner {
 
       const art::Ptr<sim::SimChannel> sch_ptr(schArray,i);
 
-      std::map<unsigned short,std::vector<sim::IDE> > sch_map(sch_ptr->TDCIDEMap());
+      const auto & sch_map(sch_ptr->TDCIDEMap());
 
       larlight::simch light_sch;
       light_sch.set_channel(sch_ptr->Channel());

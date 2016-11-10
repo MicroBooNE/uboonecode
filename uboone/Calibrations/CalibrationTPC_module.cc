@@ -41,9 +41,9 @@
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 
 #include "lardata/Utilities/LArFFT.h"
-#include "lardata/RawData/RawDigit.h"
+#include "lardataobj/RawData/RawDigit.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Wire.h"
 #include "uboone/CalData/ROIAlg.h"
 
 #include "CalibrationTPC_Algs.h"

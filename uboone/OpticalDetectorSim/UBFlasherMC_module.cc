@@ -31,23 +31,23 @@
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
 
 /// LArSoft
-#include "lardata/OpticalDetectorData/ChannelDataGroup.h"
+#include "lardataobj/OpticalDetectorData/ChannelDataGroup.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
-#include "larsim/Simulation/SimPhotons.h"
+#include "lardataobj/Simulation/SimPhotons.h"
 #include "UBOpticalADC.h" // uboonecode
 #include "UBLogicPulseADC.h" // uboonecode
 #include "uboone/Geometry/UBOpReadoutMap.h" // uboone
 
 /// nutools
-#include "larsim/Simulation/BeamGateInfo.h"
+#include "lardataobj/Simulation/BeamGateInfo.h"
 
 // Other
 #include "TF1.h"

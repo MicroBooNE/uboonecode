@@ -49,6 +49,7 @@ namespace geo {
     unsigned int GetNumberOfChannelsInCategory( opdet::UBOpticalChannelCategory_t category ) const;
     unsigned int GetChannelNumberFromCrateSlotFEMCh( unsigned int crate, unsigned int slot, unsigned int femch ) const;
     void GetCrateSlotFEMChFromReadoutChannel( unsigned int readoutch, unsigned int& crate, unsigned int& slot, unsigned int& femch ) const;
+    unsigned int GetTriggerFEMSlot() const {return fTriggerFEMSlot;}
     void SetOpMapTime( time_t t ) { requested_time = t; user_set_run=false; CheckValidity(); };
     void SetOpMapRun( int run ) { requested_run = run; user_set_run=true; CheckValidity(); };
 
@@ -63,6 +64,7 @@ namespace geo {
     std::map< unsigned int, opdet::UBOpticalChannelCategory_t > fChannelCategory;
     std::map< unsigned int, opdet::UBOpticalChannelType_t > fChannelType;
     std::set< unsigned int > fLogicChannels;
+    unsigned int fTriggerFEMSlot;
 
     // members to handle different mappings for different time ranges
     std::map< std::string, std::vector<time_t> > timerange_opmaps;

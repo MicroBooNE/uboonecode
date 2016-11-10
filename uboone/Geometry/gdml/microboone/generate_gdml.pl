@@ -96,7 +96,8 @@ my $NumberOfTestBoxes=30;
 my $granite_block="off";
 my $enclosureExtras="on";       #turn on or off depending on whether you'd like to generate the external things around the cryostat (ie. insulation, platform, stands, etc.) in the gdml file
 my $vetoWall_switch="off";  #turn on or off a proposed scintillator wall infront of the cryostat
-my $CRT_switch = "off";     #turn on/off cosmic ray tracker
+my $CRT_switch_A = "off";     #turn on/off cosmic ray tracker for Phase A (Bottom + Sides)
+my $CRT_switch_B = "on";     #turn on/off cosmic ray tracker for Phase B (Top)
 
 # The routines that create the GDML sub-files. Most of the explanatory
 # comments are in gen_defs().
@@ -118,7 +119,8 @@ if ( $granite_block eq "on" ) {  gen_granite(); } # physical volumes defined in 
 if ( $enclosureExtras eq "on" ) {  gen_enclosureExtras(); } #generation of insulation, etc. will happen if specified
 gen_cryostat();
 if ( $vetoWall_switch eq "on" ) {  gen_vetoWall();  } # physical volumes defined in gen_vetoWall()
-if ( $CRT_switch eq "on" ) {  gen_CRT();  } # physical volumes defined in gen_CRT()
+if ( $CRT_switch_A eq "on" ) {  gen_CRT_A();  } # physical volumes defined in gen_CRT_A()
+if ( $CRT_switch_B eq "on" ) {  gen_CRT_B();  } # physical volumes defined in gen_CRT_B()
 
 gen_enclosure();
 gen_world();
@@ -1708,18 +1710,32 @@ sub gen_vetoWall()
 }
 
 ##Generate Cosmic Ray Tracker (Bern's Geometry)
-sub gen_CRT()
+sub gen_CRT_A()
 {
     #Set up the output file.
     $CRT = "micro-CosmicRayTracker" . $suffix . ".gdml";
     push (@gdmlFiles, $CRT); # Add file to list of GDML fragments
     $CRT = ">" . $CRT; 
     open(CRT) or die("Could not open file $CRT for writing");
-    my $subroutineFile = 'gdml_CRT_subroutine_file.gdml';
+    my $subroutineFile = 'gdml_CRT_A_bars_subroutine_file.gdml';
     open( FILE, "< $subroutineFile" ) or die "Can't open $subroutineFile : $!";
     print CRT <FILE>;
     close FILE;
 }
+
+sub gen_CRT_B()
+{
+    #Set up the output file.
+    $CRT = "micro-CosmicRayTracker" . $suffix . ".gdml";
+    push (@gdmlFiles, $CRT); # Add file to list of GDML fragments
+    $CRT = ">" . $CRT; 
+    open(CRT) or die("Could not open file $CRT for writing");
+    my $subroutineFile = 'gdml_CRT_B_bars_subroutine_file.gdml';
+    open( FILE, "< $subroutineFile" ) or die "Can't open $subroutineFile : $!";
+    print CRT <FILE>;
+    close FILE;
+}
+
 
 # Parameterize the cryostat's surroundings.
 sub gen_enclosure()
@@ -1967,8 +1983,14 @@ EOF
     print GDML <VPF>;
   }
 
- if ( $CRT_switch eq "on" ) {
-    my $CRTvolumePlacementFile = 'gdml_CRT_volumePlacement_file.gdml';
+ if ( $CRT_switch_A eq "on" ) {
+    my $CRTvolumePlacementFile = 'gdml_CRT_A_bars_volumePlacement_file.gdml';
+    open VPF, "< $CRTvolumePlacementFile" or die "Can't open $CRTvolumePlacementFile : $!";
+    print GDML <VPF>;
+  }
+
+ if ( $CRT_switch_B eq "on" ) {
+    my $CRTvolumePlacementFile = 'gdml_CRT_B_bars_volumePlacement_file.gdml';
     open VPF, "< $CRTvolumePlacementFile" or die "Can't open $CRTvolumePlacementFile : $!";
     print GDML <VPF>;
   }

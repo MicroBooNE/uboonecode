@@ -27,7 +27,7 @@ IF (NOT CETBUILDTOOLS_VERSION)
     MESSAGE (FATAL_ERROR "ERROR: setup cetbuildtools to get the cmake modules")
 ENDIF()
 
-set(CMAKE_MODULE_PATH $ENV{ART_DIR}/Modules
+set(CMAKE_MODULE_PATH $ENV{CANVAS_DIR}/Modules
 		      $ENV{CETBUILDTOOLS_DIR}/Modules
 		      ${CMAKE_MODULE_PATH})
 
@@ -44,7 +44,9 @@ cet_report_compiler_flags()
 
 # these are minimum required versions, not the actual product versions
 find_ups_product( larcore v1_00_00 )
+find_ups_product( larcoreobj )
 find_ups_product( lardata v1_00_00 )
+find_ups_product( lardataobj )
 find_ups_product( larevt v1_00_00 )
 find_ups_product( larsim v1_00_00 )
 find_ups_product( larreco v1_00_00 )
@@ -56,8 +58,11 @@ find_ups_product( art v1_09_00 )
 find_ups_product( cetbuildtools v3_10_00 )
 find_ups_product( postgresql v9_1_5 )
 find_ups_boost( v1_53_0 )
+find_ups_product( uboonedaq_datatypes )
+find_ups_product( ifdh_art )
 
 cet_find_library( PQ NAMES pq PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
+cet_find_library( UBDut NAMES ubdata_types PATHS $ENV{UBOONEDAQ_DATATYPES_LIB} )
 
 # macros for dictionary and simple_plugin
 include(ArtDictionary)

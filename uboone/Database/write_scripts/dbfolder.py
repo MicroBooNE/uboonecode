@@ -100,7 +100,6 @@ class dbfolder():
     #
     ############################################################################################
     def write(self, file_name = None, override_future = 'no', t_start = 0):
-        print override_future
         if file_name == None:
             print '\nNice try, buddy, you need a file to upload data!'
             sys.exit(2)
@@ -180,9 +179,9 @@ class dbfolder():
 	    if not line: continue
 	    words = line.split()
 	    if words[0][0] == '#':
-	        if words[1] == 'time':
+	        if words[1].lower() == 'time':
 		    t0 = float(words[2])
-		elif words[1] == 'channel':
+		elif words[1].lower() == 'channel':
 		    column_names = words[2:]   #expects column names to be last line of header!
 		else:
 		    print '\nInvalid header in file ',fname,'!'

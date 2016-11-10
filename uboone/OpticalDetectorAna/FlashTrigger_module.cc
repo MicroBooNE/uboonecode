@@ -13,7 +13,7 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
@@ -21,11 +21,11 @@
 
 #include <memory>
 
-#include "SimulationBase/MCParticle.h"
-#include "SimulationBase/MCTruth.h"
-#include "lardata/RecoBase/OpFlash.h"
+#include "nusimdata/SimulationBase/MCParticle.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
+#include "lardataobj/RecoBase/OpFlash.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/RawData/TriggerData.h"
+#include "lardataobj/RawData/TriggerData.h"
 #include <limits>
 #include <climits>
 #include <TFile.h>

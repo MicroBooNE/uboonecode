@@ -8,7 +8,7 @@ standard_rawdigitsim:
  #
  # Signal configuration
  #
- # Signal shape ... 0=gaus, 1=square
+ # Signal shape ... 0=gaus(0), 1=square
  SigType:            [1]
  # Signal width (for shape) in time-ticks
  SigWidth:           [1]

@@ -14,9 +14,9 @@ art_make( LIBRARY_NAME OpticalSubEvents
                ${ART_FRAMEWORK_SERVICES_REGISTRY}
                ${ART_FRAMEWORK_SERVICES_OPTIONAL}
                ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-               ${ART_PERSISTENCY_COMMON}
-               ${ART_PERSISTENCY_PROVENANCE}
-               ${ART_UTILITIES}
+               art_Persistency_Common canvas_Persistency_Common
+               art_Persistency_Provenance canvas_Persistency_Provenance
+               art_Utilities canvas_Utilities
 	       ${ROOT_BASIC_LIB_LIST}	       
 	)
 		
@@ -24,7 +24,7 @@ art_make( LIBRARY_NAME OpticalSubEvents
 simple_plugin( SubEventBuilder "module"
 	       OpticalSubEvents
 	       uboone_OpticalDetectorAna_OpticalSubEvents_dict
-	       lardata_RecoBase
+	       lardataobj_RecoBase
 	       larcore_Geometry
 	       larcore_Geometry_Geometry_service
 	       lardata_Utilities
@@ -34,9 +34,9 @@ simple_plugin( SubEventBuilder "module"
                ${ART_FRAMEWORK_SERVICES_REGISTRY}
                ${ART_FRAMEWORK_SERVICES_OPTIONAL}
                ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-               ${ART_PERSISTENCY_COMMON}
-               ${ART_PERSISTENCY_PROVENANCE}
-               ${ART_UTILITIES}
+               art_Persistency_Common canvas_Persistency_Common
+               art_Persistency_Provenance canvas_Persistency_Provenance
+               art_Utilities canvas_Utilities
 	       ${ROOT_BASIC_LIB_LIST}	       
                BASENAME_ONLY
              )

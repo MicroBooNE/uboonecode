@@ -8,27 +8,27 @@ services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "reco2D_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::microboone_message_services_prod_debug
 #  FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_services
+  @table::microboone_services
 }
 services.FileCatalogMetadata.applicationVersion:  "S2013.06.25"
 
-services.user.PhotonVisibilityService: @local::microboone_photonvisibilityservice
-services.user.DatabaseUtil.ShouldConnect: false
+services.PhotonVisibilityService: @local::microboone_photonvisibilityservice
+services.DatabaseUtil.ShouldConnect: false
 
-#services.user.FileCatalogMetadataExtras:  @local::microboone_file_catalog
-#services.user.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
+#services.FileCatalogMetadataExtras:  @local::microboone_file_catalog
+#services.FileCatalogMetadataExtras.Metadata: [ "group",      "uboone",
 #                                                    "fileFormat", "root",
 #                                                    "fclName",    "standard_reco_uboone_2D.fcl",
 #                                                    "fclVersion", "v1_5",
 #                                                    "ubProjectStage",   "reco2D",
 #                                                    "ubProjectVersion", "v1_3" ]
-#services.user.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_reco2D.root"
-#services.user.BackTracker: @local::microboone_backtracker
+#services.FileCatalogMetadataExtras.RenameTemplate: "${base .root}_${CLUSTER 0}_${PROCESS 0}_reco2D.root"
+#services.BackTracker: @local::microboone_backtracker
 
 #source is now a root file
 source:
@@ -87,4 +87,4 @@ outputs:
 }
 
 physics.analyzers.hfa.HitsModuleLabel: "gaushit"
-#services.user.FileCatalogMetadataExtras.RenameTemplate: '' 
+#services.FileCatalogMetadataExtras.RenameTemplate: '' 

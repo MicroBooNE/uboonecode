@@ -13,15 +13,21 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "art/Framework/Services/Optional/TFileService.h"
+#include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/TriggerData.h"
-
+#include "lardataobj/RawData/BeamInfo.h"
+#include "lardataobj/RawData/TriggerData.h"
+#include <bitset>
 #include <memory>
 #include "getFOM.h"
+
+#include "datatypes/ub_BeamHeader.h"
+#include "datatypes/ub_BeamData.h"
+
+#include "TTree.h"
 
 class BeamDataQualityFilter;
 
@@ -41,6 +47,7 @@ public:
   bool filter(art::Event & e) override;
 
   // Selected optional functions.
+  bool beginSubRun(art::SubRun & sr) override;
   void beginJob() override;
   void endJob() override;
 
@@ -59,7 +66,17 @@ private:
     int fNFOMCut;
   } beamcuts_t;
   std::map<uint32_t, beamcuts_t> fBeamCutMap;
-
+  TTree* fTree;
+  uint32_t fRun;
+  uint32_t fSubRun;
+  uint32_t fEvent;
+  uint32_t fSec;
+  uint32_t fMSec;
+  double fTor;
+  double fHorn;
+  double fFOM;
+  uint32_t fTrigger;
+  bool fResult;
 };
 
 
@@ -82,67 +99,115 @@ BeamDataQualityFilter::BeamDataQualityFilter(fhicl::ParameterSet const & p)
     std::pair<uint32_t, beamcuts_t> bcpair(trigger_mask, bc);
     fBeamCutMap.insert(bcpair);
   }
+  art::ServiceHandle<art::TFileService> tfs;
+  fTree = tfs->make<TTree>("bdq","Beam Data Quality Filter Summary");
+
+  fTree->Branch("run",&fRun,"run/i");
+  fTree->Branch("subrun",&fSubRun,"subrun/i");
+  fTree->Branch("sec",&fSec,"sec/i");
+  fTree->Branch("msec",&fMSec,"msec/i");
+  fTree->Branch("event",&fEvent,"event/i");
+  fTree->Branch("tor",&fTor,"tor/D");
+  fTree->Branch("horn",&fHorn,"horn/D");
+  fTree->Branch("fom",&fFOM,"fom/D");
+  fTree->Branch("trigger",&fTrigger,"trigger/i");
+  fTree->Branch("result",&fResult,"result/O");
+}
+
+bool BeamDataQualityFilter::beginSubRun(art::SubRun & sr)
+{
+  fRun=sr.run();
+  fSubRun=sr.subRun();
+  
+  return true;
 }
 
 bool BeamDataQualityFilter::filter(art::Event & e)
 {
    // Implementation of required member function here.
-  bool flt=true;
+  fResult=true;
+  fTrigger=-1;
+  fFOM=-99999;
+  fHorn=-99999;
+  fTor=-99999;   
+  art::Timestamp ts = e.time();
+  fSec=ts.timeHigh();
+  fMSec=ts.timeLow()/1e6;
+  fEvent=e.event();
+
   art::Handle< std::vector<raw::Trigger> > triggerHandle;
   std::vector<art::Ptr<raw::Trigger> > trigInfo;
   if (e.getByLabel("daq", triggerHandle))
     art::fill_ptr_vector(trigInfo, triggerHandle);
   else {
     mf::LogWarning(__FUNCTION__) << "Missing trigger info. Skipping event.";
-    return flt;
+    fTree->Fill();
+    return fResult;
   }
+  fTrigger=trigInfo[0]->TriggerBits();
   std::bitset<16> trigbit(trigInfo[0]->TriggerBits());
   if (fBeamCutMap.find(trigInfo[0]->TriggerBits())==fBeamCutMap.end()) {
     mf::LogInfo(__FUNCTION__) << "Trigger not matching any of the beam(s). Skipping beam quality filter. trigger bits= "<<trigInfo[0]->TriggerBits()<<" "<<trigbit;
-    return flt;
+    fTree->Fill();
+    return fResult;
   }
   beamcuts_t* bc=&fBeamCutMap[trigInfo[0]->TriggerBits()];
-
   art::Handle< raw::BeamInfo > beam;
   if (e.getByLabel("beamdata",beam)){
     std::map<std::string, std::vector<double>> datamap = beam->GetDataMap();
-    float fom=-99999;
+    if (datamap.size()==0) {
+      mf::LogWarning(__FUNCTION__)<<"Event missing beam data";
+      fTree->Fill();
+      return fResult;
+    }
     if (bc->fRecalculateFOM) {
-      fom=1;//getFOM();
+      gov::fnal::uboone::datatypes::ub_BeamHeader ubbh;
+      std::vector<gov::fnal::uboone::datatypes::ub_BeamData> ubbdvec;
+      //currently beamHeader, timestamp not required by getFOM function
+      //filling only data which is required 
+      for (auto& bdata : datamap) {
+	gov::fnal::uboone::datatypes::ub_BeamData ubbd;
+	ubbd.setDeviceName(bdata.first);
+	ubbd.setData(bdata.second);
+	ubbdvec.push_back(ubbd);
+      } 
+      fFOM=bmd::getFOM(bc->fBeamName,ubbh,ubbdvec);
+      mf::LogDebug(__FUNCTION__)<<"Recalculated fom="<<fFOM;
     } else {
       //get it from BeamInfo
       if (datamap["FOM"].size()>0)
-	fom=datamap["FOM"][0];
+	fFOM=datamap["FOM"][0];
       else
 	mf::LogError(__FUNCTION__)<<"recalculate_fom set to false, but FOM is not in beamdata product";
     }
-    if ( fom<bc->fFOMRange[0] || fom >bc->fFOMRange[1]) {
-      flt=false;
+    if ( fFOM<bc->fFOMRange[0] || fFOM>bc->fFOMRange[1]) {
+      fResult=false;
       bc->fNFOMCut+=1;
     }
-    float intensity=0;
-    if (bc->fBeamName=="bnb" && datamap["E:TOR860"].size()>0) intensity=datamap["E:TOR860"][0];
-    else if (bc->fBeamName=="bnb" && datamap["E:TOR875"].size()>0) intensity=datamap["E:TOR875"][0];
-    else if (bc->fBeamName=="numi" && datamap["E:TORTGT"].size()>0) intensity=datamap["E:TORTGT"][0];
-    if ( intensity<bc->fIntensityRange[0] || intensity>bc->fIntensityRange[1]) {
-      flt=false;
+    if (bc->fBeamName=="bnb" && datamap["E:TOR860"].size()>0) fTor=datamap["E:TOR860"][0];
+    else if (bc->fBeamName=="bnb" && datamap["E:TOR875"].size()>0) fTor=datamap["E:TOR875"][0];
+    else if (bc->fBeamName=="numi" && datamap["E:TORTGT"].size()>0) fTor=datamap["E:TORTGT"][0];
+    if ( fTor<bc->fIntensityRange[0] || fTor>bc->fIntensityRange[1]) {
+      fResult=false;
       bc->fNIntensityCut+=1;
     }
-    float horncurr=0;
-    if (bc->fBeamName=="bnb" && datamap["E:THCURR"].size()>0) horncurr=datamap["E:THCURR"][0];
+    if (bc->fBeamName=="bnb" && datamap["E:THCURR"].size()>0) fHorn=datamap["E:THCURR"][0];
     else if (bc->fBeamName=="numi" && datamap["E:NSLINA"].size()>0 &&
 	     datamap["E:NSLINB"].size()>0 && datamap["E:NSLINC"].size()>0 &&
 	     datamap["E:NSLIND"].size()>0) 
-      horncurr=-datamap["E:NSLINA"][0]-datamap["E:NSLINB"][0]-datamap["E:NSLINC"][0]-datamap["E:NSLIND"][0];
-    if ( horncurr<bc->fHornCurrentRange[0] || horncurr>bc->fHornCurrentRange[1]) {
-      flt=false;
+      fHorn=-datamap["E:NSLINA"][0]-datamap["E:NSLINB"][0]-datamap["E:NSLINC"][0]-datamap["E:NSLIND"][0];
+
+    
+    if ( fHorn<bc->fHornCurrentRange[0] || fHorn>bc->fHornCurrentRange[1]) {
+      fResult=false;
       bc->fNHornCurrentCut+=1;
     }
   } else {
     mf::LogError(__FUNCTION__)<<"Running beam data quality filter, but missing beam data!";
   }
-  
-  return flt;
+ 
+  fTree->Fill();
+  return fResult;
 }
 
 void BeamDataQualityFilter::beginJob()

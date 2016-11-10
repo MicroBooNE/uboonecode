@@ -16,7 +16,6 @@
 #include <string>
 #include <algorithm> // std::fill()
 #include <functional>
-#include <fstream>
 #include <random>
 #include <chrono>
 
@@ -47,25 +46,16 @@
 #include "larsim/RandomUtils/LArSeedService.h"
 
 // LArSoft libraries
-// v05_11_01 dependencies
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/raw.h"
-#include "lardata/RawData/TriggerData.h"
-#include "larsim/Simulation/SimChannel.h"
-#include "larsim/Simulation/sim.h"
-
-
-// LArSoft libraries
-// #include "lardataobj/RawData/RawDigit.h"
-// #include "lardataobj/RawData/raw.h"
-// #include "lardataobj/RawData/TriggerData.h"
-// #include "lardataobj/Simulation/SimChannel.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/raw.h"
+#include "lardataobj/RawData/TriggerData.h"
+#include "lardataobj/Simulation/SimChannel.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
-//#include "lardataobj/Simulation/sim.h"
+#include "lardataobj/Simulation/sim.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
@@ -93,7 +83,7 @@ namespace detsim {
 
     void GenNoiseInTime(std::vector<float> &noise, double noise_factor) const;
     void GenNoiseInFreq(std::vector<float> &noise, double noise_factor) const;
-    void GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view, int chan);
+    void GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view);
     void MakeADCVec(std::vector<short>& adc, std::vector<float> const& noise, 
                     std::vector<double> const& charge, float ped_mean) const;
 
@@ -150,9 +140,8 @@ namespace detsim {
     };
 
     //
-    // Needed for post-filter noise (pfn) generator by Jyoti 
+    // Needed for post-filter noise (pfn) generator
     //
-
     std::vector<double> _pfn_shaping_time_v;
     TF1  *_pfn_f1;
     TF1  *_pfn_MyPoisson;
@@ -283,7 +272,7 @@ namespace detsim {
 
     // get access to the TFile service
     art::ServiceHandle<art::TFileService> tfs;
-    
+
     char buff0[80], buff1[80];
 
     if(fMakeNoiseDists) {
@@ -301,8 +290,7 @@ namespace detsim {
         throw cet::exception(__FUNCTION__)<<"Invalid test wire channel: "<<fTestWire;
 
       std::vector<unsigned int> channels;
-      channels.reserve(geo->PlaneIDs().size());
-      for(auto const& plane_id : geo->PlaneIDs())
+      for(auto const& plane_id : geo->IteratePlaneIDs())
         channels.push_back(geo->PlaneWireToChannel(plane_id.Plane,fTestWire));
 
       double xyz[3] = { std::numeric_limits<double>::max() };
@@ -327,10 +315,7 @@ namespace detsim {
 
   //-------------------------------------------------
   void SimWireMicroBooNE::endJob()
-  {
-  
-  
-  }
+  {}
 
   void SimWireMicroBooNE::produce(art::Event& evt)
   {
@@ -427,7 +412,7 @@ namespace detsim {
     // digits to be transferred to the art::Event after the put statement below
     std::unique_ptr< std::vector<raw::RawDigit>> digcol(new std::vector<raw::RawDigit>);
     digcol->reserve(N_CHANNELS);
-   
+
     std::vector<std::vector<std::vector<std::unique_ptr<ResponseParams> > > > responseParamsVec(N_CHANNELS);
 
     _wr = 0;
@@ -525,32 +510,6 @@ namespace detsim {
 //      }
 //    }
 
-    DoubleVec             noiseFactVec(N_VIEWS,0.);
-    auto tempNoiseVec = sss->GetNoiseFactVec();	
-    for (size_t v = 0; v != N_VIEWS; ++v) {
-      	
-      //the current sss only allows retrieval by channel, even though these things only change by view
-      //If these ever do change by channel, then this code automatically becomes incorrect!
-      double shapingTime = sss->GetShapingTime(first_channel_in_view[v]);	
-      double asicGain    = sss->GetASICGain(first_channel_in_view[v]);
-      
-      if (fShapingTimeOrder.find( shapingTime ) != fShapingTimeOrder.end() ) {
-        if(_pfn_shaping_time_v.size()<=v) _pfn_shaping_time_v.resize(v+1,-1);
-        if(_pfn_shaping_time_v[v]<0) _pfn_shaping_time_v[v]=shapingTime;
-        noiseFactVec[v]  = tempNoiseVec[v].at( fShapingTimeOrder.find( shapingTime )->second );
-        noiseFactVec[v] *= asicGain/4.7;
-      }
-      else {//Throw exception...
-        throw cet::exception("SimWireMicroBooNE")
-        << "\033[93m"
-        << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
-        << std::endl
-        << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
-        << "\033[00m"
-        << std::endl;
-      }
-    }
-
     
     //--------------------------------------------------------------------
     //
@@ -578,7 +537,6 @@ namespace detsim {
     //   this is needed because hits generate responses on adjacent wires!
     for(unsigned int chan = 0; chan < N_CHANNELS; chan++) {
 
-
       //clean up working vectors from previous iteration of loop
       adcvec.resize(fNTimeSamples); //compression may have changed the size of this vector
       noisetmp.resize(fNTicks); //just in case
@@ -600,9 +558,13 @@ namespace detsim {
       
       //Get pedestal with random gaussian variation
       CLHEP::RandGaussQ rGaussPed(engine, 0.0, pedestalRetrievalAlg.PedRms(chan));
-      float ped_mean = pedestalRetrievalAlg.PedMean(chan) + rGaussPed.fire(); 
-
+      float ped_mean = pedestalRetrievalAlg.PedMean(chan) + rGaussPed.fire();
+     
+     
       //Generate Noise
+
+
+
       double             noise_factor;
       auto tempNoiseVec = sss->GetNoiseFactVec();
       double shapingTime = sss->GetShapingTime(chan);
@@ -628,10 +590,10 @@ namespace detsim {
           GenNoiseInTime(noisetmp, noise_factor);
         else if(fGenNoise==2)
           GenNoiseInFreq(noisetmp, noise_factor);
-       	else if(fGenNoise==3)
-	         GenNoisePostFilter(noisetmp, noise_factor, view, chan);
+	else if(fGenNoise==3)
+	  GenNoisePostFilter(noisetmp, noise_factor, view);
       }
-
+      
       //Add Noise to NoiseDist Histogram
       //geo::SigType_t sigtype = geo->SignalType(chan);
       geo::View_t vw = geo->View(chan);
@@ -649,9 +611,6 @@ namespace detsim {
         raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
         rd.SetPedestal(ped_mean);
         digcol->push_back(std::move(rd));
-
-
-
         continue;
       }
       
@@ -720,31 +679,14 @@ namespace detsim {
       // and used on the next loop.
       MakeADCVec(adcvec, noisetmp, chargeWork, ped_mean);
       raw::RawDigit rd(chan, fNTimeSamples, adcvec, fCompression);
-      rd.SetPedestal(ped_mean); 
-    
-
-        digcol->push_back(std::move(rd)); // we do move the raw digit copy, though
-
+      rd.SetPedestal(ped_mean);
+      digcol->push_back(std::move(rd)); // we do move the raw digit copy, though
     }// end of 2nd loop over channels
 
-
-    // Used in calculation of baseline noise value, but hardcoded so now uneccesary.
-    /* 
-    double total = 0;
-    for (size_t i=3499; i < 4500; i++)
-     {
-       std::cout << "RMS of waveform " << i << " is " << rms[i] << std::endl;
-       total = total+rms[i];
-     }
-
-      double baselinerms = total/1000;
-
-      std::cout << "\n\n\n\n\n\n The average RMS is:" << baselinerms << "\n\n\n\n\n\n\n" << std::endl;
-    */      
     evt.put(std::move(digcol));
     return;
   }
-  
+
 
   //-------------------------------------------------
   void SimWireMicroBooNE::MakeADCVec(std::vector<short>& adcvec, std::vector<float> const& noisevec, 
@@ -853,24 +795,23 @@ namespace detsim {
     // multiply each noise value by fNTicks as the InvFFT
     // divides each bin by fNTicks assuming that a forward FFT
     // has already been done.
-    // Also need to scale so that noise RMS matches that asked
-    // in fhicl parameter (somewhat arbitrary scaling otherwise)
-    // harcode this scaling factor (~20) for now
+    //Also need to scale so that noise RMS matches that asked
+    //in fhicl parameter (somewhat arbitrary scaling otherwise)
+    //harcode this scaling factor (~20) for now
     for(unsigned int i = 0; i < noise.size(); ++i) noise.at(i) *= 1.*(fNTicks/20.);
     
   }
-
+  
   //---------------------------------------------------------
   Double_t rpfn_f1(double waveform_size, Double_t fitpar[], Double_t x) {
     return fitpar[0] + ( fitpar[1] + fitpar[2] * x * waveform_size/2.) * TMath::Exp(-fitpar[3] * TMath::Power( x * waveform_size/2., fitpar[4]));
   }
   
-  void SimWireMicroBooNE::GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view, int chan)
+  void SimWireMicroBooNE::GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view)
   {
     // noise is a vector of size fNTicks, which is the number of ticks
     const size_t waveform_size = noise.size();
     
-
     if(_pfn_shaping_time_v.size()<=view || _pfn_shaping_time_v[view]<0)
       throw cet::exception("SimWireMicroBooNE")
 	<< "GenNoisePostFilter encounters unknown view!" << std::endl;
@@ -887,14 +828,14 @@ namespace detsim {
     
     if(ShapingTime==2.0) {
       params[0] = 3.3708; //2us
-      fitpar[0] = 4.27132e+01;
-      fitpar[1] = 6.22750e+02;
-      fitpar[2] = -2.53535e-01;
-      fitpar[3] = 8.07578e-05;
-      fitpar[4] = 1.35510e+00;
+      fitpar[0] = 16.8;
+      fitpar[1] = 45.7;
+      fitpar[2] = 0.0028;
+      fitpar[3] = 9.5e-9;
+      fitpar[4] = 2.6;
     }
     else if(ShapingTime==1.0) {
-      params[0] = 3.5125; //1us 
+      params[0] = 3.5125; //1us
       fitpar[0] = 14.4;
       fitpar[1] = 35.1;
       fitpar[2] = 0.049;
@@ -902,48 +843,47 @@ namespace detsim {
       fitpar[4] = 2.4;
     }else
       throw cet::exception("SimWireMicroBooNE") << "<<" << __FUNCTION__ << ">> not supported shaping time " << ShapingTime << std::endl;
-
     Int_t n = waveform_size;
-
+    
     TVirtualFFT::SetTransform(0);
-   
+    
     // seed gamma-distibuted random number with mean params[0]
     // replacing continuous Poisson distribution from ROOT
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::gamma_distribution<double> distribution(params[0]);
-
+    
     // For every tick...
     for(size_t i=0; i<waveform_size; i++){
-
+      
       Double_t freq;
       if (i < n/2.){
         freq = (i)*2./n; //2 MHz digitization
       }else{
         freq = (n-i)*2./n;
       }
-
+      
       // Draw gamma-dstributed random number
       gammaRand = distribution(generator); 
-
+      
       // Define FFT parameters
       _pfn_rho_v[i] = rpfn_f1(waveform_size, fitpar, freq) * gammaRand /params[0];
       Double_t rho = _pfn_rho_v[i];
       Double_t phi = gRandom->Uniform(0,1) * 2. * TMath::Pi();
-
+      
       _pfn_value_re[i] = rho*cos(phi)/((double)waveform_size);
       _pfn_value_im[i] = rho*sin(phi)/((double)waveform_size);
     }
-
+    
     // Inverse FFT
     if(!_pfn_ifft) _pfn_ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     _pfn_ifft->SetPointsComplex(&_pfn_value_re[0],&_pfn_value_im[0]);
     _pfn_ifft->Transform();
-
+    
     // Produce fit histogram from the FFT for the real part
     TH1 *fb = 0;
     fb = TH1::TransformHisto(_pfn_ifft,fb,"Re");
-
+    
     // Get wire length 
     geo::GeometryCore const* geom = lar::providerFrom<geo::Geometry>();
     std::vector<geo::WireID> wireIDs = geom->ChannelToWire(chan);
@@ -954,12 +894,12 @@ namespace detsim {
     // Calculating using the 16th, 50th, and 84th percentiles.
     // Because the signal is expected to be above the 84th percentile, this 
     // effectively vetos the signal.
-  
+    
     Double_t min = fb->GetMinimum();
     Double_t max = fb->GetMaximum();	 
     TH1F* h_rms = new TH1F("h_rms", "h_rms", Int_t(10*(max-min+1)), min, max+1);
     
-
+    
     for(size_t i=0; i < waveform_size; ++i){
       h_rms->Fill(fb->GetBinContent(i+1));
     }
@@ -969,29 +909,33 @@ namespace detsim {
     if (h_rms->GetSum()>0){
       double xq = 0.5-0.34;
       h_rms->GetQuantiles(1, &par[0], &xq);
-    
+      
       xq = 0.5;
       h_rms->GetQuantiles(1, &par[1], &xq);
-
+      
       xq = 0.5+0.34;
       h_rms->GetQuantiles(1, &par[2], &xq);
-    
+      
       rms_quantilemethod = sqrt((pow(par[1]-par[0],2)+pow(par[2]-par[1],2))/2.);
     }
     
     // Used for calculation of baseline
     // rms.push_back(std::move(rms_quantilemethod));
-
+    
     // Scaling noise RMS with wire length dependance
     double baseline = 1.79349;
     double scalefactor = (rms_quantilemethod/baseline)*(1.019+0.00173*(wirelength));
     for(size_t i=0; i<waveform_size; ++i) {
       noise[i] = fb->GetBinContent(i+1)*scalefactor;
     }
-
+    
+    /*
+      double average=0;
+      for(auto const& v : noise) average += v;
+      average /= ((double)waveform_size);
+      std::cout<<"\033[93m Average ADC: \033[00m" << average << std::endl;
+    */
     delete fb;
-    delete h_rms;
   }
   
 }
-

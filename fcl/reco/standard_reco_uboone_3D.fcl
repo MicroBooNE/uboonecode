@@ -19,15 +19,15 @@ services:
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "reco3D_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  user:         @local::microboone_basic_services
+  @table::microboone_basic_services
 }
-services.user.PhotonVisibilityService: @local::microboone_photonvisibilityservice
-services.user.DatabaseUtil.ShouldConnect: false
+services.PhotonVisibilityService: @local::microboone_photonvisibilityservice
+services.DatabaseUtil.ShouldConnect: false
 
 #source is now a root file
 source:

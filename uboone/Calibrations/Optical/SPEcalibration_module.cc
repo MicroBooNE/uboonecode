@@ -14,7 +14,7 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 
 // Supporting libraries
@@ -37,8 +37,8 @@
 #include "TH1D.h"
 
 // LArSoft 
-#include "larcore/SimpleTypesAndConstants/RawTypes.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "uboone/TriggerSim/UBTriggerTypes.h"
 
@@ -47,11 +47,11 @@
 #include "uboone/Geometry/UBOpReadoutMap.h"
 
 //RawDigits
-#include "lardata/RawData/raw.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/OpDetWaveform.h"
-#include "lardata/RawData/DAQHeader.h"
-#include "lardata/RawData/TriggerData.h"
+#include "lardataobj/RawData/raw.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
+#include "lardataobj/RawData/DAQHeader.h"
+#include "lardataobj/RawData/TriggerData.h"
 
 // Pulse finding
 #include "uboone/OpticalDetectorAna/OpticalSubEvents/cfdiscriminator_algo/cfdiscriminator.hh"

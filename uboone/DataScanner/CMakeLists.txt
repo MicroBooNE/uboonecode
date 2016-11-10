@@ -19,16 +19,16 @@ art_make( BASENAME_ONLY
           MODULE_LIBRARIES uboonecode_uboone_MCShowerReco
 			   larcore_Geometry
 			   larcore_Geometry_Geometry_service
-			   larsim_Simulation
-			   SimulationBase
+			   larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation
+			   nusimdata_SimulationBase
 			   larsim_MCCheater_BackTracker_service
 			   lardata_Utilities
 			   larevt_Filters
-			   lardata_RawData
-			   lardata_RecoBase
-			   lardata_RecoObjects
+			   lardataobj_RawData
+			   lardataobj_RecoBase
+			   lardata_RecoObjects larreco_Deprecated
 			   ${UBOONECODE_LIB}
-			   ${SIMULATIONBASE}
+			   nusimdata_SimulationBase
 			   ${LARRECO_LIB}
 			   ${LARDATA_LIB}
 			   ${ART_FRAMEWORK_CORE}
@@ -37,9 +37,9 @@ art_make( BASENAME_ONLY
 			   ${ART_FRAMEWORK_SERVICES_REGISTRY}
 			   ${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			   ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-			   ${ART_PERSISTENCY_COMMON}
-			   ${ART_PERSISTENCY_PROVENANCE}
-			   ${ART_UTILITIES}
+			   art_Persistency_Common canvas_Persistency_Common
+			   art_Persistency_Provenance canvas_Persistency_Provenance
+			   art_Utilities canvas_Utilities
 			   ${MF_MESSAGELOGGER}
 			   ${MF_UTILITIES}
 			   ${FHICLCPP}

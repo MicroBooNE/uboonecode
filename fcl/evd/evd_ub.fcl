@@ -5,7 +5,7 @@ process_name: EVD
 services:
 {
   message:      @local::evd_message
-  user:         @local::microboone_disp
+  @table::microboone_disp
 }
 
 # Define the services
@@ -42,4 +42,4 @@ physics:
  #and output modules. all items here can be run simultaneously
  end_paths: [evd]  
 }
-services.user.RawDrawingOptions.TotalTicks: 9600
+services.RawDrawingOptions.TotalTicks: 9600

@@ -5,10 +5,10 @@ process_name: MicrobooneResp
 
 services:
 {
-  Timing:       {}
+  TimeTracker:  {}
   RandomNumberGenerator: {} #ART native random number generator
   message:      @local::standard_warning
-  user:         @local::microboone_services
+  @table::microboone_services
 }
 
 

@@ -19,7 +19,7 @@
 #include <vector>
 
 //LArSoft
-#include "lardata/RawData/TriggerData.h"
+#include "lardataobj/RawData/TriggerData.h"
 #include "lardata/DetectorInfo/ElecClock.h"
 #include "UBTrigException.h"
 

@@ -1,0 +1,51 @@
+#include "geometry_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "swtrigger_microboone.fcl"
+
+process_name: FEMemulator
+services:
+{
+  TFileService: { fileName: "FEMemulator.root" }
+  TimeTracker:  {}
+  ExptGeoHelperInterface: @local::microboone_geometry_helper
+  Geometry:               @local::microboone_geo
+  DetectorClocksService:            @local::microboone_detectorclocks
+  UBOpReadoutMap:         @local::microboone_opreadoutmap
+}
+
+services.DetectorClocksService.TrigModuleName: "daq"
+
+outputs:
+{
+}
+
+physics:
+{
+  producers:
+  {
+  }
+
+  filters:
+  {
+    swtrigger: @local::microboone_swtrigger_data
+  }
+
+ produceIt: []
+ filterIt:  [swtrigger]
+ analyzeIt: []
+
+ #define the output stream, there could be more than one if using filters
+ stream1:  []
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event,
+ #ie filters and producers
+ trigger_paths: [filterIt]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event,
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     []
+}
+
+
+

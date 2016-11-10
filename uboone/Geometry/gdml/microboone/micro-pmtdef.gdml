@@ -1,44 +1,44 @@
 <solids>
  <tube name="PMTVolume"
-  rmax="(6.1*2.54)"
-  z="(11.1*2.54)+0.005"
+  rmax="15.494"
+  z="28.199"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
 
  <tube name="PMT_AcrylicPlate"
-  rmax="(6.0*2.54)"
-  z="(0.2)"
+  rmax="15.24"
+  z="0.2"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
  <tube name="PMT_Stalk"
-  rmax="(1.25*2.54)"
-  z="(3.0*2.54)"
+  rmax="3.175"
+  z="7.62"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
  <tube name="PMT_SteelBase"
-  rmax="(6.0*2.54)"
-  z="(1.5*2.54)"
+  rmax="15.24"
+  z="3.81"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
  <tube name="PMT_Underside"
-  rmax="2.54*4.0"
-  z="2.54*2.5"
+  rmax="10.16"
+  z="6.35"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
  <box name="Paddle_PMT"
   lunit="cm"
-  x="1/8*2.54"
-  y="20*2.54"
-  z="(7+1/3)*2.54"/> 
+  x="0.3175"
+  y="50.8"
+  z="18.6266666667"/>
 
  <tube name="PMT_Lens"
-  rmax="2.54*4.0"
-  z="2.54*2.5"
+  rmax="10.16"
+  z="6.35"
   deltaphi="360"
   aunit="deg"
   lunit="cm"/>
@@ -78,27 +78,27 @@
   <solidref ref="PMTVolume"/>
   <physvol>
    <volumeref ref="volOpDetSensitive"/>
-   <position name="posOpDetSensitive" unit="cm" x="0" y="0" z="(5.5 * 2.54) - 0.1"/>
+   <position name="posOpDetSensitive" unit="cm" x="0" y="0" z="13.87"/>
   </physvol>
   <physvol>
    <volumeref ref="vol_PMT_AcrylicPlate"/>
-   <position name="pos_PMT_AcrylicPlate" unit="cm" x="0" y="0" z="(5.5 * 2.54) - 0.3"/>
+   <position name="pos_PMT_AcrylicPlate" unit="cm" x="0" y="0" z="13.67"/>
   </physvol>
   <physvol>
    <volumeref ref="vol_PMT_Stalk"/>
-   <position name="pos_PMT_Stalk" unit="cm" x="0" y="0" z="(3.0 * 2.54)-(5.5 * 2.54)"/>
+   <position name="pos_PMT_Stalk" unit="cm" x="0" y="0" z="-6.35"/>
   </physvol>
   <physvol>
    <volumeref ref="vol_PMT_SteelBase"/>
-   <position name="pos_PMT_SteelBase" unit="cm" x="0" y="0" z="(0.75 * 2.54)-(5.5 * 2.54)"/>
+   <position name="pos_PMT_SteelBase" unit="cm" x="0" y="0" z="-12.065"/>
   </physvol>
   <physvol>
    <volumeref ref="vol_PMT_Lens"/>
-   <position name="pos_PMT_Lens" unit="cm" x="0" y="0" z="(7.0 * 2.54)-(5.5 * 2.54)"/>
+   <position name="pos_PMT_Lens" unit="cm" x="0" y="0" z="3.81"/>
   </physvol>
   <physvol>
    <volumeref ref="vol_PMT_Underside"/>
-   <position name="pos_PMT_Underside" unit="cm" x="0" y="0" z="(7.0 * 2.54)-(5.5 * 2.54)"/>
+   <position name="pos_PMT_Underside" unit="cm" x="0" y="0" z="3.81"/>
   </physvol>
  </volume>
 </structure>

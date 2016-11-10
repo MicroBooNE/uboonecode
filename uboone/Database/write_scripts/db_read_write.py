@@ -50,6 +50,21 @@ def help_me():
   
   
   ----------------------------------------------------
+  NOTE ON IOVS AND OVERLAP WHEN WRITING DATA
+  ----------------------------------------------------  
+  By default, if the timestamp t is later than the start time of all other 
+  IOVs in the folder, then the written data is given an IOV that starts at 
+  t and has no end time.  The other IOVs are adjusted accordingly.
+  
+  If the timestamp t is earlier than the start time of at least one IOV, then 
+  the written data is given an IOV that starts at t and ends at the begin_time 
+  of the next IOV chronologically.  This masks part or all of the IOV that 
+  previously preceded the next IOV.  This behavior can be changed using the 
+  --override option, so that the written data has an IOV that starts at t and 
+  has no end time.  This will mask all other IOVs that have a start time >= t.
+  
+  
+  ----------------------------------------------------
   File Format
   ---------------------------------------------------- 
   Files that are written to the database via the -i(--input) option must be 
@@ -174,7 +189,7 @@ def main():
     elif o in ("--is_playlist"):
       is_playlist = True
     elif o in ("--production"):
-      host = "ifdb02.fnal.gov"
+      host = "ifdb05.fnal.gov"
       dbname = "microboone_prod"
     else:
       assert False, "unhandled option "+o

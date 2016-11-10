@@ -21,10 +21,10 @@ services:
 {
   #Load the service that manages root files for histograms.
   TFileService: { fileName: "diffusion_tree.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 }     #default is one
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 }     #default is one
   RandomNumberGenerator: {}                     #ART native random number generator
-  user:         @local::microboone_services
+  @table::microboone_services
   message:      @local::standard_info
 }
 

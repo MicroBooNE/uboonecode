@@ -10,12 +10,11 @@ services:
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "ana_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 } # default is one
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_data
   BackTracker: @local::microboone_backtracker
-  #user:         @local::microboone_services_ana
   @table::microboone_reco_mcc7_services
 }
 
@@ -75,6 +74,7 @@ physics.analyzers.analysistree.FlashMatchAssocLabel:            ["trackkalmanhit
 physics.analyzers.analysistree.PFParticleModuleLabel:           "pandoraNu"
 physics.analyzers.analysistree.FlashT0FinderLabel:              ["t0","t0","t0","t0","t0"]
 physics.analyzers.analysistree.MCT0FinderLabel:                 ["mct0","mct0","mct0","mct0","mct0"]
+physics.analyzers.analysistree.T0RecoAnodeCathodePiercingLabel: ["t0reco","t0reco","t0reco","t0reco","t0reco"]
 physics.analyzers.analysistree.CosmicScoreThresholds:           [0.0]
 physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
