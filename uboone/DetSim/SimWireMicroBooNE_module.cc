@@ -160,6 +160,7 @@ namespace detsim {
     std::vector<double> _pfn_rho_v;
     std::vector<double> _pfn_value_re;
     std::vector<double> _pfn_value_im;
+    float gammaRand;
 
     //std::vector<double> rms;  //For calculating baseline
 
