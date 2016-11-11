@@ -51,6 +51,7 @@
 #include "lardataobj/RawData/TriggerData.h"
 #include "lardataobj/Simulation/SimChannel.h"
 #include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
@@ -510,7 +511,33 @@ namespace detsim {
 //      }
 //    }
 
-    
+        DoubleVec             noiseFactVec(N_VIEWS,0.);
+    auto tempNoiseVec = sss->GetNoiseFactVec();	
+    for (size_t v = 0; v != N_VIEWS; ++v) {
+      	
+      //the current sss only allows retrieval by channel, even though these things only change by view
+      //If these ever do change by channel, then this code automatically becomes incorrect!
+      double shapingTime = sss->GetShapingTime(first_channel_in_view[v]);	
+      double asicGain    = sss->GetASICGain(first_channel_in_view[v]);
+      
+      if (fShapingTimeOrder.find( shapingTime ) != fShapingTimeOrder.end() ) {
+        if(_pfn_shaping_time_v.size()<=v) _pfn_shaping_time_v.resize(v+1,-1);
+        if(_pfn_shaping_time_v[v]<0) _pfn_shaping_time_v[v]=shapingTime;
+        noiseFactVec[v]  = tempNoiseVec[v].at( fShapingTimeOrder.find( shapingTime )->second );
+        noiseFactVec[v] *= asicGain/4.7;
+      }
+      else {//Throw exception...
+        throw cet::exception("SimWireMicroBooNE")
+        << "\033[93m"
+        << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
+        << std::endl
+        << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
+        << "\033[00m"
+        << std::endl;
+      }
+    }
+
+
     //--------------------------------------------------------------------
     //
     // Loop over channels a second time and produce the RawDigits by adding together 
@@ -828,11 +855,11 @@ namespace detsim {
     
     if(ShapingTime==2.0) {
       params[0] = 3.3708; //2us
-      fitpar[0] = 16.8;
-      fitpar[1] = 45.7;
-      fitpar[2] = 0.0028;
-      fitpar[3] = 9.5e-9;
-      fitpar[4] = 2.6;
+      fitpar[0]=4.27132e+01;
+      fitpar[1]=6.22750e+02;
+      fitpar[2]=-2.53535e-01;
+      fitpar[3]=8.0757e-05;
+      fitpar[4]=1.35510e+00;
     }
     else if(ShapingTime==1.0) {
       params[0] = 3.5125; //1us
@@ -889,7 +916,7 @@ namespace detsim {
     std::vector<geo::WireID> wireIDs = geom->ChannelToWire(chan);
     geo::WireGeo const& wire = geom->Wire(wireIDs.front());
     double wirelength = wire.HalfL() * 2;
-    
+   
     // Calculate RMS -----------------------------------------------------
     // Calculating using the 16th, 50th, and 84th percentiles.
     // Because the signal is expected to be above the 84th percentile, this 
