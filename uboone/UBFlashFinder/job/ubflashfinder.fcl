@@ -1,0 +1,27 @@
+#include "ubflashalgo.fcl"
+#include "ubflashcalib.fcl"
+BEGIN_PROLOG
+
+UBFlashBeam:
+{
+  module_type     : "UBFlashFinder"
+  FlashFinderAlgo : "SimpleFlashAlgo"
+  AlgoConfig      : @local::SimpleFlashBeam
+  OpHitProducer   : "ophitSatBeam"
+  OpFlashProducer : "simpleFlashBeam"
+  PECalib         : @local::SPECalib
+  BeamFlash       : true
+}
+
+UBFlashCosmic:
+{
+  module_type     : "UBFlashFinder"
+  FlashFinderAlgo : "SimpleFlashAlgo"
+  AlgoConfig      : @local::SimpleFlashCosmic
+  OpHitProducer   : "ophitSatCosmic"
+  OpFlashProducer : "simpleFlashCosmic"
+  PECalib         : @local::RecoPECalib
+  BeamFlash       : false
+}
+
+END_PROLOG
