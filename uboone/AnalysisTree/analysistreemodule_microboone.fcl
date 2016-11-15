@@ -13,7 +13,7 @@ microboone_analysistree:
  VertexModuleLabel:        [ "vertex3d" ]
  PandoraNuVertexModuleLabel: "pandoraNu"
  ClusterModuleLabel:       "linecluster"
- OpFlashModuleLabel:       "opflash"
+ OpFlashModuleLabel:       [ "opflash" ]
  MCShowerModuleLabel:      "mcreco" 
  MCTrackModuleLabel:      "mcreco" 
  CalorimetryModuleLabel:   [ "calo" ]
