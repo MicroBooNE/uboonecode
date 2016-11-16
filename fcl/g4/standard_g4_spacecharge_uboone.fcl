@@ -1,3 +1,6 @@
 #include "standard_g4_uboone.fcl"
+
 outputs.out1.fileName: "%ifb_%tc_g4_spacecharge.root"
-services.LArG4Parameters.EnableSCE:  true
+
+services.SpaceCharge.EnableSimSpatialSCE: true
+services.SpaceCharge.EnableSimEfieldSCE: true
