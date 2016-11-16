@@ -19,14 +19,14 @@ art_make( BASENAME_ONLY
           MODULE_LIBRARIES uboonecode_uboone_MCShowerReco
 			   larcore_Geometry
 			   larcore_Geometry_Geometry_service
-			   larsim_Simulation lardataobj_Simulation
+			   larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation
 			   nusimdata_SimulationBase
 			   larsim_MCCheater_BackTracker_service
 			   lardata_Utilities
 			   larevt_Filters
 			   lardataobj_RawData
 			   lardataobj_RecoBase
-			   lardata_RecoObjects
+			   lardata_RecoObjects larreco_Deprecated
 			   ${UBOONECODE_LIB}
 			   nusimdata_SimulationBase
 			   ${LARRECO_LIB}

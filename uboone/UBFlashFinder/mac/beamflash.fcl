@@ -1,0 +1,22 @@
+FlashFinder:
+{
+    FlashFinderAlgo : SimpleFlashAlgo
+    OpHitProducer   : ophitSatBeam
+    OpFlashProducer : simpleFlashBeam
+}
+
+SimpleFlashAlgo:
+{
+  PEThreshold:    15
+  MinPECoinc:     3
+  MinMultCoinc:   3
+  IntegralTime:   8.
+  PreSample:      0.1
+  VetoSize:       8.
+  TimeResolution: 0.03
+  PEBaseline: [2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0]
+  HitVetoRangeStart: []
+  HitVetoRangeEnd:   []
+  OpChannel: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31]
+  DebugMode: false
+}

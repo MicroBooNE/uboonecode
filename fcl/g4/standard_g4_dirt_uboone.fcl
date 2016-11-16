@@ -1,5 +1,5 @@
 #include "standard_g4_uboone.fcl"
+
+# Dirt g4 fcl is now identical to standard g4 fcl.
+
 outputs.out1.fileName: "%ifb_%tc_g4_dirt.root"
-services.Geometry.Name: "microboonev10"
-services.Geometry.GDML: "microboonev10.gdml"
-services.Geometry.ROOT: "microboonev10.gdml"

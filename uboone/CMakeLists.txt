@@ -27,6 +27,8 @@ add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(LiteMaker)
 add_subdirectory(MuCS)
 add_subdirectory(T0Reco)
+add_subdirectory(EventWeight)
+add_subdirectory(UBFlashFinder)
 
 add_subdirectory(DataOverlay)
 add_subdirectory(PatternFilter)
@@ -41,10 +43,10 @@ add_subdirectory(PatternFilter)
 #     "lardataobj_OpticalDetectorData",
 #     "lardataobj_AnalysisBase",
 #     "lardata_Utilities",
-#     "larsim_Simulation lardataobj_Simulation",
+#     "larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation",
 #     "larsim_MCCheater",
-#     "lardata_AnalysisAlg",
-#     "lardata_RecoObjects",
+#     "larreco_Calorimetry",
+#     "lardata_RecoObjects larreco_Deprecated",
 #     "larreco_RecoAlg",
 #     "larsim_LArG4",
 #     "larsim_PhotonPropagation",
@@ -60,7 +62,7 @@ add_subdirectory(PatternFilter)
 #     "larreco_EventFinder",
 #     "larsim_TriggerAlgo",
 #     "larana_OpticalDetector",
-#     "larana_Calorimetry", 
+#     "larreco_Calorimetry", 
 #     "larreco_ShowerFinder",
 #     "lareventdisplay_EventDisplay",
 #     "larana_ParticleIdentification",

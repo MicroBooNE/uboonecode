@@ -9,7 +9,7 @@ services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "wires_hist_uboone.root" }
-  Timing:       {}
+  TimeTracker:  {}
   RandomNumberGenerator: {} #ART native random number generator
   @table::microboone_simulation_services
 }

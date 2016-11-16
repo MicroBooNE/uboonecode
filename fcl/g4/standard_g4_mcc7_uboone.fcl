@@ -1,0 +1,11 @@
+#include "standard_g4_uboone.fcl"
+
+outputs.out1.fileName: "%ifb_%tc_g4_mcc7.root"
+
+services.PhotonVisibilityService.LibraryFile: "PhotonPropagation/LibraryData/uboone_photon_library_v5.root"
+
+services.LArG4Parameters.OpticalParamParameters: [ [ [30,  3, 0.15], 
+                                                     [-30, 3, 0.15],
+                                                     [0,   3, 0.15],
+                                                     [90,  3.5, 0.2],
+                                                     [0,   3.5, 0.2] ] ]

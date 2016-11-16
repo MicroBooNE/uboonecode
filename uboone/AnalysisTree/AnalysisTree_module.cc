@@ -311,8 +311,9 @@
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Wire.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/RecoObjects/BezierTrack.h"
+#include "larreco/Deprecated/BezierTrack.h"
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
+#include "uboone/EventWeight/MCEventWeight.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/AnalysisBase/FlashMatch.h"
 #include "lardataobj/AnalysisBase/T0.h"
@@ -341,6 +342,7 @@ constexpr int kMaxTrackHits  = 2000;  //maximum number of hits on a track
 constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackModuleLabel
 constexpr int kMaxVertices   = 500;    //max number of 3D vertices
 constexpr int kMaxVertexAlgos = 10;    //max number of vertex algorithms
+constexpr int kMaxFlashAlgos = 10;    //max number of flash algorithms
 constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector cells per MC particle
 constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
 constexpr int kMaxShowerHits = 10000;  //maximum number of hits on a shower
@@ -351,6 +353,9 @@ constexpr int kMaxTicks   = 9600;   //maximum number of ticks (time samples)
 constexpr int kMaxNDaughtersPerPFP = 100; //maximum number of daughters per PFParticle
 constexpr int kMaxNClustersPerPFP  = 100; //maximum number of clusters per PFParticle
 constexpr int kMaxNPFPNeutrinos    = 10;  //maximum number of reconstructed neutrino PFParticles
+
+constexpr int kMaxSysts = 1000;
+constexpr int kMaxWeights = 1000;
 
 /// total_extent\<T\>::value has the total number of elements of an array
 template <typename T>
@@ -615,7 +620,31 @@ namespace microboone {
       size_t GetMaxVertices() const { return MaxVertices; }
     }; // class VertexDataStruct 
 
+    // Flash data struct
+    class FlashDataStruct {
+    public:
+      template <typename T>
+      using FlashData_t = std::vector<T>;
 
+      size_t MaxFlashes;               ///< Maximum number of storable flashes
+
+      Short_t nfls;                    ///< Number of reconstructed vertices
+      FlashData_t<Float_t> flsTime;    ///< Flash time (us)
+      FlashData_t<Float_t> flsPe;      ///< Flash total pe
+      FlashData_t<Float_t> flsYcenter; ///< Flash Y center (cm)
+      FlashData_t<Float_t> flsZcenter; ///< Flash Z center (cm)
+      FlashData_t<Float_t> flsYwidth;  ///< Flash Y width (cm)
+      FlashData_t<Float_t> flsZwidth;  ///< Flash Z width (cm)
+      FlashData_t<Float_t> flsTwidth;  ///< Flash time width (us)
+ 
+      void Clear();
+      void SetMaxFlashes(size_t maxFlashes)
+      { MaxFlashes = maxFlashes; Resize(MaxFlashes); }
+      void Resize(size_t nFlashes);
+      void SetAddresses(TTree* pTree, std::string tracker, bool isCosmics);
+
+      size_t GetMaxFlashes() const { return MaxFlashes; }
+    }; // class FlashDataStruct
 
     /// Shower algorithm result
     /// 
@@ -823,6 +852,11 @@ namespace microboone {
     Double_t     potnumitgt;         //pot per event (NuMI E:TORTGT)
     Double_t     potnumi101;         //pot per event (NuMI E:TOR101)
 
+    std::vector<std::string> evtwgt_funcname;          // the name of the functions used
+    std::vector<std::vector<double>> evtwgt_weight;    // the weights (a vector for each function used)
+    std::vector<int> evtwgt_nweight;                   // number of weights for each function
+    Int_t evtwgt_nfunc;                                // number of functions used
+
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
     Int_t    no_hits_stored;                  //number of hits actually stored in the tree    
@@ -898,7 +932,7 @@ namespace microboone {
     Float_t clucosmicscore_tagger[kMaxClusters];      //Cosmic score associated to this cluster. In the case of more than one tag, the first one is associated.    
     Short_t clucosmictype_tagger[kMaxClusters];       //Cosmic tag type for this cluster.    
     
-    // flash information
+    /* flash information
     Int_t    no_flashes;                //number of flashes
     Float_t  flash_time[kMaxFlashes];   //flash time
     Float_t  flash_pe[kMaxFlashes];     //flash total PE
@@ -907,6 +941,11 @@ namespace microboone {
     Float_t  flash_ywidth[kMaxFlashes]; //y width of flash
     Float_t  flash_zwidth[kMaxFlashes]; //z width of flash
     Float_t  flash_timewidth[kMaxFlashes]; //time of flash
+*/
+
+    // Flash information
+    Char_t kNFlashAlgos;
+    std::vector<FlashDataStruct> FlashData;
 
     //track information
     Char_t   kNTracker;
@@ -1279,16 +1318,21 @@ namespace microboone {
     { if (unset) bits &= ~setbits; else bits |= setbits; }
       
     /// Constructor; clears all fields
-    AnalysisTreeDataStruct(size_t nTrackers = 0, size_t nVertexAlgos = 0,
+    AnalysisTreeDataStruct(size_t nTrackers = 0, size_t nVertexAlgos = 0, size_t nFlashAlgos = 0,
 			   std::vector<std::string> const& ShowerAlgos = {}):
       bits(tdDefault) 
-    { SetTrackers(nTrackers); SetVertexAlgos(nVertexAlgos); SetShowerAlgos(ShowerAlgos); Clear(); }
+    { SetTrackers(nTrackers); SetVertexAlgos(nVertexAlgos); SetFlashAlgos(nFlashAlgos); SetShowerAlgos(ShowerAlgos); Clear(); }
 
     TrackDataStruct& GetTrackerData(size_t iTracker)
     { return TrackData.at(iTracker); }
     const TrackDataStruct& GetTrackerData(size_t iTracker) const
     { return TrackData.at(iTracker); }
-    
+   
+    FlashDataStruct& GetFlashData(size_t iTracker)
+    { return FlashData.at(iTracker); }
+    const FlashDataStruct& GetFlashData(size_t iTracker) const
+    { return FlashData.at(iTracker); }
+ 
     ShowerDataStruct& GetShowerData(size_t iShower)
     { return ShowerData.at(iShower); }
     ShowerDataStruct const& GetShowerData(size_t iShower) const
@@ -1326,7 +1370,10 @@ namespace microboone {
 
     /// Allocates data structures for the given number of vertex algos (no Clear())
     void SetVertexAlgos(size_t nVertexAlgos) { VertexData.resize(nVertexAlgos); }
-    
+
+    ///Allocates data structures for the given number of flash algos (no Clear())
+    void SetFlashAlgos(size_t nFlashAlgos) { FlashData.resize(nFlashAlgos); }
+
     /// Allocates data structures for the given number of trackers (no Clear())
     void SetShowerAlgos(std::vector<std::string> const& ShowerAlgos);
     
@@ -1350,6 +1397,7 @@ namespace microboone {
 		      TTree* pTree,
 		      std::vector<std::string> const& trackers,
 		      std::vector<std::string> const& vertexalgos,
+                      std::vector<std::string> const& flashalgos,
 		      std::vector<std::string> const& showeralgos,
 		      bool isCosmics
 		      );
@@ -1361,6 +1409,9 @@ namespace microboone {
     /// Returns the number of Vertex algos for which data structures are allocated
     size_t GetNVertexAlgos() const { return VertexData.size(); }
 
+    /// Returns the number of Flash algos for which data structures are allocated
+    size_t GetNFlashAlgos() const { return FlashData.size(); }
+
     /// Returns the number of trackers for which data structures are allocated
     size_t GetNShowerAlgos() const { return ShowerData.size(); }
     
@@ -1370,8 +1421,11 @@ namespace microboone {
     /// Returns the number of trackers for which memory is allocated
     size_t GetMaxTrackers() const { return TrackData.capacity(); }
 
-    /// Returns the number of trackers for which memory is allocated
+    /// Returns the number of vertex algos for which memory is allocated
     size_t GetMaxVertexAlgos() const { return VertexData.capacity(); }
+
+    /// Returns the number of flash algos for which memory is allocated
+    size_t GetMaxFlashAlgos() const { return FlashData.capacity(); }
  
     /// Returns the number of trackers for which memory is allocated
     size_t GetMaxShowers() const { return ShowerData.capacity(); }
@@ -1531,7 +1585,7 @@ namespace microboone {
     std::string fG4ModuleLabel;
     std::string fClusterModuleLabel;
     std::string fPandoraNuVertexModuleLabel;
-    std::string fOpFlashModuleLabel;
+    std::vector<std::string> fOpFlashModuleLabel;
     std::string fMCShowerModuleLabel;
     std::string fMCTrackModuleLabel;
     std::vector<std::string> fTrackModuleLabel;
@@ -1584,7 +1638,9 @@ namespace microboone {
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
 
     size_t GetNVertexAlgos() const { return fVertexModuleLabel.size(); }
-       
+      
+    size_t GetNFlashAlgos() const { return fOpFlashModuleLabel.size(); }
+ 
     /// Returns the number of shower algorithms configured
     size_t GetNShowerAlgos() const { return fShowerModuleLabel.size(); }
     
@@ -1597,7 +1653,7 @@ namespace microboone {
     {
       if (!fData) {
 	fData.reset
-	  (new AnalysisTreeDataStruct(GetNTrackers(), GetNVertexAlgos(), GetShowerAlgos()));
+	  (new AnalysisTreeDataStruct(GetNTrackers(), GetNVertexAlgos(), GetNFlashAlgos(), GetShowerAlgos()));
 	fData->SetBits(AnalysisTreeDataStruct::tdCry,    !fSaveCryInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdGenie,  !fSaveGenieInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdGeant,  !fSaveGeantInfo);
@@ -1621,6 +1677,7 @@ namespace microboone {
       else {
 	fData->SetTrackers(GetNTrackers());
 	fData->SetVertexAlgos(GetNVertexAlgos());
+        fData->SetFlashAlgos(GetNFlashAlgos());
 	fData->SetShowerAlgos(GetShowerAlgos());
 
 	if (bClearData) fData->Clear();
@@ -1632,7 +1689,7 @@ namespace microboone {
     {
       CheckData(__func__); CheckTree(__func__);
       fData->SetAddresses
-	(fTree, fTrackModuleLabel, fVertexModuleLabel, fShowerModuleLabel, isCosmics);
+	(fTree, fTrackModuleLabel, fVertexModuleLabel, fOpFlashModuleLabel, fShowerModuleLabel, isCosmics);
     } // SetAddresses()
     
     /// Sets the addresses of all the tree branches of the specified tracking algo,
@@ -1661,7 +1718,20 @@ namespace microboone {
       fData->GetVertexData(iVertexAlg)
 	.SetAddresses(fTree, fVertexModuleLabel[iVertexAlg], isCosmics);
     } // SetVertexAddresses()
-    
+   
+    void SetFlashAddresses(size_t iFlashAlg)
+    {
+      CheckData(__func__); CheckTree(__func__);
+      if (iFlashAlg >= fData->GetNFlashAlgos()) {
+        throw art::Exception(art::errors::LogicError)
+          << "AnalysisTree::SetFlashAddresses(): no flash alg #" << iFlashAlg
+          << " (" << fData->GetNFlashAlgos() << " available)";
+      }
+      fData->GetFlashData(iFlashAlg)
+        .SetAddresses(fTree, fOpFlashModuleLabel[iFlashAlg], isCosmics);
+    } // SetVertexAddresses()
+
+ 
     /// Sets the addresses of all the tree branches of the specified shower algo,
     /// creating the missing ones
     void SetShowerAddresses(size_t iShower)
@@ -2307,6 +2377,78 @@ void microboone::AnalysisTreeDataStruct::VertexDataStruct::SetAddresses(
 }
 
 //------------------------------------------------------------------------------
+//---  AnalysisTreeDataStruct::FlashDataStruct
+//---
+
+void microboone::AnalysisTreeDataStruct::FlashDataStruct::Resize(size_t nFlashes)
+{
+  MaxFlashes = nFlashes;
+
+  flsTime.resize(MaxFlashes);
+  flsPe.resize(MaxFlashes);
+  flsYcenter.resize(MaxFlashes);
+  flsZcenter.resize(MaxFlashes);
+  flsYwidth.resize(MaxFlashes);
+  flsZwidth.resize(MaxFlashes);
+  flsTwidth.resize(MaxFlashes);
+
+}
+
+void microboone::AnalysisTreeDataStruct::FlashDataStruct::Clear() {
+  Resize(MaxFlashes);
+  nfls = -9999;
+
+  FillWith(flsTime        , -9999  );
+  FillWith(flsPe          , -9999  );
+  FillWith(flsYcenter     , -9999  );
+  FillWith(flsZcenter     , -9999  );
+  FillWith(flsYwidth      , -9999  );
+  FillWith(flsZwidth      , -9999  );
+  FillWith(flsTwidth      , -9999  );
+
+}
+
+void microboone::AnalysisTreeDataStruct::FlashDataStruct::SetAddresses(
+                                                                        TTree* pTree, std::string alg, bool isCosmics
+                                                                        ) {
+  if (MaxFlashes == 0) return; // no tracks, no tree!
+
+  microboone::AnalysisTreeDataStruct::BranchCreator CreateBranch(pTree);
+
+  AutoResettingStringSteam sstr;
+
+  std::string FlashLabel = alg;
+  std::string BranchName;
+
+  BranchName = "nfls_" + FlashLabel;
+  CreateBranch(BranchName, &nfls, BranchName + "/S");
+  std::string NFlashIndexStr = "[" + BranchName + "]";
+
+  BranchName = "flsTime_" + FlashLabel;
+  CreateBranch(BranchName, flsTime, BranchName + NFlashIndexStr + "/S");
+
+  BranchName = "flsPe_" + FlashLabel;
+  CreateBranch(BranchName, flsPe, BranchName + NFlashIndexStr + "/S");
+
+  BranchName = "flsYcenter_" + FlashLabel;
+  CreateBranch(BranchName, flsYcenter, BranchName + NFlashIndexStr + "/S");
+
+  BranchName = "flsZcenter_" + FlashLabel;
+  CreateBranch(BranchName, flsZcenter, BranchName + NFlashIndexStr + "/S");
+
+  BranchName = "flsYwidth_" + FlashLabel;
+  CreateBranch(BranchName, flsYwidth, BranchName + NFlashIndexStr + "/S");
+
+  BranchName = "flsZwidth_" + FlashLabel;
+  CreateBranch(BranchName, flsZwidth, BranchName + NFlashIndexStr + "/S");
+
+  BranchName = "flsTwidth_" + FlashLabel;
+  CreateBranch(BranchName, flsTwidth, BranchName + NFlashIndexStr + "/S");
+}
+
+
+
+//------------------------------------------------------------------------------
 //---  AnalysisTreeDataStruct::PFParticleDataStruct
 //---
 
@@ -2599,6 +2741,10 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   potnumitgt = 0;
   potnumi101 = 0;
 
+  evtwgt_nfunc = 0;
+  FillWith(evtwgt_funcname, "noname");
+  FillWith(evtwgt_nweight, 0);
+
   no_hits = 0;
   no_hits_stored = 0;  
   
@@ -2638,7 +2784,8 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(sim_charge, sim_charge + sizeof(sim_charge)/sizeof(sim_charge[0]), -99999.);
   std::fill(sim_fwhh, sim_fwhh + sizeof(sim_fwhh)/sizeof(sim_fwhh[0]), -99999.);
   std::fill(sim_rms, sim_rms + sizeof(sim_rms)/sizeof(sim_rms[0]), -99999.); 
- 
+
+/* 
   no_flashes = 0;
   std::fill(flash_time, flash_time + sizeof(flash_time)/sizeof(flash_time[0]), -9999);
   std::fill(flash_pe, flash_pe + sizeof(flash_pe)/sizeof(flash_pe[0]), -9999);
@@ -2647,6 +2794,7 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(flash_ywidth, flash_ywidth + sizeof(flash_ywidth)/sizeof(flash_ywidth[0]), -9999);
   std::fill(flash_zwidth, flash_zwidth + sizeof(flash_zwidth)/sizeof(flash_zwidth[0]), -9999);
   std::fill(flash_timewidth, flash_timewidth + sizeof(flash_timewidth)/sizeof(flash_timewidth[0]), -9999);
+*/
 
   nclusters = 0;
   std::fill(clusterId, clusterId + sizeof(clusterId)/sizeof(clusterId[0]), -9999);
@@ -2904,6 +3052,8 @@ void microboone::AnalysisTreeDataStruct::Clear() {
   std::for_each
     (VertexData.begin(), VertexData.end(), std::mem_fn(&VertexDataStruct::Clear));
   std::for_each
+    (FlashData.begin(), FlashData.end(), std::mem_fn(&FlashDataStruct::Clear));
+  std::for_each
     (ShowerData.begin(), ShowerData.end(), std::mem_fn(&ShowerDataStruct::Clear));
 } // microboone::AnalysisTreeDataStruct::Clear()
 
@@ -3144,6 +3294,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 						      TTree* pTree,
 						      const std::vector<std::string>& trackers,
 						      const std::vector<std::string>& vertexalgos,
+                                                      const std::vector<std::string>& flashalgos,
 						      const std::vector<std::string>& showeralgos,
 						      bool isCosmics
 						      ) {
@@ -3164,6 +3315,12 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("potbnb",&potbnb,"potbnb/D");
   CreateBranch("potnumitgt",&potnumitgt,"potnumitgt/D");
   CreateBranch("potnumi101",&potnumi101,"potnumi101/D");
+
+  CreateBranch("evtwgt_funcname",evtwgt_funcname);
+  CreateBranch("evtwgt_weight",evtwgt_weight);
+  CreateBranch("evtwgt_nweight",evtwgt_nweight);
+  CreateBranch("evtwgt_nfunc",&evtwgt_nfunc,"evtwgt_nfunc/I");
+
 
   if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
@@ -3244,6 +3401,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   }    
 
   if (hasFlashInfo()){
+/*
     CreateBranch("no_flashes",&no_flashes,"no_flashes/I");
     CreateBranch("flash_time",flash_time,"flash_time[no_flashes]/F");
     CreateBranch("flash_pe",flash_pe,"flash_pe[no_flashes]/F");
@@ -3252,7 +3410,18 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     CreateBranch("flash_ywidth",flash_ywidth,"flash_ywidth[no_flashes]/F");
     CreateBranch("flash_zwidth",flash_zwidth,"flash_zwidth[no_flashes]/F");
     CreateBranch("flash_timewidth",flash_timewidth,"flash_timewidth[no_flashes]/F");
-  }
+*/
+
+    kNFlashAlgos = flashalgos.size();
+    CreateBranch("kNFlashAlgos",&kNFlashAlgos,"kNFlashAlgos/B");
+    for(int i=0; i<kNFlashAlgos; i++) {
+      std::string FlashLabel = flashalgos[i];
+
+      // note that if the flashes data has maximum number of flashes 0,
+      // nothing is initialized (branches are not even created)
+      FlashData[i].SetAddresses(pTree, FlashLabel, isCosmics);
+    }
+  } // has flash info
   
   if (hasTrackInfo()){
     kNTracker = trackers.size();
@@ -3272,7 +3441,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     for(int i=0; i<kNVertexAlgos; i++){
       std::string VertexLabel = vertexalgos[i];
 
-      // note that if the tracker data has maximum number of tracks 0,
+      // note that if the vertes data has maximum number of vertices 0,
       // nothing is initialized (branches are not even created)
       VertexData[i].SetAddresses(pTree, VertexLabel, isCosmics);
     } // for trackers
@@ -3598,7 +3767,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
   fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")     ),
   fPandoraNuVertexModuleLabel (pset.get< std::string >("PandoraNuVertexModuleLabel")     ),
-  fOpFlashModuleLabel       (pset.get< std::string >("OpFlashModuleLabel")      ),
+  fOpFlashModuleLabel       (pset.get< std::vector<std::string> >("OpFlashModuleLabel")      ),
   fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
   fMCTrackModuleLabel      (pset.get< std::string >("MCTrackModuleLabel")     ),  
   fTrackModuleLabel         (pset.get< std::vector<std::string> >("TrackModuleLabel")),
@@ -3707,9 +3876,16 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   if (GetNVertexAlgos() > kMaxVertexAlgos) {
     throw art::Exception(art::errors::Configuration)
       << "AnalysisTree currently supports only up to " << kMaxVertexAlgos
-      << " tracking algorithms, but " << GetNVertexAlgos() << " are specified."
+      << " vertex algorithms, but " << GetNVertexAlgos() << " are specified."
       << "\nYou can increase kMaxVertexAlgos and recompile.";
-  } // if too many trackers
+  } // if too many vertices
+
+  if (GetNFlashAlgos() > kMaxFlashAlgos) {
+    throw art::Exception(art::errors::Configuration)
+      << "AnalysisTree currently supports only up to " << kMaxFlashAlgos
+      << " flash algorithms, but " << GetNFlashAlgos() << " are specified."
+      << "\nYou can increase kMaxFlashAlgos and recompile.";
+  } // if too many flashes
 } // microboone::AnalysisTree::AnalysisTree()
 
 //-------------------------------------------------
@@ -3815,11 +3991,12 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       art::fill_ptr_vector(clusterlist, clusterListHandle);
   }        
 
-  // * flashes
+  /* flashes
   art::Handle< std::vector<recob::OpFlash> > flashListHandle;
   std::vector<art::Ptr<recob::OpFlash> > flashlist;
   if (evt.getByLabel(fOpFlashModuleLabel,flashListHandle))
     art::fill_ptr_vector(flashlist, flashListHandle);
+  */
 
   // * MC truth information
   art::Handle< std::vector<simb::MCTruth> > mctruthListHandle;
@@ -3932,8 +4109,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   const size_t NShowerAlgos = GetNShowerAlgos(); // number of shower algorithms into fShowerModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
   const size_t NVertexAlgos = GetNVertexAlgos(); // number of vertex algos
+  const size_t NFlashAlgos = GetNFlashAlgos(); // number of flash algos
   const size_t NClusters = clusterlist.size(); //number of clusters
-  const size_t NFlashes  = flashlist.size(); // number of flashes
   // make sure there is the data, the tree and everything;
   CreateTree();
 
@@ -3962,6 +4139,14 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   for (unsigned int it = 0; it < NVertexAlgos; ++it){
     if (evt.getByLabel(fVertexModuleLabel[it],vertexListHandle[it]))
       art::fill_ptr_vector(vertexlist[it], vertexListHandle[it]);
+  }
+
+  // * flashes
+  std::vector< art::Handle< std::vector<recob::OpFlash> > > flashListHandle(NFlashAlgos);
+  std::vector< std::vector<art::Ptr<recob::OpFlash> > > flashlist(NFlashAlgos);
+  for (unsigned int it = 0; it < NFlashAlgos; ++it){
+    if (evt.getByLabel(fOpFlashModuleLabel[it],flashListHandle[it]))
+      art::fill_ptr_vector(flashlist[it], flashListHandle[it]);
   }
 
   // * PFParticles
@@ -4050,6 +4235,38 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     }
   }
 
+  //*****************************
+  //
+  // EventWeight
+  //
+  //*****************************
+
+  art::Handle< std::vector< evwgh::MCEventWeight > > evtWeights;
+
+  if (evt.getByLabel("eventweight",evtWeights)) {
+    const std::vector< evwgh::MCEventWeight > * evtwgt_vec = evtWeights.product();
+
+    evwgh::MCEventWeight evtwgt = evtwgt_vec->at(0); // just for the first neutrino interaction
+    std::map<std::string, std::vector<double>> evtwgt_map = evtwgt.fWeight;
+    int countFunc = 0;
+    // loop over the map and save the name of the function and the vector of weights for each function
+    for(std::map<std::string, std::vector<double>>::iterator it = evtwgt_map.begin(); it != evtwgt_map.end(); ++it) {
+      fData->evtwgt_funcname.push_back(it->first);      // filling the name of the function
+      fData->evtwgt_weight.push_back(it->second);       // filling the vector with the weights
+      std::vector<double> mytemp = it->second;          // getting the vector of weights
+
+      std::cout<<" *************************************"<<std::endl;
+      std::cout<<" mytemp : "<<mytemp.size()<<std::endl;
+      for(unsigned int nweight =0; nweight < mytemp.size(); nweight++) std::cout<<" weight : "<<mytemp[nweight]<<std::endl;
+      std::cout<<" *************************************"<<std::endl;
+
+      fData->evtwgt_nweight.push_back(mytemp.size());   // filling the number of weights
+      countFunc++;
+    }
+    fData->evtwgt_nweight.resize(countFunc);
+    fData->evtwgt_funcname.resize(countFunc);
+    fData->evtwgt_nfunc = countFunc;                    // saving the number of functions used
+  }
 
   //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
   //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;
@@ -4484,7 +4701,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
     }//end loop over clusters
   }//end fSaveClusterInfo
-	  
+	 
+/* 
   if (fSaveFlashInfo){
     fData->no_flashes = (int) NFlashes;
     if (NFlashes > kMaxFlashes) {
@@ -4503,7 +4721,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       fData->flash_timewidth[i]  = flashlist[i]->TimeWidth();
     }
   }
-  
+*/
   
   // Declare object-ID-to-PFParticleID maps so we can assign hasPFParticle and PFParticleID to the tracks, showers, vertices.
   std::map<Short_t, Short_t> trackIDtoPFParticleIDMap, vertexIDtoPFParticleIDMap, showerIDtoPFParticleIDMap;
@@ -5062,14 +5280,14 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 	// got this error? it might be a bug,
 	// since we are supposed to have allocated enough space to fit all tracks
 	mf::LogError("AnalysisTree:limits") << "event has " << NVertices
-					    << " " << fVertexModuleLabel[iVertexAlg] << " tracks, only "
+					    << " " << fVertexModuleLabel[iVertexAlg] << " vertices, only "
 					    << VertexData.GetMaxVertices() << " stored in tree";
       }
 
-      for (size_t i = 0; i < NVertices && i < kMaxVertices ; ++i){//loop over hits
-	    VertexData.vtxId[i] = vertexlist[iVertexAlg][i]->ID();
-	    Double_t xyz[3] = {};
-	    vertexlist[iVertexAlg][i] -> XYZ(xyz);
+      for (size_t i = 0; i < NVertices && i < kMaxVertices ; ++i){ //loop over vertices
+	VertexData.vtxId[i] = vertexlist[iVertexAlg][i]->ID();
+	Double_t xyz[3] = {};
+	vertexlist[iVertexAlg][i] -> XYZ(xyz);
         VertexData.vtxx[i] = xyz[0];
         VertexData.vtxy[i] = xyz[1];
         VertexData.vtxz[i] = xyz[2];
@@ -5101,6 +5319,40 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       }
     }
   }
+
+  // Save flash information for multiple algorithms
+  if (fSaveFlashInfo) {
+    for (unsigned int iFlashAlg=0; iFlashAlg < NFlashAlgos; ++iFlashAlg){
+      AnalysisTreeDataStruct::FlashDataStruct& FlashData = fData->GetFlashData(iFlashAlg);
+
+      size_t NFlashes = flashlist[iFlashAlg].size();
+      
+      FlashData.SetMaxFlashes(std::max(NFlashes, (size_t) 1));
+      FlashData.Clear(); // clear all data
+      FlashData.nfls = (short) NFlashes;
+       
+      // now set the tree addresses to the newly allocated memory;
+      // this creates the tree branches in case they are not there yet
+      SetFlashAddresses(iFlashAlg);
+      if (NFlashes > FlashData.GetMaxFlashes()) {
+        // got this error? it might be a bug,
+        // since we are supposed to have allocated enough space to fit all tracks
+        mf::LogError("AnalysisTree:limits") << "event has " << NFlashes
+                                            << " " << fOpFlashModuleLabel[iFlashAlg] << " flashes, only "
+                                            << FlashData.GetMaxFlashes() << " stored in tree";
+      }
+    
+      for (size_t i = 0; i < NFlashes && i < kMaxFlashes ; ++i) { //loop over flashes
+        FlashData.flsTime[i] = flashlist[iFlashAlg][i]->Time();
+        FlashData.flsPe[i] = flashlist[iFlashAlg][i]->TotalPE();
+        FlashData.flsYcenter[i] = flashlist[iFlashAlg][i]->YCenter();
+        FlashData.flsZcenter[i] = flashlist[iFlashAlg][i]->ZCenter();
+        FlashData.flsYwidth[i] = flashlist[iFlashAlg][i]->YWidth();
+        FlashData.flsZwidth[i] = flashlist[iFlashAlg][i]->ZWidth();
+        FlashData.flsTwidth[i] = flashlist[iFlashAlg][i]->TimeWidth();
+      }
+    }
+  } // if fSaveFlashInfo
 
   //mc truth information
   if (isMC){

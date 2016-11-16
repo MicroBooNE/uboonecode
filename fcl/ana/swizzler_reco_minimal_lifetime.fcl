@@ -1,0 +1,197 @@
+#include "reco_uboone_data_Feb2016.fcl"
+#include "geometry_microboone.fcl"
+#include "detectorclocks_microboone.fcl"
+#include "pmtconfig_microboone.fcl"
+#include "databaseutil_microboone.fcl"
+#include "sam_microboone.fcl"
+#include "flashfilter_microboone.fcl"
+#include "subevent_module.fcl"
+#include "seedservice_microboone.fcl"
+#include "calibration_microboone.fcl"
+#include "filters.fcl"
+#include "signalservices_microboone.fcl"
+#include "photpropservices_microboone.fcl"
+#include "photoncountert0matching.fcl"
+#include "beamdata_microboone.fcl"
+
+process_name: SwizzlerRecoLifetime
+services:
+{
+  TFileService: { fileName: "SwizRecoLifetime_hist.root" }
+  TimeTracker:         {}
+  MemoryTracker:       {}
+  RandomNumberGenerator: {} 
+  #SeedService:  @local::microboone_seedservice
+  FileCatalogMetadata:    @local::art_file_catalog_data
+  #PhotonVisibilityService: @local::microboone_photonvisibilityservice
+  OpDigiProperties:           @local::microboone_opdigiproperties  
+  @table::microboone_full_services
+}
+
+microboone_tfile_metadata:
+{
+  JSONFileName:          "SwizRecoLifetime_hist.root.json"
+  GenerateTFileMetadata: true
+  dataTier:              "root-tuple"
+  fileFormat:            "root"
+}
+
+services.ExptGeoHelperInterface: @local::microboone_geometry_helper
+services.Geometry:               @local::microboone_geo
+services.UBOpReadoutMap:           @local::microboone_opreadoutmap
+services.DetectorClocksService:            @local::microboone_detectorclocks
+services.DatabaseUtil:           @local::microboone_database
+# Database settings
+services.DatabaseUtil.DBHostName:    "ifdbprod2.fnal.gov"
+services.DatabaseUtil.DBName:        "hootgibson_prod"
+services.DatabaseUtil.DBUser:        "uboonedaq_web"
+services.DatabaseUtil.Port:          5444
+services.DatabaseUtil.PassFileName:  "uboonedb_passwd"  # name of password file. searched for using env var FW_SEARCH_PATH
+services.DatabaseUtil.ToughErrorTreatment: false
+services.DatabaseUtil.ShouldConnect: true
+services.DatabaseUtil.TableName: "main_run"
+services.DetectorPropertiesService.InheritNumberTimeSamples: false
+
+source:
+{
+  fileNames:       []
+  module_type:	   LArRawInputSourceUBooNE
+  maxEvents:       -1
+  huffmanDecode:   true
+  swizzleTPC:      true
+  swizzlePMT:      true
+  swizzleTriggerType: ALL
+  beam_histograms: [ "E:TOR101, 100, 0, 50",
+                     "E:TORTGT, 100, 0, 50",
+                     "E:TOR860, 100, 0, 5",
+                     "E:TOR875, 100, 0, 5" ]
+  saveMemoryObjectThreshold: 0
+}
+
+physics:
+{
+    producers: 
+    {
+        beamdata: @local::microboone_beamdata
+        @table::microboone_reco_data_producers
+        ### Match kalman tracks to pandora cosmic PFParticles
+        trackPFParticleMatch:         @local::microboone_trackpfparticlematch
+        }
+    
+    analyzers:{
+         Lifetime:
+   {
+   module_type: "Lifetime"
+ }
+        }
+    
+    #define the producer and filter modules for this path, order matters, 
+    #filters reject all following items.  see lines starting physics.producers below
+    reco: [ rns, 
+            digitfilter, 
+            caldata, 
+            gaushit,
+            fuzzycluster,
+	    pandoraCosmic,
+	    pandoraCosmiccalo
+            #trackkalmanhit, 
+            #trackkalmanhitcalo
+	    ]
+    
+    ana: [Lifetime]      
+    
+    #define the output stream, there could be more than one if using filters 
+    stream1:  [ out1 ]
+    
+    #trigger_paths is a keyword and contains the paths that modify the art::event, 
+    #ie filters and producers
+    trigger_paths: [reco] 
+    #end_paths: [ stream1, ana ]
+    end_paths: [ ana ]
+    
+    }
+
+# block to define where the output goes.  if you defined a filter in the physics
+# block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+# entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+ out1:
+  {
+   module_type: RootOutput
+   fileName: "%ifb_%tc_reco.root"
+   dataTier: "reconstructed"
+   streamName: "all"      
+   compressionLevel: 1
+   saveMemoryObjectThreshold: 0
+   fileProperties: {
+     maxInputFiles: 1
+     granularity: "InputFile"
+    }
+  }
+}
+
+services.DetectorClocksService.TrigModuleName: "daq"
+services.SignalShapingServiceMicroBooNE.StretchFullResponse: false
+
+# Here we include the file giving us run/data dependent overrides
+
+services.DetectorClocksService.TrigModuleName:     "daq"
+
+# Set the following if you want to run truncated RawDigits from the RawDigitFilter
+physics.producers.caldata.DodQdxCalib: true
+#physics.producers.caldata.dQdxCalibFileName: "ChannelGainAndShapingTimeCalibFactors_MicroBooNE_TPC_14mVperfC_2us_May3rd2016.txt"
+physics.producers.digitfilter.TruncateTicks:                    true
+services.DetectorPropertiesService.NumberTimeSamples:           6400
+services.DetectorPropertiesService.ReadOutWindowSize:           6400
+services.DetectorClocksService.InheritClockConfig:              false
+services.DetectorClocksService.TriggerOffsetTPC:                -0.400e3
+services.DetectorPropertiesService.Electronlifetime:  1e10
+
+# Use Mike M. gaussian deconvolution filter
+services.SignalShapingServiceMicroBooNE.FilterFuncVec:  [ "(x>0.0)*gaus", "(x>0.0)*gaus", "(x>0.0)*gaus" ]
+services.SignalShapingServiceMicroBooNE.FilterParamsVec:   [ [ 1.0, 0.0, 0.1 ], [ 1.0, 0.0, 0.1 ], [ 1.0, 0.0, 0.1 ] ]
+services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 0.738, 0.738, 0.738 ]
+
+physics.producers.gaushit.MinSig:    [4.0, 4.0, 5.0]
+
+#physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants: [4.803e-3, 3.616e-3, 5.418e-3]
+physics.producers.pandoraCosmiccalo.CaloAlg.CalAreaConstants: [4.803e-3, 3.616e-3, 5.418e-3]
+
+physics.analyzers.Lifetime.TrackModuleLabel:        "pandoraCosmic"
+physics.analyzers.Lifetime.CalorimetryModuleLabel:  "pandoraCosmiccalo"
+physics.analyzers.Lifetime.SaveTrackInfo: true
+
+# Here we try to suppress known and pointless messages
+services.message.destinations :
+{
+  STDCOUT: 
+  {
+     type:      "cout"      #tells the message service to output this destination to cout
+     threshold: "WARNING"   #tells the message service that this destination applies to WARNING and higher level messages
+     append:     true       #says to append all messages to the output
+     categories:
+     {
+       ChannelFilter:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       TrackStitcher:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       CRHitRemoval:
+       {
+         limit: 0
+         reportEvery: 0
+       }
+       default:
+       {
+         limit: -1  #don't print anything at the infomsg level except the explicitly named categories
+         reportEvery: 1
+       }
+     }
+  }
+}

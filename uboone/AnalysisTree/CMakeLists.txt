@@ -2,13 +2,13 @@
 art_make( 
           MODULE_LIBRARIES larcore_Geometry
 			larcore_Geometry_Geometry_service
-			larsim_Simulation lardataobj_Simulation
+			larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation
 			larsim_MCCheater_BackTracker_service
 	                lardata_Utilities
 			larevt_Filters
 			lardataobj_RawData
 			lardataobj_RecoBase
-			lardata_RecoObjects  
+			lardata_RecoObjects larreco_Deprecated  
 			larreco_RecoAlg
 			larpandora_LArPandoraInterface
 			SignalShapingServiceMicroBooNE_service

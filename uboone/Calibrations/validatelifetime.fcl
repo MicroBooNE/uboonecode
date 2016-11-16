@@ -1,0 +1,43 @@
+#include "services_microboone.fcl"
+#include "calorimetry_microboone.fcl"
+#include "resourcetracking_services.fcl"
+
+process_name: LifeTime
+
+services:
+{
+    TFileService: { fileName: "lifetime.root" }
+    @table::standard_resourcetrackers
+    @table::microboone_services
+    ElectronLifetimeService:    @local::microboone_electronlifetime_service
+}
+
+
+source:
+{
+  module_type: RootInput
+  fileNames: [ "/afs/fnal.gov/files/home/room3/jpdavies/lbne_r000200_sr01_20140807T150347.root" ]
+  maxEvents: -1
+}
+
+physics:
+{
+ analyzers:
+  {
+    lifetime: {
+      module_type: ValidateLifetime
+      TrackModuleLabel:         trackkalmanhit
+      CalorimetryModuleLabel:   trackkalmanhitcalo
+#      TrackModuleLabel:         pandoraCosmic
+#      CalorimetryModuleLabel:   pandoraCosmiccalo
+      CaloAlg:                  @local::microboone_calorimetryalgdata
+    }
+  }
+  ana: [ lifetime ]
+#  output: [ out1 ]
+#  trigger_paths: [ produce ]
+  end_paths: [ ana ]
+
+}
+
+physics.analyzers.lifetime.CaloAlg.CalAreaConstants: [3.117e-3, 3.029e-3,4.107e-3]

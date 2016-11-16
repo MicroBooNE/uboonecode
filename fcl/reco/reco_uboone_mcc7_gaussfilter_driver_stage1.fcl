@@ -1,0 +1,11 @@
+#include "reco_uboone_mcc7_driver_stage1.fcl"
+
+process_name: McRecoAprGausFilterStage1
+
+services.SignalShapingServiceMicroBooNE.FilterFuncVec:  [ "(x>0.0)*gaus", "(x>0.0)*gaus", "(x>0.0)*gaus" ]
+services.SignalShapingServiceMicroBooNE.FilterParamsVec:   [ [ 1.0, 0.0, 0.1 ], [ 1.0, 0.0, 0.1 ], [ 1.0, 0.0, 0.1 ] ]
+services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor:  [ 0.738, 0.738, 0.738 ]
+
+physics.producers.gaushit.MinSig:       [2.5, 2.5, 2.8]
+physics.producers.gaushit.MaxMultiHit:  4
+

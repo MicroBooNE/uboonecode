@@ -22,7 +22,7 @@ services:
 {
   scheduler: { fileMode: NOMERGE }
   TFileService: { fileName: "rawdigits.root" }
-  Timing:       {}
+  TimeTracker:  {}
   RandomNumberGenerator: {} 
   FileCatalogMetadata:    @local::art_file_catalog_data
   ExptGeoHelperInterface: @local::microboone_geometry_helper

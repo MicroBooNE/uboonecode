@@ -30,6 +30,7 @@ services:
   FileCatalogMetadata:    @local::art_file_catalog_data
   #PhotonVisibilityService: @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties  
+  ElectronLifetimeService:    @local::microboone_electronlifetime_service
   @table::microboone_full_services
 #  IFDH: {}
 }
@@ -191,6 +192,7 @@ services.DetectorPropertiesService.Electronlifetime:  1e10
 
 #physics.producers.gaushit.MinSig:    [8.0, 6.5, 8.0]
 #physics.producers.gaushit.MinSig:    [4.0, 4.0, 5.0]
+physics.producers.gaushit.MinSig:    [4.0, 2.8, 4.2]
 #physics.producers.trackkalmanhitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pandoraCosmicKHitcalo.CaloAlg.CalAreaConstants:            [6.93e-3, 5.34e-3, 6.9e-3]
 #physics.producers.pandoraNucalo.CaloAlg.CalAreaConstants:                   [6.93e-3, 5.34e-3, 6.9e-3]
