@@ -13,7 +13,7 @@ microboone_simwire:
  CompressionType:     "none"      #could also be none	
  SimDeadChannels:     false	
  
- GenNoise:            3       # 0 = no noise, 1 = time domain, 2 = freq. domain, 3 = data driven post-filter noise spectrum
+ GenNoise:            1       # 0 = no noise, 1 = time domain, 2 = freq. domain, 3 = data driven post-filter noise spectrum
  GetNoiseFromHisto:   false     #generate noise from histogram of freq-distribution
  NoiseFileFname:      "uboone_noise_v0.1.root"
  NoiseHistoName:      "NoiseFreq"  

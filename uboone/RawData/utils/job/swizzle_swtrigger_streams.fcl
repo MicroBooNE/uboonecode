@@ -29,7 +29,7 @@ services.DetectorClocksService.TrigModuleName: "daq"
 microboone_tfile_metadata:
 {
   JSONFileName:          "daq_hist.root.json"
-  GenerateTFileMetadata: false
+  GenerateTFileMetadata: true
   dataTier:              "root-tuple"
   fileFormat:            "root"
 }

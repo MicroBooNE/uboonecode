@@ -79,7 +79,7 @@ outputs:
  outbnb:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_bnb.root"
+   fileName: "%ifb_%tc_bnb_%#.root"
    dataTier: "raw"
    streamName: "outbnb"
    compressionLevel: 3
@@ -93,7 +93,7 @@ outputs:
  outbnbunbiased:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_bnb_unbiased.root"
+   fileName: "%ifb_%tc_bnb_unbiased_%#.root"
    dataTier: "raw"
    streamName: "outbnbunbiased"
    compressionLevel: 3
@@ -107,7 +107,7 @@ outputs:
  outnumi:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_numi.root"
+   fileName: "%ifb_%tc_numi_%#.root"
    dataTier: "raw"
    streamName: "outnumi"
    compressionLevel: 3
@@ -121,7 +121,7 @@ outputs:
  outnumiunbiased:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_numi_unbiased.root"
+   fileName: "%ifb_%tc_numi_unbiased_%#.root"
    dataTier: "raw"
    streamName: "outnumiunbiased"
    compressionLevel: 3
@@ -135,7 +135,7 @@ outputs:
  outextbnb:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_ext_bnb.root"
+   fileName: "%ifb_%tc_ext_bnb_%#.root"
    dataTier: "raw"
    streamName: "outextbnb"
    compressionLevel: 3
@@ -149,7 +149,7 @@ outputs:
  outextnumi:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_ext_numi.root"
+   fileName: "%ifb_%tc_ext_numi_%#.root"
    dataTier: "raw"
    streamName: "outextnumi"
    compressionLevel: 3
@@ -163,7 +163,7 @@ outputs:
  outextunbiased:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_ext_unbiased.root"
+   fileName: "%ifb_%tc_ext_unbiased_%#.root"
    dataTier: "raw"
    streamName: "outextunbiased"
    compressionLevel: 3
@@ -177,7 +177,7 @@ outputs:
  outmucs:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_mucs.root"
+   fileName: "%ifb_%tc_mucs_%#.root"
    dataTier: "raw"
    streamName: "outmucs"
    compressionLevel: 3
@@ -191,7 +191,7 @@ outputs:
  outnotpc:
   {
    module_type: RootOutput
-   fileName: "%ifb_%tc_notpc.root"
+   fileName: "%ifb_%tc_notpc_%#.root"
    dataTier: "raw"
    streamName: "outnotpc"
    compressionLevel: 3
