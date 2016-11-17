@@ -42,6 +42,7 @@ microboone_message_services:
       threshold:  "DEBUG"
       categories:{
         default:{ limit: 0 }
+	BackTracker: { limit: 0 }
       }
     }
     LogStandardOut: {
@@ -52,6 +53,7 @@ microboone_message_services:
         RecoBaseDefaultCtor: { limit: 0 }
         AnaBaseDefaultCtor:  { limit: 0 }
         GeometryBadInputPoint: { limit: 5 timespan: 1000}
+	BackTracker: { limit: 0 }
       }
     }
     LogStandardError: {
@@ -84,6 +86,7 @@ microboone_message_services_prod_debug.destinations.LogDebugFile.categories:{
   SpacePointAlg: { limit: 0 }
   KalmanFilterAlg: { limit: 0 }
   Track3DKalmanHit: { limit: 0 }
+  BackTracker: { limit: 0 }
 }
 
 
@@ -118,6 +121,7 @@ microboone_message_services_interactive.destinations.LogStandardError.categories
   RecoBaseDefaultCtor: { limit: 1 }
   AnaBaseDefaultCtor:  { limit: 1 }
   GeometryBadInputPoint: { limit: 5 timespan: 1000}
+  BackTracker: { limit: 0 }
 }
 
 END_PROLOG
