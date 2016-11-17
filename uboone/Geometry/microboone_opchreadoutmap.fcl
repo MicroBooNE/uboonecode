@@ -20,5 +20,19 @@ microboone_opreadoutmap:
         }
 }
 
+microboone_opreadoutmap_mc:
+{
+ Verbose: false
+ OpMapLists: { 
+        threeFEMOpMap: @local::microboone_threefem_opmap
+        }
+ OpMapTimeRanges: {
+        threeFEMOpMap: ["1970-01-01 00:00:00 CST","3000-01-01 23:59:59 CST"]
+        }
+ OpMapRunRanges: {
+        threeFEMOpMap: [1,999999]
+        }
+}
+
 END_PROLOG
 

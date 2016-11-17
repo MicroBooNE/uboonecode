@@ -168,7 +168,7 @@ namespace ana {
     std::vector<Double_t> fPlanePitch(_geom->Nplanes(),-1.);
 
     for(size_t i=0; i<_geom->Nplanes(); ++i) {
-      fSignalType[i] = (larlite::geo::SigType_t)(_geom->Plane(i).SignalType());
+      fSignalType[i] = (larlite::geo::SigType_t)(_geom->SignalType(i));
       fViewType[i]   = (larlite::geo::View_t)(_geom->Plane(i).View());
       fPlanePitch[i] = _geom->Plane(i).WirePitch();
       std::vector<UShort_t> wire_to_channel(_geom->Plane(i).Nwires(),larlite::data::kINVALID_USHORT);

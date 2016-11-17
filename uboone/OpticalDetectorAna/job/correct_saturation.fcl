@@ -12,7 +12,7 @@ correct_saturation: {
  LGLabelCosmic     : ""
  HGProducerCosmic  : "pmtreadout"
  HGLabelCosmic     : "OpdetCosmicHighGain"
- verbose             : true
+ verbose             : false
  IncludeBeamgate     : true
  SaveWaveformInTTree : true
  # Unfortunately UB runs w/ only 3FEMs where 3rd FEM is a low gain cosmic + beam combined
@@ -57,4 +57,10 @@ BaselineChannelNumber : [  0  , 1  , 2  , 3  , 4  , 5  , 6  , 7  , 8  , 9  , 10 
                     2042.349]
 
 }
+
+#
+# MC version (FIXME)
+#
+correct_saturation_mc: @local::correct_saturation
+
 END_PROLOG
