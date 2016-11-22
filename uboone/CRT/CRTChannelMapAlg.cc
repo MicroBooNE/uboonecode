@@ -1,67 +1,47 @@
-#include "uboone/Geometry/CRTChannelMapAlg.hh"
-#include "larcore/Geometry/AuxDetChannelMapAlg.h"
-#include "larcore/Geometry/AuxDetGeo.h"
-#include "larcore/Geometry/AuxDetGeometryCore.h"
-#include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/Geometry/TPCGeo.h"
-#include "larcore/Geometry/PlaneGeo.h"
-#include "larcore/Geometry/WireGeo.h"
-
-#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "uboone/CRT/CRTChannelMapAlg.hh"
+//This next one is for debugging purposes only
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "larcore/Geometry/AuxDetGeometryCore.h"
 
-#include <string>
-#include <vector>
+namespace crt {
 
-namespace uboone {
-
-  //----------------------------------------------------------------------------
+  //---------------------------------------------------------------------------
   CRTChannelMapAlg::CRTChannelMapAlg( fhicl::ParameterSet const& pvals,
-    fhicl::ParameterSet const& sortingParameters ):fNModules(72), fNStrips(17)
-  {
+    fhicl::ParameterSet const& sortingParameters ) {
   }
 
-  //----------------------------------------------------------------------------
-  CRTChannelMapAlg::~CRTChannelMapAlg(){}
+  //---------------------------------------------------------------------------
+  CRTChannelMapAlg::~CRTChannelMapAlg(){
+    return;
+  }
 
   void CRTChannelMapAlg::Initialize(geo::AuxDetGeometryData_t& geodata){
-    unsigned nDets=0;
-    for(std::vector<geo::AuxDetGeo*>::iterator it = geodata.auxDets.begin();
-      it!= geodata.auxDets.end(); ++it)
-    {
-      geo::AuxDetGeo* geo = *it;
-      for (uint32_t module=0;module<=this->fNModules;module++){
-        for (uint32_t strip=0;strip<=this->fNStrips; strip++){
-          char entryname[50];
-          sprintf(entryname,"Module_%d_strip_%d",module, strip);
-          if(geo->Name().find(entryname) != std::string::npos){
-            mf::LogInfo("CRTChannelMapAlg")<<"Found CRT Panel in Geometry: "<<entryname;
-            nDets++;
-          }
-        }
-      }
+    for(auto it = geodata.auxDets.begin(); it!= geodata.auxdets.end(); ++it){
+      mf::LogInfo("CRTChannelMapAlg")<<it->Name();
     }
-    mf::LogInfo("CRTChannelMapAlg")<<"Number of Detectors: "<<nDets;
   }
 
   void CRTChannelMapAlg::Uninitialize(){
+    //TODO: Release Map
   }
+  
 
   uint32_t CRTChannelMapAlg::PositionToAuxDetChannel(
-   double const worldLoc[3],
-   std::vector<geo::AuxDetGeo*> const& auxDets,
-   size_t& ad,
-   size_t& sv) const{
-     uint32_t channel = UINT_MAX;
-     ad = this->NearestAuxDet(worldLoc, auxDets);
-     sv = this->NearestSensitiveAuxDet(worldLoc, auxDets, ad);
-     return 0;
+    double const worldLoc[3],
+    std::vector<geo::AuxDetGeo*> const& auxDets,
+    size_t& ad,
+    size_t& sv) const{
+      ad = this->NearestAuxDet(worldLoc, auxDets);
+      sv = this->NearestSensitiveAuxDet(worldLoc, auxDets, ad);
+      return 0;
   }
 
   const TVector3 CRTChannelMapAlg::AuxDetChannelToPosition(
     uint32_t const& channel,
     std::string const& auxDetName,
     std::vector<geo::AuxDetGeo*> const& auxDets) const{
-      return TVector3(0., 0., 0.);
+    mf::LogInfo("CRTChannelMapAlg")<<auxDetName;
+    return TVector3(0.,0.,0.);
   }
-} // namespace
+  
+}
