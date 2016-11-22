@@ -1,28 +1,24 @@
 #ifndef GEO_CHANNELMAP_UBOONE_ALG_H
 #define GEO_CHANNELMAP_UBOONE_ALG_H
 
+#include "larcore/Geometry/GeoObjectSorterStandard.h"
+#include "larcore/Geometry/AuxDetChannelMapAlg.h"
+#include "larcore/Geometry/AuxDetGeo.h"
+#include "fhiclcpp/ParameterSet.h"
+#include <iostream>
 #include <vector>
 #include <set>
-#include <iostream>
 
-#include "fhiclcpp/ParameterSet.h"
-
-#include "larcore/Geometry/AuxDetChannelMapAlg.h"
-#include "larcore/Geometry/GeoObjectSorterStandard.h"
-#include "larcore/Geometry/AuxDetGeo.h"
 
 namespace geo{
-
-  // forward-declaration from geometry
   struct AuxDetGeometryData_t;
   class AuxDetGeo;
 }
 
-namespace uboone {
+namespace crt {
 
   class CRTChannelMapAlg : public geo::AuxDetChannelMapAlg {
-    uint32_t fNModules;
-    uint32_t fNStrips;//Should really be panels per module.
+    //TODO: Redefine the mapping scheme
   protected:
     uint32_t ChannelNumberFromModuleAndPanel(uint32_t const& module,
                                               uint32_t const& panel) const;
@@ -34,8 +30,6 @@ namespace uboone {
 
     void Initialize(geo::AuxDetGeometryData_t& geodata);
     void Uninitialize();
-
-
 
     uint32_t PositionToAuxDetChannel(double const  worldLoc[3],
                                      std::vector<geo::AuxDetGeo*> const& auxDets,

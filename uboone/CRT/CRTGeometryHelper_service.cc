@@ -7,7 +7,7 @@
 #include "larcore/Geometry/AuxDetGeo.h"
 
 
-namespace uboone
+namespace crt
 {
 
   CRTGeometryHelper::CRTGeometryHelper( fhicl::ParameterSet const & pset, art::ActivityRegistry & reg ) :  fPset( pset ){}
@@ -30,4 +30,4 @@ namespace uboone
 
 }
 
-DEFINE_ART_SERVICE_INTERFACE_IMPL(uboone::CRTGeometryHelper, geo::AuxDetExptGeoHelperInterface)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(crt::CRTGeometryHelper, geo::AuxDetExptGeoHelperInterface)

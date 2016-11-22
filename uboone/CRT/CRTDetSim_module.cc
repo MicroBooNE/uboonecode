@@ -25,17 +25,11 @@ namespace crt{
   }
 
   void CRTDetSim::produce(art::Event& evt){
+    //TODO: Do the parameterization here
 
     std::unique_ptr< std::vector<::crt::CRTData> > hits;
-
-    //artdaq::Fragment artfrag;
-    //create a new fragment instance
-    //bernfebdaq::BernFEBFragment frag(artfrag);
     mf::LogInfo(__log_name__)<<"In produce ";
-    //Get the geometry to figure out the channel mapping
     art::ServiceHandle<geo::AuxDetGeometry> geo;
-
-    //houses all of the channels hit by the event
     art::Handle< std::vector<sim::AuxDetSimChannel> > channels;
     evt.getByLabel("sim::AuxDetSimChannel",channels);
     if(!channels.isValid()) return;
@@ -65,7 +59,6 @@ namespace crt{
         float exitMomX = ideIt->exitMomentumX;
         float exitMomY = ideIt->exitMomentumY;
         float exitMomZ = ideIt->exitMomentumZ;
-
       }
     }
     evt.put(std::move(hits));
