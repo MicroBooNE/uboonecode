@@ -1,0 +1,3 @@
+crtdetsim : {
+    module_type: "CRTDetSim"
+}

@@ -13,7 +13,7 @@ namespace geo{
   class AuxDetChannelMapAlg;
 }
 
-namespace uboone
+namespace crt
 {
 
   class CRTGeometryHelper: public geo::AuxDetExptGeoHelperInterface {
@@ -32,6 +32,6 @@ namespace uboone
     fhicl::ParameterSet fPset;
   };
 }
-DECLARE_ART_SERVICE_INTERFACE_IMPL(uboone::CRTGeometryHelper, geo::AuxDetExptGeoHelperInterface, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(crt::CRTGeometryHelper, geo::AuxDetExptGeoHelperInterface, LEGACY)
 
 #endif // define
