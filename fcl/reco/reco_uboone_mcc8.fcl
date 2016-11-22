@@ -335,6 +335,12 @@ microboone_reco_mcc8_3D: [               rns,
 # this turns on the truncation of the RawDigits
 microboone_reco_mcc8_producers.digitfilter.TruncateTicks:                        true
 
+# Turn off noise filtering for mc.
+microboone_reco_mcc8_producers.digitfilter.ProcessNoise:                         false
+microboone_reco_mcc8_producers.digitfilter.FFTAlg.TransformViewVec:              [false,false,false]
+microboone_reco_mcc8_producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [false,false,false]
+
+
 physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                                 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
