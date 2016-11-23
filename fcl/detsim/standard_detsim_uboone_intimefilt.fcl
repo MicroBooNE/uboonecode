@@ -49,7 +49,7 @@ physics:
  {
     timefilter: { module_type: "FilterSimPhotonTime"
                   SimPhotonsCollectionLabel: largeant
-                  TimeWindows: [ [3125,4725] ]
+                  TimeWindows: [ [2950,4850] ]
                   MinPhotonEnergy: -1
                   MinTotalEnergy: 0
     }	  
