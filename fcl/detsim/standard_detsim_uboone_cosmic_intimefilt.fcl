@@ -1,0 +1,4 @@
+#include "standard_detsim_uboone_cosmic.fcl"
+
+outputs.out1.fileName: "%ifb_%tc_detsim_cosmic_intime.root"
+outputs.out1.SelectEvents: [ simulate ]
