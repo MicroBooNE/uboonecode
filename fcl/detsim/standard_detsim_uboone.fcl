@@ -37,7 +37,7 @@ physics:
  {
    optdigitizer:   @local::microboone_optical_adc_sim
    optfem:         @local::microboone_optical_fem_sim
-   triggersim:     @local::ubtrigger_dark_beam
+   triggersim:     @local::ubtrigger_dark_bnb
    pmtreadout:     @local::microboone_optical_dram_readout_sim
    daq:            @local::microboone_simwire
    rns:            { module_type: "RandomNumberSaver" }

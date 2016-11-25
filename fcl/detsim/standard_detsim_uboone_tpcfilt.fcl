@@ -40,7 +40,7 @@ physics:
  {
    optdigitizer:   @local::microboone_optical_adc_sim
    optfem:         @local::microboone_optical_fem_sim
-   triggersim:     @local::ubtrigger_standard
+   triggersim:     @local::ubtrigger_dark_bnb
    pmtreadout:     @local::microboone_optical_dram_readout_sim
    daq:            @local::microboone_simwire
    rns:            { module_type: "RandomNumberSaver" }
@@ -54,12 +54,14 @@ filters :
      LArG4ModuleLabel: "largeant"
      KeepCryostatNeutrinos: "true"
     }
+
+    swtrigger: @local::microboone_swtrigger_mc_bnb
 }
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
 
- simulate: [rns, filtDirtNus, optdigitizer, optfem, triggersim, pmtreadout, daq]
+ simulate: [rns, filtDirtNus, optdigitizer, optfem, triggersim, pmtreadout, daq, swtrigger]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
