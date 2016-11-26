@@ -44,7 +44,14 @@ physics:
    rns:            { module_type: "RandomNumberSaver" }
  }
  
- filters: { swtrigger: @local::microboone_swtrigger_mc_ext }
+ filters: { timefilter: { module_type: "FilterSimPhotonTime"
+                          SimPhotonsCollectionLabel: largeant
+                          TimeWindows: [ [3125,4725] ]
+                          MinPhotonEnergy: -1
+                          MinTotalEnergy: 0
+                          }
+            swtrigger: @local::microboone_swtrigger_mc_ext 
+          }
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
