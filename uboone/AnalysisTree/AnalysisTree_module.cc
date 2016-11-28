@@ -343,6 +343,7 @@ constexpr int kMaxTrackers   = 15;    //number of trackers passed into fTrackMod
 constexpr int kMaxVertices   = 500;    //max number of 3D vertices
 constexpr int kMaxVertexAlgos = 10;    //max number of vertex algorithms
 constexpr int kMaxFlashAlgos = 10;    //max number of flash algorithms
+constexpr int kNOpDets = 32;          ///< number of optical detectors (PMTs)
 constexpr unsigned short kMaxAuxDets = 4; ///< max number of auxiliary detector cells per MC particle
 constexpr int kMaxFlashes    = 1000;   //maximum number of flashes
 constexpr int kMaxShowerHits = 10000;  //maximum number of hits on a shower
@@ -624,18 +625,21 @@ namespace microboone {
     class FlashDataStruct {
     public:
       template <typename T>
-      using FlashData_t = std::vector<T>;
+      using FlashData_t     = std::vector<T>;
+      template <typename T>
+      using FlashDataSpec_t = std::vector<BoxedArray<T[kNOpDets]>>;
 
-      size_t MaxFlashes;               ///< Maximum number of storable flashes
+      size_t MaxFlashes;                                ///< Maximum number of storable flashes
 
-      Short_t nfls;                    ///< Number of reconstructed vertices
-      FlashData_t<Float_t> flsTime;    ///< Flash time (us)
-      FlashData_t<Float_t> flsPe;      ///< Flash total pe
-      FlashData_t<Float_t> flsYcenter; ///< Flash Y center (cm)
-      FlashData_t<Float_t> flsZcenter; ///< Flash Z center (cm)
-      FlashData_t<Float_t> flsYwidth;  ///< Flash Y width (cm)
-      FlashData_t<Float_t> flsZwidth;  ///< Flash Z width (cm)
-      FlashData_t<Float_t> flsTwidth;  ///< Flash time width (us)
+      Short_t nfls;                                     ///< Number of reconstructed flashes
+      FlashData_t<Float_t> flsTime;                     ///< Flash time (us)
+      FlashData_t<Float_t> flsPe;                       ///< Flash total PE
+      FlashDataSpec_t<Double_t> flsPePerOpDet;          ///< Flash PE per optical detector
+      FlashData_t<Float_t> flsYcenter;                  ///< Flash Y center (cm)
+      FlashData_t<Float_t> flsZcenter;                  ///< Flash Z center (cm)
+      FlashData_t<Float_t> flsYwidth;                   ///< Flash Y width (cm)
+      FlashData_t<Float_t> flsZwidth;                   ///< Flash Z width (cm)
+      FlashData_t<Float_t> flsTwidth;                   ///< Flash time width (us)
  
       void Clear();
       void SetMaxFlashes(size_t maxFlashes)
@@ -644,6 +648,8 @@ namespace microboone {
       void SetAddresses(TTree* pTree, std::string tracker, bool isCosmics);
 
       size_t GetMaxFlashes() const { return MaxFlashes; }
+
+      size_t GetNOpDet() const { auto const* geom = lar::providerFrom<geo::Geometry>(); return geom->NOpDets(); }
     }; // class FlashDataStruct
 
     /// Shower algorithm result
@@ -2386,12 +2392,24 @@ void microboone::AnalysisTreeDataStruct::FlashDataStruct::Resize(size_t nFlashes
 
   flsTime.resize(MaxFlashes);
   flsPe.resize(MaxFlashes);
+  flsPePerOpDet.resize(MaxFlashes);
   flsYcenter.resize(MaxFlashes);
   flsZcenter.resize(MaxFlashes);
   flsYwidth.resize(MaxFlashes);
   flsZwidth.resize(MaxFlashes);
   flsTwidth.resize(MaxFlashes);
 
+  size_t nOpDets = this->GetNOpDet();
+  if (kNOpDets != nOpDets) {
+    mf::LogError("AnalysisTree") 
+        << "Number of optical detectors from geometry services is" << nOpDets 
+        << ", which is different from the one expected of " << kNOpDets 
+        << ". Check variale kNOpDets in analysis tree module.";
+  }
+
+  for (size_t opfls = 0; opfls < MaxFlashes; opfls++) {
+    FillWith(flsPePerOpDet[opfls]   , -99999.);
+  }
 }
 
 void microboone::AnalysisTreeDataStruct::FlashDataStruct::Clear() {
@@ -2406,6 +2424,9 @@ void microboone::AnalysisTreeDataStruct::FlashDataStruct::Clear() {
   FillWith(flsZwidth      , -9999  );
   FillWith(flsTwidth      , -9999  );
 
+  for (size_t opfls = 0; opfls < MaxFlashes; opfls++) {
+    FillWith(flsPePerOpDet[opfls]  , -9999  );
+  }
 }
 
 void microboone::AnalysisTreeDataStruct::FlashDataStruct::SetAddresses(
@@ -2420,30 +2441,37 @@ void microboone::AnalysisTreeDataStruct::FlashDataStruct::SetAddresses(
   std::string FlashLabel = alg;
   std::string BranchName;
 
+  std::ostringstream oss;
+  oss << "[" << kNOpDets << "]";
+  std::string NOpDetIndexString = oss.str();
+
   BranchName = "nfls_" + FlashLabel;
   CreateBranch(BranchName, &nfls, BranchName + "/S");
   std::string NFlashIndexStr = "[" + BranchName + "]";
 
   BranchName = "flsTime_" + FlashLabel;
-  CreateBranch(BranchName, flsTime, BranchName + NFlashIndexStr + "/S");
+  CreateBranch(BranchName, flsTime, BranchName + NFlashIndexStr + "/F");
 
   BranchName = "flsPe_" + FlashLabel;
-  CreateBranch(BranchName, flsPe, BranchName + NFlashIndexStr + "/S");
+  CreateBranch(BranchName, flsPe, BranchName + NFlashIndexStr + "/F");
+
+  BranchName = "flsPePerOpDet_" + FlashLabel;
+  CreateBranch(BranchName, flsPePerOpDet, BranchName + NFlashIndexStr + NOpDetIndexString + "/D");
 
   BranchName = "flsYcenter_" + FlashLabel;
-  CreateBranch(BranchName, flsYcenter, BranchName + NFlashIndexStr + "/S");
+  CreateBranch(BranchName, flsYcenter, BranchName + NFlashIndexStr + "/F");
 
   BranchName = "flsZcenter_" + FlashLabel;
-  CreateBranch(BranchName, flsZcenter, BranchName + NFlashIndexStr + "/S");
+  CreateBranch(BranchName, flsZcenter, BranchName + NFlashIndexStr + "/F");
 
   BranchName = "flsYwidth_" + FlashLabel;
-  CreateBranch(BranchName, flsYwidth, BranchName + NFlashIndexStr + "/S");
+  CreateBranch(BranchName, flsYwidth, BranchName + NFlashIndexStr + "/F");
 
   BranchName = "flsZwidth_" + FlashLabel;
-  CreateBranch(BranchName, flsZwidth, BranchName + NFlashIndexStr + "/S");
+  CreateBranch(BranchName, flsZwidth, BranchName + NFlashIndexStr + "/F");
 
   BranchName = "flsTwidth_" + FlashLabel;
-  CreateBranch(BranchName, flsTwidth, BranchName + NFlashIndexStr + "/S");
+  CreateBranch(BranchName, flsTwidth, BranchName + NFlashIndexStr + "/F");
 }
 
 
@@ -5322,7 +5350,10 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
 
   // Save flash information for multiple algorithms
   if (fSaveFlashInfo) {
-    for (unsigned int iFlashAlg=0; iFlashAlg < NFlashAlgos; ++iFlashAlg){
+
+      auto const* geom = lar::providerFrom<geo::Geometry>(); // geometry is needed to go from OpChannel to OpDet
+
+      for (unsigned int iFlashAlg=0; iFlashAlg < NFlashAlgos; ++iFlashAlg){
       AnalysisTreeDataStruct::FlashDataStruct& FlashData = fData->GetFlashData(iFlashAlg);
 
       size_t NFlashes = flashlist[iFlashAlg].size();
@@ -5342,14 +5373,20 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
                                             << FlashData.GetMaxFlashes() << " stored in tree";
       }
     
-      for (size_t i = 0; i < NFlashes && i < kMaxFlashes ; ++i) { //loop over flashes
-        FlashData.flsTime[i] = flashlist[iFlashAlg][i]->Time();
-        FlashData.flsPe[i] = flashlist[iFlashAlg][i]->TotalPE();
-        FlashData.flsYcenter[i] = flashlist[iFlashAlg][i]->YCenter();
-        FlashData.flsZcenter[i] = flashlist[iFlashAlg][i]->ZCenter();
-        FlashData.flsYwidth[i] = flashlist[iFlashAlg][i]->YWidth();
-        FlashData.flsZwidth[i] = flashlist[iFlashAlg][i]->ZWidth();
-        FlashData.flsTwidth[i] = flashlist[iFlashAlg][i]->TimeWidth();
+      for (size_t i = 0; i < NFlashes && i < kMaxFlashes ; ++i) { // loop over flashes
+        FlashData.flsTime[i]       = flashlist[iFlashAlg][i]->Time();
+        FlashData.flsPe[i]         = flashlist[iFlashAlg][i]->TotalPE();
+        FlashData.flsYcenter[i]    = flashlist[iFlashAlg][i]->YCenter();
+        FlashData.flsZcenter[i]    = flashlist[iFlashAlg][i]->ZCenter();
+        FlashData.flsYwidth[i]     = flashlist[iFlashAlg][i]->YWidth();
+        FlashData.flsZwidth[i]     = flashlist[iFlashAlg][i]->ZWidth();
+        FlashData.flsTwidth[i]     = flashlist[iFlashAlg][i]->TimeWidth();
+
+        for (int opch = 0; opch < kNOpDets; opch++) {
+          Double_t pePerOpChannel = (Double_t) flashlist[iFlashAlg][i]->PE(opch);
+          unsigned int opdet = geom->OpDetFromOpChannel(opch);
+          FlashData.flsPePerOpDet[i][opdet] = pePerOpChannel;
+        }
       }
     }
   } // if fSaveFlashInfo

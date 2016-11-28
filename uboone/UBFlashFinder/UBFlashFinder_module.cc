@@ -53,6 +53,8 @@ private:
   std::string _flash_producer;
   std::string _hit_producer;
 
+  void GetFlashLocation(std::vector<double>, double&, double&, double&, double&);
+
   bool _beam_flash;
 };
 
@@ -112,10 +114,16 @@ void UBFlashFinder::produce(art::Event & e)
 
   for(const auto& lflash :  flash_v) {
 
+    double Ycenter, Zcenter, Ywidth, Zwidth;
+    GetFlashLocation(lflash.channel_pe, Ycenter, Zcenter, Ywidth, Zwidth);
+
     recob::OpFlash flash(lflash.time, lflash.time_err,
 			 trigger_time + lflash.time,
 			 (trigger_time + lflash.time) / 1600.,
-			 lflash.channel_pe);
+			 lflash.channel_pe, 
+                         0, 0, 1, // this are just default values
+                         Ycenter, Ywidth, Zcenter, Zwidth);
+
     opflashes->emplace_back(std::move(flash));
 
     for(auto const& hitidx : lflash.asshit_idx) {
@@ -126,6 +134,46 @@ void UBFlashFinder::produce(art::Event & e)
   
   e.put(std::move(opflashes));
   e.put(std::move(flash2hit_assn_v));
+}
+
+
+void UBFlashFinder::GetFlashLocation(std::vector<double> pePerOpChannel, 
+                                     double& Ycenter, 
+                                     double& Zcenter, 
+                                     double& Ywidth, 
+                                     double& Zwidth)
+{
+
+  // Reset variables
+  Ycenter = Zcenter = 0.;
+  Ywidth  = Zwidth  = -999.;
+  double totalPE = 0.;
+  double sumy = 0., sumz = 0., sumy2 = 0., sumz2 = 0.;
+
+  for (unsigned int opch = 0; opch < pePerOpChannel.size(); opch++) {
+
+    // Get physical detector location for this opChannel
+    double PMTxyz[3];
+    ::pmtana::OpDetCenterFromOpChannel(opch, PMTxyz);
+
+    // Add up the position, weighting with PEs
+    sumy    += pePerOpChannel[opch]*PMTxyz[1];
+    sumy2   += pePerOpChannel[opch]*PMTxyz[1]*PMTxyz[1];
+    sumz    += pePerOpChannel[opch]*PMTxyz[2];
+    sumz2   += pePerOpChannel[opch]*PMTxyz[2]*PMTxyz[2];
+
+    totalPE += pePerOpChannel[opch];
+  }
+
+  Ycenter = sumy/totalPE;
+  Zcenter = sumz/totalPE;
+
+  // This is just sqrt(<x^2> - <x>^2)
+  if ( (sumy2*totalPE - sumy*sumy) > 0. ) 
+    Ywidth = std::sqrt(sumy2*totalPE - sumy*sumy)/totalPE;
+
+  if ( (sumz2*totalPE - sumz*sumz) > 0. ) 
+    Zwidth = std::sqrt(sumz2*totalPE - sumz*sumz)/totalPE;
 }
 
 DEFINE_ART_MODULE(UBFlashFinder)
