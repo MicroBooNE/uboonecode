@@ -27,7 +27,7 @@
 #include "art/Framework/Services/Optional/RandomNumberGenerator.h"
 
 // art extensions
-#include "larsim/RandomUtils/LArSeedService.h"
+#include "nutools/RandomUtils/NuRandomService.h"
 
 // larsoft includes
 #include "nusimdata/SimulationBase/MCTruth.h"
@@ -74,9 +74,9 @@ private:
 //____________________________________________________________________________
 MuCSMCGen::MuCSMCGen(fhicl::ParameterSet const& pset)
 {
-  // create a default random engine; obtain the random seed from LArSeedService,
+  // create a default random engine; obtain the random seed from NuRandomService,
   // unless overridden in configuration with key "Seed"
-  art::ServiceHandle<sim::LArSeedService>()->createEngine(*this, pset, "Seed");
+  art::ServiceHandle<rndm::NuRandomService>()->createEngine(*this, pset, "Seed");
   
   this->reconfigure(pset);
   
