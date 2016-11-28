@@ -4,6 +4,7 @@
 #include "opticaldetectorsim_microboone.fcl"
 #include "signalservices_microboone.fcl"
 #include "time_memory_tracker_microboone.fcl"
+#include "swtrigger_microboone.fcl"
 ###include "mccheatermodules.fcl"
 ###include "filters.fcl"
 

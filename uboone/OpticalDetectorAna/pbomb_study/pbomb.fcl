@@ -72,7 +72,7 @@ physics:
    optdigitizer:   @local::microboone_optical_adc_sim_singlep
    optfem:         @local::microboone_optical_fem_sim_singlep
 
-   triggersim:     @local::ubtrigger_singlep
+   triggersim:     @local::ubtrigger_dark_bnb
 
    pmtreadout:     @local::microboone_optical_dram_readout_sim
 
