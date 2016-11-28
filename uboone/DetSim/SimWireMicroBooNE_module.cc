@@ -559,7 +559,9 @@ namespace detsim {
     double factor[3] = { 2.0, 2.0, 1.0 };
     int tickCut = 250;
 
-    // loop over the collected responses
+
+
+        // loop over the collected responses
     //   this is needed because hits generate responses on adjacent wires!
     for(unsigned int chan = 0; chan < N_CHANNELS; chan++) {
 
@@ -923,7 +925,7 @@ namespace detsim {
     std::vector<geo::WireID> wireIDs = geom->ChannelToWire(chan);
     geo::WireGeo const& wire = geom->Wire(wireIDs.front());
     double wirelength = wire.HalfL() * 2;
-   
+  
     // Calculate RMS -----------------------------------------------------
     // Calculating using the 16th, 50th, and 84th percentiles.
     // Because the signal is expected to be above the 84th percentile, this 
@@ -956,7 +958,14 @@ namespace detsim {
     
     // Scaling noise RMS with wire length dependance
     double baseline = 1.17764;
-    double scalefactor = 0.81 * (rms_quantilemethod/baseline) * (1.18117+0.0018544*wirelength);
+
+    double para = 0.4616;
+    double parb = 0.19;
+    double parc = 1.07;
+
+    // 0.77314 scale factor accounts for fact that original DDN designed based
+    // on the Y plane, updated fit takes average of wires on 2400 on each plane
+    double scalefactor = 0.77314 * (rms_quantilemethod/baseline) * sqrt(para*para + pow(parb*wirelength/100 + parc, 2));
     for(size_t i=0; i<waveform_size; ++i) {
       noise[i] = fb->GetBinContent(i+1)*scalefactor;
     }
