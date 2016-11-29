@@ -2,12 +2,7 @@
 #include "detsimmodules_microboone.fcl"
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
-#include "signalservices_microboone.fcl"
 #include "time_memory_tracker_microboone.fcl"
-#include "swtrigger_microboone.fcl"
-###include "mccheatermodules.fcl"
-###include "filters.fcl"
-
 
 process_name: Detsim
 
@@ -41,28 +36,15 @@ physics:
  {
    optdigitizer:   @local::microboone_optical_adc_sim
    optfem:         @local::microboone_optical_fem_sim
-   triggersim:     @local::ubtrigger_dark_bnb
+   triggersim:     @local::ubtrigger_standard
    pmtreadout:     @local::microboone_optical_dram_readout_sim
    daq:            @local::microboone_simwire
    rns:            { module_type: "RandomNumberSaver" }
  }
-
-filters : 
-{
-    filtDirtNus: {
-     module_type: FilterNoDirtNeutrinos
-     GenModuleLabel: "generator"
-     LArG4ModuleLabel: "largeant"
-     KeepCryostatNeutrinos: "true"
-    }
-
-    swtrigger: @local::microboone_swtrigger_mc_bnb
-}
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
-
- simulate: [rns, filtDirtNus, optdigitizer, optfem, triggersim, pmtreadout, daq, swtrigger]
+ simulate: [ rns, optdigitizer, optfem, triggersim, pmtreadout, daq ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -76,8 +58,6 @@ filters :
  end_paths:     [stream1]  
 }
 
-
-
 #block to define where the output goes.  if you defined a filter in the physics
 #block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
 #entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
@@ -87,9 +67,15 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "%ifb_%tc_detsim.root"
-   SelectEvents: [ simulate ]
    dataTier:    "detector-simulated"
    saveMemoryObjectThreshold: 0
    compressionLevel: 1
+   fastCloning: false
  }
 }
+
+# MCC7 compatibility.
+
+physics.producers.daq.GenNoise: 1
+services.SignalShapingServiceMicroBooNE.NConfigs: 2
+services.SignalShapingServiceMicroBooNE.StretchFullResponse: true

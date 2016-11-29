@@ -124,7 +124,7 @@ physics.producers.generator.BeamName: "booster"
 #physics.producers.generator.Theta0YZ: [ 0. ]       # y-latitude
 #physics.producers.generator.SigmaThetaXZ: [ 180. ] # Quasi-isotropic
 #physics.producers.generator.SigmaThetaYZ: [ 90. ]
-#physics.producers.triggersim:   @local::ubtrigger_singlep
+#physics.producers.triggersim:   @local::ubtrigger_dark_bnb
 #physics.producers.optdigitizer: @local::microboone_optical_adc_sim_singlep
 #physics.producers.optfem:       @local::microboone_optical_fem_sim_singlep
 

@@ -12,8 +12,8 @@ ubtrigger_standard:
   #
   # Input beam pulse / PMT-Trigger module labels
   #
-  BeamModName:   ["generator"]  # producer module name for BeamGateInfo
-  OpticalFEMMod: "optfem"       # producer module name for PMTTrigger
+  BeamModName:   []        # producer module name for BeamGateInfo
+  OpticalFEMMod: "optfem"  # producer module name for PMTTrigger
 
   #
   # Trigger module configuration
@@ -35,8 +35,8 @@ ubtrigger_standard:
 
   # Fire time for BNB/NuMI if there's a BeamGate present (in G4 ns unit)
   # It used to use BeamGateTime but it should not be referred to real beam spill timing
-  BNBFireTime:  -343.75
-  NuMIFireTime: -343.75
+  BNBFireTime:  0 #-343.75
+  NuMIFireTime: 0 #-343.75
   
   # Configuration to force a readout trigger per event in G4 clock [ns]
   # Note if you are running NuMI or BNB beam simulation which generates BeamGateInfo,
@@ -50,19 +50,19 @@ ubtrigger_standard:
 }
 
 microboone_triggersim: @local::ubtrigger_standard
-microboone_triggersim.Mask:  [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x30]
 
 #
-# Single-particle trigger: use DAQ trigger fired @ G4 T=0
+# Cosmic (EXT) trigger
 #
-ubtrigger_singlep:            @local::ubtrigger_standard
-ubtrigger_singlep.ExtTrigger: [-3468.75]
-ubtrigger_singlep.Mask:       [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x8]
+ubtrigger_ext:            @local::ubtrigger_standard
+ubtrigger_ext.ExtTrigger: [-414.0625]
+ubtrigger_ext.Mask:       [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x2]
 
 #
 # Beam trigger w/o optical simulation
 #
-ubtrigger_dark_beam:       @local::ubtrigger_standard
-ubtrigger_dark_beam.Mask:  [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x30]
+ubtrigger_dark_bnb:       @local::ubtrigger_standard
+ubtrigger_dark_bnb.BNBTrigger: [-31.25]
+ubtrigger_dark_bnb.Mask:  [0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x10]
 
 END_PROLOG
