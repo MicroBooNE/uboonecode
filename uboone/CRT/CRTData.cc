@@ -1,4 +1,4 @@
-#include "uboone/CRT/CRTDatas.hh"
+#include "uboone/CRT/CRTData.hh"
 
 namespace crt{
 
@@ -14,15 +14,15 @@ namespace crt{
   CRTData::~CRTData(){
   }
   uint32_t CRTData::Channel(){
-    return self->fChannel;
+    return this->fChannel;
   }
   uint32_t CRTData::T0(){
-    return self->fT0;
+    return this->fT0;
   }
   uint32_t CRTData::T1(){
-    return self->fT1;
+    return this->fT1;
   }
   uint32_t CRTData::ADC(){
-    return self->fADC;
+    return this->fADC;
   }
 }

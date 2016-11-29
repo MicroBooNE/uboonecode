@@ -4,8 +4,7 @@ namespace crt {
 
   //---------------------------------------------------------------------------
   CRTChannelMapAlg::CRTChannelMapAlg( fhicl::ParameterSet const& pvals,
-    fhicl::ParameterSet const& sortingParameters ) : 
-    fNModules(72), fNStrips(17){
+    fhicl::ParameterSet const& sortingParameters ) {
   }
 
   //---------------------------------------------------------------------------
@@ -25,12 +24,12 @@ namespace crt {
   }
 
   uint32_t CRTChannelMapAlg::PositionToAuxDetChannel(
-   double const worldLoc[3],
-   std::vector<geo::AuxDetGeo*> const& auxDets,
-   size_t& ad,
-   size_t& sv) const{
-     uint32_t channel = UINT_MAX;
-     ad = this->NearestAuxDet(worldLoc, auxDets);
+    double const worldLoc[3],
+    std::vector<geo::AuxDetGeo*> const& auxDets,
+    size_t& ad,
+    size_t& sv) const{
+      //uint32_t channel = UINT_MAX;
+      ad = this->NearestAuxDet(worldLoc, auxDets);
      sv = this->NearestSensitiveAuxDet(worldLoc, auxDets, ad);
      return 0;
   }
