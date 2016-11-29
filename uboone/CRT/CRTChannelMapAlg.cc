@@ -8,7 +8,9 @@ namespace crt {
   }
 
   //---------------------------------------------------------------------------
-  CRTChannelMapAlg::~CRTChannelMapAlg(){}
+  CRTChannelMapAlg::~CRTChannelMapAlg(){
+    return;
+  }
 
   void CRTChannelMapAlg::Initialize(geo::AuxDetGeometryData_t& geodata){
     // TODO: Redo this section with a better map
@@ -17,27 +19,23 @@ namespace crt {
   void CRTChannelMapAlg::Uninitialize(){
     //TODO: Release Map
   }
-  uint32_t ChannelNumberFromModuleAndPanel(uint32_t const& module,
-                                              uint32_t const& panel){
-    //TODO: Fill
-    return 0;
-  }
+  /*
 
   uint32_t CRTChannelMapAlg::PositionToAuxDetChannel(
     double const worldLoc[3],
     std::vector<geo::AuxDetGeo*> const& auxDets,
     size_t& ad,
     size_t& sv) const{
-      //uint32_t channel = UINT_MAX;
       ad = this->NearestAuxDet(worldLoc, auxDets);
-     sv = this->NearestSensitiveAuxDet(worldLoc, auxDets, ad);
-     return 0;
+      sv = this->NearestSensitiveAuxDet(worldLoc, auxDets, ad);
+      return 0;
   }
 
   const TVector3 CRTChannelMapAlg::AuxDetChannelToPosition(
     uint32_t const& channel,
     std::string const& auxDetName,
     std::vector<geo::AuxDetGeo*> const& auxDets) const{
-      return TVector3(0., 0., 0.);
+      return TVector3();
   }
-} // namespace
+  */
+}

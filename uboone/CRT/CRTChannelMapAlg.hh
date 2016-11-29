@@ -1,5 +1,5 @@
-#ifndef GEO_CHANNELMAP_UBOONE_ALG_H
-#define GEO_CHANNELMAP_UBOONE_ALG_H
+#ifndef CRTChannelMapAlg_hh_
+#define CRTChannelMapAlg_hh_
 
 #include "larcore/Geometry/GeoObjectSorterStandard.h"
 #include "larcore/Geometry/AuxDetChannelMapAlg.h"
@@ -11,22 +11,15 @@
 #include <set>
 
 
-namespace geo{
-  struct AuxDetGeometryData_t;
-  class AuxDetGeo;
-}
-
 namespace crt {
 
   class CRTChannelMapAlg : public geo::AuxDetChannelMapAlg {
-    //TODO: Redefine the mapping scheme
-  protected:
-    uint32_t ChannelNumberFromModuleAndPanel(uint32_t const& module,
-                                              uint32_t const& panel) const;
+
   public:
 
     CRTChannelMapAlg(fhicl::ParameterSet const& pset,
                         fhicl::ParameterSet const& sortingParameters );
+
     ~CRTChannelMapAlg();
 
     void Initialize(geo::AuxDetGeometryData_t& geodata);
@@ -35,12 +28,13 @@ namespace crt {
     uint32_t PositionToAuxDetChannel(double const  worldLoc[3],
                                      std::vector<geo::AuxDetGeo*> const& auxDets,
                                      size_t& ad,
-                                     size_t& sv) const;
+                                     size_t& sv) const{return 0.;}
 
     const TVector3 AuxDetChannelToPosition(uint32_t const& channel,
                                            std::string const& auxDetName,
-                                           std::vector<geo::AuxDetGeo*> const& auxDets) const;
+                                           std::vector<geo::AuxDetGeo*> const& auxDets) const{return TVector3();}
 
   };
 }
-#endif // GEO_CHANNELMAPSTANDARDALG_H
+
+#endif

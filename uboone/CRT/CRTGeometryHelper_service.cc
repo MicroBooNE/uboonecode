@@ -1,5 +1,5 @@
-#include "ucorsika/Geometry/CRTGeometryHelper.hh"
-#include "ucorsika/Geometry/CRTChannelMapAlg.hh"
+#include "uboone/CRT/CRTGeometryHelper.hh"
+#include "uboone/CRT/CRTChannelMapAlg.hh"
 #include "larcore/Geometry/AuxDetGeometryCore.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
