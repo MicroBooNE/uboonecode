@@ -965,7 +965,7 @@ namespace detsim {
 
     // 0.77314 scale factor accounts for fact that original DDN designed based
     // on the Y plane, updated fit takes average of wires on 2400 on each plane
-    double scalefactor = 0.77314 * (rms_quantilemethod/baseline) * sqrt(para*para + pow(parb*wirelength/100 + parc, 2));
+    double scalefactor = 0.83 * (rms_quantilemethod/baseline) * sqrt(para*para + pow(parb*wirelength/100 + parc, 2));
     for(size_t i=0; i<waveform_size; ++i) {
       noise[i] = fb->GetBinContent(i+1)*scalefactor;
     }
