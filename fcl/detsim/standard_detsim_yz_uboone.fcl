@@ -3,6 +3,7 @@
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
 #include "time_memory_tracker_microboone.fcl"
+#include "swtrigger_microboone.fcl"
 
 process_name: Detsim
 
@@ -36,15 +37,17 @@ physics:
  {
    optdigitizer:   @local::microboone_optical_adc_sim
    optfem:         @local::microboone_optical_fem_sim
-   triggersim:     @local::ubtrigger_standard
+   triggersim:     @local::ubtrigger_dark_bnb
    pmtreadout:     @local::microboone_optical_dram_readout_sim
    daq:            @local::microboone_simwire
    rns:            { module_type: "RandomNumberSaver" }
  }
+
+ filters: { swtrigger: @local::microboone_swtrigger_mc_bnb }
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ rns, optdigitizer, optfem, triggersim, pmtreadout, daq ]
+ simulate: [ rns, optdigitizer, optfem, triggersim, pmtreadout, daq, swtrigger ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -74,14 +77,6 @@ outputs:
  }
 }
 
-# MCC7 compatibility.
+# Enable YZ-dependent field response.
 
-physics.producers.daq.GenNoise: 1
-services.SignalShapingServiceMicroBooNE.NConfigs: 2
-services.SignalShapingServiceMicroBooNE.StretchFullResponse: true
-services.SignalShapingServiceMicroBooNE.FieldResponseFVersion: [ "v0.1", "v0.1"]
-services.SignalShapingServiceMicroBooNE.YZdependentResponse: false
-services.SignalShapingServiceMicroBooNE.datadrivenResponse: false
-services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
-services.SignalShapingServiceMicroBooNE.DefaultEField: 0.5
-services.SignalShapingServiceMicroBooNE.DefaultTemperature: 87
+services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
