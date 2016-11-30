@@ -16,7 +16,7 @@ services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "single_hist_uboone.root" }
-  Timing:       {}
+  TimeTracker:  {}
   RandomNumberGenerator: {} #ART native random number generator
   @table::microboone_full_services
 #  @table::microboone_services
@@ -48,7 +48,7 @@ physics:
 #   backtrack:    @local::standard_backtrackerloader
    optdigitizer: @local::microboone_optical_adc_sim
    optfem:       @local::microboone_optical_fem_sim
-   triggersim:   @local::ubtrigger_singlep
+   triggersim:   @local::ubtrigger_dark_bnb
    optreadout:   @local::microboone_optical_dram_readout_sim
    ophit:        @local::microboone_ophit
    opflash:      @local::microboone_opflash

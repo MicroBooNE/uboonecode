@@ -12,8 +12,8 @@ source : {
 services : {
 
   TFileService: { fileName: "ACTrackFilter_hist.root" }
-  #TimeTracker:       {}
-  Timing: {}
+  TimeTracker:       {}
+  #@Timing: {}
   MemoryTracker:     {}
   RandomNumberGenerator: {}                     #ART native random number generator
 

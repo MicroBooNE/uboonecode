@@ -27,6 +27,8 @@ add_subdirectory(TPCNeutrinoIDFilter)
 #add_subdirectory(LiteMaker)
 add_subdirectory(MuCS)
 add_subdirectory(T0Reco)
+add_subdirectory(EventWeight)
+add_subdirectory(UBFlashFinder)
 
 add_subdirectory(DataOverlay)
 add_subdirectory(PatternFilter)

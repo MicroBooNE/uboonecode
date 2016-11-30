@@ -5,8 +5,8 @@ process_name: OpDetWaveformAna
 services:
 {
   TFileService:            { fileName: "reco_stage_1_hist.root" }
-  Timing:                  {}
-  SimpleMemoryCheck:       { ignoreTotal: 1 }
+  TimeTracker:             {}
+  MemoryTracker:           { ignoreTotal: 1 }
   RandomNumberGenerator:   {}
   message:                 @local::microboone_message_services_prod_debug
   @table::microboone_simulation_services

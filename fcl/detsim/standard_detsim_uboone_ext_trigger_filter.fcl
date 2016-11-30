@@ -4,8 +4,7 @@
 #include "opticaldetectorsim_microboone.fcl"
 #include "signalservices_microboone.fcl"
 #include "time_memory_tracker_microboone.fcl"
-###include "mccheatermodules.fcl"
-###include "filters.fcl"
+#include "swtrigger_microboone.fcl"
 
 process_name: Detsim
 
@@ -39,25 +38,24 @@ physics:
  {
    optdigitizer:   @local::microboone_optical_adc_sim
    optfem:         @local::microboone_optical_fem_sim
-   triggersim:     @local::ubtrigger_standard
+   triggersim:     @local::ubtrigger_ext
    pmtreadout:     @local::microboone_optical_dram_readout_sim
    daq:            @local::microboone_simwire
    rns:            { module_type: "RandomNumberSaver" }
  }
  
- filters:
- {
-    timefilter: { module_type: "FilterSimPhotonTime"
-                  SimPhotonsCollectionLabel: largeant
-                  TimeWindows: [ [3125,4725] ]
-                  MinPhotonEnergy: -1
-                  MinTotalEnergy: 0
-    }	  
- }
+ filters: { timefilter: { module_type: "FilterSimPhotonTime"
+                          SimPhotonsCollectionLabel: largeant
+                          TimeWindows: [ [3125,4725] ]
+                          MinPhotonEnergy: -1
+                          MinTotalEnergy: 0
+                          }
+            swtrigger: @local::microboone_swtrigger_mc_ext 
+          }
  
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ rns, timefilter, optdigitizer, optfem, triggersim, pmtreadout, daq ]
+ simulate: [ rns, timefilter, optdigitizer, optfem, triggersim, pmtreadout, daq, swtrigger ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -79,8 +77,8 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_%tc_detsim.root"
    SelectEvents: [ simulate ]
+   fileName:    "%ifb_%tc_detsim.root"
    dataTier:    "detector-simulated"
    saveMemoryObjectThreshold: 0
    compressionLevel: 1

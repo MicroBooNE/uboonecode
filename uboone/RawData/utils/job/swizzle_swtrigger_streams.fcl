@@ -13,7 +13,7 @@ process_name: Swizzler
 services:
 {
   TFileService: { fileName: "daq_hist.root" }
-  Timing:       {}
+  TimeTracker:  {}
   RandomNumberGenerator: {} 
   FileCatalogMetadata:    @local::art_file_catalog_data
   ExptGeoHelperInterface: @local::microboone_geometry_helper
@@ -29,7 +29,7 @@ services.DetectorClocksService.TrigModuleName: "daq"
 microboone_tfile_metadata:
 {
   JSONFileName:          "daq_hist.root.json"
-  GenerateTFileMetadata: false
+  GenerateTFileMetadata: true
   dataTier:              "root-tuple"
   fileFormat:            "root"
 }

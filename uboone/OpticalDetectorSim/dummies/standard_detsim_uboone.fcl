@@ -8,8 +8,8 @@ services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "detsim_hist.root" }
-  Timing:       {}
-  SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
 #  FileCatalogMetadata:  @local::art_file_catalog_mc
 #  @table::microboone_optical_simulation_services_1window

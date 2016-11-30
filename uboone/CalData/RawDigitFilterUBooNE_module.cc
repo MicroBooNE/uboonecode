@@ -343,7 +343,14 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
             // This allows the module to be used simply to truncate waveforms with no noise processing
             if (!fProcessNoise)
             {
+                caldata::RawDigitVector pedCorrectedVec;
+                
+                pedCorrectedVec.resize(rawadc.size(),0);
+                
+                std::transform(rawadc.begin(),rawadc.end(),pedCorrectedVec.begin(),std::bind2nd(std::minus<short>(),pedCorWireVec[wireIdx]));
+                
                 saveRawDigits(filteredRawDigit, channel, rawadc, truncMeanWireVec[wireIdx], truncRmsWireVec[wireIdx]);
+                
                 continue;
             }
             

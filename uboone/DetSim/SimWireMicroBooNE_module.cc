@@ -16,6 +16,8 @@
 #include <string>
 #include <algorithm> // std::fill()
 #include <functional>
+#include <random>
+#include <chrono>
 
 // CLHEP libraries
 #include "CLHEP/Random/RandFlat.h"
@@ -25,9 +27,10 @@
 #include "TMath.h"
 #include "TComplex.h"
 #include "TString.h"
-#include "TH2.h"
+#include "TH2F.h"
 #include "TH1D.h"
 #include "TFile.h"
+#include "TCanvas.h"
 
 // art library and utilities
 #include "art/Framework/Core/ModuleMacros.h"
@@ -49,6 +52,7 @@
 #include "lardataobj/RawData/TriggerData.h"
 #include "lardataobj/Simulation/SimChannel.h"
 #include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h" // FIXME: this is not portable
@@ -81,7 +85,7 @@ namespace detsim {
 
     void GenNoiseInTime(std::vector<float> &noise, double noise_factor) const;
     void GenNoiseInFreq(std::vector<float> &noise, double noise_factor) const;
-    void GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view);
+    void GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view, int chan);
     void MakeADCVec(std::vector<short>& adc, std::vector<float> const& noise, 
                     std::vector<double> const& charge, float ped_mean) const;
 
@@ -140,7 +144,7 @@ namespace detsim {
     };
 
     //
-    // Needed for post-filter noise (pfn) generator by Jyoti (imp. by Kazu)
+    // Needed for post-filter noise (pfn) generator
     //
     std::vector<double> _pfn_shaping_time_v;
     TF1  *_pfn_f1;
@@ -149,6 +153,7 @@ namespace detsim {
     std::vector<double> _pfn_rho_v;
     std::vector<double> _pfn_value_re;
     std::vector<double> _pfn_value_im;
+    float gammaRand;
 
   }; // class SimWireMicroBooNE
 
@@ -227,7 +232,7 @@ namespace detsim {
       cet::search_path sp("FW_SEARCH_PATH");
       sp.find_file(p.get<std::string>("NoiseFileFname"), fNoiseFileFname);
 
-      TFile * in=new TFile(fNoiseFileFname.c_str(),"READ");
+      /*TFile * in=new TFile(fNoiseFileFname.c_str(),"READ");
       TH1D * temp=(TH1D *)in->Get(fNoiseHistoName.c_str());
 
       if(temp!=NULL)
@@ -238,7 +243,7 @@ namespace detsim {
       else
         throw cet::exception("SimWireMicroBooNE") << "Could not find noise histogram in Root file\n";
       in->Close();
-
+*/
     }
     //detector properties information
     auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
@@ -288,8 +293,7 @@ namespace detsim {
         throw cet::exception(__FUNCTION__)<<"Invalid test wire channel: "<<fTestWire;
 
       std::vector<unsigned int> channels;
-      channels.reserve(geo->PlaneIDs().size());
-      for(auto const& plane_id : geo->PlaneIDs())
+      for(auto const& plane_id : geo->IteratePlaneIDs())
         channels.push_back(geo->PlaneWireToChannel(plane_id.Plane,fTestWire));
 
       double xyz[3] = { std::numeric_limits<double>::max() };
@@ -319,7 +323,7 @@ namespace detsim {
   void SimWireMicroBooNE::produce(art::Event& evt)
   {
 
-    
+
     //--------------------------------------------------------------------
     //
     // Get all of the services we will be using
@@ -727,7 +731,33 @@ namespace detsim {
 //      }
 //    }
 
-    
+        DoubleVec             noiseFactVec(N_VIEWS,0.);
+    auto tempNoiseVec = sss->GetNoiseFactVec();	
+    for (size_t v = 0; v != N_VIEWS; ++v) {
+      	
+      //the current sss only allows retrieval by channel, even though these things only change by view
+      //If these ever do change by channel, then this code automatically becomes incorrect!
+      double shapingTime = sss->GetShapingTime(first_channel_in_view[v]);	
+      double asicGain    = sss->GetASICGain(first_channel_in_view[v]);
+      
+      if (fShapingTimeOrder.find( shapingTime ) != fShapingTimeOrder.end() ) {
+        if(_pfn_shaping_time_v.size()<=v) _pfn_shaping_time_v.resize(v+1,-1);
+        if(_pfn_shaping_time_v[v]<0) _pfn_shaping_time_v[v]=shapingTime;
+        noiseFactVec[v]  = tempNoiseVec[v].at( fShapingTimeOrder.find( shapingTime )->second );
+        noiseFactVec[v] *= asicGain/4.7;
+      }
+      else {//Throw exception...
+        throw cet::exception("SimWireMicroBooNE")
+        << "\033[93m"
+        << "Shaping Time received from signalservices_microboone.fcl is not one of allowed values"
+        << std::endl
+        << "Allowed values: 0.5, 1.0, 2.0, 3.0 usec"
+        << "\033[00m"
+        << std::endl;
+      }
+    }
+
+
     //--------------------------------------------------------------------
     //
     // Loop over channels a second time and produce the RawDigits by adding together 
@@ -750,7 +780,9 @@ namespace detsim {
     double factor[3] = { 2.0, 2.0, 1.0 };
     int tickCut = 250;
 
-    // loop over the collected responses
+
+
+        // loop over the collected responses
     //   this is needed because hits generate responses on adjacent wires!
     for(unsigned int chan = 0; chan < N_CHANNELS; chan++) {
 
@@ -808,9 +840,9 @@ namespace detsim {
         else if(fGenNoise==2)
           GenNoiseInFreq(noisetmp, noise_factor);
 	else if(fGenNoise==3)
-	  GenNoisePostFilter(noisetmp, noise_factor, view);
+	  GenNoisePostFilter(noisetmp, noise_factor, view, chan);
       }
-      
+   
       //Add Noise to NoiseDist Histogram
       //geo::SigType_t sigtype = geo->SignalType(chan);
       geo::View_t vw = geo->View(chan);
@@ -904,6 +936,7 @@ namespace detsim {
       digcol->push_back(std::move(rd)); // we do move the raw digit copy, though
     }// end of 2nd loop over channels
 
+ 
     evt.put(std::move(digcol));
     return;
   }
@@ -1022,42 +1055,45 @@ namespace detsim {
     for(unsigned int i = 0; i < noise.size(); ++i) noise.at(i) *= 1.*(fNTicks/20.);
     
   }
-
+  
   //---------------------------------------------------------
-  Double_t PFNPoissonReal(const Double_t *k,  const Double_t *lambda) {
-    return TMath::Exp(k[0]*TMath::Log(lambda[0])-lambda[0]) / TMath::Gamma(k[0]+1.);
-  }
 
-  void SimWireMicroBooNE::GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view)
+  void SimWireMicroBooNE::GenNoisePostFilter(std::vector<float> &noise, double noise_factor, size_t view, int chan)
   {
+    // noise is a vector of size fNTicks, which is the number of ticks
     const size_t waveform_size = noise.size();
+    
     if(_pfn_shaping_time_v.size()<=view || _pfn_shaping_time_v[view]<0)
       throw cet::exception("SimWireMicroBooNE")
-	<< "GenNoisePostFilter encounters unknown view!" << std::endl;
+	<< "GenNoisePostFilter encounters unknown view!" << std::endl;    
 
     Double_t ShapingTime = _pfn_shaping_time_v[view];
-    Double_t MaxPoissArg = 100.;
 
-    if(!_pfn_MyPoisson) _pfn_MyPoisson = new TF1("_pfn_MyPoisson",PFNPoissonReal,0.,MaxPoissArg,1);
-    if(!_pfn_f1) _pfn_f1 = new TF1("_pfn_f1",Form("[0]+([1]+[2]*min(%g-x,x))*exp(-[3]*pow(min(%g-x,x),[4]))",(double)waveform_size,(double)waveform_size),0.0,(double)waveform_size);
+      if(!_pfn_f1) _pfn_f1 = new TF1("_pfn_f1", "([0]*exp(-0.5*(((x*9592/2)-[1])/[2])**2)*exp(-0.5*pow(x*9592/(2*[3]),[4]))+[5])", 0.0, (double)waveform_size/2);
+
     if(_pfn_rho_v.empty()) _pfn_rho_v.resize(waveform_size);
     if(_pfn_value_re.empty()) _pfn_value_re.resize(waveform_size);
     if(_pfn_value_im.empty()) _pfn_value_im.resize(waveform_size);
 
-    //**Setting lambda**//
+    //**Setting lambda/
     Double_t params[1] = {0.};
-    Double_t fitpar[5] = {0.};
-    
+    Double_t fitpar[6] = {0.};
+
     if(ShapingTime==2.0) {
       params[0] = 3.3708; //2us
-      fitpar[0] = 16.8;
-      fitpar[1] = 45.7;
-      fitpar[2] = 0.0028;
-      fitpar[3] = 9.5e-9;
-      fitpar[4] = 2.6;
+
+      // wiener-like
+      fitpar[0] = 8.49571e+02;
+      fitpar[1] = 6.60496e+02;
+      fitpar[2] = 5.68387e+02;
+      fitpar[3] = 1.02403e+00;
+      fitpar[4] = 1.57143e-01;
+      fitpar[5] = 4.79649e+01;
+
+
     }
     else if(ShapingTime==1.0) {
-      params[0] = 3.5125; //1us new
+      params[0] = 3.5125; //1us
       fitpar[0] = 14.4;
       fitpar[1] = 35.1;
       fitpar[2] = 0.049;
@@ -1065,42 +1101,104 @@ namespace detsim {
       fitpar[4] = 2.4;
     }else
       throw cet::exception("SimWireMicroBooNE") << "<<" << __FUNCTION__ << ">> not supported shaping time " << ShapingTime << std::endl;
-
-    _pfn_MyPoisson->SetParameters(params);
+    
     _pfn_f1->SetParameters(fitpar);
 
-    //To assign a random number to variable X
-    for(size_t i=0; i<waveform_size; i++)
-      _pfn_rho_v[i] = _pfn_MyPoisson->GetRandom() * _pfn_f1->Eval(i);
-
-    TVirtualFFT::SetTransform(0);
-    //**Inverse FFT**//
-    TRandom3 rand(0);
-    for(size_t i=0; i<waveform_size; i++){
-      Double_t rho = _pfn_rho_v[i];
-
-      Double_t phi = 2*TMath::Pi()*rand.Rndm(1) - TMath::Pi();
-
-      _pfn_value_re[i] = rho*cos(phi)/((double)waveform_size);
-      _pfn_value_im[i] = phi*sin(phi)/((double)waveform_size);
-    }
-
     Int_t n = waveform_size;
+    
+    TVirtualFFT::SetTransform(0);
+    
+    // seed gamma-distibuted random number with mean params[0]
+    // replacing continuous Poisson distribution from ROOT
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator(seed);
+    std::gamma_distribution<double> distribution(params[0]);
+    
+    // For every tick...
+    for(size_t i=0; i<waveform_size; i++){
+      
+      Double_t freq;
+      if (i < n/2.){
+        freq = (i)*2./n; //2 MHz digitization
+      }else{
+        freq = (n-i)*2./n;
+      }
 
+      // Draw gamma-dstributed random number
+      gammaRand = distribution(generator); 
+      
+      // Define FFT parameters
+      _pfn_rho_v[i] = _pfn_f1->Eval(freq) * gammaRand/params[0];
+      Double_t rho = _pfn_rho_v[i];
+      Double_t phi = gRandom->Uniform(0,1) * 2. * TMath::Pi();
+      
+      _pfn_value_re[i] = rho*cos(phi)/((double)waveform_size);
+      _pfn_value_im[i] = rho*sin(phi)/((double)waveform_size);
+    }
+    
+    // Inverse FFT
     if(!_pfn_ifft) _pfn_ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     _pfn_ifft->SetPointsComplex(&_pfn_value_re[0],&_pfn_value_im[0]);
     _pfn_ifft->Transform();
+    
+    // Produce fit histogram from the FFT fo the real part
     TH1 *fb = 0;
     fb = TH1::TransformHisto(_pfn_ifft,fb,"Re");
+    
+    // Get wire length 
+    geo::GeometryCore const* geom = lar::providerFrom<geo::Geometry>();
+    std::vector<geo::WireID> wireIDs = geom->ChannelToWire(chan);
+    geo::WireGeo const& wire = geom->Wire(wireIDs.front());
+    double wirelength = wire.HalfL() * 2;
+  
+    // Calculate RMS -----------------------------------------------------
+    // Calculating using the 16th, 50th, and 84th percentiles.
+    // Because the signal is expected to be above the 84th percentile, this 
+    // effectively vetos the signal.
+    
+    Double_t min = fb->GetMinimum();
+    Double_t max = fb->GetMaximum();	 
+    TH1F* h_rms = new TH1F("h_rms", "h_rms", Int_t(10*(max-min+1)), min, max+1);
+    
+    
+    for(size_t i=0; i < waveform_size; ++i){
+      h_rms->Fill(fb->GetBinContent(i+1));
+    }
+    
+    double par[3];
+    double rms_quantilemethod = 0.0;
+    if (h_rms->GetSum()>0){
+      double xq = 0.5-0.34;
+      h_rms->GetQuantiles(1, &par[0], &xq);
+      
+      xq = 0.5;
+      h_rms->GetQuantiles(1, &par[1], &xq);
+      
+      xq = 0.5+0.34;
+      h_rms->GetQuantiles(1, &par[2], &xq);
+      
+      rms_quantilemethod = sqrt((pow(par[1]-par[0],2)+pow(par[2]-par[1],2))/2.);
+    
+    }
+    
+    // Scaling noise RMS with wire length dependance
+    double baseline = 1.17764;
 
-    for(size_t i=0; i<waveform_size; ++i)
-      noise[i] = fb->GetBinContent(i+1);
+    double para = 0.4616;
+    double parb = 0.19;
+    double parc = 1.07;
 
+    // 0.77314 scale factor accounts for fact that original DDN designed based
+    // on the Y plane, updated fit takes average of wires on 2400 on each plane
+    double scalefactor = 0.83 * (rms_quantilemethod/baseline) * sqrt(para*para + pow(parb*wirelength/100 + parc, 2));
+    for(size_t i=0; i<waveform_size; ++i) {
+      noise[i] = fb->GetBinContent(i+1)*scalefactor;
+    }
     /*
-    double average=0;
-    for(auto const& v : noise) average += v;
-    average /= ((double)waveform_size);
-    std::cout<<"\033[93m Average ADC: \033[00m" << average << std::endl;
+      double average=0;
+      for(auto const& v : noise) average += v;
+      average /= ((double)waveform_size);
+      std::cout<<"\033[93m Average ADC: \033[00m" << average << std::endl;
     */
     delete fb;
   }

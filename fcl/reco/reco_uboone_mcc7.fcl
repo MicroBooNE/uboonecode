@@ -39,6 +39,11 @@ microboone_reco_mcc7_services.DetectorClocksService.TriggerOffsetTPC:           
 
 microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.StretchFullResponse: true
 microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.NConfigs:            2
+microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.FilterFuncVec: [ "(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))", "(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[4])"]
+microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.FilterParamsVec: [ [ 1.8034, 1.69, 1.55, 0.19, 3.75], [ 1.84903, 1.46, 1.33, 0.23, 4.89], [ 1.03452, 0.08, 0.15, 0, 2.17]]
+microboone_reco_mcc7_services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 1, 1, 1]
+
+microboone_reco_mcc7_services.PhotonVisibilityService.LibraryFile: "PhotonPropagation/LibraryData/uboone_photon_library_v5.root"
 
 microboone_reco_mcc7_services_fullrawdigits:
 {
@@ -346,9 +351,9 @@ microboone_reco_mcc7_producers.caldata.DigitModuleLabel:                        
 microboone_reco_mcc7_producers.caldata.DodQdxCalib:                              false
 
 microboone_reco_mcc7_producers.gaushit.CalDataModuleLabel:                       "caldata"
-microboone_reco_mcc7_producers.gaushit.MinSig:                                   [2.5, 2.5, 2.8]
+microboone_reco_mcc7_producers.gaushit.MinSig:                                   [3.8, 3.8, 4.3]
 microboone_reco_mcc7_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
-microboone_reco_mcc7_producers.gaushit.MaxMultiHit:                              4
+microboone_reco_mcc7_producers.gaushit.MaxMultiHit:                              10
 #microboone_reco_mcc7_producers.gaushit.FilterHits:                               true
 
 # Fuzzy Cluster related

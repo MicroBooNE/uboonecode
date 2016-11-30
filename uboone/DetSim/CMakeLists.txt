@@ -1,5 +1,5 @@
 art_make( BASENAME_ONLY
-          EXCLUDE SimWireMicroBooNE_module.cc
+          EXCLUDE SimWireMicroBooNE_module.cc 
           MODULE_LIBRARIES larcore_Geometry
                         larcore_Geometry_Geometry_service
                         larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation

@@ -9,7 +9,6 @@ microboone_time_tracker: {
 }
 
 microboone_memory_tracker: {
-  ignoreTotal       : 0 # no. of events to exclude - '1' by default
   printSummaries    : ["*"] # or any combination of ["general","event","module"]
   includeMallocInfo : true
   dbOutput     : {
