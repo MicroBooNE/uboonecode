@@ -159,6 +159,9 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 	  }
 	}	
 	if(fYZdependentResponse) {
+	  if(fNResponses[ktype][_vw] > 1){
+	    throw art::Exception( art::errors::Configuration ) << "Don't use DIC with YZ dependent responses enabled; make all elements of NResponses == 1" << std::endl;
+	  }
 	  if(fdatadrivenResponse){
 	    if(fNdatadrivenResponses[ktype][_vw]<fNdatadrivenActiveResponses[ktype][_vw]){
 	      badN = true;
