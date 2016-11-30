@@ -529,7 +529,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponseTOffsets(const TH1F* 
     //          }
     //          tOffset[_vw] = numer/denom*delta - resp->GetXaxis()->GetBinCenter(1);
   } else {
-    std::cout << "RUSSELL: using the induction plane response" << std::endl;
+    //std::cout << "RUSSELL: using the induction plane response" << std::endl;
     // for the other planes, find the zero-crossing
     // lets find the minimum, and work backwards!
 
