@@ -23,8 +23,9 @@ namespace crt {
     ~CRTChannelMapAlg();
 
     void Initialize(geo::AuxDetGeometryData_t& geodata);
-    void Uninitialize();
 
+    void Uninitialize();
+    
     uint32_t PositionToAuxDetChannel(double const  worldLoc[3],
                                      std::vector<geo::AuxDetGeo*> const& auxDets,
                                      size_t& ad,
@@ -33,7 +34,6 @@ namespace crt {
     const TVector3 AuxDetChannelToPosition(uint32_t const& channel,
                                            std::string const& auxDetName,
                                            std::vector<geo::AuxDetGeo*> const& auxDets) const{return TVector3();}
-
   };
 }
 

@@ -1,20 +1,44 @@
-art_make( BASENAME_ONLY
-          LIBRARY_NAME uboone_crt_geometry
-          LIB_LIBRARIES larcore_Geometry
-                        ${MF_MESSAGELOGGER}
-                        ${CETLIB}
-                        ${FHICLCPP}
-                        ${ROOT_BASIC_LIB_LIST}
-          SERVICE_LIBRARIES larcore_Geometry
-                        uboone_crt_geometry
-                        ${MF_UTILITIES}
-                        ${FHICLCPP}
-                        ${CETLIB}
-                        ${ROOT_GEOM}
-                        ${ROOT_GDML}
-                        ${ROOT_BASIC_LIB_LIST}
-        )
+art_make_library( LIBRARY_NAME CRT
+                  SOURCE    CRTData.cc
+                            CRTChannelMapAlg.cc
+                  LIBRARIES larcore_Geometry
+                            ${MF_MESSAGELOGGER}
+                            ${MF_UTILITIES}
+                            ${FHICLCPP}
+                            ${ROOT_BASIC_LIB_LIST}
+                            ${ROOT_GEOM}
+                            ${CETLIB}
+)
 
-install_headers()
-install_fhicl()
-install_source()
+simple_plugin( CRTGeometryHelper service
+                larcore_Geometry
+                CRT
+                ${ART_FRAMEWORK_CORE}
+                ${ART_FRAMEWORK_IO_SOURCES}
+                ${ART_FRAMEWORK_PRINCIPAL}
+                art_Persistency_Common canvas_Persistency_Common
+                art_Persistency_Provenance canvas_Persistency_Provenance
+                art_Utilities canvas_Utilities
+                ${ART_FRAMEWORK_SERVICES_REGISTRY}
+                ${MF_MESSAGELOGGER}
+                ${MF_UTILITIES}
+                ${ROOT_BASIC_LIB_LIST}
+                ${CETLIB}
+                BASENAME_ONLY
+)
+simple_plugin( CRTDetSim module
+                larcore_Geometry
+                CRT
+                ${ART_FRAMEWORK_CORE}
+                ${ART_FRAMEWORK_IO_SOURCES}
+                ${ART_FRAMEWORK_PRINCIPAL}
+                art_Persistency_Common canvas_Persistency_Common
+                art_Persistency_Provenance canvas_Persistency_Provenance
+                art_Utilities canvas_Utilities
+                ${ART_FRAMEWORK_SERVICES_REGISTRY}
+                ${MF_MESSAGELOGGER}
+                ${MF_UTILITIES}
+                ${ROOT_BASIC_LIB_LIST}
+                ${CETLIB}
+                BASENAME_ONLY
+)

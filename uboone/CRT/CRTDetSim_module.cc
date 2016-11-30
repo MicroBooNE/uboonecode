@@ -40,7 +40,7 @@ namespace crt{
 
     for(auto it = channels->begin(); it!= channels->end(); ++it){
       uint32_t id = it->AuxDetID();
-      //uint32_t sens_id = it->AuxDetSensitiveID();
+      uint32_t sens_id = it->AuxDetSensitiveID();
       mf::LogInfo(__log_name__)<<"Found AuxDetData: "<<id<<" , "<<sens_id;
       std::vector< sim::AuxDetIDE > ides = it->AuxDetIDEs();
 
