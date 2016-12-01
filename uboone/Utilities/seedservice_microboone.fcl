@@ -1,6 +1,6 @@
 #
 # File:    seedservice_microboone.fcl
-# Desc:    custom configurations of LArSeedService for MicroBooNE
+# Desc:    custom configurations of NuRandomService for MicroBooNE
 # Author:  Gianluca Petrillo (petrillo@fnal.gov)
 # Date:    February 13th, 2015
 # Version: 1.0
@@ -20,10 +20,10 @@ BEGIN_PROLOG
 
 # 
 # the random policy extracts unpredictable, random seeds in a way similar to the
-# behaviour that existed before LArSeedService.
+# behaviour that existed before NuRandomService.
 # You don't want this for production.
 # 
-microboone_seedservice: @local::random_seedservice # from seedservice.fcl
+microboone_seedservice: @local::random_NuRandomService # from seedservice.fcl
 
 
 END_PROLOG

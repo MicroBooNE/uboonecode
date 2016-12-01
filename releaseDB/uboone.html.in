@@ -39,8 +39,9 @@ Release notes and previous versions of uboonecode can be found at the following 
       <li>Download the script.</li>
       <li>chmod +x pullProducts</li>
       <li>Scientific Linux 6.x: <pre>./pullProducts &lt;product-directory&gt; slf6 uboone-@UBOONECODE_DOT_VERSION@ e10 &lt;prof|debug&gt;</pre></li>
-      <li>Mavericks: <pre>./pullProducts &lt;product-directory&gt; d13 uboone-@UBOONECODE_DOT_VERSION@ e10 &lt;prof|debug&gt;</pre></li>
+      <!-- <li>Mavericks: <pre>./pullProducts &lt;product-directory&gt; d13 uboone-@UBOONECODE_DOT_VERSION@ e10 &lt;prof|debug&gt;</pre></li> -->
       <li>Yosemite: <pre>./pullProducts &lt;product-directory&gt; d14 uboone-@UBOONECODE_DOT_VERSION@ e10 &lt;prof|debug&gt;</pre></li>
+      <li>El Capitan: <pre>./pullProducts &lt;product-directory&gt; d15 uboone-@UBOONECODE_DOT_VERSION@ e10 &lt;prof|debug&gt;</pre></li>
       <!--<li>Larsoft needs to be installed separately:  <pre>./pullProducts &lt;product-directory&gt; &lt;slf6|d13&gt; larsoft-@LARSOFT_DOT_VERSION@ s10-e10 &lt;prof|debug&gt;</pre></li>-->
     </ul></li>
   </ul></li>

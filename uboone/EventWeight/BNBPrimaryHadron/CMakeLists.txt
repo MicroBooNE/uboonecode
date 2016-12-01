@@ -37,7 +37,7 @@ art_make_library(LIBRARY_NAME BNBPrimaryHadronWeightCalculators
 #                      ${ART_PERSISTENCY_COMMON}
 #                      ${ART_PERSISTENCY_PROVENANCE}
 #                      ${ART_UTILITIES}
-#			      ${SEEDSERVICE_SERVICE}
+#			      nutools_RandomUtils_NuRandomService_service
 #                      ${MF_MESSAGELOGGER}
 #                      ${MF_UTILITIES}
 #                      ${FHICLCPP}

@@ -6,7 +6,7 @@ art_make( BASENAME_ONLY
 			larcoreobj_SummaryData
 			${UB_DATA_TYPES}
 			${Boost_SERIALIZATION_LIBRARY}
-                        larsim_RandomUtils_LArSeedService_service
+                        nutools_RandomUtils_NuRandomService_service
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}

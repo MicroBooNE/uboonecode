@@ -4,7 +4,7 @@
 // File:        RandomPrescale_module.cc
 //
 // This is a filter module that accepts events with some specified 
-// probability.  Random number seed and engine are managed by LArSeedService
+// probability.  Random number seed and engine are managed by NuRandomService
 //               and RandomNumberGenerator service.
 //
 // FCL Parameters:
@@ -21,7 +21,7 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "larsim/RandomUtils/LArSeedService.h"
+#include "nutools/RandomUtils/NuRandomService.h"
 #include "CLHEP/Random/RandomEngine.h"
 
 namespace util
@@ -71,10 +71,10 @@ util::RandomPrescale::RandomPrescale(fhicl::ParameterSet const & pset) :
   reconfigure(pset);
 
   // Create a default random engine.
-  // Obain the random seed from LArSeedService, unless overridden in configuration 
+  // Obain the random seed from NuRandomService, unless overridden in configuration 
   // with key "Seed."
 
-  art::ServiceHandle<sim::LArSeedService> seeds;
+  art::ServiceHandle<rndm::NuRandomService> seeds;
   seeds->createEngine(*this, "HepJamesRandom", "RandomPrescale", pset, "Seed");
 }
 

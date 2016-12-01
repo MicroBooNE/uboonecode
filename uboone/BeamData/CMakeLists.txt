@@ -31,7 +31,7 @@ art_make( EXCLUDE BeamDataQualityFilter_module.cc
 			BeamDAQ
 			${UB_DATA_TYPES}
 			${Boost_SERIALIZATION_LIBRARY}
-                        larsim_RandomUtils_LArSeedService_service
+                        nutools_RandomUtils_NuRandomService_service
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
