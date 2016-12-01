@@ -35,7 +35,7 @@ services:
     }
   }
   RandomNumberGenerator: {} 
-  LArSeedService:  @local::microboone_seedservice
+  NuRandomService:  @local::microboone_seedservice
   FileCatalogMetadata:    @local::art_file_catalog_data
   DatabaseUtil:           @local::microboone_database
   @table::microboone_reco_notpc_services

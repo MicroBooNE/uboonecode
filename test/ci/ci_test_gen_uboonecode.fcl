@@ -5,11 +5,11 @@ physics.producers.generator.FluxType:       "histogram"
 physics.producers.generator.FluxSearchPaths: "./"
 physics.producers.generator.FluxFiles:     ["numode_bnb_470m_r200.root"] 
 
-services.LArSeedService.policy: "preDefinedSeed"
-services.LArSeedService.baseSeed: 1234
-services.LArSeedService.generator: 1234
-#services.LArSeedService.cry: 1234
-services.LArSeedService.corsika: 1234
+services.NuRandomService.policy: "preDefinedSeed"
+services.NuRandomService.baseSeed: 1234
+services.NuRandomService.generator: 1234
+#services.NuRandomService.cry: 1234
+services.NuRandomService.corsika: 1234
 
 
 services.RandomNumberGenerator.restoreFrom: "GenRandomSeeds_Ref.dat"
