@@ -48,7 +48,7 @@ extern "C" {
 #include "CLHEP/Random/RandGaussQ.h"
 
 // art extensions
-#include "larsim/RandomUtils/LArSeedService.h"
+#include "nutools/RandomUtils/NuRandomService.h"
 
 // LArSoft includes
 #include "larcore/Geometry/Geometry.h"
@@ -129,9 +129,9 @@ namespace detsim{
     std::string compression(pset.get< std::string >("CompressionType"));
     if(compression.compare("Huffman") == 0) fCompression = raw::kHuffman;    
 
-    // create a default random engine; obtain the random seed from LArSeedService,
+    // create a default random engine; obtain the random seed from NuRandomService,
     // unless overridden in configuration with key "Seed"
-    art::ServiceHandle<sim::LArSeedService>()
+    art::ServiceHandle<rndm::NuRandomService>()
       ->createEngine(*this, pset, "Seed");
 
     fEventCount = 0;

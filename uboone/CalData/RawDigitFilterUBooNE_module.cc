@@ -349,7 +349,7 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                 
                 std::transform(rawadc.begin(),rawadc.end(),pedCorrectedVec.begin(),std::bind2nd(std::minus<short>(),pedCorWireVec[wireIdx]));
                 
-                saveRawDigits(filteredRawDigit, channel, rawadc, truncMeanWireVec[wireIdx], truncRmsWireVec[wireIdx]);
+                saveRawDigits(filteredRawDigit, channel, pedCorrectedVec, truncMeanWireVec[wireIdx], truncRmsWireVec[wireIdx]);
                 
                 continue;
             }

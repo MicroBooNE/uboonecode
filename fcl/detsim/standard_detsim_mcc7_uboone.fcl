@@ -2,10 +2,7 @@
 #include "detsimmodules_microboone.fcl"
 #include "triggersim_microboone.fcl"
 #include "opticaldetectorsim_microboone.fcl"
-#include "signalservices_microboone.fcl"
 #include "time_memory_tracker_microboone.fcl"
-###include "mccheatermodules.fcl"
-###include "filters.fcl"
 
 process_name: Detsim
 
@@ -45,19 +42,9 @@ physics:
    rns:            { module_type: "RandomNumberSaver" }
  }
  
- filters:
- {
-    timefilter: { module_type: "FilterSimPhotonTime"
-                  SimPhotonsCollectionLabel: largeant
-                  TimeWindows: [ [3125,4725] ]
-                  MinPhotonEnergy: -1
-                  MinTotalEnergy: 0
-    }	  
- }
- 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulate: [ rns, timefilter, optdigitizer, optfem, triggersim, pmtreadout, daq ]
+ simulate: [ rns, optdigitizer, optfem, triggersim, pmtreadout, daq ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -80,9 +67,21 @@ outputs:
  {
    module_type: RootOutput
    fileName:    "%ifb_%tc_detsim.root"
-   SelectEvents: [ simulate ]
    dataTier:    "detector-simulated"
    saveMemoryObjectThreshold: 0
    compressionLevel: 1
+   fastCloning: false
  }
 }
+
+# MCC7 compatibility.
+
+physics.producers.daq.GenNoise: 1
+services.SignalShapingServiceMicroBooNE.NConfigs: 2
+services.SignalShapingServiceMicroBooNE.StretchFullResponse: true
+services.SignalShapingServiceMicroBooNE.FieldResponseFVersion: [ "v0.1", "v0.1"]
+services.SignalShapingServiceMicroBooNE.YZdependentResponse: false
+services.SignalShapingServiceMicroBooNE.datadrivenResponse: false
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
+services.SignalShapingServiceMicroBooNE.DefaultEField: 0.5
+services.SignalShapingServiceMicroBooNE.DefaultTemperature: 87

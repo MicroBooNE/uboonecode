@@ -10,7 +10,7 @@ physics.producers.generator.PosDist: 1             # Gaussian position dist.
 physics.producers.generator.X0: [ 128.0 ]
 physics.producers.generator.Y0: [ 0.0 ]
 physics.producers.generator.Z0: [ 50.0 ]
-physics.producers.generator.T0: [ 800.0 ]
+physics.producers.generator.T0: [ 3925.0 ]
 physics.producers.generator.SigmaX: [ 10.0 ]       # x = 128 +- 10
 physics.producers.generator.SigmaY: [ 10.0 ]       # y = 0 +- 10
 physics.producers.generator.SigmaZ: [ 10.0 ]       # z = 50 +- 10

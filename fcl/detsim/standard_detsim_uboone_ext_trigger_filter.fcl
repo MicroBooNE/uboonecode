@@ -1,20 +1,23 @@
 #include "services_microboone.fcl"
-#include "largeantmodules_microboone.fcl"
-#include "mcreco.fcl"
-#include "corsika_microboone.fcl"
+#include "detsimmodules_microboone.fcl"
+#include "triggersim_microboone.fcl"
+#include "opticaldetectorsim_microboone.fcl"
+#include "signalservices_microboone.fcl"
 #include "time_memory_tracker_microboone.fcl"
-process_name: G4e
+#include "swtrigger_microboone.fcl"
+
+process_name: Detsim
 
 services:
 {
   scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "g4_hist.root" }
+  TFileService: { fileName: "detsim_hist.root" }
   TimeTracker:             @local::microboone_time_tracker
   MemoryTracker:           @local::microboone_memory_tracker
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:  @local::art_file_catalog_mc
-  @table::microboone_g4_services
+  @table::microboone_detsim_services
 }
 
 #source is now a root file
@@ -33,21 +36,33 @@ physics:
 
  producers:
  {
-   largeante: @local::microboone_largeant
-   corsikae: @local::microboone_corsika_cmc
-   rns:      { module_type: "RandomNumberSaver" }
+   optdigitizer:   @local::microboone_optical_adc_sim
+   optfem:         @local::microboone_optical_fem_sim
+   triggersim:     @local::ubtrigger_ext
+   pmtreadout:     @local::microboone_optical_dram_readout_sim
+   daq:            @local::microboone_simwire
+   rns:            { module_type: "RandomNumberSaver" }
  }
-
+ 
+ filters: { timefilter: { module_type: "FilterSimPhotonTime"
+                          SimPhotonsCollectionLabel: largeant
+                          TimeWindows: [ [3125,4725] ]
+                          MinPhotonEnergy: -1
+                          MinTotalEnergy: 0
+                          }
+            swtrigger: @local::microboone_swtrigger_mc_ext 
+          }
+ 
  #define the producer and filter modules for this path, order matters, 
  #filters reject all following items.  see lines starting physics.producers below
- simulatee: [ rns, corsikae, largeante ]
+ simulate: [ rns, timefilter, optdigitizer, optfem, triggersim, pmtreadout, daq, swtrigger ]
  
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
 
  #trigger_paths is a keyword and contains the paths that modify the art::event, 
  #ie filters and producers
- trigger_paths: [ simulatee] 
+ trigger_paths: [simulate] 
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
@@ -62,17 +77,10 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "%ifb_%tc_g4.root"
-   dataTier:    "simulated"
-   compressionLevel: 1
+   SelectEvents: [ simulate ]
+   fileName:    "%ifb_%tc_detsim.root"
+   dataTier:    "detector-simulated"
    saveMemoryObjectThreshold: 0
+   compressionLevel: 1
  }
 }
-
-physics.producers.largeante.KeepParticlesInVolumes: ["volCryostat"] #only keep MCParticles that cross the cryostat
-physics.producers.largeante.InputLabels: ["corsikae"]
-#physics.producers.corsikae.ShowerFluxConstants:  [ 1.72e4, 9.2e3, 6.2e3, 9.2e3, 6.2e3]
-physics.producers.corsikae.ShowerFluxConstants:  [ 3440., 1840., 1240., 1840., 1240.]
-services.NuRandomService.policy: "perEvent"
-services.NuRandomService.algorithm: "EventTimestamp_v1"
-

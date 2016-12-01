@@ -102,13 +102,13 @@ microboone_swtrigger_data:
     }
 }
 
-microboone_swtrigger_mc:
+microboone_swtrigger_mc_bnb:
 {
     module_type: "SWTrigger"
 
-    DAQHeaderModule:  "daq"
+    DAQHeaderModule:  "triggersim"
     OpDataModule:     "pmtreadout"
-    OpFlashModule:    "opflashsat"
+    OpFlashModule:    ""
     NumberOfChannels: 32
     MinReadoutTicks:  1499
 
@@ -134,7 +134,52 @@ microboone_swtrigger_mc:
       TriggerThresPHMAX : 130
       TriggerWindowSize : 120
       TriggerWindowStart : 190
-      Verbosity : 0
+      Verbosity : 3
     }
 }
+
+microboone_swtrigger_mc_ext:
+{
+    module_type: "SWTrigger"
+
+    DAQHeaderModule:  "triggersim"
+    OpDataModule:     "pmtreadout"
+    OpFlashModule:    ""
+    NumberOfChannels: 32
+    MinReadoutTicks:  1499
+
+    drop_event : true
+    swtrg_algonames : ["EXT_BNBwin"]
+    swtrg_algotype : ["FEMBeamTriggerAlgo"]
+    swtrg_beam_window_size : 1100
+    swtrg_bits : [0x200]
+    EXT_BNBwin_FEMBeamTriggerAlgo:{
+      Discr0deadtime : 6
+      Discr0delay : 4
+      Discr0precount : 1
+      Discr0threshold : 5
+      Discr3WindowSize : 124
+      Discr3WindowStart : 186
+      Discr3deadtime : 6
+      Discr3delay : 4
+      Discr3threshold : 10
+      Discr3width : 6
+      MinReadoutTicks : 500
+      PrescaleFactor : 1.0
+      TriggerThresMult : 1
+      TriggerThresPHMAX : 130
+      TriggerWindowSize : 120
+      TriggerWindowStart : 190
+      Verbosity : 3
+    }
+}
+
+# single particle is generated w/ EXT trigger
+microboone_swtrigger_mc_singlep: @local::microboone_swtrigger_mc_bnb
+
+# alias for backward compatibility
+microboone_swtrigger_mc: @local::microboone_swtrigger_mc_bnb
+
 END_PROLOG
+
+

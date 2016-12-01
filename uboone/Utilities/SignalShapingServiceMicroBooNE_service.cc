@@ -128,8 +128,19 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   for(_vw=0; _vw<fNViews; ++_vw) { fViewMap[_vw] = fViewIndex[_vw]; }
   fViewForNormalization = pset.get<size_t>("ViewForNormalization");
   fNResponses       = pset.get<std::vector<std::vector<size_t> > >("NResponses");
+  fNYZResponses     = pset.get<std::vector<std::vector<size_t> > >("NYZResponses");
+  fNdatadrivenResponses = pset.get<std::vector<std::vector<size_t> > >("NdatadrivenResponses");
   fNActiveResponses = pset.get<std::vector<std::vector<size_t> > >("NActiveResponses");
+  fNYZActiveResponses = pset.get<std::vector<std::vector<size_t> > >("NYZActiveResponses");
+  fNdatadrivenActiveResponses = pset.get<std::vector<std::vector<size_t> > >("NdatadrivenActiveResponses");
+
   fPrintResponses   = pset.get<bool>("PrintResponses");
+  fYZdependentResponse = pset.get<bool>("YZdependentResponse");
+  fdatadrivenResponse = pset.get<bool>("datadrivenResponse");
+  fYZchargeScaling  = pset.get<std::vector<std::vector<double> > >("YZchargeScaling");
+  //fYZwireOverlap    = pset.get<std::vector<std::vector<std::vector<int> > > >("YZwireOverlap");
+  fIncludeMisconfiguredU = pset.get<bool>("IncludeMisconfiguredU");
+  fMisconfiguredU   = pset.get<std::vector<std::vector<int> > >("MisconfiguredU");
 
   for(size_t ktype=0; ktype<2; ++ktype) {
     // here are some checks
@@ -137,19 +148,36 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 
     for(size_t ktype=0; ktype<2; ++ktype) {
       for(_vw=0; _vw<fNViews; ++_vw) {
-        if(fNResponses[ktype][_vw] < fNActiveResponses[ktype][_vw])  {
-          /*
-           std::cout
-           << "NActiveResponses[" << _vw << "] = " << fNActiveResponses[ktype][_vw] <<
-           " > fNResponses[" << _vw << "] = " << fNResponses[ktype][_vw] << std::endl;
-           */
-          badN = true;
-        }
+	if(!fYZdependentResponse) {
+	  if(fNResponses[ktype][_vw] < fNActiveResponses[ktype][_vw])  {
+	    /*
+	      std::cout
+	      << "NActiveResponses[" << _vw << "] = " << fNActiveResponses[ktype][_vw] <<
+	      " > fNResponses[" << _vw << "] = " << fNResponses[ktype][_vw] << std::endl;
+	    */
+	    badN = true;
+	  }
+	}	
+	if(fYZdependentResponse) {
+	  if(fNResponses[ktype][_vw] > 1){
+	    throw art::Exception( art::errors::Configuration ) << "Don't use DIC with YZ dependent responses enabled; make all elements of NResponses == 1" << std::endl;
+	  }
+	  if(fdatadrivenResponse){
+	    if(fNdatadrivenResponses[ktype][_vw]<fNdatadrivenActiveResponses[ktype][_vw]){
+	      badN = true;
+	    }
+	  }
+	  else{
+	    if(fNYZResponses[ktype][_vw] < fNYZActiveResponses[ktype][_vw]) {
+	      badN = true;
+	    }
+	  }
+	}
       }
     }
     if(badN) {
       throw art::Exception( art::errors::InvalidNumber )
-      << "check NResponses/NActiveRespones" << std::endl;
+	<< "check NResponses/NActiveRespones or NYZResponses/NYZActiveResponses or NdatadrivenResponses/NdatadrivenActiveResponses" << std::endl;
     }
   }
 
@@ -157,6 +185,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   // Reset kernels.
 
   size_t ktype = 0;
+  size_t nWires = 0;
 
   fSignalShapingVec.resize(fNConfigs);
   for(auto& config : fSignalShapingVec) {
@@ -166,7 +195,17 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
       kset.resize(fNViews);
       _vw = 0;
       for(auto& plane : kset) {
-        size_t nWires = fNResponses[ktype][_vw];
+        if(!fYZdependentResponse) {
+	  nWires = fNResponses[ktype][_vw];
+	}
+	if(fYZdependentResponse) {
+	  if(fdatadrivenResponse){
+            nWires = fNdatadrivenResponses[ktype][_vw]; 
+	  }
+	  else{
+	    nWires = fNYZResponses[ktype][_vw];
+	  }
+	}
         plane.resize(nWires);
         for (auto& ss : plane) {
           ss.Reset();
@@ -185,7 +224,17 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
       kset.resize(fNViews);
       _vw = 0;
       for(auto& plane : kset) {
-        size_t nWires = fNResponses[ktype][_vw];
+        if(!fYZdependentResponse) {
+	  nWires = fNResponses[ktype][_vw];
+	}
+	if(fYZdependentResponse) {
+	  if(fdatadrivenResponse){
+            nWires = fNdatadrivenResponses[ktype][_vw];
+	  }
+	  else{
+	    nWires = fNYZResponses[ktype][_vw];
+	  }
+	}
         plane.resize(nWires);
       }
       _vw++;
@@ -328,7 +377,7 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
 
   // constructor decides if initialized value is a path or an environment variable
   std::string fileNameBase = pset.get<std::string>("FieldResponseFNameBase");
-  std::vector<std::string> version      = pset.get<std::vector<std::string> >("FieldResponseFVersion");
+   std::vector<std::string> version      = pset.get<std::vector<std::string> >("FieldResponseFVersion");
   fDefaultEField                 = pset.get<double>("DefaultEField");
   fDefaultTemperature            = pset.get<double>("DefaultTemperature");
 
@@ -343,42 +392,85 @@ void util::SignalShapingServiceMicroBooNE::reconfigure(const fhicl::ParameterSet
   // calculate the time scale factor for this job
   if(!fUseCalibratedResponses) SetTimeScaleFactor();
 
-  fFieldResponseHistVec.resize(fNConfigs);
-  for(size_t config=0;config<fNConfigs; ++config) {
-    fFieldResponseHistVec[config].resize(2);
-    for(size_t ktype=0;ktype<2;++ktype) {
-      fFieldResponseHistVec[config][ktype].resize(fNViews);
-      _vw = 0;
-      //std::cout << "config " << config << " in " << fNConfigs << std::endl;
-      for(auto& plane : fFieldResponseHistVec[config][ktype]) {
-        std::string fname0 = Form("%s_vw%02i_%s.root", fileNameBase.c_str(), (int)_vw, version[ktype].c_str());
-        std::string fname;
-        sp.find_file(fname0, fname);
-        
-        plane.resize(fNResponses[ktype][_vw]);
-        std::unique_ptr<TFile> fin(new TFile(fname.c_str(), "READ"));
-        _wr = 0;
-        // load up the response functions
-        for(auto& resp : plane) {
-          TString histName = Form("%s_vw%02i_wr%02i", histNameBase.c_str(), (int)_vw, (int)_wr);
-          resp = (TH1F*)fin->Get(histName);
+  if(!fdatadrivenResponse){
+    fFieldResponseHistVec.resize(fNConfigs);
+    for(size_t config=0;config<fNConfigs; ++config) {
+      fFieldResponseHistVec[config].resize(2);
+      for(size_t ktype=0;ktype<2;++ktype) {
+	fFieldResponseHistVec[config][ktype].resize(fNViews);
+	_vw = 0;
+	//std::cout << "config " << config << " in " << fNConfigs << std::endl;
+	for(auto& plane : fFieldResponseHistVec[config][ktype]) {
+	  std::string fname0 = Form("%s_vw%02i_%s.root", fileNameBase.c_str(), (int)_vw, version[ktype].c_str());
+	  std::string fname;
+	  sp.find_file(fname0, fname);
+	  plane.resize(fNResponses[ktype][_vw]);
+	  std::unique_ptr<TFile> fin(new TFile(fname.c_str(), "READ"));
+	  _wr = 0;
+	  // load up the response functions
+	  for(auto& resp : plane) {
+	    TString histName = Form("%s_vw%02i_wr%02i", histNameBase.c_str(), (int)_vw, (int)_wr);
+	    resp = (TH1F*)fin->Get(histName);
+	    auto Xaxis = resp->GetXaxis();
+	    fNFieldBins[ktype] = Xaxis->GetNbins();
+	    fFieldLowEdge[ktype] = resp->GetBinCenter(1) - 0.5*resp->GetBinWidth(1);
+	    fFieldBin1Center[ktype] = resp->GetBinCenter(1);
+	    // internal time is in nsec
+	    fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
+	    // get the offsets for each plane... use wire 0 and either peak or zero-crossing
+	    SetFieldResponseTOffsets(resp, ktype);
+	    _wr++;
+	  }
+	  fin->Close();
+	  _vw++;
+	}
+      }
+    }
+  }
 
-          auto Xaxis = resp->GetXaxis();
-          fNFieldBins[ktype] = Xaxis->GetNbins();
-          fFieldLowEdge[ktype] = resp->GetBinCenter(1) - 0.5*resp->GetBinWidth(1);
-          fFieldBin1Center[ktype] = resp->GetBinCenter(1);
-          // internal time is in nsec
-          fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
-      
-
-          // get the offsets for each plane... use wire 0 and either peak or zero-crossing
-
-          SetFieldResponseTOffsets(resp, ktype);
-
-          _wr++;
-        }
-        fin->Close();
-        _vw++;
+  if(fdatadrivenResponse){
+    fFieldResponseHistVec.resize(fNConfigs);
+    for(size_t config=0; config<fNConfigs; ++config){
+      fFieldResponseHistVec[config].resize(2);
+      for(size_t ktype=0; ktype<2; ++ktype){
+	fFieldResponseHistVec[config][ktype].resize(fNViews);
+	_vw = 0;
+	for(auto& plane : fFieldResponseHistVec[config][ktype]){
+          plane.resize(fNdatadrivenResponses[ktype][_vw]);
+	  _wr = 0;
+	  int ctr = 0;
+          // load up the response functions                                              
+          for(auto& resp : plane) {
+	    std::string fname0;
+	    std::string fname;
+	    if( (ctr == 0) || (_vw == 0 && ctr == 2) ){ 
+	      fname0 = Form("%s_vw%02i_nominal_%s.root", fileNameBase.c_str(), (int)_vw, version[ktype].c_str());
+	    }
+	    if( (_vw == 0 && ctr == 1) || (_vw == 1 && ctr == 2) ){
+	      fname0 = Form("%s_vw%02i_shortedY_%s.root", fileNameBase.c_str(), (int)_vw, version[ktype].c_str());
+	    }
+	    if( (_vw == 1 && ctr == 1) || (_vw == 2 && ctr == 1) ){
+	      fname0 = Form("%s_vw%02i_shortedU_%s.root", fileNameBase.c_str(), (int)_vw, version[ktype].c_str());
+	    }
+	    sp.find_file(fname0, fname);
+	    std::unique_ptr<TFile> fin(new TFile(fname.c_str(), "READ"));
+	    TString histName = Form("%s_vw%02i_wr%02i", histNameBase.c_str(), (int)_vw, (int)_wr);
+	    
+            resp = (TH1F*)fin->Get(histName);
+            auto Xaxis = resp->GetXaxis();
+            fNFieldBins[ktype] = Xaxis->GetNbins();
+            fFieldLowEdge[ktype] = resp->GetBinCenter(1) - 0.5*resp->GetBinWidth(1);
+            fFieldBin1Center[ktype] = resp->GetBinCenter(1);
+            // internal time is in nsec                                                  
+            fFieldBinWidth[ktype] = resp->GetBinWidth(1)*1000.;
+            // get the offsets for each plane... use wire 0 and either peak or zero-crossing                                                                                       
+            SetFieldResponseTOffsets(resp, ktype);
+	    ctr++;
+	    fin->Close();
+          }
+          //fin->Close();
+          _vw++;
+	}
       }
     }
   }
@@ -427,7 +519,6 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponseTOffsets(const TH1F* 
   */ 
 
   // this is for the standard response
-
   if(_wr==0 && _vw==fViewForNormalization) {
     // for the collection plane, find the peak
     int binMax = resp->GetMaximumBin();
@@ -441,6 +532,7 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponseTOffsets(const TH1F* 
     //          }
     //          tOffset[_vw] = numer/denom*delta - resp->GetXaxis()->GetBinCenter(1);
   } else {
+    //std::cout << "RUSSELL: using the induction plane response" << std::endl;
     // for the other planes, find the zero-crossing
     // lets find the minimum, and work backwards!
 
@@ -506,6 +598,11 @@ util::SignalShapingServiceMicroBooNE::SignalShaping(size_t channel, size_t wire,
 
   //if(ktype==0&&view==0) std::cout << "SS Params " << channel << " " << config << " " << std::endl;
 
+
+  if(fYZdependentResponse == true && view == 1 && wire == 1 && fdatadrivenResponse == false){
+    view = 2;
+    wire = 0;
+  }
   return fSignalShapingVec[config][ktype][view][wire];
 }
 
@@ -522,37 +619,31 @@ void util::SignalShapingServiceMicroBooNE::init()
     // Do microboone-specific configuration of SignalShaping by providing
     // microboone response and filter functions.
 
-
-
     // re-initialize the FFT service for the request size
     art::ServiceHandle<util::LArFFT> fFFT;
     std::string options = fFFT->FFTOptions();
     size_t fitbins = fFFT->FFTFitBins();
-    size_t fftsize = fFFT->FFTSize();
-
+    //size_t fftsize = fFFT->FFTSize();
+    int fftsize = (int) fFFT->FFTSize();
 
     // Calculate field and electronics response functions.
 
-
     std::string kset[2] = { "Convolution ", "Deconvolution "};
-
 
     for(size_t config=0;config<fNConfigs;++config) {
       for(size_t ktype=0;ktype<2;++ktype) {
         if (fNFieldBins[ktype]*4>fftsize)
-          fFFT->ReinitializeFFT( fNFieldBins[ktype]*4, options, fitbins);
+          fFFT->ReinitializeFFT( (size_t)fNFieldBins[ktype]*4, options, fitbins);
         //std::cout << std::endl << kset[ktype] << "functions:" << std::endl;
 
         // call this first, so that the binning will be known to SetElectResponse
         SetFieldResponse(ktype);
-
-
+	
         //std::cout << "Input field responses" << std::endl;
 
         for(_vw=0;_vw<fNViews; ++_vw) {
           SetElectResponse(ktype,fShapeTimeConst[config].at(_vw),fASICGainInMVPerFC[config].at(_vw));
-
-          //Electronic response
+	  //Electronic response
           //std::cout << "Electonic response " << fElectResponse[ktype].size() << " bins" << std::endl;
 
           if(fPrintResponses) {
@@ -562,28 +653,73 @@ void util::SignalShapingServiceMicroBooNE::init()
             }
             std::cout << std::endl;
           }
+	  if(!fYZdependentResponse && !fdatadrivenResponse){
+	    for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
+	      
+	      if(fPrintResponses) {          std::cout << "Input field response for view " << _vw << " wire " << _wr
+						       << ", " << (fFieldResponseVec[config][ktype][_vw][_wr]).size() << " bins" << std::endl;
+		for(size_t i = 0; i<(fFieldResponseVec[config][ktype][_vw][_wr]).size(); ++i) {
+		  std::cout << fFieldResponseVec[config][ktype][_vw][_wr][i] << " " ;
+		  if((i+1)%10==0) std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	      }
 
-          for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
-
-            if(fPrintResponses) {          std::cout << "Input field response for view " << _vw << " wire " << _wr
-              << ", " << (fFieldResponseVec[config][ktype][_vw][_wr]).size() << " bins" << std::endl;
-              for(size_t i = 0; i<(fFieldResponseVec[config][ktype][_vw][_wr]).size(); ++i) {
-                std::cout << fFieldResponseVec[config][ktype][_vw][_wr][i] << " " ;
-                if((i+1)%10==0) std::cout << std::endl;
-              }
-              std::cout << std::endl;
-            }
-
-            (fSignalShapingVec[config][ktype][_vw][_wr]).AddResponseFunction(fFieldResponseVec[config][ktype][_vw][_wr]);
-            (fSignalShapingVec[config][ktype][_vw][_wr]).AddResponseFunction(fElectResponse[ktype]);
-            (fSignalShapingVec[config][ktype][_vw][_wr]).save_response();
-            (fSignalShapingVec[config][ktype][_vw][_wr]).set_normflag(false);
-          }
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).AddResponseFunction(fFieldResponseVec[config][ktype][_vw][_wr]);
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).AddResponseFunction(fElectResponse[ktype]);
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).save_response();
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).set_normflag(false);
+	    }
+	  }
+	  if(fYZdependentResponse && !fdatadrivenResponse){
+	    bool YZflag = true;
+	    for(_wr=0; _wr<fNYZResponses[ktype][_vw]; ++_wr) {
+	      if(YZflag == false){
+		_wr = 0;
+		_vw = 2;
+	      }
+	      if(fPrintResponses) {          std::cout << "Input field response for view " << _vw << " wire " << _wr
+						       << ", " << (fFieldResponseVec[config][ktype][_vw][_wr]).size() << " bins" << std::endl;
+		for(size_t i = 0; i<(fFieldResponseVec[config][ktype][_vw][_wr]).size(); ++i) {
+		  std::cout << fFieldResponseVec[config][ktype][_vw][_wr][i] << " " ;
+		  if((i+1)%10==0) std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	      }
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).AddResponseFunction(fFieldResponseVec[config][ktype][_vw][_wr]);
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).AddResponseFunction(fElectResponse[ktype]);
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).save_response();
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).set_normflag(false);
+	      if(YZflag == false){ 
+		_wr = 2; 
+		_vw = 1;
+	      }
+	      YZflag = false;
+	    }
+	  }
+	  if(fdatadrivenResponse){
+	    for(_wr=0; _wr<fNdatadrivenResponses[ktype][_vw]; ++_wr) {	      
+	      if(_vw == 0 && _wr == 2){
+		SetElectResponse(ktype, 1.0, 4.7); // for U-plane misconfigured channels
+	      }
+	      if(fPrintResponses) {          std::cout << "Input field response for view " << _vw << " wire " << _wr
+						       << ", " << (fFieldResponseVec[config][ktype][_vw][_wr]).size() << " bins" << std::endl;
+		for(size_t i = 0; i<(fFieldResponseVec[config][ktype][_vw][_wr]).size(); ++i) {
+		  std::cout << fFieldResponseVec[config][ktype][_vw][_wr][i] << " " ;
+		  if((i+1)%10==0) std::cout << std::endl;
+		}
+		std::cout << std::endl;
+	      }
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).AddResponseFunction(fFieldResponseVec[config][ktype][_vw][_wr]);
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).AddResponseFunction(fElectResponse[ktype]);
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).save_response();
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).set_normflag(false);
+	    }
+	  }
         }
         // see if we get the same toffsets
-        
-        SetResponseSampling(ktype, config);
-
+	SetResponseSampling(ktype, config);
+	
         // Currently we only have fine binning "fFieldBinWidth"
         // for the field and electronic responses.
         // Now we are sampling the convoluted field-electronic response
@@ -592,7 +728,7 @@ void util::SignalShapingServiceMicroBooNE::init()
         if ((int)fftsize!=fFFT->FFTSize()){
           std::string options = fFFT->FFTOptions();
           int fitbins = fFFT->FFTFitBins();
-          fFFT->ReinitializeFFT( fftsize, options, fitbins);
+          fFFT->ReinitializeFFT( (size_t)fftsize, options, fitbins);
         }
 
 
@@ -600,15 +736,41 @@ void util::SignalShapingServiceMicroBooNE::init()
         if(config==0) SetFilters();
 
         // Configure deconvolution kernels.
-
         for(_vw=0;_vw<fNViews; ++_vw) {
           // std::cout << "filtervec size" << fFilterVec[_vw].size() << std::endl;
-          for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
-            (fSignalShapingVec[config][ktype][_vw][_wr]).AddFilterFunction(fFilterVec[_vw]);
-            (fSignalShapingVec[config][ktype][_vw][_wr]).SetDeconvKernelPolarity( fDeconvPol.at(_vw));
-            (fSignalShapingVec[config][ktype][_vw][_wr]).CalculateDeconvKernel();
-          }
-        }
+	  //if(!fYZdependentResponse){
+	    for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).AddFilterFunction(fFilterVec[_vw]);
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).SetDeconvKernelPolarity( fDeconvPol.at(_vw));
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).CalculateDeconvKernel();
+	    }
+	    //}
+	    // YZdependent devonolution disabled --> want to deconvolve with nominal run 1 responses
+	    /*	  if(fYZdependentResponse){
+	    bool YZflag = true;
+            for(_wr=0; _wr<fNYZResponses[ktype][_vw]; ++_wr) {
+	      if(YZflag == false){ 
+		_wr = 0; 
+		_vw = 2;
+	      }
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).AddFilterFunction(fFilterVec[_vw]);
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).SetDeconvKernelPolarity( fDeconvPol.at(_vw));
+	      if(YZflag == true && _vw == 2 && _wr == 0){
+		fSignalShapingVec[config][ktype][_vw][_wr].AddResponseFunction(fSignalShapingVec[config][ktype][_vw][_wr].Response_save(), true);
+	      }
+
+	      (fSignalShapingVec[config][ktype][_vw][_wr]).CalculateDeconvKernel();
+	      if(YZflag == false){ 
+		fSignalShapingVec[config][ktype][_vw][_wr].save_response();
+		fSignalShapingVec[config][ktype][_vw][_wr].Reset();
+		_wr = 2; 
+		_vw = 1;
+
+	      }
+              YZflag = false;
+	    }
+	    */
+	}
       }
     }
   }
@@ -637,7 +799,7 @@ void util::SignalShapingServiceMicroBooNE::SetDecon(size_t fftsize, size_t chann
   if (fftsize>FFTSize||fftsize<=FFTSize/2){
     std::string options = fFFT->FFTOptions();
     int fitbins = fFFT->FFTFitBins();
-    fFFT->ReinitializeFFT( fftsize, options, fitbins);
+    fFFT->ReinitializeFFT( (size_t)fftsize, options, fitbins);
     setDecon = true;
   }
   
@@ -715,7 +877,6 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse(size_t ktype)
   double weight;
 
   for(size_t config=0; config<fNConfigs; ++config) {
-
     integral = fFieldResponseHistVec[config][ktype][fViewForNormalization][0]->Integral();
     weight = 1./integral;
     
@@ -723,55 +884,149 @@ void util::SignalShapingServiceMicroBooNE::SetFieldResponse(size_t ktype)
     // and interpolate the histogram to fill the vector with the stretched response
         
     for(_vw=0; _vw<fNViews; ++_vw) {
-      
       double timeFactor = 1.0;
       if(!fUseCalibratedResponses) timeFactor *= f3DCorrectionVec[_vw];
       if(!fStretchFullResponse) timeFactor *= fTimeScaleFactor;
 
-      for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
-        // simplify the code
-        DoubleVec* responsePtr = &fFieldResponseVec[config][ktype][_vw][_wr];
-        TH1F*      histPtr     = fFieldResponseHistVec[config][ktype][_vw][_wr];
-
-        // see if we get the same toffsets... we do!
-        //if(_wr==0) SetFieldResponseTOffsets(histPtr, ktype);
+      if(!fYZdependentResponse && !fdatadrivenResponse){
+	for(_wr=0; _wr<fNResponses[ktype][_vw]; ++_wr) {
+	  // simplify the code
+	  DoubleVec* responsePtr = &fFieldResponseVec[config][ktype][_vw][_wr];
+	  TH1F*      histPtr     = fFieldResponseHistVec[config][ktype][_vw][_wr];
+	  
+	  // see if we get the same toffsets... we do!
+	  //if(_wr==0) SetFieldResponseTOffsets(histPtr, ktype);
+	  
+	  size_t nBins = histPtr->GetNbinsX();
+	  size_t nResponseBins = nBins*timeFactor;
+	  responsePtr->resize(nResponseBins);
+	  double x0 = histPtr->GetBinCenter(1);
+	  double xf = histPtr->GetBinCenter(nBins);
+	  double deltaX = (xf - x0)/(nBins-1);
+	  //std::cout << "lims " << x0 << " " << xf << " " << deltaX << std::endl;
+	  
+	  for(_bn=1; _bn<=nResponseBins; ++_bn) {
+	    double xVal = x0 + deltaX*(_bn-1)/timeFactor;
+	    //if(_bn==1) std::cout << "1st bin " << x0 << " " << xVal << std::endl;
+	    double yVal = histPtr->Interpolate(xVal);
+	    responsePtr->at(_bn-1) = yVal; 
+	    responsePtr->at(_bn-1) *= fFieldRespAmpVec[_vw]*weight;
+	  }
         
-        size_t nBins = histPtr->GetNbinsX();
-        size_t nResponseBins = nBins*timeFactor;
-        responsePtr->resize(nResponseBins);
-        double x0 = histPtr->GetBinCenter(1);
-        double xf = histPtr->GetBinCenter(nBins);
-        double deltaX = (xf - x0)/(nBins-1);
-        //std::cout << "lims " << x0 << " " << xf << " " << deltaX << std::endl;
-        
-        for(_bn=1; _bn<=nResponseBins; ++_bn) {
-          double xVal = x0 + deltaX*(_bn-1)/timeFactor;
-          //if(_bn==1) std::cout << "1st bin " << x0 << " " << xVal << std::endl;
-          double yVal = histPtr->Interpolate(xVal);
-          responsePtr->at(_bn-1) = yVal; 
-          responsePtr->at(_bn-1) *= fFieldRespAmpVec[_vw]*weight;
-        }
-        
-        // fill some histos
-        if(_wr==0 && config==0 && ktype==0 && !fHistDone[_vw]) {
-          sprintf(buff0, "hRawResp%i", (int)_vw);
-          fHRawResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nBins, x0-0.5*deltaX, xf+0.5*deltaX);
-          sprintf(buff0, "hStretchedResp%i", (int)_vw);
-          double x0S = timeFactor*x0 - 0.5*deltaX/timeFactor;
-          double xfS = timeFactor*xf + 0.5*deltaX/timeFactor;
-          //std::cout << "title " << buff0 << std::endl;
-          fHStretchedResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nResponseBins, x0S, xfS);
-          for(size_t i=0;i<nBins; ++i) {
-            fHRawResponse[_vw]->SetBinContent(i, histPtr->GetBinContent(i));
-            //std::cout << "bin " << i <<  " xVal " << fHRawResponse[_vw]->GetBinCenter(i) << " response " << fHRawResponse[_vw]->GetBinContent(i) << std::endl;
-          }
-          for(size_t i=0;i<nResponseBins; ++i) {
-            fHStretchedResponse[_vw]->SetBinContent(i+1, responsePtr->at(i));
-            //std::cout << "vbin " << i <<  " xVal " << fHStretchedResponse[_vw]->GetBinCenter(i) << " response " << fHStretchedResponse[_vw]->GetBinContent(i) << std::endl;
-          }
-          fHistDone[_vw] = true;
-        }
+	  // fill some histos
+	  if(_wr==0 && config==0 && ktype==0 && !fHistDone[_vw]) {
+	    sprintf(buff0, "hRawResp%i", (int)_vw);
+	    fHRawResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nBins, x0-0.5*deltaX, xf+0.5*deltaX);
+	    sprintf(buff0, "hStretchedResp%i", (int)_vw);
+	    double x0S = timeFactor*x0 - 0.5*deltaX/timeFactor;
+	    double xfS = timeFactor*xf + 0.5*deltaX/timeFactor;
+	    //std::cout << "title " << buff0 << std::endl;
+	    fHStretchedResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nResponseBins, x0S, xfS);
+	    for(size_t i=0;i<nBins; ++i) {
+	      fHRawResponse[_vw]->SetBinContent(i, histPtr->GetBinContent(i));
+	      //std::cout << "bin " << i <<  " xVal " << fHRawResponse[_vw]->GetBinCenter(i) << " response " << fHRawResponse[_vw]->GetBinContent(i) << std::endl;
+	    }
+	    for(size_t i=0;i<nResponseBins; ++i) {
+	      fHStretchedResponse[_vw]->SetBinContent(i+1, responsePtr->at(i));
+	      //std::cout << "vbin " << i <<  " xVal " << fHStretchedResponse[_vw]->GetBinCenter(i) << " response " << fHStretchedResponse[_vw]->GetBinContent(i) << std::endl;
+	    }
+	    fHistDone[_vw] = true;
+	  }
+	}
       }
+      if(fYZdependentResponse && !fdatadrivenResponse){
+	bool YZflag = true;
+	for(_wr=0; _wr<fNYZResponses[ktype][_vw]; ++_wr) {
+	  if(YZflag == false){
+	    _wr = 0;
+	    _vw = 2;
+	  }
+	  // simplify the code                                                                                                                                                                             
+	  DoubleVec* responsePtr = &fFieldResponseVec[config][ktype][_vw][_wr];
+	  TH1F*      histPtr     = fFieldResponseHistVec[config][ktype][_vw][_wr];
+	  
+	  // see if we get the same toffsets... we do!                                                                                                                                                     
+	  //if(_wr==0) SetFieldResponseTOffsets(histPtr, ktype);                                                                                                                                           
+	  
+	  size_t nBins = histPtr->GetNbinsX();
+	  size_t nResponseBins = nBins*timeFactor;
+	  responsePtr->resize(nResponseBins);
+	  double x0 = histPtr->GetBinCenter(1);
+	  double xf = histPtr->GetBinCenter(nBins);
+	  double deltaX = (xf - x0)/(nBins-1);
+	  //std::cout << "lims " << x0 << " " << xf << " " << deltaX << std::endl;                                                                                                                         
+
+	  for(_bn=1; _bn<=nResponseBins; ++_bn) {
+	    double xVal = x0 + deltaX*(_bn-1)/timeFactor;
+	    //if(_bn==1) std::cout << "1st bin " << x0 << " " << xVal << std::endl;                                                                                                                           
+	    double yVal = histPtr->Interpolate(xVal);
+	    responsePtr->at(_bn-1) = yVal;
+	    responsePtr->at(_bn-1) *= fFieldRespAmpVec[_vw]*weight;
+	  }
+
+	  // fill some histos                                                                                                                                                                              
+	  if(_wr==0 && config==0 && ktype==0 && !fHistDone[_vw]) {
+	    sprintf(buff0, "hRawResp%i", (int)_vw);
+	    fHRawResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nBins, x0-0.5*deltaX, xf+0.5*deltaX);
+	    sprintf(buff0, "hStretchedResp%i", (int)_vw);
+	    double x0S = timeFactor*x0 - 0.5*deltaX/timeFactor;
+	    double xfS = timeFactor*xf + 0.5*deltaX/timeFactor;
+	    //std::cout << "title " << buff0 << std::endl;                                                                                                                                                    
+	    fHStretchedResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nResponseBins, x0S, xfS);
+	    for(size_t i=0;i<nBins; ++i) {
+	      fHRawResponse[_vw]->SetBinContent(i, histPtr->GetBinContent(i));
+	      //std::cout << "bin " << i <<  " xVal " << fHRawResponse[_vw]->GetBinCenter(i) << " response " << fHRawResponse[_vw]->GetBinContent(i) << std::endl;                                            
+	    }
+	    for(size_t i=0;i<nResponseBins; ++i) {
+	      fHStretchedResponse[_vw]->SetBinContent(i+1, responsePtr->at(i));
+	      //std::cout << "vbin " << i <<  " xVal " << fHStretchedResponse[_vw]->GetBinCenter(i) << " response " << fHStretchedResponse[_vw]->GetBinContent(i) << std::endl;                               
+	    }
+	    fHistDone[_vw] = true;
+	  }
+	  if(YZflag == false){ 
+	      _wr = 2; 
+	      _vw = 1;
+	  }
+	  YZflag = false;
+	}
+      }
+      if(fdatadrivenResponse){
+	for(_wr=0; _wr<fNdatadrivenResponses[ktype][_vw]; ++_wr){
+	  DoubleVec* responsePtr = &fFieldResponseVec[config][ktype][_vw][_wr];
+	  TH1F* histPtr = fFieldResponseHistVec[config][ktype][_vw][_wr];
+
+	  size_t nBins = histPtr->GetNbinsX();
+          size_t nResponseBins = nBins*timeFactor;
+          responsePtr->resize(nResponseBins);
+          double x0 = histPtr->GetBinCenter(1);
+          double xf = histPtr->GetBinCenter(nBins);
+          double deltaX = (xf - x0)/(nBins-1);
+
+	  for(_bn=1; _bn<=nResponseBins; ++_bn) {
+            double xVal = x0 + deltaX*(_bn-1)/timeFactor;
+            double yVal = histPtr->Interpolate(xVal);
+            responsePtr->at(_bn-1) = yVal;
+            responsePtr->at(_bn-1) *= fFieldRespAmpVec[_vw]*weight;
+          }
+
+	  if(_wr==0 && config==0 && ktype==0 && !fHistDone[_vw]) {
+            sprintf(buff0, "hRawResp%i", (int)_vw);
+            fHRawResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nBins, x0-0.5*deltaX, xf+0.5*deltaX);
+            sprintf(buff0, "hStretchedResp%i", (int)_vw);
+            double x0S = timeFactor*x0 - 0.5*deltaX/timeFactor;
+            double xfS = timeFactor*xf + 0.5*deltaX/timeFactor;
+            fHStretchedResponse[_vw] = tfs->make<TH1D>(buff0, buff0, nResponseBins, x0S, xfS);
+            for(size_t i=0;i<nBins; ++i) {
+              fHRawResponse[_vw]->SetBinContent(i, histPtr->GetBinContent(i));
+            }
+            for(size_t i=0;i<nResponseBins; ++i) {
+              fHStretchedResponse[_vw]->SetBinContent(i+1, responsePtr->at(i));
+            }
+            fHistDone[_vw] = true;
+	  }
+	} // end _wr
+      } // end fdatadrivenResponse
+      
     }
   }
 
@@ -1002,101 +1257,240 @@ void util::SignalShapingServiceMicroBooNE::SetResponseSampling(size_t ktype, siz
     //std::cout << "Time factors " << timeFactor << " " << plotTimeFactor << std::endl;
     
     double timeFactorInv = 1./timeFactor;
-    for(_wr=0; _wr<fNResponses[ktype][view]; ++_wr) {
-      const DoubleVec* pResp = &((fSignalShapingVec[config][ktype][view][_wr]).Response_save());
-    
-      // more histos
-      //std::cout << "HistDone " << view << " " << fHistDoneF[view] << std::endl;
-      
-      if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
-        
-//        size_t nBins = fNFieldBins[ktype];
-//        double xLowF = fFieldLowEdge[ktype];
-//        double xHighF = xLowF + 0.001*fNFieldBins[ktype]*fFieldBinWidth[ktype];
 
-        double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
-        double xHighF = xLowF + 0.001*(fNFieldBins[ktype]+1)*fFieldBinWidth[ktype]*plotTimeFactor;
-        double nBins = fNFieldBins[ktype]*plotTimeFactor;
+    if(!fYZdependentResponse && !fdatadrivenResponse){
+      for(_wr=0; _wr<fNResponses[ktype][view]; ++_wr) {
+	const DoubleVec* pResp = &((fSignalShapingVec[config][ktype][view][_wr]).Response_save());
+	
+	// more histos
+	//std::cout << "HistDone " << view << " " << fHistDoneF[view] << std::endl;
+       
+	if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
+	  
+	  //        size_t nBins = fNFieldBins[ktype];
+	  //        double xLowF = fFieldLowEdge[ktype];
+	  //        double xHighF = xLowF + 0.001*fNFieldBins[ktype]*fFieldBinWidth[ktype];
 
+	  double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
+	  double xHighF = xLowF + 0.001*(fNFieldBins[ktype]+1)*fFieldBinWidth[ktype]*plotTimeFactor;
+	  double nBins = fNFieldBins[ktype]*plotTimeFactor;
+	  
         
-//        std::cout << "set 1 " << fNFieldBins[0] << " " << fFieldLowEdge[0] << " " << fFieldBinWidth[0] << std::endl;
-//        std::cout << "      " << nBins << " " << xLowF << " " << xHighF << std::endl;
-        
-        sprintf(buff0, "FullResponse%i", (int)view);
-        fHFullResponse[view] = tfs->make<TH1D>(buff0, buff0, nBins, xLowF, xHighF);                
-        for (size_t i=0; i<nBins; ++i) {
-          fHFullResponse[view]->SetBinContent(i+1, pResp->at(i));
-        }
-      }
+	  //        std::cout << "set 1 " << fNFieldBins[0] << " " << fFieldLowEdge[0] << " " << fFieldBinWidth[0] << std::endl;
+	  //        std::cout << "      " << nBins << " " << xLowF << " " << xHighF << std::endl;
+	  
+	  sprintf(buff0, "FullResponse%i", (int)view);
+	  fHFullResponse[view] = tfs->make<TH1D>(buff0, buff0, nBins, xLowF, xHighF);                
+	  for (size_t i=0; i<nBins; ++i) {
+	    fHFullResponse[view]->SetBinContent(i+1, pResp->at(i));
+	  }
+	}
+	
+	size_t nticks_input = pResp->size();
+	DoubleVec InputTime(nticks_input, 0. );
+	for (size_t itime = 0; itime < nticks_input; itime++ ) {
+	  InputTime[itime] = (1.*itime) * deltaInputTime*timeFactor;
+	}
+	//std::cout << "Input time vector done" << std::endl;
+	
+	DoubleVec SamplingResp(nticks, 0. );
+	
+	size_t SamplingCount = 0;
+	
+	size_t startJ = 1;
+	SamplingResp[0] = (*pResp)[0];
+	for ( size_t itime = 1; itime < nticks; itime++ ) {
+	  size_t low, high;
+	  for ( size_t jtime = startJ; jtime < nticks_input; jtime++ ) {
+	    if ( InputTime[jtime] >= SamplingTime[itime] ) {
+	      low  = jtime - 1;
+	      high = jtime;
+	      //            if(jtime<2&&itime<2) std::cout << itime << " " << jtime << " " << low << " " << up << std::endl;
+	      double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
+	      SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor);
+	      // note: timeFactor = timeFactorInv =  1.0 for calibrated responses
+	      SamplingResp[itime] *= timeFactorInv;
+	      SamplingCount++;
+	      startJ = jtime;
+	      break;
+	    }
+	  } // for (  jtime = 0; jtime < nticks; jtime++ )
+	} // for (  itime = 0; itime < nticks; itime++ )
+	//std::cout << "SamplingResponse done " << std::endl;
       
-      size_t nticks_input = pResp->size();
-      DoubleVec InputTime(nticks_input, 0. );
-      for (size_t itime = 0; itime < nticks_input; itime++ ) {
-        InputTime[itime] = (1.*itime) * deltaInputTime*timeFactor;
-      }
-      //std::cout << "Input time vector done" << std::endl;
+	// more histos
+	//std::cout << "HistDone " << view << " " << fHistDoneF[view] << std::endl;
+	if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
+	  double plotTimeFactor = f3DCorrectionVec[view]*fTimeScaleFactor;
+	  double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
+	  double xHighF = xLowF + 0.001*(fNFieldBins[ktype])*fFieldBinWidth[ktype]*plotTimeFactor;
+	  double binWidth = 0.5;
+	  size_t nBins = (xHighF-xLowF+1)/binWidth;
+	  //        std::cout << "set 2 " << fNFieldBins[0] << " " << fFieldLowEdge[0] << " " << fFieldBinWidth[0] << std::endl;
+	  //        std::cout << "      " << nBins << " " << xLowF << " " << xHighF << std::endl;
+	  
+	  sprintf(buff1, "SampledResponse%i", (int)view);
+	  fHSampledResponse[view] = tfs->make<TH1D>(buff1, buff1, nBins, xLowF, xHighF);                
+	  for (size_t i=0; i<nBins; ++i) {
+	    //std::cout << "bin/SamplingResp " << i << " " << SamplingResp[i] << std::endl;
+	    fHSampledResponse[view]->SetBinContent(i+1, SamplingResp[i]);
+	  }
+	  fHistDoneF[view] = true;
+	}
+	
+	if(fPrintResponses) {
+	  size_t printCount = 0;
+	  int inc = 1;
+	  //std::cout << "Sampled response (ticks) for view " << view << " wire " << _wr << " nticks " << nticks << std::endl;
+	  for(size_t i = 0; i<nticks; i+=inc) {
+	    //std::cout << SamplingResp[i] << " " ;
+	    if((printCount+1)%10==0) std::cout << std::endl;
+	    printCount++;
+	    if (printCount>=100) {inc = 100;}
+	  }
+	}
       
-      DoubleVec SamplingResp(nticks, 0. );
-      
-      size_t SamplingCount = 0;
-      
-      size_t startJ = 1;
-      SamplingResp[0] = (*pResp)[0];
-      for ( size_t itime = 1; itime < nticks; itime++ ) {
-        size_t low, high;
-        for ( size_t jtime = startJ; jtime < nticks_input; jtime++ ) {
-          if ( InputTime[jtime] >= SamplingTime[itime] ) {
-            low  = jtime - 1;
-            high = jtime;
-            //            if(jtime<2&&itime<2) std::cout << itime << " " << jtime << " " << low << " " << up << std::endl;
-            double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
-            SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor);
-            // note: timeFactor = timeFactorInv =  1.0 for calibrated responses
-            SamplingResp[itime] *= timeFactorInv;
-            SamplingCount++;
-            startJ = jtime;
-            break;
+	(fSignalShapingVec[config][ktype][view][_wr]).AddResponseFunction( SamplingResp, true);
+	//std::cout << "Finished with wire " << _wr << ", view " << _vw << std::endl;
+	
+      }  //  loop over wires
+    } // nominal response
+    if(fYZdependentResponse && !fdatadrivenResponse){
+      bool YZflag = true;
+      for(_wr=0; _wr<fNYZResponses[ktype][view]; ++_wr) {
+	if(YZflag == false){ 
+	  _wr = 0; 
+	  view = 2;
+	}
+        const DoubleVec* pResp = &((fSignalShapingVec[config][ktype][view][_wr]).Response_save());
+        if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
+          double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
+          double xHighF = xLowF + 0.001*(fNFieldBins[ktype]+1)*fFieldBinWidth[ktype]*plotTimeFactor;
+          double nBins = fNFieldBins[ktype]*plotTimeFactor;
+          sprintf(buff0, "FullResponse%i", (int)view);
+          fHFullResponse[view] = tfs->make<TH1D>(buff0, buff0, nBins, xLowF, xHighF);
+          for (size_t i=0; i<nBins; ++i) {
+            fHFullResponse[view]->SetBinContent(i+1, pResp->at(i));
           }
-        } // for (  jtime = 0; jtime < nticks; jtime++ )
-      } // for (  itime = 0; itime < nticks; itime++ )
-      //std::cout << "SamplingResponse done " << std::endl;
-      
-      // more histos
-      //std::cout << "HistDone " << view << " " << fHistDoneF[view] << std::endl;
-      if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
-        double plotTimeFactor = f3DCorrectionVec[view]*fTimeScaleFactor;
-        double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
-        double xHighF = xLowF + 0.001*(fNFieldBins[ktype])*fFieldBinWidth[ktype]*plotTimeFactor;
-        double binWidth = 0.5;
-        size_t nBins = (xHighF-xLowF+1)/binWidth;
-//        std::cout << "set 2 " << fNFieldBins[0] << " " << fFieldLowEdge[0] << " " << fFieldBinWidth[0] << std::endl;
-//        std::cout << "      " << nBins << " " << xLowF << " " << xHighF << std::endl;
-        
-        sprintf(buff1, "SampledResponse%i", (int)view);
-        fHSampledResponse[view] = tfs->make<TH1D>(buff1, buff1, nBins, xLowF, xHighF);                
-        for (size_t i=0; i<nBins; ++i) {
-          //std::cout << "bin/SamplingResp " << i << " " << SamplingResp[i] << std::endl;
-          fHSampledResponse[view]->SetBinContent(i+1, SamplingResp[i]);
         }
-        fHistDoneF[view] = true;
-      }
-            
-      if(fPrintResponses) {
-        size_t printCount = 0;
-        int inc = 1;
-        //std::cout << "Sampled response (ticks) for view " << view << " wire " << _wr << " nticks " << nticks << std::endl;
-        for(size_t i = 0; i<nticks; i+=inc) {
-          //std::cout << SamplingResp[i] << " " ;
-          if((printCount+1)%10==0) std::cout << std::endl;
-          printCount++;
-          if (printCount>=100) {inc = 100;}
+
+        size_t nticks_input = pResp->size();
+        DoubleVec InputTime(nticks_input, 0. );
+        for (size_t itime = 0; itime < nticks_input; itime++ ) {
+          InputTime[itime] = (1.*itime) * deltaInputTime*timeFactor;
         }
+	DoubleVec SamplingResp(nticks, 0. );
+        size_t SamplingCount = 0;
+        size_t startJ = 1;
+        SamplingResp[0] = (*pResp)[0];
+        for ( size_t itime = 1; itime < nticks; itime++ ) {
+          size_t low, high;
+          for ( size_t jtime = startJ; jtime < nticks_input; jtime++ ) {
+            if ( InputTime[jtime] >= SamplingTime[itime] ) {
+              low  = jtime - 1;
+              high = jtime;
+              double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
+              SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor);
+              SamplingResp[itime] *= timeFactorInv;
+              SamplingCount++;
+              startJ = jtime;
+              break;
+            }
+          } // for (  jtime = 0; jtime < nticks; jtime++ )                                                                                                                                                 
+        } // for (  itime = 0; itime < nticks; itime++ )                                                                                                                                               
+        if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
+          double plotTimeFactor = f3DCorrectionVec[view]*fTimeScaleFactor;
+          double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
+          double xHighF = xLowF + 0.001*(fNFieldBins[ktype])*fFieldBinWidth[ktype]*plotTimeFactor;
+          double binWidth = 0.5;
+          size_t nBins = (xHighF-xLowF+1)/binWidth;
+          sprintf(buff1, "SampledResponse%i", (int)view);
+          fHSampledResponse[view] = tfs->make<TH1D>(buff1, buff1, nBins, xLowF, xHighF);
+          for (size_t i=0; i<nBins; ++i) {
+	    fHSampledResponse[view]->SetBinContent(i+1, SamplingResp[i]);
+          }
+          fHistDoneF[view] = true;
+        }
+        if(fPrintResponses) {
+          size_t printCount = 0;
+          int inc = 1;
+          for(size_t i = 0; i<nticks; i+=inc) {
+            if((printCount+1)%10==0) std::cout << std::endl;
+            printCount++;
+            if (printCount>=100) {inc = 100;}
+          }
+        }
+        (fSignalShapingVec[config][ktype][view][_wr]).AddResponseFunction( SamplingResp, true);
+	if(YZflag == false){ 
+	  _wr = 2; 
+	  view = 1;
+	}
+	YZflag = false;
+      }  //  loop over wires                                                                                                                                                                               
+    } // YZ response 
+    if(fdatadrivenResponse){
+      for(_wr=0; _wr<fNdatadrivenResponses[ktype][view]; ++_wr){
+	const DoubleVec* pResp = &((fSignalShapingVec[config][ktype][view][_wr]).Response_save());
+	if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
+	  double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
+	  double xHighF = xLowF + 0.001*(fNFieldBins[ktype]+1)*fFieldBinWidth[ktype]*plotTimeFactor;
+	  double nBins = fNFieldBins[ktype]*plotTimeFactor;
+	  sprintf(buff0, "FullResponse%i", (int)view);
+	  fHFullResponse[view] = tfs->make<TH1D>(buff0, buff0, nBins, xLowF, xHighF);
+	  for (size_t i=0; i<nBins; ++i) {
+	    fHFullResponse[view]->SetBinContent(i+1, pResp->at(i));
+	  }
+	}
+
+	size_t nticks_input = pResp->size();
+	DoubleVec InputTime(nticks_input, 0. );
+	for (size_t itime = 0; itime < nticks_input; itime++ ) {
+	  InputTime[itime] = (1.*itime) * deltaInputTime*timeFactor;
+	}
+	DoubleVec SamplingResp(nticks, 0. );
+	size_t SamplingCount = 0;
+	size_t startJ = 1;
+	SamplingResp[0] = (*pResp)[0];
+	for ( size_t itime = 1; itime < nticks; itime++ ) {
+	  size_t low, high;
+	  for ( size_t jtime = startJ; jtime < nticks_input; jtime++ ) {
+	    if ( InputTime[jtime] >= SamplingTime[itime] ) {
+	      low  = jtime - 1;
+	      high = jtime;
+	      double interpolationFactor = ((*pResp)[high]-(*pResp)[low])/deltaInputTime;
+	      SamplingResp[itime] = ((*pResp)[low] + ( SamplingTime[itime] - InputTime[low] ) * interpolationFactor);
+	      SamplingResp[itime] *= timeFactorInv;
+	      SamplingCount++;
+	      startJ = jtime;
+	      break;
+	    }
+	  } // for (  jtime = 0; jtime < nticks; jtime++ )                                                                                                                                            
+	} // for (  itime = 0; itime < nticks; itime++ )  
+	if(!fHistDoneF[view] &&config==0 && ktype==0 && _wr==0) {
+	  double plotTimeFactor = f3DCorrectionVec[view]*fTimeScaleFactor;
+	  double xLowF = fFieldLowEdge[ktype]*plotTimeFactor;
+	  double xHighF = xLowF + 0.001*(fNFieldBins[ktype])*fFieldBinWidth[ktype]*plotTimeFactor;
+	  double binWidth = 0.5;
+	  size_t nBins = (xHighF-xLowF+1)/binWidth;
+	  sprintf(buff1, "SampledResponse%i", (int)view);
+	  fHSampledResponse[view] = tfs->make<TH1D>(buff1, buff1, nBins, xLowF, xHighF);
+	  for (size_t i=0; i<nBins; ++i) {
+	    fHSampledResponse[view]->SetBinContent(i+1, SamplingResp[i]);
+	  }
+	  fHistDoneF[view] = true;
+	}
+	if(fPrintResponses) {
+	  size_t printCount = 0;
+	  int inc = 1;
+	  for(size_t i = 0; i<nticks; i+=inc) {
+	    if((printCount+1)%10==0) std::cout << std::endl;
+	    printCount++;
+	    if (printCount>=100) {inc = 100;}
+	  }
+	}
+	(fSignalShapingVec[config][ktype][view][_wr]).AddResponseFunction( SamplingResp, true);
       }
-      
-      (fSignalShapingVec[config][ktype][view][_wr]).AddResponseFunction( SamplingResp, true);
-      //std::cout << "Finished with wire " << _wr << ", view " << _vw << std::endl;
-      
-    }  //  loop over wires
+    } // data driven response
   } // loop over views
   
   //std::cout << "Done with field responses" << std::endl;
