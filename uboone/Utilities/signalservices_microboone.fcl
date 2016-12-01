@@ -47,8 +47,12 @@ CalibResponseTOffset: [0, 0, 0]   # in us time offset to align all three planes
 # Settings for old-style responses (no dynamic induced charge)
 
   NResponses:           [ [1, 1, 1], [1, 1, 1] ]  # number of responses per view, including primary. 1 is current number
+  NYZResponses:         [ [1, 2, 1], [1, 2, 1] ]  # number of responses per view for YZ-depenedent field responses
+  NdatadrivenResponses: [ [3, 3, 2], [3, 3, 2] ]  # number of responses per view for data driven field responses
   NActiveResponses:     [ [1, 1, 1], [1, 1, 1] ]  # number of active responses per view, including primary. 1 is current number
-  FieldResponseFVersion:  [ "v0.1", "v0.1" ]
+  NYZActiveResponses:   [ [1, 2, 1], [1, 2, 1] ]  # number of active responses per view for YZ-dependent field responses
+  NdatadrivenActiveResponses: [ [3, 3, 2], [3, 3, 2] ]  # number of active responses per view for data driven field responses
+  FieldResponseFVersion:  [ "v0.1", "v0.1" ]	 
   
   DefaultEField:       0.5
   DefaultTemperature:  87.0
@@ -60,13 +64,20 @@ CalibResponseTOffset: [0, 0, 0]   # in us time offset to align all three planes
 
   StretchFullResponse:  false         # to maintain the original stretching scheme
                                       # false means only the field response is stretched, not the electronic response
+  YZdependentResponse:  false         # flag to use YZ-dependent field responses
+  datadrivenResponse:   false         # flag to use data driven field response (also by default uses specific electronics response for misconfigured U channels on FT 1)
+  YZchargeScaling:      [ [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0] ] # scale charge; from transparency effects - ramification of shorted wires
+  #YZwireOverlap:        [ [ [296, 671], [2400, 3071], [4800, 6143] ], [ [1168, 1903], [3568, 4303], [7136, 7263] ] ] # channel ranges for shorted wires and corresponding channel ranges for wires effected on other planes
+
+  IncludeMisconfiguredU: false
+  MisconfiguredU:	[ [2016, 2095], [2192, 2303], [2352, 2382] ]	# channel range of misconfigured U-plane wires during run 1
 
   DeconNorm: 200.
 
 # Settings for synthesized response, including adjacent wires
 
   #NResponses:            [ [5, 5, 5], [5, 5, 5] ]  # number of responses per view, including primary.
-  ##NActiveResponses:     [ [5, 3, 4], [5, 3, 4] ]  # number of active responses per view, including primary.
+  #NActiveResponses:     [ [5, 3, 4], [5, 3, 4] ]  # number of active responses per view, including primary.
   #NActiveResponses:      [ [5, 5, 5], [5, 5, 5] ]  # number of active responses per view, including primary.
   #FieldResponseFVersion: [ "v2.1", "v2.1" ]
 
