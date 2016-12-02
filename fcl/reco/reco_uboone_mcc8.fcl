@@ -395,7 +395,7 @@ microboone_reco_mcc8_producers.gaushit.CalDataModuleLabel:                      
 microboone_reco_mcc8_producers.gaushit.MinSig:                                   [3.5, 3.5, 4.0]
 microboone_reco_mcc8_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
 microboone_reco_mcc8_producers.gaushit.MaxMultiHit:                              6
-microboone_reco_mcc8_producers.gaushit.TryNplus1Fits:                            false
+microboone_reco_mcc8_producers.gaushit.TryNplus1Fits:                            0
 #microboone_reco_mcc8_producers.gaushit.FilterHits:                               true
 
 # Fuzzy Cluster related
