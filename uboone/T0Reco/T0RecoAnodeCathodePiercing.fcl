@@ -1,4 +1,3 @@
-
 BEGIN_PROLOG
 T0RecoAnodeCathodePiercing: {
  module_type       : "T0RecoAnodeCathodePiercing"  
@@ -14,3 +13,12 @@ T0RecoAnodeCathodePiercing: {
  side2bottom       : true
 }
 END_PROLOG
+
+
+T0RecoAnodeCathodePiercing_mc : @local::T0RecoAnodeCathodePiercing
+T0RecoAnodeCathodePiercing_mc.RecoT0TimeOffsetA: 0.0
+T0RecoAnodeCathodePiercing_mc.RecoT0TimeOffsetC: -14.0
+
+T0RecoAnodeCathodePiercing_reco : @local::T0RecoAnodeCathodePiercing
+T0RecoAnodeCathodePiercing_reco.RecoT0TimeOffsetA: 3.4
+T0RecoAnodeCathodePiercing_reco.RecoT0TimeOffsetC: -14.0
