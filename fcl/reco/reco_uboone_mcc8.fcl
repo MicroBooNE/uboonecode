@@ -206,10 +206,10 @@ microboone_reco_mcc8_producers:
 
   ### T0 Anode/Cathode piercing track reco
   pandoraCosmicKHitT0Reco:     @local::T0RecoAnodeCathodePiercing_mc
-  pandoraCosmic:               @local::T0RecoAnodeCathodePiercing_mc
+  pandoraCosmicT0Reco:         @local::T0RecoAnodeCathodePiercing_mc
   pandoraNuKHitT0Reco:         @local::T0RecoAnodeCathodePiercing_mc
-  pandoraNu:                   @local::T0RecoAnodeCathodePiercing_mc
-  pandoraNuPMA:                @local::T0RecoAnodeCathodePiercing_mc
+  pandoraNuT0Reco:             @local::T0RecoAnodeCathodePiercing_mc
+  pandoraNuPMAT0Reco:          @local::T0RecoAnodeCathodePiercing_mc
   pmtrackT0Reco:               @local::T0RecoAnodeCathodePiercing_mc
   stitchkalmanhitT0Reco:       @local::T0RecoAnodeCathodePiercing_mc
   trackkalmanhitT0Reco:        @local::T0RecoAnodeCathodePiercing_mc
@@ -307,7 +307,7 @@ microboone_reco_mcc8_pandoraNu: [        pandoraNu,
                                          pandoraNuPMA,
                                          pandoraNutag,
                                          pandoraNuContTag,
-                                         pandoraNuT0Rec0,
+                                         pandoraNuT0Reco,
                                          pandoraNucalo,
                                          pandoraNupid,
                                          pandoraNuKHittag,
@@ -601,7 +601,7 @@ microboone_reco_mcc8_producers.pandoraCosmicKHitT0Reco.TrackProducer: "pandoraCo
 microboone_reco_mcc8_producers.pandoraCosmicT0Reco.TrackProducer:     "pandoraCosmic"
 microboone_reco_mcc8_producers.pandoraNuKHitT0Reco.TrackProducer:     "pandoraNuKHit"
 microboone_reco_mcc8_producers.pandoraNuT0Reco.TrackProducer:         "pandoraNu"
-microboone_reco_mcc8_producers.pandoraNuPMTT0Reco.TrackProducer:      "pandoraNuPMA"
+microboone_reco_mcc8_producers.pandoraNuPMAT0Reco.TrackProducer:      "pandoraNuPMA"
 microboone_reco_mcc8_producers.pmtrackT0Reco.TrackProducer:           "pmtrack"
 microboone_reco_mcc8_producers.stitchkalmanhitT0Reco.TrackProducer:   "stitchkalmanhit"
 microboone_reco_mcc8_producers.trackkalmanhitT0Reco.TrackProducer:    "trackkalmanhit"
