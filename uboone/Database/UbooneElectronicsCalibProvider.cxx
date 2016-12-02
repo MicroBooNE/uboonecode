@@ -64,7 +64,7 @@ namespace lariov {
       
     }
     else if (fDataSource == DataSource::File) {
-      std::cout << "Using gains from local file: "<<fileName<<"\n";
+      std::cout << "Using electronics calibrations from local file: "<<fileName<<"\n";
       std::ifstream file(fileName);
       if (!file) {
         throw cet::exception("UbooneElectronicsCalibProvider")
@@ -104,7 +104,7 @@ namespace lariov {
       }
     }
     else {
-      std::cout << "Using pedestals from conditions database"<<std::endl;
+      std::cout << "Using electronics calibrations from conditions database"<<std::endl;
     }
   }
 

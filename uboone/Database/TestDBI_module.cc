@@ -32,6 +32,9 @@
 #include "larevt/CalibrationDBI/Interface/PmtGainService.h"
 #include "larevt/CalibrationDBI/Interface/PmtGainProvider.h"
 
+#include "larevt/CalibrationDBI/Interface/ElectronicsCalibService.h"
+#include "larevt/CalibrationDBI/Interface/ElectronicsCalibProvider.h"
+
 #include "larevt/CalibrationDBI/IOVData/CalibrationExtraInfo.h"
 #include "larevt/CalibrationDBI/IOVData/IOVDataError.h"
 
@@ -128,7 +131,16 @@ void TestDBI::analyze(art::Event const & evt)
     }
   }
   
-  lariov::CalibrationExtraInfo extraInfo("test_info");
+  const lariov::ElectronicsCalibProvider& elec_provider = art::ServiceHandle<lariov::ElectronicsCalibService>()->GetProvider();
+  raw::ChannelID_t elec_chan = 2019;
+  std::cout<<"Electronics Calibration Test"<<std::endl;
+  std::cout<<"  Channel: "<<elec_chan<<std::endl;
+  std::cout<<"  Gain: "<<elec_provider.Gain(elec_chan)<<std::endl;
+  std::cout<<"  GainErr: "<<elec_provider.GainErr(elec_chan)<<std::endl;
+  std::cout<<"  ShapingTime: "<<elec_provider.ShapingTime(elec_chan)<<std::endl;
+  std::cout<<"  ShapingTimeErr: "<<elec_provider.ShapingTimeErr(elec_chan)<<std::endl;
+  std::cout<<"  IsMisconfig: "<<elec_provider.ExtraInfo(elec_chan).GetIntData("is_misconfigured")<<std::endl;
+  /*lariov::CalibrationExtraInfo extraInfo("test_info");
   extraInfo.AddOrReplaceIntData("dA",1);
   extraInfo.AddOrReplaceFloatData("dB",2.2);
   std::vector<int> dC; dC.push_back(3); dC.push_back(4);
@@ -249,7 +261,7 @@ void TestDBI::analyze(art::Event const & evt)
   
   extraInfo.AddOrReplaceIntData("dA",7);
   extraInfo.AddOrReplaceFloatData("dA",6.0);
-  extraInfo.ClearDataByLabel("dA");
+  extraInfo.ClearDataByLabel("dA");*/
 }
 
 DEFINE_ART_MODULE(TestDBI)
