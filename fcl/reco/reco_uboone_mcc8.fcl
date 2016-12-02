@@ -587,7 +587,7 @@ microboone_reco_mcc8_producers.pandoraCosmicKHitT0Reco.TrackProducer: "pandoraCo
 microboone_reco_mcc8_producers.pandoraCosmicT0Reco.TrackProducer:     "pandoraCosmic"
 microboone_reco_mcc8_producers.pandoraNuKHitT0Reco.TrackProducer:     "pandoraNuKHit"
 microboone_reco_mcc8_producers.pandoraNuT0Reco.TrackProducer:         "pandoraNu"
-microboone_reco_mcc8_producers.pandoraNuPMTT0Reco.TrackProducer:      "pandoraNuPMA"
+microboone_reco_mcc8_producers.pandoraNuPMAT0Reco.TrackProducer:      "pandoraNuPMA"
 microboone_reco_mcc8_producers.pmtrackT0Reco.TrackProducer:           "pmtrack"
 microboone_reco_mcc8_producers.stitchkalmanhitT0Reco.TrackProducer:   "stitchkalmanhit"
 microboone_reco_mcc8_producers.trackkalmanhitT0Reco.TrackProducer:    "trackkalmanhit"
