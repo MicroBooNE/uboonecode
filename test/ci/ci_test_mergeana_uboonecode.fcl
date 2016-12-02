@@ -1,0 +1,7 @@
+#include "standard_ana_uboone.fcl"
+
+services.NuRandomService.policy: "preDefinedSeed"
+services.NuRandomService.baseSeed: 1234
+
+#services.RandomNumberGenerator.restoreFrom: "AnaRandomSeeds_Ref.dat"
+#services.RandomNumberGenerator.saveTo: "AnaRandomSeeds.dat"
