@@ -200,10 +200,10 @@ microboone_reco_mcc8_producers:
 
   ### T0 Anode/Cathode piercing track reco
   pandoraCosmicKHitT0Reco:     @local::T0RecoAnodeCathodePiercing_mc
-  pandoraCosmic:               @local::T0RecoAnodeCathodePiercing_mc
+  pandoraCosmicT0Reco:         @local::T0RecoAnodeCathodePiercing_mc
   pandoraNuKHitT0Reco:         @local::T0RecoAnodeCathodePiercing_mc
-  pandoraNu:                   @local::T0RecoAnodeCathodePiercing_mc
-  pandoraNuPMA:                @local::T0RecoAnodeCathodePiercing_mc
+  pandoraNuT0Reco:             @local::T0RecoAnodeCathodePiercing_mc
+  pandoraNuPMAT0Reco:          @local::T0RecoAnodeCathodePiercing_mc
   pmtrackT0Reco:               @local::T0RecoAnodeCathodePiercing_mc
   stitchkalmanhitT0Reco:       @local::T0RecoAnodeCathodePiercing_mc
   trackkalmanhitT0Reco:        @local::T0RecoAnodeCathodePiercing_mc
@@ -297,7 +297,7 @@ microboone_reco_mcc8_pandoraNu: [        pandoraNu,
                                          pandoraNuPMA,
                                          pandoraNutag,
                                          pandoraNuContTag,
-                                         pandoraNuT0Rec0,
+                                         pandoraNuT0Reco,
                                          pandoraNucalo,
                                          pandoraNupid,
                                          pandoraNuKHittag,
