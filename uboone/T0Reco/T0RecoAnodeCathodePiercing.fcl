@@ -12,7 +12,6 @@ T0RecoAnodeCathodePiercing: {
  top2side          : true
  side2bottom       : true
 }
-END_PROLOG
 
 
 T0RecoAnodeCathodePiercing_mc : @local::T0RecoAnodeCathodePiercing
@@ -22,3 +21,5 @@ T0RecoAnodeCathodePiercing_mc.RecoT0TimeOffsetC: -14.0
 T0RecoAnodeCathodePiercing_reco : @local::T0RecoAnodeCathodePiercing
 T0RecoAnodeCathodePiercing_reco.RecoT0TimeOffsetA: 3.4
 T0RecoAnodeCathodePiercing_reco.RecoT0TimeOffsetC: -14.0
+
+END_PROLOG

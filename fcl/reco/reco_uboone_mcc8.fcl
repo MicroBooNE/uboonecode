@@ -249,7 +249,7 @@ microboone_reco_mcc8_fuzzytracks: [      trackkalmanhit,
                                          trackkalmanhitContTag,
                                          stitchkalmanhitContTag,
                                          trackkalmanhitT0Reco,
-                                         stitchkalmanhitT0Reco
+                                         stitchkalmanhitT0Reco,
                                          showerrecofuzzy ]
 
 microboone_reco_mcc8_fuzzypath: [        @sequence::microboone_reco_mcc8_fuzzycluster,
