@@ -152,7 +152,7 @@ T0RecoAnodeCathodePiercing::T0RecoAnodeCathodePiercing(fhicl::ParameterSet const
 void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 {
 
-  std::cout << "NEW EVENT" << std::endl;
+  //std::cout << "NEW EVENT" << std::endl;
 
   _flash_times.clear();
   _flash_idx_v.clear();
@@ -297,7 +297,7 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
     // get pointer to individual track
     const art::Ptr<recob::Track>   trk_ptr(track_h,trk_ctr-1);
     const art::Ptr<recob::OpFlash> flash_ptr(flash_h, flash_match_result.second );
-    std::cout << "mathed to flash w/ index " << flash_match_result.second << " w/ PE " << flash_ptr->TotalPE() << " and time " << flash_ptr->Time() << " vs reco time " << trkT << std::endl;
+    //std::cout << "matched to flash w/ index " << flash_match_result.second << " w/ PE " << flash_ptr->TotalPE() << " and time " << flash_ptr->Time() << " vs reco time " << trkT << std::endl;
     util::CreateAssn(*this, e, flash_ptr, trk_ptr, *trk_flash_assn_v);
 
     }
@@ -306,7 +306,7 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
   
   e.put(std::move(T0_v));
   e.put(std::move(trk_t0_assn_v));
-  std::cout << "create track flash association " << std::endl;
+  //std::cout << "create track flash association " << std::endl;
   e.put(std::move(trk_flash_assn_v));
 
 }
