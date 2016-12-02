@@ -82,7 +82,7 @@ microboone_reco_mcc8_producers:
   ### Saturation correction module
   saturation : @local::correct_saturation
 
-### flash finders
+  ### flash finders
   ophit            : @local::microboone_ophit_beam_highgain
   ophitLow         : @local::microboone_ophit_beam_lowgain
   ophitCosmic      : @local::microboone_ophit_cosmic_highgain
@@ -96,6 +96,12 @@ microboone_reco_mcc8_producers:
   ophitSat     : @local::microboone_ophit_saturation
   opflashSat   : @local::microboone_opflash_saturation
   sflashSat    : @local::microboone_simple_flash_sat
+
+  ### Simple Flash Finder
+  ophitSatBeam:      @local::microboone_ophit_saturation_beam    
+  ophitSatCosmic:    @local::microboone_ophit_saturation_cosmic  
+  simpleFlashBeam:   @local::UBFlashBeam                         
+  simpleFlashCosmic: @local::UBFlashCosmic 
 
   ### noise filtering (if needed)
   digitfilter:                 @local::microboone_rawdigitfilter
@@ -229,7 +235,11 @@ microboone_reco_mcc8_optical: [ saturation,
                                 sflashSat,
                                 opflashLow,
                                 opflashCosmic,
-                                opflashCosmicLow ]
+                                opflashCosmicLow, 
+                                ophitSatBeam,
+                                ophitSatCosmic,
+                                simpleFlashBeam,
+                                simpleFlashCosmic]
 
 microboone_reco_mcc8_signalprocessing: [ digitfilter,
                                          caldata,
@@ -350,6 +360,10 @@ microboone_reco_mcc8_3D: [               rns,
 
 ### Below we include overrides for the modules above
 ### These are for MCC 7
+
+# Simple Flash
+physics.producers.simpleFlashBeam.PECalib:   @local:NoCalib # No calibration for MC. This is not final.
+physics.producers.simpleFlashCosmic.PECalib: @local:NoCalib # No calibration for MC. This is not final.
 
 # this turns on the truncation of the RawDigits
 microboone_reco_mcc8_producers.digitfilter.TruncateTicks:                        true
