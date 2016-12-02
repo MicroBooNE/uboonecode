@@ -18,6 +18,7 @@
 #include "photpropservices_microboone.fcl"
 #include "correct_saturation_mc.fcl"
 #include "T0RecoAnodeCathodePiercing.fcl"
+#include "ubflashfinder.fcl"
 
 #include "mchitmodules.fcl"
 #include "mcreco.fcl"
@@ -362,8 +363,8 @@ microboone_reco_mcc8_3D: [               rns,
 ### These are for MCC 7
 
 # Simple Flash
-physics.producers.simpleFlashBeam.PECalib:   @local:NoCalib # No calibration for MC. This is not final.
-physics.producers.simpleFlashCosmic.PECalib: @local:NoCalib # No calibration for MC. This is not final.
+physics.producers.simpleFlashBeam.PECalib:   @local::NoCalib # No calibration for MC. This is not final.
+physics.producers.simpleFlashCosmic.PECalib: @local::NoCalib # No calibration for MC. This is not final.
 
 # this turns on the truncation of the RawDigits
 microboone_reco_mcc8_producers.digitfilter.TruncateTicks:                        true
