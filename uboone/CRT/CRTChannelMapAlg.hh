@@ -29,11 +29,11 @@ namespace crt {
     uint32_t PositionToAuxDetChannel(double const  worldLoc[3],
                                      std::vector<geo::AuxDetGeo*> const& auxDets,
                                      size_t& ad,
-                                     size_t& sv) const{return 0.;}
+                                     size_t& sv) const;
 
     const TVector3 AuxDetChannelToPosition(uint32_t const& channel,
                                            std::string const& auxDetName,
-                                           std::vector<geo::AuxDetGeo*> const& auxDets) const{return TVector3();}
+                                           std::vector<geo::AuxDetGeo*> const& auxDets) const;
   };
 }
 

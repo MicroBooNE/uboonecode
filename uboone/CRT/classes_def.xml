@@ -1,3 +1,4 @@
 <lcgdict>
   <class name="crt::CRTData"/>
+  <class name="art::Wrapper<crt::CRTData>"/>
 </lcgdict>

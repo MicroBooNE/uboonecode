@@ -33,8 +33,11 @@ namespace crt{
     mf::LogInfo(__log_name__)<<"In produce ";
     art::ServiceHandle<geo::AuxDetGeometry> geo;
     art::Handle< std::vector<sim::AuxDetSimChannel> > channels;
-    evt.getByLabel("sim::AuxDetSimChannel",channels);
-    if(!channels.isValid()) return;
+    evt.getByLabel("largeant",channels);
+    if(!channels.isValid()){
+      mf::LogWarning(__log_name__)<<"Cannot get the AuxDetChannels";
+      return;
+    }
 
     mf::LogInfo(__log_name__)<<" Number of Channels Hit: "<<channels->size();
 
@@ -66,6 +69,7 @@ namespace crt{
       }
     }
     evt.put(std::move(hits));
+    mf::LogWarning(__log_name__)<<"Hit the end of the event list";
   }
 
   DEFINE_ART_MODULE(CRTDetSim)

@@ -19,7 +19,7 @@ namespace crt {
   void CRTChannelMapAlg::Uninitialize(){
     //TODO: Release Map
   }
-  /*
+  
 
   uint32_t CRTChannelMapAlg::PositionToAuxDetChannel(
     double const worldLoc[3],
@@ -37,5 +37,5 @@ namespace crt {
     std::vector<geo::AuxDetGeo*> const& auxDets) const{
       return TVector3();
   }
-  */
+  
 }
