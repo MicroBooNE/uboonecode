@@ -28,7 +28,7 @@ RawDigitCharacterizationAlg::RawDigitCharacterizationAlg(fhicl::ParameterSet con
     // Report.
     mf::LogInfo("RawDigitCharacterizationAlg") << "RawDigitCharacterizationAlg configured\n";
 }
-
+    
 //----------------------------------------------------------------------------
 /// Destructor.
 RawDigitCharacterizationAlg::~RawDigitCharacterizationAlg()
@@ -189,20 +189,7 @@ void RawDigitCharacterizationAlg::getWaveformParams(const RawDigitVector& rawWav
     
     truncMean /= float(curBinCnt);
     
-    // do rms calculation - the old fashioned way and over all adc values
-    std::vector<float> adcLessPedVec;
-    
-    adcLessPedVec.resize(rawWaveform.size());
-    
-    // Fill the vector
-    std::transform(rawWaveform.begin(),rawWaveform.end(),adcLessPedVec.begin(),std::bind2nd(std::minus<short>(),truncMean));
-    
-    // sort in ascending order so we can truncate the sume
-    std::sort(adcLessPedVec.begin(), adcLessPedVec.end());
-    
-    // Get the truncated sum
-    truncRms = std::inner_product(adcLessPedVec.begin(), adcLessPedVec.begin() + minNumBins, adcLessPedVec.begin(), 0.);
-    truncRms = std::sqrt(std::max(0.,truncRms / double(minNumBins)));
+    getTruncatedRMS(rawWaveform, truncMean, truncRms);
     
     // Recover the database version of the pedestal
     float pedestal = fPedestalRetrievalAlg.PedMean(channel);
@@ -219,12 +206,16 @@ void RawDigitCharacterizationAlg::getWaveformParams(const RawDigitVector& rawWav
     // We also want mean, median, rms, etc., for all ticks on the waveform
     std::vector<short> localTimeVec = rawWaveform;
     
-    std::sort(localTimeVec.begin(),localTimeVec.end());
+    std::sort(localTimeVec.begin(),localTimeVec.end(),[](const auto& left, const auto& right){return std::fabs(left) < std::fabs(right);});
     
     float realMean(float(std::accumulate(localTimeVec.begin(),localTimeVec.end(),0))/float(localTimeVec.size()));
     
     median = localTimeVec[localTimeVec.size()/2];
     mean   = std::round(realMean);
+    
+    std::vector<float> adcLessPedVec;
+    
+    adcLessPedVec.resize(localTimeVec.size());
     
     std::transform(localTimeVec.begin(),localTimeVec.end(),adcLessPedVec.begin(),std::bind2nd(std::minus<short>(),mean));
     
@@ -295,6 +286,29 @@ void RawDigitCharacterizationAlg::getWaveformParams(const RawDigitVector& rawWav
             fModeRatioProfiles[view]->Fill(double(wireIdx+0.5), double(leastNeighborRatio), 1.);
         }
     }
+    
+    return;
+}
+void RawDigitCharacterizationAlg::getTruncatedRMS(const RawDigitVector& rawWaveform,
+                                                  float&                pedestal,
+                                                  float&                truncRms) const
+{
+    // do rms calculation - the old fashioned way and over all adc values
+    std::vector<float> adcLessPedVec;
+    
+    adcLessPedVec.resize(rawWaveform.size());
+    
+    // Fill the vector
+    std::transform(rawWaveform.begin(),rawWaveform.end(),adcLessPedVec.begin(),std::bind2nd(std::minus<short>(),pedestal));
+    
+    // sort in ascending order so we can truncate the sume
+    std::sort(adcLessPedVec.begin(), adcLessPedVec.end(),[](const auto& left, const auto& right){return std::fabs(left) < std::fabs(right);});
+    
+    int minNumBins = (1. - fTruncMeanFraction) * rawWaveform.size();
+    
+    // Get the truncated sum
+    truncRms = std::inner_product(adcLessPedVec.begin(), adcLessPedVec.begin() + minNumBins, adcLessPedVec.begin(), 0.);
+    truncRms = std::sqrt(std::max(0.,truncRms / double(minNumBins)));
     
     return;
 }
