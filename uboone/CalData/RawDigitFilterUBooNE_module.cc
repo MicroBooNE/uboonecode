@@ -258,7 +258,6 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
             }
         
             if (channel >= maxChannels || !goodChan) continue;
-
         
             // Recover plane and wire in the plane
             unsigned int view = wids[0].Plane;
@@ -408,19 +407,14 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                     }
                     
                     // recalculate rms for the output
-                    double rmsVal   = 0.;
-                    double pedestal = truncMeanWireVec[locWireIdx];
-                    double pedCor   = pedCorWireVec[locWireIdx];
+                    float rmsVal   = 0.;
+                    float pedestal = truncMeanWireVec[locWireIdx];
+                    float pedCor   = pedCorWireVec[locWireIdx];
+                    float deltaPed = pedestal - pedCor;
                     
                     caldata::RawDigitVector& rawDataVec = rawDataWireTimeVec[locWireIdx];
                     
-                    for(const auto& adcVal : rawDataVec)
-                    {
-                        double adcLessPed = adcVal - pedestal + pedCor;
-                        rmsVal += adcLessPed * adcLessPed;
-                    }
-                        
-                    rmsVal = std::sqrt(std::max(0.,rmsVal / double(rawDataVec.size())));
+                    fCharacterizationAlg.getTruncatedRMS(rawDataVec, deltaPed, rmsVal);
                     
                     // The ultra high noise channels are simply zapped
                     if (rmsVal < fRmsRejectionCutHi[view]) // && ImAGoodWire(view,baseWireIdx + locWireIdx))
@@ -429,7 +423,7 @@ void RawDigitFilterUBooNE::produce(art::Event & event)
                     }
                     else
                     {
-                        mf::LogInfo("RawDigitFilterUBooNE") <<  "--> Rejecting channel for large rms, channel: " << channel << ", rmsVal: " << truncRmsWireVec[wireIdx] << ", truncMean: " << truncMeanWireVec[wireIdx] << ", pedestal: " << pedCorWireVec[wireIdx] << std::endl;
+                        mf::LogInfo("RawDigitFilterUBooNE") <<  "--> Rejecting channel for large rms, channel: " << channelWireVec[locWireIdx] << ", rmsVal: " << rmsVal << ", truncMean: " << pedestal << ", pedestal: " << pedCor << std::endl;
                     }
                 }
                 
