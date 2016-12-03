@@ -46,7 +46,7 @@ namespace lariov {
 
       ElectronicsCalib defaultCalib(0);
       CalibrationExtraInfo extra_info("ElectronicsCalib");
-      extra_info.AddOrReplaceIntData("is_misconfigured", 0);
+      extra_info.AddOrReplaceBoolData("is_misconfigured", false);
 
       defaultCalib.SetGain(default_gain);
       defaultCalib.SetGainErr(default_gain_err);
@@ -88,10 +88,10 @@ namespace lariov {
         float shaping_time_err = std::stof(line.substr(current_comma+1, line.find(',',current_comma+1)));
         
 	current_comma = line.find(',',current_comma+1);
-        float is_misconfigured = std::stoi(line.substr(current_comma+1, line.find(',',current_comma+1)));
+        int is_misconfigured = std::stoi(line.substr(current_comma+1, line.find(',',current_comma+1)));
         
 	CalibrationExtraInfo extra_info("ElectronicsCalib");
-	extra_info.AddOrReplaceIntData("is_misconfigured", is_misconfigured);
+	extra_info.AddOrReplaceBoolData("is_misconfigured", (bool)is_misconfigured);
 
         dp.SetChannel(ch);
         dp.SetGain(gain);
@@ -123,17 +123,16 @@ namespace lariov {
     for (auto it = channels.begin(); it != channels.end(); ++it) {
 
       double gain, gain_err, shaping_time, shaping_time_err;
-      long is_misconfigured;
+      bool is_misconfigured;
       fFolder->GetNamedChannelData(*it, "gain",     gain);
       fFolder->GetNamedChannelData(*it, "gain_err", gain_err); 
       fFolder->GetNamedChannelData(*it, "shaping_time",     shaping_time);
       fFolder->GetNamedChannelData(*it, "shaping_time_err", shaping_time_err); 
       fFolder->GetNamedChannelData(*it, "is_misconfigured", is_misconfigured);
       
-
       ElectronicsCalib pg(*it);
       CalibrationExtraInfo extra_info("ElectronicsCalib");
-      extra_info.AddOrReplaceIntData("is_misconfigured", (int)is_misconfigured);
+      extra_info.AddOrReplaceBoolData("is_misconfigured", is_misconfigured);
       
       pg.SetGain( (float)gain );
       pg.SetGainErr( (float)gain_err );
