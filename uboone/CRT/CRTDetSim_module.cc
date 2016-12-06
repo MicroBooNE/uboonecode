@@ -51,7 +51,7 @@ namespace crt{
         float t1 = (uint32_t) ideIt->exitT;
         float adc = (uint32_t) ideIt->energyDeposited; 
         CRTData dat(sens_id, t0, t1, adc);
-        hits.append(dat);
+        hits.push_back(dat);
       }
     }
     evt.put(std::move(hits));
