@@ -27,7 +27,6 @@ namespace crt{
   }
 
   void CRTDetSim::produce(art::Event& evt){
-    //TODO: Do the parameterization here
 
     std::unique_ptr< std::vector<CRTData> > hits;
     mf::LogInfo(__log_name__)<<"In produce ";
@@ -48,24 +47,11 @@ namespace crt{
       std::vector< sim::AuxDetIDE > ides = it->AuxDetIDEs();
 
       for(auto ideIt = ides.begin(); ideIt!= ides.end(); ++it){
-        //int trackID = ideIt->trackID;
-        //float energyDep = ideIt->energyDeposited;
-
-        /*
-        float entryX = ideIt->entryX;
-        float entryY = ideIt->entryY;
-        float entryZ = ideIt->entryZ;
-        float entryT = ideIt->entryT;
-
-        float exitX = ideIt->exitX;
-        float exitY = ideIt->exitY;
-        float exitZ = ideIt->exitZ;
-        float exitT = ideIt->exitT;
-
-        float exitMomX = ideIt->exitMomentumX;
-        float exitMomY = ideIt->exitMomentumY;
-        float exitMomZ = ideIt->exitMomentumZ;
-        */
+        float t0 = (uint32_t) ideIt->entryT;
+        float t1 = (uint32_t) ideIt->exitT;
+        float adc = (uint32_t) ideIt->energyDeposited; 
+        CRTData dat(sens_id, t0, t1, adc);
+        hits.append(dat);
       }
     }
     evt.put(std::move(hits));
