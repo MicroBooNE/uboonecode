@@ -37,5 +37,7 @@ microboone_basic_services:
  NuRandomService:                    @local::microboone_seedservice
 }
 
+microboone_basic_services.DetectorPropertiesService.Electronlifetime: 999999 #1 s lifetime
+
 END_PROLOG
 
