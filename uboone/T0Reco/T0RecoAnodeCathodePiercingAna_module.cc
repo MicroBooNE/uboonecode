@@ -68,6 +68,9 @@ private:
   bool        fUseMC;
   double      fResolution; // cm resolution to allow mc-reco track matching. [Y,Z] must be within this distance
 
+  // debug mode?
+  bool _debug;
+
   // define top, bottom, front and back boundaries of TPC
   double _TOP, _BOTTOM, _FRONT, _BACK;
 
@@ -124,6 +127,7 @@ T0RecoAnodeCathodePiercingAna::T0RecoAnodeCathodePiercingAna(fhicl::ParameterSet
   fCosmicTagProducer = p.get<std::string>("CosmicTagProducer");
   fUseMC             = p.get<bool>       ("UseMC"            );
   fResolution        = p.get<double>     ("Resolution"       );
+  _debug             = p.get<bool>       ("debug"            );
 
   // get boundaries based on detector bounds
   auto const* geom = lar::providerFrom<geo::Geometry>();
@@ -235,8 +239,14 @@ void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
   // grab flashes associated with tracks
   art::FindMany<recob::OpFlash> trk_flash_assn_v(track_h, e, fFlashProducer );
 
+  if (_debug)
+    std::cout << "There are " << trk_flash_assn_v.size() << " track -> flash associations" << std::endl;
+
   // grab CosmicTag objects associated with tracks
   art::FindMany<anab::CosmicTag> trk_cosmictag_assn_v(track_h, e, fCosmicTagProducer);
+
+  if (_debug)
+    std::cout << "There are " << trk_cosmictag_assn_v.size() << " track -> cosmictag associations" << std::endl;
 
   for (size_t i=0; i < track_h->size(); i++){
 
@@ -244,9 +254,15 @@ void T0RecoAnodeCathodePiercingAna::analyze(art::Event const & e)
 
     _matched = 0;
 
-    std::vector<const anab::T0*> T0_v = trk_t0_assn_v.at(i);
+    const std::vector<const anab::T0*>& T0_v = trk_t0_assn_v.at(i);
 
-    std::vector<const recob::OpFlash*> flash_v = trk_flash_assn_v.at(i);
+    if (_debug)
+      std::cout << T0_v.size() << "\tT0 objects associated to this track" << std::endl;
+
+    const std::vector<const recob::OpFlash*>& flash_v = trk_flash_assn_v.at(i);
+
+    if (_debug)
+      std::cout << flash_v.size() << "\tflash objects associated to this track" << std::endl;
 
     // grab T0 object
     if (T0_v.size() == 1){
