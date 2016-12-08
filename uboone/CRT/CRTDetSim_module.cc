@@ -17,18 +17,21 @@ namespace crt{
 
   std::string __log_name__ = "CRTDetSim";
 
-  CRTDetSim::CRTDetSim(const fhicl::ParameterSet& pSet){
-    produces< CRTData >();
+  CRTDetSim::CRTDetSim(const fhicl::ParameterSet& pSet): 
+    art::EDProducer()
+  {
+    produces< std::vector<CRTData> >();
     mf::LogInfo(__log_name__)<<"In construction: ";
   }
 
-  CRTDetSim::~CRTDetSim(){
+  CRTDetSim::~CRTDetSim()
+  {
     mf::LogInfo(__log_name__)<<"In destruction: ";
   }
 
-  void CRTDetSim::produce(art::Event& evt){
-
-    std::unique_ptr< std::vector<CRTData> > hits;
+  void CRTDetSim::produce(art::Event& evt)
+  {
+    
     mf::LogInfo(__log_name__)<<"In produce ";
     art::ServiceHandle<geo::AuxDetGeometry> geo;
     art::Handle< std::vector<sim::AuxDetSimChannel> > channels;
@@ -39,7 +42,7 @@ namespace crt{
     }
 
     mf::LogInfo(__log_name__)<<" Number of Channels Hit: "<<channels->size();
-
+    std::unique_ptr< std::vector<CRTData> > hits(new std::vector<CRTData>);
     for(auto it = channels->begin(); it!= channels->end(); ++it){
       uint32_t id = it->AuxDetID();
       uint32_t sens_id = it->AuxDetSensitiveID();
