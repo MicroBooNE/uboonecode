@@ -1,3 +1,5 @@
+BEGIN_PROLOG
+
 T0RecoAnodeCathodePiercing: {
  module_type       : "T0RecoAnodeCathodePiercing"  
  TrackProducer     : "pandoraCosmic"
@@ -21,3 +23,5 @@ T0RecoAnodeCathodePiercing_mc.RecoT0TimeOffsetC: 14.5
 T0RecoAnodeCathodePiercing_reco : @local::T0RecoAnodeCathodePiercing
 T0RecoAnodeCathodePiercing_reco.RecoT0TimeOffsetA: 3.4
 T0RecoAnodeCathodePiercing_reco.RecoT0TimeOffsetC: -14.0
+
+END_PROLOG
