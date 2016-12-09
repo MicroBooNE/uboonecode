@@ -29,8 +29,14 @@
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalProvider.h"
 
+#include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
+#include "larevt/CalibrationDBI/Interface/ChannelStatusProvider.h"
+
 #include "larevt/CalibrationDBI/Interface/PmtGainService.h"
 #include "larevt/CalibrationDBI/Interface/PmtGainProvider.h"
+
+#include "larevt/CalibrationDBI/Interface/ElectronicsCalibService.h"
+#include "larevt/CalibrationDBI/Interface/ElectronicsCalibProvider.h"
 
 #include "larevt/CalibrationDBI/IOVData/CalibrationExtraInfo.h"
 #include "larevt/CalibrationDBI/IOVData/IOVDataError.h"
@@ -115,6 +121,9 @@ void TestDBI::analyze(art::Event const & evt)
   fHist_Ind->Draw();
   c.SaveAs("IndHist.png");
   
+  const lariov::ChannelStatusProvider& status_provider = art::ServiceHandle<lariov::ChannelStatusService>()->GetProvider();
+  std::cout<<"  Channel 25 Status: "<<status_provider.Status(25)<<std::endl;
+  
   //const lariov::UbooneElectronLifetimeProvider& elifetime_provider = art::ServiceHandle<lariov::UbooneElectronLifetimeService>()->GetProvider();
   //std::cout<<"LIFETIME: "<<elifetime_provider.ExpOffset()<<" "<<elifetime_provider.TimeConstantErr()<<std::endl;
   
@@ -128,7 +137,16 @@ void TestDBI::analyze(art::Event const & evt)
     }
   }
   
-  lariov::CalibrationExtraInfo extraInfo("test_info");
+  const lariov::ElectronicsCalibProvider& elec_provider = art::ServiceHandle<lariov::ElectronicsCalibService>()->GetProvider();
+  raw::ChannelID_t elec_chan = 2019;
+  std::cout<<"Electronics Calibration Test"<<std::endl;
+  std::cout<<"  Channel: "<<elec_chan<<std::endl;
+  std::cout<<"  Gain: "<<elec_provider.Gain(elec_chan)<<std::endl;
+  std::cout<<"  GainErr: "<<elec_provider.GainErr(elec_chan)<<std::endl;
+  std::cout<<"  ShapingTime: "<<elec_provider.ShapingTime(elec_chan)<<std::endl;
+  std::cout<<"  ShapingTimeErr: "<<elec_provider.ShapingTimeErr(elec_chan)<<std::endl;
+  std::cout<<"  IsMisconfig: "<<elec_provider.ExtraInfo(elec_chan).GetBoolData("is_misconfigured")<<std::endl;
+  /*lariov::CalibrationExtraInfo extraInfo("test_info");
   extraInfo.AddOrReplaceIntData("dA",1);
   extraInfo.AddOrReplaceFloatData("dB",2.2);
   std::vector<int> dC; dC.push_back(3); dC.push_back(4);
@@ -249,7 +267,7 @@ void TestDBI::analyze(art::Event const & evt)
   
   extraInfo.AddOrReplaceIntData("dA",7);
   extraInfo.AddOrReplaceFloatData("dA",6.0);
-  extraInfo.ClearDataByLabel("dA");
+  extraInfo.ClearDataByLabel("dA");*/
 }
 
 DEFINE_ART_MODULE(TestDBI)

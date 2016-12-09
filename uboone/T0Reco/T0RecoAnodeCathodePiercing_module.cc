@@ -71,6 +71,9 @@ private:
   bool top2side;
   bool side2bottom;
 
+  // debug (verbose) mode?
+  bool _debug;
+
   // define top, bottom, front and back boundaries of TPC
   double _TOP, _BOTTOM, _FRONT, _BACK;
   
@@ -129,6 +132,7 @@ T0RecoAnodeCathodePiercing::T0RecoAnodeCathodePiercing(fhicl::ParameterSet const
   fPEmin             = p.get<double>     ("PEmin");
   top2side           = p.get<bool>       ("top2side");
   side2bottom        = p.get<bool>       ("side2bottom");
+  _debug             = p.get<bool>       ("debug");
   
   // get boundaries based on detector bounds
   auto const* geom = lar::providerFrom<geo::Geometry>();
@@ -152,7 +156,8 @@ T0RecoAnodeCathodePiercing::T0RecoAnodeCathodePiercing(fhicl::ParameterSet const
 void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 {
 
-  //std::cout << "NEW EVENT" << std::endl;
+  if (_debug)
+  std::cout << "NEW EVENT" << std::endl;
 
   _flash_times.clear();
   _flash_idx_v.clear();
@@ -196,13 +201,19 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
     flash_ctr += 1;
   }// for all flashes
 
+  if (_debug)
+  std::cout << "Selected a total of " << _flash_times.size() << " OpFlashes" << std::endl;
+
   // loop through reconstructed tracks
   size_t trk_ctr = 0;
 
   for (auto& track : TrkVec){
 
     trk_ctr += 1;
-    
+
+    if (_debug)
+    std::cout << "Looping through reco track " << trk_ctr << std::endl;
+
     // get sorted points for the track object [assuming downwards going]
     std::vector<TVector3> sorted_trk;
     SortTrackPoints(*track,sorted_trk);
@@ -217,11 +228,17 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
     // the first type: must exit through the bottom [indicates track reconstruction has gone 'till the end] and enter through the anode or cathode                         
     if ( (TrackExitsBottom(sorted_trk) == true) and (side2bottom == true) ) { // This begins the loop for the tracks that exit the bottom
 
+      if (_debug)
+      std::cout << "\t track exits bottom" << std::endl;
+
       // If the program reaches this loop and the boolean is 'false'
       // then this track enters either through the top, front or back.
       // We aren't interested in those types of tracks (we can't reconstruct the T0) so we can just continue
       if (TrackEntersSide(sorted_trk) == false)
 	continue;
+
+      if (_debug)
+      std::cout << "\t track enters side" << std::endl;
 
       // made it this far -> the track is good to be used                                                                                                                    
       // figure out if it enters the anode or cathode                                                                                                              
@@ -250,12 +267,18 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
 
     // This begins the loop for the tracks that enter the top
     if ( (TrackEntersTop(sorted_trk) == true) and (top2side == true) ) { 
+
+      if (_debug)
+      std::cout << "\t track enters top" << std::endl;
       
       // If the program reaches this loop and the boolean is 'false',
       // then this track exits either through the bottom, front or back.
       // We aren't interested in those types of tracks (we can't reconstruct the T0) so we can just continue
       if (TrackExitsSide(sorted_trk) == false)
 	continue;
+
+      if (_debug)
+      std::cout << "\t track exits top" << std::endl;
       
       // Now, use a function to find if the track exits through the anode or the cathode 
       bool exits_anode = TrackExitsAnode(sorted_trk);
@@ -277,6 +300,8 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
       
     } // This can end the case in which the track enters through the top 
     
+    if (_debug)
+    std::cout << "\t this track has a reconstructed time = " << trkT << std::endl;
 
     // if the time does not match one from optical flashes -> don't reconstruct
     auto const& flash_match_result = FlashMatch(trkT);
@@ -295,10 +320,12 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
     util::CreateAssn(*this, e, *T0_v, track, *trk_t0_assn_v);
 
     // get pointer to individual track
-    const art::Ptr<recob::Track>   trk_ptr(track_h,trk_ctr-1);
+    // TMP const art::Ptr<recob::Track>   trk_ptr(track_h,trk_ctr-1);
     const art::Ptr<recob::OpFlash> flash_ptr(flash_h, flash_match_result.second );
-    //std::cout << "matched to flash w/ index " << flash_match_result.second << " w/ PE " << flash_ptr->TotalPE() << " and time " << flash_ptr->Time() << " vs reco time " << trkT << std::endl;
-    util::CreateAssn(*this, e, flash_ptr, trk_ptr, *trk_flash_assn_v);
+    if (_debug)
+    std::cout << "\t mathed to flash w/ index " << flash_match_result.second << " w/ PE " << flash_ptr->TotalPE() << " and time " << flash_ptr->Time() << " vs reco time " << trkT << std::endl;
+    trk_flash_assn_v->addSingle( track, flash_ptr );
+    //util::CreateAssn(*this, e, flash_ptr, track, *trk_flash_assn_v);
 
     }
 
@@ -306,7 +333,8 @@ void T0RecoAnodeCathodePiercing::produce(art::Event & e)
   
   e.put(std::move(T0_v));
   e.put(std::move(trk_t0_assn_v));
-  //std::cout << "create track flash association " << std::endl;
+  if (_debug)
+    std::cout << "create track flash association " << std::endl;
   e.put(std::move(trk_flash_assn_v));
 
 }

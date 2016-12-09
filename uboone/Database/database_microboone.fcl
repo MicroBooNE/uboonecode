@@ -89,4 +89,26 @@ microboone_pmtgain_service:
   PmtGainProvider: @local::microboone_pmtgain_provider
 }  
 
+
+microboone_electronicscalib_provider:
+{
+    DatabaseRetrievalAlg: @local::microboone_databaseretrievalalg   
+    
+    UseDB: false
+    UseFile: false
+    
+    DefaultGain:           13.0
+    DefaultGainErr:        0.0
+    DefaultShapingTime:    1.5
+    DefaultShapingTimeErr: 0.0
+}
+microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBFolderName: "electronicscalib_data"
+microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+
+microboone_electronicscalib_service:
+{
+  service_provider: UbooneElectronicsCalibService
+  ElectronicsCalibProvider: @local::microboone_electronicscalib_provider
+} 
+
 END_PROLOG
