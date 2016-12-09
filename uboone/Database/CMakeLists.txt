@@ -6,6 +6,7 @@ art_make( BASENAME_ONLY
           LIB_LIBRARIES 
 			larevt_CalibrationDBI_IOVData
 			larevt_CalibrationDBI_Providers
+			larcore_Geometry
 			${LIBWDA}
 	                ${FHICLCPP}
 			${CETLIB}
