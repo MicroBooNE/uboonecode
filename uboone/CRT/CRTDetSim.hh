@@ -8,8 +8,12 @@
 #include "art/Framework/Core/EDProducer.h" // Base Class
 #include "art/Framework/Principal/Event.h" // For produce
 
+#include <string>
+
 namespace crt{
   class CRTDetSim :  public art:: EDProducer{
+    std::string fProducerName; //Where to pull te IDEs from
+    uint32_t fThreshold;
   public:
 
     /// Default ctor
