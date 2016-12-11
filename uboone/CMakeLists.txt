@@ -32,6 +32,7 @@ add_subdirectory(UBFlashFinder)
 
 add_subdirectory(DataOverlay)
 add_subdirectory(PatternFilter)
+add_subdirectory(MicroBooNEPandora)
 
 # Respect the order specified in lar_build, which is:
 #
