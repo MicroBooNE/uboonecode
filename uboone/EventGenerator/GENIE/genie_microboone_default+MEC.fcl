@@ -1,0 +1,111 @@
+#include "genie.fcl"
+
+BEGIN_PROLOG
+
+microboone_genie:                    @local::standard_genie
+microboone_genie.BeamName:           "booster"
+microboone_genie.GlobalTimeOffset:   1.6e6                  #microboone reads out 1.6ms before the spill
+microboone_genie.EventGeneratorList:      "Default+MEC"
+
+microboone_genie_hist:               @local::microboone_genie
+microboone_genie_hist.FluxType:       "histogram"
+microboone_genie_hist.FluxFiles:     ["flux/bnb/current/histograms/ub470_r200_bnb_fhc/numode_bnb_470m_r200.root"] 
+microboone_genie_hist.BeamCenter:    [1.25, 0., 0.]  
+microboone_genie_hist.BeamDirection: [0., 0., 1.]    
+microboone_genie_hist.BeamRadius:    4.              
+
+microboone_genie_simple:                   @local::microboone_genie
+microboone_genie_simple.FluxType:          "simple_flux"
+microboone_genie_simple.FluxSearchPaths:   "/pnfs/uboone/persistent/uboonebeam/bnb_gsimple/bnb_gsimple_fluxes_02.28.2014_470/"
+microboone_genie_simple.FluxFiles:         ["gsimple_microboone-470-onaxis_mc_nu_dummy_ntrd_*.root"]
+microboone_genie_simple.EventsPerSpill:    0
+microboone_genie_simple.POTPerSpill:       5e12
+
+microboone_genie_uniform_flux:               @local::standard_genie_uniform_flux
+microboone_genie_uniform_flux.BeamCenter:    [1.25, 0., 0.]  
+microboone_genie_uniform_flux.BeamDirection: [0., 0., 1.]    
+microboone_genie_uniform_flux.BeamRadius:    1.9 
+#microboone_genie_uniform_flux.FiducialCut:   "mzcyl:(125., 0.),10.,100.,200."
+
+microboone_genie_uniform_flux_nc:               @local::standard_genie_uniform_flux_nc
+microboone_genie_uniform_flux_nc.BeamCenter:    [1.25, 0., 0.]  
+microboone_genie_uniform_flux_nc.BeamDirection: [0., 0., 1.]    
+microboone_genie_uniform_flux_nc.BeamRadius:    0.2 
+microboone_genie_uniform_flux_nc.FiducialCut:   "mzcyl:(125., 0.),10.,100.,200."
+microboone_genie_uniform_flux_nc.GeomScan:      "flux: 10000 1.1"
+
+microboone_genie_uniform_flux_cc:               @local::standard_genie_uniform_flux_cc
+microboone_genie_uniform_flux_cc.BeamCenter:    [1.25, 0., 0.]  
+microboone_genie_uniform_flux_cc.BeamDirection: [0., 0., 1.]    
+microboone_genie_uniform_flux_cc.BeamRadius:    0.2 
+microboone_genie_uniform_flux_cc.FiducialCut:   "mzcyl:(125., 0.),10.,100.,200."
+microboone_genie_uniform_flux_cc.GeomScan:      "flux: 10000 1.1"
+
+microboone_genie_simple_dirt:                   @local::microboone_genie
+microboone_genie_simple_dirt.FluxType:          "simple_flux"
+microboone_genie_simple_dirt.FluxSearchPaths:   "/pnfs/uboone/persistent/uboonebeam/bnb_gsimple/bnb_gsimple_fluxes_02.28.2014_470_dirt/"
+microboone_genie_simple_dirt.FluxFiles:         ["gsimple_microboone-470-onaxis-dirt_mc_nu_dummy_ntrd_*.root"]
+microboone_genie_simple_dirt.EventsPerSpill:    0
+microboone_genie_simple_dirt.POTPerSpill:       5e12
+
+microboone_genie_simple_numi:                   @local::standard_genie
+microboone_genie_simple_numi.BeamName:          "numi"
+microboone_genie_simple_numi.GlobalTimeOffset:  1.6e6
+microboone_genie_simple_numi.POTPerSpill:       3e13
+microboone_genie_simple_numi.EventsPerSpill:    0
+microboone_genie_simple_numi.FluxType:          "simple_flux"
+microboone_genie_simple_numi.FluxSearchPaths:   "/pnfs/uboone/persistent/uboonebeam/numi_gsimple/numi_gsimple_fluxes_12.17.2015_470/"
+microboone_genie_simple_numi.FluxFiles:         ["gsimple_*.root"]					      
+
+microboone_genie_simple_numi_dirt:              @local::microboone_genie_simple_numi
+microboone_genie_simple_numi_dirt.BeamName:     "numi"
+microboone_genie_simple_numi_dirt.FluxType:     "simple_flux"
+microboone_genie_simple_numi_dirt.FluxSearchPaths: "/pnfs/uboone/persistent/uboonebeam/numi_gsimple/numi_gsimple_fluxes_12.17.2015_470_dirt/"
+microboone_genie_simple_numi_dirt.FluxFiles:    ["gsimple_*.root"]
+
+#microboone_genie_simple_numi_dirt:                   @local::microboone_genie_simple_numi
+#microboone_genie_simple_numi_dirt.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/normal_window_dirt/second_try/*.root",
+#   					           "numi_gsimple_fluxes_02.27.2014/length_window_dirt/second_try/*.root",
+#					           "numi_gsimple_fluxes_02.27.2014/bottom_window_dirt/second_try/*.root"]
+
+
+###########################OLD numi stuff###############################################################
+microboone_genie_numi:                   @local::standard_genie
+microboone_genie_numi.BeamName:          "numi"
+microboone_genie_numi.GlobalTimeOffset:  1.6e6
+microboone_genie_numi.POTPerSpill:       3e13
+microboone_genie_numi.EventsPerSpill:    0
+
+
+microboone_genie_simple_numi_long:                @local::microboone_genie_numi
+microboone_genie_simple_numi_long.FluxType:       "simple_flux"
+microboone_genie_simple_numi_long.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/length_window/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_norm:                @local::microboone_genie_numi
+microboone_genie_simple_numi_norm.FluxType:       "simple_flux"
+microboone_genie_simple_numi_norm.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/normal_window/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_bott:                @local::microboone_genie_numi
+microboone_genie_simple_numi_bott.FluxType:       "simple_flux"
+microboone_genie_simple_numi_bott.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/bottom_window/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_long_dirt:                @local::microboone_genie_numi
+microboone_genie_simple_numi_long_dirt.FluxType:       "simple_flux"
+microboone_genie_simple_numi_long_dirt.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/length_window_dirt/second_try/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_norm_dirt:                @local::microboone_genie_numi
+microboone_genie_simple_numi_norm_dirt.FluxType:       "simple_flux"
+microboone_genie_simple_numi_norm_dirt.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/normal_window_dirt/second_try/*.root"]
+###############################################################
+
+microboone_genie_simple_numi_bott_dirt:                @local::microboone_genie_numi
+microboone_genie_simple_numi_bott_dirt.FluxType:       "simple_flux"
+microboone_genie_simple_numi_bott_dirt.FluxFiles:      ["numi_gsimple_fluxes_02.27.2014/bottom_window_dirt/second_try/*.root"]
+###############################################################
+###########################OLD numi stuff###############################################################
+
+END_PROLOG
