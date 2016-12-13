@@ -12,8 +12,8 @@
 
 namespace crt{
   class CRTDetSim :  public art:: EDProducer{
-    std::string fProducerName; //Where to pull te IDEs from
     uint32_t fThreshold;
+    std::string fProducerName; //Where to pull te IDEs from
   public:
 
     /// Default ctor
