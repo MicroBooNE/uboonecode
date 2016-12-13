@@ -48,13 +48,13 @@ namespace crt{
       mf::LogInfo(__log_name__)<<"Number of IDEs in this event: "<<ides.size();
 
       for(auto ideIt = ides.begin(); ideIt!= ides.end(); ++ideIt){
-        //float adc = (uint32_t) ideIt->energyDeposited; 
-        //if(adc<fThreshold) continue;
-        //float t0 = (uint32_t) ideIt->entryT;
-        //float t1 = (uint32_t) ideIt->exitT;
+        float adc = (uint32_t) ideIt->energyDeposited; 
+        if(adc<fThreshold) continue;
+        float t0 = (uint32_t) ideIt->entryT;
+        float t1 = (uint32_t) ideIt->exitT;
 
-        //CRTData dat(sens_id, t0, t1, adc);
-        //hits->push_back(dat);
+        CRTData dat(sens_id, t0, t1, adc);
+        hits->push_back(dat);
       }
     }
     evt.put(std::move(hits));

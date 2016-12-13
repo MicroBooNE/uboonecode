@@ -1,6 +1,7 @@
 #ifndef CRTChannelMapAlg_hh_
 #define CRTChannelMapAlg_hh_
 
+#include "uboone/CRT/CRTGeoObjectSorter.hh"
 #include "larcore/Geometry/GeoObjectSorterStandard.h"
 #include "larcore/Geometry/AuxDetChannelMapAlg.h"
 #include "larcore/Geometry/AuxDetGeo.h"
@@ -14,6 +15,10 @@
 namespace crt {
 
   class CRTChannelMapAlg : public geo::AuxDetChannelMapAlg {
+
+    CRTGeoObjectSorter fSorter;
+    uint32_t fNModules;
+    uint32_t fNStripsPerModule;
 
   public:
 
