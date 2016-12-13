@@ -31,6 +31,7 @@ add_subdirectory(EventWeight)
 add_subdirectory(UBFlashFinder)
 add_subdirectory(LLSelectionTool)
 add_subdirectory(LLBasicTool)
+add_subdirectory(CosmicTagging)
 
 add_subdirectory(DataOverlay)
 add_subdirectory(PatternFilter)
