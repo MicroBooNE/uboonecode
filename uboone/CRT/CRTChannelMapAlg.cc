@@ -9,8 +9,8 @@ namespace crt {
   CRTChannelMapAlg::CRTChannelMapAlg( fhicl::ParameterSet const& pvals,
     fhicl::ParameterSet const& sortingParameters ) : 
     fSorter(sortingParameters),      
-    fNModules(pSet.get<uint32_t>("NModules", 76)),
-    fNStripsPerModule(pSet.get<uint32_t>("NStripsPerModule", 16)) 
+    fNModules(pvals.get<uint32_t>("NModules", 76)),
+    fNStripsPerModule(pvals.get<uint32_t>("NStripsPerModule", 16)) 
   {
   
   }
@@ -37,8 +37,8 @@ namespace crt {
       {
         std::ostringstream stream;
         stream<<"volAuxDet_Module_"<<mod<<"_strip_"<<strip;
-        fADGeoToName[index] = stream.c_str();
-        fNameToADGeo[stream.c_str()] = index;
+        fADGeoToName[index] = stream.str();
+        fNameToADGeo[stream.str()] = index;
         fADGeoToChannelAndSV[index].push_back(std::make_pair(i,0));
         ++index;
       }

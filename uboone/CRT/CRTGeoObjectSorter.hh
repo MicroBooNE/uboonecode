@@ -6,7 +6,7 @@
 
 namespace crt {
 
-  class CRTGeoObjectSorter : public AuxDetGeoObjectSorter {
+  class CRTGeoObjectSorter : public geo::AuxDetGeoObjectSorter {
     
     typedef std::vector<geo::AuxDetGeo*> AuxDetList;
     typedef std::vector<geo::AuxDetSensitiveGeo*> SensDetList;
