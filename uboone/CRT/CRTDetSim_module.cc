@@ -18,9 +18,8 @@ namespace crt{
   std::string __log_name__ = "CRTDetSim";
 
   CRTDetSim::CRTDetSim(const fhicl::ParameterSet& pSet): 
-     fProducerName(pSet.get<std::string>("ProducerName", "largeant"))
+     fProducerName(pSet.get<std::string>("ProducerName", "largeant")),
      fThreshold(pSet.get<uint32_t>("Threshold", 1))
-    art::EDProducer()
   {
     produces< std::vector<CRTData> >();
     mf::LogInfo(__log_name__)<<"In construction: ";
