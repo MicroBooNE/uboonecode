@@ -44,9 +44,9 @@ namespace crt {
     fADGeoToChannelAndSV.clear();
 
     uint32_t index=0;
-    for(uint32_t mod=0; mod<this->fSorter.GetNModules(); ++mod)
+    for(uint32_t mod=0; mod<this->fNModules; ++mod)
     {
-      for(uint32_t strip=0; strip<this->fSorter.GetNStripsPerModule(); ++strip)
+      for(uint32_t strip=0; strip<this->fNStripsPerModule;++strip)
       {
         std::ostringstream stream;
         stream<<"volAuxDet_Module_"<<mod<<"_strip_"<<strip;
@@ -56,6 +56,11 @@ namespace crt {
         ++index;
       }
     }
+  }
+
+  void CRTChannelMapAlg::Uninitialize()
+  {
+  
   }
   
   uint32_t CRTChannelMapAlg::PositionToAuxDetChannel(

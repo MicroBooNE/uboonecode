@@ -25,6 +25,7 @@ namespace crt{
 
   CRTDetSim::~CRTDetSim()
   {
+
   }
 
   void CRTDetSim::produce(art::Event& evt)
@@ -33,12 +34,11 @@ namespace crt{
     art::Handle< std::vector<sim::AuxDetSimChannel> > channels;
     evt.getByLabel(this->fProducerName,channels);
     if(!channels.isValid()){
-      mf::LogWarning("CRTDetSim")<<"Cannot get the AuxDetChannels";
+      mf::LogWarning(__log_name__)<<"Cannot get the AuxDetChannels";
       return;
     }
 
-    mf::LogInfo("CRTDetSim")<<" Number of Channels Hit: "<<channels->size();
-
+    mf::LogInfo(__log_name__)<<" Number of Channels Hit: "<<channels->size();
     std::unique_ptr< std::vector<CRTData> > hits(new std::vector<CRTData>);
     for(auto it = channels->begin(); it!= channels->end(); ++it){
       uint32_t id = it->AuxDetID();

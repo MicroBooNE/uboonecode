@@ -33,6 +33,8 @@
 
 #include <string>
 
+#include <string>
+
 namespace crt{
   class CRTDetSim :  public art:: EDProducer{
     // This is a basic ADC threshold.
