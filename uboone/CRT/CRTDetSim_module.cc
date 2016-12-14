@@ -18,7 +18,8 @@ namespace crt{
   std::string __log_name__ = "CRTDetSim";
 
   CRTDetSim::CRTDetSim(const fhicl::ParameterSet& pSet): 
-    art::EDProducer()
+     fProducerName(pSet.get<std::string>("ProducerName", "largeant")),
+     fThreshold(pSet.get<uint32_t>("Threshold", 1))
   {
     produces< std::vector<CRTData> >();
     mf::LogInfo(__log_name__)<<"In construction: ";
@@ -35,7 +36,7 @@ namespace crt{
     mf::LogInfo(__log_name__)<<"In produce ";
     art::ServiceHandle<geo::AuxDetGeometry> geo;
     art::Handle< std::vector<sim::AuxDetSimChannel> > channels;
-    evt.getByLabel("largeant",channels);
+    evt.getByLabel(this->fProducerName,channels);
     if(!channels.isValid()){
       mf::LogWarning(__log_name__)<<"Cannot get the AuxDetChannels";
       return;
@@ -50,15 +51,16 @@ namespace crt{
       std::vector< sim::AuxDetIDE > ides = it->AuxDetIDEs();
 
       for(auto ideIt = ides.begin(); ideIt!= ides.end(); ++it){
+        float adc = (uint32_t) ideIt->energyDeposited; 
+        if(adc<fThreshold) continue;
         float t0 = (uint32_t) ideIt->entryT;
         float t1 = (uint32_t) ideIt->exitT;
-        float adc = (uint32_t) ideIt->energyDeposited; 
+
         CRTData dat(sens_id, t0, t1, adc);
         hits->push_back(dat);
       }
     }
     evt.put(std::move(hits));
-    mf::LogWarning(__log_name__)<<"Hit the end of the event list";
   }
 
   DEFINE_ART_MODULE(CRTDetSim)

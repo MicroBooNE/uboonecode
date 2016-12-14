@@ -10,7 +10,7 @@
 namespace crt
 {
 
-  CRTGeometryHelper::CRTGeometryHelper( fhicl::ParameterSet const & pset, art::ActivityRegistry & reg ) :  fPset( pset ){}
+  CRTGeometryHelper::CRTGeometryHelper( fhicl::ParameterSet const & pset, art::ActivityRegistry & reg ) : fChannelMap(), fPset( pset ){}
 
   CRTGeometryHelper::~CRTGeometryHelper(){}
 

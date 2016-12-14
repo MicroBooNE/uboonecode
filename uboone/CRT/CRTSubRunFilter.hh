@@ -30,7 +30,7 @@
 
 namespace crt{
   class CRTSubRunFilter : public art::EDFilter {
-    std:string fSubRunFileName;  /// Filename holder for fhicl parameter
+    std::string fSubRunFileName;  /// Filename holder for fhicl parameter
     std::ifstream fSubRunFile;   /// Text file holder
   public:
     /// Default Constructor
@@ -38,11 +38,11 @@ namespace crt{
     /// Default Destructor
     ~CRTSubRunFilter();
     /// At beginning of subrun, opens the subrun text file
-    void beginSubRun(art::SubRun& subrun);
+    bool beginSubRun(art::SubRun& subrun);
     /// Per each event filter if not in time window
     bool filter(art::Event & e) override;
     /// Close the subrun file
-    void endSubRun(art::SubRun& subrun);
+    bool endSubRun(art::SubRun& subrun);
   };
 }
 
