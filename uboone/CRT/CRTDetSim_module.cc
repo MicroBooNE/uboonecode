@@ -17,7 +17,8 @@ namespace crt{
 
   std::string __log_name__ = "CRTDetSim";
 
-  CRTDetSim::CRTDetSim(const fhicl::ParameterSet& pSet): art::EDProducer()
+  CRTDetSim::CRTDetSim(const fhicl::ParameterSet& pSet): 
+    art::EDProducer()
   {
     produces< std::vector<CRTData> >();
     mf::LogInfo(__log_name__)<<"In construction: ";
