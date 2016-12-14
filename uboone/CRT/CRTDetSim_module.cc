@@ -44,11 +44,12 @@ namespace crt{
     std::unique_ptr< std::vector<CRTData> > hits(new std::vector<CRTData>);
     for(auto it = channels->begin(); it!= channels->end(); ++it){
       uint32_t id = it->AuxDetID();
-      uint32_t sens_id = it->AuxDetSensitiveID();
+      //uint32_t sens_id = it->AuxDetSensitiveID();
       mf::LogInfo(__log_name__)<<"Found AuxDetData: "<<id<<" , "<<sens_id;
       std::vector< sim::AuxDetIDE > ides = it->AuxDetIDEs();
 
       for(auto ideIt = ides.begin(); ideIt!= ides.end(); ++it){
+<<<<<<< HEAD
         float t0 = (uint32_t) ideIt->entryT;
         float t1 = (uint32_t) ideIt->exitT;
         float adc = (uint32_t) ideIt->energyDeposited; 

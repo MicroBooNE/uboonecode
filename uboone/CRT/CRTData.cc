@@ -1,4 +1,3 @@
-
 #include "uboone/CRT/CRTData.hh"
 
 namespace crt{

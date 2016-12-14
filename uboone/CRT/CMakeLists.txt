@@ -1,3 +1,4 @@
+
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{NUTOOLS_INC} )
 
@@ -59,3 +60,7 @@ simple_plugin( CRTDetSim module
                 ${CETLIB}
                 BASENAME_ONLY
 )
+
+install_headers()
+install_fhicl()
+install_source()
