@@ -5,6 +5,7 @@
 #include "larcore/Geometry/AuxDetChannelMapAlg.h"
 #include "larcore/Geometry/AuxDetGeo.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "TVector3.h"
 #include <iostream>
 #include <vector>
 #include <set>

@@ -4,8 +4,7 @@ namespace crt {
 
   //---------------------------------------------------------------------------
   CRTChannelMapAlg::CRTChannelMapAlg( fhicl::ParameterSet const& pvals,
-    fhicl::ParameterSet const& sortingParameters ) : 
-    fNModules(72), fNStrips(17){
+    fhicl::ParameterSet const& sortingParameters ) {
   }
 
   //---------------------------------------------------------------------------
@@ -30,9 +29,9 @@ namespace crt {
     std::vector<geo::AuxDetGeo*> const& auxDets,
     size_t& ad,
     size_t& sv) const{
-      ad = this->NearestAuxDet(worldLoc, auxDets);
-      sv = this->NearestSensitiveAuxDet(worldLoc, auxDets, ad);
-      return 0;
+     ad = this->NearestAuxDet(worldLoc, auxDets);
+     sv = this->NearestSensitiveAuxDet(worldLoc, auxDets, ad);
+     return 0;
   }
 
   const TVector3 CRTChannelMapAlg::AuxDetChannelToPosition(
