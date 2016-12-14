@@ -1,4 +1,3 @@
-
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{NUTOOLS_INC} )
 
@@ -46,6 +45,7 @@ simple_plugin( CRTGeometryHelper service
 simple_plugin( CRTDetSim module
                 larcore_Geometry
                 CRT
+		CRTData
                 ${ART_FRAMEWORK_CORE}
                 ${ART_FRAMEWORK_IO_SOURCES}
                 ${ART_FRAMEWORK_PRINCIPAL}

@@ -49,7 +49,6 @@ namespace crt{
       std::vector< sim::AuxDetIDE > ides = it->AuxDetIDEs();
 
       for(auto ideIt = ides.begin(); ideIt!= ides.end(); ++it){
-<<<<<<< HEAD
         float t0 = (uint32_t) ideIt->entryT;
         float t1 = (uint32_t) ideIt->exitT;
         float adc = (uint32_t) ideIt->energyDeposited; 
