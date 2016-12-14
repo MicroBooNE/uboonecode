@@ -1,28 +1,27 @@
 #include "uboone/CRT/CRTChannelMapAlg.hh"
-//This next one is for debugging purposes only
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "larcore/Geometry/AuxDetGeometryCore.h"
 
 namespace crt {
 
   //---------------------------------------------------------------------------
   CRTChannelMapAlg::CRTChannelMapAlg( fhicl::ParameterSet const& pvals,
-    fhicl::ParameterSet const& sortingParameters ) {
+    fhicl::ParameterSet const& sortingParameters ) : 
+    fNModules(72), fNStrips(17){
   }
 
   //---------------------------------------------------------------------------
-  CRTChannelMapAlg::~CRTChannelMapAlg(){
-    return;
-  }
+  CRTChannelMapAlg::~CRTChannelMapAlg(){}
 
   void CRTChannelMapAlg::Initialize(geo::AuxDetGeometryData_t& geodata){
-    for(auto it = geodata.auxDets.begin(); it!= geodata.auxdets.end(); ++it){
-      mf::LogInfo("CRTChannelMapAlg")<<it->Name();
-    }
+    // TODO: Redo this section with a better map
   }
 
   void CRTChannelMapAlg::Uninitialize(){
     //TODO: Release Map
+  }
+  uint32_t ChannelNumberFromModuleAndPanel(uint32_t const& module,
+                                              uint32_t const& panel){
+    //TODO: Fill
+    return 0;
   }
   
 
