@@ -10,7 +10,7 @@ art_make_library(LIBRARY_NAME WeightCalculators
 #		       nutools_NuReweight_art
 #                       nutools_NuReweight
 		       larsim_Simulation
-                       larsim_RandomUtils_LArSeedService_service
+                       nutools_RandomUtils_NuRandomService_service
 		       nusimdata_SimulationBase
               	      ${ART_FRAMEWORK_CORE}
 		      ${ART_FRAMEWORK_PRINCIPAL}
@@ -42,7 +42,7 @@ art_make(LIBRARY_NAME   EventWeight
 #                      ${ART_PERSISTENCY_COMMON}
 #                      ${ART_PERSISTENCY_PROVENANCE}
 #                      ${ART_UTILITIES}
-#		      ${SEEDSERVICE_SERVICE}
+#		      nutools_RandomUtils_NuRandomService_service
                       ${MF_MESSAGELOGGER}
                       ${MF_UTILITIES}
                        ${IFDH}

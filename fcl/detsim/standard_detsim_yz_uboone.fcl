@@ -1,0 +1,6 @@
+#include "standard_detsim_uboone.fcl"
+
+# Enable YZ-dependent field response.
+
+services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false

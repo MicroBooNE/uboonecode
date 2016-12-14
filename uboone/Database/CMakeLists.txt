@@ -6,6 +6,7 @@ art_make( BASENAME_ONLY
           LIB_LIBRARIES 
 			larevt_CalibrationDBI_IOVData
 			larevt_CalibrationDBI_Providers
+			larcore_Geometry
 			${LIBWDA}
 	                ${FHICLCPP}
 			${CETLIB}
@@ -22,7 +23,7 @@ art_make( BASENAME_ONLY
                         SignalShapingServiceMicroBooNE_service
 			larevt_CalibrationDBI_Providers
 			uboone_Database
-                        larsim_RandomUtils_LArSeedService_service
+                        nutools_RandomUtils_NuRandomService_service
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}

@@ -51,6 +51,7 @@ microboone_detsim_dark_services.SignalShapingServiceMicroBooNE: @local::microboo
 microboone_detsim_dark_services.DetPedestalService:            @local::microboone_detpedestalservice
 microboone_detsim_dark_services.ChannelStatusService:          @local::microboone_channelstatus_service
 microboone_detsim_dark_services.PmtGainService:    @local::microboone_pmtgain_service
+microboone_detsim_dark_services.ElectronicsCalibService:        @local::microboone_electronicscalib_service
 
 
 # Define microboone_simulation_dark ... (all) = (0) + (1) + (2)
@@ -60,6 +61,7 @@ microboone_simulation_dark_services.SignalShapingServiceMicroBooNE: @local::micr
 microboone_simulation_dark_services.DetPedestalService:            @local::microboone_detpedestalservice
 microboone_simulation_dark_services.ChannelStatusService:          @local::microboone_channelstatus_service
 microboone_simulation_dark_services.PmtGainService:    @local::microboone_pmtgain_service
+microboone_simulation_dark_services.ElectronicsCalibService:        @local::microboone_electronicscalib_service
 
 #
 # Define optical simulation included ones
@@ -104,7 +106,7 @@ microboone_g4_services.LArG4Parameters.EnabledPhysics:    [ "Em",
 microboone_detsim_services:                   @local::microboone_detsim_dark_services
 microboone_detsim_services.UBOpticalChConfig: @local::microboone_optical_ch_config
 microboone_detsim_services.LArPropertiesService.ScintPreScale:        0.0093   # DocDB 4914, @MToups
-microboone_detsim_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
+microboone_detsim_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap_mc
 microboone_detsim_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
                                                                       # MUST match between g4 and detsim
 
@@ -113,11 +115,11 @@ microboone_simulation_services:                                 @local::microboo
 microboone_simulation_services.LArFFT:                          @local::microboone_larfft
 microboone_simulation_services.SignalShapingServiceMicroBooNE:  @local::microboone_signalshapingservice
 microboone_simulation_services.UBOpticalChConfig:               @local::microboone_optical_ch_config
-microboone_simulation_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap
+microboone_simulation_services.UBOpReadoutMap:                  @local::microboone_opreadoutmap_mc
 microboone_simulation_services.ExptGeoHelperInterface:          @local::microboone_geometry_helper
 microboone_simulation_services.DetPedestalService:             @local::microboone_detpedestalservice
 microboone_simulation_services.ChannelStatusService:           @local::microboone_channelstatus_service
 microboone_simulation_services.PmtGainService:     @local::microboone_pmtgain_service
-
+microboone_simulation_services.ElectronicsCalibService:        @local::microboone_electronicscalib_service
 
 END_PROLOG

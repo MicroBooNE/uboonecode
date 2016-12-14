@@ -56,9 +56,14 @@ public:
     
     // Basic waveform mean and rms
     void getMeanAndRms(const RawDigitVector& rawWaveform,
-                        float&               aveVal,
-                        float&               rmsVal,
-                        float                fracBins) const;
+                       float&                aveVal,
+                       float&                rmsVal,
+                       float                 fracBins) const;
+    
+    // Truncated rms calculation
+    void getTruncatedRMS(const RawDigitVector& rawWaveform,
+                         float&                pedestal,
+                         float&                truncRms) const;
    
     // Basic waveform mean, rms and pedestal offset
     void getMeanRmsAndPedCor(const RawDigitVector& rawWaveform,

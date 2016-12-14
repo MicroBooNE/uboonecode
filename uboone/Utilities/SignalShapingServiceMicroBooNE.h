@@ -116,10 +116,23 @@ namespace util {
     // Accessors.
 
     DoubleVec2 GetNoiseFactVec()                { return fNoiseFactVec; }
+ 
     std::vector<std::vector<size_t> > GetNResponses()       { return fNResponses; }
+    std::vector<std::vector<size_t> > GetNYZResponses()     { return fNYZResponses; }
+    std::vector<std::vector<size_t> > GetNdatadrivenResponses()     { return fNdatadrivenResponses; }
     std::vector<std::vector<size_t> > GetNActiveResponses() { return fNActiveResponses; }
+    std::vector<std::vector<size_t> > GetNYZActiveResponses() { return fNYZActiveResponses; }
+    std::vector<std::vector<size_t> > GetNdatadrivenActiveResponses() { return fNdatadrivenActiveResponses; }
+    std::vector<std::vector<double> > GetYZchargeScaling()  { return fYZchargeScaling; }
+    //std::vector<std::vector<std::vector<int> > > GetYZwireOverlap() { return fYZwireOverlap; }
+    std::vector<std::vector<int> > GetMisconfiguredU()      { return fMisconfiguredU; }
+
 
     std::vector<size_t> GetViewIndex()       { return fViewIndex; }
+
+    bool IsResponseYZDependent()    { return fYZdependentResponse; }
+    bool IsdatadrivenResponse()     { return fdatadrivenResponse; }
+    bool IsMisconfiguredUIncluded() { return fIncludeMisconfiguredU; }
 
     double GetASICGain(unsigned int const channel) const;
     double GetShapingTime(unsigned int const channel) const; 
@@ -139,7 +152,7 @@ namespace util {
 
     template <class T> void Convolute(size_t channel, std::vector<T>& func) const;
     template <class T> void Convolute(size_t channel, size_t wire, std::vector<T>& func) const;
-
+  
     // Do deconvolution calcution (for reconstruction).
 
     template <class T> void Deconvolute(size_t channel, std::vector<T>& func) const;
@@ -208,7 +221,20 @@ namespace util {
     DoubleVec2 fNoiseFactVec;       ///< RMS noise in ADCs for lowest gain setting
 
     std::vector<std::vector<size_t> > fNResponses;
+    std::vector<std::vector<size_t> > fNYZResponses;
+    std::vector<std::vector<size_t> > fNdatadrivenResponses;
     std::vector<std::vector<size_t> > fNActiveResponses;
+    std::vector<std::vector<size_t> > fNYZActiveResponses;
+    std::vector<std::vector<size_t> > fNdatadrivenActiveResponses;
+
+    std::vector<std::vector<double> > fYZchargeScaling;
+    //std::vector<std::vector<std::vector<int> > > fYZwireOverlap;
+    std::vector<std::vector<int> > fMisconfiguredU;
+
+    bool fYZdependentResponse;
+    bool fdatadrivenResponse;
+    bool fIncludeMisconfiguredU;
+
     DoubleVec2 fASICGainInMVPerFC;       ///< Cold electronics ASIC gain setting in mV/fC
 
     DoubleVec fDefaultDriftVelocity;  ///< Default drift velocity of electrons in cm/usec
@@ -220,8 +246,8 @@ namespace util {
 
     // test
 
-
-    size_t fNFieldBins[2];         		///< number of bins for field response
+    int fNFieldBins[2]; // BR
+    //size_t fNFieldBins[2];         		///< number of bins for field response
     double fFieldLowEdge[2];           ///< low edge of the field response histo (for test output)
     double fFieldBin1Center[2];
     double fFieldBinWidth[2];       ///<  Bin with of the input field response.
@@ -327,7 +353,6 @@ template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(s
 template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(size_t channel, size_t wire, std::vector<T>& func) const
 {
   SignalShaping(channel, wire).Convolute(func);
-
   //negative number
   int time_offset = FieldResponseTOffset(channel,0);
   
@@ -343,7 +368,6 @@ template <class T> inline void util::SignalShapingServiceMicroBooNE::Convolute(s
   }
   
 }
-
 
 //----------------------------------------------------------------------
 // Do deconvolution.

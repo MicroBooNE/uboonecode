@@ -43,7 +43,7 @@ physics:
    backtrack:    @local::standard_backtrackerloader
    optdigitizer: @local::microboone_optical_adc_sim
    optfem:       @local::microboone_optical_fem_sim
-   triggersim:   @local::ubtrigger_singlep
+   triggersim:   @local::ubtrigger_dark_bnb
    optreadout:   @local::microboone_optical_dram_readout_sim   
    daq:          @local::microboone_simwire
  }

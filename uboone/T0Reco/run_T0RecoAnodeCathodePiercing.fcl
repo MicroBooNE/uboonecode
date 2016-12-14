@@ -1,6 +1,7 @@
 #include "services_microboone.fcl"
 #include "triggeralgo_service.fcl"
 #include "T0RecoAnodeCathodePiercing.fcl"
+#include "T0RecoAnodeCathodePiercingAna.fcl"
 
 process_name: T0RecoAnodeCathodePiercing
 
@@ -30,6 +31,8 @@ source:
 
 }
 
+#source.inputCommands: ["keep *_*_*_*", "drop anab::T0_*_*_*" ]
+
 # Define and configure some modules to do work on each event.
 # First modules are defined; they are scheduled later.
 # Modules are grouped by type.
@@ -43,15 +46,16 @@ physics:
   rns:                 { module_type: RandomNumberSaver }
 
   ### flash finders
-  t0reco : @local::T0RecoAnodeCathodePiercing 
+  t0reco : @local::T0RecoAnodeCathodePiercing_mc
  }
  analyzers:
  {
+  t0ana : @local::T0RecoAnodeCathodePiercingAna
  }
 
  #reco: [ rns, ophit, opflash, simpleFlash, opflashfilter ]
  reco: [ rns, t0reco ]
- ana: []
+ ana: [ t0ana ]
 
  #define the output stream, there could be more than one if using filters 
  stream1:  [ out1 ]
@@ -76,21 +80,6 @@ outputs:
    fileName:    "T0Reco.root"
    dataTier:    "reco"
    compressionLevel: 1
-   #outputCommands: [
-  outputCommands: [
-            "keep *_*_*_*",
-            "keep recob::Track_*_pandoraCosmic_*",
-            "drop raw::RawDigits_*_*_*",
-            "drop recob::Cluster_*_*_*",
-            "drop recob::EndPoint2D_*_*_*",
-            "drop recob::Hit_*_*_*",
-            "drop recob::Vertex_*_*_*",
-            "drop recob::Wires_*_*_*",
-            "drop recob::PFParticle_*_*_*",
-            "drop recob::Wire_*_*_*",
-            "drop raw::OpDetWaveform_*_*_*",
-            "drop *_*_*_McRecoAprStage1",
-            "drop *_*_*_DetSim"]
    }
 }
 

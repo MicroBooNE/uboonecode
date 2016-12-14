@@ -1,0 +1,10 @@
+#include "reco_uboone_mcc8_driver_stage1and2.fcl"
+
+# Enable data-driven field response.
+
+services.SignalShapingServiceMicroBooNE.FieldResponseFVersion: [ "v3.1", "v3.1"]
+services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
+services.SignalShapingServiceMicroBooNE.datadrivenResponse: true
+services.SignalShapingServiceMicroBooNE.DefaultEField: 0.273
+services.SignalShapingServiceMicroBooNE.DefaultTemperature: 89
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
