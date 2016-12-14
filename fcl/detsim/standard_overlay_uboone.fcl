@@ -1,6 +1,7 @@
 #include "services_microboone_simulation.fcl"
 
 #include "microboone_overlay.fcl"
+#include "swtrigger_microboone.fcl"
 
 process_name : DataOverlay      
 
@@ -38,6 +39,7 @@ physics: {
 
   filters : {
     daq: @local::microboone_overlay
+    swtrigger: @local::microboone_swtrigger_mc_bnb
   }
 
 
@@ -56,4 +58,6 @@ physics.filters.daq.detail.RawDigitMCModuleLabel:   "daqnonoise"
 physics.filters.daq.detail.OpDetDataModuleLabel:    "pmtreadout"
 physics.filters.daq.detail.OpDetMCModuleLabel:      "pmtreadoutnonoise"
 physics.filters.daq.detail.InputFileIsData:         false
+
+physics.filters.swtrigger.OpDataModule: "daq"
 
