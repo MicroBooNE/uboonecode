@@ -1,11 +1,11 @@
-#include "uboone/CRT/CRTGeometryHelper.hh"
-#include "uboone/CRT/CRTChannelMapAlg.hh"
-#include "larcore/Geometry/AuxDetGeometryCore.h"
-
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include <vector>
+#include "larcore/Geometry/AuxDetGeometryCore.h"
 #include "larcore/Geometry/AuxDetGeo.h"
 
+#include "uboone/CRT/CRTGeometryHelper.hh"
+#include "uboone/CRT/CRTChannelMapAlg.hh"
+
+#include <vector>
 
 namespace crt
 {

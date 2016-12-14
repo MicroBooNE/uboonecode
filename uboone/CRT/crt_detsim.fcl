@@ -1,3 +1,27 @@
-crtdetsim : {
-    module_type: "CRTDetSim"
+BEGIN_PROLOG
+
+microboone_crt_services :{
+  
+  AuxDetGeometry:{
+    Name: "microboonev11"
+    GDML: "microboonev11.gdml"
+    ROOT: "microboonev11.gdml"
+    SortingParameters: {
+      NModules : 76
+      NStripsPerModule: 16    
+    }
+  }
+  AuxDetExptGeoHelperInterface: {
+    service_provider: CRTGeometryHelper
+  }
+
 }
+
+microboone_crtdetsim : {
+    module_type: "CRTDetSim"
+    Threshold: 0
+    Calibration: 1.e6
+    ProducerName: largeant
+}
+
+END_PROLOG

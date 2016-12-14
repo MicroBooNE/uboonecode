@@ -1,3 +1,24 @@
+/**
+ * \class CRTGeometryHelper
+ *
+ * \ingroup crt
+ *
+ * \brief Interface class for the crt channel map.
+ *
+ * See `geo::AuxDetExptGeoHelperInterface` for full explanation.
+ *
+ * \author $Author: Kevin Wierman<kevin.wierman@pnnl.gov> 
+ *
+ * \version $Revision: 1.0 $
+ *
+ * \date $Date: 2016/12/12 $
+ *
+ * Contact: kevin.wierman@pnnl.gov
+ *
+ * Created on: Tuesday, December 13, 2016
+ *
+ */
+
 #ifndef CRTGeometryHelper_HH_
 #define CRTGeometryHelper_HH_
 
@@ -8,10 +29,6 @@
 #include "larcore/Geometry/AuxDetChannelMapAlg.h"
 
 #include <memory> //For std::shared_ptr
-
-namespace geo{
-  class AuxDetChannelMapAlg;
-}
 
 namespace crt
 {

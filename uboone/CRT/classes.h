@@ -1,3 +1,7 @@
+/**
+  \defgroup crt All things Cosmic Ray Tagger related
+**/
+
 #include "canvas/Persistency/Common/Wrapper.h"
 #include "uboone/CRT/CRTData.hh"
 #include <vector>

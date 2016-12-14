@@ -1,0 +1,78 @@
+#include "services_microboone.fcl"
+#include "corsika_microboone.fcl"
+#include "largeantmodules_microboone.fcl"
+#include "FilterGenInTime_module.fcl"
+#include "crtdetsim.fcl"
+
+process_name: CorsikaWithCRT
+
+services:
+{
+  scheduler:    { defaultExceptions: false }    # Make all uncaught exceptions fatal.
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "cosmics_corsika_cmc_hist.root" }
+  TimeTracker: {
+    printSummary : true
+    dbOutput     : {
+      filename   :  "time.db"
+      overwrite  :  true
+    }
+  }
+  MemoryTracker: {
+    ignoreTotal       : 1 # no. of events to exclude - '1' by default
+    printSummaries    : ["*"] # or any combination of ["general","event","module"]
+    includeMallocInfo : true
+    dbOutput     : {
+      filename   :  "mem.db"
+      overwrite  :  true
+    }
+  }
+  RandomNumberGenerator: {} #ART native random number generator
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  @table::microboone_g4_services
+  @table::microboone_crt_services
+
+source:
+{
+  module_type: EmptyEvent
+  timestampPlugin: { plugin_type: "GeneratedEventTimestamp" }
+  maxEvents:   1          # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  1           # number of first event in the file
+}
+
+physics:
+{
+
+ producers:
+ {
+   crtdetsim : @local::microboone_crtdetsim
+   largeant: @local::microboone_largeant
+   generator: @local::microboone_corsika_cmc
+   rns:       { module_type: "RandomNumberSaver" }
+ }
+
+ simulate: [ rns, generator, largeant, crtdetsim]
+
+ stream1:  [ out1 ]
+
+ trigger_paths: [simulate]
+ 
+ end_paths:     [stream1]
+}
+
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "prodcosmics_corsika_cmc_uboone_%tc_gen_intime.root"
+   dataTier:    "generated"
+   compressionLevel: 1
+   SelectEvents: [ simulate ]
+ }
+}
+
+services.Geometry.Name: "microboonev11"
+services.Geometry.GDML: "microboonev11.gdml"
+services.Geometry.ROOT: "microboonev11.gdml"
