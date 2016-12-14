@@ -11,7 +11,8 @@ art_make( BASENAME_ONLY
 		   uboonecode_uboone_SelectionTool_OpT0FinderAlgorithms
 	  	   larcore_Geometry
 		   larcore_Geometry_Geometry_service
-	   	   #Simulation
+                   uboonecode_uboone_CosmicTagging_CosmicTaggingAlgorithms
+                   #Simulation
 		   #Utilities
 		   #TimeService_service
 		   #MCBase
@@ -47,6 +48,8 @@ art_make( BASENAME_ONLY
 		   uboonecode_uboone_SelectionTool_OpT0FinderBase
 		   uboonecode_uboone_SelectionTool_OpT0FinderAlgorithms
 
+                   uboonecode_uboone_CosmicTagging_CosmicTaggingAlgorithms
+
 	  	   larcore_Geometry
 		   larcore_Geometry_Geometry_service
 		   lardataobj_RecoBase
@@ -79,4 +82,5 @@ art_make( BASENAME_ONLY
 install_fhicl()
 install_source()
 
+add_subdirectory(Algo)
 add_subdirectory(job)

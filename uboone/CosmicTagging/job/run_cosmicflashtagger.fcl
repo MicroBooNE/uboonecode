@@ -108,7 +108,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "T0Reco.root"
+   fileName:    "output.root"
    dataTier:    "reco"
    compressionLevel: 1
    outputCommands: [

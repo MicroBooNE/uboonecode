@@ -39,7 +39,8 @@
 #include "uboone/LLSelectionTool/OpT0Finder/Base/FlashMatchManager.h"
 #include "uboone/LLSelectionTool/OpT0Finder/Algorithms/LightPath.h"
 #include "uboone/LLSelectionTool/OpT0Finder/Algorithms/PhotonLibHypothesis.h"
-#include "uboone/LLSelectionTool/OpT0Finder/Algorithms/IncompatibilityChecker.h"
+
+#include "uboone/CosmicTagging/Algo/IncompatibilityChecker.h"
 
 #include "TString.h"
 #include "TTree.h"
@@ -48,6 +49,9 @@
 
 class CosmicFlashTagger;
 
+namespace cosmic {
+      class BeamFlashTrackMatchTagger;
+}
 
 class CosmicFlashTagger : public art::EDProducer {
 public:
@@ -70,6 +74,7 @@ private:
   void AddFlashPosition(::flashana::Flash_t &);
 
   ::flashana::FlashMatchManager       _mgr;
+  ::flashana::IncompatibilityChecker  _incompChecker;
   std::vector<::flashana::Flash_t>    beam_flashes;
   std::vector<art::Ptr<recob::Track>> track_v;
 
@@ -118,6 +123,8 @@ CosmicFlashTagger::CosmicFlashTagger(fhicl::ParameterSet const & p)
   _debug                   = p.get<bool>       ("DebugMode");
 
   _mgr.Configure(p.get<flashana::Config_t>("FlashMatchConfig"));
+  _incompChecker.Configure(p.get<fhicl::ParameterSet>("IncompCheckConfig"));
+  if(_debug) _incompChecker.PrintConfig();
 
   // Use '_detp' to find 'efield' and 'temp'
   auto const* _detp = lar::providerFrom<detinfo::DetectorPropertiesService>();
@@ -125,7 +132,7 @@ CosmicFlashTagger::CosmicFlashTagger(fhicl::ParameterSet const & p)
   double temp   = _detp -> Temperature();
   // Determine the drift velocity from 'efield' and 'temp'
   fDriftVelocity = _detp -> DriftVelocity(efield,temp); 
-  std::cout << "Using drift velocity = " << fDriftVelocity << " cm/us, with E = " << efield << ", and T = " << temp << std::endl;
+  if (_debug) std::cout << "Using drift velocity = " << fDriftVelocity << " cm/us, with E = " << efield << ", and T = " << temp << std::endl;
 
   if (_debug) {
     art::ServiceHandle<art::TFileService> fs;
@@ -199,7 +206,7 @@ void CosmicFlashTagger::produce(art::Event & e)
       _beam_flash_exists = 1;
     }
     if(flash.Time() < _flash_trange_start || _flash_trange_end < flash.Time()) {
-      std::cout << "Flash is in veto region (flash time is " << flash.Time() << "). Continue." << std::endl;
+      if(_debug) std::cout << "Flash is in veto region (flash time is " << flash.Time() << "). Continue." << std::endl;
       continue;
     } 
    
@@ -287,7 +294,7 @@ void CosmicFlashTagger::produce(art::Event & e)
         std::cout << "***The hypo flash has Z = " << flashHypo.z << " +- " << flashHypo.z_err << std::endl;
       }
       // CORE FUNCTION: Check if this beam flash and this flash hypothesis are incompatible
-      bool areIncompatible = ((flashana::IncompatibilityChecker*)(_mgr.GetCustomAlgo("IncompatibilityChecker")))->CheckIncompatibility(flashBeam,flashHypo);
+      bool areIncompatible = _incompChecker.CheckIncompatibility(flashBeam,flashHypo); 
       if(_debug) std::cout << "For this PFP: " << (areIncompatible ? "are INcompatible" : "are compatible") << std::endl;
       
       if (areIncompatible == false) break;
