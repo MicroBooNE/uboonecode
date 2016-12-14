@@ -21,8 +21,6 @@
 //#include "uboone/LLSelectionTool/OpT0Finder/Base/CustomAlgoFactory.h"
 
 namespace flashana{
-  class IncompatibilityChecker;
-}
   
   /**
    \class IncompatibilityChecker
@@ -30,7 +28,7 @@ namespace flashana{
    doxygen documentation!
  */
 
-  class flashana::IncompatibilityChecker {
+  class IncompatibilityChecker {
     
   public:
     
@@ -55,7 +53,7 @@ namespace flashana{
     double _nBinsRequirement;
     bool   _useFlashPosition;
   };
-
+}
 
 #endif
 /** @} */ // end of doxygen group 
