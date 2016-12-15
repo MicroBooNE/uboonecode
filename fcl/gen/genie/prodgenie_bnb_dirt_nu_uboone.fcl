@@ -10,6 +10,6 @@ physics.producers.generator.RandomTimeOffset: 1600.
 physics.producers.generator.TopVolume: "volWorld"
 physics.producers.generator.BeamName: "booster"
 
-services.Geometry.Name: "microboonev10"
-services.Geometry.GDML: "microboonev10.gdml"
-services.Geometry.ROOT: "microboonev10.gdml"
+#services.Geometry.Name: "microboonev10"
+#services.Geometry.GDML: "microboonev10.gdml"
+#services.Geometry.ROOT: "microboonev10.gdml"
