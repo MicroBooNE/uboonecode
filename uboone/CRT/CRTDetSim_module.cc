@@ -42,7 +42,7 @@ namespace crt{
     fTDelayRMSExpShift = pSet.get<double>("TDelayRMSExpShift");
     fTDelayRMSExpScale = pSet.get<double>("TDelayRMSExpScale");
     fPropDelay = pSet.get<double>("PropDelay");
-    fPropDelayError = pSet.get<double>("fPropDelayError");
+    fPropDelayError = pSet.get<double>("PropDelayError");
     fTResInterpolator = pSet.get<double>("TResInterpolator");
     fNpeScaleNorm = pSet.get<double>("NpeScaleNorm");
     fNpeScaleShift = pSet.get<double>("NpeScaleShift");

@@ -72,7 +72,3 @@ outputs:
    SelectEvents: [ simulate ]
  }
 }
-
-services.Geometry.Name: "microboonev11"
-services.Geometry.GDML: "microboonev11.gdml"
-services.Geometry.ROOT: "microboonev11.gdml"
