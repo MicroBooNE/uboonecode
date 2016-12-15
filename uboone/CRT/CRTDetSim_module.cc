@@ -7,6 +7,7 @@
 #include "lardataobj/Simulation/AuxDetSimChannel.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "larcore/Geometry/AuxDetGeometry.h"
+#include "nutools/RandomUtils/NuRandomService.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
 #include "CLHEP/Random/RandPoisson.h"
@@ -21,8 +22,8 @@ namespace crt{
 
   CRTDetSim::CRTDetSim(const fhicl::ParameterSet& pSet)
   {
-    unsigned int seed = pSet.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
-    this->createEngine(seed);
+    art::ServiceHandle<rndm::NuRandomService> Seeds;
+    Seeds->createEngine(*this, "HepJamesRandom", "crt", pset, "Seed");
     this->reconfigure(pSet);
     produces< std::vector<CRTData> >();
 
