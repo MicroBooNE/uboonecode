@@ -21,8 +21,11 @@ namespace crt{
 
   CRTDetSim::CRTDetSim(const fhicl::ParameterSet& pSet)
   {
+    unsigned int seed = pSet.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
+    this->createEngine(seed);
     this->reconfigure(pSet);
     produces< std::vector<CRTData> >();
+
   }
 
   CRTDetSim::~CRTDetSim()

@@ -1,19 +1,8 @@
 BEGIN_PROLOG
 
-# When calculating
-#
-#
-#
-#
-#
-#
-#
-
-microboone_crtdetsim : {
-    # Get CRTDetSim module
+microboone_crtdetsim: 
+{
   module_type: "CRTDetSim"
-    # Sets the module that produces the input for CRTDetSim
-    # Default: "largeant"
   ProducerName: "largeant"
   TDelayNorm: 1.
   TDelayShift: 1.
@@ -26,7 +15,7 @@ microboone_crtdetsim : {
   TDelayRMSExpShift: 0.3
   TDelayRMSExpScale: 0.1
   PropDelay: 2.0
-  fPropDelayError: 0.3
+  PropDelayError
   TResInterpolator: 0.1
   NpeScaleNorm: 0.7
   NpeScaleShift: 0.2

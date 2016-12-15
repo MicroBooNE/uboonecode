@@ -30,7 +30,7 @@ microboone_basic_services:
  ExptGeoHelperInterface:         @local::microboone_geometry_helper
  Geometry:                       @local::microboone_geo
  AuxDetGeometry:                 @local::microboone_crt_geometry
- AuxDetExptGeoHelperInterface    @local::microboone_crt_geo_interface
+ AuxDetExptGeoHelperInterface:    @local::microboone_crt_geo_interface
  DetectorPropertiesService:             @local::microboone_detproperties
  LArPropertiesService:                  @local::microboone_properties
  DatabaseUtil:                   @local::microboone_database

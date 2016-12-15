@@ -2,7 +2,7 @@
 #include "corsika_microboone.fcl"
 #include "largeantmodules_microboone.fcl"
 #include "FilterGenInTime_module.fcl"
-#include "crtdetsim.fcl"
+#include "microboone_crt_detsim.fcl"
 
 process_name: CorsikaWithCRT
 
@@ -30,7 +30,7 @@ services:
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:  @local::art_file_catalog_mc
   @table::microboone_g4_services
-  @table::microboone_crt_services
+}
 
 source:
 {
