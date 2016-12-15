@@ -157,10 +157,10 @@ microboone_opflash_saturation: @local::microboone_opflash
 microboone_opflash_saturation.InputModule: "ophitSat"
 
 microboone_opflash_saturation_beam: @local::microboone_opflash
-microboone_opflash_saturation_beam.InputModule: "ophitSatBeam"
+microboone_opflash_saturation_beam.InputModule: "ophitBeam"
 
 microboone_opflash_saturation_cosmic: @local::microboone_opflash
-microboone_opflash_saturation_cosmic.InputModule: "ophitSatCosmic"
+microboone_opflash_saturation_cosmic.InputModule: "ophitCosmic"
 
 microboone_opdigiana:        @local::standard_opdigiana
 microboone_opflashana:       @local::standard_opflashana

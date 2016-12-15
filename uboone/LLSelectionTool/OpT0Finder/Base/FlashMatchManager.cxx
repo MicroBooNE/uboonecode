@@ -139,7 +139,6 @@ namespace flashana {
       throw OpT0FinderException("PMT position array length has a mismatch among x vs. y or x vs. z");
 
     if (_alg_flash_filter) {
-
       _alg_flash_filter->Configure(main_cfg.get<flashana::Config_t>(_alg_flash_filter->AlgorithmName()));
       _alg_flash_filter->SetOpDetPositions(pmt_x_pos, pmt_y_pos, pmt_z_pos);
       _alg_flash_filter->SetActiveVolume( det_xrange[0], det_xrange[1],
@@ -148,7 +147,6 @@ namespace flashana {
       _alg_flash_filter->SetDriftVelocity( drift_velocity );
     }
     if (_alg_tpc_filter) {
-
       _alg_tpc_filter->Configure(main_cfg.get<flashana::Config_t>(_alg_tpc_filter->AlgorithmName()));
       _alg_tpc_filter->SetOpDetPositions(pmt_x_pos, pmt_y_pos, pmt_z_pos);
       _alg_tpc_filter->SetActiveVolume( det_xrange[0], det_xrange[1],
@@ -157,7 +155,6 @@ namespace flashana {
       _alg_tpc_filter->SetDriftVelocity( drift_velocity );
     }
     if (_alg_match_prohibit) {
-
       _alg_match_prohibit->Configure(main_cfg.get<flashana::Config_t>(_alg_match_prohibit->AlgorithmName()));
       _alg_match_prohibit->SetOpDetPositions(pmt_x_pos, pmt_y_pos, pmt_z_pos);
       _alg_match_prohibit->SetActiveVolume( det_xrange[0], det_xrange[1],
@@ -166,7 +163,6 @@ namespace flashana {
       _alg_match_prohibit->SetDriftVelocity( drift_velocity );
     }
     if (_alg_flash_hypothesis) {
-
       _alg_flash_hypothesis->Configure(main_cfg.get<flashana::Config_t>(_alg_flash_hypothesis->AlgorithmName()));
       _alg_flash_hypothesis->SetOpDetPositions(pmt_x_pos, pmt_y_pos, pmt_z_pos);
       _alg_flash_hypothesis->SetActiveVolume( det_xrange[0], det_xrange[1],
@@ -175,7 +171,6 @@ namespace flashana {
       _alg_flash_hypothesis->SetDriftVelocity( drift_velocity );
     }
     if (_alg_flash_match) {
-
       _alg_flash_match->Configure(main_cfg.get<flashana::Config_t>(_alg_flash_match->AlgorithmName()));
       _alg_flash_match->SetOpDetPositions(pmt_x_pos, pmt_y_pos, pmt_z_pos);
       _alg_flash_match->SetActiveVolume( det_xrange[0], det_xrange[1],
@@ -186,7 +181,6 @@ namespace flashana {
     }
 
     for (auto& name_ptr : _custom_alg_m) {
-
       name_ptr.second->Configure(main_cfg.get<flashana::Config_t>(name_ptr.first));
       name_ptr.second->SetOpDetPositions(pmt_x_pos, pmt_y_pos, pmt_z_pos);
       name_ptr.second->SetActiveVolume( det_xrange[0], det_xrange[1],

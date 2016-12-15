@@ -4,7 +4,7 @@
 #include "PhotonLibHypothesis.h"
 #include "larsim/PhotonPropagation/PhotonVisibilityService.h"
 //#include "OpT0Finder/PhotonLibrary/PhotonVisibilityService.h"
-
+#include "uboone/LLSelectionTool/OpT0Finder/Base/OpT0FinderException.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/OpDetGeo.h"
 #include "uboone/Geometry/UBOpReadoutMap.h"
@@ -22,12 +22,10 @@ namespace flashana {
     _global_qe = pset.get<double>("GlobalQE");
     _qe_v      = pset.get<std::vector<double> >("CCVCorrection");
 
-    ::art::ServiceHandle<geo::Geometry> geo;
-    ::art::ServiceHandle<geo::UBOpReadoutMap> ub_geo;
-
-    if(geo->NOpDets() != _qe_v.size()) {
-      std::cout << "CCVCorrection factor array has size " << _qe_v.size() << " != # OpDet " << geo->NOpDets() << std::endl;
-      throw std::exception();
+    if(_qe_v.size() != NOpDets()) {
+      FLASH_ERROR() << "CCVCorrection factor array has size " << _qe_v.size()
+		    << " != number of opdet (" << NOpDets() << ")!" << std::endl;
+      throw OpT0FinderException();
     }
   }
   
@@ -48,12 +46,12 @@ namespace flashana {
         auto const& pt = trk[ipt];
 	
         double q = pt.q;
-	
-        //q *= ::phot::PhotonVisibilityService::GetME().GetVisibility( pt.x, pt.y, pt.z, ipmt)*0.0093;
+
+	//q *= ::phot::PhotonVisibilityService::GetME().GetVisibility( pt.x, pt.y, pt.z, ipmt) * _global_qe / _qe_v[ipmt];
         xyz[0] = pt.x;
 	xyz[1] = pt.y;
 	xyz[2] = pt.z;
-	q *= vis->GetVisibility(xyz,ipmt) * 0.0093 * _global_qe / _qe_v[ipmt];
+	q *= vis->GetVisibility(xyz, ipmt) * _global_qe / _qe_v[ipmt];
         flash.pe_v[ipmt] += q;
 	//std::cout << "PMT : " << ipmt << " [x,y,z] -> [q] : [" << pt.x << ", " << pt.y << ", " << pt.z << "] -> [" << q << std::endl;
 	
