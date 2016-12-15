@@ -7,7 +7,7 @@ UBFlashBeam:
   module_type     : "UBFlashFinder"
   FlashFinderAlgo : "SimpleFlashAlgo"
   AlgoConfig      : @local::SimpleFlashBeam
-  OpHitProducer   : "ophitSatBeam"
+  OpHitProducer   : "ophitBeam"
   OpFlashProducer : "simpleFlashBeam"
   PECalib         : @local::SPECalib
   BeamFlash       : true
@@ -18,10 +18,16 @@ UBFlashCosmic:
   module_type     : "UBFlashFinder"
   FlashFinderAlgo : "SimpleFlashAlgo"
   AlgoConfig      : @local::SimpleFlashCosmic
-  OpHitProducer   : "ophitSatCosmic"
+  OpHitProducer   : "ophitCosmic"
   OpFlashProducer : "simpleFlashCosmic"
   PECalib         : @local::RecoPECalib
   BeamFlash       : false
 }
+
+UBFlashBeamMC: @local::UBFlashBeam
+UBFlashBeamMC.PECalib: @local::NoCalib
+
+UBFlashCosmicMC: @local::UBFlashCosmic
+UBFlashCosmicMC.PECalib: @local::NoCalib
 
 END_PROLOG
