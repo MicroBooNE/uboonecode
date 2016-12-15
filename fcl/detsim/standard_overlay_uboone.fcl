@@ -38,12 +38,12 @@ physics: {
   analyzers: { }
 
   filters : {
-    daq: @local::microboone_overlay
+    mixer: @local::microboone_overlay
     swtrigger: @local::microboone_swtrigger_mc_bnb
   }
 
 
-  mixer_path : [ daq ]
+  mixer_path : [ mixer, swtrigger ]
   trigger_paths : [ mixer_path ]
 
   output : [ out ]
@@ -53,11 +53,11 @@ physics: {
 
 #services.IChannelStatusService.ChannelStatusProvider.UseDB: false
 
-physics.filters.daq.detail.RawDigitDataModuleLabel: "daq"
-physics.filters.daq.detail.RawDigitMCModuleLabel:   "daqnonoise"
-physics.filters.daq.detail.OpDetDataModuleLabel:    "pmtreadout"
-physics.filters.daq.detail.OpDetMCModuleLabel:      "pmtreadoutnonoise"
-physics.filters.daq.detail.InputFileIsData:         false
+physics.filters.mixer.detail.RawDigitDataModuleLabel: "daq"
+physics.filters.mixer.detail.RawDigitMCModuleLabel:   "daqnonoise"
+physics.filters.mixer.detail.OpDetDataModuleLabel:    "pmtreadout"
+physics.filters.mixer.detail.OpDetMCModuleLabel:      "pmtreadoutnonoise"
+physics.filters.mixer.detail.InputFileIsData:         false
 
-physics.filters.swtrigger.OpDataModule: "daq"
+physics.filters.swtrigger.OpDataModule: "mixer"
 

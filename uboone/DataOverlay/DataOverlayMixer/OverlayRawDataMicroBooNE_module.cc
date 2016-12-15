@@ -174,7 +174,7 @@ mix::OverlayRawDataDetailMicroBooNE::OverlayRawDataDetailMicroBooNE(fhicl::Param
   fOpDetMinSampleSize(fpset.get<size_t>("OpDetMinSampleSize",100)),
   fInputFileIsData(fpset.get<bool>("InputFileIsData")),
   fRawDigitDataModuleLabel(fpset.get<std::string>("RawDigitDataModuleLabel")),
-  fOpDetDataModuleLabel(fpset.get<std::string>("OpDetMCModuleLabel")),
+  fOpDetDataModuleLabel(fpset.get<std::string>("OpDetDataModuleLabel")),
   fRawDigitMCModuleLabel(fpset.get<std::string>("RawDigitMCModuleLabel")),
   fOpDetMCModuleLabel(fpset.get<std::string>("OpDetMCModuleLabel")),
   fEventsToMix(fpset.get<size_t>("EventsToMix",1)),

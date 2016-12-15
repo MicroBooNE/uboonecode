@@ -10,8 +10,8 @@ outputs.out1.dataTier: "reconstructed-2d"
 source.inputCommands: ["keep *_*_*_*", "drop *_*_*_McRecoStage1", "drop *_*_*_McRecoStage2" ]
 
 
-physics.digitfilter.DigitModuleLabel: "daq"
-physics.ophit.InputModule: "daq"
-physics.ophitLow.InputModule: "daq"
-physics.saturation.LGProducer: "daq"
-physics.saturation.HGProducer: "daq"
+physics.producers.digitfilter.DigitModuleLabel: "mixer"
+physics.producers.ophit.InputModule: "mixer"
+physics.producers.ophitLow.InputModule: "mixer"
+physics.producers.saturation.LGProducer: "mixer"
+physics.producers.saturation.HGProducer: "mixer"
