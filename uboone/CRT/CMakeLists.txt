@@ -29,7 +29,6 @@ art_make( BASENAME_ONLY
         ${CETLIB}
 )
 
-
 art_make_library( LIBRARY_NAME CRT
     SOURCE
         CRTChannelMapAlg.cc
@@ -76,6 +75,7 @@ simple_plugin( CRTDetSim module
         art_Utilities 
         canvas_Utilities
         lardata_DetectorInfoServices_DetectorClocksServiceStandard_service
+        nutools_RandomUtils_NuRandomService_service
         ${ART_FRAMEWORK_SERVICES_REGISTRY}
         ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
         ${MF_MESSAGELOGGER}
