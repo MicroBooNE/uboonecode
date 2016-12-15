@@ -6,7 +6,7 @@
 #include "particleid_microboone.fcl"
 #include "showerfindermodules.fcl"
 #include "vertexfindermodules.fcl"
-#include "pandoramodules.fcl"
+#include "pandoramodules_microboone.fcl"
 #include "cosmicremovalmodules.fcl"
 #include "triggeralgo_service.fcl"
 #include "opticaldetectormodules.fcl"
