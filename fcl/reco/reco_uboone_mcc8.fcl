@@ -138,6 +138,7 @@ microboone_reco_mcc8_producers:
 
   ### pandora cosmic pfparticle
   pandoraCosmicKHitPFPart:        @local::microboone_cosmicpfparticletagger
+  pandoraCosmicKalmanTrackPFPart: @local::microboone_cosmicpfparticletagger
 
   ### pandora analysis
   pandoraCosmicKHittag:           @local::microboone_cosmictracktagger
@@ -299,6 +300,7 @@ microboone_reco_mcc8_pandoraCosmic: [    pandoraCosmic,
 #                                         pandoraCosmicPMA,
                                          pandoraCosmicKHitcalo,
                                          pandoraCosmicKHitpid,
+#                                         pandoraCosmicKalmanTrackPFPart,
                                          pandoraCosmicKHitPFPart,
                                          pandoraCosmicKHitFlashMatch,
                                          pandoraTrackPFPartMatch,
@@ -392,10 +394,11 @@ microboone_reco_mcc8_producers.caldata.NumSigma:                                
 microboone_reco_mcc8_producers.caldata.DodQdxCalib:                              false
 
 microboone_reco_mcc8_producers.gaushit.CalDataModuleLabel:                       "caldata"
-microboone_reco_mcc8_producers.gaushit.MinSig:                                   [3.5, 3.5, 4.0]
-microboone_reco_mcc8_producers.gaushit.MinWidth:                                 [1.0, 1.0, 1.0]
+microboone_reco_mcc8_producers.gaushit.MinSig:                                   [3.25, 3.25, 3.75]
+microboone_reco_mcc8_producers.gaushit.MinWidth:                                 [1.0,  1.0,  1.0]
 microboone_reco_mcc8_producers.gaushit.MaxMultiHit:                              6
 microboone_reco_mcc8_producers.gaushit.TryNplus1Fits:                            false
+microboone_reco_mcc8_producers.gaushit.Chi2NDF:                                  50.
 #microboone_reco_mcc8_producers.gaushit.FilterHits:                               true
 
 # Fuzzy Cluster related
@@ -528,6 +531,14 @@ microboone_reco_mcc8_producers.pandoraCosmicpid.TrackModuleLabel:               
 microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:    "pandoraCosmic"
 microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.TrackModuleLabel:         "pandoraCosmicKHit"
 microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.EndTickPadding:           75
+microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.TPCYBoundary:             5
+microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.TPCZBoundary:             5
+
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.PFParticleModuleLabel: "pandoraCosmic"
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.TrackModuleLabel:      "pandoraCosmicKalmanTrack"
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.EndTickPadding:        75
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.TPCYBoundary:          5
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.TPCZBoundary:          5
 
 microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosmicKHit"
 microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "opflash"
