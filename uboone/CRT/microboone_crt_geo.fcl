@@ -1,0 +1,23 @@
+BEGIN_PROLOG
+  
+microboone_crt_geometry: {
+  # When updating the geometry, update these fields.
+  # The auxdet manager and the regular larg4 geo manager
+  # instantiate separate services.
+  Name: "microboonev11"
+  GDML: "microboonev11.gdml"
+  ROOT: "microboonev11.gdml"
+  SortingParameters: {
+    # This can be changed to 49 in order to switch to the 
+    # Phase A CRT geometry.
+    NModules : 76
+    # This parameter should stay static unless the CRT
+    # Geometry ever changes.
+    NStripsPerModule: 16
+  }
+}
+microboone_crt_geo_interface: {
+  service_provider: CRTGeometryHelper
+}
+
+END_PROLOG
