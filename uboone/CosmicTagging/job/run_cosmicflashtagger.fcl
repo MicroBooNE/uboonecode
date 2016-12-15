@@ -65,8 +65,8 @@ physics:
    saturation:        @local::correct_saturation
    ophitSatBeam:      @local::microboone_ophit_saturation_beam
    ophitSatCosmic:    @local::microboone_ophit_saturation_cosmic
-   opflashSatBeam:    @local::microboone_opflash_saturation_beam
-   opflashSatCosmic:  @local::microboone_opflash_saturation_cosmic
+#   opflashSatBeam:    @local::microboone_opflash_saturation_beam
+#   opflashSatCosmic:  @local::microboone_opflash_saturation_cosmic
    simpleFlashBeam:   @local::UBFlashBeam
    simpleFlashCosmic: @local::UBFlashCosmic
    cosmicFlashTagger: @local::CosmicFlashTagger
@@ -108,7 +108,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "T0Reco.root"
+   fileName:    "output.root"
    dataTier:    "reco"
    compressionLevel: 1
    outputCommands: [

@@ -2,23 +2,34 @@
 #define INCOMPATIBILITYCHECKER_CXX
 
 #include "IncompatibilityChecker.h"
-#include "uboone/LLSelectionTool/OpT0Finder/Base/OpT0FinderException.h"
+#include <iostream>
+//#include "uboone/LLSelectionTool/OpT0Finder/Base/OpT0FinderException.h"
 
 namespace flashana {
 
-  static IncompatibilityCheckerFactory __global_IncompatibilityChecker__;
+//  static IncompatibilityCheckerFactory __global_IncompatibilityChecker__;
 
-  IncompatibilityChecker::IncompatibilityChecker(const std::string name)
-    : BaseAlgorithm(kCustomAlgo, name)
-    , _gap         ( 0.5    )
-  {}
-
-  void IncompatibilityChecker::_Configure_(const Config_t &pset)
+  IncompatibilityChecker::IncompatibilityChecker()
   {
-    _gap              = pset.get< double > ( "SegmentSize"      );
+    _sigmaThreshold = 5;
+    _nBinsRequirement = 1;
+    _useFlashPosition = false;
+  }
+
+  void IncompatibilityChecker::Configure(fhicl::ParameterSet const& pset)
+  {
     _sigmaThreshold   = pset.get< double > ( "SigmaThreshold"   );
     _nBinsRequirement = pset.get< int    > ( "NBinsRequirement" );
     _useFlashPosition = pset.get< bool   > ( "UseFlashPosition" );
+  }
+
+  void IncompatibilityChecker::PrintConfig() {
+
+    std::cout << "--- IncompatibilityChecker configuration:" << std::endl;
+    std::cout << "---   _sigmaThreshold   = " << _sigmaThreshold << std::endl;
+    std::cout << "---   _nBinsRequirement = " << _nBinsRequirement << std::endl;
+    std::cout << "---   _useFlashPosition = " << _useFlashPosition << std::endl;
+
   }
 
   bool IncompatibilityChecker::CheckIncompatibility(const Flash_t &flash, const Flash_t &flash_hypo) {
@@ -29,7 +40,7 @@ namespace flashana {
     std::cout << "pe for pmt 0 from hypo " << flash_hypo.pe_v[0] << std::endl;
 
     if (flash.pe_v.size() != flash_hypo.pe_v.size()) {
-     throw OpT0FinderException("Flash and hypo flash pe vector size mismatch."); 
+     throw cet::exception("Flash and hypo flash pe vector size mismatch."); 
     }
 
     bool areIncompatibleByBin    = false;
