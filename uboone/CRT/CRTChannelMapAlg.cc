@@ -1,4 +1,5 @@
 #include "uboone/CRT/CRTChannelMapAlg.hh"
+
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "larcore/Geometry/AuxDetGeometryCore.h"
 
@@ -44,9 +45,9 @@ namespace crt {
     fADGeoToChannelAndSV.clear();
 
     uint32_t index=0;
-    for(uint32_t mod=0; mod<this->fNModules; ++mod)
+    for(uint32_t mod=0; mod<this->fSorter.GetNModules(); ++mod)
     {
-      for(uint32_t strip=0; strip<this->fNStripsPerModule;++strip)
+      for(uint32_t strip=0; strip<this->fSorter.GetNStripsPerModule();++strip)
       {
         std::ostringstream stream;
         stream<<"volAuxDet_Module_"<<mod<<"_strip_"<<strip;
@@ -58,11 +59,6 @@ namespace crt {
     }
   }
 
-  void CRTChannelMapAlg::Uninitialize()
-  {
-  
-  }
-  
   uint32_t CRTChannelMapAlg::PositionToAuxDetChannel(
     double const worldLoc[3],
     std::vector<geo::AuxDetGeo*> const& auxDets,

@@ -25,13 +25,12 @@
 #ifndef CRTDetSim_HH_
 #define CRTDetSim_HH_
 
-
 #include "art/Framework/Core/ModuleMacros.h"
-#include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
-
-#include <string>
+#include "lardata/DetectorInfo/ElecClock.h"
+#include "CLHEP/Random/RandomEngine.h"
+#include "fhiclcpp/ParameterSet.h"
 
 #include <string>
 
@@ -74,7 +73,6 @@ namespace crt{
     double getChannelTriggerTicks(CLHEP::HepRandomEngine* engine,
                                   detinfo::ElecClock& clock,
                                   float t0, float npeMean, float r);
-
 
   public:
 
