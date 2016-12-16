@@ -57,7 +57,7 @@ services.TimeTracker.dbOutput: {}
 
 services.MemoryTracker.printSummaries: []
 services.MemoryTracker.includeMallocInfo: false
-services.MemoryTracker.filename: ""
+services.MemoryTracker.dbOutput.filename: ""
 
 #source is now a root file
 source:
