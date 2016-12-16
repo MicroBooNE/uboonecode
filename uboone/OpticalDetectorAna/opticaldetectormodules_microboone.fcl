@@ -20,10 +20,10 @@ microboone_simple_flash_sat: @local::microboone_simple_flash
 microboone_simple_flash_sat.OpHitProducer: "ophitSat"
 
 microboone_simple_flash_sat_beam: @local::microboone_simple_flash
-microboone_simple_flash_sat_beam.OpHitProducer: "ophitSatBeam"
+microboone_simple_flash_sat_beam.OpHitProducer: "ophitBeam"
 
 microboone_simple_flash_sat_cosmic: @local::microboone_simple_flash
-microboone_simple_flash_sat_cosmic.OpHitProducer: "ophitSatCosmic"
+microboone_simple_flash_sat_cosmic.OpHitProducer: "ophitCosmic"
 
 #
 # OpHitFinder module
@@ -154,13 +154,13 @@ microboone_opflash.InputModule: "ophit"
 # OpFlash on saturation output
 #
 microboone_opflash_saturation: @local::microboone_opflash
-microboone_opflash_saturation.InputModule: "ophitSat"
+microboone_opflash_saturation.InputModule: "ophit"
 
 microboone_opflash_saturation_beam: @local::microboone_opflash
-microboone_opflash_saturation_beam.InputModule: "ophitSatBeam"
+microboone_opflash_saturation_beam.InputModule: "ophitBeam"
 
 microboone_opflash_saturation_cosmic: @local::microboone_opflash
-microboone_opflash_saturation_cosmic.InputModule: "ophitSatCosmic"
+microboone_opflash_saturation_cosmic.InputModule: "ophitCosmic"
 
 microboone_opdigiana:        @local::standard_opdigiana
 microboone_opflashana:       @local::standard_opflashana
