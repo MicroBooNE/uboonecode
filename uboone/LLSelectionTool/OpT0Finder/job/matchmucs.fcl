@@ -12,7 +12,7 @@
 #include "time_memory_tracker_microboone.fcl"
 #include "ubflashfinder.fcl"
 #include "mucst0finder.fcl"
-#include "litedatamin_opreco.fcl"
+##include "litedatamin_opreco.fcl"
 #include "litedatamin_opdigit.fcl"
 
 process_name: TestRun
@@ -55,7 +55,7 @@ services.TimeTracker.dbOutput: {}
 
 services.MemoryTracker.printSummaries: []
 services.MemoryTracker.includeMallocInfo: false
-services.MemoryTracker.filename: ""
+services.MemoryTracker.dbOutput.filename: ""
 
 source:
 {
