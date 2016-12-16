@@ -3,7 +3,7 @@ BEGIN_PROLOG
 
 SimpleFlashBeam:
 {
-  PEThreshold:    30
+  PEThreshold:    20
   MinPECoinc:     6
   MinMultCoinc:   3
   IntegralTime:   8.
