@@ -219,24 +219,24 @@ private:
   int    _max_adc_corr; // the maximum ADC assigned to the LG corrected WF that replaced the HG saturated WF
 };
 
-size_t OpDigitSaturationCorrection::FindMatchingLGPulse(const unsigned int chan, 
+size_t OpDigitSaturationCorrection::FindMatchingLGPulse(const unsigned int opdet,
 							const double start,
 							const LGChanMap_t& LG_ChanMap)
 {
 
   // search the _LG_ChanMap for a pulse on this channel at approx. the same time
-  if (LG_ChanMap.at(chan).size() == 0)
+  if (LG_ChanMap.at(opdet).size() == 0)
     return IDX_max;
 
   // HG_pulses:
-  auto const& LG_pulses = LG_ChanMap.at(chan);
+  auto const& LG_pulses = LG_ChanMap.at(opdet);
   
   // go through them and find one with a matching time
   for (auto const& pulse : LG_pulses) {
     if(pulse.IsUseful(start,(2*_TDC))) {
       // we have found a matching pulse!
       if (_verbose)
-	std::cout << "found a matching pulse for chan " << chan << " @ time " << start << std::endl;
+	std::cout << "found a matching pulse for opdet " << opdet << " @ time " << start << std::endl;
       return pulse._index;
     }
   }// for all HG pulses
@@ -396,21 +396,26 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
     for (auto const& opch1 : opch_set) {
 
       if ( _opch_to_chcategory_m[opch1] == opdet::OpdetBeamHighGain){
+	//std::cout<<"mapping high gain channel " << opch1 << " (BeamHighGain) ... " << std::flush;
 	for(auto const& opch2 : opch_set) {
 	  if ( _opch_to_chcategory_m[opch2] == opdet::OpdetBeamLowGain) {
 	    _opchLG_to_opchHG_m[ opch2 ] = opch1;
+	    //std::cout<<opch2 << " (BeamLowGain) " << std::endl;
 	    break;
 	  }
 	}
       }// map Beam LG => HG
       if ( _opch_to_chcategory_m[opch1] == opdet::OpdetCosmicHighGain){
+	//std::cout<<"mapping high gain channel " << opch1 << " (CosmicHighGain) ... " << std::flush;
 	for(auto const& opch2 : opch_set) {
 	  if ( !_use_LG_beam_for_HG_cosmic && _opch_to_chcategory_m[opch2] == opdet::OpdetCosmicLowGain) {
 	    _opchLG_to_opchHG_m[ opch2 ] = opch1;
+	    //std::cout<<opch2 << " (CosmicLowGain) " << std::endl;
 	    break;
 	  }
 	  if ( _use_LG_beam_for_HG_cosmic && _opch_to_chcategory_m[opch2] == opdet::OpdetBeamLowGain) {
 	    _opchLG_to_opchHG_m[ opch2 ] = opch1;
+	    //std::cout<<opch2 << " (BeamLowGain) " << std::endl;
 	    break;
 	  } 
 	}
@@ -451,6 +456,13 @@ void OpDigitSaturationCorrection::SetUpChannelMap()
 	throw std::exception();
       }
     }
+    
+    std::cout << std::endl;
+    std::cout << "Loaded LG OpChannel => HG OpChannel mapping" << std::endl;
+    for(auto const& pair : _opchLG_to_opchHG_m)
+      std::cout << pair.first << " => " << pair.second << std::endl;
+    std::cout << std::endl;
+
     std::cout << std::endl;
     std::cout << "Loaded OpDet => OpChannel mapping" << std::endl;
     for(size_t opdet=0; opdet<_opdet_to_opch_m.size(); ++opdet) {
@@ -819,13 +831,15 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 	    }
 	  }// for all ADCs
 	  raw::OpDetWaveform new_wf(wf_LG.TimeStamp(),
-				    _opchLG_to_opchHG_m [ wf_LG.ChannelNumber() ],
+				    wf_HG.ChannelNumber(),
+				    //_opchLG_to_opchHG_m [ wf_LG.ChannelNumber() ],
 				    adcs);
 	  corrected_beam_wfs->push_back(new_wf);
 	  _wf_corr = new_wf;
 	  _swapped = 1;
 	  if (_verbose)
-	    std::cout << "saved a corrected waveform w/ " << _wf_corr.size() << " ticks" << std::endl;
+	    std::cout << "saved a corrected waveform w/ " << _wf_corr.size() 
+		      << " ticks @ channel number " << new_wf.ChannelNumber() << std::endl;
       }// if this waveform saturates
     }// if LG wf was found
     
@@ -946,7 +960,8 @@ void OpDigitSaturationCorrection::produce(art::Event & e)
 	    }
 	  }// for all ADCs
 	  raw::OpDetWaveform new_wf(wf_LG.TimeStamp(),
-				    _opchLG_to_opchHG_m [ _chan_LG ],
+				    wf_HG.ChannelNumber(),
+				    //_opchLG_to_opchHG_m [ _chan_LG ],
 				    adcs);
 	  _wf_corr = new_wf;
 	  _swapped = 1;

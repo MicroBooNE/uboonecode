@@ -1,0 +1,14 @@
+
+BEGIN_PROLOG
+#
+# Module configuration
+#
+TPCObjectCreator: {
+  module_type:              "TPCObjectCreator"
+  PFParticleModule:         "pandoraNu"
+  HitFinderModule:          "gaushit"
+  GeantModule:              "largeant"
+  SpacePointModule:         "pandoraNu"
+  GenieModuleLabel:         "generator"
+}
+END_PROLOG
