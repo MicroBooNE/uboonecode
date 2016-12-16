@@ -14,7 +14,7 @@ correct_saturation: {
  HGLabelCosmic     : "OpdetCosmicHighGain"
  verbose             : false
  IncludeBeamgate     : true
- SaveWaveformInTTree : true
+ SaveWaveformInTTree : false
  # Unfortunately UB runs w/ only 3FEMs where 3rd FEM is a low gain cosmic + beam combined
  # Implemented a handling of using 1 LG FEM for correcting both HG cosmic and beam.
  UseLGBeamForHGCosmic : true
