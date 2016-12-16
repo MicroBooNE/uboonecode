@@ -67,7 +67,7 @@ public:
   
   size_t nSecondaries() { return fEventsToMix; } 
 
-  void processEventIDs(art::EventIDSequence const& seq); //bookkepping for event IDs
+  void processEventAuxiliaries(art::EventAuxiliarySequence const& seq); //bookkepping for event IDs
 
   // Mixing Functions
 
@@ -260,7 +260,11 @@ mix::OverlayRawDataDetailMicroBooNE::OverlayRawDataDetailMicroBooNE(fhicl::Param
 			   *this );
     }
   }//end if file is input data
-
+  else if(!fInputFileIsData){
+    helper.declareMixOp( art::InputTag(fOpDetMixerSourceModuleLabel,"OpdetCosmicHighGain"),
+			 &OverlayRawDataDetailMicroBooNE::MixSimpleCopy<raw::OpDetWaveform>,
+			 *this );
+  }//end if file is input mc
   helper.declareMixOp( art::InputTag(fRawDigitMixerSourceModuleLabel),
 		       &OverlayRawDataDetailMicroBooNE::MixRawDigits,
 		       *this );
@@ -398,11 +402,10 @@ void mix::OverlayRawDataDetailMicroBooNE::startEvent(const art::Event& event) {
 }
 
 //For each of the mixed in events...bookkepping for event IDs
-void mix::OverlayRawDataDetailMicroBooNE::processEventIDs(art::EventIDSequence const& seq){
-  for (auto const& id : seq)
-    fEventMixingSummary->emplace_back(id.event(),id.subRun(),id.run());
+void mix::OverlayRawDataDetailMicroBooNE::processEventAuxiliaries(art::EventAuxiliarySequence const & seq){
+  for (auto const& ev : seq)
+    fEventMixingSummary->emplace_back(ev.id().event(),ev.id().subRun(),ev.id().run(),ev.time());
 }
-
 
 //End each event
 void mix::OverlayRawDataDetailMicroBooNE::finalizeEvent(art::Event& event) {

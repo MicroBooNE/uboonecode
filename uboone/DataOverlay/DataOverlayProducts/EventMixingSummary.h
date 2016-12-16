@@ -9,6 +9,7 @@
 #define DATAOVERLAYPRODUCTS_EVENTMIXINGSUMMARY_H
 
 #include <stdint.h>
+#include "canvas/Persistency/Provenance/Timestamp.h"
 
 namespace mix {
 
@@ -19,33 +20,38 @@ namespace mix {
 
   public:
   EventMixingSummary():
-    fEvent(0),fSubrun(0),fRun(0) {}
+    fEvent(0),fSubrun(0),fRun(0),fTimestamp() {}
     
 #ifndef __GCCXML__
   public:
       
-    EventMixingSummary(uint32_t e,uint32_t s,uint32_t r)
+    EventMixingSummary(uint32_t e,uint32_t s,uint32_t r, art::Timestamp t)
       {
 	fEvent  = e;
 	fSubrun = s;
 	fRun    = r;
+	fTimestamp = t;
       }    
     
     uint32_t Event()  const ;
     uint32_t SubRun() const ;
     uint32_t Run()    const ;
+    art::Timestamp Timestamp() const;
+
 
 #endif // !__GCCXML__
   private:
     uint32_t fEvent;
     uint32_t fSubrun;
     uint32_t fRun;
+    art::Timestamp fTimestamp;
   }; // class EventMixingSummary()
   
 #ifndef __GCCXML__
   inline uint32_t mix::EventMixingSummary::Event()  const { return fEvent;  }
   inline uint32_t mix::EventMixingSummary::SubRun() const { return fSubrun; }
   inline uint32_t mix::EventMixingSummary::Run()    const { return fRun;    }
+  inline art::Timestamp mix::EventMixingSummary::Timestamp() const { return fTimestamp; }
 #endif // !__GCCXML__
   
 } // namespace mix
