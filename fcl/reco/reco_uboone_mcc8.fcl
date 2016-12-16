@@ -71,154 +71,155 @@ microboone_reco_mcc8_producers:
   rns:                 { module_type: RandomNumberSaver }
 
   ### OpHit finders
-  #ophitT   : @local::ub_ophitfinder_t
-  #ophitFW  : @local::ub_ophitfinder_fw
-  #ophitSW  : @local::ub_ophitfinder_sw
-  #ophitCFD : @local::ub_ophitfinder_cfd
-  #ophitSatT   : @local::ub_ophitfinder_satt
-  #ophitSatFW  : @local::ub_ophitfinder_satfw
-  #ophitSatSW  : @local::ub_ophitfinder_satsw
-  #ophitSatCFD : @local::ub_ophitfinder_satcfd
+  #ophitT   :                     @local::ub_ophitfinder_t
+  #ophitFW  :                     @local::ub_ophitfinder_fw
+  #ophitSW  :                     @local::ub_ophitfinder_sw
+  #ophitCFD :                     @local::ub_ophitfinder_cfd
+  #ophitSatT   :                  @local::ub_ophitfinder_satt
+  #ophitSatFW  :                  @local::ub_ophitfinder_satfw
+  #ophitSatSW  :                  @local::ub_ophitfinder_satsw
+  #ophitSatCFD :                  @local::ub_ophitfinder_satcfd
 
 
   ### Saturation correction module
   saturation : @local::correct_saturation
 
   ### flash finders
-  ophit            : @local::microboone_ophit_beam_highgain
-  ophitLow         : @local::microboone_ophit_beam_lowgain
-  ophitCosmic      : @local::microboone_ophit_cosmic_highgain
-  ophitCosmicLow   : @local::microboone_ophit_cosmic_lowgain
-  opflash          : @local::microboone_opflash_beam_highgain
-  opflashLow       : @local::microboone_opflash_beam_lowgain
-  opflashCosmic    : @local::microboone_opflash_cosmic_highgain
-  opflashCosmicLow : @local::microboone_opflash_cosmic_lowgain
-  sflash           : @local::microboone_simple_flash
+  ophit            :              @local::microboone_ophit_beam_highgain
+  ophitLow         :              @local::microboone_ophit_beam_lowgain
+  ophitCosmic      :              @local::microboone_ophit_cosmic_highgain
+  ophitCosmicLow   :              @local::microboone_ophit_cosmic_lowgain
+  opflash          :              @local::microboone_opflash_beam_highgain
+  opflashLow       :              @local::microboone_opflash_beam_lowgain
+  opflashCosmic    :              @local::microboone_opflash_cosmic_highgain
+  opflashCosmicLow :              @local::microboone_opflash_cosmic_lowgain
+  sflash           :              @local::microboone_simple_flash
 
-  ophitSat     : @local::microboone_ophit_saturation
-  opflashSat   : @local::microboone_opflash_saturation
-  sflashSat    : @local::microboone_simple_flash_sat
+  ophitSat     :                  @local::microboone_ophit_saturation
+  opflashSat   :                  @local::microboone_opflash_saturation
+  sflashSat    :                  @local::microboone_simple_flash_sat
 
   ### Simple Flash Finder
-  ophitSatBeam:      @local::microboone_ophit_saturation_beam    
-  ophitSatCosmic:    @local::microboone_ophit_saturation_cosmic  
-  simpleFlashBeam:   @local::UBFlashBeam                         
-  simpleFlashCosmic: @local::UBFlashCosmic 
+  ophitSatBeam:                   @local::microboone_ophit_saturation_beam
+  ophitSatCosmic:                 @local::microboone_ophit_saturation_cosmic
+  simpleFlashBeam:                @local::UBFlashBeam
+  simpleFlashCosmic:              @local::UBFlashCosmic
 
   ### noise filtering (if needed)
-  digitfilter:                 @local::microboone_rawdigitfilter
+  digitfilter:                    @local::microboone_rawdigitfilter
 
   ### calwire producers
-  caldata:                     @local::microboone_calroi
+  caldata:                        @local::microboone_calroi
 
   ### hit-finder producers
-  gaushit:                     @local::microboone_gaushitfinder
+  gaushit:                        @local::microboone_gaushitfinder
 
   ### cluster-finder producers
-  fuzzycluster:                @local::microboone_fuzzycluster
-  fuzzyclustermerger:          @local::microboone_fuzzyclustermerger
-  linecluster:                 @local::microboone_linecluster
+  fuzzycluster:                   @local::microboone_fuzzycluster
+  fuzzyclustermerger:             @local::microboone_fuzzyclustermerger
+  linecluster:                    @local::microboone_linecluster
 
   ### pandora cosmic pass
-  pandoraCosmic:               @local::microboone_pandora
+  pandoraCosmic:                  @local::microboone_pandora
 
   ### mc producers
-  mchitfinder:                 @local::standard_mchitfinder
+  mchitfinder:                    @local::standard_mchitfinder
 
   ### pandora core modules
-  pandoraNu:                   @local::microboone_pandora
+  pandoraNu:                      @local::microboone_pandora
 
   ### pandora track3dkalmanhit
-  pandoraCosmicKHit:           @local::microboone_track3Dkalmanhit
-  pandoraNuKHit:               @local::microboone_track3Dkalmanhit
+  pandoraCosmicKHit:              @local::microboone_track3Dkalmanhit
+  pandoraNuKHit:                  @local::microboone_track3Dkalmanhit
 
   ### pandora cosmic kalmanhit
-  pandoraCosmicPMA:          @local::microboone_pmalgtrajfitter
-  pandoraNuPMA:              @local::microboone_pmalgtrajfitter
+  pandoraCosmicPMA:               @local::microboone_pmalgtrajfitter
+  pandoraNuPMA:                   @local::microboone_pmalgtrajfitter
 
   ### pandora cosmic pfparticle
-  pandoraCosmicKHitPFPart:     @local::microboone_cosmicpfparticletagger
+  pandoraCosmicKHitPFPart:        @local::microboone_cosmicpfparticletagger
+  pandoraCosmicKalmanTrackPFPart: @local::microboone_cosmicpfparticletagger
 
   ### pandora analysis
-  pandoraCosmicKHittag:        @local::microboone_cosmictracktagger
-  pandoraCosmicKHitcalo:       @local::microboone_calomc
-  pandoraCosmicKHitpid:        @local::microboone_chi2pid
-  pandoraCosmicKHitFlashMatch: @local::microboone_beamflashtrackmatchtagger
-  pandoraTrackPFPartMatch:     @local::microboone_trackpfparticlematch
-  pandoraCosmicKHitRemoval:    @local::microboone_crhitremoval
-  pandoraCosmictag:            @local::microboone_cosmictracktagger
-  pandoraCosmiccalo:           @local::microboone_calomc
-  pandoraCosmicpid:            @local::microboone_chi2pid
-  pandoraNutag:                @local::microboone_cosmictracktagger
-  pandoraNucalo:               @local::microboone_calomc
-  pandoraNupid:                @local::microboone_chi2pid
-  pandoraNuKHittag:            @local::microboone_cosmictracktagger
-  pandoraNuKHitcalo:           @local::microboone_calomc
-  pandoraNuKHitpid:            @local::microboone_chi2pid
-  pandoraNuPMAtag:             @local::microboone_cosmictracktagger
-  pandoraNuPMAcalo:            @local::microboone_calomc
-  pandoraNuPMApid:             @local::microboone_chi2pid
-  pandoraNuKHitFlashMatch:     @local::microboone_beamflashtrackmatchtagger
+  pandoraCosmicKHittag:           @local::microboone_cosmictracktagger
+  pandoraCosmicKHitcalo:          @local::microboone_calomc
+  pandoraCosmicKHitpid:           @local::microboone_chi2pid
+  pandoraCosmicKHitFlashMatch:    @local::microboone_beamflashtrackmatchtagger
+  pandoraTrackPFPartMatch:        @local::microboone_trackpfparticlematch
+  pandoraCosmicKHitRemoval:       @local::microboone_crhitremoval
+  pandoraCosmictag:               @local::microboone_cosmictracktagger
+  pandoraCosmiccalo:              @local::microboone_calomc
+  pandoraCosmicpid:               @local::microboone_chi2pid
+  pandoraNutag:                   @local::microboone_cosmictracktagger
+  pandoraNucalo:                  @local::microboone_calomc
+  pandoraNupid:                   @local::microboone_chi2pid
+  pandoraNuKHittag:               @local::microboone_cosmictracktagger
+  pandoraNuKHitcalo:              @local::microboone_calomc
+  pandoraNuKHitpid:               @local::microboone_chi2pid
+  pandoraNuPMAtag:                @local::microboone_cosmictracktagger
+  pandoraNuPMAcalo:               @local::microboone_calomc
+  pandoraNuPMApid:                @local::microboone_chi2pid
+  pandoraNuKHitFlashMatch:        @local::microboone_beamflashtrackmatchtagger
 
   ### pandora cosmic trackkalman
-  pandoraCosmicKalmanTrack:    @local::kalmantrackfit
-  pandoraNuKalmanTrack:        @local::kalmantrackfit
+  pandoraCosmicKalmanTrack:       @local::kalmantrackfit
+  pandoraNuKalmanTrack:           @local::kalmantrackfit
 
   ### track fit producers
-  trackkalmanhit:              @local::microboone_track3Dkalmanhit        # Track fit for fuzzy cluster
-  trackkalmanhitcc:            @local::microboone_track3Dkalmanhit        # Track fit for Cluster Crawler (Track Maker)
+  trackkalmanhit:                 @local::microboone_track3Dkalmanhit        # Track fit for fuzzy cluster
+  trackkalmanhitcc:               @local::microboone_track3Dkalmanhit        # Track fit for Cluster Crawler (Track Maker)
   
   ### track stitching
-  stitchkalmanhit:             @local::microboone_trackstitcher
-  stitchkalmanhitcc:           @local::microboone_trackstitcher
+  stitchkalmanhit:                @local::microboone_trackstitcher
+  stitchkalmanhitcc:              @local::microboone_trackstitcher
 
   ### shower reco producers
-  showerrecofuzzy:             @local::showerreco3d_uboone
-  showerrecopandora:           @local::showerreco3d_uboone_pandora
+  showerrecofuzzy:                @local::showerreco3d_uboone
+  showerrecopandora:              @local::showerreco3d_uboone_pandora
 
   ### calorimetry producers
-  trackkalmanhitcalo:          @local::microboone_calomc                  # Calorimetry for fuzzy cluster
-  stitchkalmanhitcalo:         @local::microboone_calomc
-  trackkalmanhitcalocc:        @local::microboone_calomc                  # Calorimeter for Cluster Crawler
-  stitchkalmanhitcalocc:       @local::microboone_calomc
+  trackkalmanhitcalo:             @local::microboone_calomc                  # Calorimetry for fuzzy cluster
+  stitchkalmanhitcalo:            @local::microboone_calomc
+  trackkalmanhitcalocc:           @local::microboone_calomc                  # Calorimeter for Cluster Crawler
+  stitchkalmanhitcalocc:          @local::microboone_calomc
 
   ### PID producers
-  trackkalmanhitpid:           @local::microboone_chi2pid
-  stitchkalmanhitpid:          @local::microboone_chi2pid
-  trackkalmanhitpidcc:         @local::microboone_chi2pid
-  stitchkalmanhitpidcc:        @local::microboone_chi2pid
+  trackkalmanhitpid:              @local::microboone_chi2pid
+  stitchkalmanhitpid:             @local::microboone_chi2pid
+  trackkalmanhitpidcc:            @local::microboone_chi2pid
+  stitchkalmanhitpidcc:           @local::microboone_chi2pid
 
   ### track-tagging producers
-  trackkalmanhittag:           @local::microboone_cosmictracktagger
-  stitchkalmanhittag:          @local::microboone_cosmictracktagger
-  trackkalmanhittagcc:         @local::microboone_cosmictracktagger
-  stitchkalmanhittagcc:        @local::microboone_cosmictracktagger
+  trackkalmanhittag:              @local::microboone_cosmictracktagger
+  stitchkalmanhittag:             @local::microboone_cosmictracktagger
+  trackkalmanhittagcc:            @local::microboone_cosmictracktagger
+  stitchkalmanhittagcc:           @local::microboone_cosmictracktagger
 
   ### PMA
-  pmtrack:                     @local::standard_pmalgtrackmaker
-  pmtracktag:                  @local::microboone_cosmictracktagger
-  pmtrackcalo:                 @local::microboone_calomc
-  pmtrackpid:                  @local::microboone_chi2pid
+  pmtrack:                        @local::standard_pmalgtrackmaker
+  pmtracktag:                     @local::microboone_cosmictracktagger
+  pmtrackcalo:                    @local::microboone_calomc
+  pmtrackpid:                     @local::microboone_chi2pid
 
   ### Containment taggers
-  pandoraCosmicContTag:        @local::microboone_containment_tag
-  pandoraNuContTag:            @local::microboone_containment_tag
-  pandoraNuPMAContTag:         @local::microboone_containment_tag
-  trackkalmanhitContTag:       @local::microboone_containment_tag
-  stitchkalmanhitContTag:      @local::microboone_containment_tag
-  trackkalmanhitccContTag:     @local::microboone_containment_tag
-  stitchkalmanhitccContTag:    @local::microboone_containment_tag
-  pmtrackContTag:              @local::microboone_containment_tag
+  pandoraCosmicContTag:           @local::microboone_containment_tag
+  pandoraNuContTag:               @local::microboone_containment_tag
+  pandoraNuPMAContTag:            @local::microboone_containment_tag
+  trackkalmanhitContTag:          @local::microboone_containment_tag
+  stitchkalmanhitContTag:         @local::microboone_containment_tag
+  trackkalmanhitccContTag:        @local::microboone_containment_tag
+  stitchkalmanhitccContTag:       @local::microboone_containment_tag
+  pmtrackContTag:                 @local::microboone_containment_tag
 
   ### T0 Anode/Cathode piercing track reco
-  pandoraCosmicKHitT0Reco:     @local::T0RecoAnodeCathodePiercing_mc
-  pandoraCosmicT0Reco:         @local::T0RecoAnodeCathodePiercing_mc
-  pandoraNuKHitT0Reco:         @local::T0RecoAnodeCathodePiercing_mc
-  pandoraNuT0Reco:             @local::T0RecoAnodeCathodePiercing_mc
-  pandoraNuPMAT0Reco:          @local::T0RecoAnodeCathodePiercing_mc
-  pmtrackT0Reco:               @local::T0RecoAnodeCathodePiercing_mc
-  stitchkalmanhitT0Reco:       @local::T0RecoAnodeCathodePiercing_mc
-  trackkalmanhitT0Reco:        @local::T0RecoAnodeCathodePiercing_mc
+  pandoraCosmicKHitT0Reco:        @local::T0RecoAnodeCathodePiercing_mc
+  pandoraCosmicT0Reco:            @local::T0RecoAnodeCathodePiercing_mc
+  pandoraNuKHitT0Reco:            @local::T0RecoAnodeCathodePiercing_mc
+  pandoraNuT0Reco:                @local::T0RecoAnodeCathodePiercing_mc
+  pandoraNuPMAT0Reco:             @local::T0RecoAnodeCathodePiercing_mc
+  pmtrackT0Reco:                  @local::T0RecoAnodeCathodePiercing_mc
+  stitchkalmanhitT0Reco:          @local::T0RecoAnodeCathodePiercing_mc
+  trackkalmanhitT0Reco:           @local::T0RecoAnodeCathodePiercing_mc
 
 }
 
@@ -299,6 +300,7 @@ microboone_reco_mcc8_pandoraCosmic: [    pandoraCosmic,
 #                                         pandoraCosmicPMA,
                                          pandoraCosmicKHitcalo,
                                          pandoraCosmicKHitpid,
+#                                         pandoraCosmicKalmanTrackPFPart,
                                          pandoraCosmicKHitPFPart,
                                          pandoraCosmicKHitFlashMatch,
                                          pandoraTrackPFPartMatch,
@@ -529,6 +531,14 @@ microboone_reco_mcc8_producers.pandoraCosmicpid.TrackModuleLabel:               
 microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:    "pandoraCosmic"
 microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.TrackModuleLabel:         "pandoraCosmicKHit"
 microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.EndTickPadding:           75
+microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.TPCYBoundary:             5
+microboone_reco_mcc8_producers.pandoraCosmicKHitPFPart.TPCZBoundary:             5
+
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.PFParticleModuleLabel: "pandoraCosmic"
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.TrackModuleLabel:      "pandoraCosmicKalmanTrack"
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.EndTickPadding:        75
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.TPCYBoundary:          5
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.TPCZBoundary:          5
 
 microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosmicKHit"
 microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "opflash"
