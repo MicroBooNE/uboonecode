@@ -1,0 +1,63 @@
+#include "services_microboone_simulation.fcl"
+
+#include "microboone_overlay.fcl"
+#include "swtrigger_microboone.fcl"
+
+process_name : DataOverlay      
+
+source : {
+  module_type : RootInput
+  maxEvents   : -1
+}
+
+services : {
+
+  TFileService: { fileName: "DataOverlayMixer_hist.root" }
+  TimeTracker:  {}
+  MemoryTracker:     { ignoreTotal: 1 }     #default is one
+  RandomNumberGenerator: {}                     #ART native random number generator
+
+  @table::microboone_simulation_services
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  message:      @local::standard_info
+
+}
+
+outputs: {
+  out: { module_type: RootOutput
+  	         fileName: "%ifb_%tc_overlaid.root"
+		 fastCloning: false
+		 compressionLevel: 1 
+		 dataTier: "detector-simulated"}
+}
+
+physics: {
+
+  producers : { }
+
+  analyzers: { }
+
+  filters : {
+    mixer: @local::microboone_overlay
+    swtrigger: @local::microboone_swtrigger_mc_bnb
+  }
+
+
+  mixer_path : [ mixer, swtrigger ]
+  trigger_paths : [ mixer_path ]
+
+  output : [ out ]
+  end_paths: [ output ]
+
+}
+
+#services.IChannelStatusService.ChannelStatusProvider.UseDB: false
+
+physics.filters.mixer.detail.RawDigitDataModuleLabel: "daq"
+physics.filters.mixer.detail.RawDigitMCModuleLabel:   "daqnonoise"
+physics.filters.mixer.detail.OpDetDataModuleLabel:    "pmtreadout"
+physics.filters.mixer.detail.OpDetMCModuleLabel:      "pmtreadoutnonoise"
+physics.filters.mixer.detail.InputFileIsData:         false
+
+physics.filters.swtrigger.OpDataModule: "mixer"
+
