@@ -14,7 +14,7 @@
 
 #include "ubflashfinder.fcl"
 
-process_name: simpleflashfinder 
+process_name: mcst0study 
 
 services:
 {
