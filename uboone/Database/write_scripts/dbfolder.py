@@ -156,7 +156,28 @@ class dbfolder():
         print '\nCreating folder %s with %d columns:\n   %s' % (self.folder_name, len(columnNames), ', '.join(columnNames))
 
         self.db.createFolder(self.folder_name, columnNamesTypes, False, grants={'uboone_web':'r'})    
-
+    
+    ############################################################################################
+    #
+    #  Tag current state of folder in DB
+    #
+    ############################################################################################
+    def tag(self, tag = None, message = ''):
+    
+        if tag == None:
+	    print '\nNeed to specify tag'
+	    return 6
+	
+	#open folder
+        try:
+            folder = self.db.openFolder(self.folder_name)
+        except:
+            print '\nFolder ', self.folder_name, 'does not exist!'
+            return 4   # Could not open DB folder
+	    
+	print '\nApplying tag: '+tag+' to current state of folder: '+self.folder_name
+	folder.createTag(tag, message)
+    
     ############################################################################################
     #
     #  parse file

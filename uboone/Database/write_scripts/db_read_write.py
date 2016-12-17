@@ -18,7 +18,7 @@ def help_me():
   ----------------------------------------------------
   -h,--help     : print help
 
-  -a,--action   : do an action [create, write, read] (required)
+  -a,--action   : do an action [create, write, read, tag] (required)
 
   -f,--folder   : folder name (required)
   
@@ -91,6 +91,9 @@ def help_me():
   
   #creates a folder called detpedestals in the production database
   python db_read_write.py --action create --folder detpedestals --production -i format_file.txt
+  
+  #tags a folder called detpedestals as 'v1' in the development database
+  python db_read_write.py --action tag --folder detpedestals --tag v1
   
   
   #prints the contents of folder pmtgains_data in the development database 
@@ -248,7 +251,9 @@ def main():
 	
     dbf = dbfolder(host, port, dbname, user, folder)
     dbf.create(column_names, column_types)  
-    
+  elif action == 'tag':
+    dbf = dbfolder(host, port, dbname, user, folder)
+    dbf.tag(tag,'')
   else:
     print "Invalid action: "+action+".  Seek help (-h) and try again\n"
     sys.exit(0)

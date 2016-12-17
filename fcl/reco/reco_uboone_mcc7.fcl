@@ -16,7 +16,7 @@
 #include "showerquality_microboone.fcl"
 #include "pandoramodules_microboone.fcl"
 #include "photpropservices_microboone.fcl"
-#include "correct_saturation_mc.fcl"
+#include "correct_saturation.fcl"
 
 #include "mchitmodules.fcl"
 #include "mcreco.fcl"

@@ -1,6 +1,6 @@
 #include "services_microboone.fcl"
 #include "analysistreemodule_microboone.fcl"
-#include "reco_uboone_mcc7.fcl"
+#include "services_microboone.fcl"
 #include "trackfindermodules_microboone.fcl"
 
 process_name: Ana
@@ -15,7 +15,7 @@ services:
   message:      @local::microboone_message_services_prod_debug
   FileCatalogMetadata:  @local::art_file_catalog_mc
   BackTracker: @local::microboone_backtracker
-  @table::microboone_reco_mcc7_services
+  @table::microboone_services_reco
 }
 
 #source is now a root file
