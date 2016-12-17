@@ -1,0 +1,29 @@
+BEGIN_PROLOG
+
+microboone_crtdetsim: 
+{
+  module_type: "CRTDetSim"
+  ProducerName: "largeant"
+  TDelayNorm: 1.
+  TDelayShift: 1.
+  TDelaySigma: 0.1
+  TDelayOffset: 0.0
+  TDelayRMSGausNorm: 0.1
+  TDelayRMSGausShift: 0.5
+  TDelayRMSGausSigma: 0.2
+  TDelayRMSExpNorm: 0.5
+  TDelayRMSExpShift: 0.3
+  TDelayRMSExpScale: 0.1
+  PropDelay: 2.0
+  PropDelayError: 0.2
+  TResInterpolator: 0.1
+  NpeScaleNorm: 0.7
+  NpeScaleShift: 0.2
+  Q0: 0.
+  QPed: 0.
+  QSlope: 0.0
+  QRMS: 0.0
+  AbsLenEff: 0.0
+}
+
+END_PROLOG
