@@ -1,0 +1,19 @@
+#include "flashmatchalg.fcl"
+
+BEGIN_PROLOG
+#
+# Module configuration
+#
+MuCSTrackFinder: {
+  module_type:           "MuCSTrackFinder"
+  TrackProducer:         "pandoraCosmic"
+  BeamOpFlashProducer:   "simpleFlashBeam"
+  CosmicOpFlashProducer: "simpleFlashCosmic"
+  TriggerProducer:       "daq"
+  FlashVetoTimeStart:    -1.5
+  FlashVetoTimeEnd:      -0.5
+  MaxTrackCount:         100
+  GainCorrection: [1.09331,1.0278,1.04057,0.986795,1.07759,1.09017,1.10477,1.14167,1.01527,1.11422,0.950291,0.977529,1.05703,0.952964,0.966842,0.991664,1.00079,0.91388,1.11111,1.08502,1.23453,1.07951,0.94202,0.990522,1.02483,1.04599,0.,1.02311,0.758705,1.11797,1.0592,1.01436]
+  FlashMatchConfig: @local::flashmatch_config
+}
+END_PROLOG

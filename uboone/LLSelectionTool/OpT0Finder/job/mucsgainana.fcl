@@ -1,0 +1,11 @@
+#include "flashmatchalg.fcl"
+
+BEGIN_PROLOG
+#
+# Module configuration
+#
+MuCSGainAna: {
+  module_type:           "MuCSGainAna"
+  OpHitProducer:         "OpHit"
+}
+END_PROLOG

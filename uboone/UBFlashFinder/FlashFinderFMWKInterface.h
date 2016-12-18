@@ -15,6 +15,5 @@ namespace pmtana {
 
   size_t OpDetFromOpChannel(size_t opch);
 
-  void OpDetCenterFromOpChannel(size_t opch, double *xyz);
 }
 #endif

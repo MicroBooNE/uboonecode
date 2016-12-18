@@ -362,13 +362,14 @@ bool SWTrigger::filter(art::Event & evt)
       continue;
     if ( wfm.size()<fMinReadoutTicks )
       continue;
-
-    int trig_dt = (int)(trigger_time - wfm.TimeStamp());
+    long int trig_dt = (long int)(trigger_time - wfm.TimeStamp());
     uint64_t unsigned_trig_dt = (trig_dt < 0 ? trig_dt*(-1) : trig_dt);
+
     if(min_trig_dt > unsigned_trig_dt) {
       min_trig_dt = unsigned_trig_dt;
       target_time = wfm.TimeStamp() * 1.e3;
     } 
+
   }
   if(target_time==1e12) {
     std::cerr<<"\033[93m[ERROR]\033[00m Did not find target time... SKIPPING EVENT" <<std::endl;

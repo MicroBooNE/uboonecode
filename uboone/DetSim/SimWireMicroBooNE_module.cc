@@ -498,13 +498,11 @@ namespace detsim {
 	      bool YZflag = true;	      
 	      if(view == 0) { // U-plane
 		if( (int)chan >= 1168 && (int)chan <= 1903 ){ // wires overlap with Y-plane shorted wires
-		  //if( (int)chan >= YZwireOverlap[2][1][1] && (int)chan <= YZwireOverlap[2][1][2] ){ // wires overlap with Y-plane shorted wires
 		  if(z >= 701 && z <= 738){ // YZ region overlaps with Y-plane shorted wires
 		    if(datadrivenresponse){
 		      if(wireIndex != 1){ YZflag = false; }
 		    }
 		    else{
-		      //charge = charge * YZchargeScaling[1][2];
 		      charge = charge * 0.98;
 		    }
 		  }
@@ -513,19 +511,16 @@ namespace detsim {
 		      if(wireIndex != 2){ YZflag = false; }
 		    }
 		    else{
-		      //charge = charge * YZchargeScaling[1][3];
 		      charge = charge * 1;
 		    }
 		  }
 		}
 		else if( IsUMisconfigured == true){
 		  if(  ((int)chan >= 2016 && (int)chan <= 2095) || ((int)chan >= 2192 && (int)chan <= 2303) || ((int)chan >= 2352 && (int)chan <= 2382)  ){ // misconfigured U-channels (from FT1)
-		  //if( ( ((int)chan >= MisconfiguredU[1][1] && (int)chan <= MisconfiguredU[1][2]) || ((int)chan >= MisconfiguredU[2][1] && (int)chan <= MisconfiguredU[2][2]) || ((int)chan >= MisconfiguredU[3][1] && (int)chan <= MisconfiguredU[3][2]) ) ){ // misconfigured U-channels (from FT1)
 		    if(datadrivenresponse){
 		      if(wireIndex != 0){ YZflag = false; }
 		    }
 		    else{
-		      //charge = charge * YZchargeScaling[1][3];
 		      charge = charge * 1;
 		    }
 		  }
@@ -535,54 +530,76 @@ namespace detsim {
 		    if(wireIndex != 2){ YZflag = false; }
 		  }
 		  else{
-		    //charge = charge * YZchargeScaling[1][1];
 		  charge = charge * 1;
 		  }
 		}
 	      } 
 
 	      else if(view == 1) { // V-plane
-		if( (int)chan >= 2400 && (int)chan <= 3071 ){ // wires overlap with U-plane shorted wires
-		  //if( (int)chan >= fYZwireOverlap[1][2][1] && (int)chan <= fYZwireOverlap[1][2][2] ){ // wires overlap with U-plane shorted wires
-		  if( (y > (z*0.577)+14.595) && (y < (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
+		if( (int)chan >= 2400 && (int)chan < 3568 ){ // wires overlap with U-plane shorted wires
+		  if( (y < (z*0.577)+14.595) && (y > (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
 		    if(datadrivenresponse){
 		      if(wireIndex != 1){ YZflag = false; }
 		    }
 		    else{
-		      //charge = charge * YZchargeScaling[2][2];
 		      if(wireIndex == 1){ charge = charge * 0.685; }
 		      if(wireIndex == 0){ YZflag = false; }
 		    }
 		  }
-		  else{
+		  else{ // nominal
                     if(datadrivenresponse){
 		      if(wireIndex != 2){ YZflag = false; }
                     }
                     else{
-                      //charge = charge * YZchargeScaling[2][1];                                                                                                                                           
                       if(wireIndex == 1){ charge = charge * 0.7; }
                       if(wireIndex == 0){ YZflag = false; }
                     }
                   }
 		}
-		else if( (int)chan >= 3568 && (int)chan <= 4303 ){ // wires overlap with Y-plane shorted wires                                                       
-		  //else if( (int)chan >= fYZwireOverlap[2][2][1] && (int)chan <= fYZwireOverlap[2][2][2] ){ // wires overlap with Y-plane shorted wires                                                   
+		else if( (int)chan >= 3568 && (int)chan <= 3743){ // wires overlap with U-plane AND Y-plane shorted wires
+		  if( (y < (z*0.577)+14.595) && (y > (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
+		    if(datadrivenresponse){
+		      if(wireIndex != 1){ YZflag = false; }
+		    }
+		    else{
+		      if(wireIndex == 1){ charge = charge * 0.685; }
+		      if(wireIndex == 0){ YZflag = false; }
+		    }
+		  }
+		  else if(z >= 701 && z <= 738){ // YZ region overlaps with Y-plane shorted wires
+		    if(datadrivenresponse){
+		      if(wireIndex != 0){ YZflag = false; }
+		    }
+		    else{
+		      if(wireIndex == 0){ charge = charge * 0.7; }
+		      if(wireIndex == 1){ YZflag = false; }
+		    }
+		  }
+		  else{ // nominal
+                    if(datadrivenresponse){
+		      if(wireIndex != 2){ YZflag = false; }
+                    }
+                    else{
+                      if(wireIndex == 1){ charge = charge * 0.7; }
+                      if(wireIndex == 0){ YZflag = false; }
+                    }
+                  }
+		}
+		else if( (int)chan > 3743 && (int)chan <= 4303 ){ // wires overlap with Y-plane shorted wires
 		  if(z >= 701 && z <= 738){ // YZ region overlaps with Y-plane shorted wires
 		    if(datadrivenresponse){
 		      if(wireIndex != 0){ YZflag = false; }
 		    }
 		    else{
-		      //charge = charge * YZchargeScaling[2][3];
 		      if(wireIndex == 0){ charge = charge * 0.7; }
 		      if(wireIndex == 1){ YZflag = false; }
 		    }
 		  }
-		  else{
+		  else{ // nominal
 		    if(datadrivenresponse){ 
 		      if(wireIndex != 2){ YZflag = false; }
 		    }
 		    else{
-		      //charge = charge * YZchargeScaling[2][1];
 		      if(wireIndex == 1){ charge = charge * 0.7; }
 		      if(wireIndex == 0){ YZflag = false; }
 		    }
@@ -593,7 +610,6 @@ namespace detsim {
 		    if(wireIndex != 2){ YZflag = false; }
 		  }
 		  else{ 
-		    //charge = charge * YZchargeScaling[2][1];
 		    if(wireIndex == 1){ charge = charge * 0.7; }
 		    if(wireIndex == 0){ YZflag = false; }
 		  }
@@ -601,14 +617,12 @@ namespace detsim {
 	      } 
 
 	      else if(view == 2) { // Y-plane
-		//if( (int)chan >= fYZwireOverlap[1][3][1] && (int)chan <= fYZwireOverlap[1][3][2] ){ // wires overlap with U-plane shorted wires
 		if( (int)chan >= 4800 && (int)chan <= 6143 ){ // wires overlap with U-plane shorted wires
-		  if( (y > (z*0.577)+14.595) && (y < (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
+		  if( (y < (z*0.577)+14.595) && (y > (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
 		    if(datadrivenresponse){
 		      if(wireIndex != 0){ YZflag = false; }
 		    }
 		    else{
-		      //charge = charge * YZchargeScaling[3][2];
 		      charge = charge * 0.8;
 		    }
 		  }
@@ -618,7 +632,6 @@ namespace detsim {
 		    }
 		    else{
 		      charge = charge * 1.0;
-		      //charge = charge * YZchargeScaling[3][1];                                                                                                                                           
 		    }
 		  }
 		}
@@ -628,7 +641,6 @@ namespace detsim {
 		  }
 		  else{
 		    charge = charge * 1.0;
-		  //charge = charge * YZchargeScaling[3][1];
 		  }
 		}
 	      } 
@@ -641,6 +653,7 @@ namespace detsim {
 	  //} // SimChannels
       } // channels
     } // YZ response
+
     //--------------------------------------------------------------------                                                                                                                           
     //                                                                                                                                                                                                  
     // I'm not sure about the purpose of this first for-loop: experts please update this comment!                                                                                                         

@@ -9,6 +9,7 @@
 #include "trackfindermodules_microboone.fcl"
 #include "kalmanfilterfinaltrackfitter.fcl"
 #include "opticaldetectormodules_microboone.fcl"
+#include "ubflashfinder.fcl"
 #include "triggeralgo_service.fcl"
 #include "cosmicremovalmodules.fcl"
 #include "calorimetry_microboone.fcl"
@@ -17,7 +18,7 @@
 #include "showerquality_microboone.fcl"
 #include "pandoramodules_microboone.fcl"
 #include "photpropservices_microboone.fcl"
-#include "correct_saturation_mc.fcl"
+#include "correct_saturation.fcl"
 #include "T0RecoAnodeCathodePiercing.fcl"
 #include "ubflashfinder.fcl"
 
@@ -79,31 +80,17 @@ microboone_reco_mcc8_producers:
   #ophitSatFW  :                  @local::ub_ophitfinder_satfw
   #ophitSatSW  :                  @local::ub_ophitfinder_satsw
   #ophitSatCFD :                  @local::ub_ophitfinder_satcfd
-
+  ophitBeam         : @local::microboone_ophit_saturation_beam
+  ophitCosmic       : @local::microboone_ophit_saturation_cosmic
 
   ### Saturation correction module
-  saturation : @local::correct_saturation
+  saturation : @local::correct_saturation_mc
 
   ### flash finders
-  ophit            :              @local::microboone_ophit_beam_highgain
-  ophitLow         :              @local::microboone_ophit_beam_lowgain
-  ophitCosmic      :              @local::microboone_ophit_cosmic_highgain
-  ophitCosmicLow   :              @local::microboone_ophit_cosmic_lowgain
-  opflash          :              @local::microboone_opflash_beam_highgain
-  opflashLow       :              @local::microboone_opflash_beam_lowgain
-  opflashCosmic    :              @local::microboone_opflash_cosmic_highgain
-  opflashCosmicLow :              @local::microboone_opflash_cosmic_lowgain
-  sflash           :              @local::microboone_simple_flash
-
-  ophitSat     :                  @local::microboone_ophit_saturation
-  opflashSat   :                  @local::microboone_opflash_saturation
-  sflashSat    :                  @local::microboone_simple_flash_sat
-
-  ### Simple Flash Finder
-  ophitSatBeam:                   @local::microboone_ophit_saturation_beam
-  ophitSatCosmic:                 @local::microboone_ophit_saturation_cosmic
-  simpleFlashBeam:                @local::UBFlashBeam
-  simpleFlashCosmic:              @local::UBFlashCosmic
+  simpleFlashBeam   : @local::UBFlashBeamMC
+  simpleFlashCosmic : @local::UBFlashCosmicMC
+  opflashBeam       : @local::microboone_opflash_saturation_beam
+  opflashCosmic     : @local::microboone_opflash_saturation_cosmic
 
   ### noise filtering (if needed)
   digitfilter:                    @local::microboone_rawdigitfilter
@@ -231,22 +218,12 @@ microboone_reco_mcc8_filters:
 ### Below are a list of convenient sequences that can be used for production/typical users. ###
 
 microboone_reco_mcc8_optical: [ saturation,
-                                ophit,
-                                ophitSat,
-                                ophitLow,
                                 ophitCosmic,
-                                ophitCosmicLow,
-                                opflash,
-                                sflash,
-                                opflashSat,
-                                sflashSat,
-                                opflashLow,
+                                ophitBeam,
                                 opflashCosmic,
-                                opflashCosmicLow, 
-                                ophitSatBeam,
-                                ophitSatCosmic,
-                                simpleFlashBeam,
-                                simpleFlashCosmic]
+                                opflashBeam,
+                                simpleFlashCosmic,
+                                simpleFlashBeam]
 
 microboone_reco_mcc8_signalprocessing: [ digitfilter,
                                          caldata,
@@ -371,10 +348,6 @@ microboone_reco_mcc8_3D: [               rns,
 ### Below we include overrides for the modules above
 ### These are for MCC 7
 
-# Simple Flash
-physics.producers.simpleFlashBeam.PECalib:   @local::NoCalib # No calibration for MC. This is not final.
-physics.producers.simpleFlashCosmic.PECalib: @local::NoCalib # No calibration for MC. This is not final.
-
 # this turns on the truncation of the RawDigits
 microboone_reco_mcc8_producers.digitfilter.TruncateTicks:                        true
 
@@ -470,6 +443,8 @@ microboone_reco_mcc8_producers.pandoraCosmicKHit.PFParticleModuleLabel:         
 
 microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputTracksLabel: "pandoraCosmic"
 microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputCaloLabel:   ""
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputPFParticleLabel:   ""
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputPidLabel:    ""
 
 microboone_reco_mcc8_producers.pandoraCosmicPMA.HitModuleLabel:                  "gaushit"
 microboone_reco_mcc8_producers.pandoraCosmicPMA.PfpModuleLabel:                  "pandoraCosmic"
@@ -503,7 +478,7 @@ microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.TPCYBoundary:     
 microboone_reco_mcc8_producers.pandoraCosmicKalmanTrackPFPart.TPCZBoundary:          5
 
 microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosmicKHit"
-microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "opflash"
+microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "simpleFlashCosmic"
 microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
 microboone_reco_data_producers.pandoraCosmicKHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
@@ -525,6 +500,8 @@ microboone_reco_mcc8_producers.pandoraNuKHit.HitFinderModuleLabel:              
 
 microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputTracksLabel:     "pandoraNu"
 microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputCaloLabel:       ""
+microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputPFParticleLabel:   ""
+microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputPidLabel:        ""
 
 microboone_reco_mcc8_producers.pandoraNuPMA.HitModuleLabel:                      "pandoraCosmicKHitRemoval"
 microboone_reco_mcc8_producers.pandoraNuPMA.PfpModuleLabel:                      "pandoraNu"
@@ -554,7 +531,7 @@ microboone_reco_mcc8_producers.pandoraNuPMApid.CalorimetryModuleLabel:          
 microboone_reco_mcc8_producers.pandoraNuPMApid.TrackModuleLabel:                 "pandoraNuPMA"
 
 microboone_reco_mcc8_producers.pandoraNuKHitFlashMatch.TrackModuleLabel:         "pandoraNuKHit"
-microboone_reco_mcc8_producers.pandoraNuKHitFlashMatch.FlashModuleLabel:         "opflash"
+microboone_reco_mcc8_producers.pandoraNuKHitFlashMatch.FlashModuleLabel:         "simpleFlashBeam"
 microboone_reco_mcc8_producers.pandoraNuKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
 microboone_reco_mcc8_producers.showerrecofuzzy.InputProducer:                    "fuzzyclustermerger"
