@@ -60,6 +60,9 @@ outputs:
  }
 }
 
+services.DetectorClocksService.InheritClockConfig:           false
+services.DetectorClocksService.TriggerOffsetTPC:             -0.400e3
+
 ### Here, we overwrite ALL module labels with the ones defined above.
 #physics.analyzers.analysistree:  @local::microboone_analysistree
 physics.analyzers.analysistree.OpFlashModuleLabel: "opflashSat"
