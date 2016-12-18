@@ -24,6 +24,7 @@ microboone_pedestalretrievalalg:
     DefaultRmsErr:   0.0
 }
 microboone_pedestalretrievalalg.DatabaseRetrievalAlg.DBFolderName: "detpedestals_data" 
+microboone_pedestalretrievalalg.DatabaseRetrievalAlg.DBTag: "v1r0"
 
 microboone_detpedestalservice: 
 {
@@ -40,6 +41,7 @@ microboone_channelstatus_provider:
   UseFile: false
 }
 microboone_channelstatus_provider.DatabaseRetrievalAlg.DBFolderName: "channelstatus_data"
+microboone_channelstatus_provider.DatabaseRetrievalAlg.DBTag: "v1r0"
 
 microboone_channelstatus_service:
 {
@@ -63,6 +65,7 @@ microboone_electronlifetime_provider:
 }
 microboone_electronlifetime_provider.DatabaseRetrievalAlg.DBFolderName: "elifetime_data_tmp"
 microboone_electronlifetime_provider.DatabaseRetrievalAlg.DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+microboone_electronlifetime_provider.DatabaseRetrievalAlg.DBTag: "v1r0"
 
 microboone_electronlifetime_service:
 {
@@ -82,6 +85,7 @@ microboone_pmtgain_provider:
 }
 microboone_pmtgain_provider.DatabaseRetrievalAlg.DBFolderName: "pmtgains_data"
 microboone_pmtgain_provider.DatabaseRetrievalAlg.DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+microboone_pmtgain_provider.DatabaseRetrievalAlg.DBTag: "v1r0"
 
 microboone_pmtgain_service:
 {
@@ -104,6 +108,7 @@ microboone_electronicscalib_provider:
 }
 microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBFolderName: "electronicscalib_data"
 microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
+microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBTag: "v1r0"
 
 microboone_electronicscalib_service:
 {

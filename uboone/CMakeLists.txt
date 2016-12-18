@@ -7,6 +7,7 @@ add_subdirectory(RawData)
 add_subdirectory(BeamData)
 add_subdirectory(BeamDAQ)
 add_subdirectory(BeamAna)
+add_subdirectory(CRT)
 add_subdirectory(Utilities)
 add_subdirectory(Database)
 add_subdirectory(Simulation)
@@ -29,6 +30,10 @@ add_subdirectory(MuCS)
 add_subdirectory(T0Reco)
 add_subdirectory(EventWeight)
 add_subdirectory(UBFlashFinder)
+add_subdirectory(LLSelectionTool)
+add_subdirectory(LLBasicTool)
+add_subdirectory(LLApp)
+add_subdirectory(CosmicTagging)
 
 add_subdirectory(DataOverlay)
 add_subdirectory(PatternFilter)
@@ -62,7 +67,7 @@ add_subdirectory(PatternFilter)
 #     "larreco_EventFinder",
 #     "larsim_TriggerAlgo",
 #     "larana_OpticalDetector",
-#     "larreco_Calorimetry", 
+#     "larreco_Calorimetry",
 #     "larreco_ShowerFinder",
 #     "lareventdisplay_EventDisplay",
 #     "larana_ParticleIdentification",
