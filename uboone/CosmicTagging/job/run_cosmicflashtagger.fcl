@@ -77,8 +77,8 @@ physics:
  {
  }
 
- reco: [ rns, saturation, ophitSatBeam, ophitSatCosmic, 
-         opflashSatBeam, opflashSatCosmic, simpleFlashBeam, simpleFlashCosmic, 
+ reco: [ rns, saturation, ophitBeam, ophitCosmic, 
+         simpleFlashBeam, simpleFlashCosmic, 
          cosmicFlashTagger ]
 
  #define the output stream, there could be more than one if using filters 
