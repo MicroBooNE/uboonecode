@@ -65,12 +65,12 @@ physics:
  producers:
  {
    saturation:        @local::correct_saturation
-   ophitSatBeam:      @local::microboone_ophit_saturation_beam
-   ophitSatCosmic:    @local::microboone_ophit_saturation_cosmic
-   opflashSatBeam:    @local::microboone_opflash_saturation_beam
-   opflashSatCosmic:  @local::microboone_opflash_saturation_cosmic
-   simpleFlashBeam:   @local::UBFlashBeam
-   simpleFlashCosmic: @local::UBFlashCosmic
+   ophitBeam:         @local::microboone_ophit_saturation_beam
+   ophitCosmic:       @local::microboone_ophit_saturation_cosmic
+   #opflashSatBeam:    @local::microboone_opflash_saturation_beam
+   #opflashSatCosmic:  @local::microboone_opflash_saturation_cosmic
+   simpleFlashBeam:   @local::UBFlashBeamMC
+   simpleFlashCosmic: @local::UBFlashCosmicMC
    cosmicFlashTagger: @local::CosmicFlashTagger
    rns:               { module_type: "RandomNumberSaver" }
  }

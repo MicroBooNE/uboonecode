@@ -164,6 +164,7 @@ namespace flashana {
     }
     if (_alg_flash_hypothesis) {
       _alg_flash_hypothesis->SetOpDetPositions(pmt_x_pos, pmt_y_pos, pmt_z_pos);
+      _alg_flash_hypothesis->Configure(main_cfg.get<flashana::Config_t>(_alg_flash_hypothesis->AlgorithmName()));
       _alg_flash_hypothesis->SetActiveVolume( det_xrange[0], det_xrange[1],
                                               det_yrange[0], det_yrange[1],
                                               det_zrange[0], det_zrange[1] );
