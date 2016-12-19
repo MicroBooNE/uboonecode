@@ -256,7 +256,12 @@ void CosmicFlashTaggerAna::analyze(art::Event const & e)
     std::vector<art::Ptr<recob::PFParticle>> cosmicTagToPFP_v = cosmicPFPAssns.at(cosmicTag.key());
     if(_debug) std::cout << "Number of PFP associated with this Cosmic Tag: " << cosmicTagToPFP_v.size() << std::endl;
 
-    if (cosmicTagToPFP_v.size() != 1){
+    if (cosmicTagToPFP_v.size() == 0){
+      std::cerr << "No cosmic tags in this event." << std::endl;
+      return;
+    }
+
+    if (cosmicTagToPFP_v.size() > 1){
       std::cerr << "More than 1 PFP associated with a single cosmic tag ?!" << std::endl;
       return;
     }
