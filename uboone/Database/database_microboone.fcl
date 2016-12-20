@@ -41,7 +41,7 @@ microboone_channelstatus_provider:
   UseFile: false
 }
 microboone_channelstatus_provider.DatabaseRetrievalAlg.DBFolderName: "channelstatus_data"
-microboone_channelstatus_provider.DatabaseRetrievalAlg.DBTag: "v1r0"
+microboone_channelstatus_provider.DatabaseRetrievalAlg.DBTag: "v1r2"
 
 microboone_channelstatus_service:
 {
@@ -108,7 +108,7 @@ microboone_electronicscalib_provider:
 }
 microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBFolderName: "electronicscalib_data"
 microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBUrl: "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
-microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBTag: "v1r0"
+microboone_electronicscalib_provider.DatabaseRetrievalAlg.DBTag: "v1r1"
 
 microboone_electronicscalib_service:
 {
