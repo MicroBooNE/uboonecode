@@ -49,7 +49,7 @@ qualifier	swtrigger	genie_xsec	larsoft		ubutil		uboone_data	uboonedaq_datatypes	
 e10:debug	e10:debug	DefaultPlusMECWithNC	e10:debug	e10:debug	-nq-		e10:debug
 e10:opt		e10:opt		DefaultPlusMECWithNC	e10:opt		e10:opt		-nq-        	e10:opt
 e10:prof	e10:prof	DefaultPlusMECWithNC	e10:prof	e10:prof	-nq-        	e10:prof
-#e10:prof-fg	e10:prof	LocalFGNievesQEAndMEC	e10:prof	e10:prof	-nq-        	e10:prof
+e10:prof-fg	e10:prof	LocalFGNievesQEAndMEC	e10:prof	e10:prof	-nq-        	e10:prof
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
