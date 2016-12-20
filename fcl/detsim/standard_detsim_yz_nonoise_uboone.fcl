@@ -77,6 +77,12 @@ outputs:
  }
 }
 
+# Enable YZ-dependent field response.
+
+services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: true
+
+# Turn off noise.
 
 physics.producers.daqnonoise.GenNoise: 0
 physics.filters.swtriggernonoise.OpDataModule: "pmtreadoutnonoise"

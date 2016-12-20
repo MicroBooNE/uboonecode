@@ -1,5 +1,0 @@
-#include "correct_saturation.fcl"
-BEGIN_PROLOG
-correct_saturation.CalibrationCorr : [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,
-                                      1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0]  # for MC 
-END_PROLOG

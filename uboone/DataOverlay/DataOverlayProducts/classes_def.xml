@@ -7,7 +7,8 @@
 
 <lcgdict>
 
-  <class name="mix::EventMixingSummary" ClassVersion="10">
+  <class name="mix::EventMixingSummary" ClassVersion="11">
+   <version ClassVersion="11" checksum="1305650479"/>
    <version ClassVersion="10" checksum="338019760"/>
   </class>
   

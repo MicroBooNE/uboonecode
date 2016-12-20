@@ -1,0 +1,24 @@
+BEGIN_PROLOG
+
+microboone_overlay:{
+  module_type : OverlayRawDataMicroBooNE
+  fileNames : [ ]
+  readMode : sequential
+  wrapFiles : true
+  coverageFraction : 1
+  detail : {
+    RawDigitDataModuleLabel : daq
+    OpDetDataModuleLabel : pmtreadout
+    RawDigitMCModuleLabel : daq
+    OpDetMCModuleLabel : pmtreadout
+    InputFileIsData : false
+    G4InputModuleLabel : largeant
+    GeneratorInputModuleLabel : generator
+    MCRecoInputModuleLabel : mcreco
+    EventsToMix: 1
+    DefaultMCRawDigitScale: 1.0
+    DefaultMCOpDetScale:    1.0
+  }
+}
+
+END_PROLOG

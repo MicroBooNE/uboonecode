@@ -77,6 +77,17 @@ outputs:
  }
 }
 
+# Enable data-driven field response.
+
+services.SignalShapingServiceMicroBooNE.FieldResponseFVersion: [ "v3.1", "v3.1"]
+services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
+services.SignalShapingServiceMicroBooNE.datadrivenResponse: true
+services.SignalShapingServiceMicroBooNE.DefaultEField: 0.273
+services.SignalShapingServiceMicroBooNE.DefaultTemperature: 89
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: true
+services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 1.0, 1.0, 1.0]
+
+# Turn off noise.
 
 physics.producers.daqnonoise.GenNoise: 0
 physics.filters.swtriggernonoise.OpDataModule: "pmtreadoutnonoise"
