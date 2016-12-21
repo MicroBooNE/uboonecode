@@ -76,7 +76,7 @@ private:
   ::flashana::FlashMatchManager       _mgr;
   ::flashana::IncompatibilityChecker  _incompChecker;
   std::vector<::flashana::Flash_t>    beam_flashes;
-  std::vector<art::Ptr<recob::Track>> track_v;
+  //std::vector<art::Ptr<recob::Track>> track_perevent_v;
 
   const anab::CosmicTagID_t TAGID_BEAM_INCOMPATIBLE = anab::CosmicTagID_t::kFlash_BeamIncompatible;
   const anab::CosmicTagID_t TAGID_NOT_TAGGED        = anab::CosmicTagID_t::kNotTagged;
@@ -252,7 +252,8 @@ void CosmicFlashTagger::produce(art::Event & e)
 
     bool beamIncompatible = false;
     art::Ptr<recob::PFParticle> pfParticle;
-      
+    lar_pandora::TrackVector track_v;
+
     // --- Loop over beam flashes ---
     for (unsigned int bf = 0; bf < beam_flashes.size(); bf++) {
 
@@ -265,7 +266,7 @@ void CosmicFlashTagger::produce(art::Event & e)
       }
 
       // Get the tracks associated with this PFParticle
-      lar_pandora::TrackVector track_v = it->second;
+      track_v = it->second;
 
       // Get the beam flash
       ::flashana::Flash_t flashBeam = beam_flashes[bf];
@@ -289,9 +290,9 @@ void CosmicFlashTagger::produce(art::Event & e)
       
       if(_debug) {
         _pfp_hypo_spec[_n_pfp-1] = flashHypo.pe_v;
-        std::cout << "***The beam flash has Z = " << flashBeam.z << " +- " << flashBeam.z_err << std::endl;
+        if(_debug) std::cout << "*** The beam flash has Z = " << flashBeam.z << " +- " << flashBeam.z_err << std::endl;
         this->AddFlashPosition(flashHypo);
-        std::cout << "***The hypo flash has Z = " << flashHypo.z << " +- " << flashHypo.z_err << std::endl;
+        if(_debug) std::cout << "*** The hypo flash has Z = " << flashHypo.z << " +- " << flashHypo.z_err << std::endl;
       }
       // CORE FUNCTION: Check if this beam flash and this flash hypothesis are incompatible
       bool areIncompatible = _incompChecker.CheckIncompatibility(flashBeam,flashHypo); 
