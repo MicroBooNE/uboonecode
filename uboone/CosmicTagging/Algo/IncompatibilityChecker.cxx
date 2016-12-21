@@ -59,7 +59,6 @@ namespace flashana {
         nIncompBins ++;
         if (nIncompBins >= _nBinsRequirement){
           areIncompatibleByBin = true;
-          //return true;
         }
       }
       totalPE_flash += flash.pe_v[pmt];
@@ -71,15 +70,14 @@ namespace flashana {
     double nsigma = (totalPE_hypo - totalPE_flash) / error;
     if (nsigma > _sigmaThreshold) {
       areIncompatibleByTotPe = true;
-      //return true;
     }
 
     if(_useFlashPosition) {
       double beamFlashZmin = flash.z - flash.z_err;
       double beamFlashZmax = flash.z + flash.z_err;
-      std::cout << "beamFlashZmin " << beamFlashZmin << std::endl;
-      std::cout << "beamFlashZmax " << beamFlashZmax << std::endl;
-      std::cout << "flash_hypo.z  " << flash_hypo.z  << std::endl;
+      //std::cout << "beamFlashZmin " << beamFlashZmin << std::endl;
+      //std::cout << "beamFlashZmax " << beamFlashZmax << std::endl;
+      //std::cout << "flash_hypo.z  " << flash_hypo.z  << std::endl;
       if (flash_hypo.z > beamFlashZmax || flash_hypo.z < beamFlashZmin) {
         areIncompatibleByFlsPos = true;
       }
@@ -87,12 +85,12 @@ namespace flashana {
 
     if(!_useFlashPosition) {
       if( (areIncompatibleByBin || areIncompatibleByTotPe) ) {
-        std::cout << "Flashs are incompatible by bin or total pe." << std::endl;
+        std::cout << "Flashes are incompatible by bin or total pe." << std::endl;
         return true;
       }
     } else {
       if( (areIncompatibleByBin || areIncompatibleByTotPe) && areIncompatibleByFlsPos) {
-        std::cout << "Flashs are incompatible by (bin or total pe) and flash position." << std::endl;
+        std::cout << "Flashes are incompatible by (bin or total pe) and flash position." << std::endl;
         return true;
       }
     }
