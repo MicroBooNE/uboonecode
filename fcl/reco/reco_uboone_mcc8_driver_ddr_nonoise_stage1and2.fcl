@@ -9,3 +9,10 @@ services.SignalShapingServiceMicroBooNE.DefaultEField: 0.273
 services.SignalShapingServiceMicroBooNE.DefaultTemperature: 89
 services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
 services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 1.0, 1.0, 1.0]
+
+# Choose no noise inputs.
+
+physics.producers.digitfilter.DigitModuleLabel: "daqnonoise"
+physics.producers.saturation.LGProducer: "pmtreadoutnonoise"
+physics.producers.saturation.HGProducer: "pmtreadoutnonoise"
+physics.producers.saturation.HGProducerCosmic: "pmtreadoutnonoise"

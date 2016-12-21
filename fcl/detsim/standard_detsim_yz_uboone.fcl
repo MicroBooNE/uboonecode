@@ -3,4 +3,4 @@
 # Enable YZ-dependent field response.
 
 services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
-services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: true
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
