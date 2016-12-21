@@ -21,6 +21,7 @@
 #include "correct_saturation.fcl"
 #include "T0RecoAnodeCathodePiercing.fcl"
 #include "ubflashfinder.fcl"
+#include "cosmicflashtagger.fcl"
 
 #include "mchitmodules.fcl"
 #include "mcreco.fcl"
@@ -126,6 +127,7 @@ microboone_reco_mcc8_producers:
   ### pandora cosmic pfparticle
   pandoraCosmicKHitPFPart:        @local::microboone_cosmicpfparticletagger
   pandoraCosmicKalmanTrackPFPart: @local::microboone_cosmicpfparticletagger
+  pandoraCosmicKHitFlashTag:      @local::microboone_cosmicpfpflashtagger
 
   ### pandora analysis
   pandoraCosmicKHittag:           @local::microboone_cosmictracktagger
@@ -133,7 +135,9 @@ microboone_reco_mcc8_producers:
   pandoraCosmicKHitpid:           @local::microboone_chi2pid
   pandoraCosmicKHitFlashMatch:    @local::microboone_beamflashtrackmatchtagger
   pandoraTrackPFPartMatch:        @local::microboone_trackpfparticlematch
-  pandoraCosmicKHitRemoval:       @local::microboone_crhitremoval
+  pandoraCosmicKHitRemoval:       @local::microboone_crhitremoval # Remove hits, based on PFP geometry
+  pandoraCosmicKHitRemovalF:      @local::microboone_crhitremoval # Remove hits, based on Flashes
+  pandoraCosmicKHitRemovalGF:     @local::microboone_crhitremoval # Remove hits, based on PFP geometry and Flashes
   pandoraCosmictag:               @local::microboone_cosmictracktagger
   pandoraCosmiccalo:              @local::microboone_calomc
   pandoraCosmicpid:               @local::microboone_chi2pid
@@ -279,9 +283,12 @@ microboone_reco_mcc8_pandoraCosmic: [    pandoraCosmic,
                                          pandoraCosmicKHitpid,
 #                                         pandoraCosmicKalmanTrackPFPart,
                                          pandoraCosmicKHitPFPart,
+                                         pandoraCosmicKHitFlashTag,    # New flash tagger
                                          pandoraCosmicKHitFlashMatch,
                                          pandoraTrackPFPartMatch,
-                                         pandoraCosmicKHitRemoval,
+                                         pandoraCosmicKHitRemoval,     # Remove hits, based on PFP geometry
+                                         pandoraCosmicKHitRemovalF,    # Remove hits, based on Flashes
+                                         pandoraCosmicKHitRemovalGF,   # Remove hits, based on PFP geometry and Flashes
                                          pandoraCosmictag,
                                          pandoraCosmicContTag,
                                          pandoraCosmicT0Reco,
@@ -487,6 +494,16 @@ microboone_reco_data_producers.pandoraCosmicKHitRemoval.TrackProducerLabels:    
 microboone_reco_data_producers.pandoraCosmicKHitRemoval.AssnProducerLabels:      ["pandoraCosmicKHit","pandoraTrackPFPartMatch"]
 microboone_reco_data_producers.pandoraCosmicKHitRemoval.EndTickPadding:          75
 
+# Remove hits, based on PFP geometry and Flashes                                 Geometry tagger            Flash tagger
+microboone_reco_mcc8_producers.pandoraCosmicKHitRemovalGF.CosmicProducerLabels: ["pandoraCosmicKHitPFPart", "pandoraCosmicKHitFlashTag" ]
+microboone_reco_mcc8_producers.pandoraCosmicKHitRemovalGF.TrackProducerLabels:  ["pandoraCosmicKHit",       "pandoraCosmicKHit"         ]
+microboone_reco_mcc8_producers.pandoraCosmicKHitRemovalGF.AssnProducerLabels:   ["pandoraCosmicKHit",       "pandoraCosmicKHit"         ]
+microboone_reco_mcc8_producers.pandoraCosmicKHitRemovalGF.CosmicTagThresholds:  [0.6,                       0.99                        ]
+# Remove hits, based on Flashes                                                  Geometry tagger            Flash tagger
+microboone_reco_mcc8_producers.pandoraCosmicKHitRemovalF.CosmicProducerLabels:  [                           "pandoraCosmicKHitFlashTag" ]
+microboone_reco_mcc8_producers.pandoraCosmicKHitRemovalF.TrackProducerLabels:   [                           "pandoraCosmicKHit"         ]
+microboone_reco_mcc8_producers.pandoraCosmicKHitRemovalF.AssnProducerLabels:    [                           "pandoraCosmicKHit"         ]
+microboone_reco_mcc8_producers.pandoraCosmicKHitRemovalF.CosmicTagThresholds:   [                           0.99                        ]             
 microboone_reco_mcc8_producers.pandoraNu.GeantModuleLabel:                       "largeant"
 microboone_reco_mcc8_producers.pandoraNu.HitFinderModuleLabel:                   "pandoraCosmicKHitRemoval"
 microboone_reco_mcc8_producers.pandoraNu.ConfigFile:                             "PandoraSettings_MicroBooNE_Neutrino.xml"
