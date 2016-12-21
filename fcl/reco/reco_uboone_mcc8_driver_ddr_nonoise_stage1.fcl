@@ -7,7 +7,7 @@ services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
 services.SignalShapingServiceMicroBooNE.datadrivenResponse: true
 services.SignalShapingServiceMicroBooNE.DefaultEField: 0.273
 services.SignalShapingServiceMicroBooNE.DefaultTemperature: 89
-services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: true
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
 services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 1.0, 1.0, 1.0]
 
 # Choose no noise inputs.
