@@ -30,6 +30,7 @@ microboone_detpedestalservice:
 {
   service_provider: UbooneDetPedestalService
   DetPedestalRetrievalAlg: @local::microboone_pedestalretrievalalg
+  EventMixingModuleLabel: "mixer"
 }
 
 
@@ -48,6 +49,7 @@ microboone_channelstatus_service:
   service_provider: UbooneChannelStatusService
   ChannelStatusProvider: @local::microboone_channelstatus_provider
   FindNoisyChannels: false
+  EventMixingModuleLabel: "mixer"
 }
 
 
@@ -89,8 +91,9 @@ microboone_pmtgain_provider.DatabaseRetrievalAlg.DBTag: "v1r0"
 
 microboone_pmtgain_service:
 {
-  service_provider: SIOVPmtGainService
+  service_provider: UboonePmtGainService
   PmtGainProvider: @local::microboone_pmtgain_provider
+  EventMixingModuleLabel: "mixer"
 }  
 
 
@@ -114,6 +117,7 @@ microboone_electronicscalib_service:
 {
   service_provider: UbooneElectronicsCalibService
   ElectronicsCalibProvider: @local::microboone_electronicscalib_provider
+  EventMixingModuleLabel: "mixer"
 } 
 
 END_PROLOG
