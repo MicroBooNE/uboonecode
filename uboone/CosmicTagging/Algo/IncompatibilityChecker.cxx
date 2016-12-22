@@ -3,11 +3,8 @@
 
 #include "IncompatibilityChecker.h"
 #include <iostream>
-//#include "uboone/LLSelectionTool/OpT0Finder/Base/OpT0FinderException.h"
 
 namespace flashana {
-
-//  static IncompatibilityCheckerFactory __global_IncompatibilityChecker__;
 
   IncompatibilityChecker::IncompatibilityChecker()
   {
@@ -34,10 +31,10 @@ namespace flashana {
 
   bool IncompatibilityChecker::CheckIncompatibility(const Flash_t &flash, const Flash_t &flash_hypo) {
 
-    std::cout << "IncompatibilityChecker::CheckIncompatibility starts" << std::endl;
+    //std::cout << "IncompatibilityChecker::CheckIncompatibility starts" << std::endl;
     // Now we have two spectra: the 'true' one (flash), and the hypo one (flash_hypo)
     // We want to understand is they are incompatible
-    std::cout << "pe for pmt 0 from hypo " << flash_hypo.pe_v[0] << std::endl;
+    //std::cout << "pe for pmt 0 from hypo " << flash_hypo.pe_v[0] << std::endl;
 
     if (flash.pe_v.size() != flash_hypo.pe_v.size()) {
      throw cet::exception("Flash and hypo flash pe vector size mismatch."); 
@@ -85,12 +82,12 @@ namespace flashana {
 
     if(!_useFlashPosition) {
       if( (areIncompatibleByBin || areIncompatibleByTotPe) ) {
-        std::cout << "Flashes are incompatible by bin or total pe." << std::endl;
+        //std::cout << "Flashes are incompatible by bin or total pe." << std::endl;
         return true;
       }
     } else {
       if( (areIncompatibleByBin || areIncompatibleByTotPe) && areIncompatibleByFlsPos) {
-        std::cout << "Flashes are incompatible by (bin or total pe) and flash position." << std::endl;
+        //std::cout << "Flashes are incompatible by (bin or total pe) and flash position." << std::endl;
         return true;
       }
     }
