@@ -70,13 +70,16 @@ private:
 
   TH1D* fHist_Col;
   TH1D* fHist_Ind;
+  
+  std::string fRDModuleLabel;
 };
 
 
 TestDBI::TestDBI(fhicl::ParameterSet const & p)
   : EDAnalyzer(p),
   fHist_Col(new TH1D("Collection","Collection",400, 350.0,550.0)),
-  fHist_Ind(new TH1D("Induction" ,"Induction" ,400,2000.0,2200.0))
+  fHist_Ind(new TH1D("Induction" ,"Induction" ,400,2000.0,2200.0)),
+  fRDModuleLabel(p.get<std::string>("RDModuleLabel"))
 {}
 
 
@@ -86,7 +89,7 @@ void TestDBI::analyze(art::Event const & evt)
   art::ServiceHandle<geo::Geometry> geo;
   art::Handle< std::vector<raw::RawDigit> > digitVecHandle;
   
-  evt.getByLabel("daq", digitVecHandle);
+  evt.getByLabel(fRDModuleLabel, digitVecHandle);
   for (auto iter = digitVecHandle->begin(); iter != digitVecHandle->end(); ++iter) {
     raw::RawDigit digit = *iter;
     unsigned int ch = digit.Channel();
