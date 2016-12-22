@@ -404,7 +404,7 @@ microboone_reco_mcc8_producers.stitchkalmanhittag.ClusterModuleLabel:           
 microboone_reco_mcc8_producers.stitchkalmanhittag.TrackModuleLabel:              "stitchkalmanhit"
 
 # ClusterCrawler / Track Maker related
-microboone_reco_mcc8_producers.trajcluster.HitFinderModuleLabel:                 "pandoraCosmicKHitRemoval"
+microboone_reco_mcc8_producers.trajcluster.TrajClustereAlg.HitFinderModuleLabel: "pandoraCosmicKHitRemoval"
 
 microboone_reco_mcc8_producers.trackkalmanhitcc.HitModuleLabel:                  "trajcluster"
 microboone_reco_mcc8_producers.trackkalmanhitcc.ClusterModuleLabel:              "trajcluster"

@@ -69,7 +69,7 @@ CalibResponseTOffset: [0, 0, 0]   # in us time offset to align all three planes
   YZchargeScaling:      [ [1.0, 1.0, 1.0], [1.0, 1.0, 1.0], [1.0, 1.0, 1.0] ] # scale charge; from transparency effects - ramification of shorted wires
   #YZwireOverlap:        [ [ [296, 671], [2400, 3071], [4800, 6143] ], [ [1168, 1903], [3568, 4303], [7136, 7263] ] ] # channel ranges for shorted wires and corresponding channel ranges for wires effected on other planes
 
-  IncludeMisconfiguredU: true
+  IncludeMisconfiguredU: false
   MisconfiguredU:	[ [2016, 2095], [2192, 2303], [2352, 2382] ]	# channel range of misconfigured U-plane wires during run 1
 
   DeconNorm: 200.
