@@ -253,7 +253,10 @@ void CosmicFlashTagger::produce(art::Event & e)
 
     bool beamIncompatible = false;
     art::Ptr<recob::PFParticle> pfParticle;
+
+    // Get the tracks associated with this PFParticle
     lar_pandora::TrackVector track_v;
+    track_v = it->second;
 
     // --- Loop over beam flashes ---
     for (unsigned int bf = 0; bf < beam_flashes.size(); bf++) {
@@ -265,9 +268,6 @@ void CosmicFlashTagger::produce(art::Event & e)
         _n_pfp++;
         _pfp_hypo_spec.resize(_n_pfp);
       }
-
-      // Get the tracks associated with this PFParticle
-      track_v = it->second;
 
       // Get the beam flash
       ::flashana::Flash_t flashBeam = beam_flashes[bf];
@@ -324,7 +324,7 @@ void CosmicFlashTagger::produce(art::Event & e)
 
   } // end of PFP loop
 
-  if (_debug) _tree1->Fill();
+  _tree1->Fill();
 
   e.put(std::move(cosmicTagTrackVector));
   e.put(std::move(assnOutCosmicTagTrack));
