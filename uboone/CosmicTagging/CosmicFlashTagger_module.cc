@@ -324,7 +324,7 @@ void CosmicFlashTagger::produce(art::Event & e)
 
   } // end of PFP loop
 
-  _tree1->Fill();
+  if (_debug) _tree1->Fill();
 
   e.put(std::move(cosmicTagTrackVector));
   e.put(std::move(assnOutCosmicTagTrack));
