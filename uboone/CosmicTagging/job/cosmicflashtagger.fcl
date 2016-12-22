@@ -17,7 +17,7 @@ MinimumNumberOfTrajectoryPoints: 1
 BeamWindowStartBNB:    3.
 BeamWindowEndBNB:      6.
 MinimumTrackLength:    20. # not used
-DebugMode:             true
+DebugMode:             false
 FlashMatchConfig:      @local::flashmatch_config
 
 IncompCheckConfig: {
