@@ -462,8 +462,8 @@ microboone_reco_mcc8_producers.pandoraCosmicKHit.PFParticleModuleLabel:         
 microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputPFParticleLabel: "pandoraCosmic"
 microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputTracksLabel: ""
 microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputCaloLabel:   ""
-microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputPFParticleLabel: ""
 microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.inputs.inputPidLabel:    ""
+microboone_reco_mcc8_producers.pandoraCosmicKalmanTrack.options.trackFromPF:     true
 
 microboone_reco_mcc8_producers.pandoraCosmicPMA.HitModuleLabel:                  "gaushit"
 microboone_reco_mcc8_producers.pandoraCosmicPMA.PfpModuleLabel:                  "pandoraCosmic"
@@ -533,8 +533,8 @@ microboone_reco_mcc8_producers.pandoraNuKHit.HitFinderModuleLabel:              
 microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputPFParticleLabel: "pandoraNu"
 microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputTracksLabel:     ""
 microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputCaloLabel:       ""
-microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputPFParticleLabel: ""
 microboone_reco_mcc8_producers.pandoraNuKalmanTrack.inputs.inputPidLabel:        ""
+microboone_reco_mcc8_producers.pandoraNuKalmanTrack.options.trackFromPF:         true
 
 microboone_reco_mcc8_producers.pandoraNuPMA.HitModuleLabel:                      "pandoraCosmicHitRemoval"
 microboone_reco_mcc8_producers.pandoraNuPMA.PfpModuleLabel:                      "pandoraNu"
@@ -582,8 +582,8 @@ microboone_reco_mcc8_producers.pandoraNuFKHit.HitFinderModuleLabel:             
 microboone_reco_mcc8_producers.pandoraNuFKalmanTrack.inputs.inputPFParticleLabel: "pandoraNuF"
 microboone_reco_mcc8_producers.pandoraNuFKalmanTrack.inputs.inputTracksLabel:    ""
 microboone_reco_mcc8_producers.pandoraNuFKalmanTrack.inputs.inputCaloLabel:      ""
-microboone_reco_mcc8_producers.pandoraNuFKalmanTrack.inputs.inputPFParticleLabel: ""
 microboone_reco_mcc8_producers.pandoraNuFKalmanTrack.inputs.inputPidLabel:       ""
+microboone_reco_mcc8_producers.pandoraNuFKalmanTrack.options.trackFromPF:        true
 
 microboone_reco_mcc8_producers.pandoraNuFPMA.HitModuleLabel:                     "pandoraCosmicHitRemovalGF"
 microboone_reco_mcc8_producers.pandoraNuFPMA.PfpModuleLabel:                     "pandoraNuF"
