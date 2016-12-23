@@ -80,7 +80,7 @@ outputs:
 # Enable YZ-dependent field response.
 
 services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
-services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: true
 
 # Turn off noise.
 
