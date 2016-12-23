@@ -82,6 +82,6 @@ services.SignalShapingServiceMicroBooNE.StretchFullResponse: true
 services.SignalShapingServiceMicroBooNE.FieldResponseFVersion: [ "v0.1", "v0.1"]
 services.SignalShapingServiceMicroBooNE.YZdependentResponse: false
 services.SignalShapingServiceMicroBooNE.datadrivenResponse: false
-services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: true
 services.SignalShapingServiceMicroBooNE.DefaultEField: 0.5
 services.SignalShapingServiceMicroBooNE.DefaultTemperature: 87
