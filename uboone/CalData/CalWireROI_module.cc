@@ -90,6 +90,8 @@ class CalWireROI : public art::EDProducer
     std::string                 fdQdxCalibFileName;    ///< Text file for constants to do wire-by-wire calibration
     std::map<unsigned int, float> fdQdxCalib;          ///< Map to do wire-by-wire calibration, key is channel number, content is correction factor
 
+    float fMinROIAverageTickThreshold; // try to remove bad ROIs
+
     void doDecon(std::vector<float>&                                       holder,
                  raw::ChannelID_t                                          channel,
                  unsigned int                                              thePlane,
@@ -167,6 +169,7 @@ void CalWireROI::reconfigure(fhicl::ParameterSet const& p)
     fFFTSize              = p.get< int  >                          ("FFTSize"                );
     fSaveWireWF           = p.get< int >                           ("SaveWireWF"             );
     fMinAllowedChanStatus = p.get< int >                           ("MinAllowedChannelStatus");
+    fMinROIAverageTickThreshold = p.get<float>("MinROIAverageTickThreshold",-0.5);
 
     fDoBaselineSub_WaveformPropertiesAlg = p.get< bool >("DoBaselineSub_WaveformPropertiesAlg");
         
@@ -547,8 +550,14 @@ void CalWireROI::produce(art::Event& evt)
 		  }
 		}
 
-                // add the range into ROIVec
-                ROIVec.add_range(roi.first, std::move(holder));
+		//wes 23.12.2016 --- sum up the roi, and if it's very negative get rid of it
+		float average_val = std::accumulate(holder.begin(),holder.end(),0.0) / holder.size();
+		float min = *std::min_element(holder.begin(),holder.end());
+		float max = *std::max_element(holder.begin(),holder.end());
+		if(average_val>fMinROIAverageTickThreshold && std::abs(min)<std::abs(max)){
+		  // add the range into ROIVec
+		  ROIVec.add_range(roi.first, std::move(holder));
+		}
             }
         } // end if not a bad channel
 
