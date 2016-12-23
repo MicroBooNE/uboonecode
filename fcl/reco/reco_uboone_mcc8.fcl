@@ -104,7 +104,7 @@ microboone_reco_mcc8_producers:
 
   ### cluster-finder producers
   fuzzycluster:                   @local::microboone_fuzzycluster
-  fuzzyclustermerger:             @local::microboone_fuzzyclustermerger
+  #fuzzyclustermerger:             @local::microboone_fuzzyclustermerger
   trajcluster:                    @local::microboone_trajcluster
 
   ### pandora cosmic pass
@@ -169,7 +169,7 @@ microboone_reco_mcc8_producers:
   stitchkalmanhitcc:              @local::microboone_trackstitcher
 
   ### shower reco producers
-  showerrecofuzzy:                @local::showerreco3d_uboone
+  #showerrecofuzzy:                @local::showerreco3d_uboone
   showerrecopandora:              @local::showerreco3d_uboone_pandora
 
   ### calorimetry producers
@@ -237,8 +237,8 @@ microboone_reco_mcc8_signalprocessing: [ digitfilter,
                                          caldata,
                                          gaushit ]
 
-microboone_reco_mcc8_fuzzycluster: [     fuzzycluster,
-                                         fuzzyclustermerger ]
+microboone_reco_mcc8_fuzzycluster: [     fuzzycluster ]
+                                         #fuzzyclustermerger ]
 
 microboone_reco_mcc8_fuzzytracks: [      trackkalmanhit,
                                          stitchkalmanhit,
@@ -251,8 +251,8 @@ microboone_reco_mcc8_fuzzytracks: [      trackkalmanhit,
                                          trackkalmanhitContTag,
                                          stitchkalmanhitContTag,
                                          trackkalmanhitT0Reco,
-                                         stitchkalmanhitT0Reco,
-                                         showerrecofuzzy ]
+                                         stitchkalmanhitT0Reco ]
+                                         #showerrecofuzzy ]
 
 microboone_reco_mcc8_fuzzypath: [        @sequence::microboone_reco_mcc8_fuzzycluster,
                                          @sequence::microboone_reco_mcc8_fuzzytracks ]
@@ -588,7 +588,7 @@ microboone_reco_mcc8_producers.pandoraNuFKalmanTrack.options.trackFromPF:       
 microboone_reco_mcc8_producers.pandoraNuFPMA.HitModuleLabel:                     "pandoraCosmicHitRemovalGF"
 microboone_reco_mcc8_producers.pandoraNuFPMA.PfpModuleLabel:                     "pandoraNuF"
 
-microboone_reco_mcc8_producers.showerrecofuzzy.InputProducer:                    "fuzzyclustermerger"
+#microboone_reco_mcc8_producers.showerrecofuzzy.InputProducer:                    "fuzzyclustermerger"
 microboone_reco_mcc8_producers.showerrecopandora.InputProducer:                  "pandoraNu"
 
 microboone_reco_mcc8_producers.pmtrack.ClusterModuleLabel:                       "trajcluster"
