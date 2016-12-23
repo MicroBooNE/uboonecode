@@ -1,0 +1,8 @@
+#include "reco_uboone_mcc8_driver_stage1.fcl"
+
+# Choose no noise inputs.
+
+physics.producers.digitfilter.DigitModuleLabel: "daqnonoise"
+physics.producers.saturation.LGProducer: "pmtreadoutnonoise"
+physics.producers.saturation.HGProducer: "pmtreadoutnonoise"
+physics.producers.saturation.HGProducerCosmic: "pmtreadoutnonoise"

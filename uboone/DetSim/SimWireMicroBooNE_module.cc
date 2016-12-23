@@ -473,11 +473,11 @@ namespace detsim {
 	int time_offset = 0;//sss->FieldResponseTOffset(chan);
 
 	for(auto timeSlice : timeSlices) {
-	  int tdc = (int)timeSlice.first;
-	  if( tdc < 0 ) continue;
+	  auto tdc = timeSlice.first;
+	  if( (int)tdc < 0 ) continue;
+	  int t = (int)ts->TPCTDC2Tick(tdc);
 
-	  int raw_digit_index =
-	    ( ((int)timeSlice.first + time_offset) >= 0 ? (int)timeSlice.first+time_offset : (fNTicks + ((int)timeSlice.first+time_offset)) );
+	  int raw_digit_index = ( (t + time_offset) >= 0 ? t+time_offset : (fNTicks + (t+time_offset)) );
 	  if(raw_digit_index <= 0 || raw_digit_index >= (int)fNTicks) continue;
 	  
 	  auto const& energyDeposits = timeSlice.second;

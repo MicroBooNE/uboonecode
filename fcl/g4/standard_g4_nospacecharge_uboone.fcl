@@ -1,0 +1,6 @@
+#include "standard_g4_uboone.fcl"
+
+outputs.out1.fileName: "%ifb_%tc_g4_nospacecharge.root"
+
+services.SpaceCharge.EnableSimSpatialSCE: false
+services.SpaceCharge.EnableSimEfieldSCE: false

@@ -76,7 +76,7 @@ private:
   ::flashana::FlashMatchManager       _mgr;
   ::flashana::IncompatibilityChecker  _incompChecker;
   std::vector<::flashana::Flash_t>    beam_flashes;
-  std::vector<art::Ptr<recob::Track>> track_v;
+  //std::vector<art::Ptr<recob::Track>> track_perevent_v;
 
   const anab::CosmicTagID_t TAGID_BEAM_INCOMPATIBLE = anab::CosmicTagID_t::kFlash_BeamIncompatible;
   const anab::CosmicTagID_t TAGID_NOT_TAGGED        = anab::CosmicTagID_t::kNotTagged;
@@ -155,6 +155,7 @@ CosmicFlashTagger::CosmicFlashTagger(fhicl::ParameterSet const & p)
 
 void CosmicFlashTagger::produce(art::Event & e)
 {
+  mf::LogDebug("CosmicFlashTagger") << "CosmicFlashTagger::produce starts." << std::endl;
   if(_debug) {
     std::cout << "CosmicFlashTagger::produce starts." << std::endl;
     std::cout << "This is run | subrun | event: " << e.id().run() << " | " << e.id().subRun() << " | " << e.id().event() << std::endl;
@@ -178,6 +179,9 @@ void CosmicFlashTagger::produce(art::Event & e)
   e.getByLabel(_opflash_producer_beam,beamflash_h);
   if( !beamflash_h.isValid() || beamflash_h->empty() ) {
     std::cerr << "Don't have good flashes." << std::endl;
+    e.put(std::move(cosmicTagTrackVector));
+    e.put(std::move(assnOutCosmicTagTrack));
+    e.put(std::move(assnOutCosmicTagPFParticle));
     return;
   }
 
@@ -191,7 +195,10 @@ void CosmicFlashTagger::produce(art::Event & e)
   e.getByLabel(_track_producer,track_h);
   if( !track_h.isValid() || track_h->empty() )  {
     std::cerr << "Don't have tracks, or they are not valid." << std::endl;
-    throw std::exception();
+    e.put(std::move(cosmicTagTrackVector));
+    e.put(std::move(assnOutCosmicTagTrack));
+    e.put(std::move(assnOutCosmicTagPFParticle));
+    return;
   }
 
   // Loop through beam flashes 
@@ -206,7 +213,7 @@ void CosmicFlashTagger::produce(art::Event & e)
       _beam_flash_exists = 1;
     }
     if(flash.Time() < _flash_trange_start || _flash_trange_end < flash.Time()) {
-      if(_debug) std::cout << "Flash is in veto region (flash time is " << flash.Time() << "). Continue." << std::endl;
+      mf::LogDebug("CosmicFlashTagger") << "Flash is in veto region (flash time is " << flash.Time() << "). Continue." << std::endl;
       continue;
     } 
    
@@ -243,7 +250,7 @@ void CosmicFlashTagger::produce(art::Event & e)
 
   } // end of flash loop
 
-  if (_debug) std::cout << "Number of beam flashes in this event: " << beam_flashes.size() << std::endl;
+  mf::LogDebug("CosmicFlashTagger") << "Number of beam flashes in this event: " << beam_flashes.size() << std::endl;
 
   _n_pfp = 0;
 
@@ -252,7 +259,11 @@ void CosmicFlashTagger::produce(art::Event & e)
 
     bool beamIncompatible = false;
     art::Ptr<recob::PFParticle> pfParticle;
-      
+
+    // Get the tracks associated with this PFParticle
+    lar_pandora::TrackVector track_v;
+    track_v = it->second;
+
     // --- Loop over beam flashes ---
     for (unsigned int bf = 0; bf < beam_flashes.size(); bf++) {
 
@@ -264,15 +275,12 @@ void CosmicFlashTagger::produce(art::Event & e)
         _pfp_hypo_spec.resize(_n_pfp);
       }
 
-      // Get the tracks associated with this PFParticle
-      lar_pandora::TrackVector track_v = it->second;
-
       // Get the beam flash
       ::flashana::Flash_t flashBeam = beam_flashes[bf];
 
       // Calculate x offset, assuming this track caused this beam flash
       double Xoffset = flashBeam.time * 0.1114359;
-      if(_debug) std::cerr << "Xoffset is " << Xoffset << std::endl;
+      mf::LogDebug("CosmicFlashTagger") << "Xoffset is " << Xoffset << std::endl;
 
       // Get trajectory (1 trajectory for all these tracks)
       ::geoalgo::Trajectory trkTrj;
@@ -287,15 +295,14 @@ void CosmicFlashTagger::produce(art::Event & e)
       flashHypo.pe_v.resize(geo->NOpDets());
       ((flashana::PhotonLibHypothesis*)(_mgr.GetAlgo(flashana::kFlashHypothesis)))->FillEstimate(qcluster,flashHypo);
       
-      if(_debug) {
-        _pfp_hypo_spec[_n_pfp-1] = flashHypo.pe_v;
-        std::cout << "***The beam flash has Z = " << flashBeam.z << " +- " << flashBeam.z_err << std::endl;
-        this->AddFlashPosition(flashHypo);
-        std::cout << "***The hypo flash has Z = " << flashHypo.z << " +- " << flashHypo.z_err << std::endl;
-      }
+      if(_debug) _pfp_hypo_spec[_n_pfp-1] = flashHypo.pe_v;
+      mf::LogDebug("CosmicFlashTagger") << "*** The beam flash has Z = " << flashBeam.z << " +- " << flashBeam.z_err << std::endl;
+      this->AddFlashPosition(flashHypo);
+      mf::LogDebug("CosmicFlashTagger") << "*** The hypo flash has Z = " << flashHypo.z << " +- " << flashHypo.z_err << std::endl;
+
       // CORE FUNCTION: Check if this beam flash and this flash hypothesis are incompatible
       bool areIncompatible = _incompChecker.CheckIncompatibility(flashBeam,flashHypo); 
-      if(_debug) std::cout << "For this PFP: " << (areIncompatible ? "are INcompatible" : "are compatible") << std::endl;
+      mf::LogDebug("CosmicFlashTagger") <<  "For this PFP: " << (areIncompatible ? "are INcompatible" : "are compatible") << std::endl;
       
       if (areIncompatible == false) break;
       else if (areIncompatible && bf == beam_flashes.size() - 1) {
@@ -323,20 +330,20 @@ void CosmicFlashTagger::produce(art::Event & e)
 
   } // end of PFP loop
 
-  _tree1->Fill();
+  if (_debug) _tree1->Fill();
 
   e.put(std::move(cosmicTagTrackVector));
   e.put(std::move(assnOutCosmicTagTrack));
   e.put(std::move(assnOutCosmicTagPFParticle));
 
-  if(_debug) std::cout << "CosmicFlashTagger::produce ends." << std::endl;
+  mf::LogDebug("CosmicFlashTagger") << "CosmicFlashTagger::produce ends." << std::endl;
 }
 
 
 //______________________________________________________________________________________________________________________________________
 int CosmicFlashTagger::GetTrajectory(std::vector<art::Ptr<recob::Track>> track_v, double Xoffset, ::geoalgo::Trajectory &track_geotrj) {
 
-  if (_debug) std::cout << "Creating trajectory for " << track_v.size() << " tracks." << std::endl;
+  mf::LogDebug("CosmicFlashTagger") << "Creating trajectory for " << track_v.size() << " tracks." << std::endl;
   int statusCode;
 
   int totalPoints = 0;
@@ -345,7 +352,7 @@ int CosmicFlashTagger::GetTrajectory(std::vector<art::Ptr<recob::Track>> track_v
     totalPoints += trk_ptr->NumberTrajectoryPoints();
   }
 
-  if (_debug) std::cout << "Number of points for this trajectory: " << totalPoints << std::endl;
+  mf::LogDebug("CosmicFlashTagger") << "Number of points for this trajectory: " << totalPoints << std::endl;
 
   if (totalPoints <= _min_trj_pts) {
     statusCode = 1;

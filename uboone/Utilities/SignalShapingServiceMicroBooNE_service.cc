@@ -697,7 +697,7 @@ void util::SignalShapingServiceMicroBooNE::init()
 	      YZflag = false;
 	    }
 	  }
-	  if(fdatadrivenResponse){
+	  if(fYZdependentResponse && fdatadrivenResponse){
 	    for(_wr=0; _wr<fNdatadrivenResponses[ktype][_vw]; ++_wr) {	      
 	      if(_vw == 0 && _wr == 2){
 		SetElectResponse(ktype, 1.0, 4.7); // for U-plane misconfigured channels

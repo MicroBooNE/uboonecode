@@ -10,13 +10,6 @@ HitProducer:           "gaushit"
 GeantModule:           "largeant"
 SpacePointProducer:    "pandoraCosmic"
 CosmicTagProducer:     "cosmicFlashTagger"
-
-BeamOpFlashProducer:   "simpleFlashBeam"
-CosmicOpFlashProducer: "simpleFlashCosmic"
-TriggerProducer:       "daq"
-FlashVetoTimeStart:    0.
-FlashVetoTimeEnd:      100.
-MinimumTrackLength:    20.
-DebugMode:             true
 }
+
 END_PROLOG

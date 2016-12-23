@@ -25,6 +25,9 @@ microboone_calroi:
  dQdxCalibFileName:     "dQdxCalibrationPlanev1.txt"
  
  ROIPropertiesAlg:      { ROIAlgParams: @local::roiAlg_DigitAboveBaseline }
+
+ MinROIAverageTickThreshold: -0.5
+
 }
 
 microboone_calwire:

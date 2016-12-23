@@ -65,12 +65,12 @@ physics:
  producers:
  {
    saturation:        @local::correct_saturation
-   ophitSatBeam:      @local::microboone_ophit_saturation_beam
-   ophitSatCosmic:    @local::microboone_ophit_saturation_cosmic
-   opflashSatBeam:    @local::microboone_opflash_saturation_beam
-   opflashSatCosmic:  @local::microboone_opflash_saturation_cosmic
-   simpleFlashBeam:   @local::UBFlashBeam
-   simpleFlashCosmic: @local::UBFlashCosmic
+   ophitBeam:         @local::microboone_ophit_saturation_beam
+   ophitCosmic:       @local::microboone_ophit_saturation_cosmic
+   #opflashSatBeam:    @local::microboone_opflash_saturation_beam
+   #opflashSatCosmic:  @local::microboone_opflash_saturation_cosmic
+   simpleFlashBeam:   @local::UBFlashBeamMC
+   simpleFlashCosmic: @local::UBFlashCosmicMC
    cosmicFlashTagger: @local::CosmicFlashTagger
    rns:               { module_type: "RandomNumberSaver" }
  }
@@ -80,8 +80,8 @@ physics:
    cosmicFlashTaggerAna: @local::CosmicFlashTaggerAna
  }
 
- reco: [ rns, saturation, ophitSatBeam, ophitSatCosmic, 
-         opflashSatBeam, opflashSatCosmic, simpleFlashBeam, simpleFlashCosmic, 
+ reco: [ rns, saturation, ophitBeam, ophitCosmic, 
+         simpleFlashBeam, simpleFlashCosmic, 
          cosmicFlashTagger ]
 
  #define the output stream, there could be more than one if using filters 
