@@ -20,3 +20,11 @@ physics.producers.saturation.HGProducerCosmic: "mixer"
 physics.producers.digitfilter.ProcessNoise:                         true
 physics.producers.digitfilter.FFTAlg.TransformViewVec:              [true,false,false]
 physics.producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [true,true,false]
+
+services.SignalShapingServiceMicroBooNE.FieldResponseFVersion: [ "v3.1", "v3.1"]
+services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
+services.SignalShapingServiceMicroBooNE.datadrivenResponse: true
+services.SignalShapingServiceMicroBooNE.DefaultEField: 0.273
+services.SignalShapingServiceMicroBooNE.DefaultTemperature: 89
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: false
+services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 1.0, 1.0, 1.0]
