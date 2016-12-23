@@ -179,6 +179,9 @@ void CosmicFlashTagger::produce(art::Event & e)
   e.getByLabel(_opflash_producer_beam,beamflash_h);
   if( !beamflash_h.isValid() || beamflash_h->empty() ) {
     std::cerr << "Don't have good flashes." << std::endl;
+    e.put(std::move(cosmicTagTrackVector));
+    e.put(std::move(assnOutCosmicTagTrack));
+    e.put(std::move(assnOutCosmicTagPFParticle));
     return;
   }
 
@@ -192,7 +195,10 @@ void CosmicFlashTagger::produce(art::Event & e)
   e.getByLabel(_track_producer,track_h);
   if( !track_h.isValid() || track_h->empty() )  {
     std::cerr << "Don't have tracks, or they are not valid." << std::endl;
-    throw std::exception();
+    e.put(std::move(cosmicTagTrackVector));
+    e.put(std::move(assnOutCosmicTagTrack));
+    e.put(std::move(assnOutCosmicTagPFParticle));
+    return;
   }
 
   // Loop through beam flashes 
@@ -324,7 +330,7 @@ void CosmicFlashTagger::produce(art::Event & e)
 
   } // end of PFP loop
 
-  _tree1->Fill();
+  if (_debug) _tree1->Fill();
 
   e.put(std::move(cosmicTagTrackVector));
   e.put(std::move(assnOutCosmicTagTrack));
