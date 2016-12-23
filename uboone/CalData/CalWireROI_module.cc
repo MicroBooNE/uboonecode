@@ -554,7 +554,7 @@ void CalWireROI::produce(art::Event& evt)
 		float average_val = std::accumulate(holder.begin(),holder.end(),0.0) / holder.size();
 		float min = *std::min_element(holder.begin(),holder.end());
 		float max = *std::max_element(holder.begin(),holder.end());
-		if(average_val>fMinROIAverageTickThreshold && std::abs(min)<std::abs(max)){
+		if(average_val>fMinROIAverageTickThreshold || std::abs(min)<std::abs(max)){
 		  // add the range into ROIVec
 		  ROIVec.add_range(roi.first, std::move(holder));
 		}
