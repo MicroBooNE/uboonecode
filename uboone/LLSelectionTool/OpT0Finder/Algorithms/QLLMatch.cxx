@@ -261,7 +261,7 @@ namespace flashana {
 	
       case kLLHD:
 	_current_llhd -= std::log10(TMath::Poisson(O,H));
-	if(isnan(_current_llhd) || isinf(_current_llhd)) _current_llhd = 1.e6;
+	if(std::isnan(_current_llhd) || std::isinf(_current_llhd)) _current_llhd = 1.e6;
       case kChi2:
 	Error = O;
 	if( Error < 1.0 ) Error = 1.0;
