@@ -17,3 +17,6 @@ physics.producers.saturation.LGProducer: "mixer"
 physics.producers.saturation.HGProducer: "mixer"
 physics.producers.saturation.HGProducerCosmic: "mixer"
 
+physics.producers.digitfilter.ProcessNoise:                         true
+physics.producers.digitfilter.FFTAlg.TransformViewVec:              [true,false,false]
+physics.producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [true,true,false]
