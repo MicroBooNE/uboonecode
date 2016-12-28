@@ -43,10 +43,9 @@ namespace uboone
 
     if ( fChannelMap )
       {
-	geom->ApplyChannelMap(fChannelMap);
+        geom->ApplyChannelMap(fChannelMap); // calls Initialize(fGeoData) for us
       }
 
-    geom->ApplyChannelMap(fChannelMap); // calls Initialize(fGeoData) for us
   }
   
   std::shared_ptr<const geo::ChannelMapAlg> UBooNEGeometryHelper::doGetChannelMapAlg() const
