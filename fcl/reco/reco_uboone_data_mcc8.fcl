@@ -370,7 +370,7 @@ microboone_reco_data_producers.digitfilter.TruncateTicks:                       
 microboone_reco_data_producers.caldata.DigitModuleLabel:                         "digitfilter"
 microboone_reco_data_producers.caldata.Threshold:                                [0, 0, 0]  # Not what you think...
 microboone_reco_data_producers.caldata.NumSigma:                                 [9, 9, 9]  # Closer to what you think...
-microboone_reco_data_producers.caldata.DodQdxCalib:                              true
+microboone_reco_data_producers.caldata.DodQdxCalib:                              false
 
 microboone_reco_data_producers.gaushit.CalDataModuleLabel:                       "caldata"
 microboone_reco_data_producers.gaushit.MinSig:                                   [2.6, 2.6, 3.25]
