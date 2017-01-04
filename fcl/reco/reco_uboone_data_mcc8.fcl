@@ -20,6 +20,7 @@
 #include "correct_saturation.fcl"
 #include "MuCSTrackTagger_module.fcl"
 #include "T0RecoAnodeCathodePiercing.fcl"
+#include "ubflashfinder.fcl"
 #include "cosmicflashtagger.fcl"
 
 BEGIN_PROLOG
