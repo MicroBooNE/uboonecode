@@ -197,14 +197,14 @@ microboone_reco_data_producers:
   pmtrackContTag:                 @local::microboone_containment_tag
 
   ### T0 Anode/Cathode piercing track reco
-  pandoraCosmicKHitT0Reco:        @local::T0RecoAnodeCathodePiercing
-  pandoraCosmicT0Reco:            @local::T0RecoAnodeCathodePiercing
-  pandoraNuKHitT0Reco:            @local::T0RecoAnodeCathodePiercing
-  pandoraNuT0Reco:                @local::T0RecoAnodeCathodePiercing
-  pandoraNuPMAT0Reco:             @local::T0RecoAnodeCathodePiercing
-  pmtrackT0Reco:                  @local::T0RecoAnodeCathodePiercing
-  stitchkalmanhitT0Reco:          @local::T0RecoAnodeCathodePiercing
-  trackkalmanhitT0Reco:           @local::T0RecoAnodeCathodePiercing
+  pandoraCosmicKHitT0Reco:        @local::T0RecoAnodeCathodePiercing_reco
+  pandoraCosmicT0Reco:            @local::T0RecoAnodeCathodePiercing_reco
+  pandoraNuKHitT0Reco:            @local::T0RecoAnodeCathodePiercing_reco
+  pandoraNuT0Reco:                @local::T0RecoAnodeCathodePiercing_reco
+  pandoraNuPMAT0Reco:             @local::T0RecoAnodeCathodePiercing_reco
+  pmtrackT0Reco:                  @local::T0RecoAnodeCathodePiercing_reco
+  stitchkalmanhitT0Reco:          @local::T0RecoAnodeCathodePiercing_reco
+  trackkalmanhitT0Reco:           @local::T0RecoAnodeCathodePiercing_reco
 
   #MuCS Track Taggers
   MuCSTrackTaggertrackkalmanhit:    @local::microboone_MuCSTrackTagger
