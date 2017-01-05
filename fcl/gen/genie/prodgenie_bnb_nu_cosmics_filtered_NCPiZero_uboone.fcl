@@ -2,7 +2,7 @@
 
 process_name: GenieGenFiltered
 
-outputs.out1.fileName: "prodgenie_bnb_nu_uboone_%tc_gen.root"
+outputs.out1.fileName: "prodgenie_bnb_nu_cosmics_filtered_NCPiZero_uboone_%tc_gen.root"
 
 source.maxEvents: 900
 
