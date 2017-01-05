@@ -4,7 +4,6 @@
 #include "signalservices_microboone.fcl"
 #include "trackfindermodules_microboone.fcl"
 #include "vertexfindermodules.fcl"
-#include "pandoramodules.fcl"
 #include "tpcneutrinoidfiltermodule_microboone.fcl"
 #include "tpcneutrinoidfilter_microboone.fcl"
 

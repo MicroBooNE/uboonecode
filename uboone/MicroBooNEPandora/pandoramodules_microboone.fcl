@@ -1,0 +1,28 @@
+BEGIN_PROLOG
+
+microboone_pandora:
+{
+  module_type:           "StandardPandora"
+  GeantModuleLabel:      "largeant"
+  HitFinderModuleLabel:  "gaushit"
+  EnableMCParticles:     false
+  EnableProduction:      true
+  EnableMonitoring:      false
+  EnableLineGaps:        true
+  UseHitWidths:          true
+  BuildTracks:           true
+  BuildShowers:          true
+}
+
+microboone_pandoracosmic:   @local::microboone_pandora
+microboone_pandoracosmic.ConfigFile:          "PandoraSettings_MicroBooNE_Cosmic.xml"
+
+microboone_pandoraneutrino: @local::microboone_pandora
+microboone_pandoraneutrino.ConfigFile:        "PandoraSettings_MicroBooNE_Neutrino.xml"
+
+microboone_pandorawriter:   @local::microboone_pandora
+microboone_pandorawriter.ConfigFile:          "PandoraSettings_Write.xml"
+microboone_pandorawriter.EnableMCParticles:   true
+microboone_pandorawriter.EnableProduction:    false
+
+END_PROLOG
