@@ -12,7 +12,7 @@ physics.producers.generator.RandomTimeOffset: 1600.
 physics.producers.generator.TopVolume: "volCryostat"
 physics.producers.generator.BeamName: "booster"
 
-physics.filters.finalstatefilter.IsVerbose: true
+
 physics.filters.finalstatefilter.isInclusive: true
 physics.filters.finalstatefilter.PDG: [13, -13, 11, -11, 22] #NC 1 photon
 physics.filters.finalstatefilter.PDGCount: [0, 0, 0, 0, 1]
