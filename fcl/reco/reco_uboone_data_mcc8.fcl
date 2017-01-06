@@ -22,6 +22,7 @@
 #include "T0RecoAnodeCathodePiercing.fcl"
 #include "ubflashfinder.fcl"
 #include "cosmicflashtagger.fcl"
+#include “wirecellmodules_microboone.fcl"
 
 BEGIN_PROLOG
 
@@ -88,7 +89,9 @@ microboone_reco_data_producers:
   opflashCosmic     : @local::microboone_opflash_saturation_cosmic
 
   ### noise filtering (if needed)
+
   digitfilter:                    @local::microboone_rawdigitfilter
+  wcNoiseFilter:                  @local::microboone_wirecellnoisefilter
 
   ### calwire producers
   caldata:                        @local::microboone_calroi
@@ -367,6 +370,9 @@ microboone_reco_data_MucSTags: [         MuCSTrackTaggertrackkalmanhit,
 
 # this turns on the truncation of the RawDigits
 microboone_reco_data_producers.digitfilter.TruncateTicks:                        true
+
+#wirecell noise filtering
+microboone_reco_mcc8_producers.wcNoiseFilter.TruncateTicks:                        true
 
 microboone_reco_data_producers.caldata.DigitModuleLabel:                         "digitfilter"
 microboone_reco_data_producers.caldata.Threshold:                                [0, 0, 0]  # Not what you think...

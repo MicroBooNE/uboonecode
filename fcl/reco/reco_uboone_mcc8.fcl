@@ -21,6 +21,7 @@
 #include "T0RecoAnodeCathodePiercing.fcl"
 #include "ubflashfinder.fcl"
 #include "cosmicflashtagger.fcl"
+#include “wirecellmodules_microboone.fcl"
 
 #include "mchitmodules.fcl"
 #include "mcreco.fcl"
@@ -92,6 +93,7 @@ microboone_reco_mcc8_producers:
 
   ### noise filtering (if needed)
   digitfilter:                    @local::microboone_rawdigitfilter
+  wcNoiseFilter:                  @local::microboone_wirecellnoisefilter
 
   ### calwire producers
   caldata:                        @local::microboone_calroi
@@ -370,6 +372,10 @@ microboone_reco_mcc8_producers.digitfilter.TruncateTicks:                       
 microboone_reco_mcc8_producers.digitfilter.ProcessNoise:                         false
 microboone_reco_mcc8_producers.digitfilter.FFTAlg.TransformViewVec:              [false,false,false]
 microboone_reco_mcc8_producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [false,false,false]
+
+#wirecell noise filtering
+microboone_reco_mcc8_producers.wcNoiseFilter.TruncateTicks:                        true
+microboone_reco_mcc8_producers.wcNoiseFilter.DoNoiseFiltering:                     false
 
 
 physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
