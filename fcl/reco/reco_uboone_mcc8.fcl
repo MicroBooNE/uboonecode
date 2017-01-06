@@ -21,7 +21,7 @@
 #include "T0RecoAnodeCathodePiercing.fcl"
 #include "ubflashfinder.fcl"
 #include "cosmicflashtagger.fcl"
-#include “wirecellmodules_microboone.fcl"
+#include "wirecellmodules_microboone.fcl"
 
 #include "mchitmodules.fcl"
 #include "mcreco.fcl"
