@@ -9,7 +9,6 @@
 #include "trackfindermodules_microboone.fcl"
 #include "kalmanfilterfinaltrackfitter.fcl"
 #include "opticaldetectormodules_microboone.fcl"
-#include "ubflashfinder.fcl"
 #include "triggeralgo_service.fcl"
 #include "cosmicremovalmodules.fcl"
 #include "calorimetry_microboone.fcl"
@@ -22,6 +21,7 @@
 #include "T0RecoAnodeCathodePiercing.fcl"
 #include "ubflashfinder.fcl"
 #include "cosmicflashtagger.fcl"
+#include "wirecellmodules_microboone.fcl"
 
 #include "mchitmodules.fcl"
 #include "mcreco.fcl"
@@ -30,8 +30,6 @@ BEGIN_PROLOG
 
 microboone_reco_mcc8_services:
 {
-  ExptGeoHelperInterface:     @local::microboone_geometry_helper
-  Geometry:                   @local::microboone_geo
   PhotonVisibilityService:    @local::microboone_photonvisibilityservice
   OpDigiProperties:           @local::microboone_opdigiproperties
                               @table::microboone_services_reco
@@ -51,17 +49,17 @@ microboone_reco_mcc8_services_fullrawdigits:
 
 ### track containment base stuff ... putting this here, cause why not? ###
 microboone_containment_tag:{ module_type: TrackContainmentTagger
-     			             TrackModuleLabels: []
-			                 #ApplyTags: []  #you can use this option to decide to apply tags or not. By default, yes.
-			                 TrackContainmentAlg:{
-	         	                                  ZBuffer:10
-		 	                                      YBuffer:20
-                                                  XBuffer:10
-		 	                                      Isolation:2.5
-                                                  Debug: false
-		 	                                      FillOutputTree: true
-	       		                                 }
-	     		            }
+                             TrackModuleLabels: []
+                             #ApplyTags: []  #you can use this option to decide to apply tags or not. By default, yes.
+                             TrackContainmentAlg:{
+                               ZBuffer:10
+                               YBuffer:20
+                               XBuffer:10
+                               Isolation:2.5
+                               Debug: false
+                               FillOutputTree: true
+                             }
+                           }
 
 
 ### This is the complete list of all producers! ###
@@ -95,6 +93,7 @@ microboone_reco_mcc8_producers:
 
   ### noise filtering (if needed)
   digitfilter:                    @local::microboone_rawdigitfilter
+  wcNoiseFilter:                  @local::microboone_wirecellnoisefilter
 
   ### calwire producers
   caldata:                        @local::microboone_calroi
@@ -233,8 +232,9 @@ microboone_reco_mcc8_optical: [ saturation,
                                 simpleFlashCosmic,
                                 simpleFlashBeam]
 
-microboone_reco_mcc8_signalprocessing: [ digitfilter,
-                                         caldata,
+microboone_reco_mcc8_signalprocessing: [ #digitfilter,
+                                         wcNoiseFilter,
+					 caldata,
                                          gaushit ]
 
 microboone_reco_mcc8_fuzzycluster: [     fuzzycluster ]
@@ -324,7 +324,7 @@ microboone_reco_mcc8_pandoraNuF: [       pandoraNuF,
                                          pandoraNuFKHit,
                                          pandoraNuFKalmanTrack,
                                          pandoraNuFPMA  ]
-				  
+
 microboone_reco_mcc8_pandora: [          @sequence::microboone_reco_mcc8_pandoraCosmic,
                                          @sequence::microboone_reco_mcc8_pandoraNu,
                                          @sequence::microboone_reco_mcc8_pandoraNuF ]
@@ -374,12 +374,16 @@ microboone_reco_mcc8_producers.digitfilter.ProcessNoise:                        
 microboone_reco_mcc8_producers.digitfilter.FFTAlg.TransformViewVec:              [false,false,false]
 microboone_reco_mcc8_producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [false,false,false]
 
+#wirecell noise filtering
+microboone_reco_mcc8_producers.wcNoiseFilter.TruncateTicks:                        true
+microboone_reco_mcc8_producers.wcNoiseFilter.DoNoiseFiltering:                     false
+
 
 physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
                                                 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 
-microboone_reco_mcc8_producers.caldata.DigitModuleLabel:                         "digitfilter"
+microboone_reco_mcc8_producers.caldata.DigitModuleLabel:                         "wcNoiseFilter"
 microboone_reco_mcc8_producers.caldata.Threshold:                                [0, 0, 0]  # Not what you think...
 microboone_reco_mcc8_producers.caldata.NumSigma:                                 [9, 9, 9]  # Closer to what you think...
 microboone_reco_mcc8_producers.caldata.DodQdxCalib:                              false
@@ -422,7 +426,7 @@ microboone_reco_mcc8_producers.stitchkalmanhittag.ClusterModuleLabel:           
 microboone_reco_mcc8_producers.stitchkalmanhittag.TrackModuleLabel:              "stitchkalmanhit"
 
 # ClusterCrawler / Track Maker related
-microboone_reco_mcc8_producers.trajcluster.TrajClustereAlg.HitFinderModuleLabel: "pandoraCosmicHitRemoval"
+microboone_reco_mcc8_producers.trajcluster.TrajClusterAlg.HitFinderModuleLabel: "pandoraCosmicHitRemoval"
 
 microboone_reco_mcc8_producers.trackkalmanhitcc.HitModuleLabel:                  "trajcluster"
 microboone_reco_mcc8_producers.trackkalmanhitcc.ClusterModuleLabel:              "trajcluster"
@@ -500,11 +504,11 @@ microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:    
 microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.FlashModuleLabel:     "simpleFlashCosmic"
 microboone_reco_mcc8_producers.pandoraCosmicKHitFlashMatch.BeamFlashTrackMatchAlgParams.MakeOutsideDriftTags: "true"
 
-microboone_reco_data_producers.pandoraCosmicHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
-microboone_reco_data_producers.pandoraCosmicHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKalmanTrackPFPart", "trackkalmanhittag"]
-microboone_reco_data_producers.pandoraCosmicHitRemoval.TrackProducerLabels:     ["pandoraCosmicKalmanTrack",       "trackkalmanhit"]
-microboone_reco_data_producers.pandoraCosmicHitRemoval.AssnProducerLabels:      ["pandoraCosmicKalmanTrack",       "pandoraTrackPFPartMatch"]
-microboone_reco_data_producers.pandoraCosmicHitRemoval.EndTickPadding:          75
+microboone_reco_mcc8_producers.pandoraCosmicHitRemoval.PFParticleProducerLabel: "pandoraCosmic"
+microboone_reco_mcc8_producers.pandoraCosmicHitRemoval.CosmicProducerLabels:    ["pandoraCosmicKalmanTrackPFPart", "trackkalmanhittag"]
+microboone_reco_mcc8_producers.pandoraCosmicHitRemoval.TrackProducerLabels:     ["pandoraCosmicKalmanTrack",       "trackkalmanhit"]
+microboone_reco_mcc8_producers.pandoraCosmicHitRemoval.AssnProducerLabels:      ["pandoraCosmicKalmanTrack",       "pandoraTrackPFPartMatch"]
+microboone_reco_mcc8_producers.pandoraCosmicHitRemoval.EndTickPadding:          75
 
 # Remove hits, based on PFP geometry and Flashes                                 Geometry tagger                  Flash tagger
 microboone_reco_mcc8_producers.pandoraCosmicHitRemovalGF.CosmicProducerLabels: ["pandoraCosmicKalmanTrackPFPart", "pandoraCosmicKHitFlashTag" ]
@@ -616,7 +620,6 @@ microboone_reco_mcc8_producers.pandoraNuPMAContTag.TrackModuleLabels:           
 microboone_reco_mcc8_producers.pandoraNuPMAContTag.ApplyTags:                    [false,false,true]
 microboone_reco_mcc8_producers.pmtrackContTag.TrackModuleLabels:                 ["pmtrack"]
 microboone_reco_mcc8_producers.pmtrackContTag.ApplyTags:                         [true]
-
 
 microboone_reco_mcc8_producers.pandoraCosmicKHitT0Reco.TrackProducer: "pandoraCosmicKHit"
 microboone_reco_mcc8_producers.pandoraCosmicT0Reco.TrackProducer:     "pandoraCosmic"

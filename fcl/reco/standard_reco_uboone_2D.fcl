@@ -5,7 +5,7 @@
 #include "cluster_microboone.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "vertexfindermodules.fcl"
-#include "pandoramodules.fcl"
+#include "pandoramodules_microboone.fcl"
 #include "triggeralgo_service.fcl"
 
 process_name: Reco2D
@@ -66,7 +66,7 @@ physics:
   cccluster:           @local::microboone_clustercrawler
 
   ### pandora
-  pandora:             @local::standard_pandora
+  pandora:             @local::microboone_pandoraneutrino
 
  }
 

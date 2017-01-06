@@ -1,0 +1,6 @@
+#include "reco_uboone_data_mcc8_driver_stage1and2.fcl"
+
+# Enable YZ-dependent field response.
+
+services.SignalShapingServiceMicroBooNE.YZdependentResponse: true
+services.SignalShapingServiceMicroBooNE.IncludeMisconfiguredU: true

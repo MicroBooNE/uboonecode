@@ -18,10 +18,12 @@ defaultqual e10
 #
 fcldir  product_dir job
 gdmldir product_dir gdml
+fwdir   product_dir scripts
 
 # table fragment to set FW_SEARCH_PATH needed 
 # to find gdml files:
 table_fragment_begin
+    pathPrepend(FW_SEARCH_PATH, ${UBOONECODE_DIR}/scripts)
     pathPrepend(FW_SEARCH_PATH, ${UBOONECODE_DIR}/gdml)
     pathPrepend(FHICL_FILE_PATH, .:./job)
 table_fragment_end

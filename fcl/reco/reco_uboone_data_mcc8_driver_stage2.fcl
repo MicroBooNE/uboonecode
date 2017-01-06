@@ -1,0 +1,10 @@
+#include "reco_uboone_data_mcc8_driver_common.fcl"
+
+process_name: DataRecoStage2
+
+services.TFileService.fileName: "reco_stage_2_hist.root"
+physics.reco: [ @sequence::microboone_reco_data_stage2 ]
+physics.trigger_paths: [ reco ]
+outputs.out1.fileName: "%ifb_%tc_reco2.root"
+outputs.out1.dataTier: "reconstructed"
+source.inputCommands: ["keep *_*_*_*", "drop *_*_*_Data*RecoStage2" ]
