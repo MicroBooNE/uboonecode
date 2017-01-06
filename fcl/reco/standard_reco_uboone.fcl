@@ -7,7 +7,7 @@
 #include "showerfindermodules.fcl"
 #include "opticaldetectormodules_microboone.fcl"
 #include "vertexfindermodules.fcl"
-#include "pandoramodules.fcl"
+#include "pandoramodules_microboone.fcl"
 #include "triggeralgo_service.fcl"
 #include "photpropservices_microboone.fcl"
 
@@ -69,7 +69,7 @@ physics:
   linemerger:          @local::standard_linemerger
 
   ### pandora
-  pandora:             @local::standard_pandora
+  pandora:             @local::microboone_pandoraneutrino
   
   ### track-finder producers
   trackkalmanhit:      @local::microboone_track3Dkalmanhit

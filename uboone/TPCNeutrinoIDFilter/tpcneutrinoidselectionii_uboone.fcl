@@ -4,7 +4,6 @@
 #include "signalservices_microboone.fcl"
 #include "trackfindermodules_microboone.fcl"
 #include "vertexfindermodules.fcl"
-#include "pandoramodules.fcl"
 #include "tpcneutrinoidfilter_microboone.fcl"
 
 process_name: TPCNeutrinoIDFilter
