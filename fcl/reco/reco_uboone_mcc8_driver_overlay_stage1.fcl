@@ -1,4 +1,4 @@
-#include "reco_uboone_mcc8_driver_common.fcl"
+#include "reco_uboone_data_mcc8_driver_common.fcl"
 
 process_name: McRecoStage1
 
@@ -10,16 +10,16 @@ outputs.out1.dataTier: "reconstructed-2d"
 source.inputCommands: ["keep *_*_*_*", "drop *_*_*_McReco*" ]
 
 
-physics.producers.digitfilter.DigitModuleLabel: "mixer"
+physics.producers.wcNoiseFilter.DigitModuleLabel: "mixer"
 #physics.producers.ophit.InputModule: "mixer"
 #physics.producers.ophitLow.InputModule: "mixer"
 physics.producers.saturation.LGProducer: "mixer"
 physics.producers.saturation.HGProducer: "mixer"
 physics.producers.saturation.HGProducerCosmic: "mixer"
 
-physics.producers.digitfilter.ProcessNoise:                         true
-physics.producers.digitfilter.FFTAlg.TransformViewVec:              [true,false,false]
-physics.producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [true,true,false]
+#physics.producers.digitfilter.ProcessNoise:                         true
+#physics.producers.digitfilter.FFTAlg.TransformViewVec:              [true,false,false]
+#physics.producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [true,true,false]
 
 services.SignalShapingServiceMicroBooNE.FieldResponseFVersion: [ "v3.1", "v3.1"]
 services.SignalShapingServiceMicroBooNE.YZdependentResponse: true

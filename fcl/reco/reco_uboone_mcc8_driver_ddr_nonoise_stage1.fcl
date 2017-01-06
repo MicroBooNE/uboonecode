@@ -12,7 +12,7 @@ services.SignalShapingServiceMicroBooNE.FilterWidthCorrectionFactor: [ 1.0, 1.0,
 
 # Choose no noise inputs.
 
-physics.producers.digitfilter.DigitModuleLabel: "daqnonoise"
+physics.producers.wcNoiseFilter.DigitModuleLabel: "daqnonoise"
 physics.producers.saturation.LGProducer: "pmtreadoutnonoise"
 physics.producers.saturation.HGProducer: "pmtreadoutnonoise"
 physics.producers.saturation.HGProducerCosmic: "pmtreadoutnonoise"

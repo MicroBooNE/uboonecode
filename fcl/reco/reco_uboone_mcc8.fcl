@@ -232,8 +232,9 @@ microboone_reco_mcc8_optical: [ saturation,
                                 simpleFlashCosmic,
                                 simpleFlashBeam]
 
-microboone_reco_mcc8_signalprocessing: [ digitfilter,
-                                         caldata,
+microboone_reco_mcc8_signalprocessing: [ #digitfilter,
+                                         wcNoiseFilter,
+					 caldata,
                                          gaushit ]
 
 microboone_reco_mcc8_fuzzycluster: [     fuzzycluster ]
@@ -382,7 +383,7 @@ physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.
                                                 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
 
-microboone_reco_mcc8_producers.caldata.DigitModuleLabel:                         "digitfilter"
+microboone_reco_mcc8_producers.caldata.DigitModuleLabel:                         "wcNoiseFilter"
 microboone_reco_mcc8_producers.caldata.Threshold:                                [0, 0, 0]  # Not what you think...
 microboone_reco_mcc8_producers.caldata.NumSigma:                                 [9, 9, 9]  # Closer to what you think...
 microboone_reco_mcc8_producers.caldata.DodQdxCalib:                              false
