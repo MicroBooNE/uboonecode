@@ -1,0 +1,19 @@
+#include "prodgenie_common_cosmic_uboone_Filtered.fcl"
+
+process_name: GenieGenFiltered
+
+outputs.out1.fileName: "prodgenie_bnb_nu_cosmics_filtered_NCSinglePhoton_uboone_%tc_gen.root"
+
+source.maxEvents: 41000
+
+physics.producers.generator: @local::microboone_genie_simple
+physics.producers.generator.GlobalTimeOffset: 3125.
+physics.producers.generator.RandomTimeOffset: 1600.
+physics.producers.generator.TopVolume: "volCryostat"
+physics.producers.generator.BeamName: "booster"
+
+
+physics.filters.finalstatefilter.isInclusive: true
+physics.filters.finalstatefilter.PDG: [13, -13, 11, -11, 22] #NC 1 photon
+physics.filters.finalstatefilter.PDGCount: [0, 0, 0, 0, 1]
+physics.filters.finalstatefilter.PDGCountExclusivity: [true, true, true, true, true]

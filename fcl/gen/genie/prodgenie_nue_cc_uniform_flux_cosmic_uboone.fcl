@@ -1,0 +1,10 @@
+#include "prodgenie_common_cosmic_uboone.fcl"
+
+process_name: GenieGen
+
+outputs.out1.fileName: "prodgenie_nue_cc_uniform_flux_cosmic_uboone_%tc_gen.root"
+
+physics.producers.generator: @local::microboone_genie_uniform_flux_cc
+physics.producers.generator.GenFlavors: [12]
+physics.producers.generator.GlobalTimeOffset: 3125.
+physics.producers.generator.RandomTimeOffset: 1600.

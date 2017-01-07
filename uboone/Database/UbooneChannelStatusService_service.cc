@@ -7,12 +7,12 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "larevt/CalibrationDBI/Interface/ChannelStatusService.h"
 #include "larevt/CalibrationDBI/Providers/SIOVChannelStatusProvider.h"
+#include "UbooneCalibrationServiceHelper.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "larcore/Geometry/Geometry.h"
 
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/raw.h"
-#include "uboone/DataOverlay/DataOverlayProducts/EventMixingSummary.h"
 
 namespace lariov{
 
@@ -48,7 +48,7 @@ namespace lariov{
       std::string         fDigitModuleLabel;      ///< The full collection of hits for finding noisy channels
       float               fTruncMeanFraction;     ///< Fraction for truncated mean
       std::vector<double> fRmsCut;       ///< channel upper rms cut
-      std::string         fMixingModuleLabel;
+      UbooneCalibrationServiceHelper       fHelper;
   };
 }//end namespace lariov
       
@@ -59,7 +59,7 @@ namespace lariov{
 
   UbooneChannelStatusService::UbooneChannelStatusService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg) 
   : fProvider(pset.get<fhicl::ParameterSet>("ChannelStatusProvider")), 
-    fMixingModuleLabel(pset.get<std::string>("EventMixingModuleLabel"))
+    fHelper(pset.get<fhicl::ParameterSet>("CalibrationHelper"))
   {
     
     fFindNoisyChannels  = pset.get<bool>                ("FindNoisyChannels",   false);
@@ -75,21 +75,7 @@ namespace lariov{
   
   void UbooneChannelStatusService::PreProcessEvent(const art::Event& evt) {
     
-    art::Handle< std::vector<mix::EventMixingSummary> > eventMixingSummary;
-    evt.getByLabel(fMixingModuleLabel, eventMixingSummary);
-    if (eventMixingSummary.isValid() && eventMixingSummary->size()>0) {
-      if (eventMixingSummary->size() > 1) {
-        std::cout<<"  INFO: "<<eventMixingSummary->size()<<" EventMixingSummary objects"<<std::endl;
-      }
-      art::Timestamp time_stamp = eventMixingSummary->front().Timestamp();
-      std::cout<<"Using EventMixingSummary timestamp to query channel status database: "<<time_stamp.value()<<std::endl;
-      fProvider.Update(time_stamp.value());
-    }
-    else {
-      std::cout<<"Using art::Event timestamp to query channel status database: "<<evt.time().value()<<std::endl;
-      //First grab an update from the database
-      fProvider.Update(evt.time().value());
-    }
+    fProvider.Update( fHelper.GetTimeStamp(evt, "Channel Status") );
 
     //Update noisy channels using raw digits
     if (fFindNoisyChannels) this->FindNoisyChannels(evt);

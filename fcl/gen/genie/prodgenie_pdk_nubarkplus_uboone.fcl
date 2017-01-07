@@ -1,0 +1,9 @@
+#include "prodsingle_common_cosmic_uboone.fcl"
+
+process_name: PDKGen
+
+outputs.out1.fileName: "prod_pdk-e+pi0_corsika_uboone_%tc_gen.root"
+
+physics.producers.generator.module_type: "NucleonDecay"
+physics.producers.generator.DecayMode: 19
+physics.producers.generator.DecayedNucleon:  2212 

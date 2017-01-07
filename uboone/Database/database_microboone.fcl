@@ -8,6 +8,10 @@ microboone_databaseretrievalalg.DBUrl: "http://dbdata0vm.fnal.gov:8186/uboonecon
 
 # for development db, use "http://dbdata0vm.fnal.gov:8086/uboonecon_dev/app/"
 
+microboone_calibservicehelper:
+{
+    EventMixingModuleLabel: "mixer"
+}
 
 microboone_pedestalretrievalalg:
 {
@@ -30,7 +34,7 @@ microboone_detpedestalservice:
 {
   service_provider: UbooneDetPedestalService
   DetPedestalRetrievalAlg: @local::microboone_pedestalretrievalalg
-  EventMixingModuleLabel: "mixer"
+  CalibrationHelper: @local::microboone_calibservicehelper
 }
 
 
@@ -49,7 +53,7 @@ microboone_channelstatus_service:
   service_provider: UbooneChannelStatusService
   ChannelStatusProvider: @local::microboone_channelstatus_provider
   FindNoisyChannels: false
-  EventMixingModuleLabel: "mixer"
+  CalibrationHelper: @local::microboone_calibservicehelper
 }
 
 
@@ -93,7 +97,7 @@ microboone_pmtgain_service:
 {
   service_provider: UboonePmtGainService
   PmtGainProvider: @local::microboone_pmtgain_provider
-  EventMixingModuleLabel: "mixer"
+  CalibrationHelper: @local::microboone_calibservicehelper
 }  
 
 
@@ -117,7 +121,7 @@ microboone_electronicscalib_service:
 {
   service_provider: UbooneElectronicsCalibService
   ElectronicsCalibProvider: @local::microboone_electronicscalib_provider
-  EventMixingModuleLabel: "mixer"
+  CalibrationHelper: @local::microboone_calibservicehelper
 } 
 
 END_PROLOG
