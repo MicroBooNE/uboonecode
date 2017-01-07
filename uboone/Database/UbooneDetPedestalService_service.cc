@@ -7,7 +7,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "larevt/CalibrationDBI/Interface/DetPedestalService.h"
 #include "larevt/CalibrationDBI/Providers/DetPedestalRetrievalAlg.h"
-#include "uboone/DataOverlay/DataOverlayProducts/EventMixingSummary.h"
+#include "UbooneCalibrationServiceHelper.h"
 
 namespace lariov{
 
@@ -32,7 +32,7 @@ namespace lariov{
         return fProvider;
       }   
       
-      std::string fMixingModuleLabel; 
+      UbooneCalibrationServiceHelper fHelper; 
     
       DetPedestalRetrievalAlg fProvider;
   };
@@ -44,7 +44,7 @@ DECLARE_ART_SERVICE_INTERFACE_IMPL(lariov::UbooneDetPedestalService, lariov::Det
 namespace lariov{
 
   UbooneDetPedestalService::UbooneDetPedestalService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg) 
-  : fMixingModuleLabel(pset.get<std::string>("EventMixingModuleLabel")),
+  : fHelper(pset.get<fhicl::ParameterSet>("CalibrationHelper")),
     fProvider(pset.get<fhicl::ParameterSet>("DetPedestalRetrievalAlg"))
   {
     //register callback to update local database cache before each event is processed
@@ -54,29 +54,10 @@ namespace lariov{
 
   void UbooneDetPedestalService::PreProcessEvent(const art::Event& evt) {
     
-    art::Handle< std::vector<mix::EventMixingSummary> > eventMixingSummary;
-    evt.getByLabel(fMixingModuleLabel, eventMixingSummary);
-    if (eventMixingSummary.isValid() && eventMixingSummary->size()>0) {
-      if (eventMixingSummary->size() > 1) {
-        std::cout<<"  INFO: "<<eventMixingSummary->size()<<" EventMixingSummary objects"<<std::endl;
-      }
-      art::Timestamp time_stamp = eventMixingSummary->front().Timestamp();
-      std::cout<<"Using EventMixingSummary timestamp to query pedestal database: "<<time_stamp.value()<<std::endl;
-      fProvider.Update(time_stamp.value());
+    if (evt.isRealData() && evt.run() < 183) {
+      fProvider.Update(1430000000000000000);
     }
-    else {  
-      // This is a temporary kludge to allow microboone to analyze early data 
-      // which did not have a proper timestamp in the daq header.
-      if (evt.isRealData() && evt.run() < 183) {
-        std::uint64_t kludge_stamp = 1430000000000000000; //yes, there really needs to be 16 zeroes
-        std::cout<<"Using kludged timestamp to query pedestal database: "<<kludge_stamp<<std::endl;
-	fProvider.Update(kludge_stamp);
-      }
-      else {
-        std::cout<<"Using art::Event timestamp to query pedestal database: "<<evt.time().value()<<std::endl;
-        fProvider.Update(evt.time().value());
-      }
-    }
+    else fProvider.Update(fHelper.GetTimeStamp(evt, "Detector Pedestals"));
   }
     
 }//end namespace lariov

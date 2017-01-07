@@ -7,7 +7,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "larevt/CalibrationDBI/Interface/ElectronicsCalibService.h"
 #include "UbooneElectronicsCalibProvider.h"
-#include "uboone/DataOverlay/DataOverlayProducts/EventMixingSummary.h"
+#include "UbooneCalibrationServiceHelper.h"
 
 namespace lariov{
 
@@ -37,7 +37,7 @@ namespace lariov{
       }
     
       UbooneElectronicsCalibProvider fProvider;
-      std::string                    fMixingModuleLabel;
+      UbooneCalibrationServiceHelper fHelper;
   };
 }//end namespace lariov
       
@@ -48,7 +48,7 @@ namespace lariov{
 
   UbooneElectronicsCalibService::UbooneElectronicsCalibService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg) 
   : fProvider(pset.get<fhicl::ParameterSet>("ElectronicsCalibProvider")),
-    fMixingModuleLabel(pset.get<std::string>("EventMixingModuleLabel"))
+    fHelper(pset.get<fhicl::ParameterSet>("CalibrationHelper"))
   {
     //register callback to update local database cache before each event is processed
     reg.sPreProcessEvent.watch(this, &UbooneElectronicsCalibService::PreProcessEvent);
@@ -56,21 +56,7 @@ namespace lariov{
   
   void UbooneElectronicsCalibService::PreProcessEvent(const art::Event& evt) {
     
-    art::Handle< std::vector<mix::EventMixingSummary> > eventMixingSummary;
-    evt.getByLabel(fMixingModuleLabel, eventMixingSummary);
-    if (eventMixingSummary.isValid() && eventMixingSummary->size()>0) {
-      if (eventMixingSummary->size() > 1) {
-        std::cout<<"  INFO: "<<eventMixingSummary->size()<<" EventMixingSummary objects"<<std::endl;
-      }
-      art::Timestamp time_stamp = eventMixingSummary->front().Timestamp();
-      std::cout<<"Using EventMixingSummary timestamp to query ASICs calibration database: "<<time_stamp.value()<<std::endl;
-      fProvider.Update(time_stamp.value());
-    }
-    else {
-      std::cout<<"Using art::Event timestamp to query ASICs calibration database: "<<evt.time().value()<<std::endl;
-      //First grab an update from the database
-      fProvider.Update(evt.time().value());
-    }
+    fProvider.Update( fHelper.GetTimeStamp(evt, "ASIC Calibrations") );
   } 
 
 }//end namespace lariov
