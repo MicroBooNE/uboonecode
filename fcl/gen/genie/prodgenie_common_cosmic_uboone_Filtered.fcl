@@ -1,5 +1,5 @@
 #include "services_microboone.fcl"
-#include "genie_microboone.fcl"
+#include "genie_microboone_default+MEC.fcl"
 #include "cry_microboone.fcl"
 #include "corsika_microboone.fcl"
 #include "filters.fcl" 
