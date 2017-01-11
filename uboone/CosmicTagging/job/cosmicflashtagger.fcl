@@ -21,8 +21,8 @@ DebugMode:             false
 FlashMatchConfig:      @local::flashmatch_config
 
 IncompCheckConfig: {
-  SigmaThreshold:   7
-  NBinsRequirement: 3
+  SigmaThreshold:   8
+  NBinsRequirement: 4
   UseFlashPosition: true
  }
 }
