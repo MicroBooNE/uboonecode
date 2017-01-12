@@ -261,6 +261,7 @@ void CosmicFlashTagger::produce(art::Event & e)
 
     bool beamIncompatible = false;
     art::Ptr<recob::PFParticle> pfParticle;
+    pfParticle = it->first;
 
     // Get the tracks associated with this PFParticle
     lar_pandora::TrackVector track_v;
@@ -270,7 +271,6 @@ void CosmicFlashTagger::produce(art::Event & e)
     for (unsigned int bf = 0; bf < beam_flashes.size(); bf++) {
 
       // Get the PFParticle
-      pfParticle = it->first;
       if(_debug){
         std::cout << "This is PFP with ID " << pfParticle->Self() << std::endl;
         _n_pfp++;
