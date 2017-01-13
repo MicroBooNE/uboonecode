@@ -413,6 +413,8 @@ microboone_reco_data_producers.stitchkalmanhitpid.TrackModuleLabel:             
 microboone_reco_data_producers.trackkalmanhittag.ClusterModuleLabel:             "fuzzycluster"
 microboone_reco_data_producers.trackkalmanhittag.TrackModuleLabel:               "trackkalmanhit"
 microboone_reco_data_producers.trackkalmanhittag.EndTickPadding:                 75
+microboone_reco_data_producers.trackkalmanhittag.TPCYBoundary:                   10
+microboone_reco_data_producers.trackkalmanhittag.TPCZBoundary:                   5
 
 microboone_reco_data_producers.stitchkalmanhittag.ClusterModuleLabel:            "fuzzycluster"
 microboone_reco_data_producers.stitchkalmanhittag.TrackModuleLabel:              "stitchkalmanhit"
@@ -483,13 +485,13 @@ microboone_reco_data_producers.pandoraCosmicpid.TrackModuleLabel:               
 microboone_reco_data_producers.pandoraCosmicKHitPFPart.PFParticleModuleLabel:    "pandoraCosmic"
 microboone_reco_data_producers.pandoraCosmicKHitPFPart.TrackModuleLabel:         "pandoraCosmicKHit"
 microboone_reco_data_producers.pandoraCosmicKHitPFPart.EndTickPadding:           75
-microboone_reco_data_producers.pandoraCosmicKHitPFPart.TPCYBoundary:             5
+microboone_reco_data_producers.pandoraCosmicKHitPFPart.TPCYBoundary:             10
 microboone_reco_data_producers.pandoraCosmicKHitPFPart.TPCZBoundary:             5
 
 microboone_reco_data_producers.pandoraCosmicKalmanTrackPFPart.PFParticleModuleLabel: "pandoraCosmic"
 microboone_reco_data_producers.pandoraCosmicKalmanTrackPFPart.TrackModuleLabel:      "pandoraCosmicKalmanTrack"
 microboone_reco_data_producers.pandoraCosmicKalmanTrackPFPart.EndTickPadding:        75
-microboone_reco_data_producers.pandoraCosmicKalmanTrackPFPart.TPCYBoundary:          5
+microboone_reco_data_producers.pandoraCosmicKalmanTrackPFPart.TPCYBoundary:          10
 microboone_reco_data_producers.pandoraCosmicKalmanTrackPFPart.TPCZBoundary:          5
 
 microboone_reco_data_producers.pandoraCosmicKHitFlashMatch.TrackModuleLabel:     "pandoraCosmicKHit"
