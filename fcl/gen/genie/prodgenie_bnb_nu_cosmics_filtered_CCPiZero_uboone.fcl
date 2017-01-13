@@ -14,6 +14,6 @@ physics.producers.generator.BeamName: "booster"
 
 
 physics.filters.finalstatefilter.isInclusive: true
-physics.filters.finalstatefilter.PDG: [13, 111] #NC PiZero
+physics.filters.finalstatefilter.PDG: [13, 111] #CC PiZero
 physics.filters.finalstatefilter.PDGCount: [1, 1]
 physics.filters.finalstatefilter.PDGCountExclusivity: [true, true]

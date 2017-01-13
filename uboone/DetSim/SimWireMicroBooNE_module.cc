@@ -499,7 +499,10 @@ namespace detsim {
 	      bool YZflag = true;	      
 	      if(view == 0) { // U-plane
 		if( (int)chan >= 1168 && (int)chan <= 1903 ){ // wires overlap with Y-plane shorted wires
-		  if(z >= 701 && z <= 738){ // YZ region overlaps with Y-plane shorted wires
+		  //if(z >= 701 && z <= 738){ // YZ region overlaps with Y-plane shorted wires
+		  if( (z > 700.9 && z < 720.1) ||
+                      (z > 720.4 && z < 724.6) ||
+                      (z > 724.9 && z < 739.3) ){ // YZ region overlaps with Y-plane shorted wires
 		    if(datadrivenresponse){ if(wireIndex != 1){ YZflag = false; } }
 		    else{ charge = charge * 0.98; }
 		  }
@@ -519,7 +522,27 @@ namespace detsim {
 	      }
 	      else if(view == 1) { // V-plane
 		if( (int)chan >= 2400 && (int)chan < 3568 ){ // wires overlap with U-plane shorted wires
-		  if( (y < (z*0.577)+14.595) && (y > (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
+		  //if( (y < (z*0.577)+14.595) && (y > (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
+		  if( ( (y < (z*0.577)+14.769) && (y > (z*0.577)+14.422) ) || 
+		      ( (y < (z*0.577)+14.076) && (y > (z*0.577)+7.840) ) || 
+		      ( (y < (z*0.577)+7.494) && (y > (z*0.577)+7.148) ) || 
+		      ( (y < (z*0.577)+6.801) && (y > (z*0.577)+3.683) ) || 
+		      ( (y < (z*0.577)+0.912) && (y > (z*0.577)+0.219) ) || 
+		      ( (y < (z*0.577)-1.513) && (y > (z*0.577)-2.552) ) || 
+		      ( (y < (z*0.577)-3.245) && (y > (z*0.577)-4.630) ) || 
+		      ( (y < (z*0.577)-12.944) && (y > (z*0.577)-21.604) ) || 
+		      ( (y < (z*0.577)-24.722) && (y > (z*0.577)-37.193) ) || 
+		      ( (y < (z*0.577)-37.539) && (y > (z*0.577)-50.703) ) || 
+		      ( (y < (z*0.577)-56.245) && (y > (z*0.577)-57.284) ) || 
+		      ( (y < (z*0.577)-57.631) && (y > (z*0.577)-63.174) ) || 
+		      ( (y < (z*0.577)-63.520) && (y > (z*0.577)-64.559) ) || 
+		      ( (y < (z*0.577)-68.370) && (y > (z*0.577)-76.684) ) || 
+		      ( (y < (z*0.577)-77.030) && (y > (z*0.577)-88.115) ) || 
+		      ( (y < (z*0.577)-88.808) && (y > (z*0.577)-90.194) ) || 
+		      ( (y < (z*0.577)-90.540) && (y > (z*0.577)-101.971) ) || 
+		      ( (y < (z*0.577)-102.318) && (y > (z*0.577)-108.900) ) || 
+		      ( (y < (z*0.577)-109.246) && (y > (z*0.577)-109.592) ) || 
+		      ( (y < (z*0.577)-109.934) && (y > (z*0.577)-115.417) ) ){ // YZ region overlaps with U-plane shorted wires
 		    if(datadrivenresponse){ if(wireIndex != 1){ YZflag = false; } }
 		    else{
 		      if(wireIndex == 1){ charge = charge * 0.685; }
@@ -558,7 +581,10 @@ namespace detsim {
                   }
 		}
 		else if( (int)chan > 3743 && (int)chan <= 4303 ){ // wires overlap with Y-plane shorted wires
-		  if(z >= 701 && z <= 738){ // YZ region overlaps with Y-plane shorted wires
+		  //if(z >= 701 && z <= 739){ // YZ region overlaps with Y-plane shorted wires
+		  if( (z > 700.9 && z < 720.1) ||
+		      (z > 720.4 && z < 724.6) ||
+		      (z > 724.9 && z < 739.3) ){ // YZ region overlaps with Y-plane shorted wires
 		    if(datadrivenresponse){ if(wireIndex != 0){ YZflag = false; } }
 		    else{
 		      if(wireIndex == 0){ charge = charge * 0.7; }
@@ -584,7 +610,27 @@ namespace detsim {
 
 	      else if(view == 2) { // Y-plane
 		if( (int)chan >= 4800 && (int)chan <= 6143 ){ // wires overlap with U-plane shorted wires
-		  if( (y < (z*0.577)+14.595) && (y > (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
+		  //if( (y < (z*0.577)+14.595) && (y > (z*0.577)-115.308) ){ // YZ region overlaps with U-plane shorted wires
+		  if( ( (y < (z*0.577)+14.769) && (y > (z*0.577)+14.422) ) || 
+		      ( (y < (z*0.577)+14.076) && (y > (z*0.577)+7.840) ) || 
+		      ( (y < (z*0.577)+7.494) && (y > (z*0.577)+7.148) ) || 
+		      ( (y < (z*0.577)+6.801) && (y > (z*0.577)+3.683) ) || 
+		      ( (y < (z*0.577)+0.912) && (y > (z*0.577)+0.219) ) || 
+		      ( (y < (z*0.577)-1.513) && (y > (z*0.577)-2.552) ) || 
+		      ( (y < (z*0.577)-3.245) && (y > (z*0.577)-4.630) ) || 
+		      ( (y < (z*0.577)-12.944) && (y > (z*0.577)-21.604) ) || 
+		      ( (y < (z*0.577)-24.722) && (y > (z*0.577)-37.193) ) || 
+		      ( (y < (z*0.577)-37.539) && (y > (z*0.577)-50.703) ) || 
+		      ( (y < (z*0.577)-56.245) && (y > (z*0.577)-57.284) ) || 
+		      ( (y < (z*0.577)-57.631) && (y > (z*0.577)-63.174) ) || 
+		      ( (y < (z*0.577)-63.520) && (y > (z*0.577)-64.559) ) || 
+		      ( (y < (z*0.577)-68.370) && (y > (z*0.577)-76.684) ) || 
+		      ( (y < (z*0.577)-77.030) && (y > (z*0.577)-88.115) ) || 
+		      ( (y < (z*0.577)-88.808) && (y > (z*0.577)-90.194) ) || 
+		      ( (y < (z*0.577)-90.540) && (y > (z*0.577)-101.971) ) || 
+		      ( (y < (z*0.577)-102.318) && (y > (z*0.577)-108.900) ) || 
+		      ( (y < (z*0.577)-109.246) && (y > (z*0.577)-109.592) ) || 
+		      ( (y < (z*0.577)-109.934) && (y > (z*0.577)-115.417) ) ){ // YZ region overlaps with U-plane shorted wires
 		    if(datadrivenresponse){ if(wireIndex != 0){ YZflag = false; } }
 		    else{ charge = charge * 0.8; }
 		  }

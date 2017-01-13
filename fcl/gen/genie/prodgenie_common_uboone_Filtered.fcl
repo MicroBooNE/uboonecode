@@ -1,5 +1,5 @@
 #include "services_microboone.fcl"
-#include "genie_microboone.fcl"
+#include "genie_microboone_default+MEC.fcl"
 #include "filters.fcl" 
 
 process_name: GenieGenFiltered
