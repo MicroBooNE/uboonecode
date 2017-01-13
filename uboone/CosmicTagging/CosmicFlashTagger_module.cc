@@ -102,6 +102,7 @@ private:
   int _run, _subrun, _event, _matchid;
   int _n_beam_flashes, _n_pfp;
   std::vector<std::vector<double>> _beam_flash_spec, _pfp_hypo_spec;
+  std::vector<int> _pfp_id;
   std::vector<double> _beam_flash_time;
   int _beam_flash_exists; // 0 == no;  1 == yes
 };
@@ -146,6 +147,7 @@ CosmicFlashTagger::CosmicFlashTagger(fhicl::ParameterSet const & p)
     _tree1->Branch("beam_flash_exists",&_beam_flash_exists,"beam_flash_exists/I");
     _tree1->Branch("n_pfp",&_n_pfp,"n_pfp/I");
     _tree1->Branch("pfp_hypo_spec","std::vector<std::vector<double>>",&_pfp_hypo_spec);
+    _tree1->Branch("pfp_id","std::vector<int>",&_pfp_id);
   }
 
   produces< std::vector<anab::CosmicTag>>();  
@@ -259,6 +261,7 @@ void CosmicFlashTagger::produce(art::Event & e)
 
     bool beamIncompatible = false;
     art::Ptr<recob::PFParticle> pfParticle;
+    pfParticle = it->first;
 
     // Get the tracks associated with this PFParticle
     lar_pandora::TrackVector track_v;
@@ -268,11 +271,11 @@ void CosmicFlashTagger::produce(art::Event & e)
     for (unsigned int bf = 0; bf < beam_flashes.size(); bf++) {
 
       // Get the PFParticle
-      pfParticle = it->first;
       if(_debug){
         std::cout << "This is PFP with ID " << pfParticle->Self() << std::endl;
         _n_pfp++;
         _pfp_hypo_spec.resize(_n_pfp);
+        _pfp_id.resize(_n_pfp);
       }
 
       // Get the beam flash
@@ -296,6 +299,7 @@ void CosmicFlashTagger::produce(art::Event & e)
       ((flashana::PhotonLibHypothesis*)(_mgr.GetAlgo(flashana::kFlashHypothesis)))->FillEstimate(qcluster,flashHypo);
       
       if(_debug) _pfp_hypo_spec[_n_pfp-1] = flashHypo.pe_v;
+      if(_debug) _pfp_id[_n_pfp-1] = pfParticle->Self();
       mf::LogDebug("CosmicFlashTagger") << "*** The beam flash has Z = " << flashBeam.z << " +- " << flashBeam.z_err << std::endl;
       this->AddFlashPosition(flashHypo);
       mf::LogDebug("CosmicFlashTagger") << "*** The hypo flash has Z = " << flashHypo.z << " +- " << flashHypo.z_err << std::endl;

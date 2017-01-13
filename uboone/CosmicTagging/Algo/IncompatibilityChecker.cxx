@@ -82,11 +82,13 @@ namespace flashana {
 
     if(!_useFlashPosition) {
       if( (areIncompatibleByBin || areIncompatibleByTotPe) ) {
+      }
+      if( areIncompatibleByBin ) {
         //std::cout << "Flashes are incompatible by bin or total pe." << std::endl;
         return true;
       }
     } else {
-      if( (areIncompatibleByBin || areIncompatibleByTotPe) && areIncompatibleByFlsPos) {
+      if( areIncompatibleByBin && areIncompatibleByFlsPos) {
         //std::cout << "Flashes are incompatible by (bin or total pe) and flash position." << std::endl;
         return true;
       }
