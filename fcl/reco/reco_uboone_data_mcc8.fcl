@@ -372,9 +372,6 @@ microboone_reco_data_MucSTags: [         MuCSTrackTaggertrackkalmanhit,
 # this turns on the truncation of the RawDigits
 microboone_reco_data_producers.digitfilter.TruncateTicks:                        true
 
-#wirecell noise filtering
-microboone_reco_mcc8_data_producers.wcNoiseFilter.TruncateTicks:                        true
-
 microboone_reco_data_producers.caldata.DigitModuleLabel:                         "wcNoiseFilter"
 microboone_reco_data_producers.caldata.Threshold:                                [0, 0, 0]  # Not what you think...
 microboone_reco_data_producers.caldata.NumSigma:                                 [9, 9, 9]  # Closer to what you think...

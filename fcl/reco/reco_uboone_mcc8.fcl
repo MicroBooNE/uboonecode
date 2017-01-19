@@ -375,8 +375,7 @@ microboone_reco_mcc8_producers.digitfilter.FFTAlg.TransformViewVec:             
 microboone_reco_mcc8_producers.digitfilter.FFTAlg.ZigZagCorrectVec:              [false,false,false]
 
 #wirecell noise filtering
-microboone_reco_mcc8_producers.wcNoiseFilter.TruncateTicks:                        true
-microboone_reco_mcc8_producers.wcNoiseFilter.DoNoiseFiltering:                     false
+microboone_reco_mcc8_producers.wcNoiseFilter.DoNoiseFiltering:                   false
 
 
 physics.producers.saturation.CalibrationCorr : [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
