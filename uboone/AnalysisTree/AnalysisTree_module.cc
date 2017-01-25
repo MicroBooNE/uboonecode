@@ -621,6 +621,35 @@ namespace microboone {
       size_t GetMaxVertices() const { return MaxVertices; }
     }; // class VertexDataStruct 
 
+    //Neutrino vertex data struct
+    class NeutrinoVertexDataStruct {
+    public:
+      template <typename T>
+      using VertexData_t = std::vector<T>;
+
+      size_t MaxVertices;             ///< maximum number of storable vertices
+
+      Short_t  nvtx;                  ///<number of reconstructed tracks
+      VertexData_t<Short_t> vtxId;    ///< the vertex ID.
+      VertexData_t<Float_t> vtxx;     ///< x position.
+      VertexData_t<Float_t> vtxy;     ///< y position.
+      VertexData_t<Float_t> vtxz;     ///< z position.
+      VertexData_t<Int_t>   vtxpdg;   ///< pdg of pfp
+
+      VertexData_t<Short_t> vtxhasPFParticle; // whether this belongs to a PFParticle 
+      VertexData_t<Short_t> vtxPFParticleID;  // if hasPFParticle, its ID
+
+      NeutrinoVertexDataStruct(): MaxVertices(0) { Clear(); }
+      NeutrinoVertexDataStruct(size_t maxVertices): MaxVertices(maxVertices) { Clear(); }
+      void Clear();
+      void SetMaxVertices(size_t maxVertices)
+      { MaxVertices = maxVertices; Resize(MaxVertices); }
+      void Resize(size_t nVertices);
+      void SetAddresses(TTree* pTree, std::string tracker, bool isCosmics);
+
+      size_t GetMaxVertices() const { return MaxVertices; }
+    }; // class NeutrinoVertexDataStruct 
+
     // Flash data struct
     class FlashDataStruct {
     public:
@@ -906,13 +935,6 @@ namespace microboone {
     Float_t  sim_fwhh[kMaxHits];  
     Double_t sim_rms[kMaxHits]; 
 
-    //Pandora Nu Vertex information
-    Short_t nnuvtx;
-    Float_t nuvtxx[kMaxVertices];
-    Float_t nuvtxy[kMaxVertices];
-    Float_t nuvtxz[kMaxVertices];
-    Short_t nuvtxpdg[kMaxVertices];
-
     //Cluster Information
     Short_t nclusters;				      //number of clusters in a given event
     Short_t clusterId[kMaxClusters];		      //ID of this cluster	 
@@ -960,7 +982,11 @@ namespace microboone {
     //vertex information
     Char_t   kNVertexAlgos;
     std::vector<VertexDataStruct> VertexData;
-    
+   
+    //neutrino vertex information
+    Char_t   kNNeutrinoVertexAlgos;
+    std::vector<NeutrinoVertexDataStruct> NeutrinoVertexData;
+
     // shower information
     Char_t   kNShowerAlgos;
     std::vector<ShowerDataStruct> ShowerData;
@@ -1324,10 +1350,10 @@ namespace microboone {
     { if (unset) bits &= ~setbits; else bits |= setbits; }
       
     /// Constructor; clears all fields
-    AnalysisTreeDataStruct(size_t nTrackers = 0, size_t nVertexAlgos = 0, size_t nFlashAlgos = 0,
+    AnalysisTreeDataStruct(size_t nTrackers = 0, size_t nVertexAlgos = 0, size_t nNuVertexAlgos = 0, size_t nFlashAlgos = 0,
 			   std::vector<std::string> const& ShowerAlgos = {}):
       bits(tdDefault) 
-    { SetTrackers(nTrackers); SetVertexAlgos(nVertexAlgos); SetFlashAlgos(nFlashAlgos); SetShowerAlgos(ShowerAlgos); Clear(); }
+    { SetTrackers(nTrackers); SetVertexAlgos(nVertexAlgos); SetNeutrinoVertexAlgos(nNuVertexAlgos); SetFlashAlgos(nFlashAlgos); SetShowerAlgos(ShowerAlgos); Clear(); }
 
     TrackDataStruct& GetTrackerData(size_t iTracker)
     { return TrackData.at(iTracker); }
@@ -1348,6 +1374,11 @@ namespace microboone {
     { return VertexData.at(iVertex); }
     const VertexDataStruct& GetVertexData(size_t iVertex) const
     { return VertexData.at(iVertex); }
+
+    NeutrinoVertexDataStruct& GetNeutrinoVertexData(size_t iNuVertex)
+    { return NeutrinoVertexData.at(iNuVertex); }
+    const NeutrinoVertexDataStruct& GetNeutrinoVertexData(size_t iNuVertex) const
+    { return NeutrinoVertexData.at(iNuVertex); }
 
     PFParticleDataStruct& GetPFParticleData()
       { return PFParticleData; }
@@ -1377,6 +1408,9 @@ namespace microboone {
     /// Allocates data structures for the given number of vertex algos (no Clear())
     void SetVertexAlgos(size_t nVertexAlgos) { VertexData.resize(nVertexAlgos); }
 
+    /// Allocates data structures for the given number of neutrino vertex algos (no Clear())
+    void SetNeutrinoVertexAlgos(size_t nNuVertexAlgos) { NeutrinoVertexData.resize(nNuVertexAlgos); }
+
     ///Allocates data structures for the given number of flash algos (no Clear())
     void SetFlashAlgos(size_t nFlashAlgos) { FlashData.resize(nFlashAlgos); }
 
@@ -1402,7 +1436,8 @@ namespace microboone {
     void SetAddresses(
 		      TTree* pTree,
 		      std::vector<std::string> const& trackers,
-		      std::vector<std::string> const& vertexalgos,
+                      std::vector<std::string> const& vertexalgos,
+                      std::vector<std::string> const& nuvertexalgos,
                       std::vector<std::string> const& flashalgos,
 		      std::vector<std::string> const& showeralgos,
 		      bool isCosmics
@@ -1414,6 +1449,9 @@ namespace microboone {
    
     /// Returns the number of Vertex algos for which data structures are allocated
     size_t GetNVertexAlgos() const { return VertexData.size(); }
+
+    /// Returns the number of Neutrinoo Vertex algos for which data structures are allocated
+    size_t GetNNuVertexAlgos() const { return NeutrinoVertexData.size(); }
 
     /// Returns the number of Flash algos for which data structures are allocated
     size_t GetNFlashAlgos() const { return FlashData.size(); }
@@ -1590,7 +1628,7 @@ namespace microboone {
     std::string fCryGenModuleLabel;
     std::string fG4ModuleLabel;
     std::string fClusterModuleLabel;
-    std::string fPandoraNuVertexModuleLabel;
+    std::vector<std::string> fPandoraNuVertexModuleLabel;
     std::vector<std::string> fOpFlashModuleLabel;
     std::string fMCShowerModuleLabel;
     std::string fMCTrackModuleLabel;
@@ -1644,7 +1682,9 @@ namespace microboone {
     size_t GetNTrackers() const { return fTrackModuleLabel.size(); }
 
     size_t GetNVertexAlgos() const { return fVertexModuleLabel.size(); }
-      
+
+    size_t GetNNuVertexAlgos() const { return fPandoraNuVertexModuleLabel.size(); }     
+ 
     size_t GetNFlashAlgos() const { return fOpFlashModuleLabel.size(); }
  
     /// Returns the number of shower algorithms configured
@@ -1659,7 +1699,7 @@ namespace microboone {
     {
       if (!fData) {
 	fData.reset
-	  (new AnalysisTreeDataStruct(GetNTrackers(), GetNVertexAlgos(), GetNFlashAlgos(), GetShowerAlgos()));
+	  (new AnalysisTreeDataStruct(GetNTrackers(), GetNVertexAlgos(), GetNNuVertexAlgos(), GetNFlashAlgos(), GetShowerAlgos()));
 	fData->SetBits(AnalysisTreeDataStruct::tdCry,    !fSaveCryInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdGenie,  !fSaveGenieInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdGeant,  !fSaveGeantInfo);
@@ -1683,6 +1723,7 @@ namespace microboone {
       else {
 	fData->SetTrackers(GetNTrackers());
 	fData->SetVertexAlgos(GetNVertexAlgos());
+        fData->SetNeutrinoVertexAlgos(GetNNuVertexAlgos());
         fData->SetFlashAlgos(GetNFlashAlgos());
 	fData->SetShowerAlgos(GetShowerAlgos());
 
@@ -1695,7 +1736,7 @@ namespace microboone {
     {
       CheckData(__func__); CheckTree(__func__);
       fData->SetAddresses
-	(fTree, fTrackModuleLabel, fVertexModuleLabel, fOpFlashModuleLabel, fShowerModuleLabel, isCosmics);
+	(fTree, fTrackModuleLabel, fVertexModuleLabel, fPandoraNuVertexModuleLabel, fOpFlashModuleLabel, fShowerModuleLabel, isCosmics);
     } // SetAddresses()
     
     /// Sets the addresses of all the tree branches of the specified tracking algo,
@@ -1724,7 +1765,19 @@ namespace microboone {
       fData->GetVertexData(iVertexAlg)
 	.SetAddresses(fTree, fVertexModuleLabel[iVertexAlg], isCosmics);
     } // SetVertexAddresses()
-   
+  
+    void SetNeutrinoVertexAddresses(size_t iNuVertexAlg)
+    {
+      CheckData(__func__); CheckTree(__func__);
+      if (iNuVertexAlg >= fData->GetNNuVertexAlgos()) {
+        throw art::Exception(art::errors::LogicError)
+          << "AnalysisTree::SetNeutrinoVertexAddresses(): no vertex alg #" << iNuVertexAlg
+          << " (" << fData->GetNNuVertexAlgos() << " available)";
+      }
+      fData->GetNeutrinoVertexData(iNuVertexAlg)
+        .SetAddresses(fTree, fPandoraNuVertexModuleLabel[iNuVertexAlg], isCosmics);
+    } // SetVertexAddresses()
+ 
     void SetFlashAddresses(size_t iFlashAlg)
     {
       CheckData(__func__); CheckTree(__func__);
@@ -2382,6 +2435,75 @@ void microboone::AnalysisTreeDataStruct::VertexDataStruct::SetAddresses(
   CreateBranch(BranchName, vtxPFParticleID, BranchName + NVertexIndexStr + "/S");
 }
 
+
+//------------------------------------------------------------------------------
+//---  AnalysisTreeDataStruct::NeutrinoVertexDataStruct
+//---
+
+void microboone::AnalysisTreeDataStruct::NeutrinoVertexDataStruct::Resize(size_t nVertices)
+{ 
+  MaxVertices = nVertices;
+  vtxId.resize(MaxVertices);
+  vtxx.resize(MaxVertices);
+  vtxy.resize(MaxVertices);
+  vtxz.resize(MaxVertices);
+  vtxpdg.resize(MaxVertices);
+
+  vtxhasPFParticle.resize(MaxVertices);
+  vtxPFParticleID.resize(MaxVertices);
+}
+
+void microboone::AnalysisTreeDataStruct::NeutrinoVertexDataStruct::Clear() {
+  Resize(MaxVertices);
+  nvtx = -9999;
+
+  FillWith(vtxId       , -9999  );
+  FillWith(vtxx        , -9999  );
+  FillWith(vtxy        , -9999  );
+  FillWith(vtxz        , -9999  );
+  FillWith(vtxpdg      , -9999  );
+  FillWith(vtxhasPFParticle, -1  );
+  FillWith(vtxPFParticleID , -1  );
+}
+
+void microboone::AnalysisTreeDataStruct::NeutrinoVertexDataStruct::SetAddresses(
+                                                                        TTree* pTree, std::string alg, bool isCosmics
+                                                                        ) {
+  if (MaxVertices == 0) return; // no tracks, no tree!
+
+  microboone::AnalysisTreeDataStruct::BranchCreator CreateBranch(pTree);
+
+  AutoResettingStringSteam sstr;
+
+  std::string VertexLabel = alg;
+  std::string BranchName;
+
+  BranchName = "nnuvtx_" + VertexLabel;
+  CreateBranch(BranchName, &nvtx, BranchName + "/S");
+  std::string NVertexIndexStr = "[" + BranchName + "]";
+
+  BranchName = "nuvtxId_" + VertexLabel;
+  CreateBranch(BranchName, vtxId, BranchName + NVertexIndexStr + "/S");
+
+  BranchName = "nuvtxx_" + VertexLabel;
+  CreateBranch(BranchName, vtxx, BranchName + NVertexIndexStr + "/F");
+
+  BranchName = "nuvtxy_" + VertexLabel;
+  CreateBranch(BranchName, vtxy, BranchName + NVertexIndexStr + "/F");
+
+  BranchName = "nuvtxz_" + VertexLabel;
+  CreateBranch(BranchName, vtxz, BranchName + NVertexIndexStr + "/F");
+
+  BranchName = "nuvtxpdg_" + VertexLabel;
+  CreateBranch(BranchName, vtxpdg, BranchName + NVertexIndexStr + "/I");
+
+  BranchName = "nuvtxhasPFParticle_" + VertexLabel;
+  CreateBranch(BranchName, vtxhasPFParticle, BranchName + NVertexIndexStr + "/S");
+
+  BranchName = "nuvtxPFParticleID_" + VertexLabel;
+  CreateBranch(BranchName, vtxPFParticleID, BranchName + NVertexIndexStr + "/S");
+}
+
 //------------------------------------------------------------------------------
 //---  AnalysisTreeDataStruct::FlashDataStruct
 //---
@@ -2847,12 +2969,6 @@ void microboone::AnalysisTreeDataStruct::ClearLocalData() {
   std::fill(clucosmicscore_tagger, clucosmicscore_tagger + sizeof(clucosmicscore_tagger)/sizeof(clucosmicscore_tagger[0]), -99999.);
   std::fill(clucosmictype_tagger , clucosmictype_tagger  + sizeof(clucosmictype_tagger )/sizeof(clucosmictype_tagger [0]), -9999);
 
-  nnuvtx = 0;
-  std::fill(nuvtxx, nuvtxx + sizeof(nuvtxx)/sizeof(nuvtxx[0]), -99999.);
-  std::fill(nuvtxy, nuvtxy + sizeof(nuvtxy)/sizeof(nuvtxy[0]), -99999.);
-  std::fill(nuvtxz, nuvtxz + sizeof(nuvtxz)/sizeof(nuvtxz[0]), -99999.);
-  std::fill(nuvtxpdg, nuvtxpdg + sizeof(nuvtxpdg)/sizeof(nuvtxpdg[0]), -99999);
-
   mcevts_truth = -99999;
   mcevts_truthcry = -99999;
   std::fill(nuPDG_truth, nuPDG_truth + sizeof(nuPDG_truth)/sizeof(nuPDG_truth[0]), -99999.);
@@ -3079,6 +3195,8 @@ void microboone::AnalysisTreeDataStruct::Clear() {
     (TrackData.begin(), TrackData.end(), std::mem_fn(&TrackDataStruct::Clear));
   std::for_each
     (VertexData.begin(), VertexData.end(), std::mem_fn(&VertexDataStruct::Clear));
+  std::for_each
+    (NeutrinoVertexData.begin(), NeutrinoVertexData.end(), std::mem_fn(&NeutrinoVertexDataStruct::Clear));
   std::for_each
     (FlashData.begin(), FlashData.end(), std::mem_fn(&FlashDataStruct::Clear));
   std::for_each
@@ -3322,6 +3440,7 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
 						      TTree* pTree,
 						      const std::vector<std::string>& trackers,
 						      const std::vector<std::string>& vertexalgos,
+                                                      const std::vector<std::string>& nuvertexalgos,
                                                       const std::vector<std::string>& flashalgos,
 						      const std::vector<std::string>& showeralgos,
 						      bool isCosmics
@@ -3396,14 +3515,6 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
     }	   
   }
 
-  if (hasPandoraNuVertexInfo()){
-    CreateBranch("nnuvtx", &nnuvtx, "nnuvtx/S");
-    CreateBranch("nuvtxx", nuvtxx, "nuvtxx[nnuvtx]/F");
-    CreateBranch("nuvtxy", nuvtxy, "nuvtxy[nnuvtx]/F");
-    CreateBranch("nuvtxz", nuvtxz, "nuvtxz[nnuvtx]/F");
-    CreateBranch("nuvtxpdg", nuvtxpdg, "nuvtxpdg[nnuvtx]/S");
-  }
-
   if (hasClusterInfo()){
     CreateBranch("nclusters",&nclusters,"nclusters/S");
     CreateBranch("clusterId", clusterId, "clusterId[nclusters]/S");
@@ -3472,6 +3583,18 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
       // note that if the vertes data has maximum number of vertices 0,
       // nothing is initialized (branches are not even created)
       VertexData[i].SetAddresses(pTree, VertexLabel, isCosmics);
+    } // for trackers
+  }
+
+  if (hasPandoraNuVertexInfo()){
+    kNNeutrinoVertexAlgos = nuvertexalgos.size();
+    CreateBranch("kNNeutrinoVertexAlgos",&kNNeutrinoVertexAlgos,"kNNeutrinoVertexAlgos/B");
+    for(int i=0; i<kNNeutrinoVertexAlgos; i++){
+      std::string NuVertexLabel = nuvertexalgos[i];
+
+      // note that if the vertes data has maximum number of vertices 0,
+      // nothing is initialized (branches are not even created)
+      NeutrinoVertexData[i].SetAddresses(pTree, NuVertexLabel, isCosmics);
     } // for trackers
   }
 
@@ -3794,7 +3917,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fCryGenModuleLabel        (pset.get< std::string >("CryGenModuleLabel")       ), 
   fG4ModuleLabel            (pset.get< std::string >("G4ModuleLabel")           ),
   fClusterModuleLabel       (pset.get< std::string >("ClusterModuleLabel")     ),
-  fPandoraNuVertexModuleLabel (pset.get< std::string >("PandoraNuVertexModuleLabel")     ),
+  fPandoraNuVertexModuleLabel (pset.get< std::vector<std::string> >("PandoraNuVertexModuleLabel")     ),
   fOpFlashModuleLabel       (pset.get< std::vector<std::string> >("OpFlashModuleLabel")      ),
   fMCShowerModuleLabel      (pset.get< std::string >("MCShowerModuleLabel")     ),  
   fMCTrackModuleLabel      (pset.get< std::string >("MCTrackModuleLabel")     ),  
@@ -3824,7 +3947,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveTrackInfo	    (pset.get< bool >("SaveTrackInfo", false)), 
   fSaveVertexInfo	    (pset.get< bool >("SaveVertexInfo", false)),
   fSaveClusterInfo	    (pset.get< bool >("SaveClusterInfo", false)),
-  fSavePandoraNuVertexInfo        (pset.get< bool >("SavePandoraNuVertexInfo", false)),
+  fSavePandoraNuVertexInfo  (pset.get< bool >("SavePandoraNuVertexInfo", false)),
   fSaveFlashInfo            (pset.get< bool >("SaveFlashInfo", false)),
   fSaveShowerInfo            (pset.get< bool >("SaveShowerInfo", false)),
   fSavePFParticleInfo	    (pset.get< bool >("SavePFParticleInfo", false)),
@@ -3905,6 +4028,13 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
     throw art::Exception(art::errors::Configuration)
       << "AnalysisTree currently supports only up to " << kMaxVertexAlgos
       << " vertex algorithms, but " << GetNVertexAlgos() << " are specified."
+      << "\nYou can increase kMaxVertexAlgos and recompile.";
+  } // if too many vertices
+
+  if (GetNNuVertexAlgos() > kMaxVertexAlgos) {
+    throw art::Exception(art::errors::Configuration)
+      << "AnalysisTree currently supports only up to " << kMaxVertexAlgos
+      << " neutrino vertex algorithms, but " << GetNNuVertexAlgos() << " are specified."
       << "\nYou can increase kMaxVertexAlgos and recompile.";
   } // if too many vertices
 
@@ -4137,6 +4267,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   const size_t NShowerAlgos = GetNShowerAlgos(); // number of shower algorithms into fShowerModuleLabel
   const size_t NHits     = hitlist.size(); // number of hits
   const size_t NVertexAlgos = GetNVertexAlgos(); // number of vertex algos
+  const size_t NNuVertexAlgos = GetNNuVertexAlgos(); // number of neutrino vertex algos
   const size_t NFlashAlgos = GetNFlashAlgos(); // number of flash algos
   const size_t NClusters = clusterlist.size(); //number of clusters
   // make sure there is the data, the tree and everything;
@@ -4167,6 +4298,25 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   for (unsigned int it = 0; it < NVertexAlgos; ++it){
     if (evt.getByLabel(fVertexModuleLabel[it],vertexListHandle[it]))
       art::fill_ptr_vector(vertexlist[it], vertexListHandle[it]);
+  }
+
+  // * nu vertices
+  std::vector< std::vector<art::Ptr<recob::Vertex> > > nuvertexlist(NNuVertexAlgos);
+  for (unsigned int vtxLabel = 0; vtxLabel < NNuVertexAlgos; vtxLabel++){
+    lar_pandora::VertexVector vertexVector;
+    lar_pandora::PFParticlesToVertices particlesToVertices;
+    lar_pandora::LArPandoraHelper::CollectVertices(evt, fPandoraNuVertexModuleLabel[vtxLabel], vertexVector, particlesToVertices);
+    
+    for (lar_pandora::PFParticlesToVertices::iterator it = particlesToVertices.begin(); it != particlesToVertices.end(); ++it){
+
+      art::Ptr<recob::PFParticle> pfParticle = it->first;
+      lar_pandora::VertexVector   vertex_v   = it->second;
+      if (vertex_v.empty()) continue;
+      if (lar_pandora::LArPandoraHelper::IsNeutrino(pfParticle)) {
+        if (vertex_v.size() == 1) // require 1 vtx associated to the neutrino PFP
+          nuvertexlist[vtxLabel].emplace_back(vertex_v[0]); 
+      }
+    }
   }
 
   // * flashes
@@ -4635,57 +4785,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     }
   }   
 
-   if(fSavePandoraNuVertexInfo) {
-     lar_pandora::PFParticleVector particleVector;
-     lar_pandora::LArPandoraHelper::CollectPFParticles(evt, fPandoraNuVertexModuleLabel, particleVector);
-     lar_pandora::VertexVector vertexVector;
-     lar_pandora::PFParticlesToVertices particlesToVertices;
-     lar_pandora::LArPandoraHelper::CollectVertices(evt, fPandoraNuVertexModuleLabel, vertexVector, particlesToVertices);
- 
-     short nprim = 0;
-     for (unsigned int n = 0; n < particleVector.size(); ++n) {
-         const art::Ptr<recob::PFParticle> particle = particleVector.at(n);
-         if(particle->IsPrimary()) nprim++;
-     }
- 
-     if (nprim > kMaxVertices){
-       // got this error? consider increasing kMaxClusters
-       // (or ask for a redesign using vectors)
-       mf::LogError("AnalysisTree:limits") << "event has " << nprim
-                                           << " nu neutrino vertices, only kMaxVertices=" << kMaxVertices << " stored in tree";
-     }
- 
-     fData->nnuvtx = nprim;
- 
-     short iv = 0;
-     for (unsigned int n = 0; n < particleVector.size(); ++n) {
-         const art::Ptr<recob::PFParticle> particle = particleVector.at(n);
-         if(particle->IsPrimary()) {
-             lar_pandora::PFParticlesToVertices::const_iterator vIter = particlesToVertices.find(particle);
-             if (particlesToVertices.end() != vIter)
-             {
-                 const lar_pandora::VertexVector &vertexVector = vIter->second;
-                 if (!vertexVector.empty())
-                 {
-                     if (vertexVector.size() == 1) {
-                        const art::Ptr<recob::Vertex> vertex = *(vertexVector.begin());
-                        double xyz[3] = {0.0, 0.0, 0.0} ;
-                        vertex->XYZ(xyz);
-                        fData->nuvtxx[iv] = xyz[0];
-                        fData->nuvtxy[iv] = xyz[1];
-                        fData->nuvtxz[iv] = xyz[2];
-                        fData->nuvtxpdg[iv] = particle->PdgCode();
-                        iv++;
-                     }
-                 }
-             }
- 
-         }
-     }
- 
-   }
 
-  
+
   if (fSaveClusterInfo){
     fData->nclusters = (int) NClusters;
     if (NClusters > kMaxClusters){
@@ -5344,6 +5445,68 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
             VertexData.vtxPFParticleID[i] = pfparticles.at(0)->Self();
           }
         } // fmPFParticle.isValid()
+      }
+    }
+  }
+
+  // Save neutrino vertex information for multiple algorithms
+  if(fSavePandoraNuVertexInfo) {
+    for (unsigned int iNuVertexAlg=0; iNuVertexAlg < NNuVertexAlgos; ++iNuVertexAlg){
+      AnalysisTreeDataStruct::NeutrinoVertexDataStruct& NuVertexData = fData->GetNeutrinoVertexData(iNuVertexAlg);
+
+      size_t NNuVertices = nuvertexlist[iNuVertexAlg].size();
+
+      NuVertexData.SetMaxVertices(std::max(NNuVertices, (size_t) 1));
+      NuVertexData.Clear(); // clear all the data
+
+      NuVertexData.nvtx = (short) NNuVertices;
+
+      // now set the tree addresses to the newly allocated memory;
+      // this creates the tree branches in case they are not there yet
+      SetNeutrinoVertexAddresses(iNuVertexAlg);
+      if (NNuVertices > NuVertexData.GetMaxVertices()) {
+        // got this error? it might be a bug,
+        // since we are supposed to have allocated enough space to fit all tracks
+        mf::LogError("AnalysisTree:limits") << "event has " << NNuVertices
+                                            << " " << fPandoraNuVertexModuleLabel[iNuVertexAlg] << " neutrino vertices, only "
+                                            << NuVertexData.GetMaxVertices() << " stored in tree";
+      }
+
+      for (size_t i = 0; i < NNuVertices && i < kMaxVertices ; ++i){ //loop over vertices
+        NuVertexData.vtxId[i] = nuvertexlist[iNuVertexAlg][i]->ID();
+        Double_t xyz[3] = {};
+        nuvertexlist[iNuVertexAlg][i] -> XYZ(xyz);
+        NuVertexData.vtxx[i] = xyz[0];
+        NuVertexData.vtxy[i] = xyz[1];
+        NuVertexData.vtxz[i] = xyz[2];
+        NuVertexData.vtxpdg[i] = -9999;
+
+/*
+        if (fSavePFParticleInfo) {
+          auto mapIter = vertexIDtoPFParticleIDMap.find(vertexlist[iVertexAlg][i]->ID());
+          if (mapIter != vertexIDtoPFParticleIDMap.end()) {
+            // This vertex has a corresponding PFParticle.
+            VertexData.vtxhasPFParticle[i] = 1;
+            VertexData.vtxPFParticleID[i] = mapIter->second;
+          }
+          else 
+            VertexData.vtxhasPFParticle[i] = 0;
+        }
+
+        // find PFParticle ID info
+        art::FindMany<recob::PFParticle> fmPFParticle(vertexListHandle[iVertexAlg], evt, fPFParticleModuleLabel);
+        if(fmPFParticle.isValid()) {
+          std::vector<const recob::PFParticle*> pfparticles = fmPFParticle.at(i);
+          if(pfparticles.size() > 1)
+          std::cerr << "Warning: more than one associated PFParticle found for a vertex. Only one stored in tree." << std::endl;
+          if (pfparticles.size() == 0)
+          VertexData.vtxhasPFParticle[i] = 0;
+          else {
+            VertexData.vtxhasPFParticle[i] = 1;
+            VertexData.vtxPFParticleID[i] = pfparticles.at(0)->Self();
+          }
+        } // fmPFParticle.isValid()
+*/
       }
     }
   }
