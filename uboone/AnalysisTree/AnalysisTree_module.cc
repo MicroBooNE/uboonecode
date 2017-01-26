@@ -601,7 +601,7 @@ namespace microboone {
 
       size_t MaxVertices; ///< maximum number of storable vertices
 
-      Short_t  nvtx;             //number of reconstructed tracks
+      Short_t  nvtx;             //number of reconstructed vertices
       VertexData_t<Short_t> vtxId;    // the vertex ID.
       VertexData_t<Float_t> vtxx;     // x position.
       VertexData_t<Float_t> vtxy;     // y position.
@@ -629,7 +629,7 @@ namespace microboone {
 
       size_t MaxVertices;             ///< maximum number of storable vertices
 
-      Short_t  nvtx;                  ///<number of reconstructed tracks
+      Short_t  nvtx;                  ///< number of neutrino reconstructed vertices
       VertexData_t<Short_t> vtxId;    ///< the vertex ID.
       VertexData_t<Float_t> vtxx;     ///< x position.
       VertexData_t<Float_t> vtxy;     ///< y position.
@@ -4301,7 +4301,8 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
   }
 
   // * nu vertices
-  std::vector< std::vector<art::Ptr<recob::Vertex> > > nuvertexlist(NNuVertexAlgos);
+  std::vector< std::vector<art::Ptr<recob::Vertex> > >     nuvertexlist(NNuVertexAlgos);
+  std::vector< std::vector<art::Ptr<recob::PFParticle> > > nuvertexlistToPfp(NNuVertexAlgos);
   for (unsigned int vtxLabel = 0; vtxLabel < NNuVertexAlgos; vtxLabel++){
     lar_pandora::VertexVector vertexVector;
     lar_pandora::PFParticlesToVertices particlesToVertices;
@@ -4315,6 +4316,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       if (lar_pandora::LArPandoraHelper::IsNeutrino(pfParticle)) {
         if (vertex_v.size() == 1) // require 1 vtx associated to the neutrino PFP
           nuvertexlist[vtxLabel].emplace_back(vertex_v[0]); 
+          nuvertexlistToPfp[vtxLabel].emplace_back(pfParticle);
       }
     }
   }
@@ -4831,26 +4833,6 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     }//end loop over clusters
   }//end fSaveClusterInfo
 	 
-/* 
-  if (fSaveFlashInfo){
-    fData->no_flashes = (int) NFlashes;
-    if (NFlashes > kMaxFlashes) {
-      // got this error? consider increasing kMaxHits
-      // (or ask for a redesign using vectors)
-      mf::LogError("AnalysisTree:limits") << "event has " << NFlashes
-					  << " flashes, only kMaxFlashes=" << kMaxFlashes << " stored in tree";
-    }
-    for (size_t i = 0; i < NFlashes && i < kMaxFlashes ; ++i){//loop over hits
-      fData->flash_time[i]       = flashlist[i]->Time();
-      fData->flash_pe[i]         = flashlist[i]->TotalPE();
-      fData->flash_ycenter[i]    = flashlist[i]->YCenter();
-      fData->flash_zcenter[i]    = flashlist[i]->ZCenter();
-      fData->flash_ywidth[i]     = flashlist[i]->YWidth();
-      fData->flash_zwidth[i]     = flashlist[i]->ZWidth();
-      fData->flash_timewidth[i]  = flashlist[i]->TimeWidth();
-    }
-  }
-*/
   
   // Declare object-ID-to-PFParticleID maps so we can assign hasPFParticle and PFParticleID to the tracks, showers, vertices.
   std::map<Short_t, Short_t> trackIDtoPFParticleIDMap, vertexIDtoPFParticleIDMap, showerIDtoPFParticleIDMap;
@@ -5466,7 +5448,7 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
       SetNeutrinoVertexAddresses(iNuVertexAlg);
       if (NNuVertices > NuVertexData.GetMaxVertices()) {
         // got this error? it might be a bug,
-        // since we are supposed to have allocated enough space to fit all tracks
+        // since we are supposed to have allocated enough space to fit all nu vertices
         mf::LogError("AnalysisTree:limits") << "event has " << NNuVertices
                                             << " " << fPandoraNuVertexModuleLabel[iNuVertexAlg] << " neutrino vertices, only "
                                             << NuVertexData.GetMaxVertices() << " stored in tree";
@@ -5479,37 +5461,14 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
         NuVertexData.vtxx[i] = xyz[0];
         NuVertexData.vtxy[i] = xyz[1];
         NuVertexData.vtxz[i] = xyz[2];
-        NuVertexData.vtxpdg[i] = -9999;
+        NuVertexData.vtxpdg[i] = nuvertexlistToPfp[iNuVertexAlg][i]->PdgCode();
 
-/*
-        if (fSavePFParticleInfo) {
-          auto mapIter = vertexIDtoPFParticleIDMap.find(vertexlist[iVertexAlg][i]->ID());
-          if (mapIter != vertexIDtoPFParticleIDMap.end()) {
-            // This vertex has a corresponding PFParticle.
-            VertexData.vtxhasPFParticle[i] = 1;
-            VertexData.vtxPFParticleID[i] = mapIter->second;
-          }
-          else 
-            VertexData.vtxhasPFParticle[i] = 0;
-        }
-
-        // find PFParticle ID info
-        art::FindMany<recob::PFParticle> fmPFParticle(vertexListHandle[iVertexAlg], evt, fPFParticleModuleLabel);
-        if(fmPFParticle.isValid()) {
-          std::vector<const recob::PFParticle*> pfparticles = fmPFParticle.at(i);
-          if(pfparticles.size() > 1)
-          std::cerr << "Warning: more than one associated PFParticle found for a vertex. Only one stored in tree." << std::endl;
-          if (pfparticles.size() == 0)
-          VertexData.vtxhasPFParticle[i] = 0;
-          else {
-            VertexData.vtxhasPFParticle[i] = 1;
-            VertexData.vtxPFParticleID[i] = pfparticles.at(0)->Self();
-          }
-        } // fmPFParticle.isValid()
-*/
+        NuVertexData.vtxhasPFParticle[i] = 1;
+        NuVertexData.vtxPFParticleID[i] = nuvertexlistToPfp[iNuVertexAlg][i]->Self();
       }
     }
   }
+
 
   // Save flash information for multiple algorithms
   if (fSaveFlashInfo) {
