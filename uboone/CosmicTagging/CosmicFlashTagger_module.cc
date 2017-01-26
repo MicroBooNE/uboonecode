@@ -70,13 +70,13 @@ public:
 
 private:
 
-  int  GetTrajectory(std::vector<art::Ptr<recob::Track>> track, double xoffset, ::geoalgo::Trajectory &);
+  flashana::QCluster_t GetQCluster(std::vector<art::Ptr<recob::Track>> track_v, double Xoffset);
+  //int  GetTrajectory(std::vector<art::Ptr<recob::Track>> track, double xoffset, ::geoalgo::Trajectory &);
   void AddFlashPosition(::flashana::Flash_t &);
 
   ::flashana::FlashMatchManager       _mgr;
   ::flashana::IncompatibilityChecker  _incompChecker;
   std::vector<::flashana::Flash_t>    beam_flashes;
-  //std::vector<art::Ptr<recob::Track>> track_perevent_v;
 
   const anab::CosmicTagID_t TAGID_BEAM_INCOMPATIBLE = anab::CosmicTagID_t::kFlash_BeamIncompatible;
   const anab::CosmicTagID_t TAGID_NOT_TAGGED        = anab::CosmicTagID_t::kNotTagged;
@@ -246,7 +246,6 @@ void CosmicFlashTagger::produce(art::Event & e)
       f.pe_err_v[opdet] = sqrt(flash.PE(i));
     }
     f.time = flash.Time();
-    //f.idx = flash_id;
     beam_flashes.resize(_n_beam_flashes);
     beam_flashes[_n_beam_flashes-1] = f;
 
@@ -282,16 +281,11 @@ void CosmicFlashTagger::produce(art::Event & e)
       ::flashana::Flash_t flashBeam = beam_flashes[bf];
 
       // Calculate x offset, assuming this track caused this beam flash
-      double Xoffset = flashBeam.time * 0.1114359;
+      double Xoffset = flashBeam.time * fDriftVelocity;
       mf::LogDebug("CosmicFlashTagger") << "Xoffset is " << Xoffset << std::endl;
 
-      // Get trajectory (1 trajectory for all these tracks)
-      ::geoalgo::Trajectory trkTrj;
-      int statusCode = this->GetTrajectory(track_v, Xoffset, trkTrj);
-      if(statusCode != 0) break;
-
-      // From the trajectory construct a QCluster
-      auto qcluster = ((flashana::LightPath*)(_mgr.GetCustomAlgo("LightPath")))->FlashHypothesis(trkTrj);
+      // Get QCluster from all the tracks in this PFP
+      flashana::QCluster_t qcluster = this->GetQCluster(track_v, Xoffset);
 
       // From the QCluster get the flash hypothesis using registered FlashHypothesis algorithm
       flashana::Flash_t flashHypo;
@@ -345,40 +339,45 @@ void CosmicFlashTagger::produce(art::Event & e)
 
 
 //______________________________________________________________________________________________________________________________________
-int CosmicFlashTagger::GetTrajectory(std::vector<art::Ptr<recob::Track>> track_v, double Xoffset, ::geoalgo::Trajectory &track_geotrj) {
+flashana::QCluster_t CosmicFlashTagger::GetQCluster(std::vector<art::Ptr<recob::Track>> track_v, double Xoffset) {
 
-  mf::LogDebug("CosmicFlashTagger") << "Creating trajectory for " << track_v.size() << " tracks." << std::endl;
-  int statusCode;
+  mf::LogDebug("CosmicFlashTagger") << "Creating QCluster for " << track_v.size() << " tracks." << std::endl;
+
+  flashana::QCluster_t summed_qcluster;
+  summed_qcluster.clear();
 
   int totalPoints = 0;
   for (unsigned int trk = 0; trk < track_v.size(); trk++) {
     art::Ptr<recob::Track> trk_ptr = track_v.at(trk);
     totalPoints += trk_ptr->NumberTrajectoryPoints();
   }
-
-  mf::LogDebug("CosmicFlashTagger") << "Number of points for this trajectory: " << totalPoints << std::endl;
-
   if (totalPoints <= _min_trj_pts) {
-    statusCode = 1;
-    return statusCode;
+    //return summed_qcluster;
   }
-  track_geotrj.resize(totalPoints,::geoalgo::Vector(0.,0.,0.));
-  int trj_pt = 0;
 
   for (unsigned int trk = 0; trk < track_v.size(); trk++) {
+
     art::Ptr<recob::Track> trk_ptr = track_v.at(trk);
+
+    ::geoalgo::Trajectory track_geotrj;
+    track_geotrj.resize(trk_ptr->NumberTrajectoryPoints(),::geoalgo::Vector(0.,0.,0.));
+
     for (size_t pt_idx=0; pt_idx < trk_ptr->NumberTrajectoryPoints(); ++pt_idx) {
       auto const& pt = trk_ptr->LocationAtPoint(pt_idx);
-      track_geotrj[trj_pt][0] = pt[0] - Xoffset;
-      track_geotrj[trj_pt][1] = pt[1];
-      track_geotrj[trj_pt][2] = pt[2];
-      trj_pt ++;
+      track_geotrj[pt_idx][0] = pt[0] - Xoffset;
+      track_geotrj[pt_idx][1] = pt[1];
+      track_geotrj[pt_idx][2] = pt[2];
     }
-  }
- 
-  statusCode = 0;
-  return statusCode;
+
+    auto qcluster = ((flashana::LightPath*)(_mgr.GetCustomAlgo("LightPath")))->FlashHypothesis(track_geotrj);
+    summed_qcluster += qcluster;
+  } // track loop
+
+  return summed_qcluster;
 }
+
+
+
 
 //______________________________________________________________________________________________________________________________________
 void CosmicFlashTagger::AddFlashPosition(::flashana::Flash_t & flash) {
