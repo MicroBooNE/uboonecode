@@ -6,10 +6,141 @@ microboone_MuCSTrackTagger:
  TrackModuleLabel:         "trackkalmanhit"
  MuCSTopBox:                [-71.795,-23.795,398.451,397.451,579.45,627.45] # top box edges [cm]
  MuCSBottomBox:             [-19.6948,28.3052,320.551,319.551,581.25,629.25] # bottom box edges [cm]
- BoxExtension:              0. #extend box dimensions by this much to allow for scattering
+ BoxExtension:              20. #extend box dimensions by this much to allow for scattering
  DirFromNPoints:           0 #number of traj. points to use to determine direction; 0=use start direction
  MinTrackLength:           0. #tracks must be at least this long to be tagged
 }
+
+microboone_MuCSTrackTagger_bs30:
+{ 
+ module_type:              "MuCSTrackTagger"
+ TrackModuleLabel:         "trackkalmanhit"
+ MuCSTopBox:                [-71.795,-23.795,398.451,397.451,579.45,627.45] # top box edges [cm]
+ MuCSBottomBox:             [-19.6948,28.3052,320.551,319.551,581.25,629.25] # bottom box edges [cm]
+ BoxExtension:              20. #extend box dimensions by this much to allow for scattering
+ DirFromNPoints:           0 #number of traj. points to use to determine direction; 0=use start direction
+ MinTrackLength:           0. #tracks must be at least this long to be tagged
+}
+
+microboone_MuCSTrackTagger_bs33:
+{ 
+ module_type:              "MuCSTrackTagger"
+ TrackModuleLabel:         "trackkalmanhit"
+ MuCSTopBox:                [168.35,216.35,349.751,348.751,579.45,627.45] # top box edges [cm]
+ MuCSBottomBox:             [168.35,216.35,320.551,319.551,581.25,629.25] # bottom box edges [cm]
+ BoxExtension:              20. #extend box dimensions by this much to allow for scattering
+ DirFromNPoints:           0 #number of traj. points to use to determine direction; 0=use start direction
+ MinTrackLength:           0. #tracks must be at least this long to be tagged
+}
+
+microboone_MuCSTrackTagger_bs34:
+{ 
+ module_type:              "MuCSTrackTagger"
+ TrackModuleLabel:         "trackkalmanhit"
+ MuCSTopBox:                [-75.19, -27.19,392.55,391.55,971.12, 1019.12] # top box edges [cm]
+ MuCSBottomBox:             [-27.19, 20.81,320.551,319.551,971.12, 1019.12] # bottom box edges [cm]
+ BoxExtension:              20. #extend box dimensions by this much to allow for scattering
+ DirFromNPoints:           0 #number of traj. points to use to determine direction; 0=use start direction
+ MinTrackLength:           0. #tracks must be at least this long to be tagged
+}
+
+microboone_MuCSTrackTagger_bs35:
+{ 
+ module_type:              "MuCSTrackTagger"
+ TrackModuleLabel:         "trackkalmanhit"
+ MuCSTopBox:                [-75.195, -27.195, 392.551, 391.551, 223.95, 271.95] # top box edges [cm]
+ MuCSBottomBox:             [-27.1948, 20.8052, 320.551, 319.551, 223.95, 271.95] # bottom box edges [cm]
+ BoxExtension:              20. #extend box dimensions by this much to allow for scattering
+ DirFromNPoints:           0 #number of traj. points to use to determine direction; 0=use start direction
+ MinTrackLength:           0. #tracks must be at least this long to be tagged
+}
+
+
+#box setup 30 configurations
+microboone_MuCSTrackTaggers_bs30: {
+  MuCSTrackTaggerbs30trackkalmanhit:    @local::microboone_MuCSTrackTagger_bs30
+  MuCSTrackTaggerbs30stitchkalmanhit:   @local::microboone_MuCSTrackTagger_bs30
+  MuCSTrackTaggerbs30pandoraCosmicKHit: @local::microboone_MuCSTrackTagger_bs30
+  MuCSTrackTaggerbs30pmtrack:           @local::microboone_MuCSTrackTagger_bs30
+  MuCSTrackTaggerbs30pandoraCosmic:     @local::microboone_MuCSTrackTagger_bs30
+}
+
+microboone_MuCSTrackTaggers_bs30.MuCSTrackTaggerbs30trackkalmanhit.TrackModuleLabel: "trackkalmanhit"
+microboone_MuCSTrackTaggers_bs30.MuCSTrackTaggerbs30stitchkalmanhit.TrackModuleLabel: "stitchkalmanhit"
+microboone_MuCSTrackTaggers_bs30.MuCSTrackTaggerbs30pandoraCosmicKHit.TrackModuleLabel: "pandoraCosmicKHit"
+microboone_MuCSTrackTaggers_bs30.MuCSTrackTaggerbs30pmtrack.TrackModuleLabel: "pmtrack"
+microboone_MuCSTrackTaggers_bs30.MuCSTrackTaggerbs30pandoraCosmic.TrackModuleLabel: "pandoraCosmic"
+
+microboone_MuCSTrackTaggers_bs30_seq: [ MuCSTrackTaggerbs30trackkalmanhit,
+                                        MuCSTrackTaggerbs30stitchkalmanhit,
+                                        MuCSTrackTaggerbs30pandoraCosmicKHit,
+                                        MuCSTrackTaggerbs30pmtrack,
+                                        MuCSTrackTaggerbs30pandoraCosmic]
+
+#box setup 33 configurations
+microboone_MuCSTrackTaggers_bs33: {
+  MuCSTrackTaggerbs33trackkalmanhit:    @local::microboone_MuCSTrackTagger_bs33
+  MuCSTrackTaggerbs33stitchkalmanhit:   @local::microboone_MuCSTrackTagger_bs33
+  MuCSTrackTaggerbs33pandoraCosmicKHit: @local::microboone_MuCSTrackTagger_bs33
+  MuCSTrackTaggerbs33pmtrack:           @local::microboone_MuCSTrackTagger_bs33
+  MuCSTrackTaggerbs33pandoraCosmic:     @local::microboone_MuCSTrackTagger_bs33
+}
+
+microboone_MuCSTrackTaggers_bs33.MuCSTrackTaggerbs33trackkalmanhit.TrackModuleLabel: "trackkalmanhit"
+microboone_MuCSTrackTaggers_bs33.MuCSTrackTaggerbs33stitchkalmanhit.TrackModuleLabel: "stitchkalmanhit"
+microboone_MuCSTrackTaggers_bs33.MuCSTrackTaggerbs33pandoraCosmicKHit.TrackModuleLabel: "pandoraCosmicKHit"
+microboone_MuCSTrackTaggers_bs33.MuCSTrackTaggerbs33pmtrack.TrackModuleLabel: "pmtrack"
+microboone_MuCSTrackTaggers_bs33.MuCSTrackTaggerbs33pandoraCosmic.TrackModuleLabel: "pandoraCosmic"
+
+microboone_MuCSTrackTaggers_bs33_seq: [ MuCSTrackTaggerbs33trackkalmanhit,
+                                        MuCSTrackTaggerbs33stitchkalmanhit,
+                                        MuCSTrackTaggerbs33pandoraCosmicKHit,
+                                        MuCSTrackTaggerbs33pmtrack,
+                                        MuCSTrackTaggerbs33pandoraCosmic]
+                                        
+#box setup 34 configurations
+microboone_MuCSTrackTaggers_bs33: {
+  MuCSTrackTaggerbs34trackkalmanhit:    @local::microboone_MuCSTrackTagger_bs34
+  MuCSTrackTaggerbs34stitchkalmanhit:   @local::microboone_MuCSTrackTagger_bs34
+  MuCSTrackTaggerbs34pandoraCosmicKHit: @local::microboone_MuCSTrackTagger_bs34
+  MuCSTrackTaggerbs34pmtrack:           @local::microboone_MuCSTrackTagger_bs34
+  MuCSTrackTaggerbs34pandoraCosmic:     @local::microboone_MuCSTrackTagger_bs34
+}
+
+microboone_MuCSTrackTaggers_bs34.MuCSTrackTaggerbs34trackkalmanhit.TrackModuleLabel: "trackkalmanhit"
+microboone_MuCSTrackTaggers_bs34.MuCSTrackTaggerbs34stitchkalmanhit.TrackModuleLabel: "stitchkalmanhit"
+microboone_MuCSTrackTaggers_bs34.MuCSTrackTaggerbs34pandoraCosmicKHit.TrackModuleLabel: "pandoraCosmicKHit"
+microboone_MuCSTrackTaggers_bs34.MuCSTrackTaggerbs34pmtrack.TrackModuleLabel: "pmtrack"
+microboone_MuCSTrackTaggers_bs34.MuCSTrackTaggerbs34pandoraCosmic.TrackModuleLabel: "pandoraCosmic"
+
+microboone_MuCSTrackTaggers_bs34_seq: [ MuCSTrackTaggerbs34trackkalmanhit,
+                                        MuCSTrackTaggerbs34stitchkalmanhit,
+                                        MuCSTrackTaggerbs34pandoraCosmicKHit,
+                                        MuCSTrackTaggerbs34pmtrack,
+                                        MuCSTrackTaggerbs34pandoraCosmic]                                        
+
+#box setup 35 configurations
+microboone_MuCSTrackTaggers_bs35: {
+  MuCSTrackTaggerbs35trackkalmanhit:    @local::microboone_MuCSTrackTagger_bs35
+  MuCSTrackTaggerbs35stitchkalmanhit:   @local::microboone_MuCSTrackTagger_bs35
+  MuCSTrackTaggerbs35pandoraCosmicKHit: @local::microboone_MuCSTrackTagger_bs35
+  MuCSTrackTaggerbs35pmtrack:           @local::microboone_MuCSTrackTagger_bs35
+  MuCSTrackTaggerbs35pandoraCosmic:     @local::microboone_MuCSTrackTagger_bs35
+}
+
+microboone_MuCSTrackTaggers_bs35.MuCSTrackTaggerbs35trackkalmanhit.TrackModuleLabel: "trackkalmanhit"
+microboone_MuCSTrackTaggers_bs35.MuCSTrackTaggerbs35stitchkalmanhit.TrackModuleLabel: "stitchkalmanhit"
+microboone_MuCSTrackTaggers_bs35.MuCSTrackTaggerbs35pandoraCosmicKHit.TrackModuleLabel: "pandoraCosmicKHit"
+microboone_MuCSTrackTaggers_bs35.MuCSTrackTaggerbs35pmtrack.TrackModuleLabel: "pmtrack"
+microboone_MuCSTrackTaggers_bs35.MuCSTrackTaggerbs35pandoraCosmic.TrackModuleLabel: "pandoraCosmic"
+
+microboone_MuCSTrackTaggers_bs35_seq: [ MuCSTrackTaggerbs35trackkalmanhit,
+                                        MuCSTrackTaggerbs35stitchkalmanhit,
+                                        MuCSTrackTaggerbs35pandoraCosmicKHit,
+                                        MuCSTrackTaggerbs35pmtrack,
+                                        MuCSTrackTaggerbs35pandoraCosmic]
+
+
 
 END_PROLOG
 
