@@ -99,7 +99,7 @@ microboone_MuCSTrackTaggers_bs33_seq: [ MuCSTrackTaggerbs33trackkalmanhit,
                                         MuCSTrackTaggerbs33pandoraCosmic]
                                         
 #box setup 34 configurations
-microboone_MuCSTrackTaggers_bs33: {
+microboone_MuCSTrackTaggers_bs34: {
   MuCSTrackTaggerbs34trackkalmanhit:    @local::microboone_MuCSTrackTagger_bs34
   MuCSTrackTaggerbs34stitchkalmanhit:   @local::microboone_MuCSTrackTagger_bs34
   MuCSTrackTaggerbs34pandoraCosmicKHit: @local::microboone_MuCSTrackTagger_bs34
