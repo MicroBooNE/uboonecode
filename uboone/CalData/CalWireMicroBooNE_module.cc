@@ -39,7 +39,7 @@
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/raw.h"
 #include "lardataobj/RecoBase/Wire.h"
-#include "lardata/RecoBaseArt/WireCreator.h"
+#include "lardata/ArtDataHelper/WireCreator.h"
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/Utilities/AssociationUtil.h"
 #include "uboone/Utilities/SignalShapingServiceMicroBooNE.h"
