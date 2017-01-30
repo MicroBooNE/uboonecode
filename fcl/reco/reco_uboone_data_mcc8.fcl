@@ -336,7 +336,7 @@ microboone_reco_data_pandoraNuF: [       pandoraNuF,
                                          pandoraNuFn,
                                          pandoraNuFnKHit,
                                          pandoraNuFnKalmanTrack,
-                                         pandoraNuFnPMA,  ]
+                                         pandoraNuFnPMA  ]
 
 microboone_reco_data_pandora: [          @sequence::microboone_reco_data_pandoraCosmic,
                                          @sequence::microboone_reco_data_pandoraNu,
