@@ -13,6 +13,7 @@ art_make(
 			larpandora_LArPandoraInterface
 			SignalShapingServiceMicroBooNE_service
                         nusimdata_SimulationBase
+                        uboone_RawData
                         ${LARRECO_LIB}
                         ${LARDATA_LIB}
                         ${ART_FRAMEWORK_CORE}

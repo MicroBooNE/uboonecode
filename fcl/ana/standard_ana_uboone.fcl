@@ -94,10 +94,14 @@ physics.analyzers.analysistree.GenieGenModuleLabel:             "generator"
 physics.analyzers.analysistree.POTModuleLabel:                  "generator"
 physics.analyzers.analysistree.CryGenModuleLabel:               "cry"
 physics.analyzers.analysistree.ShowerModuleLabel:               ["showerrecofuzzy","showerrecopandora"]
+physics.analyzers.analysistree.SWTriggerModuleLabel:            "swtrigger"
+
 physics.analyzers.analysistree.IgnoreMissingShowers:            true
 physics.analyzers.analysistree.SavePandoraNuVertexInfo:         true
 physics.analyzers.analysistree.SavePFParticleInfo:              true
 physics.analyzers.analysistree.SaveCryInfo:                     false
+physics.analyzers.analysistree.SaveSWTriggerInfo:               true
+
 physics.analyzers.pandoraNueff.TrackModuleLabel:       "pandoraNu"
 physics.analyzers.pandoraCosmiceff.TrackModuleLabel:   "pandoraCosmic"
 physics.analyzers.pandoraNuPMAeff.TrackModuleLabel:    "pandoraNuPMA"

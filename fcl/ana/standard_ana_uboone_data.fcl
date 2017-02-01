@@ -13,3 +13,4 @@ physics.analyzers.analysistree.SaveMCShowerInfo:false
 physics.analyzers.analysistree.SaveMCTrackInfo: false 
 physics.analyzers.analysistree.SaveShowerInfo:  false 
 physics.analyzers.analysistree.SaveCaloCosmics: true
+physics.analyzers.analysistree.SaveSWTriggerInfo: false

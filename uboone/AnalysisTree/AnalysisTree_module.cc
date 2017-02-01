@@ -314,6 +314,7 @@
 #include "larreco/Deprecated/BezierTrack.h"
 #include "larreco/RecoAlg/TrackMomentumCalculator.h"
 #include "uboone/EventWeight/MCEventWeight.h"
+#include "uboone/RawData/utils/ubdaqSoftwareTriggerData.h"
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/AnalysisBase/FlashMatch.h"
 #include "lardataobj/AnalysisBase/T0.h"
@@ -834,6 +835,7 @@ namespace microboone {
 	tdCalibWaveForm = 0x10000,
         tdPandoraNuVertex = 0x20000,
         tdPFParticle = 0x40000,
+        tdSWTrigger = 0x80000,
 	tdDefault = 0
 	}; // DataBits_t
     
@@ -891,6 +893,10 @@ namespace microboone {
     std::vector<std::vector<double>> evtwgt_weight;    // the weights (a vector for each function used)
     std::vector<int> evtwgt_nweight;                   // number of weights for each function
     Int_t evtwgt_nfunc;                                // number of functions used
+
+    // Software trigger information
+    std::vector<std::string> swtrigger_name;           // name of the software trigger used 
+    std::vector<bool>        swtrigger_triggered;      // if this event was triggerd or not (based on the relative swtrigger_name logic)
 
     // hit information (non-resizeable, 45x kMaxHits = 900k bytes worth)
     Int_t    no_hits;                  //number of hits
@@ -960,17 +966,6 @@ namespace microboone {
     Float_t clucosmicscore_tagger[kMaxClusters];      //Cosmic score associated to this cluster. In the case of more than one tag, the first one is associated.    
     Short_t clucosmictype_tagger[kMaxClusters];       //Cosmic tag type for this cluster.    
     
-    /* flash information
-    Int_t    no_flashes;                //number of flashes
-    Float_t  flash_time[kMaxFlashes];   //flash time
-    Float_t  flash_pe[kMaxFlashes];     //flash total PE
-    Float_t  flash_ycenter[kMaxFlashes];//y center of flash
-    Float_t  flash_zcenter[kMaxFlashes];//z center of flash
-    Float_t  flash_ywidth[kMaxFlashes]; //y width of flash
-    Float_t  flash_zwidth[kMaxFlashes]; //z width of flash
-    Float_t  flash_timewidth[kMaxFlashes]; //time of flash
-*/
-
     // Flash information
     Char_t kNFlashAlgos;
     std::vector<FlashDataStruct> FlashData;
@@ -1305,6 +1300,9 @@ namespace microboone {
     
     /// Returns whether we have Hit data
     bool hasHitInfo() const { return bits & tdHit; }
+
+    /// Returns whether we have Hit data
+    bool hasSWTriggerInfo() const { return bits & tdSWTrigger; }
 
     /// Returns whether we have Hit data
     bool hasRawDigitInfo() const { return bits & tdRawDigit; }
@@ -1644,6 +1642,7 @@ namespace microboone {
     std::vector<std::string> fMCT0FinderLabel;
     std::string fPOTModuleLabel;
     std::string fCosmicClusterTaggerAssocLabel;
+    std::string fSWTriggerLabel;
     bool fUseBuffer; ///< whether to use a permanent buffer (faster, huge memory)    
     bool fSaveAuxDetInfo; ///< whether to extract and save auxiliary detector data
     bool fSaveCryInfo; ///whether to extract and save CRY particle data
@@ -1664,6 +1663,7 @@ namespace microboone {
     bool fSaveFlashInfo;  ///whether to extract and save Flash information
     bool fSaveShowerInfo;  ///whether to extract and save Shower information
     bool fSavePFParticleInfo; ///whether to extract and save PFParticle information
+    bool fSaveSWTriggerInfo; ///whether to extract and save software trigger information
 
     std::vector<std::string> fCosmicTaggerAssocLabel;
     std::vector<std::string> fContainmentTaggerAssocLabel;
@@ -1706,6 +1706,7 @@ namespace microboone {
 	fData->SetBits(AnalysisTreeDataStruct::tdMCshwr, !fSaveMCShowerInfo); 
 	fData->SetBits(AnalysisTreeDataStruct::tdMCtrk,  !fSaveMCTrackInfo); 
 	fData->SetBits(AnalysisTreeDataStruct::tdHit,    !fSaveHitInfo);
+        fData->SetBits(AnalysisTreeDataStruct::tdSWTrigger,    !fSaveSWTriggerInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdRawDigit,    !fSaveRawDigitInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdCalWire,    !fSaveCalWireInfo);
 	fData->SetBits(AnalysisTreeDataStruct::tdSimChannel,    !fSaveSimChannelInfo);
@@ -3468,6 +3469,10 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   CreateBranch("evtwgt_nweight",evtwgt_nweight);
   CreateBranch("evtwgt_nfunc",&evtwgt_nfunc,"evtwgt_nfunc/I");
 
+  if (hasSWTriggerInfo()){
+    CreateBranch("swtrigger_name",      swtrigger_name);
+    CreateBranch("swtrigger_triggered", swtrigger_triggered);
+  }
 
   if (hasHitInfo()){    
     CreateBranch("no_hits",&no_hits,"no_hits/I");
@@ -3540,17 +3545,6 @@ void microboone::AnalysisTreeDataStruct::SetAddresses(
   }    
 
   if (hasFlashInfo()){
-/*
-    CreateBranch("no_flashes",&no_flashes,"no_flashes/I");
-    CreateBranch("flash_time",flash_time,"flash_time[no_flashes]/F");
-    CreateBranch("flash_pe",flash_pe,"flash_pe[no_flashes]/F");
-    CreateBranch("flash_ycenter",flash_ycenter,"flash_ycenter[no_flashes]/F");
-    CreateBranch("flash_zcenter",flash_zcenter,"flash_zcenter[no_flashes]/F");
-    CreateBranch("flash_ywidth",flash_ywidth,"flash_ywidth[no_flashes]/F");
-    CreateBranch("flash_zwidth",flash_zwidth,"flash_zwidth[no_flashes]/F");
-    CreateBranch("flash_timewidth",flash_timewidth,"flash_timewidth[no_flashes]/F");
-*/
-
     kNFlashAlgos = flashalgos.size();
     CreateBranch("kNFlashAlgos",&kNFlashAlgos,"kNFlashAlgos/B");
     for(int i=0; i<kNFlashAlgos; i++) {
@@ -3931,6 +3925,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fMCT0FinderLabel          (pset.get< std::vector<std::string> >("MCT0FinderLabel")   ),
   fPOTModuleLabel           (pset.get< std::string >("POTModuleLabel")),   
   fCosmicClusterTaggerAssocLabel (pset.get< std::string >("CosmicClusterTaggerAssocLabel")), 
+  fSWTriggerLabel           (pset.get< std::string >("SWTriggerModuleLabel")),
   fUseBuffer                (pset.get< bool >("UseBuffers", false)),
   fSaveAuxDetInfo           (pset.get< bool >("SaveAuxDetInfo", false)),
   fSaveCryInfo              (pset.get< bool >("SaveCryInfo", false)),  
@@ -3951,6 +3946,7 @@ microboone::AnalysisTree::AnalysisTree(fhicl::ParameterSet const& pset) :
   fSaveFlashInfo            (pset.get< bool >("SaveFlashInfo", false)),
   fSaveShowerInfo            (pset.get< bool >("SaveShowerInfo", false)),
   fSavePFParticleInfo	    (pset.get< bool >("SavePFParticleInfo", false)),
+  fSaveSWTriggerInfo        (pset.get< bool >("SaveSWTriggerInfo", false)),
   fCosmicTaggerAssocLabel  (pset.get<std::vector< std::string > >("CosmicTaggerAssocLabel") ),
   fContainmentTaggerAssocLabel  (pset.get<std::vector< std::string > >("ContainmentTaggerAssocLabel") ),
   fFlashMatchAssocLabel (pset.get<std::vector< std::string > >("FlashMatchAssocLabel") ),
@@ -4447,6 +4443,38 @@ void microboone::AnalysisTree::analyze(const art::Event& evt)
     fData->evtwgt_funcname.resize(countFunc);
     fData->evtwgt_nfunc = countFunc;                    // saving the number of functions used
   }
+
+  //*****************************
+  //
+  // Software Trigger
+  //
+  //***************************** 
+
+  if (fSaveSWTriggerInfo) {
+    art::Handle<raw::ubdaqSoftwareTriggerData> softwareTriggerHandle;
+    evt.getByLabel(fSWTriggerLabel, softwareTriggerHandle);
+
+    if (!softwareTriggerHandle.isValid() || softwareTriggerHandle.failedToGet()){
+      std::cerr << "Failed to get software trigget data product with label " << fSWTriggerLabel << std::endl;
+    }
+
+    int nAlgo = softwareTriggerHandle->getNumberOfAlgorithms();
+    std::vector<std::string> algoNames = softwareTriggerHandle->getListOfAlgorithms();
+    if ((unsigned int)nAlgo != algoNames.size()) {
+      std::cerr << "Inconsistency. Check software trigger." << std::endl;
+    }
+
+    fData->swtrigger_name.resize(nAlgo);
+    fData->swtrigger_triggered.resize(nAlgo);
+
+    for (int trigger = 0; trigger < nAlgo; trigger++){
+      fData->swtrigger_name[trigger]      = algoNames[trigger];
+      fData->swtrigger_triggered[trigger] = softwareTriggerHandle->passedAlgo(algoNames[trigger]);
+    }
+  } // swtrigger
+
+
+
 
   //  std::cout<<detprop->NumberTimeSamples()<<" "<<detprop->ReadOutWindowSize()<<std::endl;
   //  std::cout<<geom->DetHalfHeight()*2<<" "<<geom->DetHalfWidth()*2<<" "<<geom->DetLength()<<std::endl;
